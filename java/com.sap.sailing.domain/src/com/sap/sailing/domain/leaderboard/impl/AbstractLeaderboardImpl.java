@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -38,14 +37,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     private transient Iterable<Competitor> allCompetitorsCache;
 
     /**
-     * @param scoreCorrection must not be <code>null</code>
      * @param scoreComparator the comparator to use to compare basic scores, such as net points
      * @param name must not be <code>null</code>
      */
-    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(scoreCorrection, resultDiscardingRule);
-        assert scoreCorrection != null;
+    public AbstractLeaderboardImpl(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(resultDiscardingRule);
     }
     
     @Override
@@ -133,7 +129,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
         while (betterCompetitorRank < rank && ci.hasNext()) {
             Competitor betterTrackedCompetitor = ci.next();
-            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn);
+            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn, timePoint);
             if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE &&
                     maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
                 correctedRank--;

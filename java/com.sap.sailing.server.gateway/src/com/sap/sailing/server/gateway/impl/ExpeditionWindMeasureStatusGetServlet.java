@@ -14,10 +14,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServlet implements ExpeditionListener {
@@ -94,7 +99,7 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
     private boolean registerExpeditionListener() {
         boolean result = false;
         try {
-            getService().addExpeditionListener(this, false);
+            addExpeditionListener(this, false);
             result = true;
         } catch (SocketException e) {
             result = false;
@@ -102,6 +107,18 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
         return result;
     }
     
+    private void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
+        UDPExpeditionReceiver receiver = createExpeditionTrackerFactory(getContext()).getService().getOrCreateWindReceiverOnDefaultPort();
+        receiver.addListener(listener, validMessagesOnly);
+    }
+    
+    private ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
+        ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> result = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
+                getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
     @Override
     public void received(final ExpeditionMessage message) {
         if(message != null && message.getBoatID() >= 0) {

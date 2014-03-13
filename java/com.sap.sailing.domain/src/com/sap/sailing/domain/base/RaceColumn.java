@@ -31,7 +31,6 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 public interface RaceColumn extends Named {
     /**
      * Sets the information object used to access the race column's race logs.
-     * @param information
      */
     void setRaceLogInformation(RaceLogInformation information);
     
@@ -187,11 +186,8 @@ public interface RaceColumn extends Named {
 
     /**
      * Sets (or reloads) {@link RaceLog} for this column with the given fleet
-     * 
-     * @param raceLogInformation
-     * @param fleetImpl
      */
-    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleet);
 
     /**
      * Remove the association between a race and a column. This is different from
@@ -200,5 +196,34 @@ public interface RaceColumn extends Named {
      * 
      * @param fleet
      */
-    void removeRaceIdentifier(Fleet fleet);    
+    void removeRaceIdentifier(Fleet fleet);
+
+    /**
+     * While set to true, any serialization in the current thread will not include the tracked races. Make sure to set
+     * back to false, after serialization. (in finally block)
+     * 
+     * @param flagValue
+     *            set to false for default behavior, set to true to exclude tracked races
+     */
+    public void setMasterDataExportOngoingThreadFlag(boolean flagValue);
+
+    /**
+     * Usually, when a regatta has split fleets that are {@link Fleet#getOrdering() ordered}, a competitor participating in a
+     * better fleet is always scored better than all competitors participating in worse fleets. However, under some circumstances
+     * it may be desirable to model a regatta series such that the fleet pertinence does not lead to a persistent scoring ordering
+     * throughout the regatta. For example, the Extreme Sailing Series Knock-Out Races use ordered fleets, but the fleet that a
+     * competitor qualified for does not decide about total regatta ranking. It may, however, decide for in-column ranking. See also
+     * {@link #isSplit}.
+     */
+    boolean isTotalOrderDefinedByFleet();
+
+    /**
+     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
+     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
+     * in the column as many times as there are fleets in the column. For the latter case, this method returns <code>true</code>.
+     */
+    boolean hasSplitFleetContiguousScoring();
+
+    boolean hasSplitFleets();
 }

@@ -13,9 +13,9 @@ public class EventConfigImagesBarCell extends ImagesBarCell {
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public EventConfigImagesBarCell(StringMessages stringConstants) {
+    public EventConfigImagesBarCell(StringMessages stringMessages) {
         super();
-        this.stringMessages = stringConstants;
+        this.stringMessages = stringMessages;
     }
 
     public EventConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {

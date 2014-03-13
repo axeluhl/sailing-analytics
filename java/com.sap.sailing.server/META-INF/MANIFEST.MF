@@ -7,25 +7,22 @@ Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.sap.sailing.server.gateway.deserialization,
- com.sap.sailing.server.gateway.deserialization.masterdata.impl,
- com.sap.sailing.server.gateway.serialization.masterdata.impl,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.1"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain,
- com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
  com.sap.sailing.mongodb,
- com.sap.sailing.domain.swisstimingadapter,
+ com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.persistence,
- com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
  com.sap.sailing.operationaltransformation,
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.server.gateway.serialization
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
@@ -36,5 +33,7 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.gwt.ui.test,
    com.sap.sailing.server.replication.test",
  com.sap.sailing.server.masterdata,
- com.sap.sailing.server.operationaltransformation
+ com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.server.test.support;
+  x-friends:="com.sap.sailing.server.gateway.test.support"
 

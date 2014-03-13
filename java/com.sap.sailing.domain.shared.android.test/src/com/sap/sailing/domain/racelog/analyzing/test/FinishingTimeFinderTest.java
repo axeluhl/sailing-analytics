@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.racelog.analyzing.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -10,6 +12,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 
@@ -19,13 +22,12 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
     protected FinishingTimeFinder createAnalyzer(RaceLog raceLog) {
         return new FinishingTimeFinder(raceLog);
     }
-    
+
     @Override
-    protected TimePoint setupTargetEventsForPassAwareTests(int passId) {
-        RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId);
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+        RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
-        raceLog.add(event);
-        return event.getTimePoint();
+        return new TargetPair(Arrays.asList(event), event.getLogicalTimePoint());
     }
     
     @Test
@@ -45,7 +47,7 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getTimePoint(), analyzer.analyze());
+        assertSame(event2.getLogicalTimePoint(), analyzer.analyze());
     }
     
     @Test
@@ -58,6 +60,6 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event1.getTimePoint(), analyzer.analyze());
+        assertSame(event1.getLogicalTimePoint(), analyzer.analyze());
     }
 }

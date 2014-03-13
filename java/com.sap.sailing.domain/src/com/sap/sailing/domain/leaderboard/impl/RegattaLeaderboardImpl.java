@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -31,9 +30,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
     
-    public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(scoreCorrection, resultDiscardingRule);
+    public RegattaLeaderboardImpl(Regatta regatta, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(resultDiscardingRule);
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }

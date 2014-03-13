@@ -24,13 +24,13 @@ public abstract class RaceLogAnalyzer<ResultType> {
     public ResultType analyze() {
         raceLog.lockForRead();
         try {
-            return performAnalyzation();
+            return performAnalysis();
         } finally {
             raceLog.unlockAfterRead();
         }
     }
 
-    protected abstract ResultType performAnalyzation();
+    protected abstract ResultType performAnalysis();
 
     protected Iterable<RaceLogEvent> getPassEvents() {
         return raceLog.getFixes();

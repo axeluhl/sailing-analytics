@@ -33,3 +33,7 @@ Update the wind track data
 
 mongo update command:
 db.WIND_TRACKS.update({REGATTA_NAME: "Sailing Team Germany"}, { $set: {REGATTA_NAME: "Academy Tracking 2011"}}, true, true)
+
+or something along the lines of:
+
+db.eval(function() { db.RACE_LOGS.find({"RACE_LOG_IDENTIFIER.a": /ESS 2013 Porto*/, "RACE_LOG_EVENT.RACE_LOG_EVENT_CLASS" : "RaceLogWindFixEvent"}).forEach(function(e) { if (e.RACE_LOG_EVENT.WIND.DEGREE_BEARING < 0) { e.RACE_LOG_EVENT.WIND.DEGREE_BEARING = e.RACE_LOG_EVENT.WIND.DEGREE_BEARING+360.; db.RACE_LOGS.save(e); }}); })

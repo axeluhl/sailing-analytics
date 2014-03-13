@@ -55,6 +55,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         }
 
         @Override
+        public SpeedWithBearing add(SpeedWithBearing other) {
+            return AbstractSpeedWithAbstractBearingImpl.add(this, other);
+        }
+
+        @Override
         public String toString() {
             return super.toString()+" to "+getBearing().getDegrees()+"°";
         }

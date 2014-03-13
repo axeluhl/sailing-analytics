@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -33,7 +34,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Override
     @Before
     public void setUp() {
-        competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
+        competitor = new CompetitorImpl(123, "Wolfgang Hunger", Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -15,11 +16,10 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private List<SimulatorWindDTO> windDTOToDraw;
 
-    public ReplayPathCanvasOverlay(final String name, final Timer timer, WindFieldGenParamsDTO windParams) {
-        super(name, timer, windParams);
+    public ReplayPathCanvasOverlay(MapWidget map, int zIndex, final String name, final Timer timer, WindFieldGenParamsDTO windParams) {
+        super(map, zIndex, name, timer, windParams);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
-        //this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
 
@@ -30,14 +30,14 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     }
      */
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
 
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
 
         windDTOToDraw = new ArrayList<SimulatorWindDTO>();
-        for (final SimulatorWindDTO windDTO : wl.getMatrix()) {
-            if (windDTO.timepoint <= date.getTime()) {
+        for (final SimulatorWindDTO windDTO : windFieldDTO.getMatrix()) {
+            if (windDTO.timepoint <= newTime.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }
@@ -48,10 +48,10 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
     @Override
     public boolean shallStop() {
-        if (!isVisible() || windDTOToDraw == null || wl == null) {
+        if (!isVisible() || windDTOToDraw == null || windFieldDTO == null) {
             return true;
         }
-        if (windDTOToDraw.size() == wl.getMatrix().size()) {
+        if (windDTOToDraw.size() == windFieldDTO.getMatrix().size()) {
             return true;
         } else {
             return false;

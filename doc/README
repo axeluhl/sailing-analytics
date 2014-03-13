@@ -265,28 +265,10 @@ into one in the future.
                   can be obtained; the resulting document includes the
 		  parameter and simulation URLs for the individual
  		  races that are part of the event/regatta.
-  action=addevent: starts tracking all races described in the document received
-  		  from the eventJSONURL to the server instance.
-    eventJSONURL: the URL from where metadata about the entire regatta
-                  can be obtained; the resulting document includes the
-		  parameter and simulation URLs for the individual
- 		  races that are part of the event/regatta.
-    liveURI:      the live data URI for the TracTrac server
-    storedURI:	  the stored data URI for the TracTrac server; usually
-    		  the port number of this URI is that of liveURI + 1
   action=stopregatta: stops tracking of all races of the regatta; this
                   also stops all wind tracking for the races of the regatta
     regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
-  action=addrace: starts tracking a single race; if other races of
-  		  the same event/regatta are already being tracked,
-		  the race is added to the regatta
-    paramURL:     the URL from where metadata about the race
-                  can be obtained; the resulting document includes
-		  UUIDs of waypoints, competitors, etc.
-    liveURI:      the live data URI for the TracTrac server
-    storedURI:	  the stored data URI for the TracTrac server; usually
-    		  the port number of this URI is that of liveURI + 1
   action=stoprace: stops tracking of a single race, also stopping the
   		  wind trackers that were started for this race; other
  		  races of the same regatta that were being tracked will

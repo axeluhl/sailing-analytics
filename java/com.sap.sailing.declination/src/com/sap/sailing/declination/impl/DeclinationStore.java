@@ -166,66 +166,41 @@ public class DeclinationStore {
                     Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
                     TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
                     for (double lat = 0; lat < 90; lat += grid) {
-                        System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
-                        for (double lng = 0; lng < 180; lng += grid) {
-                            Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord;
-                            synchronized (storedDeclinations) {
-                                existingDeclinationRecord = storedDeclinations.get(point);
-                            }
-                            if (existingDeclinationRecord == null
-                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
-                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
-                                            .getTimePoint()) > 0.1) {
-                                // less than ~6 nautical miles and/or ~.6 months off
-                                fetchAndAppendDeclination(timePoint, point, importer, out);
-                            }
-                        }
-                        for (double lng = -grid; lng > -180; lng -= grid) {
-                            Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord;
-                            synchronized (storedDeclinations) {
-                                existingDeclinationRecord = storedDeclinations.get(point);
-                            }
-                            if (existingDeclinationRecord == null
-                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
-                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
-                                            .getTimePoint()) > 0.1) {
-                                // less than ~6 nautical miles and/or ~.6 months off
-                                fetchAndAppendDeclination(timePoint, point, importer, out);
-                            }
-                        }
+                        fetchAndAppendDeclinationForLatitude(grid, importer, year, storedDeclinations, out, month, timePoint, lat);
                     }
                     for (double lat = -grid; lat > -90; lat -= grid) {
-                        System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
-                        for (double lng = 0; lng < 180; lng += grid) {
-                            Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord;
-                            synchronized (storedDeclinations) {
-                                existingDeclinationRecord = storedDeclinations.get(point);
-                            }
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
-                                // less than ~6 nautical miles and/or ~.6 months off
-                                fetchAndAppendDeclination(timePoint, point, importer, out);
-                            }
-                        }
-                        for (double lng = -grid; lng > -180; lng -= grid) {
-                            Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord;
-                            synchronized (storedDeclinations) {
-                                existingDeclinationRecord = storedDeclinations.get(point);
-                            }
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
-                                // less than ~6 nautical miles and/or ~.6 months off
-                                fetchAndAppendDeclination(timePoint, point, importer, out);
-                            }
-                        }
+                        fetchAndAppendDeclinationForLatitude(grid, importer, year, storedDeclinations, out, month, timePoint, lat);
                     }
                     out.close();
                 }
             }
+        }
+    }
+
+    private void fetchAndAppendDeclinationForLatitude(double grid, NOAAImporter importer, int year,
+            QuadTree<Declination> storedDeclinations, Writer out, int month, TimePoint timePoint, double lat)
+            throws IOException {
+        System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
+        for (double lng = 0; lng < 180; lng += grid) {
+            fetchAndAppendDeclination(importer, storedDeclinations, out, timePoint, lat, lng);
+        }
+        for (double lng = -grid; lng > -180; lng -= grid) {
+            fetchAndAppendDeclination(importer, storedDeclinations, out, timePoint, lat, lng);
+        }
+    }
+
+    private void fetchAndAppendDeclination(NOAAImporter importer, QuadTree<Declination> storedDeclinations, Writer out,
+            TimePoint timePoint, double lat, double lng) throws IOException {
+        Position point = new DegreePosition(lat, lng);
+        final Declination existingDeclinationRecord;
+        synchronized (storedDeclinations) {
+            existingDeclinationRecord = storedDeclinations.get(point);
+        }
+        if (existingDeclinationRecord == null
+                || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
+                timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+            // less than ~6 nautical miles and/or ~.6 months off
+            fetchAndAppendDeclination(timePoint, point, importer, out);
         }
     }
 

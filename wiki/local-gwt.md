@@ -12,6 +12,16 @@ Since the OSGi manifest dependencies still require javax.servlet, the Eclipse an
 
 As a workaround, use the buildAndUpdateProduct.sh script found in the top-level configuration/ directory in git. Together with the -t and -c options (no tests, no cleaning), the compilation speed may be found acceptable. If you really urgently need to compile GWT locally on a regular basis and would like to speed up compilation, please consider temporarily editing java/com.sap.sailing.gwt.ui/pom.xml to reduce the number of modules and permutations to be compiled.
 
+Add restrictions with the following two tags to reduce the number of permutations so that gwt is compiled only in your language and browser:
+
+<set-property name="locale" value="en" />
+
+`<set-property name="user.agent" value="gecko1_8" />`
+
+`<set-property name="locale" value="en" />`
+
+Those tags must be put into the *.gwt.xml files e.g. "AdminConsole.gwt.xml".
+
 ## Debugging GWT
 
 One of the great strengths of GWT is the use of Eclipse as a Java source-level debugging environment. To enjoy this feature, launch the SailingServer launch config appropriate for your environment (Proxy / No Proxy), then launch the SailingGWT launch configuration in debug mode. After a while it will show a "Development Mode" view that shows all entry points that have been initialized. Double-click on the one you want to debug, and your default browser (hopefully FireFox, because with other browsers the GWT debug plugin tends to be not very stable or not even present) will open.

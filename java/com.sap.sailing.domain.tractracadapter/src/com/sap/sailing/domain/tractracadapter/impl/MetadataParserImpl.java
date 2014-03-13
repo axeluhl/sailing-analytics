@@ -9,12 +9,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -89,18 +89,17 @@ public class MetadataParserImpl implements MetadataParser {
      * </pre>
      */
     @Override
-    public Map<Integer, NauticalSide> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
+    public Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
+        Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            int i=1;
+            int i = 1;
             for (TracTracControlPoint controlPoint : controlPoints) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if ("PORT".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.PORT);
-                    } else if ("STARBOARD".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.STARBOARD);
+                    final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
+                    if (passingInstructions != null) {
+                        result.put(i, passingInstructions);
                     }
                 }
                 i++;

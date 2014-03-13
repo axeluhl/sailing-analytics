@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
@@ -69,12 +68,6 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
     @Override
     public void removeWaypoint(int zeroBasedPosition) {
         this.waypoints.remove(zeroBasedPosition);
-    }
-
-    @Override
-    public Iterable<Leg> getLegsAdjacentTo(Mark mark) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

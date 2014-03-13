@@ -9,13 +9,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
+import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
-import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
 
 /**
  * 
@@ -38,13 +38,14 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             groupName = null;
         } else {
             groupName = groupParamValue;
+            Window.setTitle(groupName);
             sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
                 }
                 @Override
-                public void onSuccess(LeaderboardGroupDTO group) {}
+                public void onSuccess(LeaderboardGroupDTO group) {                }
             });
         }
         String root = Window.Location.getParameter("root");

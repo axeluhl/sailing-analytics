@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
+import java.util.UUID;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -13,9 +15,11 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
     public static final String FIELD_RACELOG_IDENTIFIER = "racelog_id";
     
     private final JsonSerializer<RaceLogEvent> itemSerializer;
+    private final UUID clientUuid;
     
-    public RaceLogSerializer(JsonSerializer<RaceLogEvent> raceLogEventSerializer) {
+    public RaceLogSerializer(JsonSerializer<RaceLogEvent> raceLogEventSerializer, UUID clientUuid) {
         this.itemSerializer = raceLogEventSerializer;
+        this.clientUuid = clientUuid;
     }
     
     @Override
@@ -24,7 +28,7 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
         object.lockForRead();
         try {
             JSONArray events = new JSONArray();
-            for (RaceLogEvent event : object.getRawFixes()) {
+            for (RaceLogEvent event : object.getRawFixes(clientUuid)) {
                 events.add(itemSerializer.serialize(event));
             }
             result.put(FIELD_EVENTS, events);

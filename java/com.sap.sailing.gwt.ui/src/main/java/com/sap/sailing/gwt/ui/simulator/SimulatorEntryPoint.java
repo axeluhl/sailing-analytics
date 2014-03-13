@@ -37,6 +37,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         checkUrlParameters();
+        createSimulatorPanel();
     }
 
     private void checkUrlParameters() {
@@ -107,15 +108,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
                 seedLines = 'f';
             }
         }
-        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
-        createRaceBoardInOneScreenMode(mainPanel);
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-
-        //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, rightLabelName, stringMessages);
-        //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages, this);
         /*{
             @Override
@@ -133,7 +128,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         return logoAndTitlePanel;
     }
 
-    private void createRaceBoardInOneScreenMode(SimulatorMainPanel simulatorPanel) {
+    private void createSimulatorPanel() {
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
@@ -147,7 +144,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         p.addNorth(logoAndTitlePanel, 68);
         p.add(simulatorPanel);
         p.addStyleName("dockLayoutPanel");
-
     }
 
 }

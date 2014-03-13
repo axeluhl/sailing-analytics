@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.NauticalSide;
  */
 public class LegEntryDTO implements Serializable {
     private static final long serialVersionUID = -1236734337344886025L;
+    public LegType legType;
     public Double distanceTraveledInMeters;
     public Double averageSpeedOverGroundInKnots;
     public int rank;
@@ -64,6 +66,7 @@ public class LegEntryDTO implements Serializable {
         result = prime * result
                 + ((gapChangeSinceLegStartInSeconds == null) ? 0 : gapChangeSinceLegStartInSeconds.hashCode());
         result = prime * result + ((gapToLeaderInSeconds == null) ? 0 : gapToLeaderInSeconds.hashCode());
+        result = prime * result + ((legType == null) ? 0 : legType.hashCode());
         result = prime * result + ((numberOfManeuvers == null) ? 0 : numberOfManeuvers.hashCode());
         result = prime * result + rank;
         result = prime * result
@@ -125,6 +128,8 @@ public class LegEntryDTO implements Serializable {
             if (other.gapToLeaderInSeconds != null)
                 return false;
         } else if (!gapToLeaderInSeconds.equals(other.gapToLeaderInSeconds))
+            return false;
+        if (legType != other.legType)
             return false;
         if (numberOfManeuvers == null) {
             if (other.numberOfManeuvers != null)

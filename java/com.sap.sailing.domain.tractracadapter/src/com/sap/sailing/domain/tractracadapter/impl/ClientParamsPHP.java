@@ -476,7 +476,8 @@ public class ClientParamsPHP {
     }
 
     public Race getRace() {
-        return new Race(UUID.fromString(properties.get("RaceID")));
+        final String raceId = properties.get("RaceID");
+        return raceId == null ? null : new Race(UUID.fromString(raceId));
     }
     
     public Event getEvent() {

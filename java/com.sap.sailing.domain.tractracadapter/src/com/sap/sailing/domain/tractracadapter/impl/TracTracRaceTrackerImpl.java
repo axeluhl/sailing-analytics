@@ -1,14 +1,20 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +37,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -57,6 +63,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.ControlPoint;
@@ -76,6 +83,113 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    /**
+     * This value indicated how many stored data packets we allow that are not in the right sequence Background: It can
+     * happen that the progress for storedData hops around and delivers a progress that is lower than one received
+     * before. This can happen but only at a maximum of times this constant describes. To provide some background, here
+     * is an excerpt of a description received from Jorge Piera Llodra from TracTrac on 2014-02-05:
+     * 
+     * <i>
+     * <p>
+     * "Our library creates a new thread per data type where a data type is associated with a subscription. e.g: there
+     * is a data type for the competitor positions, other for the mark positions, other for the course update, other for
+     * the start/stop times... Every thread calculates its individual progress and its weight and the progress that you
+     * receive in the "storedDataProgress" method is a function of all the individual progresses and all the weights
+     * reported by the threads. The function that calculates the total progress is:
+     * 
+     * <pre>
+     * total_progress = sum(progress(thread_i)) / sum(weight(thread_i))
+     * </pre>
+     * 
+     * The weight is also the maximum individual progress that a thread can send: if a thread has a weight = 10 its
+     * progress only can be between 0 and 10, e.g,:
+     * <p>
+     * 
+     * You are subscribed to receive competitor positions and the current course. All the threads have a default weight
+     * and the beginning the send the values:
+     * <ul>
+     * <li>Competitor positions thread -> weight = 10, progress = 0</li>
+     * <li>Course thread -> weight = 1, progress = 0</li>
+     * </ul>
+     * The total progress that you receive is:
+     * 
+     * <pre>
+     *   total_progress = 0 + 0 / 10 + 1 = 0 / 11 = 0
+     * </pre>
+     * 
+     * Then, the "Course thread" retrieves the course from the server and it sends a new progress message to the system:
+     * 
+     * <pre>
+     *   Course thread -&gt; weight = 1, progress = 1  ---&gt total_progress = 0 + 1 /  10 + 1 = 1 / 11 = 0.090909091
+     * </pre>
+     * 
+     * Then, the "Competitor positions thread" goes to the server and it checks that there is a high number of positions
+     * for the competitors. It decides to change its weight:
+     * 
+     * <pre>
+     *   Competitor positions thread -&gt weight = 50, progress = 0 --&gt total_progress = 0 + 1 / 50 + 1 = 1 / 51 = 0.019607843
+     * </pre>
+     * 
+     * Then, the "Competitor positions thread" starts to retrieve positions and it sends several messages updating the
+     * progress:
+     * <ul>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 1 --&gt; total_progress = 1 + 1 / 50 + 1 = 2 / 51 = 0.039215686
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 2 --&gt total_progress = 2 + 1 / 50 + 1 = 3 / 51 = 0.058823529
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 3 --&gt total_progress = 3 + 1 / 50 + 1 = 4 / 51 = 0.078431373
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * ...
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 50 --&gt total_progress = 50 + 1 / 50 + 1 = 51 / 51 = 1.0
+     * </pre>
+     * 
+     * </li>
+     * </ul>
+     * 
+     * This example shows that is possible to receive more that 3 values of the progress lower than one already
+     * received. It happens because the weight of the threads changes."</i>
+     * <p>
+     * 
+     * We assume that there won't be more than eight threads in TTCM receiving data for the same race, based on Jorge's
+     * statement from 2014-02-06: "One thread per subscription where the subscriptions are:
+     * <ul>
+     * <li>Competitor positions</li>
+     * <li>Mark positions</li>
+     * <li>Mark passings</li>
+     * <li>Route</li>
+     * <li>Start/Stop times for race</li>
+     * <li>Start/Stop times for event</li>
+     * <li>Messages for race</li>
+     * <li>Messages for event</li>
+     * </ul>
+     * Potentially, you can create 8 threads per TTCM (connecting only with one single race)."
+     */
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 1000;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;
@@ -87,6 +201,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
+    private HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>> lastProgressPerID;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -134,19 +249,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
-                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     /**
@@ -157,11 +272,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
-                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     /**
@@ -178,7 +293,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
+            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
@@ -187,6 +302,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
+        this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
@@ -197,6 +313,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // so lets raise some meaningful exception
         if (tractracEvent == null) {
             throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
+        }
+        
+        // check if there is a directory configured where stored data files can be cached
+        // only cache files for races in REPLAY state
+        if (raceStatus != null && raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+            storedURI = checkForCachedStoredData(storedURI);
         }
         
         logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
@@ -233,7 +355,61 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         addListenersForStoredDataAndStartController(typeControllers);
         // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+        synchronized (this) {
+            controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI,
+                    delayToLiveInMillis, tracTracUsername, tracTracPassword);
+            notifyAll(); // the stop(boolean) method will try to cancel the controlPointPositionPoller; this may happen even before the above assignment took place; synchronize!
+        }
+    }
+
+    private URI checkForCachedStoredData(URI storedURI){
+        final String CACHE_DIR_PROPERTY = "tractrac.mtb.cache.dir";
+        if (System.getProperty(CACHE_DIR_PROPERTY) != null) {
+            final String directory = System.getProperty(CACHE_DIR_PROPERTY);
+            if (new File(directory).exists()) {
+                final String[] pathFragments = storedURI.getPath().split("\\/");
+                final String mtbFileName = pathFragments[pathFragments.length-1];
+                final String directoryAndFileName = directory+"/"+mtbFileName;
+                final File f = new File(directoryAndFileName);
+                if (!f.exists()) {
+                    FileOutputStream mtbOutStream = null;
+                    try {
+                        logger.info("Starting to download " + storedURI + " to cache dir " + directoryAndFileName);
+                        InputStream in = storedURI.toURL().openStream();
+                        mtbOutStream = new FileOutputStream(f);
+                        byte data[] = new byte[1024];
+                        int count;
+                        while ((count = in.read(data, 0, 1024)) != -1)
+                        {
+                            mtbOutStream.write(data, 0, count);
+                        }
+                        logger.info("Finished downloading file to cache!");
+                    } catch (Exception ex) {
+                        // never throw but display
+                        ex.printStackTrace();
+                    } finally {
+                        if (mtbOutStream != null) {
+                            try {
+                                mtbOutStream.close();
+                            } catch (IOException e) {
+                                // ignore
+                            }   
+                        }
+                    }
+                } else {
+                    logger.info("Found file " + directoryAndFileName + "! Reusing it for this race!");
+                }
+                
+                try {
+                    // notice us using three slashes here - this is because of a bug in the TracAPI
+                    return new URI("file:///" + directoryAndFileName);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return storedURI;
     }
 
     @Override
@@ -268,8 +444,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         };
         // now run the command once immediately and synchronously; see also bug 1345
         command.run();
-        // then schedule for periodic execution in background
-        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        
+        // then schedule for periodic execution in background if the params url does not point to a file
+        int initialDelayInMilliseconds = 1000*30; int delayInMilliseconds = 1000*15;
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ initialDelayInMilliseconds, /* delay */ delayInMilliseconds, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
 
@@ -284,27 +462,30 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         final ClientParamsPHP clientParams;
         try {
             clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
-                    new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
-                        @Override
-                        public com.sap.sailing.domain.base.ControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
-                            return domainFactory.getOrCreateControlPoint(ttControlPoint);
-                        }
-                    });
-            if (getRaces() == null || getRaces().isEmpty()) {
-                // create race definition / tracked race and add to event
-                final String raceName = clientParams.getRace().getName();
-                logger.log(Level.INFO, "Found data for non-existing race "+raceName+" in "+paramURL+". Creating RaceDefinition.");
-                final Iterable<Competitor> competitors = getCompetitors(clientParams);
-                final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
-                List<Pair<TracTracControlPoint, NauticalSide>> ttControlPointsAndPassingSide = getControlPointsWithPassingSide(clientParams,
+            if (clientParams.getRace() != null) {
+                List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstruction = getControlPointsWithPassingInstruction(
+                        clientParams, new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
+                            @Override
+                            public com.sap.sailing.domain.base.ControlPoint produceControlPoint(
+                                    TracTracControlPoint ttControlPoint) {
+                                return domainFactory.getOrCreateControlPoint(ttControlPoint);
+                            }
+                        });
+                if (getRaces() == null || getRaces().isEmpty()) {
+                    // create race definition / tracked race and add to event
+                    final String raceName = clientParams.getRace().getName();
+                    logger.log(Level.INFO, "Found data for non-existing race " + raceName + " in " + paramURL
+                            + ". Creating RaceDefinition.");
+                    final Iterable<Competitor> competitors = getCompetitors(clientParams);
+                    final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
+                List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPointsAndPassingInstructions = getControlPointsWithPassingInstruction(clientParams,
                         new ControlPointProducer<TracTracControlPoint>() {
                     @Override
                     public TracTracControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
                         return ttControlPoint;
                     }
                 });
-                Course course = domainFactory.createCourse(clientParams.getRace().getDefaultRoute().getDescription(), ttControlPointsAndPassingSide);
+                Course course = domainFactory.createCourse(clientParams.getRace().getDefaultRoute().getDescription(), ttControlPointsAndPassingInstructions);
                 List<Sideline> sidelines = domainFactory.createSidelines(
                         clientParams.getRace().getMetadata(), clientParams.getEvent().getControlPointList());
                 DynamicTrackedRace trackedRace = domainFactory.getOrCreateRaceDefinitionAndTrackedRace(
@@ -316,9 +497,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     simulator.setTrackedRace(trackedRace);
                 }
             }
-            compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingSide);
+            compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingInstruction);
             updateStartStopTimesAndLiveDelay(clientParams, simulator);
             updateMarkPositionsIfNoPositionsReceivedYet(clientParams);
+            }
         } catch (Exception e) {
             logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races " + getRaces());
             logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
@@ -380,16 +562,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     /**
-     * For all races tracked, the course is compared to the course described in <code>newCourseControlPointsWithPassingSide</code>.
+     * For all races tracked, the course is compared to the course described in <code>newCourseControlPointsWithPassingInstructions</code>.
      * If they differ, a {@link Course#update(Iterable, com.sap.sailing.domain.base.DomainFactory) course update} is triggered.
      */
     private void compareAndUpdateCourseIfNecessary(
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide) {
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstructions) {
         assert getRaces() != null;
         // to check if a course update is required, compare to the existing course's control points:
         List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-        for (Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide> controlPointAndPassingSide : newCourseControlPointsWithPassingSide) {
-            newCourseControlPoints.add(controlPointAndPassingSide.getA());
+        for (Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction> controlPointAndPassingInstruction : newCourseControlPointsWithPassingInstructions) {
+            newCourseControlPoints.add(controlPointAndPassingInstruction.getA());
         }
         List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
         for (RaceDefinition race : getRaces()) {
@@ -400,9 +582,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
                 logger.info("Detected course change based on clientparams.php contents for races " + getRaces());
                 try {
-                    course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
+                    course.update(newCourseControlPointsWithPassingInstructions, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException pfe) {
-                    logger.severe("Failed to apply course update " + newCourseControlPointsWithPassingSide
+                    logger.severe("Failed to apply course update " + newCourseControlPointsWithPassingInstructions
                             + " to course " + course);
                     logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                 }
@@ -414,22 +596,22 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         T produceControlPoint(TracTracControlPoint ttControlPoint);
     }
     
-    private <T> List<Pair<T, NauticalSide>> getControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
-        List<Pair<T, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
+    private <T> List<Pair<T, PassingInstruction>> getControlPointsWithPassingInstruction( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
+        List<Pair<T, PassingInstruction>> newCourseControlPointsWithPassingInstruction = new ArrayList<>();
         final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
-        Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
+        Map<Integer, PassingInstruction> passingInstructionData = domainFactory.getMetadataParser().parsePassingInstructionData(
                 clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
         int i = 1;
         for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
-            NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
+            PassingInstruction passingInstructions = passingInstructionData.containsKey(i) ? passingInstructionData.get(i) : null;
             final T newControlPoint = controlPointProducer.produceControlPoint(newTracTracControlPoint);
-            newCourseControlPointsWithPassingSide.add(new Pair<T, NauticalSide>(newControlPoint, nauticalSide));
+            newCourseControlPointsWithPassingInstruction.add(new Pair<T, PassingInstruction>(newControlPoint, passingInstructions));
             i++;
         }
-        return newCourseControlPointsWithPassingSide;
+        return newCourseControlPointsWithPassingInstruction;
     }
 
-    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
+    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) throws ParseException {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
         RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
@@ -443,6 +625,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (currentRace != null) {
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
             if (trackedRace != null) {
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(simulator == null ? raceStartTime : simulator.advanceStartTime(raceStartTime));
+                }
                 TimePoint startOfTracking = clientParams.getRace().getTrackingStartTime();
                 if (startOfTracking != null) {
                     trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
@@ -505,26 +691,39 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     
     @Override
     public void stop() throws InterruptedException {
-        stop(/* stop receivers preemtively */ true);
+        stop(/* stop receivers preemtively */ false);
     }
 
-    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+        synchronized (this) {
+            while (controlPointPositionPoller == null) {
+                wait(); // constructor will notify all waiters once the controlPointPositionPoller is set
+            }
+        }
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
-        controller.stop(/* abortStored */ true);
+        new Thread("TracTrac Controller Stopper for "+getID()) {
+            public void run() {
+                controller.stop(/* abortStored */ true);
+                try {
+                    ioThread.join();
+                    if (ioThread.isAlive()) {
+                        logger.severe("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" joined but is still active. Very strange.");
+                    } else {
+                        logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
+                    }
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
+                    updateStatusOfTrackedRaces();
+                } catch (InterruptedException e) {
+                    logger.log(Level.INFO, "Interrupted while trying to join TracTrac DataController thread for "+getID());
+                } // wait no more than three seconds
+            }
+        }.start();
         for (Receiver receiver : receivers) {
             if (stopReceiversPreemtively) {
                 receiver.stopPreemptively();
             } else {
                 receiver.stopAfterProcessingQueuedEvents();
             }
-        }
-        ioThread.join(3000); // wait no more than three seconds
-        if (ioThread.isAlive()) {
-            ioThread.stop();
-            logger.warning("Tractrac IO thread for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
-        } else {
-            logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
         }
     }
 
@@ -534,23 +733,28 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void liveDataConnected() {
-        logger.info("Live data connected for race(s) "+getRaces());
+        logger.info("Live data connected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void liveDataDisconnected() {
-        logger.info("Live data disconnected for race(s) "+getRaces());
+        logger.info("Live data disconnected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void stopped() {
-        logger.info("stopped TracTrac tracking for "+getRaces());
+        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
         updateStatusOfTrackedRaces();
         // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
         // we have seen many more fixes been transmitted after having received stopped()
     }
 
+    /**
+     * Propagates {@link #lastStatus} to all tracked races to which this tracker writes.
+     * 
+     * @see #updateStatusOfTrackedRace(DynamicTrackedRace)
+     */
     private void updateStatusOfTrackedRaces() {
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
@@ -560,23 +764,37 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
     }
 
+    /**
+     * Propagates {@link #lastStatus} to <code>trackedRace</code>'s {@link TrackedRace#getStatus() status}. If
+     * {@link #lastStatus} is a {@link TrackedRaceStatusEnum#FINISHED FINISHED} status, the progress value is taken from
+     * the tracked race's current status instead of overwriting it with the progress indicated by
+     * {@link #lastStatus}.
+     */
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
         // can't update a race status once it has been set to FINISHED
         if (lastStatus != null && trackedRace.getStatus() != null && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.FINISHED) {
-            trackedRace.setStatus(lastStatus);
+            final TrackedRaceStatus status;
+            if (lastStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                // in this case use the tracked race's progress value:
+                status = new TrackedRaceStatusImpl(lastStatus.getStatus(), trackedRace.getStatus() == null ? 0.0
+                        : trackedRace.getStatus().getLoadingProgress());
+            } else {
+                status = lastStatus;
+            }
+            trackedRace.setStatus(status);
         }
     }
 
     @Override
     public void storedDataBegin() {
-        logger.info("Stored data begin for race(s) "+getRaces());
+        logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
         updateStatusOfTrackedRaces();
     }
 
     @Override
     public void storedDataEnd() {
-        logger.info("Stored data end for race(s) "+getRaces());
+        logger.info("Stored data end in tracker "+getID()+" for race(s) "+getRaces());
         if (isLiveTracking) {
             lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
             updateStatusOfTrackedRaces();
@@ -585,19 +803,45 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
+        if (lastStatus.getStatus().equals(TrackedRaceStatusEnum.ERROR)) {
+            return;
+        }
+        Integer counter = 0;
+        final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
+        if (lastProgressPair != null) {
+            Float lastProgress = lastProgressPair.getB();
+            counter = lastProgressPair.getA();
+            if (progress < lastProgress.floatValue()) {
+                if (counter.intValue() > MAX_STORED_PACKET_HOP_ALLOWANCE) {
+                    try {
+                        logger.severe("Got " + MAX_STORED_PACKET_HOP_ALLOWANCE + " times a value for progress " + progress + " that is lower than one already received " + lastProgress + "! This is a severe error - stopping receivers for " + getID() + " now!");
+                        stop(/* stopReceiversPreemptively */ true);
+                        /* make sure to indicate that this race is erroneous */
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
+                        updateStatusOfTrackedRaces();
+                        return;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    counter += 1;
+                }
+            } 
+        }
+        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
+        lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
 
     @Override
     public void storedDataError(String arg0) {
-        logger.warning("Error with stored data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with stored data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        logger.warning("Error with live data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with live data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override

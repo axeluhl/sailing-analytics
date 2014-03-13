@@ -32,6 +32,10 @@
 
    <configurations>
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />
       <plugin id="com.sap.sailing.ess40.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="5" />
@@ -47,8 +51,10 @@
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
-      <plugin id="com.sap.sailing.xcelsiusadapter" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="org.apache.felix.shell" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.jetty.continuation" autoStart="true" startLevel="4" />

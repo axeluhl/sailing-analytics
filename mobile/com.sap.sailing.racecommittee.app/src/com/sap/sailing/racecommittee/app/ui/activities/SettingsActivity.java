@@ -1,71 +1,101 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
+import android.widget.Toast;
 
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
-/**
- * @author Basil Hess (basil.hess@sap.com)
- * 
- */
 public class SettingsActivity extends PreferenceActivity {
+    
+    public static final String specificRegattaPreferencesName = "TEMP_PREFERENCE_KEY";
+    public static final String EXTRA_SPECIFIC_REGATTA_NAME = "EXTRA_SPECIFIC_REGATTA_NAME";
+    public static final String EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME = "EXTRA_SPECIFIC_REGATTA_PREFERENCE_KEY";
+    
+    
+    public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
+        // reset temp preferences
+        PreferenceHelper helper = new PreferenceHelper(context, "TEMP_PREFERENCE_KEY");
+        helper.clearPreferences();
+        helper.resetPreferences(true);
+        
+        // store local configuration in temp preferences
+        RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
+        AppPreferences preferences = AppPreferences.on(context, "TEMP_PREFERENCE_KEY");
+        PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
+        preferencesLoader.store();
+        
+        Intent intent = new Intent(context, SettingsActivity.class);
+        intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT, RegattaPreferenceFragment.class.getName());
+        intent.putExtra(SettingsActivity.EXTRA_NO_HEADERS, true);
+        Bundle info = new Bundle();
+        info.putString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME, specificRegattaPreferencesName);
+        info.putString(EXTRA_SPECIFIC_REGATTA_NAME, raceGroup.getName());
+        intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, info);
+        context.startActivity(intent);
+    }
+
+    public static void commitSpecificRegattaConfiguration(Context context, String preferencesName, String raceGroupName) {
+        
+        ReadonlyDataManager dataManager = DataManager.create(context);
+        RaceGroup group = dataManager.getDataStore().getRaceGroup(raceGroupName);
+        if (group != null) {
+            RegattaConfiguration localConfiguration = group.getRegattaConfiguration();
+            AppPreferences preferences = AppPreferences.on(context, preferencesName);
+            PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(localConfiguration, preferences);
+            loader.load();
+        } else {
+            Toast.makeText(context, "No fitting race group found.", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private boolean isRedirectedToTemp;
+    private String sharedPreferencesName;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.layout.settings_view);
         
-        setupStartProcedurePreferences();
-        setupLanguageButton();
-    }
-
-    private void setupStartProcedurePreferences() {
-        final ListPreference startProcedurePreference = (ListPreference) findPreference("defaultStartProcedureType");
-        
-        List<CharSequence> entries = new ArrayList<CharSequence>();
-        List<CharSequence> entryValues = new ArrayList<CharSequence>();
-        for (StartProcedureType type : StartProcedureType.values()) {
-            entries.add(type.toString());
-            entryValues.add(type.name());
+        Bundle arguments = getIntent().getExtras();
+        this.isRedirectedToTemp = arguments != null && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+        if (isRedirectedToTemp) {
+            Bundle info = arguments.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+            if (info != null) {
+            sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
+            String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
+            String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
+            showBreadCrumbs(title, title);
+            }
         }
-        
-        startProcedurePreference.setEntries(entries.toArray(new CharSequence[0]));
-        startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
-        
-        CheckBoxPreference overrideStartProcedurePreference = (CheckBoxPreference) findPreference("overrideDefaultStartProcedureType");
-        startProcedurePreference.setEnabled(overrideStartProcedurePreference.isChecked());
-        
-        overrideStartProcedurePreference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Boolean isChecked = (Boolean) newValue;
-                startProcedurePreference.setEnabled(isChecked.booleanValue());
-                return true;
-            }
-        });
     }
-
-    private void setupLanguageButton() {
-        Preference button = (Preference)findPreference("languagePref");
-        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference arg0) { 
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
-                startActivity(intent);
-                return true;
-            }
-        });
+   
+    @Override
+    public SharedPreferences getSharedPreferences(String name, int mode) {
+        if (isRedirectedToTemp) {
+            return super.getSharedPreferences(sharedPreferencesName, Context.MODE_PRIVATE);
+        }
+        return super.getSharedPreferences(name, mode);
     }
     
+    @Override
+    public void onBuildHeaders(List<Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+
+    public boolean isRedirected() {
+        return isRedirectedToTemp;
+    }
 }

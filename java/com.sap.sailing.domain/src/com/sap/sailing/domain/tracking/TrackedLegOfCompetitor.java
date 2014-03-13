@@ -5,15 +5,14 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -72,7 +71,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
-     * achieved and the speed value
+     * achieved and the speed value. In case you provide <code>timepoint</code> that is greater than the time point of the
+     * end of this leg the provided value will be ignored and replaced by the timepoint of the end of the leg.
      */
     Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
@@ -175,30 +175,26 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Computes the average cross track error for this leg. If you provide this method with a {@link TimePoint} greater
+     * than the time the mark passing of the leg end mark has occurred then the time point of the mark passing 
+     * of the leg end mark will be taken into account.
+     */
     Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
-     * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
-     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
-     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
-     * distance to <code>mark</code> is returned.
-     * 
-     * @param at
-     *            the wind estimation is performed for this point in time
-     */
-    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
-
-    /**
-     * Computes the maneuver loss as the "windward distance" that the boat lost compared to not having maneuvered.
-     * As defined by {@link TrackedLegOfCompetitor#getWindwardDistance(Position, Position, TimePoint)}, distances for
-     * reaching legs are computed as the along-track distance. For upwind/downwind legs it's taken to be the
-     * along-wind projection. With this distance measure, the competitors speed and bearing before the maneuver,
-     * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
-     * and the resulting extrapolated position's "windward distance" is compared to the competitor's actual position
-     * at that time. This distance is returned as the result of this method. 
+     * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the
+     * maneuver that the boat lost compared to not having maneuvered. With this distance measure, the competitors speed
+     * and bearing before the maneuver, as defined by <code>timePointBeforeManeuver</code> is extrapolated until
+     * <code>timePointAfterManeuver</code>, and the resulting extrapolated position's "windward distance" is compared to
+     * the competitor's actual position at that time. This distance is returned as the result of this method.
      */
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
 
     TrackedLeg getTrackedLeg();
+
+    /**
+     * Computes the angle between the competitors direction and the wind.
+     */
+    Bearing getBeatAngle(TimePoint at) throws NoWindException;
 }

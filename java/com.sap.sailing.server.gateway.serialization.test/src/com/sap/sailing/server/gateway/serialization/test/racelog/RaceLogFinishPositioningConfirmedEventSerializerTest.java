@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -20,10 +18,14 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.CompetitorResults;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFinishPositioningConfirmedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -37,80 +39,81 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     private RaceLogFinishPositioningConfirmedEventDeserializer deserializer;
     private RaceLogFinishPositioningConfirmedEvent event;
     private TimePoint now;
-    private List<Triple<Serializable, String, MaxPointsReason>> positioningList;
-
+    private CompetitorResults positioningList;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogFinishPositioningConfirmedEventSerializer(new CompetitorJsonSerializer(
-                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()))));
-        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorDeserializer(factory));
+                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())), null));
+        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null));
 
         now = MillisecondsTimePoint.now();
-        positioningList = new ArrayList<>();
+        positioningList = new CompetitorResultsImpl();
     }
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
         positioningList.add(new Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
                 MaxPointsReason.NONE));
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, positioningList);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNotNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(1, event.getPositionedCompetitors().size());
-        assertEquals(1, deserializedEvent.getPositionedCompetitors().size());
-        assertEquals(event.getPositionedCompetitors().get(0).getA(), deserializedEvent.getPositionedCompetitors()
+        assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(1, event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(1, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getA());
-        assertEquals(event.getPositionedCompetitors().get(0).getB(), deserializedEvent.getPositionedCompetitors()
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getB());
-        assertEquals(event.getPositionedCompetitors().get(0).getC(), deserializedEvent.getPositionedCompetitors()
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getC());
     }
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEventWithoutPositioningBackwardsCompatible()
             throws JsonDeserializationException {
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, null);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, null);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(0, deserializedEvent.getPositionedCompetitors().size());
+        assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(0, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
     }
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEventWithEmptyPositioning()
             throws JsonDeserializationException {
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, positioningList);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNotNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(0, event.getPositionedCompetitors().size());
-        assertEquals(0, deserializedEvent.getPositionedCompetitors().size());
+        assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(0, event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(0, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
     }
 
 }

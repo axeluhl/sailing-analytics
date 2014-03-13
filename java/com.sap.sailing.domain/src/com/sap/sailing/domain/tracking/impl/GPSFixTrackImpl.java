@@ -14,12 +14,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -44,6 +47,7 @@ import com.sap.sailing.domain.tracking.WithValidityCache;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
+    private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
     private static final long serialVersionUID = -7282869695818293745L;
     private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
     protected final Speed maxSpeedForSmoothing;
@@ -184,6 +188,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         distanceCache = new DistanceCache(trackedItem.toString());
         maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" for "+getTrackedItem();
+    }
 
     @Override
     public void addListener(GPSTrackListener<ItemType, FixType> listener) {
@@ -240,10 +249,6 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return result;
     }
 
-    protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
-        this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
-    }
-    
     @Override
     public ItemType getTrackedItem() {
         return trackedItem;
@@ -263,6 +268,53 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+    
+    private class EstimatedPositionIterator implements Iterator<Position> {
+        private final Iterator<Timed> timedsIter;
+        private final boolean extrapolate;
+        private final NavigableSet<FixType> fixes;
+        private Iterator<FixType> subSetIterator;
+        private FixType earlierFix;
+        private FixType laterFix; // if this is null, earlierFix is also null
+        
+        public EstimatedPositionIterator(Iterable<Timed> timeds, boolean extrapolate) {
+            this.timedsIter = timeds.iterator();
+            this.extrapolate = extrapolate;
+            this.fixes = getFixes();
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return timedsIter.hasNext();
+        }
+
+        @Override
+        public Position next() {
+            TimePoint nextTimePoint = timedsIter.next().getTimePoint();
+            if (subSetIterator == null) {
+                earlierFix = getLastFixAtOrBefore(nextTimePoint);
+                subSetIterator = fixes.subSet(createDummyGPSFix(nextTimePoint), /* fromInclusive */true, fixes.last(), /* toInclusive */
+                        true).iterator();
+                laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+            } else {
+                while (laterFix != null && laterFix.getTimePoint().before(nextTimePoint)) {
+                    earlierFix = laterFix;
+                    laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+                }
+            }
+            return getEstimatedPosition(nextTimePoint, extrapolate, earlierFix, laterFix);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    @Override
+    public Iterator<Position> getEstimatedPositions(Iterable<Timed> timeds, boolean extrapolate) {
+        return new EstimatedPositionIterator(timeds, extrapolate);
     }
     
     @Override
@@ -617,8 +669,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
                 0.9, relativeTo);
         speeds.add(speedWithConfidence);
+        double bearingConfidence = 0.9;
+        if (speed.getKnots() < 0.01) {
+            bearingConfidence = 0;
+        }
         bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                bearingConfidence, // TODO use number of tracked satellites to determine confidence of single fix
                 relativeTo));
     }
 
@@ -948,4 +1004,44 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return distanceCache;
     }
 
+    @Override
+    protected boolean add(FixType fix) {
+        final boolean result;
+        lockForWrite();
+        try {
+            result = super.add(fix);
+            invalidateValidityAndDistanceCaches(fix);
+        } finally {
+            unlockAfterWrite();
+        }
+        if (logger.isLoggable(Level.FINEST)) {
+            FixType last;
+            try {
+                lockForRead();
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
+                            ", time/distance/speed from last: "+
+                            ((last=getInternalRawFixes().lower(fix))==null
+                            ? "null"
+                                    : (fix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
+                                            fix.getPosition().getDistance(last.getPosition())) + "/"+
+                                            fix.getPosition().getDistance(last.getPosition()).inTime(fix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
+        for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
+            listener.gpsFixReceived(fix, getTrackedItem());
+        }
+        return result;
+    }
+
+    protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
+        long oldMillis = getMillisecondsOverWhichToAverage();
+        this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
+        for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
+            listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
+        }
+    }
 }

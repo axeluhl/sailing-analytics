@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceColumnDTO>> {
     private final ListBox addRacesListBox;
@@ -81,7 +81,9 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         this.existingRaces = existingRaces;
         this.stringMessages = stringMessages;
         addRacesListBox = createListBox(false);
+        addRacesListBox.ensureDebugId("NumberOfRacesListBox");
         raceNamePrefixTextBox = createTextBox(null);
+        raceNamePrefixTextBox.ensureDebugId("RaceNamePrefixTextBox");
         raceNameEntryFields = new ArrayList<TextBox>();
         isMedalRaceCheckboxes = new ArrayList<CheckBox>();
         raceColumnsGrid = new Grid(0, 0);
@@ -135,6 +137,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         raceNamePrefixTextBox.setWidth("20px");
         addRacesPanel.add(raceNamePrefixTextBox);
         addRacesBtn = new Button(stringMessages.add());
+        addRacesBtn.ensureDebugId("AddRacesButton");
         addRacesBtn.addStyleName("inlineButton");
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override

@@ -8,9 +8,9 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 

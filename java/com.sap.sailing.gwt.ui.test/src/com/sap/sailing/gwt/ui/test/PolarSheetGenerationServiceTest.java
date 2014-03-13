@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -21,105 +20,91 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.replication.ReplicationService;
 
 public class PolarSheetGenerationServiceTest {
     
     private static final String BOAT_CLASS = "Forelle";
     
     @Test
-    public void testPolarSheetGenerationService() throws InterruptedException {
+    public void testPolarSheetGenerationService() throws Exception {
          
         SailingService service = new MockSailingServiceForPolarSheetGeneration();
+
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
+        PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
+                0.05, false, windStepping, false);
         
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
         
-        PolarSheetGenerationTriggerResponse triggerData = service.generatePolarSheetForRaces(idList);
+        PolarSheetGenerationResponse triggerData = service.generatePolarSheetForRaces(idList, settings, "");
         Assert.assertNotNull(triggerData);
-        Assert.assertEquals(BOAT_CLASS, triggerData.getBoatClassName());
+        Assert.assertEquals(BOAT_CLASS, triggerData.getName());
         Assert.assertNotNull(triggerData.getId());
         
-        boolean complete = false;
-        PolarSheetsData results = null;
-        double timeOut = 10;
-        while (!complete && timeOut > 0) {
-            Thread.sleep(200);
-            timeOut = timeOut - 0.2;
-            results = service.getPolarSheetsGenerationResults(triggerData.getId());
-            complete = results.isComplete();
-        }
+        PolarSheetsData results = triggerData.getData();
         
-        Assert.assertTrue(complete);
+        Assert.assertTrue(results.isComplete());
         Assert.assertNotNull(results);
         
         Assert.assertEquals(4, results.getDataCount());
         Assert.assertEquals(4.0, results.getAveragedPolarDataByWindSpeed()[0][45]);
         Assert.assertEquals(2.0, results.getAveragedPolarDataByWindSpeed()[0][55]);
-        Assert.assertEquals(6.0, results.getAveragedPolarDataByWindSpeed()[0][30]);
-        
-        
-        
+        Assert.assertEquals(6.0, results.getAveragedPolarDataByWindSpeed()[0][35]);
         
     }
     
     
     @SuppressWarnings("serial")
-    private class MockSailingServiceForPolarSheetGeneration extends SailingServiceImpl {
-        
+    private class MockSailingServiceForPolarSheetGeneration extends SailingServiceImplMock {
         @Override
         protected RacingEventService getService() {
             RacingEventService service = new MockRacingEventServiceForPolarSheetGeneration();
             return service;
         }
-        
-        @Override
-        protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
-                BundleContext context) {
-            return null;
-        }
-        
-        @Override
-        protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
-                BundleContext context) {
-            return null;
-        }
-        
-        @Override
-        protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
-                BundleContext bundleContext) {;
-            return null;
-        }
-        
     }
     
     private class MockRacingEventServiceForPolarSheetGeneration extends RacingEventServiceImpl {
         
         @Override
-        public TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
+        public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
             MockTrackedRaceForPolarSheetGeneration trackedRace = new MockTrackedRaceForPolarSheetGeneration();
             return trackedRace;
         }
@@ -128,18 +113,18 @@ public class PolarSheetGenerationServiceTest {
     
     @SuppressWarnings("serial")
     private class MockTrackedRaceForPolarSheetGeneration extends MockedTrackedRace {
-        
-
         @Override
         public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new MockDynamicGPSFixMovinTrackForPolarSheetGeneration<Competitor>(competitor, 0);
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.0, 1.0), new MillisecondsTimePoint(1), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.001, 1.001), new MillisecondsTimePoint(2), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.002, 1.002), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.003, 1.003), new MillisecondsTimePoint(4), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-30.0))));
-            
-            //Should not be taken into consideration because it happens after the race has ended
-            track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(2.0, 3.0), new MillisecondsTimePoint(7), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
+            //Before start
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(0.009, 0.009), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(12.0, new DegreeBearingImpl(-45.0))));
+            //Race
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.0, 1.0), new MillisecondsTimePoint(10), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.001, 1.001), new MillisecondsTimePoint(11), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.002, 1.002), new MillisecondsTimePoint(12), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.003, 1.003), new MillisecondsTimePoint(13), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-35.0))));
+            //After Finish
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.01, 1.01), new MillisecondsTimePoint(75), new KnotSpeedWithBearingImpl(12.0, new DegreeBearingImpl(-45.0))));
             return track;
         }
         
@@ -150,24 +135,72 @@ public class PolarSheetGenerationServiceTest {
         }
         
         @Override
+        public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+            return getWind(p, at);
+        }
+        
+        @Override
+        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+            return new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(new WindImpl(p, at,
+                    new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(180.0))), 0.9,
+                    new Pair<Position, TimePoint>(p, at), true);
+        }
+        
+        @Override
+        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+                Iterable<WindSource> windSourcesToExclude) {
+            return getWindWithConfidence(p, at);
+        }
+        
+        @Override
         public RaceDefinition getRace() {
-            BoatClass forelle = new BoatClassImpl(BOAT_CLASS, true);
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+            BoatClass forelle = new BoatClassImpl("Forelle", true);
+            ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
             ArrayList<Competitor> competitors = new ArrayList<Competitor>();
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
+                    new BoatImpl("Schnelle Forelle", forelle, "GER000"));
             competitors.add(competitor);
-            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", new ArrayList<Waypoint>()), forelle, competitors);
+            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, competitors);
             return race;
         }
         
         @Override
+        public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
+            NavigableSet<MarkPassing> passings = new ConcurrentSkipListSet<MarkPassing>(
+                    MarkPassingByTimeComparator.INSTANCE);
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(10), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(20), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(30), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(40), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(50), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(60), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(70), null, competitor));
+            return passings;
+        }
+        
+        @Override
+        public Iterable<WindSource> getWindSources(WindSourceType type) {
+            List<WindSource> sources = new ArrayList<WindSource>();
+            sources.add(new WindSourceImpl(type));
+            return sources;
+        }
+        
+        @Override
         public TimePoint getStartOfRace() {
-            return new MillisecondsTimePoint(1);
+            return new MillisecondsTimePoint(9);
         }
         
         @Override
         public TimePoint getEndOfRace() {
-            return new MillisecondsTimePoint(5);
-        }
+            return new MillisecondsTimePoint(80);
+        };
     }
     
     @SuppressWarnings("serial")
@@ -197,7 +230,11 @@ public class PolarSheetGenerationServiceTest {
             return true;
         }
         
+        @Override
+        public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+            return this.getFirstFixAtOrAfter(at).getSpeed();
+        }
+        
     }
-
 
 }

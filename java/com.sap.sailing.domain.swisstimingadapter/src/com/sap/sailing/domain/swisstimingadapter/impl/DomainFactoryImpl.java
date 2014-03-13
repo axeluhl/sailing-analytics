@@ -9,24 +9,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
@@ -41,15 +42,14 @@ import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
-import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 import difflib.PatchFailedException;
@@ -127,16 +127,17 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType) {
         Competitor result = getCompetitorByBoatIDAndRaceType(competitor.getBoatID(), raceType);
-        if (result == null) {
-            Boat boat = new BoatImpl(competitor.getName(), raceType.getBoatClass(), competitor.getBoatID());
-            List<Person> teamMembers = new ArrayList<Person>();
+        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
+            DynamicBoat boat = new BoatImpl(competitor.getName(), raceType.getBoatClass(), competitor.getBoatID());
+            List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
             for (String teamMemberName : competitor.getName().split("[-+&]")) {
                 teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
-            Team team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
-                    competitor.getName(), team, boat);
+            DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
+            result = competitorStore.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
+                    competitor.getName(), null /*displayColor*/, team, boat);
         }
         return result;
     }
@@ -152,7 +153,7 @@ public class DomainFactoryImpl implements DomainFactory {
             List<ControlPoint> courseDefinition) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingSide */ null);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
@@ -233,7 +234,7 @@ public class DomainFactoryImpl implements DomainFactory {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         for (Mark mark : course.getMarks()) {
             ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices());
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingSide */ null);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
@@ -254,7 +255,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<String> markNameIter = devices.iterator();
                     String left = markNameIter.next();
                     String right = markNameIter.next();
-                    result = baseDomainFactory.createGate(getOrCreateMark(left), getOrCreateMark(right), left + "/" + right);
+                    result = baseDomainFactory.createControlPointWithTwoMarks(getOrCreateMark(left), getOrCreateMark(right), left + "/" + right);
                     break;
                 default:
                     throw new RuntimeException(
@@ -286,11 +287,11 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public void updateCourseWaypoints(com.sap.sailing.domain.base.Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException {
-        List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>>();
+        List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
-            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>(domainControlPoint, null));
+            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(domainControlPoint, null));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
@@ -327,10 +328,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, WindStore windStore,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RaceSpecificMessageLoader messageLoader) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis, 
-                swissTimingFactory, domainFactory, raceLogStore, windStore, messageLoader);
+                swissTimingFactory, domainFactory, raceLogStore, messageLoader);
     }
 
 }

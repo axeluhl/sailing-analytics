@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
@@ -37,9 +38,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -68,7 +69,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
-        competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Tina Lutz", new TeamImpl("Tina Lutz + Susann Beucke",
+        competitor = masterDomainFactory.getCompetitorStore().getOrCreateCompetitor("GER 61", "Tina Lutz", Color.RED, new TeamImpl("Tina Lutz + Susann Beucke",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
@@ -81,15 +82,15 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
-        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingSide*/ null));
-        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2"), /*passingSide*/ null));
-        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3"), /*passingSide*/ null));
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2"), /*passingInstruction*/ null));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3"), /*passingInstruction*/ null));
         masterCourse.removeWaypoint(1);
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
-                MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.waitUntilWindLoadingComplete();
     }
@@ -184,10 +185,10 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     
     @Test
     public void testReplicationOfLoadingOfStoredWindTrack() throws UnknownHostException, MongoException, InterruptedException {
-        MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+        MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        WindTrack windTrack = windStore.getWindTrack(trackedRegatta, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
+        WindTrack windTrack = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
         final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));

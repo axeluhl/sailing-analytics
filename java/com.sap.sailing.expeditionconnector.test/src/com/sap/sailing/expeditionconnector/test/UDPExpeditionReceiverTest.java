@@ -24,7 +24,9 @@ import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
@@ -44,6 +46,8 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 
 public class UDPExpeditionReceiverTest {
+    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    
     private String[] validLines;
     private String[] someValidWithFourInvalidLines;
     final List<ExpeditionMessage> messages = new ArrayList<ExpeditionMessage>();
@@ -152,8 +156,9 @@ public class UDPExpeditionReceiverTest {
         ExpeditionWindTracker windTracker = new ExpeditionWindTracker(new MockedTrackedRace() {
             private static final long serialVersionUID = 4444197492014940699L;
             @Override
-            public void recordWind(Wind wind, WindSource windSource) {
+            public boolean recordWind(Wind wind, WindSource windSource) {
                 windFixes.add(wind);
+                return true;
             }
         }, null, receiver, /* ExpeditionWindTrackerFactory */ null);
         receiver.addListener(windTracker, /* validMessagesOnly */ false);

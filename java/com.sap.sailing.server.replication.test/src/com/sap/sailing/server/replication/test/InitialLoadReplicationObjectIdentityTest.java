@@ -1,11 +1,11 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.hamcrest.core.Is.is;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,11 +27,16 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.test.TrackBasedTest;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -49,9 +54,11 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     @Before
     public void setUp() throws Exception {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        this.master = new RacingEventServiceImpl(mongoDBService);
-        this.replica = new RacingEventServiceImpl(mongoDBService);
         mongoDBService.getDB().dropDatabase();
+        this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+        this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
     }
     
     public void performReplicationSetup() throws Exception {
@@ -71,9 +78,13 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         String venue = "Default Venue";
         List<String> courseAreaNames = new ArrayList<String>();
         courseAreaNames.add("Default");
-        master.addEvent(eventName, venue, "", false, "monsterevent", courseAreaNames);
-        assertNotNull(master.getEvent("monsterevent"));
-        assertNull(replica.getEvent("monsterevent"));
+        final UUID eventId = UUID.randomUUID();
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+
+        master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
+        assertNotNull(master.getEvent(eventId));
+        assertNull(replica.getEvent(eventId));
         
         /* Regatta */
         final String baseEventName = "Kiel Week 2012";
@@ -124,7 +135,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
             }
         }
 
-        assertNotNull(replica.getEvent("monsterevent"));
+        assertNotNull(replica.getEvent(eventId));
         assertNotNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNotNull(replica.getLeaderboardByName(leaderboardName));

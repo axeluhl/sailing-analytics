@@ -12,7 +12,7 @@ public class LastWindFixFinder extends RaceLogAnalyzer<Wind> {
     }
 
     @Override
-    protected Wind performAnalyzation() {
+    protected Wind performAnalysis() {
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogWindFixEvent) {
                 RaceLogWindFixEvent windFixEvent = (RaceLogWindFixEvent) event;

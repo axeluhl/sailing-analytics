@@ -47,6 +47,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Label timeDelayLabel;
     private final Label timeLabel;
     private final Label dateLabel;
+    private final Label timeToStartLabel;
+    private final FlowPanel timeToStartControlPanel;
     private final Label playModeLabel;
     protected final TimeSlider timeSlider;
     private final Button backToLivePlayButton;
@@ -186,10 +188,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timeControlPanel.add(dateLabel);
         timeControlPanel.add(timeLabel);
         
-        dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         dateLabel.getElement().setClassName("dateLabel");
-        timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeLabel.getElement().setClassName("timeLabel");
+
+        // time to start control
+        timeToStartControlPanel = new FlowPanel();
+        timeToStartControlPanel.setStyleName("timePanel-controls-timeToStart");
+        timeToStartLabel = new Label();
+        timeToStartControlPanel.add(timeToStartLabel);
+        timeToStartLabel.getElement().setClassName("timeToStartLabel");
         
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
@@ -276,24 +283,24 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         setWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
-        
         controlsPanel.add(playSpeedControlPanel);
         controlsPanel.add(playModeControlPanel );
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
+        controlsPanel.add(timeToStartControlPanel);
     }
 
     @Override
-    public void timeChanged(Date time) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if (timeRangeProvider.isZoomed()) {
-            timeSlider.setCurrentValue(new Double(time.getTime()), false);
+            timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
         } else {
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.
-                if (time.after(getToTime())) {
+                if (newTime.after(getToTime())) {
                     switch (timer.getPlayMode()) {
                     case Live:
-                        Date newMaxTime = new Date(time.getTime());
+                        Date newMaxTime = new Date(newTime.getTime());
                         if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
                             newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
                         }
@@ -304,15 +311,37 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         break;
                     }
                 }
-                timeSlider.setCurrentValue(new Double(time.getTime()), false);
+                timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
             }
         }
-        dateLabel.setText(dateFormatter.format(time));
-        if (lastReceivedDataTimepoint == null) {
-            timeLabel.setText(timeFormatter.format(time));
+        dateLabel.setText(getDateLabelText(newTime));
+        timeLabel.setText(getTimeLabelText(newTime));
+        String timeToStartLabelText = getTimeToStartLabelText(newTime);
+        if(timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
+            timeToStartControlPanel.setVisible(true);
+            timeToStartLabel.setText(getTimeToStartLabelText(newTime));
         } else {
-            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
+            timeToStartControlPanel.setVisible(false);
+            timeToStartLabel.setText("");
         }
+    }
+
+    protected String getTimeToStartLabelText(Date time) {
+        return null;
+    }
+
+    protected String getTimeLabelText(Date time) {
+        final String timeLabelText;
+        if (lastReceivedDataTimepoint == null) {
+            timeLabelText = timeFormatter.format(time);
+        } else {
+            timeLabelText = timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")";
+        }
+        return timeLabelText;
+    }
+
+    protected String getDateLabelText(Date time) {
+        return dateFormatter.format(time);
     }
 
     protected Date getFromTime() {

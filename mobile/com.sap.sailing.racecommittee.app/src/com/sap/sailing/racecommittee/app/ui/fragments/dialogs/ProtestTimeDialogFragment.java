@@ -197,8 +197,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     private void setAndAnnounceProtestTime() {
         List<ManagedRace> selectedRaces = getSelectedRaces();
         TimePoint protestTime = getProtestTime();
+        TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            race.getState().setProtestStartTime(protestTime);
+            race.getState().setProtestTime(now, protestTime);
         }
     }
 

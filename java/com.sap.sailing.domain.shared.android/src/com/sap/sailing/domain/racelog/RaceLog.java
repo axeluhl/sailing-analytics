@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog;
 
 import java.util.HashSet;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
@@ -66,4 +67,40 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     void addAllListeners(HashSet<RaceLogEventVisitor> listeners);
 
     Iterable<RaceLogEventVisitor> getAllListeners();
+
+    /**
+     * Adds an event to this race log and returns {@link RaceLog#getEventsToDeliver(UUID)} 
+     * (excluding the new <code>event</code>)
+     */
+    Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId);
+    
+    /**
+     * Returns a superset of all race log events that were added to this race log but not yet returned to 
+     * the client with ID <code>clientId</code> by this method. In general, the list returned is not a true 
+     * superset but equals exactly those events not yet delivered to the client. However, if the server 
+     * was re-started since the client last called this method, and since the underlying data structures 
+     * are not durably stored, the entire set of all race log events would be delivered to the client once.
+     */
+    Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId);
+    
+    /**
+     * Returns all {@link #getRawFixes() raw fixes} and marks them as delivered to the client identified by <code>clientId</code>
+     * so that when that ID appears in a subsequent call to {@link #add(RaceLogEvent, UUID)}, the fixes returned by this call
+     * are already considered delivered to the client identified by <code>clientId</code>.
+     */
+    Iterable<RaceLogEvent> getRawFixes(UUID clientId);
+
+    /**
+     * Like {@link #add(RaceLogEvent)}, only that no events are triggered. Use this method only when loading a race log,
+     * e.g., from a replication or master data import or when loading from the database.
+     * 
+     * @return <code>true</code> if the event was actually added which is the case if there was no equal event contained
+     *         in this race log yet
+     */
+    boolean load(RaceLogEvent event);
+
+    /**
+     * Merges all events from the <code>other</code> race log into this.
+     */
+    void merge(RaceLog other);
 }

@@ -11,7 +11,7 @@ public class PathfinderFinder extends RaceLogAnalyzer<String> {
     }
 
     @Override
-    protected String performAnalyzation() {
+    protected String performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogPathfinderEvent) {
                 return ((RaceLogPathfinderEvent) event).getPathfinderId();

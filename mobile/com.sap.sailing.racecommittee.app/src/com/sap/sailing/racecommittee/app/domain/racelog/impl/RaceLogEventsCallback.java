@@ -1,0 +1,149 @@
+package com.sap.sailing.racecommittee.app.domain.racelog.impl;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
+import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingBinder;
+import com.sap.sailing.racecommittee.app.services.sending.ServerReplyCallback;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
+
+/**
+ * <p>
+ * Processes (and closes) the {@link InputStream} when posting a {@link RaceLogEvent} to the server.
+ * </p>
+ * <p>
+ * If the server sends back some {@link RaceLogEvent}s the {@link RaceLogEventsCallback} will try to reach the
+ * {@link EventSendingService} and tell him about the server-side {@link RaceLogEvent}s that will be added to
+ * the {@link RaceLog}. This gives the {@link EventSendingService} the chance to ignore them the next time they
+ * come around. The execution of the {@link RaceLogEventsCallback} will be deferred until the service is bound.
+ * </p>
+ * <p>
+ * If the {@link EventSendingService} cannot be reached (this is a really bad sign) the events are added to the
+ * {@link RaceLogEvent} immediately.
+ * </p>
+ */
+public class RaceLogEventsCallback implements ServerReplyCallback {
+    private static final String TAG = RaceLogEventsCallback.class.getName();
+
+    @Override
+    public void processResponse(Context context, InputStream responseStream, Serializable raceId) {
+        ReadonlyDataManager dataManager = DataManager.create(context);
+        List<RaceLogEvent> eventsToAdd = parseResponse(dataManager, responseStream);
+        addEvents(context, raceId, dataManager, eventsToAdd);
+    }
+
+    protected List<RaceLogEvent> parseResponse(ReadonlyDataManager dataManager, InputStream responseStream) {
+        List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
+        
+        JSONParser parser = new JSONParser();
+        try {
+            JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(responseStream));
+            SharedDomainFactory domainFactory = dataManager.getDataStore().getDomainFactory();
+            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(domainFactory);
+            for (Object o : eventsToAddAsJson) {
+                try {
+                    RaceLogEvent eventToAdd = deserializer.deserialize((JSONObject) o);
+                    eventsToAdd.add(eventToAdd);
+                } catch (JsonDeserializationException e) {
+                    ExLog.e(TAG, "Error deserializing Race Log event:\n" + o);
+                }
+            }
+        } catch (Exception e) {
+            ExLog.e(TAG, "Error parsing server response");
+        }
+
+        return eventsToAdd;
+    }
+
+    private void addEvents(Context context, Serializable raceId, ReadonlyDataManager dataManager,
+            List<RaceLogEvent> eventsToAdd) {
+        if (eventsToAdd.isEmpty()) {
+            ExLog.i(TAG, "No server-side events to add for race " + raceId);
+            return;
+        }
+        
+        ExLog.i(TAG, String.format("Server sent %d events to be added for race %s.", eventsToAdd.size(), raceId));
+
+        if (!dataManager.getDataStore().hasRace(raceId)) {
+            ExLog.w(TAG, "I have no race " + raceId);
+            return;
+        }
+        RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
+        if (raceLog == null) {
+            ExLog.w(TAG, "Unable to retrieve race log for race " + raceId);
+            return;
+        }
+        
+        EventSendingConnection connection = new EventSendingConnection(context, eventsToAdd, raceLog);
+        if (context.bindService(new Intent(context, EventSendingService.class), connection,
+                Context.BIND_AUTO_CREATE)) {
+            // execution deferred until service is bound
+            ExLog.i(TAG, "Waiting for sending service to be bound.");
+        } else {
+            ExLog.e(TAG,"Unable to bind to sending service. Processing server response without suppressing received events...");
+            addEvents(eventsToAdd, raceLog, null);
+        }
+    }
+
+    protected void addEvents(List<RaceLogEvent> eventsToAdd, RaceLog raceLog, EventSendingService sendingService) {
+        for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
+            if (sendingService != null) {
+                sendingService.registerEventForSuppression(eventToAddToRaceLog.getId());
+            }
+            raceLog.add(eventToAddToRaceLog);
+            ExLog.i(TAG, "Added event " + eventToAddToRaceLog.toString() + " to client's race log");
+        }
+    }
+
+    /**
+     * Connects to the {@link EventSendingService} and continues with execution. The service will be released afterwards.
+     */
+    private class EventSendingConnection implements ServiceConnection {
+
+        private final Context context;
+        private final List<RaceLogEvent> eventsToAdd;
+        private final RaceLog raceLog;
+        private EventSendingService sendingService;
+
+        public EventSendingConnection(Context context, List<RaceLogEvent> eventsToAdd, RaceLog raceLog) {
+            this.context = context;
+            this.eventsToAdd = eventsToAdd;
+            this.raceLog = raceLog;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            EventSendingBinder binder = (EventSendingBinder) service;
+            sendingService = binder.getService();
+            ExLog.i(TAG, "Sending service is bound. Continue to process server response...");
+            addEvents(eventsToAdd, raceLog, sendingService);
+            context.unbindService(this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg) {
+
+        }
+    }
+}

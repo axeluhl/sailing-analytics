@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 public enum TrapezoidCourseLayouts implements CourseLayouts{
-    innerLoopTrapezoid60("Trapezoid 60° Inner Loop", "I", 60),
-    outerLoopTrapezoid60("Trapezoid 60° Outer Loop", "O", 60),
-    innerLoopTrapezoid70("Trapezoid 70° Inner Loop", "I", 70),
-    outerLoopTrapezoid70("Trapezoid 70° Outer Loop", "O", 70);
+    innerLoopTrapezoid60("Trapezoid 60Â° Inner Loop", "I", 60),
+    outerLoopTrapezoid60("Trapezoid 60Â° Outer Loop", "O", 60),
+    innerLoopTrapezoid70("Trapezoid 70Â° Inner Loop", "I", 70),
+    outerLoopTrapezoid70("Trapezoid 70Â° Outer Loop", "O", 70);
     
     private String displayName;
     private String shortName;

@@ -47,9 +47,16 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return new NamedArrayAdapter<T>(context, items);
     }
 
-    @Override
+    /*@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_fragment, container, false);
+    }*/
+    
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
+        parent.addView(v, 0);
+        return parent;
     }
 
     @Override
@@ -77,6 +84,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     private void loadItems() {
+        setListShown(false);
         getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
@@ -98,7 +106,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         textText.setText(getHeaderText());
     }
 
+    @Override
     public void onLoadSucceded(Collection<T> data, boolean isCached) {
+        setListShown(true);
         namedList.clear();
         namedList.addAll(data);
         Collections.sort(namedList, new NaturalNamedComparator());
@@ -109,6 +119,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public void onLoadFailed(Exception reason) {
+        setListShown(true);
         namedList.clear();
         listAdapter.notifyDataSetChanged();
         

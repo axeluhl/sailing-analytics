@@ -35,9 +35,9 @@ public class RegattaEntryListJsonGetServlet extends AbstractJsonHttpServlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta " + regattaName
                         + " not found");
             } else {
-                NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+            	NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
                 CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(
-                        new TeamJsonSerializer(new PersonJsonSerializer(nationalityJsonSerializer)));
+                        new TeamJsonSerializer(new PersonJsonSerializer(nationalityJsonSerializer)), null);
                 JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
                 JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 

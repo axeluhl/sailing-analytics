@@ -21,8 +21,11 @@ public class WindJsonSerializer implements JsonSerializer<Wind> {
     @Override
     public JSONObject serialize(Wind wind) {
         JSONObject result = new JSONObject();
-
-        result.put(FIELD_POSITION, positionSerializer.serialize(wind.getPosition()));
+        
+        Position position = wind.getPosition();
+        if (position != null) {
+            result.put(FIELD_POSITION, positionSerializer.serialize(position));
+        }
         result.put(FIELD_TIMEPOINT, wind.getTimePoint().asMillis());
         result.put(FIELD_SPEED_IN_KNOTS, wind.getKnots());
         result.put(FIELD_DIRECTION, wind.getBearing().getDegrees());

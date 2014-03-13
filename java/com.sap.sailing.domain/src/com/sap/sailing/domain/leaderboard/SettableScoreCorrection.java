@@ -13,17 +13,12 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     /**
      * @param reason
      *            if <code>null</code>, any existing max-points reason is removed; while
-     *            {@link #getMaxPointsReason(Competitor, RaceColumn)} will return {@link MaxPointsReason#NONE}, a
-     *            call to {@link #isScoreCorrected(Competitor, RaceColumn)} will return <code>false</code> if no
+     *            {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint)} will return {@link MaxPointsReason#NONE}, a
+     *            call to {@link #isScoreCorrected(Competitor, RaceColumn, TimePoint)} will return <code>false</code> if no
      *            other explicit score correction was made for the <code>competitor</code>.
      */
     void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason);
     
-    /**
-     * @return a non-<code>null</code> result
-     */
-    MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn);
-
     void correctScore(Competitor competitor, RaceColumn raceColumn, double points);
 
     /**
@@ -45,4 +40,5 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
 
     void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed);
+
 }

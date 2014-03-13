@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/settings_category_general" >
+
+        <ListPreference
+            android:key="@string/preference_racing_procedure_override_key"
+            android:defaultValue="@string/preference_racing_procedure_override_default"
+            android:summary="@string/override_default_start_procedure_type_select_description"
+            android:title="@string/override_default_start_procedure_type_select_header" />
+	
+	    <ListPreference
+	        android:key="@string/preference_course_designer_override_key"
+	        android:defaultValue="@string/preference_course_designer_override_default"
+	        android:summary="@string/empty"
+	        android:title="@string/override_default_course_designer_type_select_header" />
+        
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="RRS26" >
+        
+        <ListPreference
+            android:key="@string/preference_racing_procedure_rrs26_classflag_key"
+            android:defaultValue="@string/preference_racing_procedure_classflag_default"
+            android:title="@string/preference_racing_procedure_classflag_header"
+            android:summary="@string/empty" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_rrs26_hasxray_key"
+            android:defaultValue="@bool/preference_racing_procedure_rrs26_hasxray_default"
+            android:title="@string/preference_racing_procedure_hasxray_header"
+            android:summary="@string/preference_racing_procedure_hasxray_description" />
+        
+	    <com.sap.sailing.racecommittee.app.ui.views.FixedMultiSelectListPreference
+	        android:key="@string/preference_racing_procedure_rrs26_startmode_flags_key"
+	        android:defaultValue="@array/preference_racing_procedure_rrs26_startmode_flags_default"
+	        android:title="@string/preference_racing_procedure_rrs26_startmode_flags_header"
+	        android:summary="@string/empty" />
+        
+    </PreferenceCategory>
+        
+    <PreferenceCategory android:title="Gate Start" >
+        
+        <ListPreference
+            android:key="@string/preference_racing_procedure_gatestart_classflag_key"
+            android:defaultValue="@string/preference_racing_procedure_classflag_default"
+            android:title="@string/preference_racing_procedure_classflag_header"
+            android:summary="@string/empty" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_gatestart_hasxray_key"
+            android:defaultValue="@bool/preference_racing_procedure_gatestart_hasxray_default"
+            android:title="@string/preference_racing_procedure_hasxray_header"
+            android:summary="@string/preference_racing_procedure_hasxray_description" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_gatestart_haspathfinder_key"
+            android:defaultValue="@bool/preference_racing_procedure_gatestart_haspathfinder_default"
+            android:title="@string/preference_racing_procedure_gatestart_haspathfinder_header"
+            android:summary="@string/preference_racing_procedure_gatestart_haspathfinder_description" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key"
+            android:defaultValue="@bool/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default"
+            android:title="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header"
+            android:summary="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description" />
+        
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="ESS Start" >
+        
+        <ListPreference
+            android:key="@string/preference_racing_procedure_ess_classflag_key"
+            android:defaultValue="@string/preference_racing_procedure_classflag_default"
+            android:title="@string/preference_racing_procedure_classflag_header"
+            android:summary="@string/empty" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_ess_hasxray_key"
+            android:defaultValue="@bool/preference_racing_procedure_ess_hasxray_default"
+            android:title="@string/preference_racing_procedure_hasxray_header"
+            android:summary="@string/preference_racing_procedure_hasxray_description" />
+        
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="Basic Start" >
+        
+        <ListPreference
+            android:key="@string/preference_racing_procedure_basic_classflag_key"
+            android:defaultValue="@string/preference_racing_procedure_classflag_default"
+            android:title="@string/preference_racing_procedure_classflag_header"
+            android:summary="@string/empty" />
+        
+        <CheckBoxPreference
+            android:key="@string/preference_racing_procedure_basic_hasxray_key"
+            android:defaultValue="@bool/preference_racing_procedure_basic_hasxray_default"
+            android:title="@string/preference_racing_procedure_hasxray_header"
+            android:summary="@string/preference_racing_procedure_hasxray_description" />
+        
+    </PreferenceCategory>
+
+</PreferenceScreen>

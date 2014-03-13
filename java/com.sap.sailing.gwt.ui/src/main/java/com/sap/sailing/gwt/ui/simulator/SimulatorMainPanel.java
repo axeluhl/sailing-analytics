@@ -65,18 +65,16 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMainPanel extends SimplePanel {
 
-	private class resizableFlowPanel extends FlowPanel implements RequiresResize {
-
-		@Override
-		public void onResize() {
-	        simulatorMap.getMap().checkResizeAndCenter();
-		}
-		
-	}
+    private class ResizableFlowPanel extends FlowPanel implements RequiresResize {
+        @Override
+        public void onResize() {
+            simulatorMap.getMap().triggerResize();
+        }
+    }
 	
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
-    private resizableFlowPanel rightPanel;
+    private ResizableFlowPanel rightPanel;
     private VerticalPanel windPanel;
 
     private Button updateButton;
@@ -149,14 +147,16 @@ public class SimulatorMainPanel extends SimplePanel {
             if (setting.getDisplayName().equals("Base Bearing (Degrees)")) {
             	simulatorMap.clearOverlays();
             	//System.out.println("Wind Base Bearing: "+setting.getValue());
-            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(1, (Double) setting.getValue());
-	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            	simulatorMap.getRegattaAreaCanvasOverlay().updateRaceCourse(1, (Double) setting.getValue());
+            	simulatorMap.getRaceCourseCanvasOverlay().draw();
+                simulatorMap.getWindNeedleCanvasOverlay().draw();
             }
             if (setting.getDisplayName().equals("Race Course Diff (Degrees)")) {
             	simulatorMap.clearOverlays();
             	//System.out.println("Wind Base Bearing: "+setting.getValue());
-            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(2, (Double) setting.getValue());
-	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            	simulatorMap.getRegattaAreaCanvasOverlay().updateRaceCourse(2, (Double) setting.getValue());
+            	simulatorMap.getRaceCourseCanvasOverlay().draw();
+                simulatorMap.getWindNeedleCanvasOverlay().draw();
             }
             if (autoUpdate) {
                 update();
@@ -226,7 +226,6 @@ public class SimulatorMainPanel extends SimplePanel {
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
             char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
-
         super();
 
         this.simulatorSvc = svc;
@@ -241,7 +240,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent evnet) {
             	boolean selectedValue = isOmniscient.getValue();
-            	simulatorMap.windParams.showOmniscient = selectedValue;
+            	simulatorMap.getWindParams().showOmniscient = selectedValue;
             }
         });
 
@@ -251,7 +250,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent evnet) {
             	boolean selectedValue = isOpportunistic.getValue();
-            	simulatorMap.windParams.showOpportunist = selectedValue;
+            	simulatorMap.getWindParams().showOpportunist = selectedValue;
             }
         });
 
@@ -261,11 +260,11 @@ public class SimulatorMainPanel extends SimplePanel {
         this.setSize("100%", "100%");
         
         leftPanel = new FlowPanel();
-        rightPanel = new resizableFlowPanel();
+        rightPanel = new ResizableFlowPanel();
         patternSelector = new ListBox();
         patternSelectorHandler = new PatternSelectorHandler();
         patternSelector.addChangeHandler(patternSelectorHandler);
-        patternSelector.getElement().getStyle().setProperty("width", "215px");
+        patternSelector.setWidth("215px");
         patternNameDTOMap = new HashMap<String, WindPatternDTO>();
         patternDisplayMap = new HashMap<String, WindPatternDisplay>();
         patternPanelMap = new HashMap<String, Panel>();
@@ -273,19 +272,19 @@ public class SimulatorMainPanel extends SimplePanel {
         currentWPPanel = null;
 
         this.raceSelector = new ListBox();
-        this.raceSelector.getElement().getStyle().setProperty("width", "215px");
+        this.raceSelector.setWidth("215px");
 
         this.legSelector = new ListBox();
-        this.legSelector.getElement().getStyle().setProperty("width", "215px");
+        this.legSelector.setWidth("215px");
 
         this.competitorSelector = new ListBox();
-        this.competitorSelector.getElement().getStyle().setProperty("width", "215px");
+        this.competitorSelector.setWidth("215px");
 
         this.boatClassSelector = new ListBox();
-        this.boatClassSelector.getElement().getStyle().setProperty("width", "215px");
+        this.boatClassSelector.setWidth("215px");
 
         directionSelector = new ListBox();
-        directionSelector.getElement().getStyle().setProperty("width", "215px");
+        directionSelector.setWidth("215px");
         
         windParams = new WindFieldGenParamsDTO();
         windParams.setMode(mode);
@@ -307,10 +306,6 @@ public class SimulatorMainPanel extends SimplePanel {
         timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-        // LogoAndTitlePanel logoAndTitlePanel = new
-        // LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
-        // logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        // this.addNorth(logoAndTitlePanel, 68);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
                 windParams, busyIndicator, mode, this);
@@ -336,7 +331,6 @@ public class SimulatorMainPanel extends SimplePanel {
         this.setWidget(mainPanel);        
 
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
-
     }
 
     public void setDefaultTimeSettings() {
@@ -834,28 +828,28 @@ public class SimulatorMainPanel extends SimplePanel {
         // int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
         int selectedLegIndex = legSelector.getSelectedIndex();
 
-        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(this.boatClassSelector.getSelectedIndex(), this.raceSelector.getSelectedIndex(),
-                this.competitorSelector.getSelectedIndex(), this.legSelector.getSelectedIndex());
+        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
 
-        if (this.windDisplayButton.getValue()) {
-            this.showTimePanel(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
-        } else if (this.summaryButton.getValue()) {
-            this.showTimePanel(false);
-        	this.simulatorMap.regattaAreaCanvasOverlay.redraw(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
-        } else if (this.replayButton.getValue()) {
-            this.showTimePanel(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selection, true);
+        if (windDisplayButton.getValue()) {
+            showTimePanel(true);
+            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, true);
+        } else if (summaryButton.getValue()) {
+            showTimePanel(false);
+            simulatorMap.getRegattaAreaCanvasOverlay().draw();
+            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
+        } else if (replayButton.getValue()) {
+            showTimePanel(true);
+            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, true);
         } else {
-            if (this.mode == SailingSimulatorConstants.ModeMeasured) {
+            if (mode == SailingSimulatorConstants.ModeMeasured) {
 
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
                 } else {
-                    this.simulatorMap.removePolyline();
-                    this.showTimePanel(false);
-                    this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
+                    simulatorMap.removePolyline();
+                    showTimePanel(false);
+                    simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
                 }
             }
         }

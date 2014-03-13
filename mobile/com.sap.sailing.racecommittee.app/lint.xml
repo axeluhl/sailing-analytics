@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
+    <issue id="IconLocation" severity="ignore" />
     <issue id="NestedWeights">
-        <ignore path="res\layout\results_capturing_view.xml" />
+        <ignore path="res/layout/results_capturing_view.xml" />
     </issue>
     <issue id="UselessLeaf">
-        <ignore path="res\layout\results_capturing_view.xml" />
+        <ignore path="res/layout/results_capturing_view.xml" />
     </issue>
 </lint>

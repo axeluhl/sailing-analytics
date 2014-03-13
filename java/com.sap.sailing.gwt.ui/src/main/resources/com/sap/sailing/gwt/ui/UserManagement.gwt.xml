@@ -14,14 +14,15 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../Leaderboard.css" />
-  <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
   
   <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
     
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
+  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.usermanagement.UserManagementPage'/>

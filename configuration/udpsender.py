@@ -1,12 +1,12 @@
 import socket, sys
 
-if len(sys.argv) <= 2:
-    print "Please provide ip and mode (TCP, UDP)"
+if len(sys.argv) <= 3:
+    print "Please provide ip, port and mode (TCP, UDP)"
     sys.exit(1)
 
 UDP_IP = sys.argv[1]
-UDP_PORT = 2013
-MODE = sys.argv[2]
+UDP_PORT = int(sys.argv[2])
+MODE = sys.argv[3]
 MESSAGE = "Hello, World!"
 
 print "Target IP:", UDP_IP

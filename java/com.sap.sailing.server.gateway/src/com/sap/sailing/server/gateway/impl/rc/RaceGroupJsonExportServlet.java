@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -20,9 +21,7 @@ import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceCellJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowJsonSerializer;
@@ -35,12 +34,10 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializ
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
 
-    private static final String PARAM_COURSE_AREA_FILTER = "courseArea";
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String courseAreaFilter = request.getParameter(PARAM_COURSE_AREA_FILTER);
+        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER);
         if (courseAreaFilter == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Need to set a course area filter.");
             return;
@@ -56,8 +53,14 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No course area found with given UUID.");
             return;
         }
-
-        JsonSerializer<RaceGroup> serializer = createSerializer();
+        String clientUuidAsString = request.getParameter(RaceLogServletConstants.PARAMS_CLIENT_UUID);
+        final UUID clientUuid;
+        if (clientUuidAsString == null) {
+            clientUuid = null;
+        } else {
+            clientUuid = UUID.fromString(clientUuidAsString);
+        }
+        JsonSerializer<RaceGroup> serializer = createSerializer(clientUuid);
         JSONArray result = new JSONArray();
 
         RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
@@ -80,17 +83,23 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         }
     }
 
-    private static JsonSerializer<RaceGroup> createSerializer() {
+    private static JsonSerializer<RaceGroup> createSerializer(UUID clientUuid) {
         return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), new CourseAreaJsonSerializer(),
+                RegattaConfigurationJsonSerializer.create(),
                 new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
                         new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
-                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer()))))));
+                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(clientUuid)))))));
 
     }
 
-    private static JsonSerializer<RaceLog> createRaceLogSerializer() {
-        return new RaceLogSerializer(RaceLogEventSerializer.create(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())))));
+    /**
+     * @param clientUuid
+     *            used to tell the race log to which client the race log is delivered so that when the client asks later
+     *            which race log events are new for that client, the race log already knows which events were already
+     *            delivered
+     */
+    private static JsonSerializer<RaceLog> createRaceLogSerializer(UUID clientUuid) {
+        return new RaceLogSerializer(RaceLogEventSerializer.create(CompetitorJsonSerializer.create()), clientUuid);
     }
 
 }

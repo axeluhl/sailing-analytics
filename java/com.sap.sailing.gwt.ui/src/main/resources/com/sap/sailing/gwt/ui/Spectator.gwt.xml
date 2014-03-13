@@ -15,16 +15,14 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../Spectator.css" />
-  <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
-  
-  <!-- Highcharts API -->
-  <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <inherits name="com.google.gwt.resources.Resources" />
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
+  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.spectator.SpectatorEntryPoint'/>
@@ -34,12 +32,7 @@
   <source path='client'/>
   <source path='shared'/>
   <source path='spectator'/>
-  <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='adminconsole'/>
+  <source path='leaderboard'/>
   <source path='usermanagement'/>
-  <source path='test'/>
-  <source path='actions'/>
-  <source path='masterdataimport'/>
-  <source path='simulator'/>
 </module>

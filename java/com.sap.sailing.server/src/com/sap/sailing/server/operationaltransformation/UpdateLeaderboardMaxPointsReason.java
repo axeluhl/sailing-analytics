@@ -50,7 +50,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
                 leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, newMaxPointsReason);
                 updateStoredLeaderboard(toState, leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                boolean isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn);
+                boolean isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint);
                 return new Triple<Double, Double, Boolean>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints(), isScoreCorrected);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor with ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());

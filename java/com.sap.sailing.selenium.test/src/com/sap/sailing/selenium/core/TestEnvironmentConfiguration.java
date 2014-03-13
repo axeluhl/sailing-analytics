@@ -42,7 +42,7 @@ public class TestEnvironmentConfiguration {
      */
     protected static class DriverDefinition {
         private String driver;
-        private Map<String, String> capabilities;
+        private Map<String, Object> capabilities;
         
         /**
          * <p>Creates a new definition of a web driver with the given class and the desired capabilities.</p>
@@ -52,7 +52,7 @@ public class TestEnvironmentConfiguration {
          * @param capabilities
          *   The capabilities of the web driver.
          */
-        public DriverDefinition(String driver, Map<String, String> capabilities) {
+        public DriverDefinition(String driver, Map<String, Object> capabilities) {
             this.driver = driver;
             this.capabilities = capabilities;
         }
@@ -73,7 +73,7 @@ public class TestEnvironmentConfiguration {
          * @return
          *   The desired capabilities of the web driver.
          */
-        public Map<String, String> getCapabilities() {
+        public Map<String, Object> getCapabilities() {
             return this.capabilities;
         }
     }
@@ -140,7 +140,7 @@ public class TestEnvironmentConfiguration {
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
-        List<DriverDefinition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
+        List<DriverDefinition> driverDefenitions = createDriverDefinitions(testEnvironmentNode);
         
         return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefenitions);
     }
@@ -183,17 +183,16 @@ public class TestEnvironmentConfiguration {
         return properties;
     }
     
-    private static List<DriverDefinition> createDriverDefenitions(Element testEnvironmentNode) {
-        List<DriverDefinition> defenitions = new LinkedList<>();
+    private static List<DriverDefinition> createDriverDefinitions(Element testEnvironmentNode) {
+        List<DriverDefinition> definitions = new LinkedList<>();
         
-        List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION,
-                NAMESPACE_URI);
+        List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION, NAMESPACE_URI);
         
-        for(Element driverDefinitionNode : driverDefinitionNodes) {
-            defenitions.add(createDriverDefinition(driverDefinitionNode));
+        for (Element driverDefinitionNode : driverDefinitionNodes) {
+            definitions.add(createDriverDefinition(driverDefinitionNode));
         }
         
-        return defenitions;
+        return definitions;
     }
     
     private static DriverDefinition createDriverDefinition(Element driverDefinitionNode) {
@@ -201,15 +200,21 @@ public class TestEnvironmentConfiguration {
         Element capabilitiesNode = XMLHelper.getElementNS(driverDefinitionNode, DRIVER_CAPABILITIES, NAMESPACE_URI);
         
         if (capabilitiesNode == null) {
-            return new DriverDefinition(driverClass, Collections.<String, String>emptyMap());
+            return new DriverDefinition(driverClass, Collections.<String, Object>emptyMap());
         }
         
-        Map<String, String> capabilities = new HashMap<>();
+        Map<String, Object> capabilities = new HashMap<>();
         
         for(Element capabilityNode : XMLHelper.getElementsNS(capabilitiesNode, DRIVER_CAPABILITY, NAMESPACE_URI)) {
             String capabilityName = XMLHelper.getContentTextNS(capabilityNode, PARAMETER_NAME, NAMESPACE_URI);
             String capabilityValue = XMLHelper.getContentTextNS(capabilityNode, PARAMETER_VALUE, NAMESPACE_URI);
-            capabilities.put(capabilityName, capabilityValue);
+            if(capabilityValue != null && !capabilityValue.isEmpty()) {
+                if(capabilityValue.equalsIgnoreCase("true") || capabilityValue.equalsIgnoreCase("false")) {
+                    capabilities.put(capabilityName, Boolean.valueOf(capabilityValue));
+                } else {
+                    capabilities.put(capabilityName, capabilityValue);
+                }
+            }
         }
         
         return new DriverDefinition(driverClass, capabilities);

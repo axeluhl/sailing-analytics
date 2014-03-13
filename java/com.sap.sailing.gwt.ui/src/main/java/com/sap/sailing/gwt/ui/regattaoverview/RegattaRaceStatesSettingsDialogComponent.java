@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,24 +18,24 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
 
 public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogComponent<RegattaRaceStatesSettings> {
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
-    private final String eventIdAsString;
+    private final UUID eventId;
     private final List<CourseAreaDTO> courseAreas;
     private final List<RaceGroupDTO> raceGroups;
 
     private CheckBox showOnlyRacesOfSameDayCheckBox;
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
-    private final Map<String, CheckBox> courseAreaCheckBoxMap;
+    private final Map<UUID, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
     private final Anchor resultingLink;
     private Button courseAreaDeselectButton;
@@ -43,13 +44,13 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            String eventIdAsString, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
+            UUID eventId, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
-        this.eventIdAsString = eventIdAsString;
+        this.eventId = eventId;
         this.courseAreas = courseAreas;
         this.raceGroups = raceGroups;
-        this.courseAreaCheckBoxMap = new HashMap<String, CheckBox>();
+        this.courseAreaCheckBoxMap = new HashMap<UUID, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
         this.resultingLink = new Anchor(stringMessages.asLink());
     }
@@ -219,8 +220,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     @Override
     public RegattaRaceStatesSettings getResult() {
-        List<String> selectedCourseAreas = new ArrayList<String>();
-        for (Entry<String, CheckBox> entry : courseAreaCheckBoxMap.entrySet()) {
+        List<UUID> selectedCourseAreas = new ArrayList<UUID>();
+        for (Entry<UUID, CheckBox> entry : courseAreaCheckBoxMap.entrySet()) {
             if (entry.getValue().getValue()) {
                 selectedCourseAreas.add(entry.getKey());
             }
@@ -249,7 +250,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
             public String getErrorMessage(RegattaRaceStatesSettings settings) {
                 String errorMessage = null;
                 if (errorMessage == null) {
-                    updateLinkUrl(eventIdAsString, settings);
+                    updateLinkUrl(eventId, settings);
                 }
                 return errorMessage;
             }
@@ -261,7 +262,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         return null;
     }
     
-    private void updateLinkUrl(String eventIdAsString, RegattaRaceStatesSettings settings) {
+    private void updateLinkUrl(UUID eventId, RegattaRaceStatesSettings settings) {
         boolean isSetVisibleCourseAreasInUrl = true;
         boolean isSetVisibleRegattasInUrl = true;
         if (settings.getVisibleCourseAreas().size() == courseAreas.size()) {
@@ -270,7 +271,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         if (settings.getVisibleRegattas().size() == raceGroups.size()) {
             isSetVisibleRegattasInUrl = false;
         }
-        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventIdAsString, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
+        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
     }
 
 }

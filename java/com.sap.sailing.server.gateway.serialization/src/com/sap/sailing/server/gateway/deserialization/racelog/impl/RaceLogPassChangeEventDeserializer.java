@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
 public class RaceLogPassChangeEventDeserializer extends BaseRaceLogEventDeserializer {
@@ -17,9 +18,9 @@ public class RaceLogPassChangeEventDeserializer extends BaseRaceLogEventDeserial
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors) {
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors) {
 
-        return factory.createPassChangeEvent(createdAt, timePoint, id, competitors, passId);
+        return factory.createPassChangeEvent(createdAt, author, timePoint, id, competitors, passId);
     }
 
 }

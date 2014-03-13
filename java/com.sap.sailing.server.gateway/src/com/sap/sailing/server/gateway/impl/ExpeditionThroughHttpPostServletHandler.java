@@ -1,11 +1,18 @@
 package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.AbstractHttpPostServlet;
 import com.sap.sailing.server.gateway.HttpMessageSenderServletRequestHandler;
 
@@ -22,6 +29,7 @@ import com.sap.sailing.server.gateway.HttpMessageSenderServletRequestHandler;
  *
  */
 public class ExpeditionThroughHttpPostServletHandler extends HttpMessageSenderServletRequestHandler {
+    private static final Logger logger = Logger.getLogger(ExpeditionThroughHttpPostServletHandler.class.getName());
     private final ExpeditionListener listener;
     
     public ExpeditionThroughHttpPostServletHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
@@ -34,12 +42,32 @@ public class ExpeditionThroughHttpPostServletHandler extends HttpMessageSenderSe
                 }
             }
         };
-        getService().addExpeditionListener(listener, /* validMessagesOnly */ false);
+        addExpeditionListener(listener, /* validMessagesOnly */ false);
     }
     
+    private void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
+        UDPExpeditionReceiver receiver = createExpeditionTrackerFactory(getContext()).getService().getOrCreateWindReceiverOnDefaultPort();
+        receiver.addListener(listener, validMessagesOnly);
+    }
+    
+    private ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
+        ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> result = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
+                getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
     @Override
     protected void stop() {
-        getService().removeExpeditionListener(listener);
+        UDPExpeditionReceiver receiver;
+        try {
+            ExpeditionWindTrackerFactory windTrackerFactory = createExpeditionTrackerFactory(getContext()).getService();
+            receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+            receiver.removeListener(listener);
+        } catch (SocketException e) {
+            logger.info("Failed to remove expedition listener " + listener
+                    + "; exception while trying to retrieve wind receiver: " + e.getMessage());
+        }
         super.stop();
     }
 }

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.base.LatLngBounds;
 
 /**
  * @author Lennart Hensler (D054527)
@@ -25,7 +25,7 @@ public class RaceMapZoomSettings {
         }
 
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            return calculator.calculateNewBounds(forMap);
+            return calculator == null ? null : calculator.calculateNewBounds(forMap);
         }
     };
 

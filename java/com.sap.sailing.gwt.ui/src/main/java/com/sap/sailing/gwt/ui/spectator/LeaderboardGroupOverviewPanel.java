@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -295,7 +296,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.getName().compareTo(g2.getName());
+                return new NaturalComparator(false).compare(g1.getName(), g2.getName());
             }
         });
         groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {

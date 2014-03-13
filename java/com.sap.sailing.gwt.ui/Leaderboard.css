@@ -1,5 +1,6 @@
 @import url(fontface.css);
 @import url(CommonControls.css);
+@import url(ViewerToolbar.css);
 
 /** Add css rules here for your application. */
 /*
@@ -46,10 +47,6 @@ h1 {
 
 table {
   border-collapse: separate; }
-
-.leaderboardMargin {
-	margin: 5px;
-}
 
 .leaderboardContent {
 }

@@ -1,8 +1,9 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -11,16 +12,20 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private static final long serialVersionUID = 8755035775682718882L;
     
     private final RegattaIdentifier regattaIdentifier;
-    private final Serializable newDefaultCourseAreaId;
+    private final UUID newDefaultCourseAreaId;
+    private final RegattaConfiguration newConfiguration;
     
-    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId) {
+    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, UUID newDefaultCourseAreaId,
+            RegattaConfiguration newConfiguration) {
         this.regattaIdentifier = regattaIdentifier;
         this.newDefaultCourseAreaId = newDefaultCourseAreaId;
+        this.newConfiguration = newConfiguration;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null);
+        return regatta;
     }
 
     @Override

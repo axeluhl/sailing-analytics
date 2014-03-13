@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -21,6 +22,8 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
@@ -49,12 +52,12 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     
     static class MasterReplicationDescriptorMock extends ReplicationMasterDescriptorImpl {
 
-        public MasterReplicationDescriptorMock(String hostname, String exchangeName, int servletPort, int messagingPort) {
-            super(hostname, exchangeName, servletPort, messagingPort, UUID.randomUUID().toString());
+        public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort) {
+            super(messagingHost, hostname, exchangeName, servletPort, messagingPort, UUID.randomUUID().toString());
         }
         
         public static MasterReplicationDescriptorMock from(ReplicationMasterDescriptor obj) {
-            return new MasterReplicationDescriptorMock(obj.getHostname(), obj.getExchangeName(), obj.getServletPort(), obj.getMessagingPort());
+            return new MasterReplicationDescriptorMock(obj.getMessagingHostname(), obj.getHostname(), obj.getExchangeName(), obj.getServletPort(), obj.getMessagingPort());
         }
         
         @Override
@@ -114,12 +117,13 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     private Event addEventOnMaster() {
         final String eventName = "ESS Masquat";
         final String venueName = "Masquat, Oman";
-        final String publicationUrl = "http://ess40.sapsailing.com";
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         final boolean isPublic = false;
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        return master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        return master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
     }
     
     private void stopMessagingExchange() {

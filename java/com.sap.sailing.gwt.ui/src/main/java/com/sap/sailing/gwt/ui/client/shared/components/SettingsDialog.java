@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client.shared.components;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> {
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;

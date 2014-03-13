@@ -16,5 +16,5 @@
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.domain.test"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -XX:+UseParallelGC -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156 -ea -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -XX:+UseParallelGC -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost -ea -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties"/>
 </launchConfiguration>

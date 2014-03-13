@@ -16,22 +16,66 @@
 
 package org.moxieapps.gwt.highcharts.client;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartLoadEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartLoadEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartRedrawEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartRedrawEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointLegendItemClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOutEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointRemoveEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointUnselectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointUpdateEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesHideEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOutEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesShowEvent;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.DataLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.LegendLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.StackLabelsData;
+import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.AreaRangePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.AreaSplinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.AreaSplineRangePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.BarPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.ColumnPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.ColumnRangePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.OHLCPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.PiePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SplinePlotOptions;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.json.client.*;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNull;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Widget;
-import org.moxieapps.gwt.highcharts.client.events.*;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.DataLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.LegendLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.StackLabelsData;
-import org.moxieapps.gwt.highcharts.client.plotOptions.*;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * The common base class for both {@link Chart} types as well as {@link StockChart} types.
@@ -2182,6 +2226,9 @@ public abstract class BaseChart<T> extends Widget {
 
     // Purposefully package scope so we can get to this method from the Series and Point classes as well
     JSONValue convertPointToJSON(Point point) {
+        if (point == null) {
+            return JSONNull.getInstance();
+        }
         JSONObject options = point.getOptions();
         if (options != null) {
             addPointScalarValues(point, options);

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 public interface UserAgentChecker {
     
-    public final UserAgentCheckerImpl INSTANCE = new UserAgentCheckerImpl();
+    public final UserAgentChecker INSTANCE = new UserAgentCheckerImpl();
 
     /**
 	 * Returns false if the given userAgent is not supported.

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
@@ -49,6 +50,14 @@ public interface Track<FixType extends Timed> extends Serializable {
      * @return the smoothened fixes
      */
     Iterable<FixType> getFixes();
+
+    /**
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     * 
+     * @return The smoothened fixes between from and to.
+     */
+    Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive);
 
     /**
      * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
@@ -104,4 +113,35 @@ public interface Track<FixType extends Timed> extends Serializable {
      */
     Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
 
+    /**
+     * Returns a descending iterator starting at the first fix before <code>startingAt</code> (or "at or before" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
+     * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     */
+    Iterator<FixType> getFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
+
+    /**
+     * Returns a descending iterator starting at the first raw fix before <code>startingAt</code> (or "at or before" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getRawFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     */
+    Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
+    
+    /**
+     * @return the average duration between two fixes (outliers removed) in this track or <code>null</code> if there is not
+     * more than one fix in the track
+     */
+    Duration getAverageIntervalBetweenFixes();
+    
+    /**
+     * @return the average duration between two fixes (outliers <em>not</em> removed) in this track or <code>null</code> if there is not
+     * more than one raw fix in the track
+     */
+    Duration getAverageIntervalBetweenRawFixes();
 }

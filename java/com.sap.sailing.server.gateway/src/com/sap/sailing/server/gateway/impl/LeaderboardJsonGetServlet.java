@@ -145,7 +145,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     totalNumberOfCacheEntries -= oldCacheValue.size();
                 }
             } else {
-                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f, /* access-based eviction */ true) {
+                // Note: don't use access-based ordering as it turns the get(...) call into a "write" access
+                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f) {
                     private static final long serialVersionUID = -6197983565575024084L;
                     @Override
                     protected boolean removeEldestEntry(Entry<Triple<TimePoint, ResultStates, Integer>, StringBuffer> eldest) {
@@ -162,10 +163,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 if (oldCacheValue != null) {
                     result.putAll(oldCacheValue);
                     totalNumberOfCacheEntries -= oldCacheValue.size();
-                } else {
-                    // first time we cache something for that leaderboard; ensure we get update triggers:
-                    cacheManager.add(leaderboard);
                 }
+                // ensure we get update triggers; note that oldCacheValue!=null doesn't mean that there are currently listeners active;
+                // the listeners could have been removed, and the SmartFutureCache will keep old values around as there is no explicit
+                // cache eviction for a SmartFutureCache.
+                cacheManager.add(leaderboard);
                 result.putAll(computedCacheUpdate);
                 totalNumberOfCacheEntries += result.size();
             }
@@ -314,7 +316,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     jsonEntry.put("raceRank", trackedRace.getRank(competitor, resultTimePoint));
                 }
                 jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, resultTimePoint));
-                jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
+                jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, resultTimePoint));
             }
             counter++;
         }

@@ -2,22 +2,23 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class RegattaRaceStatesSettings {
-    private List<String> visibleCourseAreas;
+    private List<UUID> visibleCourseAreas;
     private List<String> visibleRegattas;
     
     private boolean showOnlyRacesOfSameDay;
     private boolean showOnlyCurrentlyRunningRaces;
 
     public RegattaRaceStatesSettings() {
-        this.visibleCourseAreas = new ArrayList<String>();
+        this.visibleCourseAreas = new ArrayList<UUID>();
         this.visibleRegattas = new ArrayList<String>();
         this.showOnlyRacesOfSameDay = false;
         this.showOnlyCurrentlyRunningRaces = true;
     }
 
-    public RegattaRaceStatesSettings(List<String> visibleCourseAreas, List<String> visibleRegattas, 
+    public RegattaRaceStatesSettings(List<UUID> visibleCourseAreas, List<String> visibleRegattas, 
             boolean showOnlyRacesOfSameDay, boolean showOnlyCurrentlyRunningRaces) {
         this.visibleCourseAreas = visibleCourseAreas;
         this.visibleRegattas = visibleRegattas;
@@ -25,7 +26,7 @@ public class RegattaRaceStatesSettings {
         this.showOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRaces;
     }
 
-    public List<String> getVisibleCourseAreas() {
+    public List<UUID> getVisibleCourseAreas() {
         return visibleCourseAreas;
     }
     

@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
@@ -52,6 +54,8 @@ public abstract class BaseActivity extends LoggableActivity {
     }
 
     private static final String TAG = BaseActivity.class.getName();
+    
+    protected AppPreferences preferences;
 
     protected MenuItem menuItemLive;
 
@@ -63,6 +67,12 @@ public abstract class BaseActivity extends LoggableActivity {
     
     public BaseActivity() {
         this.sendingServiceConnection = new EventSendingServiceConnection();
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.preferences = AppPreferences.on(getApplicationContext());
     }
 
     @Override
@@ -159,7 +169,7 @@ public abstract class BaseActivity extends LoggableActivity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", AppPreferences.on(this).getServerBaseURL(), sendingServiceStatus);
     }
 
     protected void fadeActivity(Class<?> activity, boolean newTopTask) {
@@ -174,5 +184,9 @@ public abstract class BaseActivity extends LoggableActivity {
     protected void fadeActivity(Intent intent) {
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+    
+    public RaceApplication getRaceApplication() {
+        return (RaceApplication) getApplication();
     }
 }

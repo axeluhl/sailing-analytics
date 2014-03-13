@@ -14,14 +14,21 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse.gwt</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.geocoding</module>
+		<module>com.sap.sailing.datamining</module>
+		<module>com.sap.sailing.datamining.shared</module>
+		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
+		<module>com.sap.sailing.domain.igtimiadapter</module>
+		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
+		<module>com.sap.sailing.domain.igtimiadapter.test</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
@@ -35,7 +42,7 @@
 		<module>com.sap.sailing.server.replication</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
-		<module>com.sap.sailing.xcelsiusadapter</module>
+		<module>com.sap.sailing.xmlexport</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.mongodb</module>
 		<module>com.tractrac.clientmodule</module>
@@ -57,7 +64,7 @@
 		<module>com.sap.sailing.simulator</module>
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
-	        <module>com.sap.sailing.gwt.ui</module>
+		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
@@ -69,9 +76,10 @@
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.server.gateway.test</module>
+		<module>com.sap.sailing.server.gateway.test.support</module>
 		<module>com.sap.sailing.server.gateway.serialization.test</module>
 		<module>com.sap.sailing.server.replication.test</module>
-       	        <module>com.sap.sailing.gwt.ui.test</module>
+		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.kiworesultimport.test</module>
@@ -95,8 +103,6 @@
 	</modules>
 	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<tycho-version>0.18.1</tycho-version>
         
 		<!--
@@ -112,14 +118,13 @@
           -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
 		</parameters.vm-settings>
 		<parameters.tractrac>
-          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156
+          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
 		</parameters.tractrac>
 		<parameters.mongodb>
-          -Dmongo.host=10.18.22.156
+          -Dmongo.host=localhost
 		</parameters.mongodb>
         <parameters.debug>
-          -Xdebug
-          -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+          -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
         </parameters.debug>
         <!--
           "Forward declaration" for better readability. The actual value should be defined in the local settings.xml,
@@ -127,6 +132,7 @@
         -->
         <parameters.proxy>
         </parameters.proxy>
+        <reportsdirectory>${project.build.directory}/surefire-reports</reportsdirectory>
         <skipTests>false</skipTests>
 	</properties>
 
@@ -185,6 +191,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.16</version>
+					<configuration>
+						<reportsDirectory>${reportsdirectory}</reportsDirectory>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -249,6 +258,7 @@
 						<!-- Exclude inner classes -->
 						<exclude>**/*$*</exclude>
 					</excludes>
+					<reportsDirectory>${reportsdirectory}</reportsDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -272,32 +282,21 @@
     </extensions>
 
 	</build>
-	
-	<repositories>
-		<repository>
-			<id>equinox-sdk-3.9</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/kepler/</url>
-		</repository>
-<!--		
-		<repository>
-			<id>sap-nexus</id>
-			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
-		</repository>
---> 
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-		</repository>
- 
-		<repository>
-			<id>uni-luebeck</id>
-			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
-		</repository>
 
-		<repository>
-			<id>sailing-server-maven</id>
-			<url>http://maven.sapsailing.com/maven</url>
-		</repository>
-	</repositories>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.16</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<reportsDirectories>
+						<reportsDirectory>${reportsdirectory}</reportsDirectory>
+						<aggregate>true</aggregate>
+					</reportsDirectories>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

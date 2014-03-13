@@ -14,7 +14,7 @@ This document describes the onboarding process for a new team member (developer)
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
 6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for GWT)
 7. JDK 1.7 (Java SE 7), http://jdk7.java.net
-8. Maven 3, http://maven.apache.org
+8. Maven 3.1.1 (or higher), http://maven.apache.org
 
 #### Further optional but recommended installations
 
@@ -46,13 +46,16 @@ This document describes the onboarding process for a new team member (developer)
 
 3. Setup and configure Eclipse
   - Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
-  - Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse, you need the Gogle WebToolkit SDK from the same update site, too)
+  - Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse, you need the Google WebToolkit SDK from the same update site, too)
+  - Install the Google Android SDK from the same Google Plugin for Eclipse update site
   - Install Eclipse eGit (optional)
   - Check that JDK 1.7 is available and has been set for compilation in Eclipse
   - Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   - Check that JDK 1.6 has been matched to JavaSE-1.6 and that JDK 1.7 has been matched to JavaSE-1.7 (...>Installed JREs>Execution Environments)
   - It is also possible to match the SAPJVM 6 or 7 to the JavaSE-1.6 (for profiling purposes)
-  - Import all Race Analysis projects from the /java(!!!) subdirectory of the git main folder
+  - Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
+  - Import all Race Analysis projects from the `java/` subdirectory of the git main folder
+  - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   - Set the Eclipse target platform to race-analysis-p2-ide-local.target (located in com.sap.sailing.targetplatform/definitions)
   - Wait until the target platform has been resolved completely
   - In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF
@@ -68,15 +71,15 @@ This document describes the onboarding process for a new team member (developer)
   - Press List Races
 
 #### Maven Setup
-Copy the settings.xml from the top-level git folder to your ~/.m2 directory and adjust the proxy settings accordingly. Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the java/ subfolder of the git workspace and issue "mvn -fae clean install". This should build the software and run all the tests. If you want to avoid the tests being executed, run "mvn -Dmaven.test.skip=true -fae clean install". If you want to make sure the GWT compiler really re-builds all artifacts, remove all java/com.sap.sailing.gwt.ui/com.sap.sailing.gwt.ui.* directories, then re-build.
+Copy the settings.xml from the top-level git folder to your ~/.m2 directory and adjust the proxy settings accordingly. Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
-- Install the GWT Browser Plugin (Chrome or Firefox) for the GWT Development mode
+- Install the GWT Browser Plugin (Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably) for the GWT Development mode
 
 #### Additional steps required for Android projects
 
-To ensure that all components of the Analysis Suite are working, you should also import all Android projects into your workspace. There are some additional requirements to enable the build process of these projects.
+To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
 
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
   - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
@@ -87,6 +90,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   - In Eclipse press Window -> Android SDK Manager
   - Ensure that everything of "Tools" is installed
   - Install everything of "Android 3.2 API 13"
+  - Optional: it's a good idea to install the newest API Version
   - Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
 3. Import the Android projects into your workspace
   - Android projects can be found in the /mobile subdirectory
@@ -101,4 +105,4 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
 
-See [Mobile Development](mobile-development) for further options to run the applications including emulators.
+See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.

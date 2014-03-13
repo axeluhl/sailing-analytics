@@ -13,12 +13,17 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8086/</context-root>
+  <context-root>http://riccardo:riccardo@localhost:8085/</context-root>
   
   <!--
     The folder where screenshots (attachments) are stored.
   -->
-  <screenshots-folder></screenshots-folder>
+  <screenshots-folder>
+    file:///home/hudson/repo/jobs/SAPSailingAnalytics-selenium/workspace/java/com.sap.sailing.selenium.test/bin/surefire-reports/
+  </screenshots-folder>
+  <!--
+  <screenshots-folder>file://{user.dir}/bin/surefire-reports/</screenshots-folder>
+  -->
   
   <!--
     In this section necessary system properties for the different web drivers can be provided if needed. For more
@@ -34,18 +39,18 @@
     NOTE: For the Chrome and the InternetExplorer driver an additional "server", which acts as a bridge between the
           browser and the driver, is needed.
   -->
-  <!--
   <system-properties>
      <system-property>
-        <name>webdriver.chrome.driver</name>
-        <value>[path to]\chromedriver.exe</value>
+        <name>webdriver.enable.native.events </name>
+        <value>true</value>
      </system-property>
+  <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
         <value>[path to]\firefox.exe</value>
      </system-property>
-  </system-properties>
   -->
+  </system-properties>
   
   <!--
     The driver definitions define all web drivers (browsers) which should be used for the execution of the tests. This
@@ -55,6 +60,7 @@
     The capabilities section can be used for fine tuning of the driver (e.g. version). For more information see the
     pages mentioned above.
   -->
+  <!-- -->
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
      <!--
      <capabilities>

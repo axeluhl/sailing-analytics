@@ -8,8 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -68,7 +68,7 @@ public class Simulator {
     private void startWindPlayer() {
         assert this.trackedRace != null;
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
-                trackedRace.getTrackedRegatta(), trackedRace,
+                trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {
             new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
@@ -104,12 +104,16 @@ public class Simulator {
      * {@link #setAdvanceInMillis(long)}.
      */
     private synchronized long getAdvanceInMillis() {
-        while (advanceInMillis == -1) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
-                // ignore; try again
+        while (!isAdvanceInMilliseSet()) {
+            if (trackedRace.getStartOfRace() != null) {
+                setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
+            } else {
+                try {
+                    wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
+                } catch (InterruptedException e) {
+                    logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
+                    // ignore; try again
+                }
             }
         }
         return advanceInMillis;
@@ -150,11 +154,25 @@ public class Simulator {
     }
 
     /**
-     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and {@link #delay(TimePoint)} is called.
-     * Otherwise, <code>time</code> is taken to be the original start time of the race which is then used to compute
-     * {@link #advanceInMillis} such that <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
+     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
+     * {@link #delay(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
+     * race which is then used to compute {@link #advanceInMillis} such that
+     * <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
      */
     public TimePoint advanceMarkPassingTimePoint(TimePoint time) {
+        return advanceTimePointAndUseAsStartTimeIfNeeded(time);
+    }
+
+    /**
+     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
+     * {@link #delay(TimePoint)} is called. Otherwise, the given start time <code>time</code> is used to compute
+     * {@link #advanceInMillis} such that <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
+     */
+    public TimePoint advanceStartTime(TimePoint raceStartTime) {
+        return advanceTimePointAndUseAsStartTimeIfNeeded(raceStartTime);
+    }
+
+    private TimePoint advanceTimePointAndUseAsStartTimeIfNeeded(TimePoint time){
         if (isAdvanceInMilliseSet()) {
             return advance(time);
         } else {

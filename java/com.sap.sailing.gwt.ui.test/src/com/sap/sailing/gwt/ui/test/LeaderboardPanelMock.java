@@ -3,10 +3,12 @@ package com.sap.sailing.gwt.ui.test;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
@@ -16,11 +18,10 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
 
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
-            StringMessages stringConstants) {
-        super(sailingService, null, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
-        /* showMetaLeaderboardsOnSamePage */ false), new CompetitorSelectionModel(
-                /* hasMultiSelection */true), leaderboardName, errorReporter, stringConstants, null, /* showRaceDetails */ true);
+            StringMessages stringMessages) {
+        super(sailingService, new AsyncActionsExecutor(), LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false), new CompetitorSelectionModel(
+                /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
     }
 
     @Override

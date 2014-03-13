@@ -4,12 +4,11 @@ import java.io.InputStream;
 import java.util.Date;
 
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
-public class PersonImpl extends NamedImpl implements Person {
+public class PersonImpl extends NamedImpl implements DynamicPerson {
     private static final long serialVersionUID = -2104903799224233508L;
-    private final Nationality nationality;
+    private Nationality nationality;
     private final Date dateOfBirth;
     private final String description;
     
@@ -28,6 +27,11 @@ public class PersonImpl extends NamedImpl implements Person {
     @Override
     public Nationality getNationality() {
         return nationality;
+    }
+    
+    @Override
+    public void setNationality(Nationality newNationality) {
+        this.nationality = newNationality;
     }
 
     @Override

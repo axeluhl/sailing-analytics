@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -94,8 +95,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         
         showWindChart = false;
         leaderboard = null;
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false,
-                /* showMetaLeaderboardsOnSamePage */ false); 
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
@@ -122,7 +122,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
                 updateRaceTimesInfoProvider();
             }
         };
-        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
+        leaderboardPanel.getElement().getStyle().setMargin(5, Unit.PX);
         return leaderboardPanel;
     }
     

@@ -6,12 +6,15 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 
 public class ReplicationStopTest extends AbstractServerReplicationTest {
@@ -28,13 +31,14 @@ public class ReplicationStopTest extends AbstractServerReplicationTest {
     }
     
     private Event addEventOnMaster(String eventName) {
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         final String venueName = "Masquat, Oman";
-        final String publicationUrl = "http://ess40.sapsailing.com";
         final boolean isPublic = false;
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        return master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        return master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
     }
     
     

@@ -4,9 +4,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.app.DatePickerDialog.OnDateSetListener;
-import android.app.FragmentManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,20 +21,33 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.PathfinderPrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.PrerequisiteRaceDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseGateLaunchTimesDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChoosePathFinderDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseStartModeDialog;
+import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 
-public class SetStartTimeRaceFragment extends RaceFragment implements UserRequiredActionPerformedListener {
+public class SetStartTimeRaceFragment extends RaceFragment {
+
+    private static final String KEY_STATE = "KEY";
+
+    private static final String TAG = SetStartTimeRaceFragment.class.getName();
 
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
@@ -43,16 +56,20 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     protected boolean isReset;
-    private StartProcedureType selectedStartProcedureType;
 
     protected Spinner spinnerStartProcedure;
     protected TimePicker pickerTime;
     protected Button btSetDate;
     protected Button btSetTime;
     protected Button btPostpone;
+    protected Button btSetCourse;
     protected TextView textInfoText;
 
     protected DatePickerFragment datePicker;
+    
+
+    private RacingProcedureType selectedStartProcedureType;
+    private SetStartTimeState state;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,6 +91,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         btSetDate = (Button) getView().findViewById(R.id.race_reset_time_btn_date);
         btSetTime = (Button) getView().findViewById(R.id.race_reset_time_btn_time);
         btPostpone = (Button) getView().findViewById(R.id.race_reset_time_btn_postpone);
+        btSetCourse = (Button) getView().findViewById(R.id.race_set_course);
 
         btSetDate.setOnClickListener(new OnClickListener() {
             @Override
@@ -89,6 +107,13 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
                 setStartTime();
             }
         });
+        
+        btSetCourse.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View paramView) {
+                showCourseDesignDialog();
+            }
+        });
 
         btPostpone.setOnClickListener(new OnClickListener() {
             @Override
@@ -99,6 +124,12 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         });
 
         textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
+        
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_STATE)) {
+            ExLog.i(TAG, "Restoring set start time state...");
+            this.state = savedInstanceState.getParcelable(KEY_STATE);
+            setStartTime(this.state);
+        }
     }
 
     private void setupDatePicker() {
@@ -111,7 +142,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
 
                 if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
                         && startDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
-                    btSetDate.setText("Today");
+                    btSetDate.setText(R.string.today);
                 } else {
                     String dateString = DateFormat.getDateFormat(getActivity()).format(startDate.getTime());
                     btSetDate.setText(dateString);
@@ -122,6 +153,12 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         datePicker.setCurrentYear(today.get(Calendar.YEAR));
         datePicker.setCurrentMonth(today.get(Calendar.MONTH));
         datePicker.setCurrentDay(today.get(Calendar.DAY_OF_MONTH));
+    }
+
+    private void showCourseDesignDialog() {
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "courseDesignDialogFragment");
     }
 
     private void setupTimePicker() {
@@ -142,13 +179,13 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     private void setupStartProcedureSpinner() {
-        ArrayAdapter<StartProcedureType> adapter = new ArrayAdapter<StartProcedureType>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, StartProcedureType.values());
+        ArrayAdapter<RacingProcedureType> adapter = new ArrayAdapter<RacingProcedureType>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, RacingProcedureType.validValues());
         spinnerStartProcedure.setAdapter(adapter);
         spinnerStartProcedure.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedStartProcedureType = (StartProcedureType) adapterView.getItemAtPosition(position);
+                selectedStartProcedureType = (RacingProcedureType) adapterView.getItemAtPosition(position);
             }
 
             @Override
@@ -156,17 +193,8 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
             }
         });
 
-        //TODO read the preferences from AppPreferences
-        StartProcedureType type = StartProcedureType.ESS;
-        boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
-                "overrideDefaultStartProcedureType", false);
-        if (overrideStartProcedureType) {
-            type = StartProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
-                    "defaultStartProcedureType", StartProcedureType.ESS.name()));
-        } else {
-            type = getRace().getState().getStartProcedureType();
-        }
-        spinnerStartProcedure.setSelection(adapter.getPosition(type));
+        RacingProcedureType configType = getRaceState().getConfiguration().getDefaultRacingProcedureType();
+        spinnerStartProcedure.setSelection(adapter.getPosition(configType));
     }
 
     @Override
@@ -174,6 +202,15 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         super.onStart();
         ExLog.i(SetStartTimeRaceFragment.class.getName(),
                 String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (state != null) {
+            ExLog.i(TAG, "Storing start time state...");
+            outState.putParcelable(KEY_STATE, state);
+        }
     }
 
     @Override
@@ -239,46 +276,90 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().createNewStartProcedure(selectedStartProcedureType);
-        Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
-                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
-        if (action == null) {
-            getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
-        } else {
-            FragmentManager fragmentManager = getFragmentManager();
+        final TimePoint now = MillisecondsTimePoint.now();
 
-            RaceDialogFragment fragment;
-            try {
-                fragment = action.newInstance();
-                Bundle args = getRecentArguments();
-                fragment.setArguments(args);
+        getRaceState().setAdvancePass(now);
+        getRaceState().setRacingProcedure(now, selectedStartProcedureType);
+        
+        this.state = new SetStartTimeState(now, new MillisecondsTimePoint(newStartTime));
+        setStartTime(state);
+    }
 
-                fragment.show(fragmentManager, "userActionRequiredDialog");
-            } catch (java.lang.InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
-        }
-
+    private void setStartTime(SetStartTimeState state) {
+        getRaceState().requestNewStartTime(state.now, state.startTime, resolver);
     }
 
     protected void showAPModeDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
-
         Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
-
-        fragment.show(fragmentManager, "dialogAPMode");
+        fragment.show(getFragmentManager(), "dialogAPMode");
     }
 
-    @Override
-    public void onUserRequiredActionPerformed() {
-        setStartTime();
+    RacingProcedurePrerequisite.Resolver resolver = new RacingProcedurePrerequisite.Resolver() {
+        @Override
+        public void fulfill(GateLaunchTimePrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChooseGateLaunchTimesDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void fulfill(PathfinderPrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChoosePathFinderDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void fulfill(StartmodePrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChooseStartModeDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void onFulfilled() {
+            state = null;
+        }
+    };
+
+    public static class SetStartTimeState implements Parcelable {
+
+        private final TimePoint now;
+        private final TimePoint startTime;
+        
+        public SetStartTimeState(TimePoint now, TimePoint startTime) {
+            this.now = now;
+            this.startTime = startTime;
+        }
+
+        private SetStartTimeState(Parcel in) {
+            now = (TimePoint) in.readSerializable();
+            startTime = (TimePoint) in.readSerializable();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeSerializable(now);
+            dest.writeSerializable(startTime);
+        }
+
+        public static final Parcelable.Creator<SetStartTimeState> CREATOR = new Parcelable.Creator<SetStartTimeState>() {
+            public SetStartTimeState createFromParcel(Parcel in) {
+                return new SetStartTimeState(in);
+            }
+
+            public SetStartTimeState[] newArray(int size) {
+                return new SetStartTimeState[size];
+            }
+        };
+        
+        @Override
+        public int describeContents() {
+            return 0;
+        }
     }
 
 }

@@ -17,9 +17,10 @@ import com.sap.sailing.util.BuildVersion;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final String REPLICATION_SERVLET = "/replication/replication";
-    private final String hostname;
+    private final String masterServletHostname;
     private final String exchangeName;
     private final int servletPort;
+    private final String messagingHostname;
     private final int messagingPort;
     private final String queueName;
     
@@ -28,8 +29,9 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     /**
      * @param messagingPort 0 means use default port
      */
-    public ReplicationMasterDescriptorImpl(String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
-        this.hostname = hostname;
+    public ReplicationMasterDescriptorImpl(String messagingHostname, String masterServletHostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
+        this.masterServletHostname = masterServletHostname;
+        this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
@@ -39,7 +41,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException, UnsupportedEncodingException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString()
                 + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + java.net.URLEncoder.encode(BuildVersion.getBuildVersion(), "UTF-8"));
@@ -47,21 +49,21 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString());
     }
     
     @Override
     public URL getInitialLoadURL() throws MalformedURLException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name());
     }
 
     @Override
     public synchronized QueueingConsumer getConsumer() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(getHostname());
+        connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {
             connectionFactory.setPort(port);
@@ -137,6 +139,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public int getMessagingPort() {
         return messagingPort;
     }
+    
+    @Override
+    public String getMessagingHostname() {
+        return messagingHostname;
+    }
 
     @Override
     public int getServletPort() {
@@ -145,7 +152,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public String getHostname() {
-        return hostname;
+        return masterServletHostname;
     }
     
     @Override

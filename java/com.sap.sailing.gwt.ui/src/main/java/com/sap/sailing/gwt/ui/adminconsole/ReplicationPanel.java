@@ -14,17 +14,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.ui.IntegerBox;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -146,9 +145,9 @@ public class ReplicationPanel extends FlowPanel {
     
     private void addReplication() {
         AddReplicationDialog dialog = new AddReplicationDialog(null,
-                new DialogCallback<Triple<Pair<String, String>, Integer, Integer>>() {
+                new DialogCallback<Triple<Triple<String, String, String>, Integer, Integer>>() {
                     @Override
-                    public void ok(final Triple<Pair<String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
+                    public void ok(final Triple<Triple<String, String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
                         registeredMasters.removeRow(0);
                         registeredMasters.insertRow(0);
                         registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
@@ -156,14 +155,15 @@ public class ReplicationPanel extends FlowPanel {
                         stopReplicationButton.setEnabled(false);
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
+                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
                                 addButton.setEnabled(true);
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(), e.getMessage()));
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(), e.getMessage()));
                                 updateReplicaList();
                             }
 
@@ -275,17 +275,19 @@ public class ReplicationPanel extends FlowPanel {
      * @author Axel Uhl (d043530)
      *
      */
-    private class AddReplicationDialog extends DataEntryDialog<Triple<Pair<String, String>, Integer, Integer>> {
+    private class AddReplicationDialog extends DataEntryDialog<Triple<Triple<String, String, String>, Integer, Integer>> {
         private final TextBox hostnameEntryField;
+        private final TextBox exchangeHostnameEntryField;
         private final TextBox exchangenameEntryField;
         private final IntegerBox messagingPortField;
         private final IntegerBox servletPortField;
         
-        public AddReplicationDialog(final Validator<Triple<Pair<String, String>, Integer, Integer>> validator,
-                final DialogCallback<Triple<Pair<String, String>, Integer, Integer>> callback) {
+        public AddReplicationDialog(final Validator<Triple<Triple<String, String, String>, Integer, Integer>> validator,
+                final DialogCallback<Triple<Triple<String, String, String>, Integer, Integer>> callback) {
             super(stringMessages.connect(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
             hostnameEntryField = createTextBox("localhost");
+            exchangeHostnameEntryField = createTextBox("localhost");
             exchangenameEntryField = createTextBox("sapsailinganalytics");
             messagingPortField = createIntegerBox(0, /* visible length */ 5);
             servletPortField = createIntegerBox(8888, /* visibleLength */ 5);
@@ -297,19 +299,26 @@ public class ReplicationPanel extends FlowPanel {
          */
         @Override
         protected Widget getAdditionalWidget() {
-            Grid grid = new Grid(8, 2);
+            Grid grid = new Grid(10, 2);
             grid.setWidget(0, 0, new Label(stringMessages.hostname()));
             grid.setWidget(0, 1, hostnameEntryField);
             grid.setWidget(1, 0, new Label(stringMessages.explainReplicationHostname()));
-            grid.setWidget(2, 0, new Label(stringMessages.exchangeName()));
-            grid.setWidget(2, 1, exchangenameEntryField);
-            grid.setWidget(3, 0, new Label(stringMessages.explainReplicationExchangeName()));
-            grid.setWidget(4, 0, new Label(stringMessages.messagingPortNumber()));
-            grid.setWidget(4, 1, messagingPortField);
-            grid.setWidget(5, 0, new Label(stringMessages.explainReplicationExchangePort()));
-            grid.setWidget(6, 0, new Label(stringMessages.servletPortNumber()));
-            grid.setWidget(6, 1, servletPortField);
-            grid.setWidget(7, 0, new Label(stringMessages.explainReplicationServletPort()));
+            
+            grid.setWidget(2, 0, new Label(stringMessages.exchangeHost()));
+            grid.setWidget(2, 1, exchangeHostnameEntryField);
+            grid.setWidget(3, 0, new Label(stringMessages.explainExchangeHostName()));
+            
+            grid.setWidget(4, 0, new Label(stringMessages.exchangeName()));
+            grid.setWidget(4, 1, exchangenameEntryField);
+            grid.setWidget(5, 0, new Label(stringMessages.explainReplicationExchangeName()));
+            
+            grid.setWidget(6, 0, new Label(stringMessages.messagingPortNumber()));
+            grid.setWidget(6, 1, messagingPortField);
+            grid.setWidget(7, 0, new Label(stringMessages.explainReplicationExchangePort()));
+            
+            grid.setWidget(8, 0, new Label(stringMessages.servletPortNumber()));
+            grid.setWidget(8, 1, servletPortField);
+            grid.setWidget(9, 0, new Label(stringMessages.explainReplicationServletPort()));
             return grid;
         }
         
@@ -320,9 +329,9 @@ public class ReplicationPanel extends FlowPanel {
         }
 
         @Override
-        protected Triple<Pair<String, String>, Integer, Integer> getResult() {
-            return new Triple<Pair<String, String>, Integer, Integer>(
-                    new Pair<String, String>(hostnameEntryField.getText(), exchangenameEntryField.getText()),
+        protected Triple<Triple<String, String, String>, Integer, Integer> getResult() {
+            return new Triple<Triple<String, String, String>, Integer, Integer>(
+                    new Triple<String, String, String>(exchangeHostnameEntryField.getText(), hostnameEntryField.getText(), exchangenameEntryField.getText()),
                     messagingPortField.getValue(), servletPortField.getValue());
         }
     }

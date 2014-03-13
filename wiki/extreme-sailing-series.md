@@ -148,3 +148,21 @@ http://www.extremesailingseries.com/app/results/sap_results.php?event=istanbul
 Replacing istanbul with whatever the event name is for the results that you want to update. To update the overall series results just hit:
 
 http://www.extremesailingseries.com/app/results/sap_results.php?event=total
+
+http://www.extremesailingseries.com/app/results/csv_uploads/
+
+### Competitor colors for 2014
+
+<pre>
+#33CC33 Groupama
+#FF0000 Alinghi
+#2AFFFF GAC
+#000010 ETNZ
+#FFFFFF Gazprom
+#999999 JP Morgan
+#FFC61E SAP
+#B07A00 Oman Air
+#000099 Realteam
+#990099 Red Bull
+#16A6ED The Wave
+</pre>

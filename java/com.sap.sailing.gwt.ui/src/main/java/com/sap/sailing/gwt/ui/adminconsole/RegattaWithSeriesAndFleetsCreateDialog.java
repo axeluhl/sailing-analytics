@@ -6,21 +6,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     
-    private Grid seriesGrid;
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    
+    private ListEditorComposite<SeriesDTO> seriesEditor;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -50,7 +49,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (!boatClassNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterABoatClass();
             } else if (!unique) {
                 errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }
@@ -99,66 +98,30 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
-        this.seriesGrid = new Grid(0, 0);
+        
+        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon(), /*enableFleetRemoval*/true);
     }
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-        panel.add(createHeadlineLabel(stringMessages.series()));
-        panel.add(seriesGrid);
-        Button addSeriesButton = new Button(stringMessages.addSeries());
-        addSeriesButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RegattaDTO result = getResult();
-                SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
-                        .unmodifiableCollection(result.series), stringMessages, new DialogCallback<SeriesDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(SeriesDTO newSeries) {
-                        series.add(newSeries);
-                        updateSeriesGrid(panel);
-                    }
-                });
-                dialog.show();
-            }
-        });
-        panel.add(addSeriesButton);
-    }
-
-    private void updateSeriesGrid(VerticalPanel parentPanel) {
-        int widgetIndex = parentPanel.getWidgetIndex(seriesGrid);
-        parentPanel.remove(seriesGrid);
-
-        int seriesCount = series.size();
-        seriesGrid = new Grid(seriesCount * 2, 3);
-        seriesGrid.setCellSpacing(3);
-
-        for (int i = 0; i < seriesCount; i++) {
-            SeriesDTO seriesDTO = series.get(i);
-            Label seriesLabel = new Label((i + 1) + ". " + stringMessages.series() + ":");
-            seriesLabel.setWordWrap(false);
-            seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            seriesGrid.setWidget(i * 2, 0, seriesLabel);
-            seriesGrid.setHTML(i * 2, 1, seriesDTO.getName());
-            if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                seriesGrid.setHTML(i * 2 + 1, 1, seriesDTO.getFleets().size() + " fleets: "
-                        + seriesDTO.getFleets().toString());
-            } else {
-                seriesGrid.setHTML(i * 2 + 1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
-            }
-        }
-
-        parentPanel.insert(seriesGrid, widgetIndex);
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
     }
 
     @Override
     public void show() {
         super.show();
         nameEntryField.setFocus(true);
+    }
+    
+    @Override
+    protected RegattaDTO getResult() {
+        RegattaDTO dto = super.getResult();
+        dto.series = seriesEditor.getValue();
+        return dto;
     }
 
 }

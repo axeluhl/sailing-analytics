@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -68,9 +69,13 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
+            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new CountingOutputStream(
+                    resp.getOutputStream(), /* log every megabyte */1024l * 1024l, Level.INFO,
+                    "HTTP output for initial load for " + req.getRemoteHost()));
+            ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
             try {
                 getService().serializeForInitialReplication(oos);
+                gzipOutputStream.finish();
             } catch (Exception e) {
                 logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
                 logger.log(Level.SEVERE, "doGet", e);

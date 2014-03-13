@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -293,9 +293,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Course course = race.getCourse();
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
-                    for(ControlPoint cp: currentCourseDefinition) {
-                        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(cp, null));
+                    List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
+                    for (ControlPoint cp : currentCourseDefinition) {
+                        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {
@@ -389,13 +389,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 newStatus = TrackedRaceStatusEnum.LOADING;
             }
             trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
-        }
-    }
-
-    @Override
-    public void eot() {
-        for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
-            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
     }
 }

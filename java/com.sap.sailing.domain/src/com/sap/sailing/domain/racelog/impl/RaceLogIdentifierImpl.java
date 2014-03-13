@@ -26,6 +26,14 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
     }
 
     @Override
+    public String getDeprecatedIdentifier() {
+        return String.format("%s.%s.%s", 
+                this.getTemplate().getParentObjectName(),
+                this.getRaceColumnName(),
+                this.getFleetName());
+    }
+
+    @Override
     public RaceLogIdentifierTemplate getTemplate() {
         return template;
     }

@@ -16,9 +16,10 @@ public class CourseAreaArrayAdapter extends NamedArrayAdapter<CourseArea> {
     @Override
     public boolean isEnabled(int position) {
         CourseArea courseArea = getItem(position);
-        if (AppPreferences.getManagedCourseAreaNames(getContext()).contains(courseArea.getName())) {
+        AppPreferences preferences = AppPreferences.on(getContext());
+        if (preferences.getManagedCourseAreaNames().contains(courseArea.getName())) {
             return true;
-        } else if (AppPreferences.getManagedCourseAreaNames(getContext()).contains("*")) {
+        } else if (preferences.getManagedCourseAreaNames().contains("*")) {
             return true;
         } else {
             return false;

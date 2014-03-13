@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -17,24 +20,29 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
@@ -50,7 +58,10 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     private CellTable<EventDTO> eventTable;
     private MultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
+    private List<EventDTO> allEvents;
+    private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
     private Button removeEventsButton;
+    private TextColumn<EventDTO> startEndDateColumn;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -65,7 +76,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     }
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    
+
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public SailingEventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
@@ -81,23 +92,31 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         HorizontalPanel eventsPanel = new HorizontalPanel();
         eventsPanel.setSpacing(5);
         mainPanel.add(eventsPanel);
+        
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fillEvents();
+            }
+        });
+        eventsPanel.add(refreshButton);
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
         createEventBtn.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 openCreateEventDialog();
             }
         });
         eventsPanel.add(createEventBtn);
-        
+
         removeEventsButton = new Button(stringMessages.remove());
         removeEventsButton.setEnabled(false);
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm("Do you really want to remove the events?")) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
                     removeEvents(eventSelectionModel.getSelectedSet());
                 }
             }
@@ -123,10 +142,10 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             }
         };
 
-        TextColumn<EventDTO> publicationUrlColumn = new TextColumn<EventDTO>() {
+        startEndDateColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
-                return event.publicationUrl;
+                return DateAndTimeFormatterUtil.formatDateRange(event.startDate, event.endDate);
             }
         };
 
@@ -154,14 +173,32 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
                 return builder.toSafeHtml();
             }
         };
-
+        
+        final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                int regattaCount = event.regattas.size();
+                int i = 1;
+                for (RegattaDTO regatta : event.regattas) {
+                    builder.appendEscaped(regatta.getName());
+                    if (i < regattaCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        
         ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
                 new EventConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
             public void update(int index, EventDTO event, String value) {
                 if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm("Do you really want to remove the event: '" + event.getName() + "' ?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                         removeEvent(event);
                     }
                 } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -170,12 +207,19 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             }
         });
 
+        eventNameColumn.setSortable(true);
+        venueNameColumn.setSortable(true);
+        isPublicColumn.setSortable(true);
+        startEndDateColumn.setSortable(true);
+        courseAreasColumn.setSortable(true);
+
         eventTable = new CellTable<EventDTO>(10000, tableRes);
         eventTable.addColumn(eventNameColumn, stringMessages.event());
         eventTable.addColumn(venueNameColumn, stringMessages.venue());
-        eventTable.addColumn(publicationUrlColumn, stringMessages.publicationUrl());
+        eventTable.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
+        eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
         eventSelectionModel = new MultiSelectionModel<EventDTO>();
@@ -190,13 +234,81 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         eventProvider = new ListDataProvider<EventDTO>();
         eventProvider.addDataDisplay(eventTable);
         mainPanel.add(eventTable);
+        allEvents = new ArrayList<EventDTO>();
+        eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
+                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn));
+        filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
+                eventTable, eventProvider) {
 
+            @Override
+            public Iterable<String> getSearchableStrings(EventDTO t) {
+                List<String> result = new ArrayList<String>();
+                result.add(t.getName());
+                result.add(t.venue.getName());
+                for (CourseAreaDTO c : t.venue.getCourseAreas()) {
+                    result.add(c.getName());
+                }
+                return result;
+            }
+        };
+        eventsPanel.add(filterTextbox);
         fillEvents();
     }
 
-    protected void removeEvents(Collection<EventDTO> events) {
+    private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
+            Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
+            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn,
+            Column<EventDTO, SafeHtml> courseAreasColumn) {
+        ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
+        result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return new NaturalComparator().compare(e1.getName(), e2.getName());
+            }
+        });
+        result.setComparator(venueNameColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return new NaturalComparator().compare(e1.venue.getName(), e2.venue.getName());
+            }
+        });
+        result.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                int result;
+                if(e1.startDate != null && e2.startDate != null) {
+                    result = e2.startDate.compareTo(e1.startDate);
+                } else if(e1.startDate == null && e2.startDate != null) {
+                    result = 1;
+                } else if(e1.startDate != null && e2.startDate == null) {
+                    result = -1;
+                } else {
+                    result = 0;
+                }
+                return result;
+            }
+        });
+        result.setComparator(isPublicColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
+            }
+        });
+        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return new NaturalComparator().compare(Arrays.toString(e1.venue.getCourseAreas().toArray()),
+                        Arrays.toString(e2.venue.getCourseAreas().toArray()));
+            }
+        });
+
+        return result;
+
+    }
+
+    private void removeEvents(Collection<EventDTO> events) {
         if (!events.isEmpty()) {
-            Collection<String> eventIds = new HashSet<String>();
+            Collection<UUID> eventIds = new HashSet<UUID>();
             for (EventDTO event : events) {
                 eventIds.add(event.id);
             }
@@ -262,12 +374,9 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
         List<String> regattaNames = new ArrayList<String>();
-        //        for(RegattaDTO regatta: updatedEvent.regattas) {
-        //            regattaNames.add(regatta.name);
-        //        }
         List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
 
-        sailingService.updateEvent(oldEvent.getName(), oldEvent.id, updatedEvent.venue, updatedEvent.publicationUrl, 
+        sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
                 updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
@@ -277,15 +386,17 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void onSuccess(Void result) {
                 fillEvents();
-                if(!oldEvent.getName().equals(updatedEvent.getName())) {
+                if (!oldEvent.getName().equals(updatedEvent.getName())) {
                     sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             fillEvents();
                         }
+
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
+                                            
                         }
                     });
                 }
@@ -316,12 +427,12 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         List<String> courseAreaNamesToAdd = new ArrayList<String>();
 
         List<String> newCourseAreaNames = new ArrayList<String>();
-        for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
+        for (CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
             newCourseAreaNames.add(courseArea.getName());
         }
 
         List<String> oldCourseAreaNames = new ArrayList<String>();
-        for(CourseAreaDTO courseArea : oldEvent.venue.getCourseAreas()) {
+        for (CourseAreaDTO courseArea : oldEvent.venue.getCourseAreas()) {
             oldCourseAreaNames.add(courseArea.getName());
         }
 
@@ -330,7 +441,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
                 courseAreaNamesToAdd.add(newCourseAreaName);
         }
 
-        for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
+        for (CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
             if (courseAreaNamesToAdd.contains(courseArea.getName())) {
                 courseAreasToAdd.add(courseArea);
             }
@@ -344,7 +455,8 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.getName(), newEvent.venue.getName(), newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
+                newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
@@ -366,8 +478,10 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
             @Override
             public void onSuccess(List<EventDTO> result) {
-                eventProvider.getList().clear();
-                eventProvider.getList().addAll(result);
+                allEvents.clear();
+                allEvents.addAll(result);
+                eventTable.getColumnSortList().push(startEndDateColumn);
+                filterTextbox.updateAll(allEvents);
             }
         });
     }

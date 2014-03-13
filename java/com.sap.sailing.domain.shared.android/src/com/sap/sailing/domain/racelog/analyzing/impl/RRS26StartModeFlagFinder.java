@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.Arrays;
 
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
 
-    private final List<Flags> startModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA);
-    private StartProcedureTypeAnalyzer procedureAnalyzer;
+    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA);
+    
+    private final RacingProcedureTypeAnalyzer procedureAnalyzer;
+    private final List<Flags> startModeFlags;
 
     /**
      * Searches for the start mode flag of a RRS26 race.
@@ -21,24 +23,31 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
      *            to be used to ensure a RRS26 race. Must operate on the same race log. Otherwise a
      *            {@link IllegalArgumentException} is thrown.
      */
-    public RRS26StartModeFlagFinder(StartProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog) {
+    public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog) {
+        this(procedureAnalyzer, raceLog, defaultStartModeFlags);
+    }
+    
+    public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog, List<Flags> startModeFlags) {
         super(raceLog);
         if (raceLog != procedureAnalyzer.getRaceLog()) {
             throw new IllegalArgumentException("Both analyzers must operate on the same race log.");
         }
         this.procedureAnalyzer = procedureAnalyzer;
+        this.startModeFlags = startModeFlags;
     }
 
     @Override
-    protected Flags performAnalyzation() {
-        StartProcedureType type = procedureAnalyzer.analyze();
-        if (StartProcedureType.RRS26.equals(type)) {
-            for (RaceLogEvent event : getPassEventsDescending()) {
-                if (event instanceof RaceLogFlagEvent) {
-                    RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
-                    if (isStartModeFlagEvent(flagEvent)) {
-                        return flagEvent.getUpperFlag();
-                    }
+    protected Flags performAnalysis() {
+        RacingProcedureType type = procedureAnalyzer.analyze();
+        if (!RacingProcedureType.RRS26.equals(type)) {
+            return null;
+        }
+        
+        for (RaceLogEvent event : getPassEventsDescending()) {
+            if (event instanceof RaceLogFlagEvent) {
+                RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
+                if (isStartModeFlagEvent(flagEvent)) {
+                    return flagEvent.getUpperFlag();
                 }
             }
         }

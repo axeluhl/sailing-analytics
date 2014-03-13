@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -19,8 +20,9 @@ public class RegattaDTO extends NamedDTO {
     public List<RaceWithCompetitorsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
-    public String defaultCourseAreaIdAsString;
+    public UUID defaultCourseAreaUuid;
     public String defaultCourseAreaName;
+    public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
 
     public RegattaDTO() {}
 

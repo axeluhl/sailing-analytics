@@ -187,7 +187,7 @@ public class Timer {
         time = new Date(timePointAsMillis);
         if ((oldTime == null) != (time == null) || (oldTime != null && !oldTime.equals(time))) {
             for (TimeListener listener : timeListeners) {
-                listener.timeChanged(time);
+                listener.timeChanged(time, oldTime);
             }
         }
     }
@@ -210,6 +210,9 @@ public class Timer {
         }
     }
     
+    /**
+     * @return the refresh interval in milliseconds
+     */
     public long getRefreshInterval() {
         return refreshInterval;
     }

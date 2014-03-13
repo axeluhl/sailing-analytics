@@ -1,12 +1,18 @@
 package com.sap.sailing.domain.persistence;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -25,9 +31,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
  */
 public interface DomainObjectFactory {
     /**
-     * @param regatta only needed for backward compatibility because old wind tracks used the regatta name as part of the key
+     * @param regattaName only needed for backward compatibility because old wind tracks used the regatta name as part of the key
      */
-    WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
+    WindTrack loadWindTrack(String regattaName, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     /**
      * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
@@ -72,7 +78,7 @@ public interface DomainObjectFactory {
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
-    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
 
     Event loadEvent(String name);
@@ -86,4 +92,14 @@ public interface DomainObjectFactory {
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
+    
+    /**
+     * Loads all competitors, and resolves them via the domain factory.
+     * @return
+     */
+    Collection<Competitor> loadAllCompetitors();
+
+    DomainFactory getBaseDomainFactory();
+
+    Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
 }

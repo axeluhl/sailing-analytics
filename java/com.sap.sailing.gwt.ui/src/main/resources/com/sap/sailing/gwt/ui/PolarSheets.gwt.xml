@@ -22,11 +22,14 @@
 	</entry-point>
 
 	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.GoogleMaps' />
+	<inherits name='com.google.gwt.maps.Maps' />
 
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
 	<!-- Other module inherits -->
+	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+    <inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 </module>

@@ -4,73 +4,94 @@ import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
+import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
- * This class extends @CanvasOverlay to provide the functionality that the canvas always covers the
+ * This class extends @CanvasOverlayV3 to provide the functionality that the canvas always covers the
  * full viewable area of the map
  * 
  * @author Nidhi Sawhney(D054070)
  * @author Christopher Ronnewinkel (D036654)
  *
  */
-public abstract class FullCanvasOverlay extends CanvasOverlay implements RequiresResize {
+public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements RequiresResize {
 
-    /* x coordinate where the widget is placed */
-    private int widgetPosLeft = 0;
-    /* y coordinate where the widget is placed */
-    private int widgetPosTop = 0;
+    /** the x coordinate where the canvas is placed */
+    private double widgetPosLeft = 0;
+    
+    /** the y coordinate where the canvas element is placed */
+    private double widgetPosTop = 0;
 
     public String pointColor = "Red";
-    
     public String textColor = "Black";
     
-    protected static Logger logger = Logger.getLogger("com.sap.sailing");
+    protected static Logger logger = Logger.getLogger(FullCanvasOverlay.class.getName());
     
-    /* Set the canvas to be the size of the map and set it to the top left corner of the map */
+    public FullCanvasOverlay(MapWidget map, int zIndex) {
+        super(map, zIndex);
+        
+        /*getMap().addDragEndHandler( new DragEndMapHandler() {
+			@Override
+			public void onEvent(DragEndMapEvent event) {
+				// TODO Auto-generated method stub
+				draw();
+			};	
+		});*/
+
+        getMap().addCenterChangeHandler(new CenterChangeMapHandler() {
+ 			@Override
+			public void onEvent(CenterChangeMapEvent event) {
+				// TODO Auto-generated method stub
+				draw();				
+			};
+        });
+        
+    }
+    
+    /**
+     *  Set the canvas to be the size of the map and set it to the top left corner of the map 
+     */
     protected void setCanvasSettings() {
-        int canvasWidth = getMap().getSize().getWidth();
-        int canvasHeight = getMap().getSize().getHeight();
+        int canvasWidth = getMap().getDiv().getClientWidth();
+        int canvasHeight = getMap().getDiv().getClientHeight();
    
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-   
-        Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
-        Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
+
+        Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
+        Point ne = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
 
-        getPane().setWidgetPosition(getCanvas(), getWidgetPosLeft(), getWidgetPosTop());
-
+        setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
     }
 
     @Override
     public void onResize() {
-    	
     	// improve browser performance by deferred scheduling of redraws
-    	Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-    		public void execute() {
-    			redraw(true);
-    		}
-    	});
-    	
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            public void execute() {
+                draw();
+            }
+        });
     }
 
-
     @Override
-    protected void redraw(boolean force) {
-    	logger.info("In FullCanvasOverlay.redraw" + force);
-
-    	// Reset the canvas, e.g. onMove() of map or onResize() of window
-    	setCanvasSettings();
-
+    protected void draw() {
+        if (mapProjection != null) {
+            // Reset the canvas, e.g. onMove() of map or onResize() of window
+            setCanvasSettings();
+        }
     }
 
     /**
@@ -87,7 +108,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
         context2d.lineTo(x+1, y+1);
         context2d.closePath();
         context2d.stroke();  
-        
     }
     
     /**
@@ -97,14 +117,12 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
      * @param text to be displayed at the point on the canvas
      */
     protected void drawPointWithText(double x, double y, String text) {
-        
         Context2d context2d = canvas.getContext2d();
         drawPoint(x, y);
-        if (getMap().getZoomLevel() >= 11) {
+        if (getMap().getZoom() >= 11) {
         	context2d.setFillStyle(textColor);
         	context2d.fillText(text, x, y);
         }
-
     }
     
     /**
@@ -130,19 +148,17 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
      * @param text
      */
     protected void drawCircleWithText(double x, double y, double radius, String color, String text) {
-        
         Context2d context2d = canvas.getContext2d();
         context2d.setGlobalAlpha(0.9f);
         drawCircle(x, y,radius,color);
         context2d.setGlobalAlpha(1.0f);
-        if (getMap().getZoomLevel() >= 11) {
+        if (getMap().getZoom() >= 11) {
         	context2d.setFillStyle(textColor);
-			double fontsize = 9.0 + (12.0-9.0)*(getMap().getZoomLevel() - 10.0)/(12.0-10.0);
+			double fontsize = 9.0 + (12.0-9.0)*(getMap().getZoom() - 10.0)/(12.0-10.0);
         	context2d.setFont("normal "+fontsize+"px Calibri");
         	context2d.fillText(text, x + 0.7*fontsize, y + 0.3*fontsize);
         	//System.out.println("ZoomLevel: "+getMap().getZoomLevel()+", Fontsize: "+fontsize);
         }
-       
     }
     
     /**
@@ -167,7 +183,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
      * Debug function to draw the boundaries of the canvas
      */
     protected void drawCanvas() {
-       
         Context2d context2d  = canvas.getContext2d();
         context2d.setStrokeStyle("Black");
         context2d.setLineWidth(3);
@@ -195,30 +210,27 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
         context2d.lineTo(canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         context2d.closePath();
         context2d.stroke();
-        
     }
 
     protected void drawArrow(final SimulatorWindDTO windDTO, final double angle, final double length, final double weight, String color, final int index, final boolean drawHead) {
-        final String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
-                + "knots "
-                + windDTO.trueWindBearingDeg;
+        String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
+                + "knots " + windDTO.trueWindBearingDeg;
         logger.fine(msg);
 
-        final PositionDTO position = windDTO.position;
+        PositionDTO position = windDTO.position;
 
-        final LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        final Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
     
-        final int x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        final int y = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        double x = canvasPositionInPx.getX() - getWidgetPosLeft();
+        double y = canvasPositionInPx.getY() - getWidgetPosTop();
 
         //windFieldPoints.put(new ToolTip(x, y), windDTO);
 
         drawArrowPx(x, y, angle, length, weight, drawHead, color);
     }
 
-        protected void drawArrowPx(double x, double y, double angle, double length, double weight, boolean drawHead, String color) {
-        
+    protected void drawArrowPx(double x, double y, double angle, double length, double weight, boolean drawHead, String color) {
         final double dx = length * Math.sin(angle);
         final double dy = -length * Math.cos(angle);
 
@@ -241,7 +253,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
     }
 
     protected void drawHead(final double x, final double y, final double theta, final double headLength, final double weight, String color) {
-
         double t = theta + (Math.PI / 4);
         if (t > Math.PI) {
             t -= 2 * Math.PI;
@@ -259,24 +270,24 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
         final double y2 = (y + Math.sin(t2) * headLength);
         final double x2o = (x + Math.cos(t2) * weight/2);
         final double y2o = (y - Math.sin(t2) * weight/2);
+        
         drawLine(x1o, y1o, x1, y1, weight, color);
         drawLine(x2o, y2o, x2, y2, weight, color);
-
     }
 
-    public int getWidgetPosLeft() {
+    public double getWidgetPosLeft() {
         return widgetPosLeft;
     }
 
-    public void setWidgetPosLeft(int widgetPosLeft) {
+    public void setWidgetPosLeft(double widgetPosLeft) {
         this.widgetPosLeft = widgetPosLeft;
     }
 
-    public int getWidgetPosTop() {
+    public double getWidgetPosTop() {
         return widgetPosTop;
     }
 
-    public void setWidgetPosTop(int widgetPosTop) {
+    public void setWidgetPosTop(double widgetPosTop) {
         this.widgetPosTop = widgetPosTop;
     }
 }

@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
@@ -93,6 +94,26 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     @Override
     public boolean isCarryForward() {
         return false;
+    }
+
+    /**
+     * Implements this by delegating to and negating the result of {@link #hasSplitFleetContiguousScoring()}. This is a
+     * reasonable default implementation because if the score is not split up by fleet but scored contiguously
+     * ascending/descending, this usually means that the fleets re-convene after this series instead of remaining split.
+     */
+    @Override
+    public boolean isTotalOrderDefinedByFleet() {
+        return !hasSplitFleetContiguousScoring();
+    }
+
+    @Override
+    public boolean hasSplitFleetContiguousScoring() {
+        return false;
+    }
+
+    @Override
+    public boolean hasSplitFleets() {
+        return Util.size(getFleets()) > 1;
     }
 
 }

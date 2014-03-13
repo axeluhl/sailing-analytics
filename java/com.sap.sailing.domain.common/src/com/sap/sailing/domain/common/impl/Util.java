@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +23,12 @@ public class Util {
         }
     }
 
+    public static <T> T[] toArray(Iterable<T> what, T[] arr) {
+        List<T> list = new ArrayList<T>();
+        addAll(what, list);
+        return list.toArray(arr);
+    }
+    
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
@@ -241,6 +248,24 @@ public class Util {
                 result = false;
             } else {
                 result = o1.equals(o2);
+            }
+        }
+        return result;
+    }
+    
+    public static <T> int compareToWithNull(Comparable<T> o1, T o2) {
+        final int result;
+        if (o1 == null) {
+            if (o2 == null) {
+                result = 0;
+            } else {
+                result = -1;
+            }
+        } else {
+            if (o2 == null) {
+                result = 1;
+            } else {
+                result = o1.compareTo(o2);
             }
         }
         return result;

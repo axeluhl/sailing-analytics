@@ -12,8 +12,8 @@ public class MarkPassingImpl implements MarkPassing {
     private final Competitor competitor;
     
     public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
-        super();
-        this.timePoint = timePoint;
+    	super();
+    	this.timePoint = timePoint;
         this.waypoint = waypoint;
         this.competitor = competitor;
     }
@@ -27,7 +27,7 @@ public class MarkPassingImpl implements MarkPassing {
     public Waypoint getWaypoint() {
         return waypoint;
     }
-
+   
     @Override
     public Competitor getCompetitor() {
         return competitor;

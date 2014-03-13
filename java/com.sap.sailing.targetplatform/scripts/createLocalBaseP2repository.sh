@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-ECLIPSE_HOME=c:/apps/eclipse371
+ECLIPSE_HOME=c:/apps/eclipse
 SAILING_GIT_HOME=c:/data/SAP/sailing/workspace
 TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base
 

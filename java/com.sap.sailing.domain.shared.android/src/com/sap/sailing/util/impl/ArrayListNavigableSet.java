@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.SortedSet;
 
 /**
@@ -62,12 +63,20 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
 
     @Override
     public E first() {
-        return list.get(0);
+        try {
+            return list.get(0);
+        } catch (IndexOutOfBoundsException e) {
+            throw new NoSuchElementException(e.getMessage());
+        }
     }
 
     @Override
     public E last() {
-        return list.get(list.size()-1);
+        try {
+            return list.get(list.size()-1);
+        } catch (IndexOutOfBoundsException e) {
+            throw new NoSuchElementException(e.getMessage());
+        }
     }
 
     @Override

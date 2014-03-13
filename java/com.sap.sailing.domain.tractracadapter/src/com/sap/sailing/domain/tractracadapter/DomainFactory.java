@@ -20,9 +20,8 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -52,6 +51,11 @@ import com.tractrac.clientmodule.data.Position;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
+    /**
+     * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use what can be
+     * reached from <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance
+     * used by all other services linked to the <code>RacingEventService</code>.
+     */
     static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
@@ -60,7 +64,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints);
+    Course createCourse(String name, Iterable<Pair<TracTracControlPoint, PassingInstruction>> controlPoints);
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
@@ -78,12 +82,6 @@ public interface DomainFactory {
     GPSFixMoving createGPSFixMoving(Position position);
 
     Person getOrCreatePerson(String name, Nationality nationality, UUID id);
-
-    /**
-     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
-     * is split along "+" signs with one {@link Person} object created for each part.
-     */
-    Team getOrCreateTeam(String name, Nationality nationality, UUID competitorId);
 
     /**
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such
@@ -134,16 +132,17 @@ public interface DomainFactory {
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
+     * @param raceStatus 
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
@@ -211,6 +210,9 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
+    /**
+     * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
+     */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
@@ -229,7 +231,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
@@ -249,8 +251,8 @@ public interface DomainFactory {
     Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore,
-            String tracTracUsername, String tracTracPassword);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
+            String tracTracUsername, String tracTracPassword, String raceStatus);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

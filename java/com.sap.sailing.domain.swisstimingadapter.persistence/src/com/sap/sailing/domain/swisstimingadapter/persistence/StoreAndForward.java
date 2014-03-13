@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -161,7 +163,7 @@ public class StoreAndForward implements Runnable {
     private long getLastMessageCount() {
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
         if (lastMessageCountRecord == null) {
-            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l));
+            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l), WriteConcern.SAFE);
         }
         return lastMessageCountRecord == null ? 0 : ((Number) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue();
     }
@@ -266,67 +268,75 @@ public class StoreAndForward implements Runnable {
             while (!stopped) {
                 try {
                     InputStream is = socket.getInputStream();
-                    Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
-                    if (messageAndOptionalSequenceNumber == null) {
-                        // found EOF; stopping
-                        stopped = true;
-                    } else {
-                        // ignore any sequence number contained in the message; we'll create our own
-                        DBObject emptyQuery = new BasicDBObject();
-                        DBObject incrementLastMessageCountQuery = new BasicDBObject().append("$inc",
-                                new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
-                        while (!stopped && messageAndOptionalSequenceNumber != null) {
-                            logger.fine("Thread " + this + " received message: "
-                                    + messageAndOptionalSequenceNumber.getA());
-                            DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery,
-                                    incrementLastMessageCountQuery);
-                            lastMessageCount = ((newCountRecord == null) ? 0l : ((Number) newCountRecord
-                                    .get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
-                            SailMasterMessage message = swissTimingFactory.createMessage(
-                                    messageAndOptionalSequenceNumber.getA(), lastMessageCount);
-                            swissTimingAdapterPersistence.storeSailMasterMessage(message);
-                            synchronized (StoreAndForward.this) {
-                                for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
-                                    // write the sequence number of the message into the stream before actually writing
-                                    // the
-                                    // SwissTiming message
-                                    try {
-                                        transceiver.sendMessage(message, os);
-                                    } catch (Exception e) {
-                                        logger.log(Level.SEVERE, "Error sending message to " + os, e);
-                                        int i = streamsToForwardTo.indexOf(os);
+                    try {
+                        Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                        if (messageAndOptionalSequenceNumber == null) {
+                            // found EOF; stopping
+                            stopped = true;
+                        } else {
+                            // ignore any sequence number contained in the message; we'll create our own
+                            DBObject emptyQuery = new BasicDBObject();
+                            DBObject incrementLastMessageCountQuery = new BasicDBObject().append("$inc",
+                                    new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
+                            while (!stopped && messageAndOptionalSequenceNumber != null) {
+                                logger.fine("Thread " + this + " received message: "
+                                        + messageAndOptionalSequenceNumber.getA());
+                                DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery,
+                                        incrementLastMessageCountQuery);
+                                lastMessageCount = ((newCountRecord == null) ? 0l : ((Number) newCountRecord
+                                        .get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
+                                SailMasterMessage message = swissTimingFactory.createMessage(
+                                        messageAndOptionalSequenceNumber.getA(), lastMessageCount);
+                                swissTimingAdapterPersistence.storeSailMasterMessage(message);
+                                synchronized (StoreAndForward.this) {
+                                    for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
+                                        // write the sequence number of the message into the stream before actually
+                                        // writing
+                                        // the
+                                        // SwissTiming message
                                         try {
-                                            os.close();
-                                        } catch (Exception exc) {
-                                            logger.log(Level.SEVERE, "Exception closing socket output stream " + os
-                                                    + " after being unable to forward message " + message, exc);
-                                        }
-                                        streamsToForwardTo.remove(os);
-                                        Socket s = socketsToForwardTo.remove(i);
-                                        logger.info("Unable to send to socket " + s
-                                                + ". Trying to close. Removing from sockets to forward to.");
-                                        try {
-                                            s.close();
-                                        } catch (Exception exc) {
-                                            logger.log(Level.WARNING, "Exception trying to close socket " + s
-                                                    + " after being unable to forward message " + message, exc);
+                                            transceiver.sendMessage(message, os);
+                                        } catch (Exception e) {
+                                            logger.log(Level.SEVERE, "Error sending message to " + os, e);
+                                            int i = streamsToForwardTo.indexOf(os);
+                                            try {
+                                                os.close();
+                                            } catch (Exception exc) {
+                                                logger.log(Level.SEVERE, "Exception closing socket output stream " + os
+                                                        + " after being unable to forward message " + message, exc);
+                                            }
+                                            streamsToForwardTo.remove(os);
+                                            Socket s = socketsToForwardTo.remove(i);
+                                            logger.info("Unable to send to socket " + s
+                                                    + ". Trying to close. Removing from sockets to forward to.");
+                                            try {
+                                                s.close();
+                                            } catch (Exception exc) {
+                                                logger.log(Level.WARNING, "Exception trying to close socket " + s
+                                                        + " after being unable to forward message " + message, exc);
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            if (!stopped) {
-                                messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
-                                if (messageAndOptionalSequenceNumber == null) {
-                                    // received EOF; stopping received
-                                    stopped = true;
+                                if (!stopped) {
+                                    messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                                    if (messageAndOptionalSequenceNumber == null) {
+                                        // received EOF; stopping received
+                                        stopped = true;
+                                    }
                                 }
                             }
                         }
+                    } catch (SocketException e) {
+                        logger.log(
+                                Level.INFO,
+                                "Error during receiving message. Terminating this receiver and waiting for another inbound connection.",
+                                e);
+                        stopped = true;
                     }
                     // note that we're not changing anything with the sockets to which we forward messages; that will only happen
                     // if forwarding to any of those sockets fails
                 } catch (Exception e) {
-                    e.printStackTrace();
                     if (!stopped) {
                         logger.log(Level.INFO, "Error during forwarding message. Continuing...", e);
                         try {
@@ -386,8 +396,7 @@ public class StoreAndForward implements Runnable {
         int sailMasterPort = Integer.valueOf(args[i++]);
         int clientPort = Integer.valueOf(args[i++]);
         
-        MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
+        MongoDBService mongoDBService = MongoDBConfiguration.getDefaultConfiguration().getService();
         SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         if (hostname == null) {
             new StoreAndForward(sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
@@ -403,7 +412,7 @@ public class StoreAndForward implements Runnable {
                 try {
                     ReceivingThread receivingThread = establishConnection();
                     if (!isInSailMasterListeningMode()) {
-                        receivingThread.join(); // we're in active connecting mode; wait for thread to die, then trie again
+                        receivingThread.join(); // we're in active connecting mode; wait for thread to die, then try again
                     }
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Exception in StoreAndForward", e);

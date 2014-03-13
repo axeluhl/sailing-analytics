@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
+import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
@@ -66,25 +67,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         
         // read optional parameters 
-        RaceBoardViewConfiguration.ViewModes viewMode;
-        String viewModeParamValue = Window.Location.getParameter(RaceBoardViewConfiguration.PARAM_VIEW_MODE);
-        if (viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
-            try {
-                viewMode = RaceBoardViewConfiguration.ViewModes.valueOf(viewModeParamValue);
-            } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
-            }
-        } else {
-            viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
-        }
         boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
         boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
         boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
-        raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
+                showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
         
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -145,6 +135,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
             return;
         }
+        
+        Window.setTitle(selectedRace.getName());
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
@@ -154,12 +146,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
-
-        switch (raceBoardPanel.getConfiguration().getViewMode()) {
-            case ONESCREEN:
-                createRaceBoardInOneScreenMode(raceBoardPanel);
-                break;
-        }
+        createRaceBoardInOneScreenMode(raceBoardPanel);
     }  
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {

@@ -13,9 +13,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class PolarSheetsEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
 
-    // private static final Logger logger =
-    // Logger.getLogger(PolarSheetsEntryPoint.class.getName());
-
     private Set<RegattaDisplayer> regattaDisplayers;
 
     @Override

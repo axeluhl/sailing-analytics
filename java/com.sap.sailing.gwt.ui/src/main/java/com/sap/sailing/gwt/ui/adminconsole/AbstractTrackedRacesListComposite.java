@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -10,26 +9,18 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -42,7 +33,9 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -51,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
@@ -72,11 +66,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private final VerticalPanel panel;
 
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-
     private final Label noTrackedRacesLabel;
 
     protected final SailingServiceAsync sailingService;
@@ -87,12 +76,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private final Button btnRefresh;
 
-    private final TextBox filterRacesTextbox;
+    private final LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected final TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
-
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
@@ -101,7 +89,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            RaceSelectionProvider raceSelectionProvider, final StringMessages stringMessages, boolean hasMultiSelection) {
+            final RaceSelectionProvider raceSelectionProvider, final StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -124,22 +112,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterPanel.setSpacing(5);
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        filterRacesTextbox = new TextBox();
-        filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                fillRaceListFromAvailableRacesApplyingFilter();
-            }
-        });
-        filterPanel.add(filterRacesTextbox);
-
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesCellTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -164,12 +143,25 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 }
             }
         });
+        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
+            @Override
+            public List<String> getSearchableStrings(RaceDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.boatClass);
+                strings.add(t.getRegattaName());
+                strings.add(t.toString());
+                return strings;
+            }
+        };
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
+        filterPanel.add(filterablePanelRaces);
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
 
         btnRefresh = new Button(stringMessages.refresh());
-        btnRefresh.ensureDebugId("Refresh");
+        btnRefresh.ensureDebugId("RefreshButton");
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -177,9 +169,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
-
         addControlButtons(trackedRacesButtonPanel);
-
     }
 
     abstract protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces);
@@ -198,7 +188,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.getRegattaName().compareTo(r2.getRegattaName());
+                return new NaturalComparator().compare(r1.getRegattaName(), r2.getRegattaName());
             }
         });
 
@@ -212,7 +202,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.boatClass.compareTo(r2.boatClass);
+                return new NaturalComparator(false).compare(r1.boatClass, r2.boatClass);
             }
         });
 
@@ -227,7 +217,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.getName().compareTo(r2.getName());
+                return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
 
@@ -235,7 +225,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.startOfRace != null) {
-                    return dateFormatter.render(raceDTO.startOfRace) + " " + timeFormatter.render(raceDTO.startOfRace);
+                    return DateAndTimeFormatterUtil.defaultDateFormatter.render(raceDTO.startOfRace) + " " + 
+                            DateAndTimeFormatterUtil.defaultTimeFormatter.render(raceDTO.startOfRace);
                 }
 
                 return "";
@@ -248,7 +239,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 if (r1.startOfRace != null && r2.startOfRace != null) {
                     return r1.startOfRace.compareTo(r2.startOfRace);
                 }
-                
+
                 return r1.startOfRace == null ? (r2.startOfRace == null ? 0 : -1) : 1;
             }
         });
@@ -273,7 +264,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             private boolean hasWindData(RaceDTO race) {
                 return race.trackedRace != null && race.trackedRace.hasWindData == true;
             }
-            
+
         });
 
         TextColumn<RaceDTO> hasGPSDataColumn = new TextColumn<RaceDTO>() {
@@ -297,7 +288,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             private boolean hasGPSData(RaceDTO race) {
                 return race.trackedRace != null && race.trackedRace.hasGPSData == true;
             }
-            
+
         });
 
         TextColumn<RaceDTO> raceStatusColumn = new TextColumn<RaceDTO>() {
@@ -311,12 +302,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
                 if (r1.status != null && r2.status != null) {
-                    if (r1.status.status == TrackedRaceStatusEnum.LOADING && r2.status.status == TrackedRaceStatusEnum.LOADING) {
+                    if (r1.status.status == TrackedRaceStatusEnum.LOADING
+                            && r2.status.status == TrackedRaceStatusEnum.LOADING) {
                         return new Double(r1.status.loadingProgress).compareTo(r2.status.loadingProgress);
                     }
                     return new Integer(r1.status.status.getOrder()).compareTo(r2.status.status.getOrder());
                 }
-                
+
                 return r1.status == null ? (r2.status == null ? 0 : -1) : 1;
             }
         });
@@ -339,7 +331,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 if (r1Delay != null && r2Delay != null) {
                     return r1Delay.compareTo(r2Delay);
                 }
-                
+
                 return r1Delay == null ? (r2Delay == null ? 0 : -1) : 1;
             }
 
@@ -356,50 +348,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
-        
+
         return columnSortHandler;
     }
 
-    private void fillRaceListFromAvailableRacesApplyingFilter() {
-        String text = filterRacesTextbox.getText();
-        List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        raceList.getList().clear();
-        if (text != null && !text.isEmpty()) {
-            for (RaceDTO raceDTO : getAllRaces()) {
-                boolean failed = false;
-                for (String word : wordsToFilter) {
-                    String textAsUppercase = word.toUpperCase().trim();
-                    if (!raceDTO.getRegattaName().toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.boatClass.toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.getName().toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
-                    }
-                }
-                if (!failed) {
-                    raceList.getList().add(raceDTO);
-                }
-            }
-        } else {
-            for (RaceDTO raceFromAllRaces : getAllRaces()) {
-                raceList.getList().add(raceFromAllRaces);
-            }
-        }
-        // now sort again according to selected criterion
-        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
-        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update selection based on underlying domain
-                                                                         // race selection model
-    }
-
+    
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         for (RaceDTO raceFromAllRaces : raceList.getList()) {
             selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
         }
-    }
-
-    private Iterable<RaceDTO> getAllRaces() {
-        return allRaces;
     }
 
     @Override
@@ -424,16 +382,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
             sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
-                    new AsyncCallback<Void>() {
+                    new MarkedAsyncCallback<Void>() {
                         @Override
-                        public void onFailure(Throwable caught) {
+                        public void handleFailure(Throwable caught) {
                             errorReporter
                                     .reportError("Exception trying to set the delay to live for the selected tracked races: "
                                             + caught.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
+                        public void handleSuccess(Void result) {
                             regattaRefresher.fillRegattas();
                         }
                     });
@@ -442,7 +400,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     @Override
     public String getLocalizedShortName() {
-        return "Tracked races";
+        return stringMessages.trackedRaces();
     }
 
     @Override
@@ -528,14 +486,15 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         }
         allRaces = newAllRaces;
-        fillRaceListFromAvailableRacesApplyingFilter();
+        filterablePanelRaces.updateAll(allRaces);
         raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers
                                                                   // onRaceSelectionChange
     }
 
     /**
-     * Allows applying some sort of filter to the process of adding races.
-     * Defaults to true in standard implementation. Override for custom behavior
+     * Allows applying some sort of filter to the process of adding races. Defaults to true in standard implementation.
+     * Override for custom behavior
+     * 
      * @param race
      * @return
      */

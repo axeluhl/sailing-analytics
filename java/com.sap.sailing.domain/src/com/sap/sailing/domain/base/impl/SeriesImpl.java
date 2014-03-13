@@ -14,7 +14,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.impl.RenamableImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -25,7 +25,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
-public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener {
+public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
     private final List<Fleet> fleetsInAscendingOrder;
@@ -46,6 +46,15 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      * carry-forward score from a previous series.
      */
     private boolean firstColumnIsNonDiscardableCarryForward;
+    
+    /**
+     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
+     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
+     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code> which is
+     * also the default.
+     */
+    private boolean hasSplitFleetContiguousScoring;
     
     /**
      * @param fleets
@@ -226,7 +235,13 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void setIsMedal(boolean isMedal) {
+        boolean oldIsMedal = this.isMedal;
         this.isMedal = isMedal;
+        if (oldIsMedal != isMedal) {
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, isMedal);
+            }
+        }
     }
 
     @Override
@@ -247,6 +262,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
     }
 
     @Override
@@ -353,6 +373,16 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
+            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+            }
+        }
+    }
+
+    @Override
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
@@ -370,5 +400,8 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
 
-    
+    @Override
+    public boolean hasSplitFleetContiguousScoring() {
+        return hasSplitFleetContiguousScoring;
+    }
 }

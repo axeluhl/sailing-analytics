@@ -9,9 +9,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -47,9 +49,11 @@ public interface ScoringScheme extends Serializable {
      * 
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
-     * race. 
+     * race.
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher);
+    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
     
     /**
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
@@ -93,4 +97,13 @@ public interface ScoringScheme extends Serializable {
      * for the total scores.
      */
     boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
+
+    /**
+     * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These instances of a
+     * leaderboard are based on other leaderboards grouped in a {@link LeaderboardGroup}. It can happen that the
+     * {@link ScoringScheme} needs to have a look at the total points of the other leaderboards in that group. The
+     * ordering of the list containing the total points matches the order in the group.
+     * @throws NoWindException 
+     */
+    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException;
 }

@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -13,7 +13,7 @@
 
     <properties>
         <parameters.jetty>
-          -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8086
+          -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085
         </parameters.jetty>
         <!--
           NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the
@@ -70,9 +70,22 @@
                                     <artifactId>com.sap.sailing.feature.runtime</artifactId>
                                     <version>0.0.0</version>
                                 </dependency>
+                                
+                                <!-- This bundle should only be deployed in a test environment! -->
+                                <dependency>
+                                    <type>eclipse-plugin</type>
+                                    <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
+                                    <version>0.0.0</version>
+                                </dependency>
                             </dependencies>
                             
                             <bundleStartLevel>
+                                <bundle>
+                                    <id>com.sap.sailing.server.gateway.test.support</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                
                                 <bundle>
                                     <id>com.sap.sailing.ess40.resultimport</id>
                                     <level>3</level>
@@ -81,6 +94,11 @@
                                 <bundle>
                                     <id>com.sap.sailing.freg.resultimport</id>
                                     <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sse.gwt</id>
+                                    <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
@@ -126,7 +144,22 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
-                                    <id>com.sap.sailing.xcelsiusadapter</id>
+                                    <id>com.sap.sailing.datamining.shared</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.datamining</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.domain.igtimiadapter</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.xmlexport</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>

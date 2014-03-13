@@ -33,6 +33,12 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     private static final String SWISSTIMING_DATEFORMAT_PATTERN = "dd.MM.yyyy HH:mm";
     private static final TimeZone DEFAULT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
+    private final DomainFactory domainFactory;
+
+    public SwissTimingReplayServiceImpl(DomainFactory domainFactory) {
+        this.domainFactory = domainFactory;
+    }
+
     @Override
     public List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText) {
         URL raceListUrl;
@@ -100,7 +106,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
                     (String) jsonRaceEntry.get("flight_number"), (String) jsonRaceEntry.get("race_id"),
                     (String) jsonRaceEntry.get("rsc"), (String) jsonRaceEntry.get("name"),
                     (String) jsonRaceEntry.get("class"), startTime,
-                    (String) jsonRaceEntry.get("link"));
+                    (String) jsonRaceEntry.get("link")+"&_start=0");
             result.add(replayRace);
         }
         return result;
@@ -143,7 +149,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     }
 
     @Override
-    public void loadRaceData(String link, DomainFactory domainFactory, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory, trackedRegattaRegistry);
         loadRaceData(link, listener);
     }

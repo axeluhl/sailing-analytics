@@ -37,7 +37,7 @@ public class GeoUtils {
             d = -d;
         }
         DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.US));
-        String dms = "" + d + '\u00B0' + m + '\u2032' + df.format(s) + '\u2033'; // add º, ', " symbols
+        String dms = "" + d + '\u00B0' + m + '\u2032' + df.format(s) + '\u2033'; // add o, ', " symbols
 
         return dms;
     }

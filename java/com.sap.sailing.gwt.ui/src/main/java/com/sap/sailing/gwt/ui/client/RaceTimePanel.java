@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -27,6 +28,25 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         autoAdjustPlayMode = true;
     }
     
+    /**
+     * If the race's start time is already known and the <code>time</code> is before the start we can set the count-down label
+     */
+    @Override
+    protected String getTimeToStartLabelText(Date time) {
+        String result = null;
+        RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
+        if (selectedRaceTimes.startOfRace != null) {
+            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+                long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
+                result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
+            } else {
+                long timeSinceStartInMs = time.getTime() - selectedRaceTimes.startOfRace.getTime();
+                result = stringMessages.timeSinceStart(DateAndTimeFormatterUtil.formatElapsedTime(timeSinceStartInMs));
+            } 
+        }
+        return result;
+    }
+
     @Override
     public void updateSettings(RaceTimePanelSettings newSettings) {
         super.updateSettings(newSettings);

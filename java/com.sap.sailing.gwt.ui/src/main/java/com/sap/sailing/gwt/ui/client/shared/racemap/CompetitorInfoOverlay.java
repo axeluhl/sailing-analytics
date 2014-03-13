@@ -3,124 +3,126 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.canvas.dom.client.TextMetrics;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.Point;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
- * A google map overlay based on a HTML5 canvas for drawing competitor information close to the boat
+ * A google map overlay based on a HTML5 canvas for drawing a competitor info on a map at a given position.
+ * 
+ * @author Frank Mittag
  */
-public class CompetitorInfoOverlay extends CanvasOverlay {
+public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     /**
-     * The competitor.
+     * The text to display in the canvas
      */
-    private final CompetitorDTO competitorDTO;
+    private String infoText;
 
     /**
      * The current GPS fix of the boat position of the competitor.
      */
-    private GPSFixDTO boatFix;
-
-    private final RaceMapImageManager raceMapImageManager;
+    private PositionDTO position;
 
     private int canvasWidth;
     private int canvasHeight;
-    private int infoBoxHeight;
-    private int infoBoxWidth;
-    private double cornerRadius;
-    
-    public CompetitorInfoOverlay(CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
-        super();
-        this.competitorDTO = competitorDTO;
-        this.raceMapImageManager = raceMapImageManager;
-        
-        canvasWidth = 20;
-        canvasHeight = 45;
-        infoBoxWidth = 20;
-        infoBoxHeight = 20;
-        cornerRadius = 4;
+    private int infoBoxHeight = 20;
 
-        if(getCanvas() != null) {
-            getCanvas().setWidth(String.valueOf(canvasWidth));
-            getCanvas().setHeight(String.valueOf(canvasHeight));
-            getCanvas().setCoordinateSpaceWidth(canvasWidth);
-            getCanvas().setCoordinateSpaceHeight(canvasHeight);
-        }
+    private Color competitorColor; 
+
+    public CompetitorInfoOverlay(MapWidget map, int zIndex, Color competitorColor, String infoText) {
+        super(map, zIndex);
+        this.competitorColor = competitorColor;
+        this.infoText = infoText;
+        canvasWidth = 100;
+        canvasHeight = 100;
+
+        setCanvasSize(canvasWidth, canvasHeight);
+        canvas.addStyleName("competitorInfo-Canvas");
     }
 
     @Override
-    protected Overlay copy() {
-        return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
-    }
-
-    @Override
-    protected void redraw(boolean force) {
-        if (boatFix != null) {
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            String infoText = competitorDTO.getSailID();
-            if(infoText == null || infoText.isEmpty()) {
-            	infoText = competitorDTO.getName();
-            }
-
-            Context2d context2d = getCanvas().getContext2d();
+    protected void draw() {
+        if (mapProjection != null && position != null) {
+            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
+            Context2d ctx = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
-            context2d.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = context2d.measureText(competitorDTO.getSailID());
+            ctx.setFont("12px bold Verdana sans-serif");
+            TextMetrics measureText = ctx.measureText(infoText);
             double textWidth = measureText.getWidth();
 
-            canvasWidth = (int) textWidth + 17;
-            infoBoxWidth = canvasWidth;
-            getCanvas().setWidth(String.valueOf(canvasWidth));
-            getCanvas().setCoordinateSpaceWidth(canvasWidth);
-            
-            // Change origin and dimensions to match true size (a stroke makes the shape a bit larger)
-            context2d.setFillStyle(grayTransparentColor);
-            drawRoundedRect(context2d, cornerRadius/2, cornerRadius/2, infoBoxWidth-cornerRadius, infoBoxHeight-cornerRadius, cornerRadius);
-            
-            // this translation is important for drawing lines with a real line width of 1 pixel
-            context2d.translate(-0.5, -0.5);
-            context2d.setStrokeStyle("gray");
-            context2d.setLineWidth(1.0);
-            context2d.beginPath();
-            context2d.moveTo(cornerRadius/2, infoBoxHeight/2);
-            context2d.lineTo(cornerRadius/2, canvasHeight);
-            context2d.stroke(); 
-            context2d.translate(0.0, 0.0);
+            canvasWidth = (int) textWidth + 10 + infoBoxHeight;
+            setCanvasSize(canvasWidth, canvasHeight);
 
-            context2d.beginPath();
-            context2d.setFillStyle("black");
-            context2d.fillText(competitorDTO.getSailID(), 8, 14);
-            context2d.stroke(); 
+            ctx.save();
+            ctx.clearRect(0,  0,  canvasWidth, canvasHeight);
 
-            Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
-            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX(), boatPositionInPx.getY() - canvasHeight);
+            ctx.setLineWidth(1.0);
+            ctx.setFillStyle(grayTransparentColor);
+            if(competitorColor != null) {
+                ctx.setStrokeStyle(competitorColor.getAsHtml());
+            } else {
+                ctx.setStrokeStyle("#888888");
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(0,0);
+            ctx.lineTo(0,101);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(1.0,1.0);
+            ctx.lineTo(canvasWidth,1.0);
+            ctx.lineTo(canvasWidth-infoBoxHeight,infoBoxHeight);
+            ctx.lineTo(1.0,infoBoxHeight);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // show a second measure
+//            ctx.beginPath();
+//            ctx.moveTo(1.0,26.4);
+//            ctx.lineTo(66.2,26.4);
+//            ctx.lineTo(53.1,39.3);
+//            ctx.lineTo(1.0,39.3);
+//            ctx.closePath();
+//            ctx.fill();
+//            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.setFillStyle("black");
+            ctx.fillText(infoText, 8, 14);
+            ctx.stroke();
+
+            ctx.restore();
+            
+            Point objectPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
+            setCanvasPosition(objectPositionInPx.getX(), objectPositionInPx.getY() - canvasHeight);
         }
     }
-    
-	public static void drawRoundedRect(Context2d context, double x, double y, double w, double h, double r) {
-		context.beginPath();
-		context.moveTo(x + r, y);
-		context.lineTo(x + w - r, y);
-		context.quadraticCurveTo(x + w, y, x + w, y + r);
-		context.lineTo(x + w, y + h - r);
-		context.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-		context.lineTo(x + r, y + h);
-		context.quadraticCurveTo(x, y + h, x, y + h - r);
-		context.lineTo(x, y + r);
-		context.quadraticCurveTo(x, y, x + r, y);
-		context.stroke();
-		context.fill();
-	}
-    
-    public GPSFixDTO getBoatFix() {
-        return boatFix;
-    }
 
-    public void setBoatFix(GPSFixDTO boatFix) {
-        this.boatFix = boatFix;
-    }    
+    /**
+     * @param position the new position of the overlay
+     * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
+     */
+
+    public void setPosition(PositionDTO position, long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionAndRotationTransition();
+        } else {
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
+        }
+        this.position = position;
+    }
+    
+    /**
+     * Updates the text to show
+     */
+    public void setInfoText(String infoText) {
+        this.infoText = infoText;
+    }
 }

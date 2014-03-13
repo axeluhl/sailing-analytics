@@ -20,8 +20,7 @@ public abstract class AbstractMongoDBTest {
     
     public AbstractMongoDBTest() throws UnknownHostException, MongoException {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
-        service = MongoDBService.INSTANCE;
-        service.setConfiguration(getDBConfiguration());
+        service = getDBConfiguration().getService();
         mongo = newMongo();
         db = service.getDB();
     }
@@ -31,7 +30,7 @@ public abstract class AbstractMongoDBTest {
     }
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"), dbConfiguration.getPort());
+        return new Mongo(dbConfiguration.getHostName(), dbConfiguration.getPort());
     }
     
     @Before

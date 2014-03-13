@@ -3,72 +3,48 @@
 The following screenshots will help you creating a new Amazon application instance. An application instance is the container for exactly one Java application server. Each instance is configured using so called "user data". This configuration will then be read by the java server.
 
 ## AMI Selection
-In the "Classic Wizard" select "My AMIs"
+In the "Classic Wizard" select "My AMIs" and then select "Sailing Analytics Java Server"
 
 <img src="/wiki/images/amazon/StartInstance1.JPG" width="70%" height="70%"/>
 
-Make sure to select the AMI with the name "App"
+Then select an instance type that matches what you want - be aware of the fact that t1.micro is not suitable for build process.
 
 <img src="/wiki/images/amazon/StartInstance2.JPG" width="70%" height="70%"/>
 
-Select a subnet that matches the one of the database server
+Select a subnet that matches the one of the database server (in most cases this will be eu-west-1c). Leave other options untouched but scroll down to get to the "Advanced Options". There fill the user data field.
 
 <img src="/wiki/images/amazon/StartInstance3.JPG" width="70%" height="70%"/>
 
-Select the correct instance type. Micro also works if you don't want to put that much load on your server.
+Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data" (Advanced Data). Here one example that loads a specific release package.
 
-<img src="/wiki/images/amazon/StartInstance4.JPG" width="70%" height="70%"/>
-
-Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data". This configuration should at least contain `MONGODB_*` and `REPLICATION_*` parameters. Here one example:
+<img src="/wiki/images/amazon/UserDataDetails.JPG" width="70%" height="70%"/>
 
 <pre>
-SERVER_NAME=LIVE1
-MEMORY=1024m
-REPLICATION_HOST=172.31.25.253
-REPLICATION_CHANNEL=sapsailinganalytics-live
-TELNET_PORT=14888
-SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
-MONGODB_PORT=10202
-EXPEDITION_PORT=2010
-REPLICATE_ON_START=False
-REPLICATE_MASTER_SERVLET_HOST=
-REPLICATE_MASTER_SERVLET_PORT=
-REPLICATE_MASTER_QUEUE_HOST=
-REPLICATE_MASTER_QUEUE_PORT=
+INSTALL_FROM_RELEASE=master-201311062138
+USE_ENVIRONMENT=live-server
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 </pre>
 
-It does not really matter which SERVER_PORTS you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port.
+It does not really matter which SERVER_PORT (if you specify one) you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port!
+
+Provide your instance with an useful name.
 
 <img src="/wiki/images/amazon/StartInstance5.JPG" width="70%" height="70%"/>
 
-Use a new interface for your Network. Do not change any other field.
+Make absolutely sure to select the right Security Group. If you do not select the group "Sailing Analytics App" your server won't be able to access any database.
 
 <img src="/wiki/images/amazon/StartInstance6.JPG" width="70%" height="70%"/>
 
-Now make sure to click on the "Edit" button
+Configure the key. Make sure to always use the "Administrator" key.
 
 <img src="/wiki/images/amazon/StartInstance7.JPG" width="70%" height="70%"/>
 
-In order to select "Delete on Termination" for your root volume
-
-<img src="/wiki/images/amazon/StartInstance8.JPG" width="70%" height="70%"/>
-
-Then give your instance a meaningful name by inserting a value for the tag "Name"
-
-<img src="/wiki/images/amazon/StartInstance9.JPG" width="70%" height="70%"/>
-
-Use the existing "Administrator" Key. Do NOT generate your own key - this won't work. In order to access instances you should've got two private keys. If not then contact one of the administrators.
-
-<img src="/wiki/images/amazon/StartInstance10.JPG" width="70%" height="70%"/>
-
-Then select the preconfigured security group "Sailing Analytics App". Do NOT select anything other than that or create your own.
-
-<img src="/wiki/images/amazon/StartInstance11.JPG" width="70%" height="70%"/>
-
-Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costy.
+Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costly.
 
 <img src="/wiki/images/amazon/StartInstance12.JPG" width="70%" height="70%"/>
+
+Should the reachability status check fail, your instance will not be reachable, and the best option is to terminate and re-create that instance. Sorry.
 
 Your application is now ready. Check that everything is green.
 

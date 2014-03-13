@@ -188,3 +188,21 @@ select {
 .paddedPanel {
     padding: 10px;
 }
+
+.gwt-SuggestBoxPopup {
+	text-align: left;
+	cursor: pointer;
+	cursor: hand;
+	border: 1px solid #666;
+	border-top: 0;
+	background-color: #fff;
+	z-index: 999;
+}
+
+.gwt-SuggestBoxPopup .item {
+	border: 1px dotted #aaa;
+}
+
+.gwt-SuggestBoxPopup .item-selected {
+	background-color: #ffc;
+}

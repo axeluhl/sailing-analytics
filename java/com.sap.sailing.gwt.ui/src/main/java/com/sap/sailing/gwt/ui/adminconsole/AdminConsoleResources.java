@@ -34,10 +34,31 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/dice.png")
     ImageResource scoresIcon();
-    
+
+    @Source("com/sap/sailing/gwt/ui/client/images/users.png")
+    ImageResource competitorsIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/blackdot.png")
     ImageResource blackdotIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
     ImageResource reddotIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/arrow_left.png")
+    ImageResource arrowLeft();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/arrow_right.png")
+    ImageResource arrowRight();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/help.png")
+    ImageResource help();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/clock.png")
+    ImageResource clockIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flag_blue.png")
+    ImageResource flagIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
+    ImageResource exportXMLIcon();
 }

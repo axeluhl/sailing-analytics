@@ -3,11 +3,13 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -22,12 +24,17 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -98,6 +105,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
+        logListener = new DynamicTrackedRaceLogListener(this);
+        courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
+        startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
     }
 
     /**
@@ -120,7 +130,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        if (track != null) {
+            track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        }
     }
 
     @Override
@@ -233,6 +245,46 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addListener(RaceChangeListener listener) {
         synchronized (getListeners()) {
             getListeners().add(listener);
+        }
+    }
+
+    /**
+     * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
+     * of the {@link #getWindLoadingLock() wind loading lock}, locking against the wind loading thread which uses the
+     * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
+     * hasn't started yet.
+     */
+    @Override
+    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
+        if (notifyAboutWindFixesAlreadyLoaded) {
+            LockUtil.lockForRead(getWindLoadingLock());
+        }
+        try {
+            addListener(listener);
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                // Now notify all wind fixes we can get from the race by now. TrackedRace.getWindSource() delivers all wind
+                // sources known so far. If there is a wind track being loaded, it will be separately notified later by
+                // DynamicTrackedRaceImpl.createWindTrack(...).
+                // Holding the serialization lock 
+                for (WindSource windSource : getWindSources()) {
+                    if (windSource.getType().canBeStored()) {
+                        WindTrack windTrack = getOrCreateWindTrack(windSource);
+                        // replicate all wind fixed that may have been loaded by the wind store
+                        windTrack.lockForRead();
+                        try {
+                            for (Wind wind : windTrack.getRawFixes()) {
+                                listener.windDataReceived(wind, windSource);
+                            }
+                        } finally {
+                            windTrack.unlockAfterRead();
+                        }
+                    }
+                }
+            }
+        } finally {
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                LockUtil.unlockAfterRead(getWindLoadingLock());
+            }
         }
     }
 
@@ -572,15 +624,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the super class implementation, notifies all race listeners registered with this tracked
-     * race using their {@link RaceChangeListener#windDataReceived(Wind, WindSource)} method. In particular this
-     * replicates all wind fixes that may have been loaded from the wind store for the new track.
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
+     * call, all listeners are notified about these existing wind fixes using their
+     * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
+     * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
-            // replicate all wind fixed that may have been loaded by the wind store
+            // replicate all wind fixes that may have been loaded by the wind store
             result.lockForRead();
             try {
                 for (Wind wind : result.getRawFixes()) {
@@ -594,22 +647,26 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource) {
+        final boolean result;
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfRace = getStartOfRace();
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
+        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
             &&
         (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
-            getOrCreateWindTrack(windSource).add(wind);
+            result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
+        } else {
+            result = false;
         }
+        return result;
     }
 
     @Override
@@ -724,5 +781,81 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
+    /**
+     * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
+     */
+    @Override
+    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
+        Bearing result = null;
+        PassingInstruction instruction = w.getPassingInstructions();
+        if (instruction == PassingInstruction.None || instruction == null) {
+            if (w.equals(getRace().getCourse().getFirstWaypoint()) || w.equals(getRace().getCourse().getLastWaypoint())) {
+                instruction = PassingInstruction.Line;
+            } else {
+                int numberofMarks = 0;
+                Iterator<Mark> it = w.getMarks().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    numberofMarks++;
+                }
+                if (numberofMarks == 2) {
+                    instruction = PassingInstruction.Gate;
+                } else if (numberofMarks == 1) {
+                    instruction = PassingInstruction.Port;
+                }
+            }
+        }
+        if (instruction == PassingInstruction.FixedBearing) {
+            result = w.getFixedBearing();
+        } else if (instruction == PassingInstruction.Gate || instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard) {
+            Bearing before = getTrackedLegFinishingAt(w).getLegBearing(t);
+            Bearing after = getTrackedLegStartingAt(w).getLegBearing(t);
+            if (before != null && after != null) {
+                result = before.middle(after.reverse());
+            }
+        } else if (instruction == PassingInstruction.Line) {
+            Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
+            if (pos.getA() != null && pos.getB() != null) {
+                Position portPosition = getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
+                Position starboardPosition = getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
+                if (portPosition != null && starboardPosition != null) {
+                    result = portPosition.getBearingGreatCircle(starboardPosition);
+                }
+            }
+        } else if (instruction == PassingInstruction.Offset) {
+            // TODO Bug 1712
+        }
+        return result;
+    }
 
+    @Override
+    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
+        List<Position> markPositions = new ArrayList<Position>();
+        for (Mark lineMark : w.getMarks()) {
+            final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
+            false);
+            if (estimatedMarkPosition == null) {
+                return new Pair<Mark, Mark>(null,null);
+            }
+            markPositions.add(estimatedMarkPosition);
+        }
+        final List<Leg> legs = getRace().getCourse().getLegs();
+        final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(w);
+        final boolean isStartLine = indexOfWaypoint == 0;
+        final Bearing legDeterminingDirectionBearing = getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
+        if (legDeterminingDirectionBearing == null) {
+            return new Pair<Mark, Mark>(null, null);
+        }
+        Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1), legDeterminingDirectionBearing);
+        final Mark starboardMarkWhileApproachingLine;
+        final Mark portMarkWhileApproachingLine;
+        if (crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint.getMeters() < 0) {
+            portMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
+            starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
+        } else {
+            portMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
+            starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
+        }
+        return new Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+    }
 }

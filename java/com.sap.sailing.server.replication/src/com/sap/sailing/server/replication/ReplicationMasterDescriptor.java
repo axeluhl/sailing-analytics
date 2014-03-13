@@ -38,4 +38,6 @@ public interface ReplicationMasterDescriptor {
     String getExchangeName();
 
     void stopConnection();
+
+    String getMessagingHostname();
 }

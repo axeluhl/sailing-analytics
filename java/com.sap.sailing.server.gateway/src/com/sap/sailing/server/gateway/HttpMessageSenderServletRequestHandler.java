@@ -9,6 +9,8 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.framework.BundleContext;
+
 import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.server.RacingEventService;
@@ -31,6 +33,10 @@ public abstract class HttpMessageSenderServletRequestHandler {
     public HttpMessageSenderServletRequestHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
         this.owner = owner;
         this.writer = resp.getWriter();
+    }
+    
+    protected BundleContext getContext() {
+        return owner.getContext();
     }
     
     protected RacingEventService getService() {

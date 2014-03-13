@@ -15,6 +15,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>RCConfiguration</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.ConfigurationJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCConfiguration</servlet-name>
+		<url-pattern>/rc/configuration</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>RaceGroups</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RaceGroupJsonExportServlet</servlet-class>
 	</servlet>
@@ -169,6 +178,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>WindImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindImportServlet</servlet-name>
+		<url-pattern>/expedition-import</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>
@@ -176,16 +194,15 @@
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<url-pattern>/expeditionWindStatus</url-pattern>
 	</servlet-mapping>
-		
+			
 	<servlet>
-		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.MasterDataByLeaderboardGroupJsonGetServlet</servlet-class>
+		<servlet-name>WindStatusServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
-		<url-pattern>/masterdata/leaderboardgroups</url-pattern>
+		<servlet-name>WindStatusServlet</servlet-name>
+		<url-pattern>/windStatus</url-pattern>
 	</servlet-mapping>
-			
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.TrackFilesExportPostServlet</servlet-class>
@@ -218,7 +235,6 @@
     	<servlet-name>Jersey REST API</servlet-name>
     	<url-pattern>/api/*</url-pattern>
   	</servlet-mapping>
-
 	<servlet>
     	<servlet-name>Jersey REST SPI</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
@@ -232,5 +248,4 @@
     	<servlet-name>Jersey REST SPI</servlet-name>
     	<url-pattern>/spi/*</url-pattern>
   	</servlet-mapping>
-  	
  </web-app>

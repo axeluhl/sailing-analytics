@@ -36,7 +36,7 @@ public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRace
 
         JSONObject result = super.serialize(finishPositioningListEvent);
         
-        result.put(FIELD_POSITIONED_COMPETITORS, serializePositionedCompetitors(finishPositioningListEvent.getPositionedCompetitors()));
+        result.put(FIELD_POSITIONED_COMPETITORS, serializePositionedCompetitors(finishPositioningListEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
 
         return result;
     }

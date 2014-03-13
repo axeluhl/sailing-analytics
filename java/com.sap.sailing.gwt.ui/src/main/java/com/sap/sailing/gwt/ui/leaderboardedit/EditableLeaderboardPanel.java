@@ -55,17 +55,19 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -82,6 +84,19 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
+    
+    private class SettingsClickHandler implements ClickHandler {
+        private final StringMessages stringMessages;
+
+        private SettingsClickHandler(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            new SettingsDialog<LeaderboardSettings>(EditableLeaderboardPanel.this, stringMessages).show();
+        }
+    }
 
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
@@ -360,6 +375,35 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             return reasonForMaxPoints == null ? "" : reasonForMaxPoints.name();
         }
     }
+    
+    private class UncorrectedNetPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected UncorrectedNetPointsViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            String result = "";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsUncorrected != null) {
+                result="("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
+            }
+            return result;
+        }
+    }
 
     private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell netPointsEditCell;
@@ -557,8 +601,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
-                /* showMetaLeaderboardsOnSamePage */ false),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
@@ -585,6 +628,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 });
             }
         });
+        
+        
 
         Grid scoreCorrectionInfoGrid = new Grid(3,3);
         scoreCorrectionInfoGrid.setCellPadding(3);
@@ -633,6 +678,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
         getContentPanel().add(new Label(getStringMessages().suppressedCompetitors()+":"));
         getContentPanel().add(suppressedCompetitorsTable);
+
+        // add a dedicated settings button that allows users to remove columns if needed; the settings
+        // button has disappeared as the LeaderboardPanel switched to the use of the more general Component
+        // framework with its own handling of component and settings visibility
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(getSettingsIcon()).getSafeHtml());
+        settingsAnchor.setTitle(stringMessages.settings());
+        settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
+        getRefreshAndSettingsPanel().add(settingsAnchor);
+
     }
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
@@ -670,7 +724,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     public void onSuccess(Void result) {
                         Window.setStatus("Successfully unsuppressed competitor "+object.getName());
                         // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                        timeChanged(getLeaderboardDisplayDate());
+                        timeChanged(getLeaderboardDisplayDate(), null);
                     }
                 });
             }
@@ -742,7 +796,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             @Override
                             public void onSuccess(Void result) {
                                 // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                                timeChanged(getLeaderboardDisplayDate());
+                                timeChanged(getLeaderboardDisplayDate(), null);
                             }
                         });
                     }
@@ -824,6 +878,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(maxPointsDropDownCellProvider);
         final NetPointsEditCellProvider netPointsEditCellProvider = new NetPointsEditCellProvider(race.getRaceColumnName());
         list.add(netPointsEditCellProvider);
+        final UncorrectedNetPointsViewProvider uncorrectedViewProvider = new UncorrectedNetPointsViewProvider(race.getRaceColumnName());
+        list.add(uncorrectedViewProvider);
         list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;

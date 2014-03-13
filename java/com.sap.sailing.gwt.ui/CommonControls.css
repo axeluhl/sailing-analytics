@@ -372,6 +372,18 @@ body ::-webkit-scrollbar-track {
 .timePanel-controls-time .dateLabel,
 .timePanel-controls-time .timeLabel {
     padding: 4px 20px 0 0;
+    float:left;
+}
+
+.timePanel-controls-timeToStart {
+    float:left;
+    padding: 0 0 0 0;
+    border-left: 1px solid #fcbb22;
+}
+
+.timePanel-controls-timeToStart .timeToStartLabel {
+    float:left;
+	padding: 4px 20px 0 20px;
 }
 
 .timePanel-controls-timeDelay {

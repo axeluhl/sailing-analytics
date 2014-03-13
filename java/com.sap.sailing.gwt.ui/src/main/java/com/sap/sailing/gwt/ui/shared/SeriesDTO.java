@@ -14,19 +14,28 @@ public class SeriesDTO extends NamedDTO {
     private int[] discardThresholds;
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
+    private boolean hasSplitFleetContiguousScoring;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal,
+            int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
+            boolean hasSplitFleetContiguousScoring) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
         this.startsWithZeroScore = startsWithZeroScore;
+        this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
     
+    
+    public boolean hasSplitFleetContiguousScoring() {
+        return hasSplitFleetContiguousScoring;
+    }
+
     public boolean isMedal() {
         return isMedal;
     }
@@ -82,5 +91,9 @@ public class SeriesDTO extends NamedDTO {
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
+    }
+
+    public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
+        this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
     }
 }

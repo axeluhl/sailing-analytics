@@ -13,6 +13,10 @@ public interface Bearing extends Serializable {
      */
     Bearing reverse();
     
+    /**
+     * Adds the bearing <code>diff</code> to this bearing and returns the new result. The result will be between 0 and 360 (inclusive) if
+     * this bearing and <code>diff</code> are also within 0 and 360.
+     */
     Bearing add(Bearing diff);
     
     /**

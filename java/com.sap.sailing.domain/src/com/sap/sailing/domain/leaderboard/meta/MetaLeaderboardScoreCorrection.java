@@ -6,18 +6,15 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 
 public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
     private static final long serialVersionUID = 3773423384260065869L;
-    private AbstractMetaLeaderboard metaLeaderboard;
 
-    public MetaLeaderboardScoreCorrection() {
-    }
-    
-    protected void setMetaLeaderboard(AbstractMetaLeaderboard metaLeaderboard) {
-        this.metaLeaderboard = metaLeaderboard;
+    public MetaLeaderboardScoreCorrection(MetaLeaderboard leaderboard) {
+        super(leaderboard);
     }
     
     @Override
@@ -43,11 +40,16 @@ public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
             MaxPointsReason newMaxPointsReason) {
         super.notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
     }
+    
+    @Override
+    protected MetaLeaderboard getLeaderboard() {
+        return (MetaLeaderboard) super.getLeaderboard();
+    }
 
     @Override
     public TimePoint getTimePointOfLastCorrectionsValidity() {
         TimePoint result = super.getTimePointOfLastCorrectionsValidity();
-        for (Leaderboard leaderboard : metaLeaderboard.getLeaderboards()) {
+        for (Leaderboard leaderboard : getLeaderboard().getLeaderboards()) {
             TimePoint leaderboardLastCorrectionTimePoint = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
             if (result == null || (leaderboardLastCorrectionTimePoint != null && leaderboardLastCorrectionTimePoint.after(result))) {
                 result = leaderboardLastCorrectionTimePoint;

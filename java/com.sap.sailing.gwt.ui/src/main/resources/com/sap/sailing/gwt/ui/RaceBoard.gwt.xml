@@ -15,14 +15,19 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../RaceBoard.css" />
+
   <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
+  <inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  <inherits name='com.google.gwt.maps.Maps' />
   
   <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
+  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.raceboard.RaceBoardEntryPoint'/>

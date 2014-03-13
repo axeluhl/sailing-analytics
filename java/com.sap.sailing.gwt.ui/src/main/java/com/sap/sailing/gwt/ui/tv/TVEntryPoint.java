@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
 
 public class TVEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
@@ -44,8 +44,8 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
-        raceboardViewConfig = new RaceBoardViewConfiguration(RaceBoardViewConfiguration.ViewModes.ONESCREEN,
-                activeCompetitorsFilterSetName, showLeaderboard, showWindChart, showCompetitorsChart, /* canReplayWhileLiveIsPossible */ false, autoSelectMedia);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName,
+                showLeaderboard, showWindChart, showCompetitorsChart, /* canReplayWhileLiveIsPossible */ false, autoSelectMedia);
 
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override

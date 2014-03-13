@@ -1,8 +1,10 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-
 import android.content.Context;
+
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 
 /**
  * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.
@@ -10,18 +12,23 @@ import android.content.Context;
 public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
+        DataStore dataStore = InMemoryDataStore.INSTANCE;
         if (AppConstants.IS_DATA_OFFLINE) {
-            return new OfflineDataManager(context, InMemoryDataStore.INSTANCE);
+            return new OfflineDataManager(context, dataStore, dataStore.getDomainFactory());
         }
-        return new OnlineDataManager(context, InMemoryDataStore.INSTANCE);
+        return new OnlineDataManager(context, dataStore, dataStore.getDomainFactory());
     }
 
-    protected Context context;
-    protected DataStore dataStore;
+    protected final AppPreferences preferences;
+    protected final Context context;
+    protected final DataStore dataStore;
+    protected final SharedDomainFactory domainFactory;
 
-    public DataManager(Context context, DataStore dataStore) {
+    protected DataManager(Context context, DataStore dataStore, SharedDomainFactory domainFactory) {
         this.context = context;
         this.dataStore = dataStore;
+        this.domainFactory = domainFactory;
+        this.preferences = AppPreferences.on(context);
     }
 
     public DataStore getDataStore() {

@@ -2,13 +2,29 @@
 
 . `pwd`/env.sh
 
-TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
-if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
-        echo "Could not find server on telnet port $TELNET_PORT. Perhaps server is not running?"
-        exit
+if [[ `uname` != "Darwin" ]]; then
+    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
+else
+    TELNET_ACTIVE=`netstat -an 2>/dev/null | grep ".$TELNET_PORT"`
 fi
 
-NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
-echo -n exit | $NC_CMD > /dev/null
+if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
+        echo "Could not find server on telnet port $TELNET_PORT. Perhaps server is not running?"
+        if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+            echo "Stopped" | mail -s "Server $SERVER_NAME could not be stopped!" $SERVER_STARTUP_NOTIFY
+        fi
+else
+    NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
+    echo -n exit | $NC_CMD > /dev/null
 
-echo "Stopped server $SERVER_NAME"
+    echo "Stopped server $SERVER_NAME"
+    if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+        echo "OK" | mail -s "Server $SERVER_NAME stopped successfully!" $SERVER_STARTUP_NOTIFY
+    fi
+fi
+
+# make really sure to kill server
+echo "Making sure to stop server by its PID"
+kill `cat server.pid`
+sleep 5
+rm server.pid

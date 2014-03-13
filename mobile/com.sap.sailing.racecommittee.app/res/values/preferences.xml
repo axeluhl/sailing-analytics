@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    
+    <string name="preference_identifier_key">identifierPreference</string>
+    <string name="preference_sync_key">syncConnectionPreference</string>
+    <string name="preference_update_key">forceUpdatePreference</string>
+
+    <string name="preference_language_key">languagePref</string>
+    <string name="preference_server_url_key">webserviceUrlPref</string>
+    <string name="preference_server_url_default">http://ess40-2014.sapsailing.com/</string>
+    <string name="preference_course_areas_key">courseAreasPref</string>
+    <string-array name="preference_course_areas_default">
+        <item>Alpha</item>
+        <item>Stadium</item>
+    </string-array>
+    <string-array name="preference_course_areas_example">
+        <item>Alpha</item>
+        <item>Bravo</item>
+        <item>Charly</item>
+        <item>Stadion</item>
+        <item>Offshore</item>
+    </string-array>
+
+    <string name="preference_mail_key">mailRecipientPreference</string>
+    <string name="preference_mail_default">lukas.niemeier@sap.com</string>
+    
+    <string name="preference_polling_active_key">pollingActivePreference</string>
+    <bool name="preference_polling_active_default">true</bool>
+    <string name="preference_polling_interval_key">pollingIntervalPreference</string>
+    <integer name="preference_polling_interval_default">120</integer>
+
+    <string name="preference_racing_procedure_override_key">defaultRacingProcedureType</string>
+    <string name="preference_racing_procedure_override_default">RRS26</string>
+
+    <string name="preference_course_designer_override_key">defaultCourseDesignerType</string>
+    <string name="preference_course_designer_override_default">BY_NAME</string>
+    
+    <string name="preference_course_designer_by_name_course_names_key">courseDesignerByNameCourseNames</string>
+    <string-array name="preference_course_designer_by_name_course_names_default">
+        <item>O2</item>
+        <item>I2</item>
+        <item>O3</item>
+    </string-array>
+    <string-array name="preference_course_designer_by_name_course_names_example">
+        <item>O1</item>
+        <item>O2</item>
+        <item>O3</item>
+        <item>I1</item>
+        <item>I2</item>
+        <item>I3</item>
+    </string-array>
+
+    <string name="preference_racing_procedure_classflag_default">CLASS</string>
+    <string name="preference_racing_procedure_rrs26_classflag_key">rrs26ClassFlag</string>
+    <string name="preference_racing_procedure_rrs26_hasxray_key">rrs26IndividualRecall</string>
+    <bool name="preference_racing_procedure_rrs26_hasxray_default">true</bool>
+    <string name="preference_racing_procedure_rrs26_startmode_flags_key">rrs26StartmodeFlags</string>
+    <string-array name="preference_racing_procedure_rrs26_startmode_flags_default">
+        <item>PAPA</item>
+        <item>INDIA</item>
+        <item>BLACK</item>
+        <item>ZULU</item>
+    </string-array>
+    <string name="preference_racing_procedure_gatestart_classflag_key">gateStartClassFlag</string>
+    <string name="preference_racing_procedure_gatestart_hasxray_key">gateStartIndividualRecall</string>
+    <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_key">gateStartPathfinder</string>
+    <bool name="preference_racing_procedure_gatestart_haspathfinder_default">true</bool>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key">gateStartHasAdditionalGolfDownTime</string>
+    <bool name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default">true</bool>
+	<string name="preference_racing_procedure_ess_classflag_key">essClassFlag</string>
+    <string name="preference_racing_procedure_ess_hasxray_key">essIndividualRecall</string>
+    <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>
+	<string name="preference_racing_procedure_basic_classflag_key">basicClassFlag</string>
+    <string name="preference_racing_procedure_basic_hasxray_key">basicIndividualRecall</string>
+    <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
+    
+    <string name="preference_regatta_specific_save_key">basicIndividualRecall</string>
+</resources>

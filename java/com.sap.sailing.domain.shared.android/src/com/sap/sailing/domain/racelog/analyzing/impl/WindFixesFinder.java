@@ -15,7 +15,7 @@ public class WindFixesFinder extends RaceLogAnalyzer<List<Wind>> {
     }
 
     @Override
-    protected List<Wind> performAnalyzation() {
+    protected List<Wind> performAnalysis() {
         final List<Wind> windFixes = new ArrayList<Wind>();
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogWindFixEvent) {

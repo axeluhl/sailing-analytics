@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
@@ -17,19 +19,25 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     private CharSequence[] loginTypeDescriptions;
     private LoginType selectedLoginType;
-
+    private RaceLogEventAuthor author;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loginTypeDescriptions = new CharSequence[2];
-        loginTypeDescriptions[0] = getString(R.string.login_type_officer);
-        loginTypeDescriptions[1] = getString(R.string.login_type_viewer);
+        loginTypeDescriptions = new CharSequence[] { getString(R.string.login_type_officer_on_start_vessel),
+                                                     getString(R.string.login_type_officer_on_finish_vessel),
+                                                     getString(R.string.login_type_shore_control),
+                                                     getString(R.string.login_type_viewer) };
         selectedLoginType = DefaultLoginType;
     }
 
     public LoginType getSelectedLoginType() {
         return selectedLoginType;
+    }
+    
+    public RaceLogEventAuthor getAuthor() {
+        return author;
     }
 
     @Override
@@ -50,11 +58,22 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
                 .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
+                        // see loginTypeDescriptions for the indices of the login types
                         case 0:
                             selectedLoginType = LoginType.OFFICER;
+                            author = new RaceLogEventAuthorImpl("Race Officer on Start Vessel", 0);
                             break;
                         case 1:
+                            selectedLoginType = LoginType.OFFICER;
+                            author = new RaceLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+                            break;
+                        case 2:
+                            selectedLoginType = LoginType.OFFICER;
+                            author = new RaceLogEventAuthorImpl("Shore Control", 2);
+                            break;
+                        case 3:
                             selectedLoginType = LoginType.VIEWER;
+                            author = new RaceLogEventAuthorImpl("Viewer", 3);
                             break;
                         default:
                             selectedLoginType = LoginType.NONE;

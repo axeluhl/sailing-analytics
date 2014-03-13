@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -178,12 +181,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         return competitorsFromBestToWorst.indexOf(competitor) + 1;
-    }
-
-    @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -352,6 +349,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public void addListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -534,6 +537,17 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         // TODO Auto-generated method stub
         
@@ -541,6 +555,42 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public TimePoint getStartTimeReceived() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public LineDetails getStartLine(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public LineDetails getFinishLine(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getCourseLength() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

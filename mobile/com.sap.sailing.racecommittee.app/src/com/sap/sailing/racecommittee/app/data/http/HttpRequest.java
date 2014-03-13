@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -20,7 +21,7 @@ public abstract class HttpRequest {
     private final static int lowestOkCode = HttpStatus.SC_OK;
     private final static int lowestRedirectCode = HttpStatus.SC_MULTIPLE_CHOICES;
 
-    private static void validateHttpResponse(HttpURLConnection connection) throws IOException {
+    private static void validateHttpResponseCode(HttpURLConnection connection) throws IOException {
         int statusCode = connection.getResponseCode();
         if (statusCode != -1) {
             if (statusCode >= lowestOkCode && statusCode < lowestRedirectCode) {
@@ -31,47 +32,107 @@ public abstract class HttpRequest {
         throw new IOException(String.format("Request response had no valid status."));
     }
 
-    private URL url;
+    public interface HttpRequestProgressListener {
+        void onHttpProgress(float progress);
+    }
+
+    private final HttpRequestProgressListener listener;
+    private final URL url;
+    private boolean isCancelled;
 
     public HttpRequest(URL url) {
-        this.url = url;
+        this(url, null);
     }
-    
-    protected abstract BufferedInputStream execute(HttpURLConnection connection) throws IOException;
 
-    public InputStream execute() throws Exception {
+    public HttpRequest(URL url, HttpRequestProgressListener listener) {
+        this.url = url;
+        this.listener = listener;
+        this.isCancelled = false;
+    }
+
+    public boolean isCancelled() {
+        return isCancelled;
+    }
+
+    public void cancel() {
+        this.isCancelled = true;
+    }
+
+    /**
+     * Returns a copied {@link InputStream} of the server's response.
+     * You must close this stream when done.
+     */
+    public InputStream execute() throws IOException {
         ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
-        
+
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(15000);
         connection.setRequestProperty("connection", "close");
 
-        BufferedInputStream stream = null;
+        BufferedInputStream responseInputStream = null;
         try {
-            stream = execute(connection);
-        } catch (FileNotFoundException fnfe) {
-            throw new FileNotFoundException(String.format("(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.",
-                    this.hashCode(), fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
-        }
+            try {
+                responseInputStream = doRequest(connection);
+            } catch (FileNotFoundException fnfe) {
+                // 404 errors...
+                throw new FileNotFoundException(String.format(
+                        "(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.", this.hashCode(),
+                        fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
+            }
 
-        validateHttpResponse(connection);
-        byte[] streamData = copyStream(stream);
-        connection.disconnect();
-        
-        ExLog.i(TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
-        return new ByteArrayInputStream(streamData);
+            validateHttpResponseCode(connection);
+
+            InputStream copiedResponseInputStream = readAndCopyResponse(connection, responseInputStream);
+            
+            if (copiedResponseInputStream != null) {
+                ExLog.i(TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
+            } else {
+                ExLog.i(TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
+            }
+            
+            connection.disconnect();
+            return copiedResponseInputStream;
+        } catch (IOException e) {
+            ExLog.i(TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
+            throw e;
+        } finally {
+            if (responseInputStream != null) {
+                responseInputStream.close();
+            }
+        }
     }
 
-    private byte[] copyStream(BufferedInputStream stream) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int len;
-        byte[] buffer = new byte[4096];
-        while ((len = stream.read(buffer)) != -1) {
-          bos.write(buffer, 0, len);
+    protected InputStream readAndCopyResponse(HttpURLConnection connection, BufferedInputStream inputStream)
+            throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        if (!readResponse(connection, inputStream, outputStream)) {
+            return null;
         }
-        return bos.toByteArray();
+        return new ByteArrayInputStream(outputStream.toByteArray());
     }
+
+    protected boolean readResponse(HttpURLConnection connection, BufferedInputStream inputStream,
+            OutputStream outputStream) throws IOException {
+        int fileLength = connection.getContentLength();
+        byte data[] = new byte[4096];
+        long total = 0;
+        int count;
+        while ((count = inputStream.read(data)) != -1) {
+            if (isCancelled()) {
+                return false;
+            }
+            total += count;
+            // publishing the progress....
+            if (fileLength > 0 && listener != null) {
+                listener.onHttpProgress(total / (float) fileLength);
+            }
+            outputStream.write(data, 0, count);
+        }
+        return true;
+    }
+
+    protected abstract BufferedInputStream doRequest(HttpURLConnection connection) throws IOException;
 
 }

@@ -3,18 +3,37 @@
 # source variables
 . `pwd`/env.sh
 
-TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
-if [[ $TELNET_ACTIVE != "" ]]; then
-    echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"
-    echo "Configuration for this server is:"
-    echo "SERVER_NAME: $SERVER_NAME"
-    echo "SERVER_PORT: $SERVER_PORT"
-    echo "MEMORY: $MEMORY"
-    echo "TELNET_PORT: $TELNET_PORT"
-    echo "MONGODB_PORT: $MONGODB_PORT"
-    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
-    exit
+echo "Configuration for this server is:"
+echo ""
+echo "SERVER_NAME: $SERVER_NAME"
+echo "MEMORY: $MEMORY"
+echo "SERVER_PORT: $SERVER_PORT"
+echo "TELNET_PORT: $TELNET_PORT"
+echo "MONGODB_HOST: $MONGODB_HOST"
+echo "MONGODB_PORT: $MONGODB_PORT"
+echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+echo "REPLICATION_HOST: $REPLICATION_HOST"
+echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS"
+echo ""
+echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+echo "DEPLOY_TO: $DEPLOY_TO"
+echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+echo ""
+echo "JAVA_HOME: $JAVA_HOME"
+echo "INSTANCE_ID: $INSTANCE_ID"
+echo ""
+
+if [[ `uname` != "Darwin" ]]; then
+    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+else
+    TELNET_ACTIVE=`netstat -an 2>/dev/null | grep ".$SERVER_PORT"`
 fi
 
-echo "Server $SERVER_NAME is not running."
+if [[ $TELNET_ACTIVE != "" ]]; then
+    echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"
+else
+    echo "Server $SERVER_NAME is not running."
+fi
+

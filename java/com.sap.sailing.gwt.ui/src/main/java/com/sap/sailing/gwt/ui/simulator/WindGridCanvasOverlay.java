@@ -16,15 +16,13 @@ import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.overlay.Overlay;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
 
@@ -36,15 +34,15 @@ import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
  * 
  */
 public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
-    /* The wind field that is to be displayed in the overlay */
-    protected WindFieldDTO wl;
-    /*
+    /** The wind field that is to be displayed in the overlay */
+    private WindFieldDTO windFieldDTO;
+    
+    /**
      * Map containing the windfield for easy retrieval with key as time point.
      */
-    protected SortedMap<Long, List<SimulatorWindDTO>> timePointWindDTOMap;
+    private SortedMap<Long, List<SimulatorWindDTO>> timePointWindDTOMap;
 
-    protected final Timer timer;
-    protected WindFieldGenParamsDTO windParams = null;
+    private final Timer timer;
 
     private int xRes;
     private int yRes;
@@ -72,55 +70,43 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     private class SortByWindSpeed implements Comparator<SimulatorWindDTO> {
-
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
             return Double.compare(w1.trueWindSpeedInKnots, w2.trueWindSpeedInKnots);
         }
-
     }
 
     private class SortByLatitude implements Comparator<SimulatorWindDTO> {
-
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
             return Double.compare(w1.position.latDeg, w2.position.latDeg);
         }
-
     }
 
     private class SortByLongitude implements Comparator<SimulatorWindDTO> {
-
         @Override
         public int compare(final SimulatorWindDTO w1, final SimulatorWindDTO w2) {
             return Double.compare(w1.position.lngDeg, w2.position.lngDeg);
         }
-
     }
 
-    public WindGridCanvasOverlay(final Timer timer, WindFieldGenParamsDTO windParams, final int xRes, final int yRes) {
-        super();
+    public WindGridCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final int xRes, final int yRes) {
+        super(map, zIndex);
         this.timer = timer;
-        this.windParams = windParams;
         this.xRes = xRes;
         this.yRes = yRes;
-        init();
-    }
 
-    public WindGridCanvasOverlay() {
-        super();
-        this.timer = null;
-        init();
-    }
-
-    private void init() {
-        wl = null;
+        windFieldDTO = null;
         timePointWindDTOMap = new TreeMap<Long, List<SimulatorWindDTO>>();
         colorPalette = null;
     }
 
+    public WindGridCanvasOverlay(MapWidget map, int zIndex) {
+        this(map, zIndex, null, 0, 0);
+    }
+
     public void setWindField(final WindFieldDTO wl) {
-        this.wl = wl;
+        this.windFieldDTO = wl;
 
         timePointWindDTOMap.clear();
         if (wl != null) {
@@ -150,39 +136,37 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                 windDTOToDraw = headMap.get(headMap.lastKey());
                 createPositionGrid(windDTOToDraw);
             }
-
         }
     }
 
     @Override
-    protected void initialize(final MapWidget map) {
-        super.initialize(map);
+    public void addToMap() {
+        super.addToMap();
 
         if (timer != null) {
-            this.timer.addTimeListener(this);
+            timer.addTimeListener(this);
         }
-        setVisible(true);
     }
 
     @Override
-    protected void remove() {
-        setVisible(false);
+    public void removeFromMap() {
+        super.removeFromMap();
+        
         if (timer != null) {
-            this.timer.removeTimeListener(this);
+            timer.removeTimeListener(this);
         }
-        super.remove();
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
         List<SimulatorWindDTO> windDTOToDraw = new ArrayList<SimulatorWindDTO>();
 
-        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime() + 1));
+        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(newTime.getTime() + 1));
 
         if (!headMap.isEmpty()) {
             windDTOToDraw = headMap.get(headMap.lastKey());
         }
-        logger.info("In WindGridCanvasOverlay.timeChanged drawing " + windDTOToDraw.size() + " points" + " @ " + date);
+        logger.info("In WindGridCanvasOverlay.timeChanged drawing " + windDTOToDraw.size() + " points" + " @ " + newTime);
 
         drawWindGrid(windDTOToDraw);
     }
@@ -200,19 +184,12 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    protected Overlay copy() {
-        return new WindFieldCanvasOverlay(this.timer, windParams);
-    }
-
-    @Override
-    protected void redraw(final boolean force) {
-        super.redraw(force);
-        if (wl != null) {
+    protected void draw() {
+        super.draw();
+        if (mapProjection != null && windFieldDTO != null) {
             clear();
-
             drawWindGrid();
         }
-
     }
 
     private void clear() {
@@ -223,10 +200,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     protected void drawWindGrid() {
 
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
 
         } else {
-            drawWindGrid(wl.getMatrix());
+            drawWindGrid(windFieldDTO.getMatrix());
         }
 
     }
@@ -263,10 +240,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
             final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
-            final Point canvasPositionInPx1 = getMap().convertLatLngToDivPixel(positionLatLng1);
+            final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
             final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
-            final Point canvasPositionInPx2 = getMap().convertLatLngToDivPixel(positionLatLng2);
+            final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getX() - canvasPositionInPx1.getX();
         }
@@ -288,10 +265,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SimulatorWindDTO windDTO2 = windDTOList.get(1);
 
             final LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg, windDTO1.position.lngDeg);
-            final Point canvasPositionInPx1 = getMap().convertLatLngToDivPixel(positionLatLng1);
+            final Point canvasPositionInPx1 = mapProjection.fromLatLngToDivPixel(positionLatLng1);
 
             final LatLng positionLatLng2 = LatLng.newInstance(windDTO2.position.latDeg, windDTO2.position.lngDeg);
-            final Point canvasPositionInPx2 = getMap().convertLatLngToDivPixel(positionLatLng2);
+            final Point canvasPositionInPx2 = mapProjection.fromLatLngToDivPixel(positionLatLng2);
 
             return canvasPositionInPx2.getY() - canvasPositionInPx1.getY();
         }
@@ -435,16 +412,16 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private void drawGridCell(final GridCell cell) {
 
         LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.latDeg, cell.bottomLeft.lngDeg);
-        final Point blPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        final Point blPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         positionLatLng = LatLng.newInstance(cell.bottomRight.latDeg, cell.bottomRight.lngDeg);
-        final Point brPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        final Point brPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         positionLatLng = LatLng.newInstance(cell.topLeft.latDeg, cell.topLeft.lngDeg);
-        final Point tlPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        final Point tlPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         positionLatLng = LatLng.newInstance(cell.topRight.latDeg, cell.topRight.lngDeg);
-        final Point trPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        final Point trPoint = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         /*
          * Uncomment to see the center of the grid for debug drawCircle(blPoint.getX()-this.getWidgetPosLeft(),

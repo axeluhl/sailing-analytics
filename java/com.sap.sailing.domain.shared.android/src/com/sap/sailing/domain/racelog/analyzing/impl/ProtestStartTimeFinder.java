@@ -12,7 +12,7 @@ public class ProtestStartTimeFinder extends RaceLogAnalyzer<TimePoint> {
     }
 
     @Override
-    protected TimePoint performAnalyzation() {
+    protected TimePoint performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogProtestStartTimeEvent) {
                 return ((RaceLogProtestStartTimeEvent) event).getProtestStartTime();
