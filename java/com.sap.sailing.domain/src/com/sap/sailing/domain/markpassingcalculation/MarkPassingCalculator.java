@@ -115,7 +115,6 @@ public class MarkPassingCalculator {
         }
 
         private void updateWaypoints(List<Waypoint> newWaypoints, List<Waypoint> removedWaypoints) {
-            // TODO Can probably run in parallel
             Map<Competitor, Iterable<Candidate>> addedCandidates = finder.addWaypoints(newWaypoints);
             Map<Competitor, Iterable<Candidate>> removedCandidates = finder.removeWaypoints(removedWaypoints);
             chooser.removeWaypoints(removedWaypoints);

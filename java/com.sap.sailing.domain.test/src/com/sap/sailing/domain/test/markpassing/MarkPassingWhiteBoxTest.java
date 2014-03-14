@@ -10,6 +10,10 @@ import java.util.NavigableSet;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -184,5 +188,114 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         cans = finder.getCandidateDeltas(ben, fixes);
         Candidate behind = Util.get(cans.getA(), 0);
         assertTrue(behind.getProbability() > inFront.getProbability());
+    }
+
+    @Test
+    public void fixAndUnfixMarkPassing() {
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(11000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                340)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000396, -0.000602), new MillisecondsTimePoint(35000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                315)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000164, -0.000012), new MillisecondsTimePoint(60000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                90)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000402, 0.00043), new MillisecondsTimePoint(85000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                135)));
+        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(115000), new KnotSpeedWithBearingImpl(5,
+                new DegreeBearingImpl(90)));
+
+        race.recordFix(tom, fix1);
+        race.recordFix(tom, fix2);
+        race.recordFix(tom, fix3);
+        race.recordFix(tom, fix4);
+        race.recordFix(tom, fix5);
+
+        CandidateChooser chooser = new CandidateChooserImpl(race);
+        Iterable<Waypoint> waypoints = race.getRace().getCourse().getWaypoints();
+        Candidate c0 = new CandidateImpl(1, new MillisecondsTimePoint(12000), 1, Util.get(waypoints, 0));
+        Waypoint waypointToSet = Util.get(waypoints, 1);
+        Candidate c1 = new CandidateImpl(2, new MillisecondsTimePoint(60000), 1, waypointToSet);
+        Candidate c2 = new CandidateImpl(3, new MillisecondsTimePoint(110000), 1, Util.get(waypoints, 2));
+
+        chooser.calculateMarkPassDeltas(tom, Arrays.asList(c0, c1, c2), new ArrayList<Candidate>());
+
+        NavigableSet<MarkPassing> markPassingsBeforeFixing = race.getMarkPassings(tom);
+        MarkPassing markPassingBeforeAdding = Util.get(markPassingsBeforeFixing, 1);
+        assertTrue(markPassingBeforeAdding.getTimePoint().asMillis() == 60000);
+
+        chooser.setFixedPassing(tom, waypointToSet, new MillisecondsTimePoint(58000));
+
+        NavigableSet<MarkPassing> markPassingsAfterFixing = race.getMarkPassings(tom);
+        MarkPassing markPassingAfterAdding = Util.get(markPassingsAfterFixing, 1);
+        assertTrue(markPassingAfterAdding.getTimePoint().asMillis() == 58000);
+
+        chooser.setFixedPassing(tom, waypointToSet, new MillisecondsTimePoint(59000));
+
+        NavigableSet<MarkPassing> markPassingsAfterSecondFixing = race.getMarkPassings(tom);
+        MarkPassing markPassingAfterSecondAdding = Util.get(markPassingsAfterSecondFixing, 1);
+        assertTrue(markPassingAfterSecondAdding.getTimePoint().asMillis() == 59000);
+
+        chooser.removeFixedPassing(tom, waypointToSet);
+
+        NavigableSet<MarkPassing> markPassingsAfterRemoving = race.getMarkPassings(tom);
+        MarkPassing markPassingAfterRemoving = Util.get(markPassingsAfterRemoving, 1);
+        assertTrue(markPassingAfterRemoving.getTimePoint().asMillis() == 60000);
+    }
+
+    @Test
+    public void testAddingAndRemovingWaypointToFinder() {
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                330)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                270)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(47000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                225)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                190)));
+
+        race.recordFix(ron, fix1);
+        race.recordFix(ron, fix2);
+        race.recordFix(ron, fix3);
+        race.recordFix(ron, fix4);
+        CandidateFinder finder = new CandidateFinderImpl(race);
+        Waypoint newWaypoint = new WaypointImpl(m, PassingInstruction.Port);
+        Course course = race.getRace().getCourse();
+
+        // Before adding
+        Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesBefore = finder.getAllCandidates(ron);
+        assertEquals(Util.size(allCandidatesBefore.getB()), 0);
+        for (Candidate can : allCandidatesBefore.getA()) {
+            assertTrue(can.getWaypoint() != newWaypoint);
+        }
+        assertEquals(Util.size(allCandidatesBefore.getA()), 4);
+
+        // The process of adding
+        course.addWaypoint(4, newWaypoint);
+        List<Waypoint> wayAsList = Arrays.asList(newWaypoint);
+        Iterable<Candidate> addedCans = finder.addWaypoints(wayAsList).get(ron);
+        assertEquals(Util.size(addedCans), 2);
+        for (Candidate c : addedCans) {
+            assertEquals(c.getWaypoint(), newWaypoint);
+        }
+
+        // Before removing
+        Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesInBetween = finder.getAllCandidates(ron);
+        assertEquals(Util.size(allCandidatesInBetween.getA()), 6);
+        assertEquals(Util.size(allCandidatesInBetween.getB()), 0);
+
+        // The Process of removing
+        course.removeWaypoint(4);
+        Iterable<Candidate> removedCans = finder.removeWaypoints(wayAsList).get(ron);
+        assertEquals(Util.size(removedCans), 2);
+        for (Candidate c : removedCans) {
+            assertEquals(c.getWaypoint(), newWaypoint);
+        }
+
+        // After removing
+        Pair<Iterable<Candidate>, Iterable<Candidate>> allCansAfterRemoving = finder.getAllCandidates(ron);
+        assertEquals(Util.size(allCansAfterRemoving.getB()), 0);
+        for (Candidate can : allCansAfterRemoving.getA()) {
+            assertTrue(can.getWaypoint() != newWaypoint);
+        }
+        assertEquals(Util.size(allCansAfterRemoving.getA()), 4);
     }
 }

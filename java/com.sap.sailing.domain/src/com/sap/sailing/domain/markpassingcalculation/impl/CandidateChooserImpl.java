@@ -107,6 +107,8 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void removeWaypoints(Iterable<Waypoint> ways) {
+        // TODO Decrease Index of all Candidates + Increase for added!!
+        // TODO Recalculate Edges (LegEstimation!!)
         for (Competitor c : currentMarkPasses.keySet()) {
             for (Waypoint w : ways) {
                 currentMarkPasses.get(c).remove(w);
@@ -114,16 +116,21 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
 
-    /**
-     * It is not poosible to change a set passing without removing the old one first.
-     */
+    @Override
     public void setFixedPassing(Competitor c, Waypoint w, TimePoint t) {
         Candidate fixedCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, 1, w);
-        fixedPassings.get(c).add(fixedCan);
+        NavigableSet<Candidate> fixed = fixedPassings.get(c);
+        if (!fixed.add(fixedCan)) {
+            Candidate old = fixed.ceiling(fixedCan);
+            fixed.remove(old);
+            removeCandidates(c, Arrays.asList(old));
+            fixed.add(fixedCan);
+        }
         addCandidates(c, Arrays.asList(fixedCan));
         findShortestPath(c);
     }
 
+    @Override
     public void removeFixedPassing(Competitor c, Waypoint w) {
         Candidate toRemove = null;
         for (Candidate can : fixedPassings.get(c)) {
@@ -132,12 +139,12 @@ public class CandidateChooserImpl implements CandidateChooser {
                 break;
             }
         }
+        fixedPassings.get(c).remove(toRemove);
         removeCandidates(c, Arrays.asList(toRemove));
         findShortestPath(c);
     }
 
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
-        // TODO Add all fixed, not only start and end
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
             for (Candidate oldCan : candidates.get(c)) {
@@ -152,12 +159,20 @@ public class CandidateChooserImpl implements CandidateChooser {
                 } else {
                     continue;
                 }
-                // If a start time is given the probability of an Edge from start to an other candidate can be
-                // evaluated.
-                if (late == end) {
-                    addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
-                } else if (early == start && (raceStartTime == null || !early.getTimePoint().after(late.getTimePoint()))) {
-                    addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
+
+                // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
+                // Otherwise the edge is only created if the distance estimation, which can be calculated as long as the
+                // candidates are not the proxy and or start is big enough.
+                NavigableSet<Candidate> fixed = fixedPassings.get(c);
+                if (fixed.contains(early) || fixed.contains(late)) {
+                    if (late == end || early == start && (early.getTimePoint() == null || late.getTimePoint().after(early.getTimePoint()))) {
+                        addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
+                    } else {
+                        if (late.getTimePoint().after(early.getTimePoint())) {
+                            final double probability = getDistanceEstimationBasedProbability(c, early, late);
+                            addEdge(edges, new Edge(early, late, probability, race.getRace().getCourse()));
+                        }
+                    }
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
                     final double probability = getDistanceEstimationBasedProbability(c, early, late);
                     if (probability > MINIMUM_PROBABILITY) {
@@ -200,10 +215,8 @@ public class CandidateChooserImpl implements CandidateChooser {
             });
             Map<Candidate, Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
             candidateWithParentAndSmallestTotalCost.put(startOfFixedInterval, new Pair<Candidate, Double>(null, 0.0));
-            Set<Edge> successors = allCompetitorEdges.get(startOfFixedInterval);
-            insertSuccessors(0, currentEdgesCheapestFirst, successors, endOfFixedInterval);
+            insertSuccessors(0, currentEdgesCheapestFirst, allCompetitorEdges.get(startOfFixedInterval), endOfFixedInterval);
             boolean endFound = false;
-            // Termination?
             while (!endFound) {
                 Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();

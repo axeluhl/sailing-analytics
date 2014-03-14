@@ -29,4 +29,5 @@ public interface Candidate extends Comparable<CandidateImpl> {
     Double getProbability();
 
     int compareTo(Candidate arg0);
+    
 }
