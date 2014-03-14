@@ -103,6 +103,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
  */
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
+    public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -1748,13 +1749,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages, new AsyncCallback<LeaderboardDTO>() {
+                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
+            asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
+                    new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
                             getBusyIndicator().setBusy(false);
                         }
-
+        
                         @Override
                         public void onFailure(Throwable caught) {
                             getBusyIndicator().setBusy(false);
@@ -1763,7 +1766,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                             true /* silentMode */);
                         }
                     });
-            asyncActionsExecutor.execute(getLeaderboardByNameAction);
         } else {
             getBusyIndicator().setBusy(false);
         }
