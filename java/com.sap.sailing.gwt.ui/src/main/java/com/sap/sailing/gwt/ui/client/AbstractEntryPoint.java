@@ -24,20 +24,20 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     protected UserAgentDetails userAgent;
     protected Label persistentAlertLabel;
     
-    /**
-     * Create a remote service proxy to talk to the server-side sailing service.
-     */
-    protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
-    /**
-     * Create a remote service proxy to talk to the server-side media service.
-     */
-    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-
-    /**
-     * Create a remote service proxy to talk to the server-side user management service.
-     */
-    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+//    /**
+//     * Creates a remote service proxy to talk to the server-side SailingService.
+//     */
+//    protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+//
+//    /**
+//     * Creates a remote service proxy to talk to the server-side MediaService.
+//     */
+//    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+//
+//    /**
+//     * Creates a remote service proxy to talk to the server-side UsermanagementService.
+//     */
+//    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     /**
      * The message displayed to the user when the server cannot be reached or
@@ -69,16 +69,18 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
         
-        ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
-        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
-        ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
+//        registerASyncService((ServiceDefTarget) sailingService, "sailing");
+//        registerASyncService((ServiceDefTarget) mediaService, "media");
+//        registerASyncService((ServiceDefTarget) userManagementService, "usermanagement");
+    }
+
+    protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
-        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
-        userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
+        
+        serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
     }
-    
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);

@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -23,6 +24,9 @@ import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
@@ -32,6 +36,7 @@ import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
 
@@ -40,6 +45,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+
+        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
 //        String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
 //        boolean showBenchmark = benchmarkParameter != null && benchmarkParameter.equals("true");
