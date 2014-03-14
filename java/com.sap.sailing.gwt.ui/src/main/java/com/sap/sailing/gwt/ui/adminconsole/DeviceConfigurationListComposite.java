@@ -64,7 +64,6 @@ public class DeviceConfigurationListComposite extends Composite {
 
         configurationSelectionModel = new MultiSelectionModel<DeviceConfigurationMatcherDTO>();
         configurationSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @SuppressWarnings("unchecked")
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 selectionProvider.setSelection(getSelectedConfigurations());
