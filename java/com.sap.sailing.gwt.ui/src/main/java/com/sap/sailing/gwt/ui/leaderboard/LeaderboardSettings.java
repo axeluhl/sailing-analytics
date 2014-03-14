@@ -45,13 +45,19 @@ public class LeaderboardSettings {
     private final boolean sortAscending;
     
     /**
+     * Shows scores sum'd up for each race column
+     */
+    private final boolean showAddedScores;
+    
+    /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
-            boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
+            boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
+            boolean showAddedScores) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -68,6 +74,7 @@ public class LeaderboardSettings {
         this.nameOfRaceToSort = nameOfRaceToSort;
         this.sortAscending = sortAscending;
         this.updateUponPlayStateChange = updateUponPlayStateChange;
+        this.showAddedScores = showAddedScores;
     }
   
     public List<DetailType> getManeuverDetailsToShow() {
@@ -140,5 +147,9 @@ public class LeaderboardSettings {
 
     public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
         return activeRaceColumnSelectionStrategy;
+    }
+
+    public boolean isShowAddedScores() {
+        return showAddedScores;
     }
 }

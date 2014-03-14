@@ -221,19 +221,19 @@ public class RegattaDetailsComposite extends Composite {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     RegattaIdentifier identifier = new RegattaName(regatta.getName());
-                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>() {
-
-                        @Override
-                        protected void handleFailure(Throwable cause) {
-                            errorReporter.reportError("Error trying to remove series " + series.getName()
-                                    + ": " + cause.getMessage());
-                        }
-
-                        @Override
-                        protected void handleSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
+                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable cause) {
+                                    errorReporter.reportError("Error trying to remove series " + series.getName()
+                                            + ": " + cause.getMessage());
+                                }
+        
+                                @Override
+                                public void onSuccess(Void result) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                    }));
                 }
 
             }
