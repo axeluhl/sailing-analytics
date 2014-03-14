@@ -163,10 +163,8 @@ public class AbstractPosition implements Position {
 
     @Override
     public Position getTargetCoordinates(Position localOrigin, Bearing localEquatorBearing, Position targetOrigin, Bearing targetEquatorBearing) {
-    	
     	Bearing localBearing = localEquatorBearing.getDifferenceTo(localOrigin.getBearingGreatCircle(this));
     	Distance localDistance = this.getDistance(localOrigin);
-    	
     	return targetOrigin.translateGreatCircle(targetEquatorBearing.add(localBearing), localDistance);
     }
   
