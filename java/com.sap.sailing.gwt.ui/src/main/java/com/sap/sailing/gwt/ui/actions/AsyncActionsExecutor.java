@@ -64,8 +64,8 @@ public class AsyncActionsExecutor {
     private final int maxPendingCalls;
     private final int maxPendingCallsPerType;
     private int numPendingCalls = 0;
-    private Map<String, Integer> actionsPerType = new HashMap<String, Integer>();
-    private Map<String, ExecutionJob<?>> lastRequestedActions = new HashMap<String, ExecutionJob<?>>();
+    private final Map<String, Integer> actionsPerType = new HashMap<String, Integer>();
+    private final Map<String, ExecutionJob<?>> lastRequestedActions = new HashMap<String, ExecutionJob<?>>();
     
     
     public AsyncActionsExecutor() {
