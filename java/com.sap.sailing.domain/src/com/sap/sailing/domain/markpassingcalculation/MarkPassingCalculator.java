@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
@@ -88,8 +87,9 @@ public class MarkPassingCalculator {
             boolean finished = false;
             Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
             Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
-            List<Waypoint> newWaypoints = new ArrayList<>();
-            List<Waypoint> removedWaypoints = new ArrayList<>();
+            Integer smallestWaypointChange = null;
+            List<MarkPassing> fixedMarkPassings = new ArrayList<>();
+            List<MarkPassing> removedMarkPassings = new ArrayList<>();
             while (!finished) {
                 List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                 try {
@@ -102,11 +102,12 @@ public class MarkPassingCalculator {
                     if (listener.isEndMarker(fixInsertion)) {
                         finished = true;
                     } else {
-                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, newWaypoints, removedWaypoints);
+                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, smallestWaypointChange, fixedMarkPassings, removedMarkPassings);
                     }
                 }
                 if (!suspended) {
-                    updateWaypoints(newWaypoints, removedWaypoints);
+                    updateWaypoints(smallestWaypointChange);
+                    updateFixedMarkPassings(fixedMarkPassings, removedMarkPassings);
                     computeMarkPasses(competitorFixes, markFixes);
                     competitorFixes.clear();
                     markFixes.clear();
@@ -114,12 +115,20 @@ public class MarkPassingCalculator {
             }
         }
 
-        private void updateWaypoints(List<Waypoint> newWaypoints, List<Waypoint> removedWaypoints) {
-            Map<Competitor, Iterable<Candidate>> addedCandidates = finder.addWaypoints(newWaypoints);
-            Map<Competitor, Iterable<Candidate>> removedCandidates = finder.removeWaypoints(removedWaypoints);
-            chooser.removeWaypoints(removedWaypoints);
-            for (Competitor c : race.getRace().getCompetitors()) {
-                chooser.calculateMarkPassDeltas(c, addedCandidates.get(c), removedCandidates.get(c));
+        private void updateFixedMarkPassings(List<MarkPassing> fixedMarkPassings, List<MarkPassing> removedMarkPassings) {
+            for (MarkPassing m : removedMarkPassings) {
+                chooser.removeFixedPassing(m.getCompetitor(), m.getWaypoint());
+            }
+            for (MarkPassing m : fixedMarkPassings) {
+                chooser.setFixedPassing(m.getCompetitor(), m.getWaypoint(), m.getTimePoint());
+            }
+        }
+
+        private void updateWaypoints(Integer smallestInterger) {
+            Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addedCandidates = finder.invalidateAfterCourseChange(smallestInterger);
+            for (Entry<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> entry : addedCandidates.entrySet()) {
+                Pair<Iterable<Candidate>, Iterable<Candidate>> deltas = entry.getValue();
+                chooser.calculateMarkPassDeltas(entry.getKey(), deltas.getA(), deltas.getB());
             }
         }
 
@@ -224,8 +233,8 @@ public class MarkPassingCalculator {
         suspended = false;
         listener.getQueue().add(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
-                    List<Waypoint> removedWaypoints) {
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, Integer smallestWaypoint,
+                    List<MarkPassing> fixMarkPassing, List<MarkPassing> removeFixedMarkPassing) {
             }
         });
     }
