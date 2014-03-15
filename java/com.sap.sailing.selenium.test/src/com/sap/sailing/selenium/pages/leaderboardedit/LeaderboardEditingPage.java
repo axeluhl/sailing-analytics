@@ -47,6 +47,14 @@ public class LeaderboardEditingPage extends HostPage {
         return new LeaderboardTable(this.driver, findElementBySeleniumId(context, "LeaderboardTable"));
     }
     
+    @Override
+    protected void initElements() {
+        super.initElements();
+        
+        // Wait for the initial loading of the data
+        waitForAjaxRequestsExecuted("loadLeaderboardData", 1);
+    }
+    
     /**
      * <p>Verifies that the current page is the leaderboard editing page by checking the title of the page.</p>
      */

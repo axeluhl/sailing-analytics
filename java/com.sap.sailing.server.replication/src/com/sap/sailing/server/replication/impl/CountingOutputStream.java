@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sailing.server.replication.impl;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

@@ -9,5 +9,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.datamining.shared,
  com.sap.sailing.datamining.shared.impl
-Import-Package: com.google.gwt.i18n.client
 Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"
