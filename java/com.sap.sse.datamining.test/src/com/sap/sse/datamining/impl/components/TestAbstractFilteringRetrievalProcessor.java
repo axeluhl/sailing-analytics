@@ -3,9 +3,9 @@ package com.sap.sse.datamining.impl.components;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 import org.junit.Before;
@@ -21,7 +21,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     private Processor<Iterable<Integer>> filteringRetrievalProcessor;
     private Collection<Integer> dataSource;
     
-    private Collection<Integer> receivedResults = new ArrayList<>();
+    private Collection<Integer> receivedResults = new HashSet<>();
 
     @Test
     public void testFiltration() throws InterruptedException {
@@ -29,7 +29,7 @@ public class TestAbstractFilteringRetrievalProcessor {
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
-        Collection<Integer> expectedResults = Arrays.asList(0, 1, 2);
+        Collection<Integer> expectedResults = new HashSet<>(Arrays.asList(0, 1, 2));
         assertThat(receivedResults, is(expectedResults));
     }
     

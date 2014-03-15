@@ -39,5 +39,11 @@ public class ComparatorClusterBoundary<ElementType> implements ClusterBoundary<E
     public ComparisonStrategy getStrategy() {
         return strategy;
     }
+    
+    @SuppressWarnings("unchecked") // Necessary because you can't use instanceof with generics
+    @Override
+    public Class<ElementType> getClusterElementsType() {
+        return (Class<ElementType>) boundaryValue.getClass();
+    }
 
 }

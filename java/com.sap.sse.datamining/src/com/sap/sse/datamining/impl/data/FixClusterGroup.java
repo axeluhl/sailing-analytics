@@ -8,9 +8,11 @@ import com.sap.sse.datamining.data.ClusterGroup;
 
 public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
 
-    private final Iterable<Cluster<ElementType>> clusters;
+    private final String name;
+    private final Collection<Cluster<ElementType>> clusters;
 
-    public FixClusterGroup(Collection<Cluster<ElementType>> clusters) {
+    public FixClusterGroup(String name, Collection<Cluster<ElementType>> clusters) {
+        this.name = name;
         this.clusters = new HashSet<>(clusters);
     }
 
@@ -22,6 +24,21 @@ public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
             }
         }
         return null;
+    }
+    
+    @Override
+    public Class<ElementType> getClusterElementsType() {
+        return clusters.iterator().next().getClusterElementsType();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+    
+    @Override
+    public String toString() {
+        return getName() + clusters;
     }
 
 }

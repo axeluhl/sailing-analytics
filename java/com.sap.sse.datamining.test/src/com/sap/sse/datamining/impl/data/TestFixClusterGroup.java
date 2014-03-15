@@ -47,7 +47,7 @@ public class TestFixClusterGroup {
         clusters.add(clusterFromZeroToTen);
         clusters.add(clusterFromElevenToTwenty);
         clusters.add(clusterFromTwentyOneToThirty);
-        return new FixClusterGroup<>(clusters);
+        return new FixClusterGroup<>("Test Group", clusters);
     }
     
     @Test
@@ -65,7 +65,7 @@ public class TestFixClusterGroup {
         clusters.add(clusterFromElevenToTwenty);
         clusters.add(clusterFromTwentyOneToThirty);
         clusters.add(clusterGreaterThanThirty);
-        return new FixClusterGroup<>(clusters);
+        return new FixClusterGroup<>("Test Group", clusters);
     }
 
     @Before

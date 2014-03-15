@@ -6,4 +6,6 @@ public interface Cluster<ElementType> {
     
     public boolean isInRange(ElementType value);
 
+    public Class<ElementType> getClusterElementsType();
+
 }

@@ -8,4 +8,6 @@ public interface ClusterBoundary<ElementType> {
 
     public ComparisonStrategy getStrategy();
 
+    public Class<ElementType> getClusterElementsType();
+
 }
