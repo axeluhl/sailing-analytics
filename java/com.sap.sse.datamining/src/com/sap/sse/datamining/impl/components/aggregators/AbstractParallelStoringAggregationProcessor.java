@@ -3,7 +3,8 @@ package com.sap.sse.datamining.impl.components.aggregators;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -12,13 +13,13 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
                       extends AbstractSimpleParallelProcessor<InputType, AggregatedType> {
 
-    private final ReentrantReadWriteLock storeLock;
+    private final Lock storeLock;
     private final String aggregationNameMessageKey;
 
     public AbstractParallelStoringAggregationProcessor(ExecutorService executor, Collection<Processor<AggregatedType>> resultReceivers,
                                                        String aggregationNameMessageKey) {
         super(executor, resultReceivers);
-        storeLock = new ReentrantReadWriteLock();
+        storeLock = new ReentrantLock();
         this.aggregationNameMessageKey = aggregationNameMessageKey;
     }
 
@@ -27,11 +28,11 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
         return new Callable<AggregatedType>() {
             @Override
             public AggregatedType call() throws Exception {
-                storeLock.writeLock().lock();
+                storeLock.lock();
                 try {
                     storeElement(element);
                 } finally {
-                    storeLock.writeLock().unlock();
+                    storeLock.unlock();
                 }
                 return AbstractParallelStoringAggregationProcessor.super.createInvalidResult();
             }

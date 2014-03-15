@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,19 +74,10 @@ public class TestAbstractFilteringRetrievalProcessor {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Integer>, Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
+        filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;
-            }
-            @Override
-            protected Callable<Integer> createInstruction(final Integer filteredPartialElement) {
-                return new Callable<Integer>() {
-                    @Override
-                    public Integer call() throws Exception {
-                        return filteredPartialElement;
-                    }
-                };
             }
         };
     }

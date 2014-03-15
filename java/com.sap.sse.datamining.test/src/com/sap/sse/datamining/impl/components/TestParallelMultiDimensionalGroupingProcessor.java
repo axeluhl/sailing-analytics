@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.Before;
@@ -25,7 +24,7 @@ import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestParallelMultiDimensionalGroupingProcessor {
     
-    private Processor<Iterable<Number>> processor;
+    private Processor<Number> processor;
     private Collection<Processor<GroupedDataEntry<Number>>> receivers;
 
     private GroupedDataEntry<Number> groupedElement;
@@ -79,7 +78,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     @Test
     public void testGroupKeyGeneration() {
         Number number = new Number(1111);
-        processor.onElement(Arrays.asList(number));
+        processor.onElement(number);
         ConcurrencyTestsUtil.sleepFor(200); //Giving the processor time to finish the instruction
         verifyGroupedElement(number);
     }

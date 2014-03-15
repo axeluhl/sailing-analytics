@@ -5,7 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -143,29 +144,29 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
      */
     private class UnfinishedInstructionsCounter {
         
-        private final ReentrantReadWriteLock instructionsAmountLock;
+        private final Lock instructionsAmountLock;
         private int unfinishedInstructionsAmount;
         
         public UnfinishedInstructionsCounter() {
-            instructionsAmountLock = new ReentrantReadWriteLock();
+            instructionsAmountLock = new ReentrantLock();
         }
         
         public void increment() {
-            instructionsAmountLock.writeLock().lock();
+            instructionsAmountLock.lock();
             try {
                 unfinishedInstructionsAmount++;
             } finally {
-                instructionsAmountLock.writeLock().unlock();
+                instructionsAmountLock.unlock();
             }
         }
         
         public void decrement() {
-            instructionsAmountLock.writeLock().lock();
+            instructionsAmountLock.lock();
             try {
                 unfinishedInstructionsAmount--;
                 unfinishedInstructionsAmount = Math.max(0, unfinishedInstructionsAmount);
             } finally {
-                instructionsAmountLock.writeLock().unlock();
+                instructionsAmountLock.unlock();
             }
         }
         

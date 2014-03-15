@@ -13,7 +13,7 @@ import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class ParallelMultiDimensionalGroupingProcessor<DataType>
-             extends AbstractPartitioningParallelProcessor<Iterable<DataType>, DataType, GroupedDataEntry<DataType>> {
+             extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
     private Iterable<Function<?>> dimensions;
 
@@ -64,11 +64,6 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
     private GroupKey createGroupKeyFor(DataType input, Function<?> mainDimension) {
         Object keyValue = mainDimension.tryToInvoke(input);
         return new GenericGroupKey<Object>(keyValue);
-    }
-
-    @Override
-    protected Iterable<DataType> partitionElement(Iterable<DataType> element) {
-        return element;
     }
 
     @Override

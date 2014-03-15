@@ -114,7 +114,7 @@ public class TestProcessorQuery {
         Collection<Function<?>> dimensions = new ArrayList<>();
         Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
         dimensions.add(getLengthFunction);
-        Processor<Iterable<Number>> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
+        Processor<Number> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
         
         FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
             @Override
@@ -122,19 +122,10 @@ public class TestProcessorQuery {
                 return element.getValue() >= 10;
             }
         };
-        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
             @Override
             protected Iterable<Number> retrieveData(Iterable<Number> element) {
                 return element;
-            }
-            @Override
-            protected Callable<Iterable<Number>> createInstruction(final Number filteredPartialElement) {
-                return new Callable<Iterable<Number>>() {
-                    @Override
-                    public Iterable<Number> call() throws Exception {
-                        return Arrays.asList(filteredPartialElement);
-                    }
-                };
             }
         };
         
