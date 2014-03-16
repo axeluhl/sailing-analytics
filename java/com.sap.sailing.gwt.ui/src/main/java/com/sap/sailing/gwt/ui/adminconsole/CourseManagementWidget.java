@@ -75,7 +75,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     }
     
     private class ControlPointCreationDialog extends DataEntryDialog<ControlPointDTO> {
-        private final MarkTableWrapper marksTable;
+        private final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marksTable;
         private final MultiSelectionModel<MarkDTO> selectionModel;
         
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
@@ -99,7 +99,8 @@ public abstract class CourseManagementWidget implements IsWidget {
                     validate();
                 }
             });
-            marksTable = new MarkTableWrapper(selectionModel, CourseManagementWidget.this.sailingService, stringMessages, errorReporter);
+            marksTable = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
+                    selectionModel, CourseManagementWidget.this.sailingService, stringMessages, errorReporter);
             marksTable.getDataProvider().getList().addAll(marks);
         }
 
@@ -167,7 +168,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected final VerticalPanel mainPanel;
     
-    protected MarkTableWrapper marksTable;
+    protected MarkTableWrapper<SingleSelectionModel<MarkDTO>> marksTable;
     
     protected final Handler markSelectionChangeHandler;
     protected final Button insertWaypointBefore;
@@ -265,7 +266,7 @@ public abstract class CourseManagementWidget implements IsWidget {
 
         // race course marks table
         markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        marksTable = new MarkTableWrapper(markSelectionModel, sailingService, stringMessages, errorReporter);
+        marksTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(markSelectionModel, sailingService, stringMessages, errorReporter);
         markSelectionChangeHandler = new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

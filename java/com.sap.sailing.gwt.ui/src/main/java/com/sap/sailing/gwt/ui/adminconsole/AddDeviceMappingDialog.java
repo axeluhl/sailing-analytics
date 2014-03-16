@@ -36,7 +36,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     private final ListBox deviceType;
     private final TextBox deviceId;
     private final CompetitorTableWrapper competitorTable;
-    private final MarkTableWrapper markTable;
+    private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
     private Serializable selectedItem;
@@ -89,7 +89,8 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         
         final SingleSelectionModel<MarkDTO> markSelectionModel = new SingleSelectionModel<MarkDTO>();
         competitorTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
-        markTable = new MarkTableWrapper(markSelectionModel, sailingService, stringMessages, errorReporter);
+        markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
+                markSelectionModel, sailingService, stringMessages, errorReporter);
         
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override

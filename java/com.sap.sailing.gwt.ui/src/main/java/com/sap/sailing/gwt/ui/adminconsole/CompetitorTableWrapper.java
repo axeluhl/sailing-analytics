@@ -6,21 +6,15 @@ import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
@@ -30,29 +24,14 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 
-public class CompetitorTableWrapper implements IsWidget {
-    private final CellTable<CompetitorDTO> competitorTable;
-    private final MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
-    private final ListDataProvider<CompetitorDTO> competitorProvider;
+public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSelectionModel<CompetitorDTO>> {
     private List<CompetitorDTO> allCompetitors;
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
-    private final VerticalPanel mainPanel;
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-
-    private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-    
-    @Override
-    public Widget asWidget() {
-        return mainPanel;
-    }
 
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        mainPanel = new VerticalPanel();
-        competitorProvider = new ListDataProvider<CompetitorDTO>();
-        ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(competitorProvider.getList());
+        super(sailingService, stringMessages, errorReporter, new MultiSelectionModel<CompetitorDTO>());
+        
+        ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
         
         // competitors table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
@@ -141,9 +120,9 @@ public class CompetitorTableWrapper implements IsWidget {
                 return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-        competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
+
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                allCompetitors, competitorTable, competitorProvider) {
+                allCompetitors, table, dataProvider) {
 
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
@@ -156,24 +135,13 @@ public class CompetitorTableWrapper implements IsWidget {
         };
 
         mainPanel.add(filterField);
-        competitorProvider.addDataDisplay(competitorTable);
-        competitorTable.addColumnSortHandler(competitorColumnListHandler);
-        competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
-        competitorTable.addColumn(competitorNameColumn, stringMessages.name());
-        competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
-        competitorTable.addColumn(displayColorColumn, stringMessages.color());
-        competitorTable.addColumn(competitorIdColumn, stringMessages.id());
-        competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
-        competitorTable.setSelectionModel(competitorSelectionModel);
-        mainPanel.add(competitorTable);
-    }
-    
-    public CellTable<CompetitorDTO> getTable() {
-        return competitorTable;
-    }
-    
-    public MultiSelectionModel<CompetitorDTO> getSelectionModel() {
-        return competitorSelectionModel;
+        table.addColumnSortHandler(competitorColumnListHandler);
+        table.addColumn(sailIdColumn, stringMessages.sailNumber());
+        table.addColumn(competitorNameColumn, stringMessages.name());
+        table.addColumn(boatClassColumn, stringMessages.boatClass());
+        table.addColumn(displayColorColumn, stringMessages.color());
+        table.addColumn(competitorIdColumn, stringMessages.id());
+        mainPanel.add(table);
     }
     
     public List<CompetitorDTO> getAllCompetitors() {
