@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -85,6 +86,7 @@ import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
@@ -799,12 +801,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_PATHFINDER_ID.name(), pathfinderEvent.getPathfinderId());
         return result;
     }
-
-    private Object storeRaceLogDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent event) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(event, result);
-
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
+    
+    private void storeRaceLogDeviceMappingEvent(DeviceMappingEvent<? extends WithID> event, DBObject result) {
         DBObject deviceId = null;
         try {
             deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
@@ -813,9 +811,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             e.printStackTrace();
         }
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
+        TimePoint from = event.getFrom() == null ? new MillisecondsTimePoint(Long.MIN_VALUE) : event.getFrom();
+        TimePoint to = event.getTo() == null ? new MillisecondsTimePoint(Long.MAX_VALUE) : event.getTo();
+        storeTimePoint(from, result, FieldNames.RACE_LOG_FROM);
+        storeTimePoint(to, result, FieldNames.RACE_LOG_TO);
+    }
+
+    private Object storeRaceLogDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
+        storeRaceLogDeviceMappingEvent(event, result);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
-        storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
-        storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
         return result;
     }
 
@@ -824,17 +832,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
-        DBObject deviceId = null;
-        try {
-            deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
-            e.printStackTrace();
-        }
-        result.put(FieldNames.DEVICE_ID.name(), deviceId);
+        storeRaceLogDeviceMappingEvent(event, result);
         result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
-        storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
-        storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
         return result;
     }
 
