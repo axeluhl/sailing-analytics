@@ -46,12 +46,14 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
  * duration of the overlap.</li>
  * </ol>
  */
-public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> {
+public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> {
     public DeviceMappingFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    protected abstract boolean isValidMapping(DeviceMappingEvent<?> mapping);
+    protected boolean isValidMapping(DeviceMappingEvent<?> mapping) {
+        return mapping instanceof DeviceMappingEvent;
+    }
 
     protected DeviceMapping<ItemT> getMapping(DeviceMappingEvent<ItemT> event) {
         return new DeviceMappingImpl<ItemT>(event.getMappedTo(), event.getDevice(),

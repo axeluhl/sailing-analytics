@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.Revokable;
 
@@ -39,13 +42,13 @@ public interface DeviceMappingEvent<ItemType extends WithID> extends RaceLogEven
     DeviceIdentifier getDevice();
     
     /**
-     * The {@code return} type may be {@code null}, symbolizing an open range.
+     * The {@code return} value may be {@code null} or have a milliseconds value of {@link Long#MIN_VALUE}, symbolizing an open range.
      * In that case the device should be mapped to the item for any timepoint before that specified by {@link #getTo()}.
      */
     TimePoint getFrom();
     
     /**
-     * The {@code return} type may be {@code null}, symbolizing an open range.
+     * The {@code return} value may be {@code null} or have a milliseconds value of {@link Long#MAX_VALUE}, symbolizing an open range.
      * In that case the device should be mapped to the item for any timepoint after that specified by {@link #getFrom()}.
      */
     TimePoint getTo();

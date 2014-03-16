@@ -56,7 +56,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
                             updateWaypointTable(raceCourseDTO);
-                            updateMarksTable(raceCourseDTO.getMarks());
+                            marksTable.refresh(raceCourseDTO.getMarks());
                         }
             
                         @Override

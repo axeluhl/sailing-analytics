@@ -87,17 +87,14 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
 
         Button addCompetitorButton = new Button(stringMessages.add());
         addCompetitorButton.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                                openAddCompetitorDialog();
-                        }
-                });
+            @Override
+            public void onClick(ClickEvent event) {
+                openAddCompetitorDialog();
+            }
+        });
         buttonPanel.add(addCompetitorButton);
 
         super.addButtons(buttonPanel);
-
-        saveButton.setEnabled(editable);
-        saveButton.setTitle(stringMessages.canOnlyBeEditedBeforeStartingTracking());
     }
 
     @Override

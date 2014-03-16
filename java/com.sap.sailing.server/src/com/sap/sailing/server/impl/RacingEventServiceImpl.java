@@ -261,6 +261,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * object so that service lookups become possible.
      */
     private BundleContext bundleContext;
+    
+    private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
@@ -402,6 +404,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
+        this.serviceFinderFactory = serviceFinderFactory;
     }
 
     @Override
@@ -2233,5 +2236,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public CompetitorStore getCompetitorStore() {
         return competitorStore;
+    }
+    
+    @Override
+    public TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory() {
+        return serviceFinderFactory;
     }
 }

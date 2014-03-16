@@ -20,6 +20,7 @@ public abstract class RaceLogTrackingDialog extends DialogBox {
     protected final String fleetName;
     protected Button saveButton;
     protected final boolean editable;
+    protected final VerticalPanel mainPanel;
       
     public RaceLogTrackingDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, String leaderboardName, String raceColumnName, String fleetName) {
@@ -36,7 +37,7 @@ public abstract class RaceLogTrackingDialog extends DialogBox {
         this.fleetName = fleetName;
         this.editable = editable;
         
-        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel = new VerticalPanel();
         setWidget(mainPanel);
 
         addMainContent(mainPanel);
@@ -58,16 +59,18 @@ public abstract class RaceLogTrackingDialog extends DialogBox {
                 hide();
             }
         });
-        saveButton = new Button(stringMessages.save());
-        saveButton.setTitle(stringMessages.canOnlyBeEditedBeforeStartingTracking());
-        saveButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                save();
-            }
-        });
         buttonPanel.add(cancel);
-        buttonPanel.add(saveButton);
+        if (editable) {
+            saveButton = new Button(stringMessages.save());
+            saveButton.setTitle(stringMessages.canOnlyBeEditedBeforeStartingTracking());
+            saveButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    save();
+                }
+            });
+            buttonPanel.add(saveButton);
+        }
     }
     
     protected abstract void save();

@@ -983,4 +983,13 @@ public interface StringMessages extends Messages {
     String copyCourseToOther();
     String nowSelectRaceColumnAndFleetToCopyTo();
     String selectRowInTableToCopyCourse();
+    String deviceId();
+    String deviceType();
+    String mappedToType();
+    String mappedTo();
+    String deviceMappings();
+    String atMostOneEndOfTheTimeRangeMayBeOpen();
+    String pleaseSelectAnItemToMapTo();
+    String device();
+    String timeRange();
 }

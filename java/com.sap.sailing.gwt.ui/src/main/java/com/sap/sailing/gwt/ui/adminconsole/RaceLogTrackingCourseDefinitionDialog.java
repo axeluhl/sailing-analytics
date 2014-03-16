@@ -96,7 +96,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                     }
                 }
             });
-            marksTable.addColumn(actionColumn);
+            marksTable.getTable().addColumn(actionColumn);
         }
 
         @Override
@@ -134,7 +134,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
                 @Override
                 public void onSuccess(Collection<MarkDTO> result) {
-                    updateMarksTable(result);
+                    marksTable.refresh(result);
                 }
                 
                 @Override

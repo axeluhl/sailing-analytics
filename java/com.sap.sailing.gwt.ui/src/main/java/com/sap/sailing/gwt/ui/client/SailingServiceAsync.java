@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -555,5 +556,13 @@ public interface SailingServiceAsync {
 
     void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
             String leaderboardTo, String raceColumnTo, String fleetTo, AsyncCallback<Void> callback);
+
+    void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
+
+    void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<DeviceMappingDTO>> callback);
+
+    void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO mapping, AsyncCallback<Void> callback);
 }
 

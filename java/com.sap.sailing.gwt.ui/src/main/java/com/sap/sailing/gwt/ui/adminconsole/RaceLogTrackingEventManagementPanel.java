@@ -110,6 +110,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 final String leaderboardName = getSelectedLeaderboardName();
                 final String raceColumnName = object.getA().getName();
                 final String fleetName = object.getB().getName();
+                boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
                 if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_ADD_RACELOG_TRACKER.equals(value)) {
                     addRaceLogTracker(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
@@ -117,13 +118,12 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_START_RACELOG_TRACKING.equals(value)) {
                     startRaceLogTracking(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
-                    boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
                             getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    //TODO
+                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY_COURSE.equals(value)) {
                     final Label selectToCopy = new Label(stringMessages.selectRowInTableToCopyCourse());
                     final VerticalPanel panelToAddTo = (VerticalPanel) selectedLeaderBoardPanel.getContentWidget();

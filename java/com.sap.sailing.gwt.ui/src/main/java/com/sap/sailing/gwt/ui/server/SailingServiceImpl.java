@@ -49,6 +49,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.DataMiningFactory;
@@ -161,6 +162,10 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -188,9 +193,14 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
+import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.LastPingMappingEventFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
@@ -243,6 +253,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -368,7 +379,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
     
-    private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker; 
+    private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
+    
+    private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
+    deviceIdentifierStringSerializationHandlerTracker;
 
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -410,6 +424,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
         raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
+        deviceIdentifierStringSerializationHandlerTracker = createAndOpenDeviceIdentifierStringSerializationHandlerTracker(context);
         igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -4094,4 +4109,101 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         getRaceLogTrackingAdapter().copyCourseToOtherRaceLog(fromRaceLog, toRaceLog, baseDomainFactory, getService());
     }
+    
+    private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
+            boolean withFallback) {
+        TypeBasedServiceFinderFactory factory = getService().getTypeBasedServiceFinderFactory();
+        TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> finder = factory.createServiceFinder(DeviceIdentifierStringSerializationHandler.class);
+        if (withFallback) {
+            finder.setFallbackService(new PlaceHolderDeviceIdentifierStringSerializationHandler());
+        }
+        return finder;
+    }
+    
+    private DeviceIdentifier deserializeDeviceIdentifier(String type, String deviceId) throws NoCorrespondingServiceRegisteredException,
+    TransformationException {
+        DeviceIdentifierStringSerializationHandler handler =
+                getDeviceIdentifierStringSerializerHandlerFinder(false).findService(type);
+        return handler.deserialize(deviceId, type, null);
+    }
+    
+    private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
+        String deviceId = mapping.getDevice().getStringRepresentation();
+        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().asMillis() == Long.MIN_VALUE ? 
+                null : mapping.getTimeRange().from().asDate();
+        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
+                null : mapping.getTimeRange().to().asDate();
+        Serializable item = null;
+        if (mapping.getMappedTo() instanceof Competitor) {
+            item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
+        } else if (mapping.getMappedTo() instanceof Mark) {
+            item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
+        } else {
+            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
+        }
+        return new DeviceMappingDTO(mapping.getDevice().getIdentifierType(),
+                deviceId, from, to, item);
+    }
+    
+    @Override
+    public List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) throws TransformationException {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
+        for (List<? extends DeviceMapping<Competitor>> list : new DeviceCompetitorMappingFinder(raceLog).analyze().values()) {
+            for (DeviceMapping<Competitor> mapping : list) {
+                result.add(convertToDeviceMappingDTO(mapping));
+            }
+        }
+        for (List<? extends DeviceMapping<Mark>> list : new DeviceMarkMappingFinder(raceLog).analyze().values()) {
+            for (DeviceMapping<Mark> mapping : list) {
+                result.add(convertToDeviceMappingDTO(mapping));
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceType, dto.deviceId);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
+        TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
+        DeviceMappingEvent<?> event = null;
+        if (dto.mappedTo instanceof MarkDTO) {
+            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
+            event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
+                    device, mark, raceLog.getCurrentPassId(), from, to);
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
+            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+            event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now, getService().getServerAuthor(),
+                    device, competitor, raceLog.getCurrentPassId(), from, to);
+        } else {
+            throw new RuntimeException("Can only map devices to competitors or marks");
+        }
+        raceLog.add(event);
+    }
+    
+    private ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
+    createAndOpenDeviceIdentifierStringSerializationHandlerTracker(BundleContext context) {
+        ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler> tracker = 
+                new ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>(
+                        context, DeviceIdentifierStringSerializationHandler.class, null);
+        
+        tracker.open();
+        return tracker;
+    }
+    
+    @Override
+    public List<String> getDeserializableDeviceIdentifierTypes() {
+        List<String> result = new ArrayList<String>();
+        for (ServiceReference<DeviceIdentifierStringSerializationHandler> reference :
+            deviceIdentifierStringSerializationHandlerTracker.getServiceReferences()) {
+            result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
+        }
+        return result;
+    }    
 }

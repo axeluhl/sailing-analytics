@@ -1,25 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
@@ -33,7 +25,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -84,7 +75,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     }
     
     private class ControlPointCreationDialog extends DataEntryDialog<ControlPointDTO> {
-        private final CellTable<MarkDTO> marksTable;
+        private final MarkTableWrapper marksTable;
         private final MultiSelectionModel<MarkDTO> selectionModel;
         
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
@@ -108,10 +99,8 @@ public abstract class CourseManagementWidget implements IsWidget {
                     validate();
                 }
             });
-            marksTable = createAvailableMarksTable(stringMessages, tableRes, selectionModel);
-            ListDataProvider<MarkDTO> markDataProvider = new ListDataProvider<MarkDTO>();
-            markDataProvider.getList().addAll(marks);
-            markDataProvider.addDataDisplay(marksTable);
+            marksTable = new MarkTableWrapper(selectionModel, CourseManagementWidget.this.sailingService, stringMessages, errorReporter);
+            marksTable.getDataProvider().getList().addAll(marks);
         }
 
         @Override
@@ -142,7 +131,7 @@ public abstract class CourseManagementWidget implements IsWidget {
 
         @Override
         protected Widget getAdditionalWidget() {
-            return marksTable;
+            return marksTable.getTable();
         }
     }
     
@@ -153,8 +142,6 @@ public abstract class CourseManagementWidget implements IsWidget {
      * be longer than the list of marks actually used by the control points backing the course's waypoints because of
      * the possibility of spare marks.
      */
-    protected final CellTable<MarkDTO> marksTable;
-    protected final ListDataProvider<MarkDTO> markDataProvider;
     protected final SingleSelectionModel<MarkDTO> markSelectionModel;
 
     /**
@@ -180,11 +167,15 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected final VerticalPanel mainPanel;
     
+    protected MarkTableWrapper marksTable;
+    
     protected final Handler markSelectionChangeHandler;
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
     protected final Button saveButton;
     protected boolean ignoreWaypointAndOldAndNewMarkSelectionChange;
+    protected final SailingServiceAsync sailingService;
+    protected final ErrorReporter errorReporter;
     
     @Override
     public Widget asWidget() {
@@ -193,6 +184,8 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     public CourseManagementWidget(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages) {
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
         mainPanel = new VerticalPanel();
         
         controlPointsNeedingReplacement = new HashSet<ControlPointDTO>();
@@ -271,28 +264,26 @@ public abstract class CourseManagementWidget implements IsWidget {
         controlPointDataProvider.addDataDisplay(controlPointsTable);
 
         // race course marks table
-       markDataProvider = new ListDataProvider<MarkDTO>();
-       markSelectionChangeHandler = new Handler() {
+        markSelectionModel = new SingleSelectionModel<MarkDTO>();
+        marksTable = new MarkTableWrapper(markSelectionModel, sailingService, stringMessages, errorReporter);
+        markSelectionChangeHandler = new Handler() {
             @Override
-           public void onSelectionChange(SelectionChangeEvent event) {
+            public void onSelectionChange(SelectionChangeEvent event) {
                 if (!ignoreWaypointAndOldAndNewMarkSelectionChange) {
                     updateNewMark(controlPointsSelectionModel.getSelectedSet(), markSelectionModel.getSelectedObject());
                 }
             }
         };
-        markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        marksTable = createAvailableMarksTable(stringMessages, tableRes, markSelectionModel);
-        marksTable.getSelectionModel().addSelectionChangeHandler(markSelectionChangeHandler);
-        markDataProvider.addDataDisplay(marksTable);
+        markSelectionModel.addSelectionChangeHandler(markSelectionChangeHandler);
         grid.setWidget(1,  1, marksTable);
-        
+
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
         insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
         insertWaypointBefore.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-               insertWaypoint(sailingService, stringMessages, tableRes, /* before */ true);
+                insertWaypoint(sailingService, stringMessages, tableRes, /* before */ true);
             }
 
         });
@@ -312,7 +303,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         refreshBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-               refresh();
+                refresh();
             }
         });
         courseActionsPanel.add(refreshBtn);
@@ -356,7 +347,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             if (selectionSize == 1) {
                 MarkDTO newMark = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewMark();
                 if (newMark != null) {
-                    for (MarkDTO markDTO : markDataProvider.getList()) {
+                    for (MarkDTO markDTO : marksTable.getDataProvider().getList()) {
                         if (markDTO.getName().equals(newMark.getName())) {
                             markSelectionModel.setSelected(markDTO, true);
                         }
@@ -390,67 +381,6 @@ public abstract class CourseManagementWidget implements IsWidget {
         assert newLeft != null && newRight != null;
         // if old gate had null ID, the new gate will have a null ID too, causing the server to generate one
         return new GateDTO(oldGate.getIdAsString(), oldGate.getName(), newLeft, newRight);
-    }
-
-    private CellTable<MarkDTO> createAvailableMarksTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
-            SelectionModel<MarkDTO> selectionModel) {
-        CellTable<MarkDTO> result = new CellTable<MarkDTO>(/* pageSize */10000, tableRes);
-        result.setSelectionModel(selectionModel);
-        TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
-            @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.getName();
-            }
-        };
-        result.addColumn(markNameColumn, stringMessages.mark());
-
-        final SafeHtmlCell markPositionCell = new SafeHtmlCell();
-        Column<MarkDTO, SafeHtml> markPositionColumn = new Column<MarkDTO, SafeHtml>(markPositionCell) {
-            @Override
-            public SafeHtml getValue(MarkDTO mark) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                if(mark.position != null) {
-                    NumberFormat fmt = NumberFormat.getFormat("#.###");
-                    builder.appendEscaped(fmt.format(mark.position.latDeg)+", "+fmt.format(mark.position.lngDeg));
-                }
-                return builder.toSafeHtml();
-            }
-        };
-        result.addColumn(markPositionColumn, stringMessages.position());
-        
-        TextColumn<MarkDTO> markColorColumn = new TextColumn<MarkDTO>() {
-            @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.color != null ? markDTO.color : "";
-            }
-        };
-        result.addColumn(markColorColumn, stringMessages.color());
-
-        TextColumn<MarkDTO> markShapeColumn = new TextColumn<MarkDTO>() {
-            @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.shape != null ? markDTO.shape : "";
-            }
-        };
-        result.addColumn(markShapeColumn, stringMessages.shape());
-
-        TextColumn<MarkDTO> markPatternColumn = new TextColumn<MarkDTO>() {
-            @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.pattern != null ? markDTO.pattern : "";
-            }
-        };
-        result.addColumn(markPatternColumn, stringMessages.pattern());
-
-        TextColumn<MarkDTO> markUUIDColumn = new TextColumn<MarkDTO>() {
-            @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.getIdAsString();
-            }
-        };
-        result.addColumn(markUUIDColumn, "UUID");
-        
-        return result;
     }
 
     private void updateNewMark(Set<ControlPointAndOldAndNewMark> selectedWaypointsAndOldAndNewMarks, MarkDTO selectedNewMark) {
@@ -491,7 +421,7 @@ public abstract class CourseManagementWidget implements IsWidget {
 
     private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
             AdminConsoleTableResources tableRes, final boolean beforeSelection) {
-        new ControlPointCreationDialog(stringMessages, tableRes, markDataProvider.getList(), new DialogCallback<ControlPointDTO>() {
+        new ControlPointCreationDialog(stringMessages, tableRes, marksTable.getDataProvider().getList(), new DialogCallback<ControlPointDTO>() {
             @Override
             public void cancel() {
                 // dialog cancelled, do nothing
@@ -549,16 +479,5 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         }
         handleControlPointSelectionChange();
-    }
-    
-    protected void updateMarksTable(Collection<MarkDTO> marks) {
-        markDataProvider.getList().clear();
-        markDataProvider.getList().addAll(marks);
-        Collections.sort(markDataProvider.getList(), new Comparator<MarkDTO>() {
-            @Override
-            public int compare(MarkDTO o1, MarkDTO o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
     }
 }

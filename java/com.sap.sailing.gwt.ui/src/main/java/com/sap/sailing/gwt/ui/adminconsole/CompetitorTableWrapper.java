@@ -184,6 +184,10 @@ public class CompetitorTableWrapper implements IsWidget {
         return filterField;
     }
     
+    public void refreshCompetitorList(Iterable<CompetitorDTO> competitors) {
+        getFilteredCompetitors(competitors);
+    }
+    
     public void refreshCompetitorList(String leaderboardName) {
         refreshCompetitorList(leaderboardName, false, null);
     }
@@ -207,7 +211,7 @@ public class CompetitorTableWrapper implements IsWidget {
 
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
-                    getFilteredCompetitors(result);
+                    refreshCompetitorList(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });
@@ -222,6 +226,7 @@ public class CompetitorTableWrapper implements IsWidget {
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
+                    refreshCompetitorList(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });
