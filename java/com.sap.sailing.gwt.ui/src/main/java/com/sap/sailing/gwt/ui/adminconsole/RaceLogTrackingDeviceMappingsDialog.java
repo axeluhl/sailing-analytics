@@ -92,6 +92,20 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                         @Override
                         public void cancel() {}
                     }).show();
+                } else if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    sailingService.revokeRaceLogEvents(leaderboardName, raceColumnName, fleetName, dto.originalRaceLogEventIds,
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Could not remove mappings: " + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refresh();
+                                }
+                        
+                    });
                 }
             }
         });
@@ -111,6 +125,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
                 int i = (int) pointMouseOverEvent.getXAsLong();
                 deviceMappingTable.getSelectionModel().setSelected(allMappings.get(i), true);
+                chart.getSeries()[0].getPoints()[i].select(true, false);
                 return true;
             }
         }).setColor(SERIES_COLOR));

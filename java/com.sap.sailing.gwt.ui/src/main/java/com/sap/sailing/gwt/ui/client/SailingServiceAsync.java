@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -567,5 +568,8 @@ public interface SailingServiceAsync {
 
     void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
+
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds,
+            AsyncCallback<Void> callback);
 }
 

@@ -204,7 +204,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     protected DeviceMappingDTO getResult() {
         String deviceTypeS = deviceType.getSelectedIndex() < 0 ? null : deviceType.getValue(deviceType.getSelectedIndex());
         return new DeviceMappingDTO(deviceTypeS, deviceId.getValue(), from.getValue(), to.getValue(),
-                selectedItem);
+                selectedItem, null);
     }
 
 }

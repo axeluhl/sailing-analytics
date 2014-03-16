@@ -195,6 +195,7 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
@@ -4145,7 +4146,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
         }
         return new DeviceMappingDTO(mapping.getDevice().getIdentifierType(),
-                deviceId, from, to, item);
+                deviceId, from, to, item, mapping.getOriginalRaceLogEventIds());
     }
     
     @Override
@@ -4173,17 +4174,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         DeviceMapping<?> mapping = convertToDeviceMapping(dto);
         TimePoint now = MillisecondsTimePoint.now();
         DeviceMappingEvent<?> event = null;
+        TimePoint from = mapping.getTimeRange().openBeginning() ? null : mapping.getTimeRange().from();
+        TimePoint to = mapping.getTimeRange().openEnd() ? null : mapping.getTimeRange().to();
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
             event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), mark, raceLog.getCurrentPassId(),
-                    mapping.getTimeRange().from(), mapping.getTimeRange().to());
+                    mapping.getDevice(), mark, raceLog.getCurrentPassId(), from, to);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
             event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), competitor, raceLog.getCurrentPassId(),
-                    mapping.getTimeRange().from(), mapping.getTimeRange().to());
+                    mapping.getDevice(), competitor, raceLog.getCurrentPassId(), from, to);
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -4217,11 +4218,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
-            return new DeviceMappingImpl<Mark>(mark, device, timeRange);
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange,dto.originalRaceLogEventIds);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange);
+            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds);
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -4232,8 +4233,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-        RaceLogEvent closingEvent = new OpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
+        List<CloseOpenEndedDeviceMappingEvent> closingEvents =
+                new OpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
                 new MillisecondsTimePoint(closingTimePoint)).analyze();
-        raceLog.add(closingEvent);
+        
+        for (RaceLogEvent event : closingEvents) {
+            raceLog.add(event);            
+        }
+    }
+    
+    @Override
+    public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
+            List<Serializable> eventIds) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        for (Serializable idToRevoke : eventIds) {
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
+                    getService().getServerAuthor(), raceLog.getCurrentPassId(), idToRevoke);
+            raceLog.add(event);
+        }
     }
 }

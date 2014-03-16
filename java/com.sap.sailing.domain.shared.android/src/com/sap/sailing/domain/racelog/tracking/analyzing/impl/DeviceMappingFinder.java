@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.tracking.analyzing.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,17 +55,22 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
 
     protected DeviceMapping<ItemT> getMapping(DeviceMappingEvent<ItemT> event) {
         return new DeviceMappingImpl<ItemT>(event.getMappedTo(), event.getDevice(),
-                new TimeRangeImpl(event.getFrom(), event.getTo()));
+                new TimeRangeImpl(event.getFrom(), event.getTo()), event.getId());
     }
 
     protected DeviceMapping<ItemT> getMapping(DeviceIdentifier device, ItemT item,
-            TimePoint from, TimePoint to) {
-        return new DeviceMappingImpl<ItemT>(item, device, new TimeRangeImpl(from, to));
+            TimePoint from, TimePoint to, List<Serializable> originalEventIds) {
+        return new DeviceMappingImpl<ItemT>(item, device, new TimeRangeImpl(from, to), originalEventIds);
     }
 
     protected DeviceMapping<ItemT> getMapping(DeviceIdentifier device, ItemT item,
-            TimeRange range) {
-        return new DeviceMappingImpl<ItemT>(item, device, range);
+            TimePoint from, TimePoint to, Serializable originalEventId) {
+        return getMapping(device, item, from, to, Collections.singletonList(originalEventId));
+    }
+
+    protected DeviceMapping<ItemT> getMapping(DeviceIdentifier device, ItemT item,
+            TimeRange range, List<Serializable> originalEventIds) {
+        return new DeviceMappingImpl<ItemT>(item, device, range, originalEventIds);
     }
 
     private <T, U> List<U> getItemSet(Map<T, List<U>> map, T item) {
@@ -85,6 +91,9 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
         ItemT item = toBeAdded.getMappedTo();
         DeviceIdentifier device = toBeAdded.getDevice();
         List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
+        
+        List<Serializable> originalEventIds = new ArrayList<Serializable>();
+        originalEventIds.addAll(toBeAdded.getOriginalRaceLogEventIds());
 
 
         for (DeviceMapping<ItemT> otherMapping : initial) {
@@ -105,6 +114,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
                         //otherwise merge
                     } else {
                         timeRange = timeRange.union(otherTimeRange);
+                        originalEventIds.addAll(otherMapping.getOriginalRaceLogEventIds());
                     }
 
                     //different device: higher prio overwrites other
@@ -114,11 +124,13 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
                     } else {
                         if (otherTimeRange.startsBefore(timeRange)) {
                             //add the part of the lower-prio mapping, that lies before the higher-prio mapping
-                            result.add(getMapping(otherMapping.getDevice(), item, otherTimeRange.from(), timeRange.from().minus(1)));
+                            result.add(getMapping(otherMapping.getDevice(), item, otherTimeRange.from(), timeRange.from().minus(1),
+                                    otherMapping.getOriginalRaceLogEventIds()));
                         }
                         if (otherTimeRange.endsAfter(timeRange)) {
                             //add the part of the lower-prio mapping, that lies after the higher-prio mapping
-                            result.add(getMapping(otherMapping.getDevice(), item, timeRange.to().plus(1), otherTimeRange.to()));
+                            result.add(getMapping(otherMapping.getDevice(), item, timeRange.to().plus(1), otherTimeRange.to(),
+                                    otherMapping.getOriginalRaceLogEventIds()));
                         }
                     }
                 }
@@ -130,7 +142,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
         }
 
         //other mappings have been checked for conflicts, now add toBeAdded (time range may have grown through merges)
-        result.add(getMapping(device, item, timeRange));
+        result.add(getMapping(device, item, timeRange, toBeAdded.getOriginalRaceLogEventIds()));
 
         return result;
     }
@@ -170,7 +182,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
             Map<Serializable, CloseOpenEndedDeviceMappingEvent> closingEvents) {
         List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
         
-        for (DeviceMappingEvent<ItemT> event : events) {
+        for (DeviceMappingEvent<ItemT> event : events) {            
             TimePoint from = event.getFrom();
             TimePoint to = event.getTo();
             TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ?
@@ -178,7 +190,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
             if (from == null) from = closingTimePoint;
             if (to == null) to = closingTimePoint;
             
-            result.add(getMapping(event.getDevice(), item, from, to));
+            result.add(getMapping(event.getDevice(), item, from, to, event.getId()));
         }
         
         return result;

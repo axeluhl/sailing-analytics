@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 
 public class RaceLogTrackingDeviceMappingsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CLOSE = "CLOSE";
+    public static final String ACTION_REMOVE = "REMOVE";
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
     
@@ -22,8 +23,10 @@ public class RaceLogTrackingDeviceMappingsImagesBarCell extends ImagesBarCell {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
         DeviceMappingDTO mapping = (DeviceMappingDTO) getContext().getKey();
         
+        result.add(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), makeImagePrototype(resources.removeIcon())));
+        
         if (mapping.from == null || mapping.to == null) {
-            result.add(new ImageSpec(ACTION_CLOSE, stringMessages.pingPosition(stringMessages.closeTimeRange()),
+            result.add(new ImageSpec(ACTION_CLOSE, stringMessages.closeTimeRange(),
                     makeImagePrototype(resources.closeTimeRange())));
         }
 
