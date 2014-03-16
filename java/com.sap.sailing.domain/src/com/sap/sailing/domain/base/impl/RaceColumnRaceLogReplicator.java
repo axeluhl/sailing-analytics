@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
@@ -142,6 +143,11 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     
     @Override
     public void visit(DefineMarkEvent event) {
+        notifyOnAdd(event);
+    }
+    
+    @Override
+    public void visit(CloseOpenEndedDeviceMappingEvent event) {
         notifyOnAdd(event);
     }
 }

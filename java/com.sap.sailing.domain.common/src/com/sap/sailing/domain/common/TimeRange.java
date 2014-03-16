@@ -3,8 +3,14 @@ package com.sap.sailing.domain.common;
 import java.io.Serializable;
 
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
+    /**
+     * @return {@code null}, if the timepoint is at the beginning of time
+     */
     TimePoint from();
     
+    /**
+     * @return {@code null}, if the timepoint is at the beginning of time
+     */
     TimePoint to();
     
     /**

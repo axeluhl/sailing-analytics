@@ -40,6 +40,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> revokeEventSerializer;
     private JsonSerializer<RaceLogEvent> registerCompetitorEventSerializer;
     private JsonSerializer<RaceLogEvent> defineMarkEventSerializer;
+    private JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer;
 
     private RaceLogEventFactory factory;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
@@ -67,6 +68,7 @@ public class RaceLogEventSerializerTest {
         revokeEventSerializer = mock(JsonSerializer.class);
         registerCompetitorEventSerializer = mock(JsonSerializer.class);
         defineMarkEventSerializer = mock(JsonSerializer.class);
+        closeOpenEndedDeviceMappingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
@@ -74,7 +76,8 @@ public class RaceLogEventSerializerTest {
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 deviceCompetitorMappingEventSerializer, deviceMarkMappingEventSerializer, denoteForTrackingEventSerializer,
-                startTrackingEventSerializer, revokeEventSerializer, registerCompetitorEventSerializer, defineMarkEventSerializer);
+                startTrackingEventSerializer, revokeEventSerializer, registerCompetitorEventSerializer, defineMarkEventSerializer,
+                closeOpenEndedDeviceMappingEventSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -238,6 +241,14 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = factory.createDefineMarkEvent(null, author, 0, null);
         serializer.serialize(event);
         verify(defineMarkEventSerializer).serialize(event);
+    }
+    
+    @Test
+    public void testCloseOpenEndedDeviceMappingEventSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createCloseOpenEndedDeviceMappingEvent(null, author, 0, null, null);
+        serializer.serialize(event);
+        verify(closeOpenEndedDeviceMappingEventSerializer).serialize(event);
     }
 
 }

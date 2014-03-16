@@ -43,6 +43,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -261,6 +262,20 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getMark(), actualEvent.getMark());
+    }
+
+    @Test
+    public void testStoreAndLoadCloseOpenDeviceMappingEvent() {
+        CloseOpenEndedDeviceMappingEvent expectedEvent = eventFactory.createCloseOpenEndedDeviceMappingEvent(
+                        expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
+                        UUID.randomUUID(), new MillisecondsTimePoint(49));
+
+        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        CloseOpenEndedDeviceMappingEvent actualEvent = loadEvent(dbObject);
+
+        assertBaseFields(expectedEvent, actualEvent);
+        assertEquals(expectedEvent.getDeviceMappingEventId(), actualEvent.getDeviceMappingEventId());
+        assertEquals(expectedEvent.getClosingTimePoint(), actualEvent.getClosingTimePoint());
     }
 
     /**

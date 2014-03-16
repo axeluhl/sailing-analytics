@@ -82,6 +82,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -764,6 +765,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDefineMarkEvent(event));
         return result;
     }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, CloseOpenEndedDeviceMappingEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCloseOpenEndedDeviceMappingEvent(event));
+        return result;
+    }
     
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
@@ -880,6 +889,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DefineMarkEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_MARK.name(), storeMark(event.getMark()));
+        return result;
+    }
+
+    private Object storeRaceLogCloseOpenEndedDeviceMappingEvent(CloseOpenEndedDeviceMappingEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), CloseOpenEndedDeviceMappingEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
+        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
         return result;
     }
 

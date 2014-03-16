@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -113,4 +114,7 @@ public interface RaceLogEventFactory {
     RegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Competitor competitor);
     
     DefineMarkEvent createDefineMarkEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Mark mark);
+    
+    CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
+            Serializable deviceMappingEventId, TimePoint closingTimePoint);
 }

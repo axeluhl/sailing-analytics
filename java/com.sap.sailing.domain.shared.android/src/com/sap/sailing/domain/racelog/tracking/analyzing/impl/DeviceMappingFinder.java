@@ -1,8 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking.analyzing.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,23 +14,20 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.tracking.impl.TimedComparator;
 
 /**
  * Extracts the {@link DeviceMapping}s with the appropriate {@link TimeRange}s from the {@link RaceLog}.
  * Based on the {@link DeviceMappingEvent}s found in the {@code RaceLog} for the tracked {@code items}
- * ({@code Competitor}s and {@code Marks}), the the actual mappings are created by removing conflicting
+ * ({@code Competitor}s and {@code Marks}), the actual mappings are created by removing conflicting
  * overlaps of these mappings by the rules defined below.
  * <p>
  * Mappings can be defined with an open-ended time range (e.g. track this from now on), which should then be
- * closed by another mapping for the same {@code item} and {@code device} which is open-ended towards the other
- * end (e.g. open-ended start instead of end).
- * If there are several candidates that could close an open range, the closest one is chosen.
- * One open-ended mapping can also close several others.
+ * closed by a corresponding {@link CloseOpenEndedDeviceMappingEvent}.
  * <p>
  * The events in the {@code RaceLog} are ordered by their priority through the {@link RaceLogEventComparator}.
  * Therefore, the rules for resolving conflicts are applied by inspecting the events in order of increasing
@@ -143,82 +139,47 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
     protected Map<ItemT, List<DeviceMapping<ItemT>>> performAnalysis() {
         Map<ItemT, List<DeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<DeviceMappingEvent<ItemT>>>();
         Map<ItemT, List<DeviceMapping<ItemT>>> mappings = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
+        Map<Serializable, CloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, CloseOpenEndedDeviceMappingEvent>();
 
         for (RaceLogEvent e : raceLog.getUnrevokedEvents()) {
             if (e instanceof DeviceMappingEvent && isValidMapping(((DeviceMappingEvent<?>) e))) {
                 @SuppressWarnings("unchecked")
                 DeviceMappingEvent<ItemT> mappingEvent = (DeviceMappingEvent<ItemT>) e;
                 getItemSet(events, mappingEvent.getMappedTo()).add(mappingEvent);
+            } else if (e instanceof CloseOpenEndedDeviceMappingEvent) {
+                CloseOpenEndedDeviceMappingEvent closingEvent = (CloseOpenEndedDeviceMappingEvent) e;
+                closingEvents.put(closingEvent.getDeviceMappingEventId(), closingEvent);
             }
         }
 
         for (ItemT item : events.keySet()) {
-            List<DeviceMapping<ItemT>> closedRanges = combineOpenRanges(events.get(item), item);
+            List<DeviceMapping<ItemT>> closedRanges = closeOpenRanges(events.get(item), item, closingEvents);
             
-            List<DeviceMapping<ItemT>> iterativelyResolve = new ArrayList<DeviceMapping<ItemT>>();
+            List<DeviceMapping<ItemT>> iterativelyResolved = new ArrayList<DeviceMapping<ItemT>>();
             for (DeviceMapping<ItemT> mapping : closedRanges) {
-                iterativelyResolve = getOverlapFreeMappings(iterativelyResolve, mapping);
+                iterativelyResolved = getOverlapFreeMappings(iterativelyResolved, mapping);
             }
             
-            mappings.put(item, iterativelyResolve);
+            mappings.put(item, iterativelyResolved);
         }
 
         return mappings;
     }
     
-    /**
-     * Combines mappings with open ranges for same device, that also close each other.
-     * If no matching open-ended mapping is found at all, the mapping is left untouched.
-     * One open-ended mapping can close multiple other open-ended mappings, if it is the closest for those.
-     * Mappings without open end are left untouched.
-     */
-    private List<DeviceMapping<ItemT>> combineOpenRanges(List<DeviceMappingEvent<ItemT>> events, ItemT item) {
-        final Map<DeviceMapping<ItemT>, DeviceMappingEvent<ItemT>> mappingToEvent = new HashMap<DeviceMapping<ItemT>, DeviceMappingEvent<ItemT>>();
-        List<DeviceMapping<ItemT>> openEnds = new ArrayList<DeviceMapping<ItemT>>();
-        List<DeviceMapping<ItemT>> openBeginnings = new ArrayList<DeviceMapping<ItemT>>();
+    private List<DeviceMapping<ItemT>> closeOpenRanges(List<DeviceMappingEvent<ItemT>> events, ItemT item,
+            Map<Serializable, CloseOpenEndedDeviceMappingEvent> closingEvents) {
         List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
-
-        for (DeviceMappingEvent<ItemT> event : events) {
-            DeviceMapping<ItemT> mapping = getMapping(event);
-            mappingToEvent.put(mapping, event);
-            result.add(mapping);
-        }
-
-        //find open-ended
-        for (DeviceMapping<ItemT> mapping : result) {
-            if (mapping.getTimeRange().openEnd()) openEnds.add(mapping);
-            else if (mapping.getTimeRange().openBeginning()) openBeginnings.add(mapping);
-        }
-
-        Collections.sort(openEnds, Collections.reverseOrder(TimedComparator.INSTANCE));
-
-        for (DeviceMapping<ItemT> openBeginning : openBeginnings) {
-            TimeRange openBeginningRange = openBeginning.getTimeRange();
-            DeviceIdentifier device = openBeginning.getDevice();
-
-            for (DeviceMapping<ItemT> openEnd : openEnds) {
-                TimeRange openEndRange = openEnd.getTimeRange();
-
-                if (device.equals(openEnd.getDevice()) && openEndRange.from().before(openBeginningRange.to())) {
-                    result.remove(openBeginning);
-                    result.remove(openEnd);
-
-                    DeviceMapping<ItemT> combined = getMapping(device, item, openEndRange.intersection(openBeginningRange));
-                    DeviceMappingEvent<ItemT> higherPrioEvent = RaceLogEventComparator.INSTANCE.compare(mappingToEvent.get(openBeginning),
-                            mappingToEvent.get(openEnd)) > 0 ? mappingToEvent.get(openBeginning) : mappingToEvent.get(openEnd);
-                    mappingToEvent.put(combined, higherPrioEvent);
-                    result.add(combined);
-                    break;
-                }
-            }
-        }
         
-        Collections.sort(result, new Comparator<DeviceMapping<ItemT>>() {
-            @Override
-            public int compare(DeviceMapping<ItemT> arg0, DeviceMapping<ItemT> arg1) {
-                return RaceLogEventComparator.INSTANCE.compare(mappingToEvent.get(arg0), mappingToEvent.get(arg1));
-            }
-        });
+        for (DeviceMappingEvent<ItemT> event : events) {
+            TimePoint from = event.getFrom();
+            TimePoint to = event.getTo();
+            TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ?
+                    closingEvents.get(event.getId()).getClosingTimePoint() : null;
+            if (from == null) from = closingTimePoint;
+            if (to == null) to = closingTimePoint;
+            
+            result.add(getMapping(event.getDevice(), item, from, to));
+        }
         
         return result;
     }

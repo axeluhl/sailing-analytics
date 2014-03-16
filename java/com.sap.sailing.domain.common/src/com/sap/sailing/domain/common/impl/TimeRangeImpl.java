@@ -16,7 +16,7 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
 
     @Override
     public int compareTo(TimeRange other) {
-        if (other.from() == from() && other.to() == to()) return 0;
+        if (other.from().equals(from()) && other.to().equals(to())) return 0;
         return startsBefore(other) ? -1 : 1;
     }
 
