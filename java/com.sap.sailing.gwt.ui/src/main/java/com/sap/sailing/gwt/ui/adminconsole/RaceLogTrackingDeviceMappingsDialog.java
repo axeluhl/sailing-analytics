@@ -24,7 +24,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -40,6 +42,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     
     private List<DeviceMappingDTO> allMappings = new ArrayList<DeviceMappingDTO>();
     
+    private DeviceMappingTableWrapper deviceMappingTable;
+    
     private Point[] data;
     
     private Date latest;
@@ -52,26 +56,17 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             final String raceColumnName, final String fleetName) {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, false);
         
-        refresh();
-    }
-
-    @Override
-    protected void addButtons(Panel buttonPanel) {
-        Button addCompetitorButton = new Button(stringMessages.add());
-        addCompetitorButton.addClickHandler(new ClickHandler() {
+        deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
+        deviceMappingTable.getTable().addCellPreviewHandler(new CellPreviewEvent.Handler<DeviceMappingDTO>() {
             @Override
-            public void onClick(ClickEvent event) {
-                addMapping();
+            public void onCellPreview(CellPreviewEvent<DeviceMappingDTO> event) {
+                int i = allMappings.indexOf(event.getValue());
+                chart.getSeries()[0].getPoints()[i].select(true, false);
             }
         });
-        buttonPanel.add(addCompetitorButton);
-
-        super.addButtons(buttonPanel);
-    }
-    
-    @Override
-    protected void addMainContent(Panel mainPanel) {
-        super.addMainContent(mainPanel);
+        
+        HorizontalPanel panel = new HorizontalPanel();
+        mainPanel.add(panel);
         
         chart = new Chart()
         .setType(Series.Type.COLUMN_RANGE)
@@ -82,7 +77,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
             @Override
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-                pointMouseOverEvent.getXAsLong();
+                int i = (int) pointMouseOverEvent.getXAsLong();
+                deviceMappingTable.getSelectionModel().setSelected(allMappings.get(i), true);
                 return true;
             }
         }).setColor(SERIES_COLOR));
@@ -102,8 +98,6 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         .setType(Axis.Type.DATE_TIME)
         .setGridLineWidth(0)
         .setMinorGridLineWidth(0);
-        
-        mainPanel.add(chart);
 
         chart.setWidth(CHART_WIDTH + "px");
         chart.setHeight("400px");
@@ -121,6 +115,26 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                     "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
         }));
+        
+
+        panel.add(chart);
+        panel.add(deviceMappingTable);
+        
+        refresh();
+    }
+
+    @Override
+    protected void addButtons(Panel buttonPanel) {
+        Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addMapping();
+            }
+        });
+        buttonPanel.add(addCompetitorButton);
+
+        super.addButtons(buttonPanel);
     }
 
     @Override
@@ -133,7 +147,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         data = new Point[allMappings.size()];
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
-        long extension = (long) ((latestMillis - earliestMillis) * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
+        long range = latestMillis - earliestMillis;
+        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
         long yMin = earliestMillis - extension;
         long yMax = latestMillis + extension;
         
@@ -142,8 +157,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             JSONObject userData = new JSONObject();
             userData.put(FIELD_INDEX, userData);
             
-            long from = mapping.from == null ? yMin - extension : mapping.from.getTime();
-            long to = mapping.to == null ? yMax + extension : mapping.to.getTime();
+            long from = mapping.from == null ? yMin - range : mapping.from.getTime();
+            long to = mapping.to == null ? yMax + range : mapping.to.getTime();
             
             data[i] = new Point(i, from, to);
             
@@ -167,7 +182,6 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     }
     
     private void refresh() {
-        allMappings.clear();
         earliest = new Date(Long.MAX_VALUE);
         latest = new Date(Long.MIN_VALUE);
         
@@ -176,10 +190,11 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             public void onSuccess(List<DeviceMappingDTO> result) {
                 for (DeviceMappingDTO mapping : result) {
                     updateExtremes(mapping);
-                    allMappings.add(mapping);
                 }
+                allMappings = result;
                 
                 updateChart();
+                deviceMappingTable.refresh(allMappings);
             }
             
             @Override
