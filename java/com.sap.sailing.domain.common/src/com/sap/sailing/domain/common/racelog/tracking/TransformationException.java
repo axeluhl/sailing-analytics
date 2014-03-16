@@ -9,7 +9,7 @@ public class TransformationException extends IOException {
     }
 
     public TransformationException(Class<?> from, Class<?> to, String at, Throwable e) {
-        super(String.format("Couldn't transform %s into %s at %s", from.getName(), to.getName(), at), e);
+        super("Couldn't transform "+from.getName()+" into "+to.getName()+" at "+at, e);
     }
 
     public TransformationException(Class<?> from, Class<?> to, String at) {
