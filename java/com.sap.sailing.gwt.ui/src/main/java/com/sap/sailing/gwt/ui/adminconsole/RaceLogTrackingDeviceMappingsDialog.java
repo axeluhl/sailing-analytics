@@ -7,6 +7,8 @@ import java.util.List;
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Global;
+import org.moxieapps.gwt.highcharts.client.Highcharts;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -34,13 +36,14 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     public static final double PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS = 0.1;
     public static final String FIELD_INDEX = "index";
     public static final int CHART_WIDTH = 500;
+    public static final String SERIES_COLOR = "#fcb913";
     
     private List<DeviceMappingDTO> allMappings = new ArrayList<DeviceMappingDTO>();
     
     private Point[] data;
     
-    private Date latestMappingTo;
-    private Date earliestMappingFrom;
+    private Date latest;
+    private Date earliest;
     
     private Chart chart;
     
@@ -82,7 +85,13 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                 pointMouseOverEvent.getXAsLong();
                 return true;
             }
-        }));
+        }).setColor(SERIES_COLOR));
+        
+        Highcharts.setOptions(
+                new Highcharts.Options().setGlobal(
+                        new Global()
+                        .setUseUTC(false)
+                        ));
         
         chart.getXAxis().setOption("labels/enabled", false)
         .setGridLineWidth(0)
@@ -96,8 +105,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         
         mainPanel.add(chart);
 
-        chart.setWidth(CHART_WIDTH + "px");//Window.getClientWidth() / 2 + "px");
-        chart.setHeight("400px");//Window.getClientHeight() / 2 + "px");
+        chart.setWidth(CHART_WIDTH + "px");
+        chart.setHeight("400px");
         
         chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
             @Override
@@ -108,7 +117,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                 
                 return "<b>" + stringMessages.device() + ":</b> " + mapping.deviceType + " - " + mapping.deviceId + "<br/>" +
                     "<b>" + stringMessages.mappedTo() + ":</b> " + itemType + " - " + mapping.mappedTo + "<br/>" +
-                    "<b>" + stringMessages.timeRange() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.from) + " - " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
+                    "<b>" + stringMessages.from() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.from) + "<br/>" +
+                    "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
         }));
     }
@@ -121,43 +131,51 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     
     private void updateChart() {
         data = new Point[allMappings.size()];
-        long earliest = earliestMappingFrom.getTime();
-        long latest = latestMappingTo.getTime();
-        long extension = (long) ((latest - earliest) * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
+        long earliestMillis = earliest.getTime();
+        long latestMillis = latest.getTime();
+        long extension = (long) ((latestMillis - earliestMillis) * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
+        long yMin = earliestMillis - extension;
+        long yMax = latestMillis + extension;
+        
         int i = 0;
         for (DeviceMappingDTO mapping : allMappings) {
             JSONObject userData = new JSONObject();
             userData.put(FIELD_INDEX, userData);
-//            long from = mapping.from == null ? Long.MIN_VALUE : mapping.from.getTime();
-//            long to = mapping.to == null ? Long.MAX_VALUE : mapping.to.getTime();
-            long from = mapping.from == null ? earliest : mapping.from.getTime();
-            long to = mapping.to == null ? latest : mapping.to.getTime();
-            data[i] = new Point(i, from, to);//open, high, low, close);//.setUserData(userData);
+            
+            long from = mapping.from == null ? yMin - extension : mapping.from.getTime();
+            long to = mapping.to == null ? yMax + extension : mapping.to.getTime();
+            
+            data[i] = new Point(i, from, to);
             
             i++;
         }
         
         chart.removeAllSeries(false);
         
-        chart.getYAxis().setMin(earliest - extension)
-        .setMax(latest + extension);
-
         chart.addSeries(chart.createSeries()
                 .setName(stringMessages.deviceMappings())
                 .setPoints(data));
+        
+        chart.getYAxis().setExtremes(yMin, yMax);
+    }
+    
+    private void updateExtremes(DeviceMappingDTO mapping) {
+        if (mapping.from != null && earliest.after(mapping.from)) earliest = mapping.from;
+        if (mapping.to != null && latest.before(mapping.to)) latest = mapping.to;
+        if (mapping.to != null && earliest.after(mapping.to)) earliest = mapping.to;
+        if (mapping.from != null && latest.before(mapping.from)) latest = mapping.from;
     }
     
     private void refresh() {
         allMappings.clear();
-        earliestMappingFrom = new Date(Long.MAX_VALUE);
-        latestMappingTo = new Date(Long.MIN_VALUE);
+        earliest = new Date(Long.MAX_VALUE);
+        latest = new Date(Long.MIN_VALUE);
         
         sailingService.getDeviceMappingsFromRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 for (DeviceMappingDTO mapping : result) {
-                    if (mapping.from != null && earliestMappingFrom.after(mapping.from)) earliestMappingFrom = mapping.from;
-                    if (mapping.to != null && latestMappingTo.before(mapping.to)) latestMappingTo = mapping.to;      
+                    updateExtremes(mapping);
                     allMappings.add(mapping);
                 }
                 
