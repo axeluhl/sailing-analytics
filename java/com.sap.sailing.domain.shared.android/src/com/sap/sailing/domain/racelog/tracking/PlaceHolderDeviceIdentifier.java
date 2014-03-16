@@ -34,12 +34,33 @@ public class PlaceHolderDeviceIdentifier implements DeviceIdentifier {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((stringRepresentation == null) ? 0 : stringRepresentation.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DeviceIdentifier) {
-            DeviceIdentifier other = (DeviceIdentifier) obj;
-            return type.equals(other.getIdentifierType()) &&
-                    stringRepresentation.equals(other.getStringRepresentation());
-        }
-        return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PlaceHolderDeviceIdentifier other = (PlaceHolderDeviceIdentifier) obj;
+        if (stringRepresentation == null) {
+            if (other.stringRepresentation != null)
+                return false;
+        } else if (!stringRepresentation.equals(other.stringRepresentation))
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
+            return false;
+        return true;
     }
 }

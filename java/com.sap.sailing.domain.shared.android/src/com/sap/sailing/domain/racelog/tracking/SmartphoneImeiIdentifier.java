@@ -35,6 +35,11 @@ public class SmartphoneImeiIdentifier implements DeviceIdentifier {
     }
     
     @Override
+    public int hashCode() {
+        return imei.hashCode();
+    }
+    
+    @Override
     public String getStringRepresentation() {
         return imei;
     }

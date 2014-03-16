@@ -38,4 +38,9 @@ public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
         }
         return false;
     }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

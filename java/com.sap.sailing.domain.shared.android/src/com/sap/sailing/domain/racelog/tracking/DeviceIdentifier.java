@@ -5,6 +5,10 @@ import java.io.Serializable;
 /**
  * Identifies any kind of tracking device. Should be implemented accordingly for different tracking
  * adapters, e.g. for smartphones, Igtimi trackers etc.
+ * 
+ * {@link Object#equals(Object)} and {@link Object#hashCode()} should be implemented so that multiple
+ * deserializations of same device identifier (conceptually) result in objects that are be identified
+ * as being equal through these two methods.
  * @author Fredrik Teschke
  *
  */
