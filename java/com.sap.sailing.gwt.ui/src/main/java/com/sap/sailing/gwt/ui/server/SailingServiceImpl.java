@@ -129,6 +129,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
@@ -155,6 +156,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -202,6 +204,7 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.LastPingMappingEventFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.OpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
@@ -4167,20 +4170,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceType, dto.deviceId);
+        DeviceMapping<?> mapping = convertToDeviceMapping(dto);
         TimePoint now = MillisecondsTimePoint.now();
-        TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
-        TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
         DeviceMappingEvent<?> event = null;
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
             event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
-                    device, mark, raceLog.getCurrentPassId(), from, to);
+                    mapping.getDevice(), mark, raceLog.getCurrentPassId(),
+                    mapping.getTimeRange().from(), mapping.getTimeRange().to());
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
             event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now, getService().getServerAuthor(),
-                    device, competitor, raceLog.getCurrentPassId(), from, to);
+                    mapping.getDevice(), competitor, raceLog.getCurrentPassId(),
+                    mapping.getTimeRange().from(), mapping.getTimeRange().to());
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -4205,5 +4208,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
         }
         return result;
-    }    
+    }
+    
+    DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceType, dto.deviceId);
+        TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
+        TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
+        TimeRange timeRange = new TimeRangeImpl(from, to);
+        if (dto.mappedTo instanceof MarkDTO) {
+            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange);
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
+            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange);
+        } else {
+            throw new RuntimeException("Can only map devices to competitors or marks");
+        }
+    }
+    
+    @Override
+    public void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
+        RaceLogEvent closingEvent = new OpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
+                new MillisecondsTimePoint(closingTimePoint)).analyze();
+        raceLog.add(closingEvent);
+    }
 }

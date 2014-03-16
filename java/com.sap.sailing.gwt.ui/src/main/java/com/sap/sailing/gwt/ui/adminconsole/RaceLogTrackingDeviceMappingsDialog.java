@@ -19,6 +19,7 @@ import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
@@ -64,6 +65,37 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                 chart.getSeries()[0].getPoints()[i].select(true, false);
             }
         });
+        ImagesBarColumn<DeviceMappingDTO, RaceLogTrackingDeviceMappingsImagesBarCell> actionCol =
+                new ImagesBarColumn<DeviceMappingDTO, RaceLogTrackingDeviceMappingsImagesBarCell>(
+                new RaceLogTrackingDeviceMappingsImagesBarCell(stringMessages));
+        actionCol.setFieldUpdater(new FieldUpdater<DeviceMappingDTO, String>() {
+            @Override
+            public void update(int index, final DeviceMappingDTO dto, String value) {
+                if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_CLOSE.equals(value)) {
+                    new SetTimePointDialog(stringMessages, stringMessages.setClosingTimePoint(), new DialogCallback<Date>() {
+                        @Override
+                        public void ok(Date editedObject) {
+                            sailingService.closeOpenEndedDeviceMapping(leaderboardName, raceColumnName, fleetName,
+                                    dto, editedObject, new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            refresh();
+                                        }
+                                        
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError("Could not close open ended mapping: " + caught.getMessage());
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void cancel() {}
+                    }).show();
+                }
+            }
+        });
+        deviceMappingTable.getTable().addColumn(actionCol, stringMessages.actions());
         
         HorizontalPanel panel = new HorizontalPanel();
         mainPanel.add(panel);
@@ -121,6 +153,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         panel.add(deviceMappingTable);
         
         refresh();
+        center();
     }
 
     @Override

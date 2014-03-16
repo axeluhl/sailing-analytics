@@ -992,4 +992,7 @@ public interface StringMessages extends Messages {
     String pleaseSelectAnItemToMapTo();
     String device();
     String timeRange();
+    String closeTimeRange();
+    String setClosingTimePoint();
+    String startOfTimeRangeMustLieBeforeEnd();
 }

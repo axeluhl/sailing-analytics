@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -433,4 +434,7 @@ public interface SailingService extends RemoteService {
             throws TransformationException;
     
     List<String> getDeserializableDeviceIdentifierTypes();
+    
+    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping,
+            Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException;
 }

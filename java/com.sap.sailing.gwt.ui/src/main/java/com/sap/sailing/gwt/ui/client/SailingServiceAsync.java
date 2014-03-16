@@ -564,5 +564,8 @@ public interface SailingServiceAsync {
 
     void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mapping, AsyncCallback<Void> callback);
+
+    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
 }
 

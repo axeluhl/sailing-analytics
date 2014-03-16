@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
@@ -57,6 +58,10 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
                 if ((valueToValidate.from == null || valueToValidate.from.compareTo(new Date(Long.MIN_VALUE)) == 0)
                         && (valueToValidate.to == null || valueToValidate.to.compareTo(new Date(Long.MAX_VALUE)) == 0)) {
                     return stringMessages.atMostOneEndOfTheTimeRangeMayBeOpen();
+                }
+                if (valueToValidate.from != null && valueToValidate.to != null &&
+                        valueToValidate.to.before(valueToValidate.from)) {
+                    return stringMessages.startOfTimeRangeMustLieBeforeEnd();
                 }
                 if (valueToValidate.mappedTo == null) {
                     return stringMessages.pleaseSelectAnItemToMapTo();
@@ -142,6 +147,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel panel = new HorizontalPanel();
+        VerticalPanel tablesPanel = new VerticalPanel();
         Grid entryGrid = new Grid(4, 2);
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
@@ -156,8 +162,9 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         entryGrid.setWidget(3, 1, to);
         
         panel.add(entryGrid);
-        panel.add(marksPanel);
-        panel.add(competitorsPanel);
+        panel.add(tablesPanel);
+        tablesPanel.add(marksPanel);
+        tablesPanel.add(competitorsPanel);
         
         marksPanel.setContentWidget(markTable.getTable());
         competitorsPanel.setContentWidget(competitorTable.getTable());

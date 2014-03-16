@@ -19,7 +19,8 @@ public class LastPingMappingEventFinder<T extends WithID> extends RaceLogAnalyze
         for (RaceLogEvent e : raceLog.getUnrevokedEventsDescending()) {
             if (e instanceof DeviceMappingEvent) {
                 DeviceMappingEvent<?> mappingEvent = (DeviceMappingEvent<?>) e;
-                if (item.equals(mappingEvent.getMappedTo()) && mappingEvent.getFrom().equals(mappingEvent.getTo())) {
+                if (item.equals(mappingEvent.getMappedTo()) && mappingEvent.getFrom() != null &&
+                        mappingEvent.getTo() != null && mappingEvent.getFrom().equals(mappingEvent.getTo())) {
                     @SuppressWarnings("unchecked")
                     DeviceMappingEvent<T> cast = (DeviceMappingEvent<T>) mappingEvent;
                     return cast;
