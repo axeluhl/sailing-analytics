@@ -40,7 +40,7 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
             if (fallback != null) {
                 return fallback;
             } else {
-                throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType);       
+                throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType.getSimpleName());       
             }
         }
 

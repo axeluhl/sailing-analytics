@@ -34,7 +34,7 @@ public class GPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJso
         }
         throw new NoCorrespondingServiceRegisteredException(
                 "Only handlers for GPSFix, GPSFixMoving, GPSFixNmeaDTO, GPSFixMovingNmeaDTO are registered",
-                type, GPSFixJsonHandler.class);
+                type, GPSFixJsonHandler.class.getSimpleName());
     }
 
     @Override

@@ -26,7 +26,7 @@ TypeBasedServiceFinder<ServiceType> {
             throws NoCorrespondingServiceRegisteredException {
         if (type.equals(this.type)) return service;
         if (fallback != null) return fallback;
-        throw new NoCorrespondingServiceRegisteredException("Only one service registered", type, service.getClass());
+        throw new NoCorrespondingServiceRegisteredException("Only one service registered", type, service.getClass().getSimpleName());
     }
 
     @Override
