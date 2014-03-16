@@ -5,8 +5,8 @@ import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRange {
-	public static final TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);
-	public static final TimePoint EndOfTime = new MillisecondsTimePoint(Long.MAX_VALUE);
+    public static final TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);
+    public static final TimePoint EndOfTime = new MillisecondsTimePoint(Long.MAX_VALUE);
     private static final long serialVersionUID = 8710198176227507300L;
 
     public TimeRangeImpl(TimePoint from, TimePoint to) {
@@ -67,39 +67,39 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
         return to().asMillis() - timePoint.asMillis();
     }
 
-	@Override
-	public TimeRange union(TimeRange other) {
-		if (! intersects(other)) return null;
-		TimePoint newFrom = startsBefore(other) ? from() : other.from();
-		TimePoint newTo = endsAfter(other) ? to() : other.to();
-		return new TimeRangeImpl(newFrom, newTo);
-	}
+    @Override
+    public TimeRange union(TimeRange other) {
+        if (! intersects(other)) return null;
+        TimePoint newFrom = startsBefore(other) ? from() : other.from();
+        TimePoint newTo = endsAfter(other) ? to() : other.to();
+        return new TimeRangeImpl(newFrom, newTo);
+    }
 
-	@Override
-	public boolean openBeginning() {
-		return from().equals(BeginningOfTime);
-	}
+    @Override
+    public boolean openBeginning() {
+        return from().equals(BeginningOfTime);
+    }
 
-	@Override
-	public boolean openEnd() {
-		return to().equals(EndOfTime);
-	}
+    @Override
+    public boolean openEnd() {
+        return to().equals(EndOfTime);
+    }
 
-	@Override
-	public TimeRange intersection(TimeRange other) {
-		if (! intersects(other)) return null;
-		TimePoint newFrom = startsBefore(other) ? other.from() : from();
-		TimePoint newTo = endsAfter(other) ? other.to() : to();
-		return new TimeRangeImpl(newFrom, newTo);
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj instanceof TimeRange) {
-			TimeRange other = (TimeRange) obj;
-			return from().equals(other.from()) && to().equals(other.to());
-		}
-		return super.equals(obj);
-	}
+    @Override
+    public TimeRange intersection(TimeRange other) {
+        if (! intersects(other)) return null;
+        TimePoint newFrom = startsBefore(other) ? other.from() : from();
+        TimePoint newTo = endsAfter(other) ? other.to() : to();
+        return new TimeRangeImpl(newFrom, newTo);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof TimeRange) {
+            TimeRange other = (TimeRange) obj;
+            return from().equals(other.from()) && to().equals(other.to());
+        }
+        return super.equals(obj);
+    }
 }
