@@ -27,6 +27,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 else return stringMessages.mark();
             }
         };
+        itemTypeCol.setSortable(true);
         listHandler.setComparator(itemTypeCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
@@ -41,6 +42,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 return mapping.mappedTo.toString();
             }
         };
+        itemCol.setSortable(true);
         listHandler.setComparator(itemCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
@@ -55,6 +57,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 return mapping.deviceType;
             }
         };
+        deviceTypeCol.setSortable(true);
         listHandler.setComparator(deviceTypeCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
@@ -69,6 +72,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 return mapping.deviceId;
             }
         };
+        deviceIdCol.setSortable(true);
         listHandler.setComparator(deviceIdCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
@@ -83,6 +87,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 return DateAndTimeFormatterUtil.formatDateAndTime(mapping.from);
             }
         };
+        fromCol.setSortable(true);
         listHandler.setComparator(fromCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
@@ -97,6 +102,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 return DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
         };
+        toCol.setSortable(true);
         listHandler.setComparator(toCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
