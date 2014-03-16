@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
-import com.sap.sailing.domain.base.SharedDomainFactory;
 
 
 /**
@@ -23,11 +21,6 @@ public class PlaceHolderDeviceIdentifier implements DeviceIdentifier {
     public PlaceHolderDeviceIdentifier(String type, String stringRepresentation) {
         this.type = type;
         this.stringRepresentation = stringRepresentation;
-    }
-
-    @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
-        return this;
     }
 
     @Override

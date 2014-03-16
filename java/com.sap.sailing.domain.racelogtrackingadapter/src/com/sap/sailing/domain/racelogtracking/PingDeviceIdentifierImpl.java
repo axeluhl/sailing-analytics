@@ -2,9 +2,6 @@ package com.sap.sailing.domain.racelogtracking;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
-import com.sap.sailing.domain.base.SharedDomainFactory;
-
 public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     private static final long serialVersionUID = -4049961972156611640L;
 
@@ -22,12 +19,6 @@ public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     @Override
     public String getIdentifierType() {
         return TYPE;
-    }
-
-    @Override
-    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
-        //No resolving necessary, only relevant on the creating server
-        return this;
     }
 
     @Override

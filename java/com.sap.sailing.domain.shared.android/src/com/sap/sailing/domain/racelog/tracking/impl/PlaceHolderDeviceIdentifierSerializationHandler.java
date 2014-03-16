@@ -3,7 +3,6 @@ package com.sap.sailing.domain.racelog.tracking.impl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 
 /**
@@ -16,17 +15,15 @@ import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
  * @author Fredrik Teschke
  *
  */
-public class PlaceHolderDeviceIdentifierSerializationHandler implements DeviceIdentifierSerializationHandler<Object> {
+public class PlaceHolderDeviceIdentifierSerializationHandler {
 
-    @Override
-    public DeviceIdentifier deserialize(Object object, String type, String stringRepresentation) throws TransformationException {
+    public DeviceIdentifier deserialize(String object, String type, String stringRepresentation) throws TransformationException {
         if (type.equals(PlaceHolderDeviceIdentifier.TYPE)) {
             type = (String) object;
         }
         return new PlaceHolderDeviceIdentifier(type, stringRepresentation);
     }
 
-    @Override
     public Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
         return new Pair<String, String>(object.getIdentifierType(), PlaceHolderDeviceIdentifier.TYPE);
     }

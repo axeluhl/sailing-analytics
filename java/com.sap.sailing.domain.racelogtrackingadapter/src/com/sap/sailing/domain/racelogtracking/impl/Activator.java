@@ -13,6 +13,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
@@ -53,6 +54,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneImeiMongoHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneImeiJsonHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new SmartphoneImeiStringSerializationHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
         
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new PingDeviceIdentifierMongoHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new PingDeviceIdentifierJsonHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));

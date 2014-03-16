@@ -18,6 +18,6 @@ public class SmartphoneImeiIdentifierJsonDeserializer extends TypeBasedJsonDeser
     protected SmartphoneImeiIdentifier deserializeAfterCheckingType(JSONObject object)
             throws JsonDeserializationException {
         String imei = (String) object.get(FIELD_IMEI);
-        return (SmartphoneImeiIdentifier) new SmartphoneImeiIdentifier(imei).resolve(null);
+        return (SmartphoneImeiIdentifier) new SmartphoneImeiIdentifier(imei);
     }
 }
