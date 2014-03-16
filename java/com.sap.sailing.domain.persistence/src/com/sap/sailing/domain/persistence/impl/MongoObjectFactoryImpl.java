@@ -811,10 +811,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             e.printStackTrace();
         }
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
-        TimePoint from = event.getFrom() == null ? new MillisecondsTimePoint(Long.MIN_VALUE) : event.getFrom();
-        TimePoint to = event.getTo() == null ? new MillisecondsTimePoint(Long.MAX_VALUE) : event.getTo();
-        storeTimePoint(from, result, FieldNames.RACE_LOG_FROM);
-        storeTimePoint(to, result, FieldNames.RACE_LOG_TO);
+        if (event.getFrom() != null) {
+            storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
+        }
+        if (event.getTo() != null) {
+            storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
+        }
     }
 
     private Object storeRaceLogDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent event) {
