@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.tracking.analyzing.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +71,10 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
         return new DeviceMappingImpl<ItemT>(item, device, range);
     }
 
-    private <T> List<DeviceMapping<ItemT>> getItemSet(Map<T, List<DeviceMapping<ItemT>>> map, T item) {
-        List<DeviceMapping<ItemT>> list = map.get(item);
+    private <T, U> List<U> getItemSet(Map<T, List<U>> map, T item) {
+        List<U> list = map.get(item);
         if (list == null) {
-            list = new ArrayList<DeviceMapping<ItemT>>();
+            list = new ArrayList<U>();
             map.put(item, list);
         }
         return list;
@@ -97,7 +98,7 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
             if (otherTimeRange.intersects(timeRange)) {
 
                 //same device
-                if (otherMapping.getDevice() == device) {
+                if (otherMapping.getDevice().equals(device)) {
 
                     //two open ranges that close each other
                     if ((otherTimeRange.openEnd() && timeRange.openBeginning() && otherTimeRange.from().before(timeRange.to())) ||
@@ -117,11 +118,11 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
                     } else {
                         if (otherTimeRange.startsBefore(timeRange)) {
                             //add the part of the lower-prio mapping, that lies before the higher-prio mapping
-                            result.add(getMapping(device, item, otherTimeRange.from(), timeRange.from().minus(1)));
+                            result.add(getMapping(otherMapping.getDevice(), item, otherTimeRange.from(), timeRange.from().minus(1)));
                         }
                         if (otherTimeRange.endsAfter(timeRange)) {
                             //add the part of the lower-prio mapping, that lies after the higher-prio mapping
-                            result.add(getMapping(device, item, timeRange.to().plus(1), otherTimeRange.to()));
+                            result.add(getMapping(otherMapping.getDevice(), item, timeRange.to().plus(1), otherTimeRange.to()));
                         }
                     }
                 }
@@ -140,95 +141,85 @@ public class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<M
 
     @Override
     protected Map<ItemT, List<DeviceMapping<ItemT>>> performAnalysis() {
-        Map<ItemT, List<DeviceMapping<ItemT>>> preliminary = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
-        Map<ItemT, List<DeviceMapping<ItemT>>> result = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
+        Map<ItemT, List<DeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<DeviceMappingEvent<ItemT>>>();
+        Map<ItemT, List<DeviceMapping<ItemT>>> mappings = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
 
-        /* iterate over events in order
-         * -> events with higher importance (later, higher author prio) are located towards the end, and should
-         * therefore override those before
-         * 
-         * group the events by item, as conflicts have to be resolved within these per-item groups
-         */
         for (RaceLogEvent e : raceLog.getUnrevokedEvents()) {
             if (e instanceof DeviceMappingEvent && isValidMapping(((DeviceMappingEvent<?>) e))) {
                 @SuppressWarnings("unchecked")
                 DeviceMappingEvent<ItemT> mappingEvent = (DeviceMappingEvent<ItemT>) e;
-                ItemT item = mappingEvent.getMappedTo();
-                getItemSet(preliminary, item).add(getMapping(mappingEvent));
+                getItemSet(events, mappingEvent.getMappedTo()).add(mappingEvent);
             }
         }
 
-        //combine mappings that close each other
-        for (ItemT item : preliminary.keySet()) {
-            preliminary.put(item, combineOpenRanges(preliminary.get(item), item));
-        }
-
-        //resolve overlaps
-        for (ItemT item : preliminary.keySet()) {
-            List<DeviceMapping<ItemT>> temp = new ArrayList<DeviceMapping<ItemT>>();
-            for (DeviceMapping<ItemT> mapping : preliminary.get(item)) {
-                temp = getOverlapFreeMappings(temp, mapping);
+        for (ItemT item : events.keySet()) {
+            List<DeviceMapping<ItemT>> closedRanges = combineOpenRanges(events.get(item), item);
+            
+            List<DeviceMapping<ItemT>> iterativelyResolve = new ArrayList<DeviceMapping<ItemT>>();
+            for (DeviceMapping<ItemT> mapping : closedRanges) {
+                iterativelyResolve = getOverlapFreeMappings(iterativelyResolve, mapping);
             }
-            result.put(item, temp);
+            
+            mappings.put(item, iterativelyResolve);
         }
 
-        return result;
+        return mappings;
     }
-
+    
     /**
      * Combines mappings with open ranges for same device, that also close each other.
      * If no matching open-ended mapping is found at all, the mapping is left untouched.
      * One open-ended mapping can close multiple other open-ended mappings, if it is the closest for those.
      * Mappings without open end are left untouched.
      */
-    private List<DeviceMapping<ItemT>> combineOpenRanges(List<DeviceMapping<ItemT>> list, ItemT item) {
-        //sort by devices
-        Map<DeviceIdentifier, List<DeviceMapping<ItemT>>> byDevice = new HashMap<DeviceIdentifier, List<DeviceMapping<ItemT>>>();
-        for (DeviceMapping<ItemT> mapping : list) {
-            getItemSet(byDevice, mapping.getDevice()).add(mapping);
+    private List<DeviceMapping<ItemT>> combineOpenRanges(List<DeviceMappingEvent<ItemT>> events, ItemT item) {
+        final Map<DeviceMapping<ItemT>, DeviceMappingEvent<ItemT>> mappingToEvent = new HashMap<DeviceMapping<ItemT>, DeviceMappingEvent<ItemT>>();
+        List<DeviceMapping<ItemT>> openEnds = new ArrayList<DeviceMapping<ItemT>>();
+        List<DeviceMapping<ItemT>> openBeginnings = new ArrayList<DeviceMapping<ItemT>>();
+        List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
+
+        for (DeviceMappingEvent<ItemT> event : events) {
+            DeviceMapping<ItemT> mapping = getMapping(event);
+            mappingToEvent.put(mapping, event);
+            result.add(mapping);
         }
 
-        List<DeviceMapping<ItemT>> overallResult = new ArrayList<DeviceMapping<ItemT>>(); 
+        //find open-ended
+        for (DeviceMapping<ItemT> mapping : result) {
+            if (mapping.getTimeRange().openEnd()) openEnds.add(mapping);
+            else if (mapping.getTimeRange().openBeginning()) openBeginnings.add(mapping);
+        }
 
-        for (DeviceIdentifier device : byDevice.keySet()) {
-            List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>(); 
-            List<DeviceMapping<ItemT>> openEnds = new ArrayList<DeviceMapping<ItemT>>();
-            List<DeviceMapping<ItemT>> openBeginnings = new ArrayList<DeviceMapping<ItemT>>();
+        Collections.sort(openEnds, Collections.reverseOrder(TimedComparator.INSTANCE));
 
-            //find open-ended
-            for (DeviceMapping<ItemT> mapping : list) {
-                if (mapping.getTimeRange().openEnd()) openEnds.add(mapping);
-                else if (mapping.getTimeRange().openBeginning()) openBeginnings.add(mapping);
-                else result.add(mapping);
-            }
+        for (DeviceMapping<ItemT> openBeginning : openBeginnings) {
+            TimeRange openBeginningRange = openBeginning.getTimeRange();
+            DeviceIdentifier device = openBeginning.getDevice();
 
-            Collections.sort(openEnds, Collections.reverseOrder(new TimedComparator()));
-            List<DeviceMapping<ItemT>> usedOpenEnds = new ArrayList<DeviceMapping<ItemT>>();
-            List<DeviceMapping<ItemT>> usedOpenBeginnings = new ArrayList<DeviceMapping<ItemT>>();
+            for (DeviceMapping<ItemT> openEnd : openEnds) {
+                TimeRange openEndRange = openEnd.getTimeRange();
 
-            //now find closest matching
-            for (DeviceMapping<ItemT> openBeginning : openBeginnings) {
-                TimeRange openBeginningRange = openBeginning.getTimeRange();
-                for (DeviceMapping<ItemT> openEnd : openEnds) {
-                    TimeRange openEndRange = openEnd.getTimeRange();
-                    if (openEndRange.from().before(openBeginningRange.to())) {
-                        usedOpenEnds.add(openEnd);
-                        usedOpenBeginnings.add(openBeginning);
-                        result.add(getMapping(device, item, openEndRange.intersection(openBeginningRange)));
-                        break;
-                    }
+                if (device.equals(openEnd.getDevice()) && openEndRange.from().before(openBeginningRange.to())) {
+                    result.remove(openBeginning);
+                    result.remove(openEnd);
+
+                    DeviceMapping<ItemT> combined = getMapping(device, item, openEndRange.intersection(openBeginningRange));
+                    DeviceMappingEvent<ItemT> higherPrioEvent = RaceLogEventComparator.INSTANCE.compare(mappingToEvent.get(openBeginning),
+                            mappingToEvent.get(openEnd)) > 0 ? mappingToEvent.get(openBeginning) : mappingToEvent.get(openEnd);
+                    mappingToEvent.put(combined, higherPrioEvent);
+                    result.add(combined);
+                    break;
                 }
             }
-
-            openEnds.removeAll(usedOpenEnds);
-            openBeginnings.removeAll(usedOpenBeginnings);
-            result.addAll(openEnds);
-            result.addAll(openBeginnings);
-
-            overallResult.addAll(result);
         }
-
-        Collections.sort(overallResult, RaceLogEventComparator.INSTANCE);
-        return overallResult;
+        
+        Collections.sort(result, new Comparator<DeviceMapping<ItemT>>() {
+            @Override
+            public int compare(DeviceMapping<ItemT> arg0, DeviceMapping<ItemT> arg1) {
+                return RaceLogEventComparator.INSTANCE.compare(mappingToEvent.get(arg0), mappingToEvent.get(arg1));
+            }
+        });
+        
+        return result;
     }
 }

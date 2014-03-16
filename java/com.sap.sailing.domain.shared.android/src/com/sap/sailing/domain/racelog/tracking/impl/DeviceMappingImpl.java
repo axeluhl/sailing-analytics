@@ -44,4 +44,9 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
     public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(DeviceMappingEvent<T> event) {
         return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(), new TimeRangeImpl(event.getFrom(), event.getTo()));
     }
+    
+    @Override
+    public String toString() {
+        return "Device Mapping - device: " + device + ", mapped to: " + mappedTo + ", time range: " + timeRange;
+    }
 }

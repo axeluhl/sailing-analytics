@@ -42,4 +42,9 @@ DeviceMappingEvent<ItemType> {
     public TimePoint getTo() {
         return to;
     }
+    
+    @Override
+    public String getShortInfo() {
+        return "device: " + device + ", mapped to: " + mappedTo + ", from: " + from + ", to: " + to;
+    }
 }

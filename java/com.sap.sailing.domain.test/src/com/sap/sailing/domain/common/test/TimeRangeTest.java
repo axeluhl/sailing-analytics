@@ -91,6 +91,11 @@ public class TimeRangeTest {
     	assertEquals(5, union2.from().asMillis());
     	assertEquals(Long.MAX_VALUE, union.to().asMillis());
     	assertEquals(Long.MAX_VALUE, union2.to().asMillis());
+    	
+    	one = create(Long.MIN_VALUE, 10);
+    	union = two.union(one);
+    	assertTrue(union.openBeginning());
+    	assertTrue(union.openEnd());
     }
     
     @Test

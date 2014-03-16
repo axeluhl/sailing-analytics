@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.racelog.tracking.analyzing.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
@@ -12,6 +16,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -26,18 +31,24 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     private final Mark mark = new MarkImpl("mark");
     private final DeviceIdentifier device = new SmartphoneImeiIdentifier("imei");
     
+    private int time = 0;
+    
     private List<DeviceMapping<Competitor>> getMappings() {
         return new DeviceCompetitorMappingFinder(log).analyze().get(competitor);
     }
     
+    private TimePoint t() {
+        return new MillisecondsTimePoint(time++);
+    }
+    
     private void addMapping(RaceLogEventAuthor author, DeviceIdentifier device, long from, long to, Competitor item) {
-        RaceLogEvent mapping = factory.createDeviceCompetitorMappingEvent(now, author, device, item, 0,
+        RaceLogEvent mapping = factory.createDeviceCompetitorMappingEvent(t(), author, t(), UUID.randomUUID(), device, item, 0,
                 new MillisecondsTimePoint(from), new MillisecondsTimePoint(to));
         log.add(mapping);
     }
     
     private void addMapping(RaceLogEventAuthor author, DeviceIdentifier device, long from, long to, Mark item) {
-        RaceLogEvent mapping = factory.createDeviceMarkMappingEvent(now, author, device, item, 0,
+        RaceLogEvent mapping = factory.createDeviceMarkMappingEvent(t(), author, t(), UUID.randomUUID(), device, item, 0,
                 new MillisecondsTimePoint(from), new MillisecondsTimePoint(to));
         log.add(mapping);
     }
@@ -93,9 +104,6 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     	addMapping(author, device, Long.MIN_VALUE, 5, competitor);
     	mappings = getMappings();
     	assertEquals(2, mappings.size());
-    	mapping = mappings.get(0);
-    	assertEquals(0, mapping.getTimeRange().from().asMillis());
-    	assertEquals(5, mapping.getTimeRange().to().asMillis());
     	
     	//another closing mapping, that is closer, but is merged
     	addMapping(author, device, Long.MIN_VALUE, 3, competitor);
@@ -112,5 +120,35 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     	//open-ended at beginning, eats others up
     	addMapping(author, device, -10, Long.MAX_VALUE, competitor);
     	assertEquals(1, getMappings().size());
+    }
+    
+    @Test
+    public void doesLaterMappingThatIncludesOtherOverwrite() throws ParseException {
+        DeviceIdentifier cde = new SmartphoneImeiIdentifier("cde");
+        DeviceIdentifier abc = new SmartphoneImeiIdentifier("abc");
+        DateFormat df = new SimpleDateFormat("mm:ss");
+        long m1600 = df.parse("16:00").getTime();
+        long m1550 = df.parse("15:50").getTime();
+        long m1615 = df.parse("16:15").getTime();
+        long m1610 = df.parse("16:10").getTime();
+        addMapping(author, abc, m1600, m1610, competitor);
+        addMapping(author, cde, m1550, m1615, competitor);
+        
+        assertEquals(1, getMappings().size());
+    }
+    
+    @Test
+    public void doesLaterMappingThatLiesWithinBreakOtherIntoPieces() throws ParseException {
+        DeviceIdentifier cde = new SmartphoneImeiIdentifier("cde");
+        DeviceIdentifier abc = new SmartphoneImeiIdentifier("abc");
+        DateFormat df = new SimpleDateFormat("mm:ss");
+        long m1600 = df.parse("16:00").getTime();
+        long m1550 = df.parse("15:50").getTime();
+        long m1615 = df.parse("16:15").getTime();
+        long m1610 = df.parse("16:10").getTime();
+        addMapping(author, cde, m1550, m1615, competitor);
+        addMapping(author, abc, m1600, m1610, competitor);
+        
+        assertEquals(3, getMappings().size());
     }
 }
