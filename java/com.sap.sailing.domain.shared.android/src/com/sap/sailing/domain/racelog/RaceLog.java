@@ -98,4 +98,9 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      *         in this race log yet
      */
     boolean load(RaceLogEvent event);
+
+    /**
+     * Merges all events from the <code>other</code> race log into this.
+     */
+    void merge(RaceLog other);
 }

@@ -72,6 +72,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
  */
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
+    public static final String LODA_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    
     private static final int LINE_WIDTH = 1;
     
     private final Label noCompetitorsSelectedLabel;
@@ -218,7 +220,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
-                leaderboardGroupName, leaderboardName, new AsyncCallback<CompetitorsRaceDataDTO>() {
+                leaderboardGroupName, leaderboardName);
+        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LODA_COMPETITOR_CHART_DATA_CATEGORY,
+                new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
@@ -234,7 +238,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                             }
                         }
                     }
-
+        
                     @Override
                     public void onFailure(Throwable caught) {
                         hideLoading();
@@ -242,7 +246,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                                 timer.getPlayMode() == PlayModes.Live);
                     }
                 });
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
     }
     

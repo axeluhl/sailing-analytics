@@ -101,10 +101,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageTackLossInMeters();
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMeters();
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
-            return stringMessages.timeSinceLastPositionFix();
-        case RACE_TRACKING_QUALITY:
-            return "TQ";
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval();
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStart();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
@@ -168,7 +166,6 @@ public class DetailTypeFormatter {
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
         case RACE_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
@@ -176,6 +173,9 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.secondsUnit();
 
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratio();
+            
         case TOTAL_TIME_SAILED_IN_SECONDS:
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -197,7 +197,6 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
-        case RACE_TRACKING_QUALITY:
         case BEAT_ANGLE:
             return "";
         }
@@ -304,10 +303,8 @@ public class DetailTypeFormatter {
             return stringMessages.totalAverageSpeedOverGroundTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
-            return stringMessages.timeSinceLastPositionFixTooltip();
-        case RACE_TRACKING_QUALITY:
-            return stringMessages.trackingQuality();
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratioBetweenTimeSinceLastPositionFixAndAverageSamplingIntervalTooltip();
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStartTooltip();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
