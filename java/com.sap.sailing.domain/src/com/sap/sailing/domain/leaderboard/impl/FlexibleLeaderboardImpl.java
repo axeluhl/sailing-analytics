@@ -90,7 +90,18 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     @Override
-    public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
+    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
+        FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */ false, fleet);
+        column.setTrackedRace(fleet, race); // triggers listeners because this object was registered above as race column listener on the column
+        return column;
+    }
+
+    @Override
+    public FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
+        return addRaceColumn(name, medalRace, /* logAlreadyExistingColumn */ true, fleets);
+    }
+    
+    private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn, Fleet... fleets) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
             final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
@@ -135,22 +146,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
         return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
-    }
-
-    @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
-        FlexibleRaceColumn column = getRaceColumnByName(columnName);
-        if (column == null) {
-            column = createRaceColumn(columnName, medalRace, fleet);
-            column.addRaceColumnListener(this);
-            races.add(column);
-            column.setRaceLogInformation(
-                    new RaceLogInformationImpl(
-                            raceLogStore,
-                            new RaceLogOnLeaderboardIdentifier(this, column.getName())));
-        }
-        column.setTrackedRace(fleet, race); // triggers listeners because this object was registered above as race column listener on the column
-        return column;
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
