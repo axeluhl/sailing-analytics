@@ -54,8 +54,9 @@ public class PolarFixCache extends
             List<PolarFix> resultForRace = result.get(trackedRace.getRaceIdentifier());
             if (resultForRace == null) {
                 notCached.add(trackedRace);
-            }
-            resultList.addAll(resultForRace);
+			} else {
+				resultList.addAll(resultForRace);
+			}
         }
         if (notCached.size() > 0) {
             throw new NoCacheEntryException(notCached, resultList);

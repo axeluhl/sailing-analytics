@@ -173,7 +173,7 @@ public class PolarDataServiceImpl implements PolarDataService {
                         new SimplePolarFixRaceInterval(e.getNotCached()),
                         settings, executor);
                 aggregator.startPolarFixAggregation();
-                fixes = aggregator.getAggregationResultAsSingleList();
+                fixes.addAll(aggregator.getAggregationResultAsSingleList());
             }
         } else {
             PolarFixAggregator aggregator = new PolarFixAggregator(new SimplePolarFixRaceInterval(trackedRaces),
