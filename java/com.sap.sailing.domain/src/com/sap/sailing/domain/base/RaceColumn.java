@@ -186,11 +186,8 @@ public interface RaceColumn extends Named {
 
     /**
      * Sets (or reloads) {@link RaceLog} for this column with the given fleet
-     * 
-     * @param raceLogInformation
-     * @param fleetImpl
      */
-    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleet);
 
     /**
      * Remove the association between a race and a column. This is different from

@@ -3,7 +3,6 @@ package com.sap.sailing.selenium.core;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -35,8 +34,6 @@ public class SeleniumElementLocator implements ElementLocator {
 
     private WebElement element;
     private List<WebElement> elements;
-    
-    private static final Logger logger = Logger.getLogger(SeleniumElementLocator.class.getName());
     
     /**
      * <p>Creates a new element locator for the given field using the specified context and timeout for the search.</p>
@@ -95,11 +92,7 @@ public class SeleniumElementLocator implements ElementLocator {
         this.element = this.wait.until(new Function<SearchContext, WebElement>() {
             @Override
             public WebElement apply(SearchContext context) {
-                //return context.findElement(SeleniumElementLocator.this.getBy());
-                WebElement element = context.findElement(SeleniumElementLocator.this.getBy());
-                logger.info("findElement(" + getBy() + ") returned " + element + " which is " +
-                        (isElementUsable(element) ? "useable" : " not useable"));
-                return (isElementUsable(element) ? element : null);
+                return context.findElement(SeleniumElementLocator.this.getBy());
             }
         });
 
@@ -143,18 +136,5 @@ public class SeleniumElementLocator implements ElementLocator {
     @Override
     public String toString() {
         return "SeleniumElementLocator->" + this.by;
-    }
-    
-    /**
-     * <p>By default, elements are considered as "found" if they are in the DOM and displayed. You can override this
-     *   method in order to change whether or not an element is considered as loaded.</p>
-     * 
-     * @param element
-     *   The element to use.
-     * @return
-     *   {@code true} if the element is usable and {@code false} otherwise.
-     */
-    protected boolean isElementUsable(WebElement element) {
-        return element.isDisplayed();
     }
 }

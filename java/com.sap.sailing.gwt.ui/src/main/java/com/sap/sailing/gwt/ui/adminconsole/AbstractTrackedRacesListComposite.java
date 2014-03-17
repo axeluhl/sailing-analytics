@@ -16,6 +16,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -382,19 +383,21 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
             sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
-                    new MarkedAsyncCallback<Void>() {
-                        @Override
-                        public void handleFailure(Throwable caught) {
-                            errorReporter
-                                    .reportError("Exception trying to set the delay to live for the selected tracked races: "
-                                            + caught.getMessage());
-                        }
+                    new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to set the delay to live for the selected tracked races: "
+                                                    + caught.getMessage());
+                                }
 
-                        @Override
-                        public void handleSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                            }
+                    ));
         }
     }
 

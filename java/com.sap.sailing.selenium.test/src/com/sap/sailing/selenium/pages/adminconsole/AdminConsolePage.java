@@ -2,7 +2,6 @@ package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
@@ -67,8 +66,6 @@ public class AdminConsolePage extends HostPage {
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
     
-    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
-    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -80,15 +77,10 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        logger.info("Window is " + driver.manage().window().getSize().width + ", " + driver.manage().window().getSize().height);
-        //driver.manage().window().setSize(new Dimension(994, 730));
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
-//        FluentWait<WebDriver> wait = createFluentWait(driver);
-//        wait.withTimeout(5, TimeUnit.SECONDS);
-//        wait.pollingEvery(100, TimeUnit.MILLISECONDS);
-//        
+//        FluentWait<WebDriver> wait = createFluentWait(driver, 5, 100);
 //        Alert alert = wait.until(new Function<WebDriver, Alert>() {
 //            @Override
 //            public Alert apply(WebDriver context) {
@@ -106,7 +98,11 @@ public class AdminConsolePage extends HostPage {
     private WebElement tabPanel;
     
     @CacheLookup
-    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/..")
+    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabs\")]")
+    private WebElement tabsContainer;
+    
+    @CacheLookup
+    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]")
     private List<WebElement> tabs;
     
     private AdminConsolePage(WebDriver driver) {
@@ -156,7 +152,6 @@ public class AdminConsolePage extends HostPage {
     }
     
     private WebElement goToTab(String label, final String id) {
-        logger.info("Try to got to tab " + label);
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
         
@@ -166,10 +161,7 @@ public class AdminConsolePage extends HostPage {
             WebElement scroller = this.tabPanel.findElement(direction.getBy());
             
             while(!tab.isDisplayed() && scroller.isDisplayed()) {
-                WebElement arrow = scroller.findElement(By.tagName("img"));
-                arrow.click();
-                
-                // QUESTION: Do we need some kind of delay because of the scrolling?
+                scrollAndWait(scroller);
             }
             
             
@@ -181,8 +173,7 @@ public class AdminConsolePage extends HostPage {
             int tabIndex = (direction == ScrollDirection.Left ? getFirstVisibleTabIndex() : getLastVisibleTabIndex());
             
             if(scroller.isDisplayed() && getTabIndex(tab) == tabIndex) {
-                WebElement arrow = scroller.findElement(By.tagName("img"));
-                arrow.click();
+                scrollAndWait(scroller);
             }
                 
         }
@@ -190,9 +181,7 @@ public class AdminConsolePage extends HostPage {
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         Actions actions = new Actions(this.driver);
-        int offset = determineOffsetForClick(tab);
-        logger.info("Try to click on tab " + label + " at posstion " + offset + ", 5");
-        actions.moveToElement(tab, offset, 5);
+        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
         actions.click();
         actions.perform();
         
@@ -206,11 +195,6 @@ public class AdminConsolePage extends HostPage {
     private ScrollDirection getScrollDirection(WebElement tab) {
         int tabIndex = getTabIndex(tab);
         
-        logger.info("Try to determine scroll direction");
-        logger.info("Index for tab " + tab.getText() + " is " + tabIndex);
-        logger.info("First visible tab is " + getFirstVisibleTabIndex());
-        logger.info("Last visible tab is " + getLastVisibleTabIndex());
-        
         if(tabIndex < getFirstVisibleTabIndex())
             return ScrollDirection.Left;
         
@@ -218,6 +202,17 @@ public class AdminConsolePage extends HostPage {
             return ScrollDirection.Rigth;
         
         return null;
+    }
+    
+    private void scrollAndWait(WebElement scroller) {
+        WebElement arrow = scroller.findElement(By.tagName("img"));
+        arrow.click();
+        
+        // TODO: Find a better solution with ImplicitWait
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException exception) {
+        }
     }
     
     private int getTabIndex(WebElement tab) {
@@ -246,10 +241,7 @@ public class AdminConsolePage extends HostPage {
     
     private int determineOffsetForClick(WebElement tab) {
         int tabIndex = getTabIndex(tab);
-        logger.info("Try to determine offset for click");
-        logger.info("Index for tab " + tab.getText() + " is " + tabIndex);
-        logger.info("First visible tab is " + getFirstVisibleTabIndex());
-        logger.info("Last visible tab is " + getLastVisibleTabIndex());
+        
         if(tabIndex == getFirstVisibleTabIndex())
             return -1;
         

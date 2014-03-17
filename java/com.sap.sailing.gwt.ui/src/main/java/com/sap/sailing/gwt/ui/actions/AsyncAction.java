@@ -10,13 +10,5 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author c5163874
  */
 public interface AsyncAction<Result> {
-    void execute(AsyncActionsExecutor asyncActionsExecutor);
-    
-    Result getResult();
-
-    AsyncCallback<Result> getCallback();
-
-    AsyncCallback<Result> getWrapperCallback(AsyncActionsExecutor asyncActionsExecutor);
-
-    String getType(); 
+    public void execute(AsyncCallback<Result> callback);
 }

@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
@@ -385,6 +386,10 @@ public abstract class DataEntryDialog<T> {
         DialogUtils.linkEnterToButton(getOkButton(), result);
         DialogUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
+    }
+    
+    public void addTooltip(IsWidget widget, String tooltip) {
+        widget.asWidget().setTitle(tooltip);
     }
 
     public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {

@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -24,14 +25,14 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
         
         registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
-        sailingService.getLeaderboardNames(new MarkedAsyncCallback<List<String>>() {
+        sailingService.getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
+                new AsyncCallback<List<String>>() {
             @Override
-            public void handleSuccess(List<String> leaderboardNames) {
+            public void onSuccess(List<String> leaderboardNames) {
                 String leaderboardName = Window.Location.getParameter("name");
                 if (leaderboardNames.contains(leaderboardName)) {
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.editScores(), stringMessages, LeaderboardEditPage.this);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-                    // TODO: Here happens something async. We have to use the semaphore for ui tests.
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages, userAgent);
                     leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
@@ -42,10 +43,10 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                 }
             }
             @Override
-            public void handleFailure(Throwable t) {
+            public void onFailure(Throwable t) {
                 reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
             }
-        });
+        }));
     }
 
 }

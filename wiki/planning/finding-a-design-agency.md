@@ -291,7 +291,7 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
-  <td>++</td>
+  <td>+</td>
   <td>++</td>
   <td>-</td>
   <td>0</td>
@@ -327,7 +327,7 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td><b>16</b></td>
+  <td><b>15</b></td>
   <td><b>20</b></td>
   <td>5</td>
   <td>9</td>
@@ -359,3 +359,15 @@ Items marked with * have a heigher weight in theory. This weight is not reflecte
 </table>
 
 ## Resumee
+
+The two only serious contenders in the process eventually turned out to be Sovanta and Ubilabs. After both agencies had presented themselves professionally and well-prepared at their respective offices, had listened carefully and created serious enthusiasm around the project, we tasked them with a tiny test project to better allow us to differentiate their skills and processes. In short, we asked them to spend a day or two into the re-design of our landing page sapsailing.com.
+
+Both completed the task in time, and we had both present their results and findings to our team. The Sovanta presentation demonstrated that they spent serious effort in understanding the domain. The scribbles they showed were OK but not overwhelming. The explanations of how they got there and why things were proposed the way they were was not entirely satisfactory to us. There was a very strong focus on a live video feed which is not always present. Some ideas such as the world map of events were nice and showed that Sovanta worked their way into the domain.
+
+Ubilabs presented a flawless and incredibly great design. With a lot less effort they had reached a clearer structure and were able to explain exactly why they did what and how. They conveyed the "Apple" feeling we had so long been looking for. Simple but not simplistic; beautiful, yet functional, combined with a solid understanding of the domain, given the comparably little effort they were able to put in. Their greatest skills are undoubtedly in the areas that we require the most.
+
+The working relation and the communication style worked better for all of our team in the Ubilabs case. We consider this an important aspect when it comes to a long-term working relation, and we are convinced that it outweighs the additional cost and effort incurred by the remoteness of their office location. Their significantly lower price, though certainly not the main criteria, helps in making their offer even more attractive. Ubilabs has a strong focus on anything geo-spatial as shown in theire rerefences and is Google Maps Premier Partner, adding lots of specific know-how to the project when it comes to the visualization of spatial data as we have it for the SAP Sailing Analytics.
+
+Last but not least, we felt that for Ubilabs, being a small, excellent and very ambitious company, the project will mean more to them than it would mean to Sovanta, giving the project more priority and the best of skills the company has to offer.
+
+All things considered, we think that partnering with Ubilabs will lead to better results at lower cost which is what we want. Although it was a close call, our thoughts are backed by the evaluation matrix above, which gives Ubilabs a five-point edge over Sovanta.

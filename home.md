@@ -18,6 +18,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
   * [[Building and Deploying|wiki/building-and-deploying]]
+  * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Server Replication|wiki/server-replication]]
