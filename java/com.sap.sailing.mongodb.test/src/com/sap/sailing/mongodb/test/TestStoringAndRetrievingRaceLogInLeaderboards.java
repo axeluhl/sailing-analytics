@@ -2,6 +2,10 @@ package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
@@ -9,6 +13,7 @@ import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -58,7 +63,9 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoDBTest {
 
@@ -116,7 +123,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     }
     
     @Test
-    public void testThatRemoveRaceColumnAlsoRemovesPersistentRaceLog() {        
+    public void testThatRemoveRaceColumnAlsoRemovesPersistentRaceLog() {
         RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
@@ -127,6 +134,51 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
         // now assert that the race log is empty because the column was removed and so should have been the race log
         RaceLog loadedRaceLog = leaderboard.getRaceColumnByName(raceColumnName).getRaceLog(leaderboard.getRaceColumnByName(raceColumnName).getFleets().iterator().next());
+        loadedRaceLog.lockForRead();
+        try {
+            assertEquals(0, Util.size(loadedRaceLog.getRawFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testThatRenameRaceColumnMigratesPersistentRaceLog() {
+        RacingEventServiceImpl service = mock(RacingEventServiceImpl.class);
+        when(service.getMongoObjectFactory()).thenReturn(mongoObjectFactory);
+        when(service.getLeaderboardByName(leaderboardName)).thenReturn(leaderboard);
+        doCallRealMethod().when(service).renameLeaderboardColumn(Matchers.anyString(), Matchers.anyString(), Matchers.anyString());
+        RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumn.getRaceLog(defaultFleet).add(expectedEvent);
+        db.getLastError(); // sync DB to ensure event is stored
+        final String newColumnName = "New "+raceColumnName;
+        service.renameLeaderboardColumn(leaderboardName, raceColumnName, newColumnName);
+        db.getLastError(); // sync DB
+        // now assert that the race log still holds the original race log event because the column was only renamed
+        RaceLog renamedRaceLog = leaderboard.getRaceColumnByName(newColumnName).getRaceLog(leaderboard.getRaceColumnByName(newColumnName).getFleets().iterator().next());
+        renamedRaceLog.lockForRead();
+        try {
+            assertEquals(1, Util.size(renamedRaceLog.getRawFixes()));
+            assertSame(expectedEvent, renamedRaceLog.getRawFixes().iterator().next());
+        } finally {
+            renamedRaceLog.unlockAfterRead();
+        }
+        RaceLog reloadedRenamedRaceLog = domainObjectFactory.loadRaceLog(leaderboard.getRaceColumnByName(newColumnName)
+                .getRaceLogIdentifier(leaderboard.getRaceColumnByName(newColumnName).getFleets().iterator().next()));
+        reloadedRenamedRaceLog.lockForRead();
+        try {
+            assertEquals(1, Util.size(reloadedRenamedRaceLog.getRawFixes()));
+            assertEquals(0, RaceLogEventComparator.INSTANCE.compare(expectedEvent, reloadedRenamedRaceLog.getRawFixes().iterator().next()));
+        } finally {
+            reloadedRenamedRaceLog.unlockAfterRead();
+        }
+        leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
+        // now assert that the race log is empty because the renamed column's persistent race log is expected to have
+        // been removed
+        RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
         try {
             assertEquals(0, Util.size(loadedRaceLog.getRawFixes()));
