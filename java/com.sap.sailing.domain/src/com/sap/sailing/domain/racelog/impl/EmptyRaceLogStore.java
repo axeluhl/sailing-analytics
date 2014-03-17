@@ -18,4 +18,8 @@ public enum EmptyRaceLogStore implements RaceLogStore {
     @Override
     public void removeListenersAddedByStoreFrom(RaceLog raceLogAvailable) {
     }
+
+    @Override
+    public void removeRaceLog(RaceLogIdentifier identifier) {
+    }
 }

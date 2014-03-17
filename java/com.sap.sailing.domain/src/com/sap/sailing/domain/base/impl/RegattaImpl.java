@@ -111,7 +111,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.series = seriesList;
         for (Series s : series) {
-            linkToRegattaAndAddListeners(s);
+            linkToRegattaAndConnectRaceLogsAndAddListeners(s);
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -306,12 +306,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         setRaceLogInformationOnRaceColumn(raceColumn);
-        
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
 
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            raceLogStore.removeRaceLog(identifier);
+        }
         raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
     }
 
@@ -403,7 +406,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void addSeries(Series seriesToAdd) {
         Series existingSeries = getSeriesByName(seriesToAdd.getName());
         if (existingSeries == null) {
-            linkToRegattaAndAddListeners(seriesToAdd);
+            linkToRegattaAndConnectRaceLogsAndAddListeners(seriesToAdd);
             synchronized (this.series) {
                 ArrayList<Series> newSeriesList = new ArrayList<Series>();
                 for (Series seriesObject : this.series) {
@@ -415,7 +418,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
     }
 
-    private void linkToRegattaAndAddListeners(Series seriesToAdd) {
+    private void linkToRegattaAndConnectRaceLogsAndAddListeners(Series seriesToAdd) {
         seriesToAdd.setRegatta(this);
         seriesToAdd.addRaceColumnListener(this);
         registerRaceLogsOnRaceColumns(seriesToAdd);
