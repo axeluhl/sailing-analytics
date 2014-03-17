@@ -19,10 +19,10 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
-public class TestRaceLogRemoval extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
+public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     private final String blueFleetName = "Blue";
     
-    public TestRaceLogRemoval() throws UnknownHostException, MongoException {
+    public TestRaceLogRemovalInRegatta() throws UnknownHostException, MongoException {
         super();
     }
 

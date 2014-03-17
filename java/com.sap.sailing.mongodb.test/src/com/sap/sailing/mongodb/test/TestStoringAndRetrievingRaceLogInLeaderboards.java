@@ -76,12 +76,9 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         now = MillisecondsTimePoint.now();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
-
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
-
         leaderboard = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-
         Fleet defaultFleet = leaderboard.getFleet(null);
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
     }
@@ -90,25 +87,20 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         raceColumn.getRaceLog(defaultFleet).add(event);
-
         mongoObjectFactory.storeLeaderboard(leaderboard);
     }
 
     private RaceLog retrieveRaceLog() {
         Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
         Fleet loadedDefaultFleet = loadedLeaderboard.getFleet(null);
-
         return loadedLeaderboard.getRaceColumnByName(raceColumnName).getRaceLog(loadedDefaultFleet);
     }
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogProtestStartTimeEvent() {        
         RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
-
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, expectedEvent);
-
         RaceLog loadedRaceLog = retrieveRaceLog();
-
         loadedRaceLog.lockForRead();
         try {
             RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
@@ -118,6 +110,26 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(expectedEvent.getId(), actualEvent.getId());
             assertEquals(expectedEvent.getProtestStartTime(), actualEvent.getProtestStartTime());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testThatRemoveRaceColumnAlsoRemovesPersistentRaceLog() {        
+        RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumn.getRaceLog(defaultFleet).add(expectedEvent);
+        db.getLastError(); // sync DB
+        leaderboard.removeRaceColumn(raceColumnName);
+        db.getLastError(); // sync DB
+        leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
+        // now assert that the race log is empty because the column was removed and so should have been the race log
+        RaceLog loadedRaceLog = leaderboard.getRaceColumnByName(raceColumnName).getRaceLog(leaderboard.getRaceColumnByName(raceColumnName).getFleets().iterator().next());
+        loadedRaceLog.lockForRead();
+        try {
+            assertEquals(0, Util.size(loadedRaceLog.getRawFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
         }
