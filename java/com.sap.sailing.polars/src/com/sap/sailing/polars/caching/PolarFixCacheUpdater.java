@@ -27,6 +27,7 @@ public class PolarFixCacheUpdater implements
             PolarFixCacheRaceInterval updateInterval) throws Exception {
         PolarFixAggregator aggregator = new PolarFixAggregator(updateInterval,
                 PolarSheetGenerationSettingsImpl.createStandardPolarSettings(), executor);
+        Thread.sleep(updateInterval.getCompetitorAndTimepointsForRace().keySet().iterator().next().getMillisecondsOverWhichToAverageSpeed());
         aggregator.startPolarFixAggregation();
 
         return aggregator.get();

@@ -47,7 +47,7 @@ public class PolarFixCacheRaceInterval implements UpdateInterval<PolarFixCacheRa
             if (mapOfTimpointCompetitorPairs != null) {
                 joinedMap.putAll(mapOfTimpointCompetitorPairs);
             }
-            Map<Competitor, Pair<TimePoint, TimePoint>> mapOfOtherTimpointCompetitorPairs = competitorAndTimepointsForRace
+            Map<Competitor, Pair<TimePoint, TimePoint>> mapOfOtherTimpointCompetitorPairs = otherUpdateIntervalInExplicitForm
                     .get(race);
             if (mapOfOtherTimpointCompetitorPairs != null) {
                 mergeMap(joinedMap, mapOfOtherTimpointCompetitorPairs);
@@ -68,7 +68,7 @@ public class PolarFixCacheRaceInterval implements UpdateInterval<PolarFixCacheRa
                 Pair<TimePoint, TimePoint> joinedTimepointInterval = joinTimepointIntervals(existingValue, otherValue);
                 joinedMap.put(competitor, joinedTimepointInterval);
             } else {
-                joinedMap.put(otherEntry.getKey(), otherEntry.getValue());
+                joinedMap.put(competitor, otherValue);
             }
 
         }
@@ -85,8 +85,8 @@ public class PolarFixCacheRaceInterval implements UpdateInterval<PolarFixCacheRa
             Pair<TimePoint, TimePoint> otherValue) {
         TimePoint startExisting = existingValue.getA();
         TimePoint endExisting = existingValue.getB();
-        TimePoint startOther = existingValue.getA();
-        TimePoint endOther = existingValue.getB();
+        TimePoint startOther = otherValue.getA();
+        TimePoint endOther = otherValue.getB();
 
         TimePoint startNew = startExisting.before(startOther) ? startExisting : startOther;
         TimePoint endNew = endExisting.after(endOther) ? endExisting : endOther;

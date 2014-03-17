@@ -8,3 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.sap.sailing.polars
 Import-Package: com.sap.sailing.domain.test.mock,
  org.junit;version="4.8.2"
+Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
+ org.hamcrest;bundle-version="1.1.0"
