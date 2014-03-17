@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
-import com.sap.sse.datamining.components.GrouperType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public class RestrictedGroupingProvider implements GroupingProvider {
     

@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.components;
+package com.sap.sse.datamining.shared.components;
 
 import com.sap.sse.datamining.shared.Message;
 

@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.datamining.components.GrouperType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public abstract class GroupBySelectionPanel extends FlowPanel {
 

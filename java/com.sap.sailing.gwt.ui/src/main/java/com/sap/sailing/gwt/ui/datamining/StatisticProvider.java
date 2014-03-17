@@ -5,7 +5,7 @@ import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.datamining.selection.SimpleStatistic;
-import com.sap.sse.datamining.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public interface StatisticProvider extends Component<Object> {
     

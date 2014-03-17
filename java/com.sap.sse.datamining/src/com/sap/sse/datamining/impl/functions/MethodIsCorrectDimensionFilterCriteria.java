@@ -2,8 +2,8 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
 
-import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public class MethodIsCorrectDimensionFilterCriteria implements FilterCriteria<Method> {
 

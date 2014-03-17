@@ -3,12 +3,12 @@ package com.sap.sse.datamining.factories;
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sse.datamining.components.AggregatorType;
 import com.sap.sse.datamining.components.ParallelAggregator;
-import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.deprecated.GroupDividingParallelAggregator;
 import com.sap.sse.datamining.impl.workers.builders.AggregationWorkerBuilder;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.ElementType;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

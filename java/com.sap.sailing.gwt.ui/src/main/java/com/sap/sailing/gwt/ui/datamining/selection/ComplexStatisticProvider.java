@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
-import com.sap.sse.datamining.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public class ComplexStatisticProvider implements StatisticProvider {
     
