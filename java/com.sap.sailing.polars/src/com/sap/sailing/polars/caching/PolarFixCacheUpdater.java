@@ -42,7 +42,12 @@ public class PolarFixCacheUpdater implements
             newCacheValue.putAll(oldCacheValue);
         }
         for (Entry<RegattaAndRaceIdentifier, List<PolarFix>> newEntry : computedCacheUpdate.entrySet()) {
-            newCacheValue.put(newEntry.getKey(), newEntry.getValue());
+        	List<PolarFix> oldList = newCacheValue.get(newEntry.getKey());
+			if (oldList != null) {
+        		oldList.addAll(newEntry.getValue());
+			} else {
+				newCacheValue.put(newEntry.getKey(), newEntry.getValue());
+			}
         }
         return newCacheValue;
     }
