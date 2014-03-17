@@ -138,6 +138,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public void removeRaceColumn(String columnName) {
         final FlexibleRaceColumn raceColumn = getRaceColumnByName(columnName);
+        for (Fleet fleet : raceColumn.getFleets()) {
+            raceLogStore.removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+        }
         races.remove(raceColumn);
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
         raceColumn.removeRaceColumnListener(this);
