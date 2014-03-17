@@ -311,6 +311,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            raceLogStore.removeRaceLog(identifier);
+        }
         raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
     }
 

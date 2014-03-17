@@ -40,6 +40,12 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
     }
 
     @Override
+    public void removeRaceLog(RaceLogIdentifier identifier) {
+        raceLogCache.remove(identifier);
+        mongoObjectFactory.removeRaceLog(identifier);
+    }
+
+    @Override
     public void removeListenersAddedByStoreFrom(RaceLog raceLog) {
         RaceLogEventVisitor visitor = listeners.get(raceLog);
         if (visitor != null) {
