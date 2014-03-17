@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.filter;
+package com.sap.sse.common.filter;
 
 public class TextOperator implements FilterOperator<String> {
     private Operators operator;

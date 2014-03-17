@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.filter;
+package com.sap.sse.common.filter;
 
 /**
  * A value filter using an operator to match a value to be filtered 

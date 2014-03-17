@@ -4,8 +4,9 @@
 	<inherits name="com.google.gwt.user.User" />
 	<!-- Other module inherits -->
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-        <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
+	<inherits name="com.sap.sse.SSECommon" />
+    <inherits name="com.sap.sailing.domain.SailingDomain" />
   	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
 	<entry-point

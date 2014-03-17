@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.filter;
+package com.sap.sse.common.filter;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;

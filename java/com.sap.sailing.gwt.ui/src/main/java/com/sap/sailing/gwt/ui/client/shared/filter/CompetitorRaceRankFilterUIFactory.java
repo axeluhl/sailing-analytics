@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.BinaryOperator;
+import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 

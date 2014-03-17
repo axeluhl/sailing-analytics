@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.google.gwt.core.shared.GWT;
-import com.sap.sailing.domain.common.filter.BinaryOperator;
-import com.sap.sailing.domain.common.filter.TextOperator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.filter.BinaryOperator;
+import com.sap.sse.common.filter.TextOperator;
 
 public class FilterOperatorsFormatter {
     

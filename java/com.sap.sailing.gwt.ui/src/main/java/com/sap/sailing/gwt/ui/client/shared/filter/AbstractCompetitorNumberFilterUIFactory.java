@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.filter.BinaryOperator;
-import com.sap.sailing.domain.common.filter.NumberFilter;
+import com.sap.sse.common.filter.BinaryOperator;
+import com.sap.sse.common.filter.NumberFilter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractCompetitorNumberFilterUIFactory<T extends Number> implements FilterUIFactory<CompetitorDTO> {  
