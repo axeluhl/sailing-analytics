@@ -12,7 +12,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class HasTrackedLegOfCompetitorContextImpl extends HasTrackedLegContextImpl implements HasTrackedLegOfCompetitorContext {
 
-    private Competitor competitor;
+    private final Competitor competitor;
 
     public HasTrackedLegOfCompetitorContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
             CourseArea courseArea, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber, Competitor competitor) {

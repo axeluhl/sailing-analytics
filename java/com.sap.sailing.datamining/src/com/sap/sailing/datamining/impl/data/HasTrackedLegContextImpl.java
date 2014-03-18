@@ -1,8 +1,7 @@
 package com.sap.sailing.datamining.impl.data;
 
-import java.util.Calendar;
-
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
+import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.LegType;
@@ -15,57 +14,26 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class HasTrackedLegContextImpl implements HasTrackedLegContext {
+public class HasTrackedLegContextImpl extends HasTrackedRaceContextImpl implements HasTrackedLegContext {
     
-    private LeaderboardGroup leaderboardGroup;
-    private Leaderboard leaderboard;
-    private CourseArea courseArea;
-    private Fleet fleet;
-    private TrackedRace trackedRace;
-    private TrackedLeg trackedLeg;
+    private final TrackedLeg trackedLeg;
+    private final int legNumber;
     private LegType legType;
-    private int legNumber;
-    private Integer year;
-
     private boolean legTypeHasBeenInitialized;
-    private boolean yearHasBeenInitialized;
 
+    public HasTrackedLegContextImpl(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
+        this(trackedRaceContext.getLeaderboardGroup(), trackedRaceContext.getLeaderboard(), trackedRaceContext
+                .getCourseArea(), trackedRaceContext.getFleet(), trackedRaceContext.getTrackedRace(), trackedLeg,
+                legNumber);
+    }
+    
     public HasTrackedLegContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet,
                                  TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
-        this.leaderboardGroup = leaderboardGroup;
-        this.leaderboard = leaderboard;
-        this.courseArea = courseArea;
-        this.fleet = fleet;
-        this.trackedRace = trackedRace;
+        super(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace);
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;
     }
-
-    @Override
-    public LeaderboardGroup getLeaderboardGroup() {
-        return leaderboardGroup;
-    }
-
-    @Override
-    public Leaderboard getLeaderboard() {
-        return leaderboard;
-    }
-
-    @Override
-    public CourseArea getCourseArea() {
-        return courseArea;
-    }
-
-    @Override
-    public Fleet getFleet() {
-        return fleet;
-    }
-
-    @Override
-    public TrackedRace getTrackedRace() {
-        return trackedRace;
-    }
-
+    
     @Override
     public TrackedLeg getTrackedLeg() {
         return trackedLeg;
@@ -82,14 +50,6 @@ public class HasTrackedLegContextImpl implements HasTrackedLegContext {
     @Override
     public int getLegNumber() {
         return legNumber;
-    }
-
-    @Override
-    public Integer getYear() {
-        if (!yearHasBeenInitialized) {
-            initializeYear();
-        }
-        return year;
     }
 
     private void initializeLegType() {
@@ -112,17 +72,6 @@ public class HasTrackedLegContextImpl implements HasTrackedLegContext {
             }
         }
         return at;
-    }
-
-    private void initializeYear() {
-        TimePoint time = getTrackedRace().getStartOfRace() != null ? getTrackedRace().getStartOfRace() : getTrackedRace().getStartOfTracking();
-        if (time == null) {
-            year = 0;
-        }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time.asDate());
-        year = calendar.get(Calendar.YEAR);
-        yearHasBeenInitialized = true;
     }
 
 }
