@@ -43,7 +43,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -58,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";

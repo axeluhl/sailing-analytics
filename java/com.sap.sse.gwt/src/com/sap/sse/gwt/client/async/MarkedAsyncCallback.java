@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.async;
 
 import com.google.gwt.debug.client.DebugInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;

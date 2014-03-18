@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.actions;
+package com.sap.sse.gwt.client.async;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,6 @@ import com.google.gwt.core.client.GWT;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 
 /**
  * A executor class making the actual remote call for an {@link AsyncAction}. The class is managing the number of

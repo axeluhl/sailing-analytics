@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
 public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
     private final SailingServiceAsync sailingService;

@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.async.PendingAjaxCallMarker;
 import com.sap.sse.gwt.shared.DebugConstants;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
