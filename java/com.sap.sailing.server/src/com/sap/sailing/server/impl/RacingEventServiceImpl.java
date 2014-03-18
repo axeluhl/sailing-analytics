@@ -93,6 +93,9 @@ import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -601,13 +604,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(oldColumnName);
             if (raceColumn instanceof FlexibleRaceColumn) {
+                // remove race log under old identifier; the race log identifier changes
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    getMongoObjectFactory().removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                }
                 ((FlexibleRaceColumn) raceColumn).setName(newColumnName);
+                // store the race logs again under the new identifiers
+                storeRaceLogs(raceColumn);
                 updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Race column " + oldColumnName + " cannot be renamed");
             }
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    /**
+     * When a race column is renamed, its race log identifiers change. Therefore, the race logs need to be stored
+     * under the new identifier again to be consistent with the in-memory image again.
+     */
+    private void storeRaceLogs(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, getMongoObjectFactory());
+            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            raceLog.lockForRead();
+            try {
+                for (RaceLogEvent e : raceLog.getRawFixes()) {
+                    e.accept(storeVisitor);
+                }
+            } finally {
+                raceLog.unlockAfterRead();
+            }
         }
     }
 
@@ -653,7 +682,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
-        mongoObjectFactory.storeLeaderboard(leaderboard);
+        getMongoObjectFactory().storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 
