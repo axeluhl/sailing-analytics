@@ -514,10 +514,10 @@ public interface SailingServiceAsync {
     void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
-     * Gets the race's current start time and current pass identifier. If no start time is set, the pass identifier will
-     * still be returned, but the start time field will be <code>null</code>.
+     * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
+     * pass identifier will still be returned, but the start time field will be <code>null</code>.
      */
-    void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
+    void getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Triple<Date, Integer, RacingProcedureType>> callback);
 
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);

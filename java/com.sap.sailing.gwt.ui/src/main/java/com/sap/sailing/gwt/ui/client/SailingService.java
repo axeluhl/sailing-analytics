@@ -377,7 +377,7 @@ public interface SailingService extends RemoteService {
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
-    Triple<Date, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 

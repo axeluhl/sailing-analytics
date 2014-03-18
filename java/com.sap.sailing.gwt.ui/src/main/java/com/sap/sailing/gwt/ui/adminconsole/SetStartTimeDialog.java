@@ -157,7 +157,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     }
 
     private void refreshCurrentStartTime() {
-        service.getStartTime(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Util.Triple<Date,Integer, RacingProcedureType>>() {
+        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Util.Triple<Date,Integer, RacingProcedureType>>() {
             
             @Override
             public void onSuccess(Util.Triple<Date, Integer, RacingProcedureType> result) {

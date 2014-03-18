@@ -3797,8 +3797,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Triple<Date, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
-        Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
+    public Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
+        Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName);
         if (result == null || result.getA() == null) {
             return null;
         }

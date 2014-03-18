@@ -497,9 +497,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
+     * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Triple<TimePoint, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     

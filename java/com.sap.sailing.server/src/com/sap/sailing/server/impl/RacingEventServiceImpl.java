@@ -2243,7 +2243,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Triple<TimePoint, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+    public Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
