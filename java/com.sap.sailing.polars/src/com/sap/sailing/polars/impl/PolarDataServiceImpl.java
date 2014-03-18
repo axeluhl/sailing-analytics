@@ -32,7 +32,6 @@ import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.analysis.impl.PolarSheetAnalyzerImpl;
 import com.sap.sailing.polars.caching.NoCacheEntryException;
 import com.sap.sailing.polars.caching.PolarFixCache;
-import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
 import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
@@ -221,10 +220,11 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public void competitorPositionChanged(final TimePoint timePoint, final Competitor competitor,
             final TrackedRace createdTrackedRace, long delay) {
+        // TODO build datamining pipeline for the cache
 
-        PolarFixCacheRaceInterval interval = new PolarFixCacheRaceInterval(createIntervalSpecification(
-                createdTrackedRace, competitor, timePoint));
-        polarFixCache.triggerUpdate(createdTrackedRace.getRace().getBoatClass(), interval);
+        // PolarFixCacheRaceInterval interval = new PolarFixCacheRaceInterval(createIntervalSpecification(
+        // createdTrackedRace, competitor, timePoint));
+        // polarFixCache.triggerUpdate(createdTrackedRace.getRace().getBoatClass(), interval);
 
     }
 
