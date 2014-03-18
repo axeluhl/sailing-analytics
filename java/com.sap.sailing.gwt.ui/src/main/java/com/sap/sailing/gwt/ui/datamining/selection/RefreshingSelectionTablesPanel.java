@@ -22,8 +22,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -58,8 +58,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     private Map<DimensionIdentifier, SelectionTable<?, ?>> tablesMappedByDimension;
     private Set<SelectionChangedListener> listeners;
     
-    public RefreshingSelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter) {
+    public RefreshingSelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;

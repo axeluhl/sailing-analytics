@@ -51,11 +51,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.datamining.DataMiningFactory;
-import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3591,18 +3586,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             competitorIdsAsStrings.add(competitor.getIdAsString());
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
-    }
-
-    
-    @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition, getService()); 
-        return query.run();
-    }
-    
-    @Override
-    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
-        return null;
     }
     
     @Override

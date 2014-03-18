@@ -52,6 +52,16 @@
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<display-name>Data Mining Service</display-name>
+	    <servlet-name>DataMiningService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DataMiningService</servlet-name>
+		<url-pattern>/service/datamining</url-pattern>
+	</servlet-mapping>
 	
 	<!-- enabling remote logging -->
 	<servlet>

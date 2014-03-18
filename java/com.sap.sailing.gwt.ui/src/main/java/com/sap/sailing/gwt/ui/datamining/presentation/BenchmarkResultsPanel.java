@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.List;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -10,16 +8,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.gwt.ui.client.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.datamining.shared.QueryResult;
 
 public class BenchmarkResultsPanel extends FlowPanel {
     
-    private SailingServiceAsync sailingService;
+    private DataMiningServiceAsync dataMiningService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
     private QueryDefinitionProvider queryDefinitionProvider;
@@ -28,10 +25,10 @@ public class BenchmarkResultsPanel extends FlowPanel {
     private Label benchmarkStatusLabel;
     private BenchmarkResultsChart resultsChart;
 
-    public BenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public BenchmarkResultsPanel(StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider) {
         super();
-        this.sailingService = sailingService;
+        this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.queryDefinitionProvider = queryDefinitionProvider;
@@ -44,22 +41,14 @@ public class BenchmarkResultsPanel extends FlowPanel {
     private void runBenchmark() {
         benchmarkStatusLabel.setText(" | " + stringMessages.running());
         resultsChart.reset();
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the regattas from the server: " + caught.getMessage());
-            }
-            @Override
-            public void onSuccess(List<RegattaDTO> regattas) {
-                final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientBenchmarkData(times, 1));
-            }
-        });
+        
+        int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
+        runQuery(new ClientBenchmarkData(times, 1));
     }
 
     private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        getSailingService().runQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
+        dataMiningService.runQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
@@ -71,10 +60,6 @@ public class BenchmarkResultsPanel extends FlowPanel {
                 updateResults(benchmarkData, overallTime, result);
             }
         });
-    }
-
-    protected SailingServiceAsync getSailingService() {
-        return sailingService;
     }
     
     protected QueryDefinitionProvider getQueryDefinitionProvider() {

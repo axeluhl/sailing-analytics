@@ -10,16 +10,16 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public class ComplexStatisticProvider implements StatisticProvider {
     
@@ -127,9 +127,15 @@ public class ComplexStatisticProvider implements StatisticProvider {
     }
 
     private void notifyHandlers() {
+        SimpleStatistic newStatistic = getStatistic();
         for (StatisticChangedListener listener : listeners) {
-            listener.statisticChanged();
+            listener.statisticChanged(newStatistic);
         }
+    }
+
+    @Override
+    public SimpleStatistic getStatistic() {
+        return new SimpleStatistic(getDataType(), getStatisticType(), getAggregatorType());
     }
 
     @Override
