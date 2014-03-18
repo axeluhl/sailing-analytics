@@ -23,6 +23,10 @@ public interface DataMiningStringMessages {
     
     //TODO Replace with static method, after Java 8 can be used
     public static final class Util {
+
+        private static boolean supportedLocalesHaveBeenInitialized = false;
+        private static final String DEFAULT_LOCALE_NAME = "default";
+        private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
         
         private static final String DEFAULT_STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
         
@@ -55,6 +59,21 @@ public interface DataMiningStringMessages {
             }
             
             return new CompoundDataMiningStringMessages(stringMessages);
+        }
+
+        public static Locale getLocaleFrom(String localeInfoName) {
+            if (!supportedLocalesHaveBeenInitialized) {
+                initializeSupportedLocales();
+            }
+            
+            Locale locale = Util.supportedLocalesMappedByLocaleInfo.get(localeInfoName);
+            return locale != null ? locale : Util.supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
+        }
+        
+        private static void initializeSupportedLocales() {
+            supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, Locale.ENGLISH);
+            supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
+            supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
         }
         
         private Util () {
