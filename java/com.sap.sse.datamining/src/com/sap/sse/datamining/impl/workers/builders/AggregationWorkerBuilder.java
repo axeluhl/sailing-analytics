@@ -1,7 +1,5 @@
 package com.sap.sse.datamining.impl.workers.builders;
 
-import com.sap.sse.datamining.components.AggregatorType;
-import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleMedianAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
@@ -9,6 +7,8 @@ import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerMedianAggreg
 import com.sap.sse.datamining.impl.workers.aggregators.SumAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleDoubleSumAggregationHelper;
 import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregationHelper;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.ElementType;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

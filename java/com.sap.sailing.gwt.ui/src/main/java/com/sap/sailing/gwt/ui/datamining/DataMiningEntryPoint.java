@@ -31,8 +31,8 @@ import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
-import com.sap.sse.datamining.components.AggregatorType;
-import com.sap.sse.datamining.components.GrouperType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
 

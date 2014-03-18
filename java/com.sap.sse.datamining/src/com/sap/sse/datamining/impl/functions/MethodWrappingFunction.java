@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
-import com.sap.sse.datamining.annotations.Dimension;
-import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 

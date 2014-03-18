@@ -10,8 +10,8 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
-import com.sap.sse.datamining.components.AggregatorType;
-import com.sap.sse.datamining.components.GrouperType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 8408302866342877839L;

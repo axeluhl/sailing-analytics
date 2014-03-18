@@ -3,9 +3,9 @@ package com.sap.sailing.datamining.data;
 import com.sap.sailing.datamining.WindStrengthCluster;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sse.datamining.annotations.Dimension;
-import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
 
 public interface TrackedLegOfCompetitorWithContext {
     

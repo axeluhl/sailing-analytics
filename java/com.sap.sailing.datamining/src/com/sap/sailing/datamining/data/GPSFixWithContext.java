@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.data;
 import com.sap.sailing.datamining.WindStrengthCluster;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface GPSFixWithContext extends GPSFixMoving {
     

@@ -1,8 +1,8 @@
 package com.sap.sailing.datamining.shared;
 
-import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.components.ElementType;
 
 public enum StatisticType {
 

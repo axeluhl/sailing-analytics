@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sse.datamining.components.GrouperType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public interface GroupingProvider extends Component<Object> {
     

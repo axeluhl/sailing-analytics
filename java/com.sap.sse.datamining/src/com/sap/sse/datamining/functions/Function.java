@@ -3,10 +3,10 @@ package com.sap.sse.datamining.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.Dimension;
-import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface Function<ReturnType> {
