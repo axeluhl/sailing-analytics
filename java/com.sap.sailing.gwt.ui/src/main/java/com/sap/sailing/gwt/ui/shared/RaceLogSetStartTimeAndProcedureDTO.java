@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 /**
  * DTO holding all information to set a new start time on a specific race.
  */
-public class RaceLogSetStartTimeDTO implements IsSerializable {
+public class RaceLogSetStartTimeAndProcedureDTO implements IsSerializable {
     public String leaderboardName;
     public String raceColumnName;
     public String fleetName;

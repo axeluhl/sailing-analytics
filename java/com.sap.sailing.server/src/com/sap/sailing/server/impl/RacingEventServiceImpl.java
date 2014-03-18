@@ -2218,7 +2218,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
     
     @Override
-    public TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+    public TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {

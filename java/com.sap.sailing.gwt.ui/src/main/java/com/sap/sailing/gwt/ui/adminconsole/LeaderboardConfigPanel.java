@@ -69,7 +69,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
@@ -745,9 +745,9 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
         new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
-                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeDTO>() {
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
             @Override
-            public void ok(RaceLogSetStartTimeDTO editedObject) {
+            public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
                 sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable caught) {

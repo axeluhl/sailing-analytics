@@ -29,10 +29,10 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog;
 
-public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> {
+public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndProcedureDTO> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
@@ -52,7 +52,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 
-            DataEntryDialog.DialogCallback<RaceLogSetStartTimeDTO> callback) {
+            DataEntryDialog.DialogCallback<RaceLogSetStartTimeAndProcedureDTO> callback) {
         super(stringMessages.setStartTime(), stringMessages.setStartTimeDescription(), stringMessages.setStartTime(), 
                 stringMessages.cancel(), new StartTimeValidator(stringMessages), callback);
         this.service = service;
@@ -142,8 +142,8 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
     }
 
     @Override
-    protected RaceLogSetStartTimeDTO getResult() {
-        RaceLogSetStartTimeDTO dto = new RaceLogSetStartTimeDTO();
+    protected RaceLogSetStartTimeAndProcedureDTO getResult() {
+        RaceLogSetStartTimeAndProcedureDTO dto = new RaceLogSetStartTimeAndProcedureDTO();
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
         dto.fleetName = fleetName;
@@ -191,7 +191,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
         });
     }
     
-    private static class StartTimeValidator implements Validator<RaceLogSetStartTimeDTO> {
+    private static class StartTimeValidator implements Validator<RaceLogSetStartTimeAndProcedureDTO> {
         
         private final StringMessages stringMessages;
         
@@ -200,7 +200,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
         }
 
         @Override
-        public String getErrorMessage(RaceLogSetStartTimeDTO dto) {
+        public String getErrorMessage(RaceLogSetStartTimeAndProcedureDTO dto) {
             if (dto.authorName == null || dto.authorName.isEmpty() || 
                     dto.authorPriority == null || dto.startTime == null) {
                 return stringMessages.pleaseEnterAValue();

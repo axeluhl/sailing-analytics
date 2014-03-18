@@ -51,7 +51,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -375,7 +375,7 @@ public interface SailingService extends RemoteService {
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
 
-    boolean setStartTimeAndProcedure(RaceLogSetStartTimeDTO dto);
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
     Triple<Date, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
 

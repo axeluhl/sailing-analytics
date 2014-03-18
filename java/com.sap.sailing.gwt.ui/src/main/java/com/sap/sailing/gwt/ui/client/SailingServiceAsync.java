@@ -51,7 +51,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -509,9 +509,9 @@ public interface SailingServiceAsync {
 
     /**
      * Sets the a new start time.
-     * @param dto {@link RaceLogSetStartTimeDTO} identifying the race to set the start time on and the new start time.
+     * @param dto {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new start time.
      */
-    void setStartTimeAndProcedure(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
+    void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
      * Gets the race's current start time and current pass identifier. If no start time is set, the pass identifier will

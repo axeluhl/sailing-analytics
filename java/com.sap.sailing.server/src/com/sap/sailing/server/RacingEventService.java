@@ -493,7 +493,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param startTime the new Start-Time
      * @return
      */
-    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+    TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
