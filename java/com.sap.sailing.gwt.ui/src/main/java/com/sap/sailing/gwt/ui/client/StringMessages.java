@@ -968,4 +968,6 @@ public interface StringMessages extends Messages {
     String ratio();
     String importWind();
     String importWindTooltip();
+    String authorName();
+    String authorPriority();
 }

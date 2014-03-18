@@ -124,10 +124,10 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
         
         
         authorNameBox = createTextBox("Shore");
-        content.setWidget(1, 0, createLabel("Author name"));
+        content.setWidget(1, 0, createLabel(stringMessages.authorName()));
         content.setWidget(1, 1, authorNameBox);
         authorPriorityBox = createIntegerBox(4, 2);
-        content.setWidget(2, 0, createLabel("Author priority"));
+        content.setWidget(2, 0, createLabel(stringMessages.authorPriority()));
         content.setWidget(2, 1, authorPriorityBox);
         
         racingProcedureSelection = createListBox(false);
