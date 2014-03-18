@@ -37,12 +37,17 @@ public class TopLevelMasterData implements Serializable {
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
-            final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks) {
+            final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks,
+            boolean exportWind) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.allMediaTracks = new HashSet<MediaTrack>();
         this.allMediaTracks.addAll(allMediaTracks);
         this.leaderboardGroups = groupsToExport;
-        this.windTrackMasterData = fillWindMap(groupsToExport);
+        if (exportWind) {
+            this.windTrackMasterData = fillWindMap(groupsToExport);
+        } else {
+            this.windTrackMasterData = new HashSet<WindTrackMasterData>();
+        }
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
     }
 

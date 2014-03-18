@@ -345,7 +345,7 @@ public interface SailingService extends RemoteService {
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
     
     DataImportProgress getImportOperationProgress(UUID id);
 
