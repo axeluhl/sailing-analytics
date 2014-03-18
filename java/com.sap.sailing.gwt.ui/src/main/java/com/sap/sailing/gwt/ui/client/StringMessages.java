@@ -970,4 +970,6 @@ public interface StringMessages extends Messages {
     String overallProgress();
     String showAddedScores();
     String ratio();
+    String importWind();
+    String importWindTooltip();
 }
