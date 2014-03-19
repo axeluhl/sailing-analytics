@@ -258,7 +258,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         if(type.isRaceSpecific()) {
                 objToInsert.put(FieldNames.RACE_ID.name(), message.getRaceID());
             messageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-            if (message.getSequenceNumber() == null){
+            if (message.getSequenceNumber() == null) {
                 DBObject emptyQuery = new BasicDBObject();
                 DBObject incrementLastMessageCountQuery = new BasicDBObject().
                         append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
@@ -330,6 +330,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         racesMessageCollection.drop();
         DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         cmdMessageCollection.drop();
+        DBCollection lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
+        lastMessageCountCollection.drop();
         database.getLastError(); // wait for the drop() to complete
     }
 }

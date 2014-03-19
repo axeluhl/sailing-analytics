@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import java.util.logging.Logger;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -56,16 +54,14 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
     
-    private static final Logger logger = Logger.getLogger(CellTablePO.class.getName());
-    
-    private static final String LOADING_ANIMATION_IMAGE = "url(\"data:image/gif;base64," +               //$NON-NLS-1$
+    private static final String LOADING_ANIMATION_IMAGE = "data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
             "vYWQuaW5mbwAh+QQJCgAAACwAAAAAKwALAAACMoSOCMuW2diD88UKG95W88uF4DaGWFmhZid93pq+pwxnLUnXh8" +  //$NON-NLS-1$
             "ou+sSz+T64oCAyTBUAACH5BAkKAAAALAAAAAArAAsAAAI9xI4IyyAPYWOxmoTHrHzzmGHe94xkmJifyqFKQ0pwL" +  //$NON-NLS-1$
             "LgHa82xrekkDrIBZRQab1jyfY7KTtPimixiUsevAAAh+QQJCgAAACwAAAAAKwALAAACPYSOCMswD2FjqZpqW9xv" +  //$NON-NLS-1$
             "4g8KE7d54XmMpNSgqLoOpgvC60xjNonnyc7p+VKamKw1zDCMR8rp8pksYlKorgAAIfkECQoAAAAsAAAAACsACwA" +  //$NON-NLS-1$
             "AAkCEjgjLltnYmJS6Bxt+sfq5ZUyoNJ9HHlEqdCfFrqn7DrE2m7Wdj/2y45FkQ13t5itKdshFExC8YCLOEBX6Ah" +  //$NON-NLS-1$
-            "QAADsAAAAAAAAAAAA=\")";                                                                     //$NON-NLS-1$
+            "QAADsAAAAAAAAAAAA=";                                                                     //$NON-NLS-1$
     
     private static final String ASCENDING_IMAGE = "url(\"data:image/png;base64," +                       //$NON-NLS-1$
             "iVBORw0KGgoAAAANSUhEUgAAAAsAAAAHCAYAAADebrddAAAAiklEQVR42mNgwALyKrumFRf3iDAQAvmVXVVAxf/" +  //$NON-NLS-1$
@@ -219,10 +215,8 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             entry.deselect();
         }
         
-        logger.info("Try to select " + entries.size() + " entries");
         // Select all specified entries
         for(T entry : entries) {
-            logger.info("Entry belongs " + (this.getWebElement().equals(entry.table.getWebElement()) ? "" : "not ") + "to the table");
             if(this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
@@ -280,7 +274,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             while(iterator.hasNext()) {
                 WebElement row = iterator.next();
                 
-                if(isRowForLoadingIndicator(row) || isRowForEmptyTableWidget(row))
+                if(isRowForLoadingIndicatorOrEmptyTableWidget(row))
                     iterator.remove();
             }
             
@@ -292,18 +286,18 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     protected abstract T createDataEntry(WebElement element);
     
-    // TODO [D049941]: Implement this method
-    private boolean isRowForEmptyTableWidget(WebElement row) {
-        return false;
-    }
-    
-    private boolean isRowForLoadingIndicator(WebElement row) {
+    /**
+     * Checks if the row is the table row displayed for a loading indicator or an empty table.
+     * @param row the row to check
+     * @return
+     */
+    private boolean isRowForLoadingIndicatorOrEmptyTableWidget(WebElement row) {
         List<WebElement> images = row.findElements(By.xpath(LOADING_ANIMATION_XPATH));
         
         if(images.isEmpty() || images.size() > 1)
             return false;
         
-        String image = images.get(0).getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
+        String image = images.get(0).getAttribute("src");
         
         return LOADING_ANIMATION_IMAGE.equals(image);
     }

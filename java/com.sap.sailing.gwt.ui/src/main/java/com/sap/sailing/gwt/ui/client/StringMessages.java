@@ -778,8 +778,8 @@ public interface StringMessages extends Messages {
     String importSelectAtLeastOne();
     String deselectAll();
     String polarDiagramButton();
-    String timeSinceLastPositionFix();
-    String timeSinceLastPositionFixTooltip();
+    String ratioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval();
+    String ratioBetweenTimeSinceLastPositionFixAndAverageSamplingIntervalTooltip();
     String trackingQuality();
     String legType();
     String seriesLeaderboard();
@@ -963,4 +963,8 @@ public interface StringMessages extends Messages {
     String eventOverview();
     String start();
     String overallProgress();
+    String showAddedScores();
+    String ratio();
+    String importWind();
+    String importWindTooltip();
 }

@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -221,19 +222,19 @@ public class RegattaDetailsComposite extends Composite {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     RegattaIdentifier identifier = new RegattaName(regatta.getName());
-                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>() {
-
-                        @Override
-                        protected void handleFailure(Throwable cause) {
-                            errorReporter.reportError("Error trying to remove series " + series.getName()
-                                    + ": " + cause.getMessage());
-                        }
-
-                        @Override
-                        protected void handleSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
+                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable cause) {
+                                    errorReporter.reportError("Error trying to remove series " + series.getName()
+                                            + ": " + cause.getMessage());
+                                }
+        
+                                @Override
+                                public void onSuccess(Void result) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                    }));
                 }
 
             }
@@ -303,53 +304,66 @@ public class RegattaDetailsComposite extends Composite {
                 raceColumnsToRemove.add(existingRaceColumn.getName());
             }
         }
-        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to add race columns "
-                            + raceColumnsToAdd + " to series " + series.getName()
-                            + ": " + caught.getMessage());
-
-                }
-
-                @Override
-                public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                    regattaRefresher.fillRegattas();
-                }
-            });
-        
-        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove race columns "
-                        + raceColumnsToAdd + " from series " + series.getName()
-                        + ": " + caught.getMessage());
+        StringBuilder racesToRemove = new StringBuilder();
+        boolean first = true;
+        for (String raceColumnToRemove : raceColumnsToRemove) {
+            if (first) {
+                first = false;
+            } else {
+                racesToRemove.append(", ");
             }
+            racesToRemove.append(raceColumnToRemove);
+        }
+        if (Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
+            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd,
+                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to add race columns " + raceColumnsToAdd
+                                    + " to series " + series.getName() + ": " + caught.getMessage());
 
-            @Override
-            public void onSuccess(Void v) {
-                regattaRefresher.fillRegattas();
-            }
-        });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged
-                || hasSplitFleetContiguousScoringChanged || seriesNameChanged) {
-            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(), seriesDescriptor.isMedal(),
-                    seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
-                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetContiguousScoring(),
-                    series.getFleets(),
+                        }
+
+                        @Override
+                        public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
+
+            sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to update series "
-                                    + series.getName()
-                                    + ": " + caught.getMessage());
+                            errorReporter.reportError("Error trying to remove race columns " + raceColumnsToAdd
+                                    + " from series " + series.getName() + ": " + caught.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
+                        public void onSuccess(Void v) {
                             regattaRefresher.fillRegattas();
                         }
-            });
+                    });
+            if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
+                    || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
+                    || seriesNameChanged) {
+                sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
+                        seriesDescriptor.isMedal(), seriesDescriptor.getResultDiscardingThresholds(),
+                        seriesDescriptor.isStartsWithZeroScore(),
+                        seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
+                        seriesDescriptor.hasSplitFleetContiguousScoring(), series.getFleets(),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error trying to update series " + series.getName() + ": "
+                                        + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                regattaRefresher.fillRegattas();
+                            }
+                        });
+            }
         }
     }
 

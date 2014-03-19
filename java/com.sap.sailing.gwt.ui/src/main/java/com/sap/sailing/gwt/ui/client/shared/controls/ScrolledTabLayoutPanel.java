@@ -9,7 +9,6 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -20,7 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A {@link TabLayoutPanel} that shows scroll buttons if necessary. Stolen from the internets and adapted.
+ * A {@link TabLayoutPanel} that shows scroll buttons if necessary.
  */
 public class ScrolledTabLayoutPanel extends TabLayoutPanel {
     
@@ -162,14 +161,14 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
     }
     
     private Widget centerVertical(Widget widget, String styleName) {
-        VerticalPanel vertical = new VerticalPanel();
-        vertical.setSize("100%", "100%");
-        vertical.setStylePrimaryName(styleName);
-        vertical.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        DOM.setStyleAttribute(vertical.getElement(), "backgroundColor", "#ccc");
-        DOM.setStyleAttribute(vertical.getElement(), "marginTop", "6px");
-        vertical.add(widget);
-        return vertical;
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.setSize("100%", "100%");
+        vPanel.setStylePrimaryName(styleName);
+        vPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        vPanel.getElement().getStyle().setBackgroundColor("#ccc");
+        vPanel.getElement().getStyle().setMarginTop(6, Unit.PX);
+        vPanel.add(widget);
+        return vPanel;
     }
 
     private void checkIfScrollButtonsNecessary() {

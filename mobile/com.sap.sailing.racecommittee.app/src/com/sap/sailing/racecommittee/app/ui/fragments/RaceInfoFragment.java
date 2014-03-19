@@ -27,10 +27,8 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 
 public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
@@ -68,20 +66,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         this.courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
         this.windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
 
-        courseInfoHeader.setText(getString(R.string.running_on_unknown));
         windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
                 .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
 
-        courseInfoHeader.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                showCourseDesignDialog();
-            }
-        });
-        
         windInfoHeader.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -147,12 +136,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         transaction.commit();
     }
 
-    private void showCourseDesignDialog() {
-        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
-        fragment.setArguments(getRecentArguments());
-        fragment.show(getFragmentManager(), "courseDesignDialogFragment");
-    }
-
     private void showRaceResetConfirmationDialog() {
         prepareResetRaceView();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -197,7 +180,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                         Util.size(courseDesign.getWaypoints())));
             }
         } else {
-            courseInfoHeader.setText(getString(R.string.running_on_unknown));
+            courseInfoHeader.setText(getString(R.string.no_course_active));
         }
     }
     

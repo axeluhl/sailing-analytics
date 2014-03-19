@@ -24,10 +24,15 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         String name = object.get(EventJsonSerializer.FIELD_NAME).toString();
         Number startDate = (Number) object.get(EventJsonSerializer.FIELD_START_DATE);
         Number endDate = (Number) object.get(EventJsonSerializer.FIELD_END_DATE);
-        JSONObject venueObject = Helpers.getNestedObjectSafe(object, EventJsonSerializer.FIELD_VENUE);
-        Venue venue = venueDeserializer.deserialize(venueObject);
-        return new EventBaseImpl(name, new MillisecondsTimePoint(startDate.longValue()), new MillisecondsTimePoint(endDate.longValue()), 
-                venue, true, id);
+        final Venue venue;
+        if (object.get(EventJsonSerializer.FIELD_VENUE) != null) {
+            JSONObject venueObject = Helpers.getNestedObjectSafe(object, EventJsonSerializer.FIELD_VENUE);
+            venue = venueDeserializer.deserialize(venueObject);
+        } else {
+            venue = null;
+        }
+        return new EventBaseImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, true, id);
     }
 
 }

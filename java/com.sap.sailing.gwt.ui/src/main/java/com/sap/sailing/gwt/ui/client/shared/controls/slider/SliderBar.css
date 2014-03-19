@@ -16,9 +16,6 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-knob {
-  top: 12px;
-  width: 11px;
-  height: 21px;
   z-index: 1;
   cursor: pointer;
   top: 7px;

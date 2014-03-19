@@ -168,7 +168,7 @@
 	<string name="race_reset_time_schedule_race">Rennen planen</string>
 	<string name="race_reset_time_startmode_starttime">Startmodus und Startzeit setzen</string>
 	<string name="today">Heute</string>
-	<string name="start">Start</string>
+	<string name="start">Startzeit des Rennens setzen</string>
 	
 	<string name="nationality">Nationalität</string>
 	<string name="number">Nummer</string>
@@ -236,4 +236,8 @@
 	<string name="rrs26_start_mode_changed_to">Startmodus Flagge verändert zu %1$s</string>
 	<string name="preference_there_are_no_regattas">Bisher keine Regatta geladen.</string>
 	<string name="configure_regatta">Konfiguriere Regatta %1$s</string>
+
+	<string name="race_start_in_4_minutes">Rennen startet in genau 4 Minuten</string>
+	<string name="race_reset_course">Kurs ändern</string>
+	<string name="no_course_active">Kein Kurs gesetzt</string>
 </resources>

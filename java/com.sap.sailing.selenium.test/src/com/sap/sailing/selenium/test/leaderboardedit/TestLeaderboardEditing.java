@@ -66,10 +66,9 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
             TrackedRaceDescriptor trackedRace, long waitingTime) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(jsonUrl);
-        captureScreenshot("beforeStartTracking");
         tracTracEvents.setTrackSettings(false, true, false);
         tracTracEvents.startTrackingForRace(trackableRace);
-        captureScreenshot("afterStartTracking");
+        
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
         trackedRacesList.waitForTrackedRace(trackedRace);
         trackedRacesList.stopTracking(trackedRace);
