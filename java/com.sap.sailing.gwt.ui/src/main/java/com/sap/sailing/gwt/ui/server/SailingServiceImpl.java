@@ -428,7 +428,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     protected SwissTimingAdapter getSwissTimingAdapter() {
-        return swissTimingAdapterTracker.getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
+        return swissTimingAdapterTracker.getService().getOrCreateSwissTimingAdapter(baseDomainFactory);
     }
 
     protected TracTracAdapter getTracTracAdapter() {
@@ -2160,7 +2160,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) 
             throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDTO> result = new ArrayList<SwissTimingRaceRecordDTO>();
-        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
+        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port)) {
             SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(rr.getRaceID(), rr.getDescription(), rr.getStartTime());
             BoatClass boatClass = getSwissTimingAdapter().getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
@@ -2183,9 +2183,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port + " and canSendRequests=" + canSendRequests);
         for (SwissTimingRaceRecordDTO rr : rrs) {
-            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.ID, hostname,
+            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.ID, rr.description,
+                    hostname,
                     port,
-                    canSendRequests,
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {

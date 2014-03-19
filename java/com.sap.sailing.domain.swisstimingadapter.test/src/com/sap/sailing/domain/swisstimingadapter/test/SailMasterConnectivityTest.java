@@ -38,7 +38,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
-import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 
 public class SailMasterConnectivityTest {
     private static final int port = 24354;
@@ -52,13 +51,9 @@ public class SailMasterConnectivityTest {
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
-        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        swissTimingPersistence.dropAllRaceMasterData();
         Race race4711 = new RaceImpl("4711", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
-        swissTimingPersistence.storeRace(race4711);
-        swissTimingPersistence.storeRace(race4712);
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, swissTimingPersistence, /* canSendRequests */ true);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, raceId, raceDescription);
         connector.trackRace("W4702");
         connector.trackRace(race4711.getRaceID());
         connector.trackRace(race4712.getRaceID());
@@ -131,9 +126,7 @@ public class SailMasterConnectivityTest {
     
     @Test
     public void testRaceTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Iterator<Race> i = races.iterator();
-        Race r1 = i.next();
+        Race r1 = connector.getRace();
         TimePoint start1 = connector.getStartTime(r1.getRaceID());
         TimePoint now = MillisecondsTimePoint.now();
         Calendar cal = new GregorianCalendar();
@@ -176,9 +169,7 @@ public class SailMasterConnectivityTest {
 
     @Test
     public void testCourseConfig() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Iterator<Race> i = races.iterator();
-        Race r1 = i.next();
+        Race r1 = connector.getRace();
         Course course1 = connector.getCourse(r1.getRaceID());
         assertEquals(r1.getRaceID(), course1.getRaceID());
         assertEquals(2, Util.size(course1.getMarks()));

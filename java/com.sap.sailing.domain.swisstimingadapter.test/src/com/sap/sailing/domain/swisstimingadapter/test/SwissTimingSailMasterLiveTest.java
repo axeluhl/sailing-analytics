@@ -34,7 +34,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 
 @Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
@@ -43,9 +42,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Before
     public void connect() throws InterruptedException {
-        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300,
-                swissTimingPersistence, /* canSendRequests */true);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, raceId, raceDescription);
     }
     
     @After

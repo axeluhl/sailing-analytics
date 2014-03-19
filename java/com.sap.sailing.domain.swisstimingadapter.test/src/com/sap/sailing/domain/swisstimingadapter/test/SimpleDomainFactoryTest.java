@@ -10,14 +10,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-
-
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
@@ -72,16 +69,6 @@ public class SimpleDomainFactoryTest {
                     public String getRaceID() {
                         return raceID;
                     }
-
-                    @Override
-                    public TimePoint getStartTime() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setStartTime(TimePoint timePoint) {
-                    }
-            
         }, new StartList() {
             @Override
             public String getRaceID() {

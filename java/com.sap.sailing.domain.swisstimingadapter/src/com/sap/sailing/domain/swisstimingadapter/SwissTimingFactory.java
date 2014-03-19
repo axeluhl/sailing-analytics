@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -37,29 +36,27 @@ public interface SwissTimingFactory {
      * {@link SailMasterConnector#trackRace} and {@link SailMasterConnector#stopTrackingRace} operations.
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
      * listener.
-     * 
-     * @param canSendRequests
-     *            tells whether the hostname/port combination is able to receive and process SailMaster request messages;
-     *            if <code>false</code>, only events are sent by the host to which the connector connects.
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port,
-            RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceDescription)
+            throws InterruptedException, ParseException;
 
-    SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, 
-            RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
+    SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId,
+            String raceDescription) throws InterruptedException, ParseException;
 
     SailMasterTransceiver createSailMasterTransceiver();
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
-
-    RaceTracker createRaceTracker(Regatta regatta, String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
-            WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException, InterruptedException,
+    SwissTimingRaceTracker createRaceTracker(String raceID, String raceDescription, String hostname, int port,
+            long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException,
             IOException, ParseException;
 
-    Race createRace(String raceId, String description, TimePoint startTime);
+    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceDescription, String hostname, int port, long delayToLiveInMillis,
+            WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException, InterruptedException,
+            IOException, ParseException;
+
+    Race createRace(String raceId, String description);
 
     SailMasterMessage createMessage(String message);
 

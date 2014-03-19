@@ -15,15 +15,11 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
     
-    Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException;
+    Race getRace();
     
     Course getCourse(String raceID) throws UnknownHostException, IOException, InterruptedException;
     
-    boolean hasCourse(String raceID);
-
     StartList getStartList(String raceID) throws UnknownHostException, IOException, InterruptedException;
-
-    boolean hasStartlist(String raceID);
 
     TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException;
     
@@ -88,10 +84,6 @@ public interface SailMasterConnector {
      * @throws IOException 
      */
     void stop() throws IOException;
-
-    void trackRace(String raceID) throws ParseException;
-
-    void stopTrackingRace(String raceID);
 
     void removeSailMasterListener(String raceID, SailMasterListener listener);
 
