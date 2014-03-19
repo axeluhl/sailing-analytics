@@ -21,7 +21,7 @@ public interface SailMasterConnector {
     
     StartList getStartList(String raceID) throws UnknownHostException, IOException, InterruptedException;
 
-    TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException;
+    TimePoint getStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException;
     
     Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
     

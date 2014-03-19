@@ -41,8 +41,8 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private SailMasterConnector connector;
 
     @Before
-    public void connect() throws InterruptedException {
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, raceId, raceDescription);
+    public void connect() throws InterruptedException, ParseException {
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", "Women 470 Race 2");
     }
     
     @After
@@ -64,17 +64,14 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetRaces() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        assertEquals(1, Util.size(races));
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         assertEquals("Women 470 Race 2", race.getDescription());
         assertEquals("W4702", race.getRaceID());
     }
 
     @Test
     public void testGetCourse() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         assertNotNull(course);
         Iterable<Mark> marks = course.getMarks();
@@ -83,8 +80,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetStartList() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         StartList startList = connector.getStartList(race.getRaceID());
         Iterable<Competitor> competitors = startList.getCompetitors();
         assertEquals(race.getRaceID(), startList.getRaceID());
@@ -93,24 +89,20 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
-        TimePoint startTime = connector.getStartTime(race.getRaceID());
+        TimePoint startTime = connector.getStartTime();
         assertNotNull(startTime);
     }
     
     @Test
     public void testGetClockAtMark() throws UnknownHostException, IOException, InterruptedException, ParseException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         List<Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
         assertFalse(clockAtMark.isEmpty());
     }
     
     @Test
     public void testGetCurrentBoatSpeed() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             Speed currentBoatSpeed = connector.getCurrentBoatSpeed(race.getRaceID(), competitor.getBoatID());
             assertNotNull(currentBoatSpeed);
@@ -119,8 +111,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Iterator<Competitor> competitorIter = connector.getStartList(race.getRaceID()).getCompetitors().iterator();
         competitorIter.next();
         competitorIter.next();
@@ -139,8 +130,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetDistanceToMark() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             for (int i = 0; i < Util.size(course.getMarks()); i++) {
@@ -155,8 +145,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetMarkPassingTimes() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         int numberOfMarks = Util.size(course.getMarks());
         Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();

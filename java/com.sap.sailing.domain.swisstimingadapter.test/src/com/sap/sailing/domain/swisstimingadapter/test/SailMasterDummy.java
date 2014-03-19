@@ -66,7 +66,9 @@ public class SailMasterDummy implements Runnable {
     private void respondToMessage(String message, OutputStream os) throws IOException {
         SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message);
         String[] sections = smMessage.getSections();
-        if ((MessageType.RAC.name()+"?").equals(sections[0])) {
+        if (MessageType.OPN.name().equals(sections[0])) {
+            
+        } else if ((MessageType.RAC.name()+"?").equals(sections[0])) {
             // Available Races
             transceiver.sendMessage("RAC!|2|4711;A wonderful test race|4712;Not such a wonderful race", os);
         } else if ((MessageType.CCG.name()+"?").equals(sections[0])) {

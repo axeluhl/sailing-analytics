@@ -42,21 +42,22 @@ import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 public class SailMasterConnectivityTest {
     private static final int port = 24354;
     
-    private SailMasterConnector connector;
     private Thread dummyServerThread;
     private SailMasterDummy sailMaster;
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+
+    private SailMasterConnector connector4711;
+
+    private SailMasterConnector connector4712;
     
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
         Race race4711 = new RaceImpl("4711", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, raceId, raceDescription);
-        connector.trackRace("W4702");
-        connector.trackRace(race4711.getRaceID());
-        connector.trackRace(race4712.getRaceID());
+        connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), race4711.getDescription());
+        connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), race4712.getDescription());
     }
 
     private void startSailMasterDummy() throws InterruptedException {
@@ -69,7 +70,8 @@ public class SailMasterConnectivityTest {
     
     @After
     public void tearDown() throws IOException, InterruptedException {
-        connector.sendRequestAndGetResponse(MessageType._STOPSERVER);
+        connector4711.sendRequestAndGetResponse(MessageType._STOPSERVER);
+        connector4712.sendRequestAndGetResponse(MessageType._STOPSERVER);
         dummyServerThread.join();
         Thread.sleep(100); // give socket subsystem a chance to free up the port
     }
@@ -79,7 +81,7 @@ public class SailMasterConnectivityTest {
         final String[] raceIDResult = new String[1];
         final RaceStatus[] raceStatusResult = new RaceStatus[1];
         final Collection<Fix> fixesResult = new ArrayList<Fix>();
-        connector.addSailMasterListener(new SailMasterListener() {
+        connector4711.addSailMasterListener(new SailMasterListener() {
             @Override
             public void receivedTimingData(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {}
             @Override
@@ -116,7 +118,8 @@ public class SailMasterConnectivityTest {
     
     @Test
     public void testRAC() throws UnknownHostException, IOException, InterruptedException {
-        SailMasterMessage response = connector.sendRequestAndGetResponse(MessageType.RAC);
+        // TODO this test probably doesn't make sense anymore because request/response is no longer supported
+        SailMasterMessage response = connector4711.sendRequestAndGetResponse(MessageType.RAC);
         assertEquals(MessageType.RAC.name()+"!|2|4711;A wonderful test race|4712;Not such a wonderful race", response.getMessage());
         assertArrayEquals(new String[] { "RAC!", "2", "4711;A wonderful test race",
                 "4712;Not such a wonderful race" }, response.getSections());
@@ -126,8 +129,7 @@ public class SailMasterConnectivityTest {
     
     @Test
     public void testRaceTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
-        Race r1 = connector.getRace();
-        TimePoint start1 = connector.getStartTime(r1.getRaceID());
+        TimePoint start1 = connector4711.getStartTime();
         TimePoint now = MillisecondsTimePoint.now();
         Calendar cal = new GregorianCalendar();
         Calendar nowCal = new GregorianCalendar();
@@ -138,8 +140,7 @@ public class SailMasterConnectivityTest {
         assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
         assertEquals(15, cal.get(Calendar.MINUTE));
         assertEquals(22, cal.get(Calendar.SECOND));
-        Race r2 = i.next();
-        TimePoint start2 = connector.getStartTime(r2.getRaceID());
+        TimePoint start2 = connector4712.getStartTime();
         cal.setTime(start2.asDate());
         assertSameDay(nowCal, cal);
         // 18:17:23
@@ -156,21 +157,18 @@ public class SailMasterConnectivityTest {
     
     @Test
     public void testStructuredRaceId() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        assertEquals(2, Util.size(races));
-        Iterator<Race> i = races.iterator();
-        Race r1 = i.next();
+        Race r1 = connector4711.getRace();
         assertEquals("4711", r1.getRaceID());
         assertEquals("A wonderful test race", r1.getDescription());
-        Race r2 = i.next();
+        Race r2 = connector4712.getRace();
         assertEquals("4712", r2.getRaceID());
         assertEquals("Not such a wonderful race", r2.getDescription());
     }
 
     @Test
     public void testCourseConfig() throws UnknownHostException, IOException, InterruptedException {
-        Race r1 = connector.getRace();
-        Course course1 = connector.getCourse(r1.getRaceID());
+        Race r1 = connector4711.getRace();
+        Course course1 = connector4711.getCourse(r1.getRaceID());
         assertEquals(r1.getRaceID(), course1.getRaceID());
         assertEquals(2, Util.size(course1.getMarks()));
         Iterator<Mark> mi = course1.getMarks().iterator();
@@ -183,8 +181,8 @@ public class SailMasterConnectivityTest {
         assertEquals(Arrays.asList(new String[] { "WW1" }), m12.getDevices());
         assertEquals(2, m12.getIndex());
 
-        Race r2 = i.next();
-        Course course2 = connector.getCourse(r2.getRaceID());
+        Race r2 = connector4712.getRace();
+        Course course2 = connector4712.getCourse(r2.getRaceID());
         assertEquals(r2.getRaceID(), course2.getRaceID());
         assertEquals(3, Util.size(course2.getMarks()));
         mi = course2.getMarks().iterator();
@@ -204,10 +202,8 @@ public class SailMasterConnectivityTest {
     
     @Test
     public void testStartList() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Iterator<Race> i = races.iterator();
-        Race r1 = i.next();
-        StartList sl1 = connector.getStartList(r1.getRaceID());
+        Race r1 = connector4711.getRace();
+        StartList sl1 = connector4711.getStartList(r1.getRaceID());
         assertEquals(r1.getRaceID(), sl1.getRaceID());
         assertEquals(2, Util.size(sl1.getCompetitors()));
         Iterator<Competitor> ci = sl1.getCompetitors().iterator();
@@ -219,8 +215,8 @@ public class SailMasterConnectivityTest {
         assertEquals("GER 8140", schlonskiBohn.getBoatID());
         assertEquals("GER", schlonskiBohn.getThreeLetterIOCCode());
         assertEquals("Schlonski/Bohn", schlonskiBohn.getName());
-        Race r2 = i.next();
-        StartList sl2 = connector.getStartList(r2.getRaceID());
+        Race r2 = connector4712.getRace();
+        StartList sl2 = connector4712.getStartList(r2.getRaceID());
         assertEquals(r2.getRaceID(), sl2.getRaceID());
         assertEquals(3, Util.size(sl2.getCompetitors()));
         ci = sl2.getCompetitors().iterator();

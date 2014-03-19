@@ -619,7 +619,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
-    public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException {
+    public TimePoint getStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
         return startTime;
     }
 
