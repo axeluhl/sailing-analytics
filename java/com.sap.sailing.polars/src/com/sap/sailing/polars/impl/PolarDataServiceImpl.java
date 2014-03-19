@@ -1,6 +1,5 @@
 package com.sap.sailing.polars.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.polars.PolarDataService;
@@ -228,13 +226,15 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     }
 
-    private Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> createIntervalSpecification(
-            TrackedRace createdTrackedRace, Competitor competitor, TimePoint timePoint) {
-        HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> result = new HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>>();
-        HashMap<Competitor, Pair<TimePoint, TimePoint>> competitorMap = new HashMap<Competitor, Pair<TimePoint, TimePoint>>();
-        competitorMap.put(competitor, new Pair<TimePoint, TimePoint>(timePoint, timePoint));
-        result.put(createdTrackedRace, competitorMap);
-        return result;
-    }
+    // private Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> createIntervalSpecification(
+    // TrackedRace createdTrackedRace, Competitor competitor, TimePoint timePoint) {
+    // HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> result = new HashMap<TrackedRace,
+    // Map<Competitor, Pair<TimePoint, TimePoint>>>();
+    // HashMap<Competitor, Pair<TimePoint, TimePoint>> competitorMap = new HashMap<Competitor, Pair<TimePoint,
+    // TimePoint>>();
+    // competitorMap.put(competitor, new Pair<TimePoint, TimePoint>(timePoint, timePoint));
+    // result.put(createdTrackedRace, competitorMap);
+    // return result;
+    // }
 
 }

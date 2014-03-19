@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.sap.sailing.polars.regression.IncrementalLinearRegressionProcessor;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
-import com.sap.sailing.polars.regression.impl.ApacheSimpleRegressionWrapper;
 import com.sap.sailing.polars.regression.impl.IncrementalLeastSquaresProcessor;
 
 public class IncrementalLinearRegressionTest {
@@ -19,7 +18,6 @@ public class IncrementalLinearRegressionTest {
 
     private IncrementalLinearRegressionProcessor createRegressionProcessor() {
         IncrementalLinearRegressionProcessor processor = new IncrementalLeastSquaresProcessor();
-        ApacheSimpleRegressionWrapper apacheProcessor = new ApacheSimpleRegressionWrapper();
         return processor;
     }
 
