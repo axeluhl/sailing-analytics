@@ -22,12 +22,9 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
                     try {
                         if(!bufferedMessageList.isEmpty()) {
                             SailMasterMessage message = bufferedMessageList.get(0);
-         
                             notifyParentListeners(message);
-        
                             bufferedMessageList.remove(0);
                         }                    
-        
                         Thread.sleep(messageDeliveryIntervalInMs);
                     } catch (Exception e) {
                     }

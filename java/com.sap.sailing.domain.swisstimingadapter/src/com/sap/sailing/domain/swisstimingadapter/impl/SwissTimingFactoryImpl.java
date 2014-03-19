@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -24,6 +25,8 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
+    private static final Logger logger = Logger.getLogger(SwissTimingFactoryImpl.class.getName());
+    
     private final Map<Triple<String, Integer, String>, SailMasterConnector> connectors;
 
     public SwissTimingFactoryImpl() {
@@ -43,13 +46,17 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
         } else {
             Triple<String, Integer, String> key = new Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
-            if (result == null) {
+            if (result == null || result.isStopped()) {
+                if (result == null) {
+                    logger.info("Creating a new connector for "+key+" because none found");
+                } else {
+                    logger.info("Creating a new connector for "+key+" because the old one was stopped");
+                }
                 result = new SailMasterConnectorImpl(host, port, raceId, raceDescription);
                 connectors.put(key, result);
                 // TODO how do connectors get stopped, terminated and removed from the connectors map again?
-            } else if (result.isStopped()) {
-                result = new SailMasterConnectorImpl(host, port, raceId, raceDescription);
-                connectors.put(key, result);
+            } else {
+                logger.info("Re-using connector for "+key+" because it wasn't stopped");
             }
             return result;
         }

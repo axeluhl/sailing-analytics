@@ -415,6 +415,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public synchronized void stop() throws IOException {
+        logger.info("Stopping SailMasterConnector listening on port "+port+" with socket "+socket);
         stopped = true;
         socket.close();
         socket = null;
@@ -475,8 +476,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException {
         if (socket == null) {
+            logger.info("Opening socket to "+host+":"+port+"...");
             socket = new Socket(host, port);
             synchronized (this) {
+                logger.info("...successfully opened socket to "+host+":"+port);
                 connected = true;
                 notifyAll();
             }

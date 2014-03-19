@@ -41,8 +41,10 @@ public class SailMasterDummy implements Runnable {
                 final Socket socket = listenOn.accept();
                 if (stopped) {
                     // could have been stopped while we were listening on a socket
+                    logger.info("Stopping SailMasterDummy");
                     socket.close();
                 } else {
+                    logger.info("Received connect to SailMasterDummy on port "+port+": "+socket);
                     synchronized (this) {
                         sockets.add(socket);
                         this.notifyAll();
@@ -142,6 +144,7 @@ public class SailMasterDummy implements Runnable {
             if (sockets.isEmpty()) {
                 // wait a while to get notified about socket being set; could be a thread startup / synchronization
                 // problem
+                logger.info("No sockets found in SailMasterDummy; waiting for a second for one to appear...");
                 this.wait(/* timeout in milliseconds */1000l);
             }
         }
@@ -150,6 +153,7 @@ public class SailMasterDummy implements Runnable {
         }
         synchronized (this) {
             for (Socket socket : sockets) {
+                logger.info("Forwarding message "+message+" to socket "+socket);
                 transceiver.sendMessage(message, socket.getOutputStream());
             }
         }
