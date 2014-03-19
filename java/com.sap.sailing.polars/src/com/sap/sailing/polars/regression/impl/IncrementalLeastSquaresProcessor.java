@@ -1,7 +1,7 @@
 package com.sap.sailing.polars.regression.impl;
 
 import com.sap.sailing.polars.regression.IncrementalLinearRegressionProcessor;
-import com.sap.sailing.polars.regression.NoDataHasBeenAddedException;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 /**
  * Allows a linear regression of a 2 dimensional and growing dataset. It has a complexity of O(1)
@@ -33,9 +33,9 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
     private int numberOfPointsAdded = 0;
 
     @Override
-    public double getY(double x) throws NoDataHasBeenAddedException {
-        if (numberOfPointsAdded < 1) {
-            throw new NoDataHasBeenAddedException();
+    public double getY(double x) throws NotEnoughDataHasBeenAddedException {
+        if (numberOfPointsAdded < 2) {
+            throw new NotEnoughDataHasBeenAddedException();
         }
 
         return alpha0 + alpha1 * x;
@@ -95,6 +95,16 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
 
     private void calculatePartA(double x, double y) {
         partA = partA + x * y;
+    }
+
+    @Override
+    public double getSlope() {
+        return alpha1;
+    }
+
+    @Override
+    public double getIntercept() {
+        return alpha0;
     }
 
 }
