@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -47,15 +48,19 @@ public class SailMasterConnectivityTest {
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
 
+    private SailMasterConnector connector4702;
+    
     private SailMasterConnector connector4711;
 
     private SailMasterConnector connector4712;
-    
+
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
+        Race race4702 = new RaceImpl("W4702", "470 Women Race 2");
         Race race4711 = new RaceImpl("4711", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
+        connector4702 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4702.getRaceID(), race4702.getDescription());
         connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), race4711.getDescription());
         connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), race4712.getDescription());
     }
@@ -70,8 +75,9 @@ public class SailMasterConnectivityTest {
     
     @After
     public void tearDown() throws IOException, InterruptedException {
-        connector4711.sendRequestAndGetResponse(MessageType._STOPSERVER);
-        connector4712.sendRequestAndGetResponse(MessageType._STOPSERVER);
+        connector4702.sendRequestAndGetResponse(MessageType._STOPSERVER);
+        Socket s = new Socket("localhost", port); // ensure that the stopped state is recognized and the dummy server doesn't wait forever in the accept
+        s.close();
         dummyServerThread.join();
         Thread.sleep(100); // give socket subsystem a chance to free up the port
     }
@@ -81,7 +87,7 @@ public class SailMasterConnectivityTest {
         final String[] raceIDResult = new String[1];
         final RaceStatus[] raceStatusResult = new RaceStatus[1];
         final Collection<Fix> fixesResult = new ArrayList<Fix>();
-        connector4711.addSailMasterListener(new SailMasterListener() {
+        connector4702.addSailMasterListener(new SailMasterListener() {
             @Override
             public void receivedTimingData(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {}
             @Override

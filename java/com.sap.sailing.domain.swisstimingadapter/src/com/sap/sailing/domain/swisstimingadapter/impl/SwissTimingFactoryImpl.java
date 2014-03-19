@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
-    private final Map<Pair<String, Integer>, SailMasterConnector> connectors;
+    private final Map<Triple<String, Integer, String>, SailMasterConnector> connectors;
 
     public SwissTimingFactoryImpl() {
         connectors = new HashMap<>();
@@ -41,7 +41,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
             return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceDescription);
         } else {
-            Pair<String, Integer> key = new Pair<String, Integer>(host, port);
+            Triple<String, Integer, String> key = new Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
             if (result == null) {
                 result = new SailMasterConnectorImpl(host, port, raceId, raceDescription);
@@ -58,7 +58,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId,
             String raceDescription) throws InterruptedException, ParseException {
-        Pair<String, Integer> key = new Pair<String, Integer>(host, port);
+        Triple<String, Integer, String> key = new Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
             result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceDescription);
