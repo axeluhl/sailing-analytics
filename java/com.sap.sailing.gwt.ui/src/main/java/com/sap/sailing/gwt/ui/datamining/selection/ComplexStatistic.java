@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public class ComplexStatistic {
 

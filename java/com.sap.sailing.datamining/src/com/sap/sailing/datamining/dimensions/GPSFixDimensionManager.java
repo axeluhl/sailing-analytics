@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining.dimensions;
 
-import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sse.datamining.data.deprecated.Dimension;
+import com.sap.sse.datamining.impl.data.deprecated.AbstractDimension;
 
 public final class GPSFixDimensionManager implements DimensionManager<GPSFixWithContext> {
 

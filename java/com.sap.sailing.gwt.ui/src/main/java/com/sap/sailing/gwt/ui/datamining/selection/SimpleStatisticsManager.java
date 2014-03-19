@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
+import com.sap.sse.datamining.shared.components.AggregatorType;
 
 public class SimpleStatisticsManager implements StatisticsManager {
     

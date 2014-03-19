@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -14,13 +15,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.impl.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.DataMiningService;
+import com.sap.sailing.gwt.ui.client.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -30,19 +31,19 @@ import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
-
-//    private static final String PARAM_BENCHMARK = "benchmark";
+    
+    private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-//        String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
-//        boolean showBenchmark = benchmarkParameter != null && benchmarkParameter.equals("true");
+        super.setServiceEntryPoint((ServiceDefTarget) dataMiningService, "datamining");
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         SplitLayoutPanel splitPanel = new SplitLayoutPanel();
@@ -60,7 +61,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         
         splitPanel.add(dockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, sailingService, this, queryDefinitionProvider, resultsPresenter);
+        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProvider, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
         

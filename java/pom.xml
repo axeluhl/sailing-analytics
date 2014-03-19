@@ -15,6 +15,9 @@
 
 	<modules>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.datamining</module>
+		<module>com.sap.sse.datamining.shared</module>
+		<module>com.sap.sse.datamining.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
