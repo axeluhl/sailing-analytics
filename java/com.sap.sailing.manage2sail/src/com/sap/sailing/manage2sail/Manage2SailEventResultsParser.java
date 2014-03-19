@@ -1,4 +1,4 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.manage2sail;
 
 import java.io.IOException;
 import java.io.InputStream;

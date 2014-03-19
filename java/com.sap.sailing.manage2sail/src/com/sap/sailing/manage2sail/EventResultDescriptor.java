@@ -1,4 +1,4 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.manage2sail;
 
 import java.net.URL;
 import java.util.ArrayList;

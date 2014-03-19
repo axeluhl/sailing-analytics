@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.manage2sail.EventResultDescriptor;
+import com.sap.sailing.manage2sail.Manage2SailEventResultsParser;
+import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;

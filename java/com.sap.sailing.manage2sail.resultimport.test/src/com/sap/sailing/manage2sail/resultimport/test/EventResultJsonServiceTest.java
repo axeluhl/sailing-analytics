@@ -11,8 +11,8 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import com.sap.sailing.manage2sail.resultimport.EventResultDescriptor;
-import com.sap.sailing.manage2sail.resultimport.Manage2SailEventResultsParser;
+import com.sap.sailing.manage2sail.EventResultDescriptor;
+import com.sap.sailing.manage2sail.Manage2SailEventResultsParser;
 
 public class EventResultJsonServiceTest {
     private static final String EVENT_RESULTS_JSON = "eventResults.json";
