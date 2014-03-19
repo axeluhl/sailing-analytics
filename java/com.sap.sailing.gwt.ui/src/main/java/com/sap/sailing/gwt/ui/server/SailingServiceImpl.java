@@ -3450,7 +3450,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
-            final boolean compress) {
+            final boolean compress, final boolean exportWind) {
         final UUID importOperationId = UUID.randomUUID();
         getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, "Initializing", 0.0);
         // Create a progress indicator for as long as the server gets data from the other server.
@@ -3467,7 +3467,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 int port = hostnameAndPort.getB();
                 String query;
                 try {
-                    query = createLeaderboardQuery(groupNames, compress);
+                    query = createLeaderboardQuery(groupNames, compress, exportWind);
                 } catch (UnsupportedEncodingException e1) {
                     throw new RuntimeException(e1);
                 }
@@ -3545,17 +3545,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getService().getDataImportLock().getProgress(id);
     }
 
-    private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {
+    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)
+            throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
             queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        if (compress) {
-            queryStringBuffer.append("compress=true");
-        } else {
-            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
-        }
+        queryStringBuffer.append(String.format("compress=%s&exportWind=%s", compress, exportWind));
         return queryStringBuffer.toString();
     }
 

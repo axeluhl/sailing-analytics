@@ -75,7 +75,7 @@ public class Util {
         while (aIter.hasNext() && bIter.hasNext()) {
             T ao = aIter.next();
             T bo = bIter.next();
-            if (!ao.equals(bo)) {
+            if (!equalsWithNull(ao, bo)) {
                 return false;
             }
         }
@@ -101,7 +101,7 @@ public class Util {
             return ((Collection<?>) ts).contains(t);
         } else {
             for (T t2 : ts) {
-                if (t2.equals(t)) {
+                if (equalsWithNull(t2, t)) {
                     return true;
                 }
             }

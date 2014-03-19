@@ -2099,43 +2099,47 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     sideToWhichWaypointWasPassed));
         }
         final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
-        final Bearing courseBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver).getBearing();
-        final Bearing courseAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver).getBearing();
-        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
-        boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
-        boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
-        if (tacked && jibed) {
-            maneuverType = ManeuverType.PENALTY_CIRCLE;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
+        final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
+        final SpeedWithBearing estimatedSpeedAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver);
+        if (wind != null && estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
+            BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+            final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
+            final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
+            boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getBearing());
+            boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getFrom());
+            if (tacked && jibed) {
+                maneuverType = ManeuverType.PENALTY_CIRCLE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (tacked) {
+                maneuverType = ManeuverType.TACK;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (jibed) {
+                maneuverType = ManeuverType.JIBE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else {
+                // heading up or bearing away
+                Bearing windBearing = wind.getBearing();
+                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
+                        : ManeuverType.BEAR_AWAY;
             }
-        } else if (tacked) {
-            maneuverType = ManeuverType.TACK;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
-            }
-        } else if (jibed) {
-            maneuverType = ManeuverType.JIBE;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
-            }
-        } else {
-            // heading up or bearing away
-            Bearing windBearing = wind.getBearing();
-            Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning
-                    .getBearing());
-            Bearing toWindAfterManeuver = windBearing
-                    .getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
-            maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
-                    : ManeuverType.BEAR_AWAY;
+            final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+            result.add(maneuver);
         }
-        final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                maneuverTimePoint, speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees, maneuverLoss);
-        result.add(maneuver);
         return result;
     }
 

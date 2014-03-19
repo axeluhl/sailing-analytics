@@ -468,6 +468,7 @@ public interface SailingServiceAsync {
             AsyncCallback<RaceLogDTO> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress,
+ boolean exportWind,
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
