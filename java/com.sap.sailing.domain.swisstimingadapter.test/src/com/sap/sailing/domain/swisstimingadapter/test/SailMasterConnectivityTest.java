@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -151,6 +152,7 @@ public class SailMasterConnectivityTest {
         Thread.sleep(500);
         TimePoint start1 = connector4711.getStartTime();
         Calendar cal = new GregorianCalendar();
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         cal.setTime(start1.asDate());
         assertEquals(2011, cal.get(Calendar.YEAR));
         assertEquals(5, cal.get(Calendar.MONTH));

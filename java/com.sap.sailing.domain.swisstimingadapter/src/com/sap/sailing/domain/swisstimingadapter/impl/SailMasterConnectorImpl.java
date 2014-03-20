@@ -102,9 +102,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      * The only way known so far for how to find out the time zone relative to which the other time stamps
      * are to be interpreted is to start with the current default time zone's offset and wait for an
      * {@link MessageType#RPD RPD} event to be received. From this event, the time zone offset can be extracted
-     * and applied to all other time stamps. It is stored using the race ID as key.
+     * and applied to all other time stamps. It is stored in this field.
      */
-    private final Map<String, String> lastTimeZoneSuffixPerRaceID;
+    private String lastTimeZoneSuffix;
     
     private TimePoint startTime;
     
@@ -129,7 +129,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
-        lastTimeZoneSuffixPerRaceID = new HashMap<String, String>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
         synchronized (this) {
@@ -330,7 +329,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
-        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffixPerRaceID.get(raceID);
+        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffix;
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
                 parseTimeAndDateISO(startTimeEstimatedStartTimeISO, raceID));
         if (startTimeEstimatedStartTime != null) {
@@ -565,11 +564,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private String getLastTimeZoneSuffix(String raceID) {
-        String result = lastTimeZoneSuffixPerRaceID.get(raceID);
+        String result = lastTimeZoneSuffix;
         if (result == null) {
             int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
             result = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
-            lastTimeZoneSuffixPerRaceID.put(raceID, result);
+            lastTimeZoneSuffix = result;
         }
         return result;
     }
@@ -584,7 +583,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
         if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
             timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
-            lastTimeZoneSuffixPerRaceID.put(raceID, timeAndDateISO.substring(timeAndDateISO.length()-5));
+            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
         }
         synchronized(dateFormat) {
             return dateFormat.parse(timeAndDateISO);
