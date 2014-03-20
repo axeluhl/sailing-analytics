@@ -102,6 +102,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         fillConfigurations();
 
         jsonUrlBox = new TextBox();
+        jsonUrlBox.setText("test"); // by using 'test' as the JSON URL you will get some useful content from a static json file 
         jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
 
         connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
@@ -155,6 +156,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         };
 
+        // AXEL: DON'T DELETE
 //        TextColumn<SwissTimingRaceRecordDTO> stateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
 //            @Override
 //            public String getValue(SwissTimingRaceRecordDTO object) {
@@ -380,6 +382,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                                 if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.getName());
                                 }
+                                updatePanelFromSelectedStoredConfiguration();
                             }
                         });
             }

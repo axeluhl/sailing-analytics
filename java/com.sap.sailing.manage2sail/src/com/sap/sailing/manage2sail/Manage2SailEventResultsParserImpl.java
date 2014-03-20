@@ -93,7 +93,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
     private Date parseDate(JSONObject jsonDate, String attributeName) {
         Date result = null;
         String dateAsString = (String) jsonDate.get(attributeName);
-        if(dateAsString != null) {
+        if(dateAsString != null && !dateAsString.isEmpty()) {
             try {
                 result = DateParser.parseUTC(dateAsString);
             } catch (InvalidDateException e) {
