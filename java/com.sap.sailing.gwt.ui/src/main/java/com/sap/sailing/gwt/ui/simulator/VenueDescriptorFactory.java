@@ -38,15 +38,15 @@ public class VenueDescriptorFactory {
 
         // Foxtrot
         cPos = LatLng.newInstance(54.445775, 10.29223889);
-        courseAreas.add(new CourseAreaDescriptor("Foxtrot", cPos, 0.65, "#B4287C"));
+        courseAreas.add(new CourseAreaDescriptor("Foxtrot", cPos, 0.65, "#DA58A6"));
 
         // India
         cPos = LatLng.newInstance(54.44803611, 10.20863611);
-        courseAreas.add(new CourseAreaDescriptor("India", cPos, 0.40, "#774741"));
+        courseAreas.add(new CourseAreaDescriptor("India", cPos, 0.40, "#B7827B"));
 
         // Juliett
         cPos = LatLng.newInstance(54.46183611, 10.2239);
-        courseAreas.add(new CourseAreaDescriptor("Juliett", cPos, 0.55, "#818585"));
+        courseAreas.add(new CourseAreaDescriptor("Juliett", cPos, 0.55, "#979b9b"));
 
         // Echo
         cPos = LatLng.newInstance(54.47640278, 10.20090556);
@@ -58,7 +58,7 @@ public class VenueDescriptorFactory {
 
         // Charlie
         cPos = LatLng.newInstance(54.49327222, 10.17525833);
-        courseAreas.add(new CourseAreaDescriptor("Charlie", cPos, 0.70, "#0A5998"));
+        courseAreas.add(new CourseAreaDescriptor("Charlie", cPos, 0.70, "#2796f1"));
 
         // Delta
         cPos = LatLng.newInstance(54.49706111, 10.21921944);
@@ -66,11 +66,11 @@ public class VenueDescriptorFactory {
 
         // Bravo
         cPos = LatLng.newInstance(54.50911667, 10.13973333);
-        courseAreas.add(new CourseAreaDescriptor("Bravo", cPos, 0.80, "#CE3032"));
+        courseAreas.add(new CourseAreaDescriptor("Bravo", cPos, 0.80, "#d34547"));
 
         // Alfa
         cPos = LatLng.newInstance(54.52905, 10.18515278);
-        courseAreas.add(new CourseAreaDescriptor("Alfa", cPos, 1.00, "#D9699B"));
+        courseAreas.add(new CourseAreaDescriptor("Alfa", cPos, 1.00, "#d65c93"));
         
         venue.setDefaultCourseArea(defaultCourseArea);
         return venue;

@@ -124,24 +124,47 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
                 centerPoint.getY() - borderPoint.getY());
         double pxRadius = Math.sqrt(diffPoint.getX() * diffPoint.getX() + diffPoint.getY() * diffPoint.getY());
 
+        String bgColor;
+        
+        if (simulatorMap.getWindParams().isShowStreamlets2()) {
+        	bgColor = "#505050";
+        } else {
+        	bgColor = "#DEDEDE";
+        }
+        
         context2d.setGlobalAlpha(1.0f);
-        context2d.setFillStyle("#DEDEDE");
-        context2d.setLineWidth(pxStroke);
-        context2d.setStrokeStyle(color);
+        context2d.setFillStyle(bgColor);
         context2d.beginPath();
         context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(),
                 pxRadius, 0.0, 2 * Math.PI);
         context2d.closePath();
         context2d.fill();
-        context2d.stroke();
 
-        context2d.setGlobalAlpha(0.4f);
+        context2d.setGlobalAlpha(0.5f);
         context2d.setFillStyle(color);
         context2d.beginPath();
         context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(),
                 pxRadius, 0.0, 2 * Math.PI);
         context2d.closePath();
         context2d.fill();
+
+        context2d.setGlobalAlpha(1.0f);
+        context2d.setLineWidth(pxStroke);
+        context2d.setStrokeStyle(bgColor);
+        context2d.beginPath();
+        context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(),
+                pxRadius, 0.0, 2 * Math.PI);
+        context2d.closePath();
+        context2d.stroke();
+
+        context2d.setGlobalAlpha(0.8f);
+        context2d.setLineWidth(pxStroke);
+        context2d.setStrokeStyle(color);
+        context2d.beginPath();
+        context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(),
+                pxRadius, 0.0, 2 * Math.PI);
+        context2d.closePath();
+        context2d.stroke();
 
         if (getMap().getZoom() >= 11) {
             context2d.setGlobalAlpha(0.8f);
@@ -154,9 +177,9 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
             context2d.fillText(name, centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() + 0.32 * fontsize
                     - this.getWidgetPosTop());
 
-            context2d.setGlobalAlpha(1.0f);
         }
-
+        
+        context2d.setGlobalAlpha(1.0f);
     }
 
     protected LatLng getEdgePoint(LatLng pos, double dist) {
