@@ -476,8 +476,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     List<String> lsnArgs = new ArrayList<>();
                     lsnArgs.add("ON"); // request live messages always; why not?
                     if (maxSequenceNumber != -1) {
+                        logger.info("Requesting messages starting from sequence number "+(maxSequenceNumber+1));
                         // already received a numbered message; ask only for newer messages with greater sequence number
-                        lsnArgs.add(new Long(maxSequenceNumber).toString());
+                        lsnArgs.add(new Long(maxSequenceNumber+1).toString());
                     }
                     final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN, lsnArgs.toArray(new String[0]));
                     sendMessage(lsnRequest, os);
