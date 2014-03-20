@@ -8,8 +8,8 @@ package com.sap.sailing.gwt.ui.client;
  */
 public class DebugIdHelper {
     /**
-     * <p>Creates adebug identifier for the given enum value. The identifier is the camel cased name of the enum value
-     *   as declared in its enum declaration. The name is splited into single words using the underscore.</p>
+     * <p>Creates a debug identifier for the given enum value. The identifier is the camel cased name of the enum value
+     *   as declared in its enum declaration. The name is split into single words using the underscore.</p>
      * 
      * @param value
      *   The enum value for which the identfier should be created.
@@ -21,11 +21,11 @@ public class DebugIdHelper {
     }
     
     /**
-     * <p>Creates adebug identifier for the given name. The name is splited into single words using all whitespace
+     * <p>Creates a debug identifier for the given name. The name is splited into single words using all whitespace
      *   characters.</p>
      * 
      * @param value
-     *   The name for which the identfier should be created.
+     *   The name for which the identifier should be created.
      * @return
      *   A debug identifier for the given enum value.
      */
