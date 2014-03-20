@@ -34,10 +34,14 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
     
     @Override
     public synchronized void sendMessage(SailMasterMessage message, OutputStream os) throws IOException {
-        if (message.getSequenceNumber()==null) {
+        if (message.getSequenceNumber() == null) {
             sendMessage(message.getMessage(), os);
         } else {
-            sendMessage(""+message.getSequenceNumber()+"|"+message.getMessage(), os);
+            StringBuilder sb = new StringBuilder();
+            sb.append(message.getSequenceNumber());
+            sb.append('|');
+            sb.append(message.getMessage());
+            sendMessage(sb.toString(), os);
         }
         os.flush();
     }

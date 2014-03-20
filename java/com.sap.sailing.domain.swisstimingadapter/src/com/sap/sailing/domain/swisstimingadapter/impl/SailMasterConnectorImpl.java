@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
@@ -12,10 +13,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +47,6 @@ import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
@@ -87,12 +87,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private Socket socket;
     private final DateFormat dateFormat;
     private final Set<SailMasterListener> listeners;
-    private final Map<String, Set<SailMasterListener>> raceSpecificListeners;
     private final Thread receiverThread;
     private boolean stopped;
     private boolean connected;
-    
-    private final Set<String> idsOfTrackedRaces;
+    private final String raceId;
+    private final String raceDescription;
     
     /**
      * Currently the SwissTiming SailMaster protocol only transmits time zone information when sending
@@ -103,11 +102,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      * The only way known so far for how to find out the time zone relative to which the other time stamps
      * are to be interpreted is to start with the current default time zone's offset and wait for an
      * {@link MessageType#RPD RPD} event to be received. From this event, the time zone offset can be extracted
-     * and applied to all other time stamps. It is stored using the race ID as key.
+     * and applied to all other time stamps. It is stored in this field.
      */
-    private final Map<String, String> lastTimeZoneSuffixPerRaceID;
+    private String lastTimeZoneSuffix;
     
-    private final Map<String, TimePoint> startTimePerRaceID;
+    private TimePoint startTime;
     
     /**
      * Used for the {@link #rendevouz(SailMasterMessage)} pattern. For each {@link MessageType} there
@@ -116,29 +115,20 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      */
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
-    private final Map<String, List<SailMasterMessage>> raceSpecificMessageBuffers;
-    
-    private final Map<String, Long> sequenceNumberOfLastMessageForRaceID;
-    
-    private final RaceSpecificMessageLoader messageLoader;
+    private long maxSequenceNumber;
 
-    private final boolean canSendRequests;
-
-    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
+    private Long numberOfStoredMessages;
+    
+    public SailMasterConnectorImpl(String host, int port, String raceId, String raceDescription) throws InterruptedException, ParseException {
         super();
-        this.messageLoader = messageLoader;
+        maxSequenceNumber = -1l;
+        this.raceId = raceId; // from this time on, the connector interprets messages for raceID
+        this.raceDescription = raceDescription;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        idsOfTrackedRaces = new HashSet<String>();
         this.host = host;
         this.port = port;
-        this.canSendRequests = canSendRequests;
         this.listeners = new HashSet<SailMasterListener>();
-        this.raceSpecificListeners = new HashMap<String, Set<SailMasterListener>>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
-        raceSpecificMessageBuffers = new HashMap<String, List<SailMasterMessage>>();
-        sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
-        lastTimeZoneSuffixPerRaceID = new HashMap<String, String>();
-        startTimePerRaceID = new HashMap<String, TimePoint>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
         synchronized (this) {
@@ -146,80 +136,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 wait();
             }
         }
-    }
-    
-    /**
-     * If a non-<code>null</code> {@link #messageLoader} was passed to the constructor, buffering of messages for
-     * <code>raceID</code> is activated by creating a buffer list in {@link #raceSpecificMessageBuffers} and the stored
-     * messages for <code>raceID</code> are loaded using {@link #messageLoader}. When done with loading, the messages
-     * loaded are "replayed" by notifying listeners about them; then, all messages from the buffer in
-     * {@link #raceSpecificMessageBuffers} are notified to listeners. Messages notified to listeners are removed from
-     * the buffer. This happens while owning this object's lock. The receiving thread has to obtain the lock in order to
-     * check if buffering for <code>raceID</code> is active and to add a new message to the buffer. If the last message
-     * is taken from the buffer here, while owning the lock the buffer is removed which will cause the receiving thread
-     * to no longer buffer but forward to listeners immediately.
-     * @throws ParseException 
-     */
-    @Override
-    public void trackRace(String raceID) throws ParseException {
-        List<SailMasterMessage> buffer = null;
-        synchronized (this) {
-            if (messageLoader != null) {
-                buffer = new LinkedList<SailMasterMessage>();
-                sequenceNumberOfLastMessageForRaceID.put(raceID, -1l);
-                raceSpecificMessageBuffers.put(raceID, buffer);
-            }
-        }
-        idsOfTrackedRaces.add(raceID); // from this time on, the connector interprets messages for raceID
-        if (messageLoader != null) {
-            notifyListenersStoredDataProgress(raceID, 0.0);
-            List<SailMasterMessage> messages = messageLoader.loadRaceMessages(raceID);
-            long maxSequenceNumber = -1;
-            int i = 0;
-            for (SailMasterMessage message : messages) {
-                logger.fine("notifying loaded message "+message);
-                notifyListeners(message);
-                assert message.getSequenceNumber() == null || message.getSequenceNumber() > maxSequenceNumber;
-                if (message.getSequenceNumber() != null) {
-                    maxSequenceNumber = message.getSequenceNumber();
-                }
-                i++;
-                notifyListenersStoredDataProgress(raceID, ((double) i)/(double) messages.size());
-            }
-            notifyListenersStoredDataProgress(raceID, 1.0);
-            // now process the buffered messages one by one:
-            SailMasterMessage bufferedMessage;
-            do {
-                synchronized (this) {
-                    if (buffer.size() > 0) {
-                        bufferedMessage = buffer.remove(0);
-                        if (bufferedMessage.getSequenceNumber() != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
-                            maxSequenceNumber = bufferedMessage.getSequenceNumber();
-                        } else {
-                            logger.info("discarding already loaded buffered message " + bufferedMessage);
-                            bufferedMessage = null;
-                        }
-                    } else {
-                        bufferedMessage = null;
-                    }
-                    if (buffer.isEmpty()) {
-                        // buffer is empty; stop buffering
-                        sequenceNumberOfLastMessageForRaceID.put(raceID, maxSequenceNumber);
-                        raceSpecificMessageBuffers.remove(raceID);
-                    }
-                }
-                if (bufferedMessage != null) {
-                    logger.fine("notifying buffered message " + bufferedMessage);
-                    notifyListeners(bufferedMessage);
-                }
-            } while (raceSpecificMessageBuffers.containsKey(raceID));
-        }
-        notifyListenersStoredDataProgress(raceID, 1.0);
-    }
-    
-    @Override
-    public void stopTrackingRace(String raceID) {
-        idsOfTrackedRaces.remove(raceID);
     }
     
     public void run() {
@@ -237,33 +153,19 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     } else {
                         SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
                         // drop race-specific messages for non-tracked races
-                        if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
-                            boolean messageProcessed = false;
-                            synchronized (this) {
-                                if (message.getType().isRaceSpecific() && isCurrentlyBuffering(message.getRaceID())) {
-                                    buffer(message);
-                                    messageProcessed = true;
-                                }
+                        if (message.getSequenceNumber() != null) {
+                            maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
+                            if (maxSequenceNumber <= numberOfStoredMessages) {
+                                notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber / (double) numberOfStoredMessages);
                             }
-                            if (!messageProcessed) {
-                                if (message.isResponse()) {
-                                    // this is a response for an explicit request
-                                    rendevouz(message);
-                                } else if (message.isEvent()) {
-                                    // only notify if it hasn't been loaded from a store yet
-                                    if (!message.getType().isRaceSpecific()
-                                            || message.getSequenceNumber() == null
-                                            || (sequenceNumberOfLastMessageForRaceID.containsKey(message.getRaceID()) && message
-                                                    .getSequenceNumber() > sequenceNumberOfLastMessageForRaceID
-                                                    .get(message.getRaceID()))) {
-                                        // a spontaneous event
-                                        logger.fine("notifying message " + message);
-                                        notifyListeners(message);
-                                    } else {
-                                        logger.info("discarding already notified message " + message);
-                                    }
-                                }
-                            }
+                        }
+                        if (message.isResponse()) {
+                            // this is a response for an explicit request
+                            rendevouz(message);
+                        } else if (message.isEvent()) {
+                            // a spontaneous event
+                            logger.fine("notifying message " + message);
+                            notifyListeners(message);
                         }
                         if (message.getType() == MessageType._STOPSERVER) {
                             logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
@@ -282,17 +184,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
         logger.info("Stopping Sail Master connector thread");
         stopped = true;
-    }
-    
-    private synchronized void buffer(SailMasterMessage message) {
-        logger.fine("buffering message "+message);
-        assert message.getType().isRaceSpecific();
-        List<SailMasterMessage> buffer = raceSpecificMessageBuffers.get(message.getRaceID());
-        buffer.add(message);
-    }
-
-    private synchronized boolean isCurrentlyBuffering(String raceID) {
-        return raceSpecificMessageBuffers.containsKey(raceID);
     }
     
     @Override
@@ -348,7 +239,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private void notifyListenersStoredDataProgress(String raceID, double progress) {
-        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(raceID)) {
+        for (SailMasterListener listener : getListeners(raceID)) {
             try {
                 listener.storedDataProgress(raceID, progress);
             } catch (Exception e) {
@@ -372,7 +263,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 parseHHMMSSToMilliseconds(details[2]);
             markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
-        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners(message.getRaceID())) {
             try {
                 listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
             } catch (Exception e) {
@@ -384,7 +275,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
         List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
-        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners(message.getRaceID())) {
             try {
                 listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
             } catch (Exception e) {
@@ -396,7 +287,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
-        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners(message.getRaceID())) {
             try {
                 listener.receivedStartList(message.getSections()[1], startListMessage);
             } catch (Exception e) {
@@ -408,7 +299,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersCCG(SailMasterMessage message) {
         Course course = parseCourseConfigurationMessage(message);
-        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners(message.getRaceID())) {
             try {
                 listener.receivedCourseConfiguration(message.getSections()[1], course);
             } catch (Exception e) {
@@ -438,11 +329,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
-        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffixPerRaceID.get(raceID);
+        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffix;
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
                 parseTimeAndDateISO(startTimeEstimatedStartTimeISO, raceID));
         if (startTimeEstimatedStartTime != null) {
-            startTimePerRaceID.put(raceID, startTimeEstimatedStartTime);
+            startTime = startTimeEstimatedStartTime;
         }
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
@@ -495,7 +386,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark, boatIRM));
             }
         }
-        Set<SailMasterListener> allListeners = getGeneralAndRaceSpecificListeners(message.getRaceID());
+        Set<SailMasterListener> allListeners = getListeners(message.getRaceID());
         for (SailMasterListener listener : allListeners) {
             try {
                 listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
@@ -507,17 +398,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
     }
 
-    private Set<SailMasterListener> getGeneralAndRaceSpecificListeners(String raceID) {
-        Set<SailMasterListener> allListeners = new HashSet<SailMasterListener>(listeners);
-        Set<SailMasterListener> listenersForThisRace = raceSpecificListeners.get(raceID);
-        if (listenersForThisRace != null) {
-            allListeners.addAll(listenersForThisRace);
-        }
-        return allListeners;
+    private Set<SailMasterListener> getListeners(String raceID) {
+        return Collections.unmodifiableSet(listeners);
     }
 
     @Override
     public synchronized void stop() throws IOException {
+        logger.info("Stopping SailMasterConnector listening on port "+port+" with socket "+socket);
         stopped = true;
         socket.close();
         socket = null;
@@ -530,20 +417,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     @Override
-    public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException {
+    public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException {
         ensureSocketIsOpen();
         listeners.add(listener);
-    }
-    
-    @Override
-    public synchronized void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException {
-        ensureSocketIsOpen();
-        Set<SailMasterListener> set = raceSpecificListeners.get(raceID);
-        if (set == null) {
-            set = new HashSet<SailMasterListener>();
-            raceSpecificListeners.put(raceID, set);
-        }
-        set.add(listener);
     }
     
     @Override
@@ -551,77 +427,98 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         listeners.remove(listener);
     }
 
-    @Override
-    public synchronized void removeSailMasterListener(String raceID, SailMasterListener listener) {
-        Set<SailMasterListener> set = raceSpecificListeners.get(raceID);
-        if (set != null) {
-            set.remove(listener);
-            if (set.isEmpty()) {
-                raceSpecificListeners.remove(raceID);
-            }
-        }
-    }
-    
     public SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException {
         ensureSocketIsOpen();
+        return sendRequestAndGetResponseAssumingSocketIsOpen(messageType, args);
+    }
+
+    private SailMasterMessage sendRequestAndGetResponseAssumingSocketIsOpen(MessageType messageType, String... args)
+            throws IOException, InterruptedException {
         OutputStream os = socket.getOutputStream();
+        final SailMasterMessage sailMasterMessage = createSailMasterMessage(messageType, args);
+        sendMessage(sailMasterMessage, os);
+        return receiveMessage(messageType);
+    }
+
+    private SailMasterMessage createSailMasterMessage(MessageType messageType, String... args) {
         StringBuilder requestMessage = new StringBuilder();
         requestMessage.append(messageType.name());
-        requestMessage.append('?');
+        if (messageType != MessageType.OPN && messageType != MessageType.LSN) {
+            // OPN and LSN don't have the questionmark appended
+            requestMessage.append('?');
+        }
         for (String arg : args) {
             requestMessage.append('|');
             requestMessage.append(arg);
         }
-        sendMessage(requestMessage.toString(), os);
-        return receiveMessage(messageType);
+        final SailMasterMessage sailMasterMessage = new SailMasterMessageImpl(requestMessage.toString());
+        return sailMasterMessage;
     }
 
-    private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException {
-        if (socket == null) {
-            socket = new Socket(host, port);
-            synchronized (this) {
-                connected = true;
-                notifyAll();
+    private synchronized void ensureSocketIsOpen() throws InterruptedException {
+        while (!stopped && socket == null) {
+            try {
+                logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name() + " message...");
+                socket = new Socket(host, port);
+                final OutputStream os = socket.getOutputStream();
+                final InputStream is = socket.getInputStream();
+                final SailMasterMessage opnRequest = createSailMasterMessage(MessageType.OPN, raceId);
+                sendMessage(opnRequest, os);
+                SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
+                    logger.info("Recevied non-OK response " + opnResponse + " for our request "
+                            + opnRequest + ". Closing socket and trying again in 1s...");
+                    closeAndNullSocketAndWaitABit();
+                } else {
+                    logger.info("Received " + opnResponse + " which seems OK. Continuing with " + MessageType.LSN.name() + " request...");
+                    numberOfStoredMessages = Long.valueOf(opnResponse.getSections()[2]);
+                    List<String> lsnArgs = new ArrayList<>();
+                    lsnArgs.add("ON"); // request live messages always; why not?
+                    if (maxSequenceNumber != -1) {
+                        logger.info("Requesting messages starting from sequence number "+(maxSequenceNumber+1));
+                        // already received a numbered message; ask only for newer messages with greater sequence number
+                        lsnArgs.add(new Long(maxSequenceNumber+1).toString());
+                    }
+                    final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN, lsnArgs.toArray(new String[0]));
+                    sendMessage(lsnRequest, os);
+                    SailMasterMessageImpl lsnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                    if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
+                        logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
+                                + ". Closing socket and trying again in 1s...");
+                        closeAndNullSocketAndWaitABit();
+                    } else {
+                        logger.info("Received "+lsnResponse+" which seems to be OK. I think we're connected!");
+                        synchronized (this) {
+                            logger.info("...successfully opened socket to " + host + ":" + port);
+                            // TODO now request all messages starting after the last message received so far
+                            connected = true;
+                            notifyAll();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.log(Level.INFO, "Exception trying to establish SailMaster connection to " + host + ":" + port
+                        + ". Trying again in 1s.", e);
+                closeAndNullSocketAndWaitABit();
             }
         }
     }
 
-    private boolean canSendRequests() {
-        return canSendRequests;
-    }
-    
-    @Override
-    public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> result = null;
-        if (messageLoader != null) {
-            result = messageLoader.getRaces();
+    private void closeAndNullSocketAndWaitABit() throws InterruptedException {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            logger.log(Level.INFO, "Exception trying to close socket. Maybe already closed. Continuing", e);
         }
-        if (result == null && canSendRequests()) {
-            SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
-            assertResponseType(MessageType.RAC, response);
-            result = parseAvailableRacesMessage(response);
-        }
-        return result;
+        socket = null;
+        Thread.sleep(1000);
     }
 
     @Override
-    public boolean hasCourse(String raceID) {
-        boolean result = false;
-        if (messageLoader != null) {
-            result = messageLoader.hasRaceCourse(raceID);
-        }
-        return result; 
+    public Race getRace() {
+        return new RaceImpl(raceId, raceDescription);
     }
 
-    @Override
-    public boolean hasStartlist(String raceID) {
-        boolean result = false;
-        if (messageLoader != null) {
-            result = messageLoader.hasRaceStartlist(raceID);
-        }
-        return result;
-    }
-    
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
         assertMessageType(MessageType.RAC, availableRacesMessage);
         int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
@@ -667,11 +564,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private String getLastTimeZoneSuffix(String raceID) {
-        String result = lastTimeZoneSuffixPerRaceID.get(raceID);
+        String result = lastTimeZoneSuffix;
         if (result == null) {
             int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
             result = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
-            lastTimeZoneSuffixPerRaceID.put(raceID, result);
+            lastTimeZoneSuffix = result;
         }
         return result;
     }
@@ -686,7 +583,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
         if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
             timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
-            lastTimeZoneSuffixPerRaceID.put(raceID, timeAndDateISO.substring(timeAndDateISO.length()-5));
+            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
         }
         synchronized(dateFormat) {
             return dateFormat.parse(timeAndDateISO);
@@ -753,19 +650,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
-    public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException {
-        TimePoint result = null;
-        if (messageLoader != null) {
-            result = startTimePerRaceID.get(raceID);
-        }
-        if (result == null && canSendRequests()) {
-            SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
-            String[] sections = response.getSections();
-            assertResponseType(MessageType.STT, response);
-            assertRaceID(raceID, sections[1]);
-            result = new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2], raceID));
-        }
-        return result; 
+    public TimePoint getStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
+        return startTime;
     }
 
     private Date parseTimePrefixedWithISOToday(String timeHHMMSS, String raceID) throws ParseException {

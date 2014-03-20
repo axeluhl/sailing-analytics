@@ -41,7 +41,6 @@ import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -327,11 +326,10 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
-            boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RaceSpecificMessageLoader messageLoader) {
-        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis, 
-                swissTimingFactory, domainFactory, raceLogStore, messageLoader);
+            String raceDescription, long delayToLiveInMillis,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore) {
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceDescription, delayToLiveInMillis, 
+                swissTimingFactory, domainFactory, raceLogStore);
     }
 
 }

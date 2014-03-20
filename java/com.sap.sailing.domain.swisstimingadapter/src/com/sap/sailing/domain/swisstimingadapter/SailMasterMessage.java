@@ -8,7 +8,8 @@ public interface SailMasterMessage {
     String getMessage();
 
     /**
-     * @return the {@link #getMessage()} result split along occurrences of the "|" character ("pipe")
+     * @return the {@link #getMessage()} result split along occurrences of the "|" character ("pipe"). The element with index 0
+     * is usually the message type field.
      */
     String[] getSections();
     

@@ -54,9 +54,8 @@ public interface DomainFactory {
     void removeRace(String raceID);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
-            boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RaceSpecificMessageLoader messageLoader);
+            String raceDescription, long delayToLiveInMillis,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
 
     RaceType getRaceTypeFromRaceID(String raceID);
 

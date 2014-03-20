@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 
 public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImpl {
@@ -13,8 +12,9 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
 
     private long messageDeliveryIntervalInMs = Long.valueOf(System.getProperty("simulateLiveMode.delayInMillis", "250"));
     
-    public SailMasterLiveSimulatorConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
-        super(host, port, messageLoader, canSendRequests);
+    public SailMasterLiveSimulatorConnectorImpl(String host, int port, String raceId, String raceDescription)
+            throws InterruptedException, ParseException {
+        super(host, port, raceId, raceDescription);
         bufferedMessageList = Collections.synchronizedList(new ArrayList<SailMasterMessage>());
         Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {
@@ -22,12 +22,9 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
                     try {
                         if(!bufferedMessageList.isEmpty()) {
                             SailMasterMessage message = bufferedMessageList.get(0);
-         
                             notifyParentListeners(message);
-        
                             bufferedMessageList.remove(0);
                         }                    
-        
                         Thread.sleep(messageDeliveryIntervalInMs);
                     } catch (Exception e) {
                     }

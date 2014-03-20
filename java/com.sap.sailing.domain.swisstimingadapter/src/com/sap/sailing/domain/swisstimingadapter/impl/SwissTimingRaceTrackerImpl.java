@@ -30,7 +30,6 @@ import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
@@ -60,7 +59,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     private final SailMasterConnector connector;
     private final String raceID;
-    private final RaceSpecificMessageLoader messageLoader;
+    private final String raceDescription;
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
     private final Regatta regatta;
@@ -86,32 +85,32 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      * tracker by calling {@link #receivedTimingData(String, String, List)}.
      */
     private final TMDMessageQueue tmdMessageQueue;
-    
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore,
-            DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+
+    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, String hostname, int port, RaceLogStore raceLogStore,
+            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
-                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID,
+                raceDescription, hostname, port, windStore, domainFactory, factory, trackedRegattaRegistry,
+                delayToLiveInMillis);
     }
     
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
-            DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, String hostname, int port,
+            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
         this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
+        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceDescription);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
-        this.messageLoader = messageLoader;
+        this.raceDescription = raceDescription;
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
-        connector.addSailMasterListener(raceID, this);
+        connector.addSailMasterListener(this);
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         this.delayToLiveInMillis = delayToLiveInMillis;
-        connector.trackRace(raceID);
     }
 
     @Override
@@ -129,7 +128,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.setStatus(newStatus);
         }
-        connector.removeSailMasterListener(raceID, this);
+        connector.removeSailMasterListener(this);
     }
 
     @Override
@@ -334,19 +333,21 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedStartList(String raceID, StartList startList) {
-        StartList oldStartList = this.startList;
-        this.startList = startList;
-        if (oldStartList == null && course != null) {
-            createRaceDefinition(raceID, course);
+        if (this.raceID.equals(raceID)) {
+            StartList oldStartList = this.startList;
+            this.startList = startList;
+            if (oldStartList == null && course != null) {
+                createRaceDefinition(course);
+            }
         }
     }
 
-    private void createRaceDefinition(String raceID, Course course) {
+    private void createRaceDefinition(Course course) {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race swissTimingRace = messageLoader.getRace(raceID);
+        Race swissTimingRace = new RaceImpl(raceID, raceDescription);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
         trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
@@ -377,7 +378,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         Course oldCourse = this.course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {
-                createRaceDefinition(raceID, course);
+                createRaceDefinition(course);
                 this.course = course;
             }
         } else {
