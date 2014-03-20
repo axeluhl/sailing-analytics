@@ -167,7 +167,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
     
-    private Wind getWind(TimePoint timePoint) throws ClassNotFoundException, IOException, ParseException {
+    private Wind getWind(final TimePoint timePoint) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
         Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(), timePoint);
         Bearing awa = getAWA(timePoint, awaPair);
