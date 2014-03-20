@@ -129,7 +129,7 @@ public class WindReceiverTest {
         assertEquals(expectedTrueWind1.getKnots(), wind1.getKnots(), 0.00000001);
         assertEquals(expectedTrueWind1.getBearing().getDegrees(), wind1.getBearing().getDegrees(), 0.00000001);
 
-        Wind wind2 = windReceived.get(deviceSerialNumber1);
+        Wind wind2 = windReceived.get(deviceSerialNumber2);
         assertEquals(timePoint3, wind2.getTimePoint());
         assertEquals(49.9, wind2.getPosition().getLatDeg(), 0.00000001);
         assertEquals(8.87, wind2.getPosition().getLngDeg(), 0.00000001);
