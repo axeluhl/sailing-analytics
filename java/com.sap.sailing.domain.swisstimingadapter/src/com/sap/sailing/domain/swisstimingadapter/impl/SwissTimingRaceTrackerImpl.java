@@ -108,7 +108,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.raceDescription = raceDescription;
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
-        connector.addSailMasterListener(raceID, this);
+        connector.addSailMasterListener(this);
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         this.delayToLiveInMillis = delayToLiveInMillis;
     }
@@ -128,7 +128,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.setStatus(newStatus);
         }
-        connector.removeSailMasterListener(raceID, this);
+        connector.removeSailMasterListener(this);
     }
 
     @Override

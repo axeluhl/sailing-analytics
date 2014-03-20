@@ -46,15 +46,7 @@ public interface SailMasterConnector {
      * Adds the listener and ensures that the connector is actually connected, even if no request has explicitly
      * been sent, so that the connector will at least receive spontaneous events.
      */
-    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException;
-    
-    /**
-     * Like {@link #addSailMasterListener(SailMasterListener)}, but only forwards race-specific events for the
-     * race identified by <code>raceID</code> to the <code>listener</code>. Clients still need to call
-     * {@link #trackRace(String)} with the <code>raceID</code> to make the connector actually receive the
-     * events for that race.
-     */
-    void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException;
+    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
     
     void removeSailMasterListener(SailMasterListener listener);
 
@@ -84,8 +76,6 @@ public interface SailMasterConnector {
      * @throws IOException 
      */
     void stop() throws IOException;
-
-    void removeSailMasterListener(String raceID, SailMasterListener listener);
 
     boolean isStopped();
 }
