@@ -154,24 +154,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     } else {
                         SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
                         // drop race-specific messages for non-tracked races
+                        if (message.getSequenceNumber() != null) {
+                            maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
+                            if (maxSequenceNumber <= numberOfStoredMessages) {
+                                notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber / (double) numberOfStoredMessages);
+                            }
+                        }
+                        if (message.isResponse()) {
+                            // this is a response for an explicit request
+                            rendevouz(message);
+                        } else if (message.isEvent()) {
+                            // a spontaneous event
+                            logger.fine("notifying message " + message);
+                            notifyListeners(message);
+                        }
                         if (message.getType() == MessageType._STOPSERVER) {
                             logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
                             stop();
-                        } else {
-                            if (message.getSequenceNumber() != null) {
-                                maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
-                                if (maxSequenceNumber <= numberOfStoredMessages) {
-                                    notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber / (double) numberOfStoredMessages);
-                                }
-                            }
-                            if (message.isResponse()) {
-                                // this is a response for an explicit request
-                                rendevouz(message);
-                            } else if (message.isEvent()) {
-                                // a spontaneous event
-                                logger.fine("notifying message " + message);
-                                notifyListeners(message);
-                            }
                         }
                     }
                 } catch (SocketException se) {
