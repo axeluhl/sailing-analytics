@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
@@ -196,18 +197,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     @Override
     public void fillRegattas() {
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onSuccess(List<RegattaDTO> result) {
-                for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
-                    regattaDisplayer.fillRegattas(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                reportError("Remote Procedure Call getRegattas() - Failure");
-            }
-        });
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+                new AsyncCallback<List<RegattaDTO>>() {
+                    @Override
+                    public void onSuccess(List<RegattaDTO> result) {
+                        for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
+                            regattaDisplayer.fillRegattas(result);
+                        }
+                    }
+        
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        reportError("Remote Procedure Call getRegattas() - Failure");
+                    }
+                }));
     }
 }
