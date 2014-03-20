@@ -80,7 +80,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
             for (DBObject o : stConfigs.find()) {
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
-                result.add(stConfig);
+                // the old swisstiming config was not based on a json URL -> ignore such configs
+                if(stConfig.getJsonURL() != null) {
+                    result.add(stConfig);
+                }
             }
             Collections.reverse(result);
         } catch (Exception e) {
@@ -93,10 +96,12 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
-        Boolean canSendRequests = (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name());
-        return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
-                (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()), (Integer) object
-                        .get(FieldNames.ST_CONFIG_PORT.name()), canSendRequests == null ? false : canSendRequests);
+        String name = (String) object.get(FieldNames.ST_CONFIG_NAME.name());
+        String jsonURL = (String) object.get(FieldNames.ST_CONFIG_JSON_URL.name());
+        String hostname = (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name());
+        Integer port = (Integer) object.get(FieldNames.ST_CONFIG_PORT.name());
+
+        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port);
     }
 
     @Override
@@ -226,9 +231,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
             stConfigCollection.remove(equallyNamedConfig);
         }
+        result.put(FieldNames.ST_CONFIG_JSON_URL.name(), swissTimingConfiguration.getJsonURL());
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
-        result.put(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name(), swissTimingConfiguration.canSendRequests());
 
         stConfigCollection.insert(result);
     }

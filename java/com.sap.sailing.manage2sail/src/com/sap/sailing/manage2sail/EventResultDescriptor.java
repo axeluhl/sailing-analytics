@@ -10,6 +10,9 @@ public class EventResultDescriptor {
     private String isafId;
     private String name;
     private URL xrrUrl;
+
+    private String trackingDataHost;
+    private Integer trackingDataPort;
     
     public EventResultDescriptor() {
         regattaResults = new ArrayList<RegattaResultDescriptor>();
@@ -53,5 +56,21 @@ public class EventResultDescriptor {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTrackingDataHost() {
+        return trackingDataHost;
+    }
+
+    public void setTrackingDataHost(String trackingDataHost) {
+        this.trackingDataHost = trackingDataHost;
+    }
+
+    public Integer getTrackingDataPort() {
+        return trackingDataPort;
+    }
+
+    public void setTrackingDataPort(Integer trackingDataPort) {
+        this.trackingDataPort = trackingDataPort;
     }
 }

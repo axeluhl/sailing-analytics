@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -211,9 +212,9 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
 
-    List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
+    SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws Exception;
 
-    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port);
 
     String[] getCountryCodes();
     

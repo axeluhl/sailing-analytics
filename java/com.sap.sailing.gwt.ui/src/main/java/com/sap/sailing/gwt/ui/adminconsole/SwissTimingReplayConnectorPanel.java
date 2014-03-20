@@ -96,7 +96,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         grid = new Grid(3, 2);
         verticalPanel.add(grid);
 
-        grid.setWidget(0, 0, new Label(stringMessages.historyOfConnections() + ":"));
+        grid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
         grid.setWidget(0, 1, previousConfigurationsComboBox);
         grid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
         grid.setWidget(1, 1, jsonUrlBox);

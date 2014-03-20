@@ -50,7 +50,7 @@ public interface SwissTimingFactory {
 
     SailMasterTransceiver createSailMasterTransceiver();
 
-    SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
+    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, int port);
 
     SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 

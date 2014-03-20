@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -256,6 +257,7 @@ import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -265,6 +267,11 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.manage2sail.EventResultDescriptor;
+import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
+import com.sap.sailing.manage2sail.RaceResultDescriptor;
+import com.sap.sailing.manage2sail.RegattaResultDescriptor;
+import com.sap.sailing.manage2sail.TestManage2SailEventResultsParser;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -2151,30 +2158,51 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDTO> result = new ArrayList<SwissTimingConfigurationDTO>();
         for (SwissTimingConfiguration stConfig : configs) {
-            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort(), stConfig.canSendRequests()));
+            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(), stConfig.getHostname(), stConfig.getPort()));
         }
         return result;
     }
 
     @Override
-    public List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) 
+    public SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) 
             throws UnknownHostException, IOException, InterruptedException, ParseException {
-        List<SwissTimingRaceRecordDTO> result = new ArrayList<SwissTimingRaceRecordDTO>();
-        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
-            SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(rr.getRaceID(), rr.getDescription(), rr.getStartTime());
-            BoatClass boatClass = getSwissTimingAdapter().getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
-            swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
-            swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
-            swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
-            swissTimingRaceRecordDTO.hasStartlist = rr.hasStartlist();
-            result.add(swissTimingRaceRecordDTO);
+        
+        SwissTimingEventRecordDTO result = null; 
+        List<SwissTimingRaceRecordDTO> swissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
+        
+        // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
+        // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
+        EventResultDescriptor eventResult = null;
+        if("test".equalsIgnoreCase(eventJsonURL)) {
+            eventResult = TestManage2SailEventResultsParser.getTestEventResult();
+        } else {
+            URL url = new URL(eventJsonURL);
+            URLConnection eventResultConn = url.openConnection();
+            Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
+            eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
+        }
+        if (eventResult != null) {
+            for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
+                for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
+                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), race.getStartTimeUTC());
+                    swissTimingRaceRecordDTO.boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getClassName();
+                    swissTimingRaceRecordDTO.gender = regattaResult.getCompetitorGenderType().name();
+                    swissTimingRaceRecordDTO.hasCourse = false;
+                    swissTimingRaceRecordDTO.hasStartlist = false;
+                    swissTimingRaces.add(swissTimingRaceRecordDTO);
+                }
+            }
+            result = new SwissTimingEventRecordDTO(eventResult.getId(), eventResult.getName(), eventResult.getTrackingDataHost(),
+                    eventResult.getTrackingDataPort(), swissTimingRaces);
         }
         return result;
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests) {
-        swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port, canSendRequests));
+    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port) {
+        if(!jsonURL.equalsIgnoreCase("test")) {
+            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port));
+        }
     }
 
     @Override
@@ -2183,12 +2211,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port + " and canSendRequests=" + canSendRequests);
         for (SwissTimingRaceRecordDTO rr : rrs) {
-            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.ID, hostname,
+            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, hostname,
                     port,
                     canSendRequests,
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
-                new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {
+                new Thread("Wind tracking starter for race " + rr.raceId + "/" + rr.raceName) {
                     public void run() {
                         try {
                             startTrackingWind(raceHandle, correctWindByDeclination,

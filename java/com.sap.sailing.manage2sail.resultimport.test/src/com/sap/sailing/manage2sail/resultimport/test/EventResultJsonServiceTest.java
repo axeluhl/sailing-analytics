@@ -12,7 +12,7 @@ import java.io.InputStream;
 import org.junit.Test;
 
 import com.sap.sailing.manage2sail.EventResultDescriptor;
-import com.sap.sailing.manage2sail.Manage2SailEventResultsParser;
+import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 
 public class EventResultJsonServiceTest {
     private static final String EVENT_RESULTS_JSON = "eventResults.json";
@@ -21,7 +21,7 @@ public class EventResultJsonServiceTest {
 
     @Test
     public void testParsingEventResultsFromJson() throws IOException {
-        Manage2SailEventResultsParser parser = new Manage2SailEventResultsParser();
+        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
             
         EventResultDescriptor eventResult = parser.getEventResult(getInputStream(EVENT_RESULTS_JSON));
         assertNotNull(eventResult);

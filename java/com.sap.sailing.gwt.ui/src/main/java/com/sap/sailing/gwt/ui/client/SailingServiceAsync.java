@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -250,10 +251,9 @@ public interface SailingServiceAsync {
 
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
 
-    void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
-            AsyncCallback<List<SwissTimingRaceRecordDTO>> asyncCallback);
+    void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port, AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
