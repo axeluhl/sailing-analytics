@@ -1176,8 +1176,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-            polarDataService.competitorPositionChanged(fix.getTimePoint(), item, race,
-                    race.getMillisecondsOverWhichToAverageSpeed());
+            polarDataService.competitorPositionChanged(fix, item, race);
         }
 
     }

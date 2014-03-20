@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.polars.PolarDataService;
@@ -33,6 +33,7 @@ import com.sap.sailing.polars.caching.PolarFixCache;
 import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
+import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.util.SmartFutureCache;
 
 /**
@@ -52,11 +53,14 @@ public class PolarDataServiceImpl implements PolarDataService {
     
     private final PolarSheetAnalyzer polarSheetAnalyzer;
 
+    private final PolarDataMiner polarDataMiner;
+
     public PolarDataServiceImpl(Executor executor) {
         this.polarFixCache = new PolarFixCache(executor);
         this.polarSheetPerBoatClassCache = new PolarSheetPerBoatClassCache(this);
         polarFixCache.addListener(polarSheetPerBoatClassCache);
         this.polarSheetAnalyzer = new PolarSheetAnalyzerImpl(this);
+        this.polarDataMiner = new PolarDataMiner();
     }
 
     @Override
@@ -216,8 +220,9 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public void competitorPositionChanged(final TimePoint timePoint, final Competitor competitor,
-            final TrackedRace createdTrackedRace, long delay) {
+    public void competitorPositionChanged(final GPSFixMoving fix, final Competitor competitor,
+            final TrackedRace createdTrackedRace) {
+        polarDataMiner.addFix(fix, competitor, createdTrackedRace);
         // TODO build datamining pipeline for the cache
 
         // PolarFixCacheRaceInterval interval = new PolarFixCacheRaceInterval(createIntervalSpecification(
