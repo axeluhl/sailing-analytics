@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
@@ -114,12 +115,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      */
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
-    private final Map<String, Long> sequenceNumberOfLastMessageForRaceID;
+    private long maxSequenceNumber;
+
+    private Long numberOfStoredMessages;
     
     public SailMasterConnectorImpl(String host, int port, String raceId, String raceDescription) throws InterruptedException, ParseException {
         super();
-        sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
-        sequenceNumberOfLastMessageForRaceID.put(raceId, -1l);
+        maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
         this.raceDescription = raceDescription;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -135,8 +137,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 wait();
             }
         }
-        // TODO evaluate the response to the OPN message, analyzing how many messages mean 100% stored data
-        notifyListenersStoredDataProgress(raceId, 1.0);
     }
     
     public void run() {
@@ -154,28 +154,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     } else {
                         SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
                         // drop race-specific messages for non-tracked races
-                        if (!message.getType().isRaceSpecific() || raceId.equals(message.getRaceID())) {
+                        if (message.getType() == MessageType._STOPSERVER) {
+                            logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
+                            stop();
+                        } else {
+                            if (message.getSequenceNumber() != null) {
+                                maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
+                                if (maxSequenceNumber <= numberOfStoredMessages) {
+                                    notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber / (double) numberOfStoredMessages);
+                                }
+                            }
                             if (message.isResponse()) {
                                 // this is a response for an explicit request
                                 rendevouz(message);
                             } else if (message.isEvent()) {
-                                // only notify if it hasn't been loaded from a store yet
-                                if (!message.getType().isRaceSpecific()
-                                        || message.getSequenceNumber() == null
-                                        || (sequenceNumberOfLastMessageForRaceID.containsKey(message.getRaceID()) && message
-                                                .getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message
-                                                .getRaceID()))) {
-                                    // a spontaneous event
-                                    logger.fine("notifying message " + message);
-                                    notifyListeners(message);
-                                } else {
-                                    logger.info("discarding already notified message " + message);
-                                }
+                                // a spontaneous event
+                                logger.fine("notifying message " + message);
+                                notifyListeners(message);
                             }
-                        }
-                        if (message.getType() == MessageType._STOPSERVER) {
-                            logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
-                            stop();
                         }
                     }
                 } catch (SocketException se) {
@@ -441,6 +437,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private SailMasterMessage sendRequestAndGetResponseAssumingSocketIsOpen(MessageType messageType, String... args)
             throws IOException, InterruptedException {
         OutputStream os = socket.getOutputStream();
+        final SailMasterMessage sailMasterMessage = createSailMasterMessage(messageType, args);
+        sendMessage(sailMasterMessage, os);
+        return receiveMessage(messageType);
+    }
+
+    private SailMasterMessage createSailMasterMessage(MessageType messageType, String... args) {
         StringBuilder requestMessage = new StringBuilder();
         requestMessage.append(messageType.name());
         if (messageType != MessageType.OPN && messageType != MessageType.LSN) {
@@ -451,29 +453,66 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             requestMessage.append('|');
             requestMessage.append(arg);
         }
-        sendMessage(requestMessage.toString(), os);
-        return receiveMessage(messageType);
+        final SailMasterMessage sailMasterMessage = new SailMasterMessageImpl(requestMessage.toString());
+        return sailMasterMessage;
     }
 
-    private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException, InterruptedException {
-        while (socket == null) {
-            logger.info("Opening socket to "+host+":"+port+" and sending "+MessageType.OPN.name()+" message...");
-            socket = new Socket(host, port);
-            // FIXME the problem here is that receiving messages only happens in the run() method executed in the thread started by the constructor which is calling this method --> deadlock
-            SailMasterMessage response = sendRequestAndGetResponseAssumingSocketIsOpen(MessageType.OPN, raceId);
-            if (response.getSections()[1].equals("OK")) {
-                synchronized (this) {
-                    logger.info("...successfully opened socket to " + host + ":" + port);
-                    // TODO now request all messages starting after the last message received so far
-                    connected = true;
-                    notifyAll();
+    private synchronized void ensureSocketIsOpen() throws InterruptedException {
+        while (!stopped && socket == null) {
+            try {
+                logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name() + " message...");
+                socket = new Socket(host, port);
+                final OutputStream os = socket.getOutputStream();
+                final InputStream is = socket.getInputStream();
+                final SailMasterMessage opnRequest = createSailMasterMessage(MessageType.OPN, raceId);
+                sendMessage(opnRequest, os);
+                SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
+                    logger.info("Recevied non-OK response " + opnResponse + " for our request "
+                            + opnRequest + ". Closing socket and trying again in 1s...");
+                    closeAndNullSocketAndWaitABit();
+                } else {
+                    logger.info("Received " + opnResponse + " which seems OK. Continuing with " + MessageType.LSN.name() + " request...");
+                    numberOfStoredMessages = Long.valueOf(opnResponse.getSections()[2]);
+                    List<String> lsnArgs = new ArrayList<>();
+                    lsnArgs.add("ON"); // request live messages always; why not?
+                    if (maxSequenceNumber != -1) {
+                        // already received a numbered message; ask only for newer messages with greater sequence number
+                        lsnArgs.add(new Long(maxSequenceNumber).toString());
+                    }
+                    final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN, lsnArgs.toArray(new String[0]));
+                    sendMessage(lsnRequest, os);
+                    SailMasterMessageImpl lsnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                    if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
+                        logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
+                                + ". Closing socket and trying again in 1s...");
+                        closeAndNullSocketAndWaitABit();
+                    } else {
+                        logger.info("Received "+lsnResponse+" which seems to be OK. I think we're connected!");
+                        synchronized (this) {
+                            logger.info("...successfully opened socket to " + host + ":" + port);
+                            // TODO now request all messages starting after the last message received so far
+                            connected = true;
+                            notifyAll();
+                        }
+                    }
                 }
-            } else {
-                logger.info("...failure connecting to "+host+":"+port+". Trying again in 1s...");
-                socket = null;
-                Thread.sleep(1000);
+            } catch (IOException e) {
+                logger.log(Level.INFO, "Exception trying to establish SailMaster connection to " + host + ":" + port
+                        + ". Trying again in 1s.", e);
+                closeAndNullSocketAndWaitABit();
             }
         }
+    }
+
+    private void closeAndNullSocketAndWaitABit() throws InterruptedException {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            logger.log(Level.INFO, "Exception trying to close socket. Maybe already closed. Continuing", e);
+        }
+        socket = null;
+        Thread.sleep(1000);
     }
 
     @Override

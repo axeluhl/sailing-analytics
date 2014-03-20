@@ -14,6 +14,10 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     private String[] sections;
 
     /**
+     * Produces a message from a message string; if the message string carries a leading sequence number (instead of a
+     * leading {@link MessageType} name), the {@link #sequenceNumber} field will be filled accordingly or remain
+     * <code>null</code> otherwise.
+     * 
      * @param message
      *            If the message starts with the pattern "[0-9][0-9]*|" then the number preceding the pipe symbol is
      *            taken to be the {@link #sequenceNumber} and everything after the pipe symbol is assigned to
@@ -52,7 +56,7 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     
     @Override
     public String toString() {
-        return ""+getSequenceNumber()+": "+getMessage();
+        return (getSequenceNumber() == null ? "" : ""+getSequenceNumber()+": ")+getMessage();
     }
 
     @Override
