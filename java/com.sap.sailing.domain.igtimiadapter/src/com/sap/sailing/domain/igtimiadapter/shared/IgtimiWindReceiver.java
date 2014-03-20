@@ -3,7 +3,9 @@ package com.sap.sailing.domain.igtimiadapter.shared;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,13 +62,13 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
  */
 public class IgtimiWindReceiver implements BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(IgtimiWindReceiver.class.getName());
-    private final DynamicTrack<AWA> awaTrack;
-    private final DynamicTrack<AWS> awsTrack;
-    private final DynamicTrack<GpsLatLong> gpsTrack;
-    private final DynamicTrack<COG> cogTrack;
-    private final DynamicTrack<SOG> sogTrack;
-    private final DynamicTrack<HDG> hdgTrack;
-    private final DynamicTrack<HDGM> hdgmTrack;
+    private final Map<String, DynamicTrack<AWA>> awaTrack;
+    private final Map<String, DynamicTrack<AWS>> awsTrack;
+    private final Map<String, DynamicTrack<GpsLatLong>> gpsTrack;
+    private final Map<String, DynamicTrack<COG>> cogTrack;
+    private final Map<String, DynamicTrack<SOG>> sogTrack;
+    private final Map<String, DynamicTrack<HDG>> hdgTrack;
+    private final Map<String, DynamicTrack<HDGM>> hdgmTrack;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
     private final ConcurrentHashMap<IgtimiWindListener, IgtimiWindListener> listeners;
@@ -74,37 +76,37 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private class FixReceiver extends IgtimiFixReceiverAdapter {
         @Override
         public void received(AWA fix) {
-            getAwaTrack().add(fix);
+            getAwaTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(AWS fix) {
-            getAwsTrack().add(fix);
+            getAwsTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(GpsLatLong fix) {
-            getGpsTrack().add(fix);
+            getGpsTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(COG fix) {
-            getCogTrack().add(fix);
+            getCogTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(SOG fix) {
-            getSogTrack().add(fix);
+            getSogTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(HDG fix) {
-            getHdgTrack().add(fix);
+            getHdgTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
 
         @Override
         public void received(HDGM fix) {
-            getHdgmTrack().add(fix);
+            getHdgmTrack(fix.getSensor().getDeviceSerialNumber()).add(fix);
         }
     }
 
@@ -112,13 +114,22 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         receiver = new FixReceiver();
         declinationService = DeclinationService.INSTANCE;
         listeners = new ConcurrentHashMap<>();
-        awaTrack = new DynamicTrackImpl<>("AWA Track for Igtimi wind track for device "+deviceSerialNumbers);
-        awsTrack = new DynamicTrackImpl<>("AWS Track for Igtimi wind track for device "+deviceSerialNumbers);
-        gpsTrack = new DynamicTrackImpl<>("GPS Track for Igtimi wind track for device "+deviceSerialNumbers);
-        cogTrack = new DynamicTrackImpl<>("COG Track for Igtimi wind track for device "+deviceSerialNumbers);
-        sogTrack = new DynamicTrackImpl<>("SOG Track for Igtimi wind track for device "+deviceSerialNumbers);
-        hdgTrack = new DynamicTrackImpl<>("HDG Track for Igtimi wind track for device "+deviceSerialNumbers);
-        hdgmTrack = new DynamicTrackImpl<>("HDGM Track for Igtimi wind track for device "+deviceSerialNumbers);
+        awaTrack = new HashMap<>();
+        awsTrack = new HashMap<>();
+        gpsTrack = new HashMap<>();
+        cogTrack = new HashMap<>();
+        sogTrack = new HashMap<>();
+        hdgTrack = new HashMap<>();
+        hdgmTrack = new HashMap<>();
+    }
+    
+    private <T extends Fix> DynamicTrack<T> getTrack(String deviceSerialNumber, Map<String, DynamicTrack<T>> tracksByDeviceSerialNumber) {
+        DynamicTrack<T> result = tracksByDeviceSerialNumber.get(deviceSerialNumber);
+        if (result == null) {
+            result = new DynamicTrackImpl<T>("Track for Igtimi wind track for device "+deviceSerialNumber);
+            tracksByDeviceSerialNumber.put(deviceSerialNumber, result);
+        }
+        return result;
     }
     
     /**
@@ -142,7 +153,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         boolean loggedWindFixGenerationProblem = false;
         for (AWS aws : awsFixes) {
             try {
-                final Wind wind = getWind(aws.getTimePoint());
+                final Wind wind = getWind(aws.getTimePoint(), aws.getSensor().getDeviceSerialNumber());
                 if (wind != null) {
                     notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
                 } else {
@@ -167,16 +178,16 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
     
-    private Wind getWind(final TimePoint timePoint) throws ClassNotFoundException, IOException, ParseException {
+    private Wind getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(), timePoint);
+        Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(deviceSerialNumber), timePoint);
         Bearing awa = getAWA(timePoint, awaPair);
-        Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(), timePoint);
+        Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(deviceSerialNumber), timePoint);
         Speed aws = getAWS(timePoint, awsPair);
-        Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(), timePoint);
+        Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(deviceSerialNumber), timePoint);
         Position pos = getPosition(timePoint, gpsPair);
-        Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(), timePoint);
-        Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(), timePoint);
+        Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
+        Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
         Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
         if (awa != null && aws != null && pos != null && heading != null) {
             Bearing apparentWindDirection = heading.add(awa);
@@ -204,9 +215,9 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
              * So again, my personal preference would be to work with the data that should be the most accurate
              * (COG/SOG) and consider algorithms that handle smoothing of that data best."
              */
-            Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(), timePoint);
+            Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
             Speed sog = getSOG(timePoint, sogPair);
-            Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(), timePoint);
+            Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
             Bearing cog = getCOG(timePoint, cogPair);
             SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
             SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
@@ -393,32 +404,32 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return result;
     }
 
-    private DynamicTrack<AWA> getAwaTrack() {
-        return awaTrack;
+    private DynamicTrack<AWA> getAwaTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, awaTrack);
     }
 
-    private DynamicTrack<AWS> getAwsTrack() {
-        return awsTrack;
+    private DynamicTrack<AWS> getAwsTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, awsTrack);
     }
 
-    private DynamicTrack<GpsLatLong> getGpsTrack() {
-        return gpsTrack;
+    private DynamicTrack<GpsLatLong> getGpsTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, gpsTrack);
     }
 
-    private DynamicTrack<COG> getCogTrack() {
-        return cogTrack;
+    private DynamicTrack<COG> getCogTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, cogTrack);
     }
 
-    private DynamicTrack<SOG> getSogTrack() {
-        return sogTrack;
+    private DynamicTrack<SOG> getSogTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, sogTrack);
     }
 
-    private DynamicTrack<HDG> getHdgTrack() {
-        return hdgTrack;
+    private DynamicTrack<HDG> getHdgTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, hdgTrack);
     }
 
-    private DynamicTrack<HDGM> getHdgmTrack() {
-        return hdgmTrack;
+    private DynamicTrack<HDGM> getHdgmTrack(String deviceSerialNumber) {
+        return getTrack(deviceSerialNumber, hdgmTrack);
     }
 
     /**
