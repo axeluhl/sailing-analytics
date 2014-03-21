@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.FindBy;
@@ -199,10 +200,14 @@ public class TracTracEventManagementPanelPO extends PageArea {
         return regatta;
     }
     
-    public void setReggataForTracking(RegattaDescriptor regatta) {
+    public void setReggataForTracking(String regatta) {
         Select select = new Select(this.availableRegattasListBox);
         
-        select.selectByValue(regatta.toString());
+        select.selectByValue(regatta);
+    }
+    
+    public void setReggataForTracking(RegattaDescriptor regatta) {
+        setReggataForTracking(regatta.toString());
     }
     
     /**
@@ -249,9 +254,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         this.startTrackingButton.click();
         
-        // TODO: Dialog ignore
-        
-        waitForAjaxRequests();
+        if(ExpectedConditions.alertIsPresent() == null)
+            waitForAjaxRequests();
     }
     
     public TrackedRacesListPO getTrackedRacesList() {
