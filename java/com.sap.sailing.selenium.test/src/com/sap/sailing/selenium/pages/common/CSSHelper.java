@@ -6,7 +6,30 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
-public class CSSHelper {    
+public class CSSHelper {
+    /**
+     * <p>Creates an XPath 1.0 predicate that matches if an element has the given style sheet class in its "class"
+     *   attribute.</p>
+     * 
+     * @param className
+     *   The name of the style sheet class to check for.
+     * @return
+     *   An XPath predicate that matches if an element has the given style sheet class in its "class" attribute.
+     */
+    public static String containsCSSClassPredicate(String className) {
+        return "contains(concat(' ',normalize-space(@class),' '),' " + className + " ')";
+    }
+    
+    public static String containsCSSClassesPredicate(String... classNames) {
+        StringBuilder builder = new StringBuilder(70 * classNames.length);
+        
+        for(String className : classNames) {
+            builder.append(containsCSSClassPredicate(className));
+            builder.append(" and ");
+        }
+        return builder.substring(0, builder.length() - 5);
+    }
+    
     public static List<String> getCSSClassNames(WebElement element) {
         String cssClasses = element.getAttribute(CSSConstants.CSS_CLASS_ATTRIBUTE_NAME);
         
