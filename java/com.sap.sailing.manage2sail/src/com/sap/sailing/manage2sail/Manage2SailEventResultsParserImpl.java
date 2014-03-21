@@ -32,7 +32,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
             result.setName((String) jsonRoot.get("Name"));
             result.setXrrUrl(parseURL(jsonRoot, "XrrUrl"));
             result.setTrackingDataHost((String) jsonRoot.get("TrackingDataHost"));
-            result.setTrackingDataPort(((Number) jsonRoot.get("TrackingDataPort")).intValue());
+            result.setTrackingDataPort(parseInteger(jsonRoot, "TrackingDataPort"));
             
             JSONArray jsonRegattas = (JSONArray) jsonRoot.get("Regattas");
             for (Object regattaObject: jsonRegattas) {
@@ -89,7 +89,19 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
         }
         return result;
     }
-    
+
+    private Integer parseInteger(JSONObject jsonDate, String attributeName) {
+        Integer result = null;
+        String asString = (String) jsonDate.get(attributeName);
+        if(asString != null && !asString.isEmpty()) {
+            try {
+                result = Integer.parseInt(asString);
+            } catch (NumberFormatException e) {
+            } 
+        }
+        return result;
+    }
+
     private Date parseDate(JSONObject jsonDate, String attributeName) {
         Date result = null;
         String dateAsString = (String) jsonDate.get(attributeName);
@@ -97,7 +109,6 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
             try {
                 result = DateParser.parseUTC(dateAsString);
             } catch (InvalidDateException e) {
-                e.printStackTrace();
             } 
         }
         return result;
@@ -110,7 +121,6 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
             try {
                 result = new URL(urlAsString);
             } catch (MalformedURLException e) {
-                e.printStackTrace();
             }
         }
         return result;
