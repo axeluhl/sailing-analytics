@@ -9,11 +9,11 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
 public class RegattaCreateDialogPO extends DataEntryDialogPO {
-    @FindBy(how = BySeleniumId.class, using = "RegattaNameTextField")
-    private WebElement regattaNameTextField;
+    @FindBy(how = BySeleniumId.class, using = "NameTextBox")
+    private WebElement nameTextBox;
     
-    @FindBy(how = BySeleniumId.class, using = "BoatClassTextField")
-    private WebElement boatClassTextField;
+    @FindBy(how = BySeleniumId.class, using = "BoatClassTextBox")
+    private WebElement boatClassTextBox;
     
 //    @FindBy(how = BySeleniumId.class, using = "ScoringSchemeListBox")
 //    private WebElement scoringSystemDropDown;
@@ -30,13 +30,13 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     }
     
     public void setRegattaName(String name) {
-        this.regattaNameTextField.clear();
-        this.regattaNameTextField.sendKeys(name);
+        this.nameTextBox.clear();
+        this.nameTextBox.sendKeys(name);
     }
     
     public void setBoatClass(String boatClass) {
-        this.boatClassTextField.clear();
-        this.boatClassTextField.sendKeys(boatClass);
+        this.boatClassTextBox.clear();
+        this.boatClassTextBox.sendKeys(boatClass);
     }
     
     // TODO: Scoring System, Event and Course Area
