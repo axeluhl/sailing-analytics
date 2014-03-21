@@ -512,7 +512,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     ControlPointAndOldAndNewMark selectedElement = selectedElements.iterator().next();
                     int insertPos = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
                     for (MarkDTO markDTO : result.getMarks()) {
-                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewMark(result, null, markDTO));
+                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewMark(result, /* passing instructions */ null, markDTO));
                     }
                 }
             }
