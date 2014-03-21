@@ -405,7 +405,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         }
         sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
-                selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
+                selectedRaces, hostname, port, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

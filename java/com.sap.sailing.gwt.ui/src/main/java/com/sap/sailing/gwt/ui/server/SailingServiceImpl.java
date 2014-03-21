@@ -2206,9 +2206,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-            boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
-                + " with hostname " + hostname + " and port " + port + " and canSendRequests=" + canSendRequests);
+                + " with hostname " + hostname + " and port " + port);
         for (SwissTimingRaceRecordDTO rr : rrs) {
             final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, 
                     hostname, port,

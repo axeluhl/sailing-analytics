@@ -106,7 +106,7 @@ public interface SailingServiceAsync {
             boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
-            String hostname, int port, boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
