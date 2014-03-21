@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -43,7 +44,9 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     protected static final String FOOT_TAG_NAME = "tfoot"; //$NON-NLS-1$
     
-    private static final String TABLE_HEADER_XPATH = "./thead/tr/th";
+    protected static final String TABLE_HEADER_XPATH = "./thead/tr/th";
+    
+    protected static final String GWT_HEADER_XPATH = "./thead/tr//*[@__gwt_header]";
     
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
@@ -182,6 +185,28 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         
         for(WebElement row : getRows()) {
             entries.add(createDataEntry(row));
+        }
+        
+        return entries;
+    }
+    
+    public T getEntry(Object identifier) {
+        for(T entry : getEntries()) {
+            if(Objects.equals(identifier, entry.getIdentifier())) {
+                return entry;
+            }
+        }
+        
+        return null;
+    }
+    
+    public List<T> getEntries(List<?> identifiers) {
+        List<T> entries = new ArrayList<>();
+        
+        for(T entry : getEntries()) {
+            if(identifiers.contains(entry.getIdentifier())) {
+                entries.add(entry);
+            }
         }
         
         return entries;
