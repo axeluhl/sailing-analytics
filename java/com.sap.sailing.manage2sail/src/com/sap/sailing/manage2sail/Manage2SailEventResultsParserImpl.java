@@ -90,14 +90,11 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
         return result;
     }
 
-    private Integer parseInteger(JSONObject jsonDate, String attributeName) {
+    private Integer parseInteger(JSONObject jsonNumber, String attributeName) {
         Integer result = null;
-        String asString = (String) jsonDate.get(attributeName);
-        if(asString != null && !asString.isEmpty()) {
-            try {
-                result = Integer.parseInt(asString);
-            } catch (NumberFormatException e) {
-            } 
+        Number asNumber = (Number) jsonNumber.get(attributeName);
+        if(asNumber != null) {
+            result = asNumber.intValue();
         }
         return result;
     }
