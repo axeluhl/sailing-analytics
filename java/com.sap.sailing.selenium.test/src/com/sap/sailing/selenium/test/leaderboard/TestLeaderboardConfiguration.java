@@ -1,0 +1,159 @@
+package com.sap.sailing.selenium.test.leaderboard;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.sap.sailing.selenium.core.WebDriverWindow;
+import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.LeaderboardEntry;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+
+public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
+    private static final String IDM_5O5_2013_JSON_URL =
+            "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
+    
+    private static final String REGATTA = "IDM 2013"; //$NON-NLS-1$
+    
+    //private static final String LEADERBOARD = "IDM 2013 (505)"; //$NON-NLS-1$
+    
+    private static final String EVENT = "IDM 5O5 2013"; //$NON-NLS-1$
+    private static final String BOAT_CLASS = "505"; //$NON-NLS-1$
+    private static final String RACE = "Race %d"; //$NON-NLS-1$
+    
+    private RegattaDescriptor regatta;
+    
+    //private LeaderboardDescriptor leaderboard;
+    
+    private List<TrackableRaceDescriptor> trackableRaces;
+    private List<TrackedRaceDescriptor> trackedRaces;
+    private List<RaceDescriptor> leaderboardRaces;
+    
+    
+    @Before
+    public void setUp() {
+        this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
+        
+        this.trackableRaces = new ArrayList<>();
+        this.trackedRaces = new ArrayList<>();
+        this.leaderboardRaces = new ArrayList<>();
+        
+        for(int i = 1; i <= 3; i++) {
+            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  String.format(RACE, i), BOAT_CLASS);
+            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, String.format(RACE, i));
+            RaceDescriptor leaderboardRace = new RaceDescriptor(String.format("R%s", i), "Default", false, false, 0);
+            
+            this.trackableRaces.add(trackableRace);
+            this.trackedRaces.add(trackedRace);
+            this.leaderboardRaces.add(leaderboardRace);
+        }
+        
+        clearState(getContextRoot());
+    }
+    
+    @Test
+    @Ignore("Not ready yet")
+    public void testDynamicLeaderboardConfiguration() {
+        // Open a second window which we use for the leaderboard later
+        WindowManager manager = this.environment.getWindowManager();
+        WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
+        WebDriverWindow leaderboardWindow = manager.openNewWindow();
+        
+//        adminConsoleWindow.switchToWindow();
+//        
+        // Open the admin console for some configuration steps
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        
+        // Create a regatta with 1 series and 3 races as well as a leaderborad
+        RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
+        regattaStructure.createRegatta(this.regatta);
+        
+        RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
+        SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
+        seriesDialog.addRaces(1, 3);
+        seriesDialog.pressOk();
+        
+        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
+
+        // Start the tracking for the races and wait until they are ready to use
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
+        tracTracEvents.setReggataForTracking(this.regatta);
+        tracTracEvents.setTrackSettings(false, false, false);
+        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
+        //       selection (Firefox on Windows)
+        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
+        for(TrackableRaceDescriptor race : this.trackableRaces) {
+            tracTracEvents.startTrackingForRace(race);
+        }
+        
+        TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.TRACKING);
+        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
+        //       selection (Firefox on Windows)
+        //trackedRacesList.stopTracking(this.trackedRaces);
+        for(TrackedRaceDescriptor race : this.trackedRaces) {
+            trackedRacesList.stopTracking(race);
+        }
+        
+        leaderboardWindow.switchToWindow();
+        
+        // Open the leaderboard and check for "empty" leaderboard
+        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), "IDM 2013 (505)", true);
+        LeaderboardTablePO table = leaderboard.getLeaderboardTable();
+        List<String> races = table.getRaceNames();
+        
+        assertThat(races.size(), equalTo(3));
+        assertThat(table.getEntries().size(), equalTo(0));
+        
+        // Link the races and check the leaderboard again
+        for(int i = 0; i < 3; i++) {
+            adminConsoleWindow.switchToWindow();
+            leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+            
+            LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
+            leaderboardDetails.linkRace(this.leaderboardRaces.get(i), this.trackedRaces.get(i));
+            
+            leaderboardWindow.switchToWindow();
+            
+            leaderboard.refreshOnes();
+        }
+//        
+//        // TODO: Check for empty leaderboard
+//        
+//        
+//        leaderboard.setAutoRefreshEnabled(true);
+//        
+//        adminConsoleWindow.switchToWindow();
+        
+        // Add 5 races to the leaderboard
+        
+        
+        
+        // TODO: Link the races and check the leaderboard
+        //leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        
+    }
+}
