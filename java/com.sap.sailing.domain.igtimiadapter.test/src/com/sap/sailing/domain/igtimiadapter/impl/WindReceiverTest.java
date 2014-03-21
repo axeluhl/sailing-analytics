@@ -66,6 +66,42 @@ public class WindReceiverTest {
         assertEquals(expectedTrueWind.getBearing().getDegrees(), wind.getBearing().getDegrees(), 0.00000001);
     }
 
+    @Test
+    public void trueWindCalculationTest() {
+        final List<Wind> windReceived = new ArrayList<>();
+        final String deviceSerialNumber = "Non-Existing Test Device";
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
+        receiver.addListener(new IgtimiWindListener() {
+            @Override
+            public void windDataReceived(Wind wind, String deviceSerialNumber) {
+                windReceived.add(wind);
+            }
+        });
+        TimePoint timePoint = MillisecondsTimePoint.now();
+        Map<Integer, Object> awaMap = new HashMap<>(); awaMap.put(1, 208. /* degrees from */);
+        Map<Integer, Object> awsMap = new HashMap<>(); awsMap.put(1, 16.668 /* knots */);
+        Map<Integer, Object> hdgMap = new HashMap<>(); hdgMap.put(1, 177. /* true degrees */);
+        Map<Integer, Object> gpsLatLongMap = new HashMap<>(); gpsLatLongMap.put(2, 23.6 /* lat */); gpsLatLongMap.put(1, 58.3 /* lng */);
+        Map<Integer, Object> sogMap = new HashMap<>(); sogMap.put(1, 8.1488 /* knots */);
+        Map<Integer, Object> cogMap = new HashMap<>(); cogMap.put(1, 354.3 /* degrees; 2 degrees drift */);
+        final SensorImpl sensor = new SensorImpl(deviceSerialNumber, 0);
+        receiver.received(Arrays.asList(new AWA(timePoint, sensor, awaMap),
+                                        new AWS(timePoint, sensor, awsMap),
+                                        new HDG(timePoint, sensor, hdgMap),
+                                        new GpsLatLong(timePoint, sensor, gpsLatLongMap),
+                                        new SOG(timePoint, sensor, sogMap),
+                                        new COG(timePoint, sensor, cogMap)));
+        assertFalse(windReceived.isEmpty());
+        assertEquals(1, windReceived.size());
+        Wind wind = windReceived.get(0);
+        assertEquals(timePoint, wind.getTimePoint());
+        SpeedWithBearing boatSogCog = new KnotSpeedWithBearingImpl(8.1488, new DegreeBearingImpl(354.3));
+        SpeedWithBearing apparentWindTo = new KnotSpeedWithBearingImpl(16.668, new DegreeBearingImpl(177).add(new DegreeBearingImpl(208).reverse()));
+        SpeedWithBearing expectedTrueWind = apparentWindTo.add(boatSogCog);
+        assertEquals(expectedTrueWind.getKnots(), wind.getKnots(), 0.00000001);
+        assertEquals(expectedTrueWind.getBearing().getDegrees(), wind.getBearing().getDegrees(), 0.00000001);
+    }
+
     /**
      * See bug 1867; constructs two data sets for two different devices. The AWA, HDG, GPS, SOG and COG fixes have equal time
      * points for both devices. The AWS fixes have later time points. This is to re-produce the problem where the wind fix receiver
