@@ -36,12 +36,24 @@ public abstract class AbstractTimePoint implements TimePoint {
     
     @Override
     public TimePoint plus(Duration duration) {
-        return plus(duration.asMillis());
+        final TimePoint result;
+        if (duration != null) {
+            result = plus(duration.asMillis());
+        } else {
+            result = this;
+        }
+        return result;
     }
 
     @Override
     public TimePoint minus(Duration duration) {
-        return minus(duration.asMillis());
+        final TimePoint result;
+        if (duration != null) {
+            result = minus(duration.asMillis());
+        } else {
+            result = this;
+        }
+        return result;
     }
 
     @Override
