@@ -20,7 +20,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SailingService</servlet-name>
-		<url-pattern>/sailing</url-pattern>
+		<url-pattern>/service/sailing</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -30,7 +30,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MediaService</servlet-name>
-		<url-pattern>/media</url-pattern>
+		<url-pattern>/service/media</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -40,7 +40,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SimulatorService</servlet-name>
-		<url-pattern>com.sap.sailing.gwt.ui.Simulator/simulator</url-pattern>
+		<url-pattern>/service/simulator</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -50,7 +50,17 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>UserManagementService</servlet-name>
-		<url-pattern>/usermanagement</url-pattern>
+		<url-pattern>/service/usermanagement</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<display-name>Data Mining Service</display-name>
+	    <servlet-name>DataMiningService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DataMiningService</servlet-name>
+		<url-pattern>/service/datamining</url-pattern>
 	</servlet-mapping>
 	
 	<!-- enabling remote logging -->

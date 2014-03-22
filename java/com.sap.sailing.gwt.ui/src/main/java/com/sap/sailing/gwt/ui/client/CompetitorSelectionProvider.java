@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 
 public interface CompetitorSelectionProvider {
 

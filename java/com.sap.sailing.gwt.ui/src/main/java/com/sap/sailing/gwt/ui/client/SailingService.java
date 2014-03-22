@@ -8,10 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -73,7 +69,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
  * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
-@RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
@@ -355,11 +350,7 @@ public interface SailingService extends RemoteService {
     
     DataImportProgress getImportOperationProgress(UUID id);
 
-    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
-
     Iterable<CompetitorDTO> getCompetitors();
-    
-    DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 

@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
     protected final StringMessages stringMessages;

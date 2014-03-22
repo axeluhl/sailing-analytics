@@ -1,12 +1,15 @@
 package com.sap.sailing.datamining.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.Clusters;
-import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
+import com.sap.sse.datamining.data.deprecated.ClusterOfComparable;
+import com.sap.sse.datamining.impl.data.deprecated.ClusterOfComparableImpl;
 
 public class TestClusters {
     
