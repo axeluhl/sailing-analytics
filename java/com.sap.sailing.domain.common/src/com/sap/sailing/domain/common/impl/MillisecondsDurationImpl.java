@@ -27,4 +27,57 @@ public class MillisecondsDurationImpl implements Duration {
     public Duration divide(long divisor) {
         return new MillisecondsDurationImpl(asMillis() / divisor);
     }
+
+    @Override
+    public Duration times(long factor) {
+        return new MillisecondsDurationImpl(asMillis() * factor);
+    }
+
+    @Override
+    public double asMinutes() {
+        return asSeconds() / 60;
+    }
+
+    @Override
+    public double asHours() {
+        return asMillis() / Duration.ONE_HOUR.asMillis();
+    }
+
+    @Override
+    public double asDays() {
+        return asMillis() / Duration.ONE_DAY.asMillis();
+    }
+    
+    @Override
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append(asSeconds()).append("seconds ").append(asMillis()).append("millis");
+        return result.toString();
+    }
+
+    @Override
+    public Duration minus(Duration duration) {
+        return new MillisecondsDurationImpl(asMillis()-duration.asMillis());
+    }
+
+    @Override
+    public Duration minus(long milliseconds) {
+        return new MillisecondsDurationImpl(asMillis()-milliseconds);
+    }
+
+    @Override
+    public Duration plus(long milliseconds) {
+        return new MillisecondsDurationImpl(asMillis()+milliseconds);
+    }
+
+    @Override
+    public Duration plus(Duration duration) {
+        return new MillisecondsDurationImpl(asMillis()+duration.asMillis());
+    }
+
+    @Override
+    public int compareTo(Duration o) {
+        long diff = asMillis() - o.asMillis();
+        return diff > 0l ? 1 : diff < 0l ? -1 : 0;
+    }
 }

@@ -215,6 +215,15 @@ public class ClientParamsPHP {
         public String getName() {
             return getProperty("Name");
         }
+        
+        /**
+         * @return true if this race has been initialized. A race can be uninitialized
+         * until a real start of tracking has been set in the event manager.
+         */
+        public boolean isInitialized() {
+            String isInitialized = getProperty("initialized");
+            return (isInitialized == null || (isInitialized != null && isInitialized.equals("1")));
+        }
 
         public TimePoint getStartTime() throws ParseException {
             return getTimePoint("StartTime");
@@ -225,23 +234,42 @@ public class ClientParamsPHP {
         }
         
         public TimePoint getTrackingStartTime() {
-            try {
-                return getTimePoint("TrackingStartTime");
-            } catch (ParseException e) {
-                logger.info("Exception trying to parse property RaceTrackingStartTime with value "+getProperty("TrackingStartTime"));
-                logger.log(Level.SEVERE, "getRaceTrackingStartTime", e);
-                return null;
+            TimePoint result;
+            // do not send out any tracking start time if race is not initialized
+            // background: TracTrac creates races for the whole day that get a tracking
+            // start and end time but no real tracking took place. If in the event manager
+            // the administrator starts the tracking then the real start of tracking will be
+            // set and the isInitialized() will be true.
+            if (!isInitialized()) {
+                result = null;
+            } else {
+                try {
+                    result = getTimePoint("TrackingStartTime");
+                } catch (ParseException e) {
+                    logger.info("Exception trying to parse property RaceTrackingStartTime with value "
+                            + getProperty("TrackingStartTime"));
+                    logger.log(Level.SEVERE, "getRaceTrackingStartTime", e);
+                    result = null;
+                }
             }
+            return result;
         }
         
         public TimePoint getTrackingEndTime() {
-            try {
-                return getTimePoint("TrackingEndTime");
-            } catch (ParseException e) {
-                logger.info("Exception trying to parse property RaceTrackingEndTime with value "+properties.get("RaceTrackingEndTime"));
-                logger.log(Level.SEVERE, "RaceTrackingEndTime", e);
-                return null;
+            TimePoint result;
+            if (!isInitialized()) {
+                result = null;
+            } else {
+                try {
+                    result = getTimePoint("TrackingEndTime");
+                } catch (ParseException e) {
+                    logger.info("Exception trying to parse property RaceTrackingEndTime with value "
+                            + properties.get("RaceTrackingEndTime"));
+                    logger.log(Level.SEVERE, "RaceTrackingEndTime", e);
+                    result = null;
+                }
             }
+            return result;
         }
         
         public Route getDefaultRoute() {

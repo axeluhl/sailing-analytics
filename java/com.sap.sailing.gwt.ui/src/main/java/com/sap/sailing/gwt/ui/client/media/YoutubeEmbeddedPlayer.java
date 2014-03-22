@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
-import com.sap.sailing.gwt.ui.client.shared.controls.dialog.WindowBox;
+import com.sap.sse.gwt.client.dialog.WindowBox;
 
 public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 

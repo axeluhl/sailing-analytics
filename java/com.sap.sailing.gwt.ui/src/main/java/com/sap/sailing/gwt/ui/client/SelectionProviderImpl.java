@@ -40,7 +40,12 @@ public class SelectionProviderImpl<T> implements SelectionProvider<T> {
     }
     
     @Override
-    public void setSelection(List<T> newSelection, SelectionChangeListener<T>... listenersNotToNotify) {
+    public void setSelection(List<T> newSelection) {
+        setSelection(newSelection, null);
+    }
+
+    @Override
+    public void setSelection(List<T> newSelection, SelectionChangeListener<T>[] listenersNotToNotify) {
         boolean notify = !selection.equals(newSelection);
         selection.clear();
         selection.addAll(newSelection);
@@ -50,10 +55,10 @@ public class SelectionProviderImpl<T> implements SelectionProvider<T> {
     }
 
     private void notifyListeners(SelectionChangeListener<T>[] listenersNotToNotify) {
-        List<T> selectedRegattas = getSelectedItems();
+        List<T> selectedItems = getSelectedItems();
         for (SelectionChangeListener<T> listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
-                listener.onSelectionChange(selectedRegattas);
+                listener.onSelectionChange(selectedItems);
             }
         }
     }
@@ -64,20 +69,20 @@ public class SelectionProviderImpl<T> implements SelectionProvider<T> {
      * <code>newAllItems</code> are removed from the selection. If this happens, the selection listeners are notified.
      */
     @Override
-    public void setAllItems(List<T> newAllItems, SelectionChangeListener<T>... listenersNotToNotify) {
+    public void setAllItems(List<T> newAllItems) {
         allItems.clear();
         for (T r : newAllItems) {
             allItems.add(r);
         }
         for (Iterator<T> i = selection.iterator(); i.hasNext(); ) {
-            T selectedRegatta = i.next();
-            if (!allItems.contains(selectedRegatta)) {
+            T selectedItem = i.next();
+            if (!allItems.contains(selectedItem)) {
                 i.remove();
             }
         }
         // when setting all items, the underlying items will usually have changed their identity and maybe also their state;
         // so notifying the selection listeners is necessary anyhow
-        notifyListeners(listenersNotToNotify);
+        notifyListeners(null);
     }
 
     @Override

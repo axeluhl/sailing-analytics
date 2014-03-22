@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.polarsheets;
 
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class PolarSheetGenerationSettingsValidator implements Validator<PolarSheetGenerationSettings> {
     

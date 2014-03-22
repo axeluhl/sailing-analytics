@@ -7,4 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.sap.sailing.datamining.shared
+Export-Package: com.sap.sailing.datamining.shared,
+ com.sap.sailing.datamining.shared.impl
+Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"

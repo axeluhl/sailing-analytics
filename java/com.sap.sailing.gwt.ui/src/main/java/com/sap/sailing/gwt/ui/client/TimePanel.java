@@ -26,8 +26,8 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.SliderBar;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider;
 
 public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
