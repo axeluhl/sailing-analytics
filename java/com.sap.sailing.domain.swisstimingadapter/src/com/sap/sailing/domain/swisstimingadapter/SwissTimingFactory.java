@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
@@ -37,26 +38,26 @@ public interface SwissTimingFactory {
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
      * listener.
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceDescription)
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, String raceId, String raceDescription, BoatClass boatClass)
             throws InterruptedException, ParseException;
 
     SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId,
-            String raceDescription) throws InterruptedException, ParseException;
+            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException;
 
     SailMasterTransceiver createSailMasterTransceiver();
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, int port);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String raceDescription, String hostname, int port,
+    SwissTimingRaceTracker createRaceTracker(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
             long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore,
             DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException,
             IOException, ParseException;
 
-    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceDescription, String hostname, int port, long delayToLiveInMillis,
+    RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, long delayToLiveInMillis,
             WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException, InterruptedException,
             IOException, ParseException;
 
-    Race createRace(String raceId, String description);
+    Race createRace(String raceId, String description, BoatClass boatClass);
 
     SailMasterMessage createMessage(String message);
 

@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -46,10 +47,10 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
 
     @Override
     public RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceDescription,
-            String hostname, int port, RaceLogStore logStore, long timeoutInMilliseconds)
+            BoatClass boatClass, String hostname, int port, RaceLogStore logStore, long timeoutInMilliseconds)
             throws Exception {
         return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, raceDescription, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
+                raceID, raceDescription, boatClass, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
                 swissTimingDomainFactory, logStore),
                 timeoutInMilliseconds);
     }

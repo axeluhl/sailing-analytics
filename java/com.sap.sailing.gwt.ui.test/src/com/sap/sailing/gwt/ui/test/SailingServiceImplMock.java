@@ -12,6 +12,7 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
@@ -106,7 +107,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
                     @Override
                     public RacesHandle addSwissTimingRace(TrackerManager trackerManager,
-                            RegattaIdentifier regattaToAddTo, String raceID, String raceDescription, String hostname,
+                            RegattaIdentifier regattaToAddTo, String raceID, String raceDescription, BoatClass boatClass, String hostname,
                             int port, RaceLogStore logStore, long timeoutInMilliseconds)
                             throws InterruptedException, UnknownHostException, IOException, ParseException,
                             Exception {

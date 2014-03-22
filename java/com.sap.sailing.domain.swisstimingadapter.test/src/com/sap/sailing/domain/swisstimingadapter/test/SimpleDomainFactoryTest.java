@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
@@ -57,7 +58,7 @@ public class SimpleDomainFactoryTest {
         final String raceID = "SAX920103";
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(
                 EmptyRaceLogStore.INSTANCE,
-                raceID,
+                raceID, null /* boat class */,
                 new RacingEventServiceImpl()),
                 new Race() {
                     @Override
@@ -68,6 +69,11 @@ public class SimpleDomainFactoryTest {
                     @Override
                     public String getRaceID() {
                         return raceID;
+                    }
+
+                    @Override
+                    public BoatClass getBoatClass() {
+                        return null;
                     }
         }, new StartList() {
             @Override

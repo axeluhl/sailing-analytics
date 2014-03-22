@@ -26,6 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -92,6 +93,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private boolean connected;
     private final String raceId;
     private final String raceDescription;
+    private final BoatClass boatClass;
     
     /**
      * Currently the SwissTiming SailMaster protocol only transmits time zone information when sending
@@ -119,11 +121,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceDescription) throws InterruptedException, ParseException {
+    public SailMasterConnectorImpl(String host, int port, String raceId, String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
         this.raceDescription = raceDescription;
+        this.boatClass = boatClass;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         this.host = host;
         this.port = port;
@@ -516,7 +519,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public Race getRace() {
-        return new RaceImpl(raceId, raceDescription);
+        return new RaceImpl(raceId, raceDescription, boatClass);
     }
 
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
@@ -525,7 +528,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
             String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
-            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], boatClass));
         }
         return result;
     }

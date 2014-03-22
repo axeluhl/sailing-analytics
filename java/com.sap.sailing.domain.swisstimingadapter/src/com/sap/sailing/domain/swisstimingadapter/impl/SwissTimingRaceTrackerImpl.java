@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -60,6 +61,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final SailMasterConnector connector;
     private final String raceID;
     private final String raceDescription;
+    private final BoatClass boatClass;
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
     private final Regatta regatta;
@@ -86,26 +88,27 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      */
     private final TMDMessageQueue tmdMessageQueue;
 
-    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, String hostname, int port, RaceLogStore raceLogStore,
+    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, RaceLogStore raceLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID,
-                raceDescription, hostname, port, windStore, domainFactory, factory, trackedRegattaRegistry,
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID,
+                raceDescription, boatClass, hostname, port, windStore, domainFactory, factory, trackedRegattaRegistry,
                 delayToLiveInMillis);
     }
     
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, String hostname, int port,
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
         this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceDescription);
+        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceDescription, boatClass);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
         this.raceDescription = raceDescription;
+        this.boatClass = boatClass;
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(this);
@@ -231,8 +234,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
-                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceID(
-                                fix.getBoatID(), raceID);
+                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceIDOrBoatClass(
+                                fix.getBoatID(), raceID, boatClass);
                         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                         competitorTrack.addGPSFix(gpsFix);
                         break;
@@ -257,8 +260,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
-            Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceID(boatID,
-                    raceID);
+            Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID,
+                    raceID, boatClass);
             // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
             // we need to use this to *update* the competitor's mark passings list, not *replace* it
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
@@ -286,7 +289,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
                             startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                     MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                            domainFactory.getCompetitorByBoatIDAndRaceID(boatID, raceID));
+                            domainFactory.getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass));
                     markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
                 } else {
                     // 
@@ -347,7 +350,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race swissTimingRace = new RaceImpl(raceID, raceDescription);
+        Race swissTimingRace = new RaceImpl(raceID, raceDescription, boatClass);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
         trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
@@ -412,5 +415,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     public DomainFactory getDomainFactory() {
         return domainFactory;
+    }
+
+    public BoatClass getBoatClass() {
+        return boatClass;
     }
 }

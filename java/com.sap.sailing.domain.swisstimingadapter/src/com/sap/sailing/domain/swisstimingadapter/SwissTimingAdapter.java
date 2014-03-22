@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -23,7 +24,7 @@ public interface SwissTimingAdapter {
      * @param raceDescription TODO
      */
     RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceDescription,
-            String hostname, int port, RaceLogStore logStore, long timeoutInMilliseconds)
+            BoatClass boatClass, String hostname, int port, RaceLogStore logStore, long timeoutInMilliseconds)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();

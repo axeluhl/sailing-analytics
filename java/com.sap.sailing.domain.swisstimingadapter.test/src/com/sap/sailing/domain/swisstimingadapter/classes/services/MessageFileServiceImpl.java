@@ -183,7 +183,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         List<Race> result = new ArrayList<Race>();
         for (int i = 0; i < count; i++) {
             String[] idAndDescription = message.getSections()[2 + i].split(";");
-            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], null /* boat class */));
         }
         return new RACMessage(result);
     }
