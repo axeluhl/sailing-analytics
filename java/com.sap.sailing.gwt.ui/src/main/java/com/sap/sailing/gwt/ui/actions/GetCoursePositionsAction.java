@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
 public class GetCoursePositionsAction implements AsyncAction<CoursePositionsDTO> {
     private final SailingServiceAsync sailingService;

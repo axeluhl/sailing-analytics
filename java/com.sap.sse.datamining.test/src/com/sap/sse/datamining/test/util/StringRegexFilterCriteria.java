@@ -1,0 +1,16 @@
+package com.sap.sse.datamining.test.util;
+
+import com.sap.sse.datamining.impl.criterias.RegexFilterCriteria;
+
+public class StringRegexFilterCriteria extends RegexFilterCriteria<String> {
+
+    public StringRegexFilterCriteria(String regex) {
+        super(regex);
+    }
+
+    @Override
+    protected String getValueToMatch(String data) {
+        return data;
+    }
+
+}

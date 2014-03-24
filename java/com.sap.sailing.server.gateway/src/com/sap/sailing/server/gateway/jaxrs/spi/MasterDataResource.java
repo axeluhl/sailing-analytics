@@ -37,11 +37,15 @@ public class MasterDataResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/x-java-serialized-object")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
-            @QueryParam("compress") Boolean compress) throws UnsupportedEncodingException {
+            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind)
+            throws UnsupportedEncodingException {
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started");
         if (compress == null) {
             compress = false;
+        }
+        if (exportWind == null) {
+            exportWind = true;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
@@ -72,7 +76,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-                        .getAllMediaTracks());
+.getAllMediaTracks(), exportWind);
 
         ResponseBuilder resp;
         if (compress) {

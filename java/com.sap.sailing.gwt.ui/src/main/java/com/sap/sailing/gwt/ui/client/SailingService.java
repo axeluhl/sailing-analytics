@@ -8,10 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -34,6 +30,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -50,7 +47,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -72,7 +69,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
  * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
-@RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
@@ -329,8 +325,13 @@ public interface SailingService extends RemoteService {
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
     
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
-            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
+            throws Exception;
     
+    List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
+            boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, List<String> visibleRegattas)
+            throws Exception;
+
     String getBuildVersion();
 
     void stopReplicatingFromMaster();
@@ -345,15 +346,11 @@ public interface SailingService extends RemoteService {
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
     
     DataImportProgress getImportOperationProgress(UUID id);
 
-    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
-
     Iterable<CompetitorDTO> getCompetitors();
-    
-    DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
@@ -369,9 +366,9 @@ public interface SailingService extends RemoteService {
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
 
-    boolean setStartTime(RaceLogSetStartTimeDTO dto);
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
-    Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 

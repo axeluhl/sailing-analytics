@@ -21,9 +21,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.IntegerBox;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance

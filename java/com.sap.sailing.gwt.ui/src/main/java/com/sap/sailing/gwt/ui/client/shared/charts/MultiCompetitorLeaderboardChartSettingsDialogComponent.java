@@ -12,8 +12,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> {
     private ListBox chartTypeSelectionListBox;

@@ -1,0 +1,202 @@
+package com.sap.sse.datamining.impl.components.aggregators;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
+
+public class TestParallelDoubleAggregationProcessors {
+    
+    private Collection<Processor<Map<GroupKey, Double>>> receivers;
+    private Map<GroupKey, Double> receivedAggregations;
+
+    @Test
+    public void testSumAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>> sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        processElements(sumAggregationProcessor, elements);
+        
+        sumAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedSumAggregations(elements);
+        verifyReceivedAggregations(expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedSumAggregations(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, Double> expectedSumAggregations = new HashMap<>();
+        for (GroupedDataEntry<Double> element : elements) {
+            GroupKey key = element.getKey();
+            if (!expectedSumAggregations.containsKey(key)) {
+                expectedSumAggregations.put(key, 0.0);
+            }
+            Double currentValue = expectedSumAggregations.get(key);
+            expectedSumAggregations.put(key, currentValue + element.getDataEntry());
+        }
+        return expectedSumAggregations;
+    }
+
+    @Test
+    public void testAverageAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>> averageAggregationProcessor = new ParallelGroupedDoubleDataAverageAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        processElements(averageAggregationProcessor, elements);
+        
+        averageAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedAverageAggregations(elements);
+        verifyReceivedAggregations(expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedAverageAggregations(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, Double> result = new HashMap<>();
+        
+        Map<GroupKey, Double> sumAggregations = computeExpectedSumAggregations(elements);
+        Map<GroupKey, Double> elementAmountPerKey = countElementAmountPerKey(elements);
+        for (Entry<GroupKey, Double> sumAggregationEntry : sumAggregations.entrySet()) {
+            GroupKey key = sumAggregationEntry.getKey();
+            result.put(key, sumAggregationEntry.getValue() / elementAmountPerKey.get(key));
+        }
+        return result;
+    }
+
+    private Map<GroupKey, Double> countElementAmountPerKey(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, Double> elementAmountPerKey = new HashMap<>();
+        for (GroupedDataEntry<Double> element : elements) {
+            GroupKey key = element.getKey();
+            if (!elementAmountPerKey.containsKey(key)) {
+                elementAmountPerKey.put(key, 0.0);
+            }
+            Double currentAmount = elementAmountPerKey.get(key);
+            elementAmountPerKey.put(key, currentAmount + 1.0);
+        }
+        return elementAmountPerKey;
+    }
+
+    @Test
+    public void testMedianAggregationProcessor() throws InterruptedException {
+        Processor<GroupedDataEntry<Double>> medianAggregationProcessor = new ParallelGroupedDoubleDataMedianAggregationProcessor(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Collection<GroupedDataEntry<Double>> elements = createElements();
+        processElements(medianAggregationProcessor, elements);
+        
+        medianAggregationProcessor.finish();
+        Map<GroupKey, Double> expectedReceivedAggregations = computeExpectedMedianAggregations(elements);
+        verifyReceivedAggregations(expectedReceivedAggregations);
+    }
+
+    private Map<GroupKey, Double> computeExpectedMedianAggregations(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, Double> result = new HashMap<>();
+        
+        Map<GroupKey, List<Double>> groupedValues = getGroupedValuesOf(elements);
+        for (Entry<GroupKey, List<Double>> groupedValuesEntry : groupedValues.entrySet()) {
+            result.put(groupedValuesEntry.getKey(), getMedianOf(groupedValuesEntry.getValue()));
+        }
+        
+        return result;
+    }
+
+    private Map<GroupKey, List<Double>> getGroupedValuesOf(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, List<Double>> groupedValues = new HashMap<>();
+        for (GroupedDataEntry<Double> element : elements) {
+            GroupKey key = element.getKey();
+            if (!groupedValues.containsKey(key)) {
+                groupedValues.put(key, new ArrayList<Double>());
+            }
+            groupedValues.get(key).add(element.getDataEntry());
+        }
+        return groupedValues;
+    }
+
+    private Double getMedianOf(List<Double> values) {
+        Collections.sort(values);
+        if (listSizeIsEven(values)) {
+            int index1 = values.size() / 2;
+            int index2 = index1 + 1;
+            return (values.get(index1) + values.get(index2)) / 2;
+        } else {
+            int index = (values.size() + 1) / 2;
+            return values.get(index);
+        }
+    }
+
+    private boolean listSizeIsEven(List<Double> values) {
+        return values.size() % 2 == 0;
+    }
+
+    private Collection<GroupedDataEntry<Double>> createElements() {
+        Collection<GroupedDataEntry<Double>> elements = new ArrayList<>();
+        
+        GroupKey firstGroupKey = new GenericGroupKey<Integer>(1);
+        elements.add(new GroupedDataEntry<Double>(firstGroupKey, 5.0));
+        elements.add(new GroupedDataEntry<Double>(firstGroupKey, 10.0));
+        elements.add(new GroupedDataEntry<Double>(firstGroupKey, 7.0));
+        
+        GroupKey secondGroupKey = new GenericGroupKey<Integer>(2);
+        elements.add(new GroupedDataEntry<Double>(secondGroupKey, 5.0));
+        elements.add(new GroupedDataEntry<Double>(secondGroupKey, 3.0));
+        elements.add(new GroupedDataEntry<Double>(secondGroupKey, 7.0));
+        elements.add(new GroupedDataEntry<Double>(secondGroupKey, 7.0));
+        
+        GroupKey thirdGroupKey = new GenericGroupKey<Integer>(3);
+        elements.add(new GroupedDataEntry<Double>(thirdGroupKey, 5.0));
+        elements.add(new GroupedDataEntry<Double>(thirdGroupKey, 5.0));
+        elements.add(new GroupedDataEntry<Double>(thirdGroupKey, 5.0));
+        
+        return elements;
+    }
+
+    private void processElements(Processor<GroupedDataEntry<Double>> processor, Collection<GroupedDataEntry<Double>> elements) {
+        for (GroupedDataEntry<Double> element : elements) {
+            processor.onElement(element);
+        }
+    }
+
+    private void verifyReceivedAggregations(Map<GroupKey, Double> expectedReceivedAggregations) {
+        assertThat("No aggregation has been received.", receivedAggregations, notNullValue());
+        
+        for (Entry<GroupKey, Double> expectedReceivedAggregationEntry : expectedReceivedAggregations.entrySet()) {
+            assertThat("The expected aggregation entry '" + expectedReceivedAggregationEntry + "' wasn't received.",
+                       receivedAggregations.containsKey(expectedReceivedAggregationEntry.getKey()), is(true));
+            assertThat("The result for group '" + expectedReceivedAggregationEntry.getKey() + "' isn't correct.",
+                       receivedAggregations.get(expectedReceivedAggregationEntry.getKey()), is(expectedReceivedAggregationEntry.getValue()));
+        }
+    }
+    
+    @Before
+    public void initializeResultReceivers() {
+        Processor<Map<GroupKey, Double>> receiver = new Processor<Map<GroupKey,Double>>() {
+            @Override
+            public void onElement(Map<GroupKey, Double> element) {
+                receivedAggregations = element;
+            }
+            @Override
+            public void finish() throws InterruptedException {
+            }
+            @Override
+            public void abort() {
+            }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
+            }
+        };
+        
+        receivers = new ArrayList<>();
+        receivers.add(receiver);
+    }
+
+}

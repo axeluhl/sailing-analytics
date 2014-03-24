@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.filter.AbstractNumberFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.filter.AbstractNumberFilter;
 
 /**
  * A filter filtering competitors by their total rank

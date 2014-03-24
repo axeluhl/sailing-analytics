@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -492,13 +493,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param startTime the new Start-Time
      * @return
      */
-    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
+    TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
+     * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     

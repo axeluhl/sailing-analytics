@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Double>> {
     private final ListBox maxPointsBox;

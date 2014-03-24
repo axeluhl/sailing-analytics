@@ -22,19 +22,22 @@ public class TrackingQualityMinMaxRenderer extends MinMaxRenderer {
      */
     public void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
         Double ratio = getValueProvider().getDoubleValue(row);
-        String stringValue = getValueProvider().getStringValueToRender(row);
-        stringValue = stringValue == null ? "" : stringValue;
-        final String barStyle;
-        if (ratio <= 1.5) {
-            barStyle = "minMaxBackgroundBarGood";
-        } else if (ratio <= 3) {
-            barStyle = "minMaxBackgroundBar";
-        } else {
-            barStyle = "minMaxBackgroundBarBad";
+        if (ratio != null) {
+            String stringValue = getValueProvider().getStringValueToRender(row);
+            stringValue = stringValue == null ? "" : stringValue;
+            final String barStyle;
+            if (ratio <= 1.5) {
+                barStyle = "minMaxBackgroundBarGood";
+            } else if (ratio <= 3) {
+                barStyle = "minMaxBackgroundBar";
+            } else {
+                barStyle = "minMaxBackgroundBarBad";
+            }
+            sb.appendHtmlConstant(
+                    "<div " + (title == null ? "" : "title=\"" + title + "\" ") + "class=\"" + barStyle + "\" "
+                            + "style=\"background-size: 100% 25px; \">").appendEscaped(stringValue)
+                    .appendHtmlConstant("</div>");
         }
-        sb.appendHtmlConstant("<div " + (title == null ? "" : "title=\"" + title + "\" ")
-                        + "class=\""+barStyle+"\" "
-                + "style=\"background-size: 100% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
     }
 
 }

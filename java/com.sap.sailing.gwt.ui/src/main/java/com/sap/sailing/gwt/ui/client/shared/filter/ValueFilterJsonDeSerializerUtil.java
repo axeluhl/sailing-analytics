@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.filter.BinaryOperator;
-import com.sap.sailing.domain.common.filter.NumberFilter;
-import com.sap.sailing.domain.common.filter.TextFilter;
-import com.sap.sailing.domain.common.filter.TextOperator;
-import com.sap.sailing.domain.common.filter.ValueFilter;
+import com.sap.sse.common.filter.BinaryOperator;
+import com.sap.sse.common.filter.NumberFilter;
+import com.sap.sse.common.filter.TextFilter;
+import com.sap.sse.common.filter.TextOperator;
+import com.sap.sse.common.filter.ValueFilter;
 
 public class ValueFilterJsonDeSerializerUtil {
     public static final String FIELD_FILTER_NAME = "name";

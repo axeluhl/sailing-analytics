@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
     private static class ComponentAndValidator<SettingsType> extends Pair<Component<SettingsType>, Validator<SettingsType>> {
