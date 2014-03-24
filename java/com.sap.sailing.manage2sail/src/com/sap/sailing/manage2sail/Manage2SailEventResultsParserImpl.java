@@ -1,4 +1,4 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.manage2sail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
-public class Manage2SailEventResultsParser {
+public class Manage2SailEventResultsParserImpl implements Manage2SailEventResultsParser {
 
     /**
      * @param is closed before the method returns, also in case of exception
@@ -31,6 +31,8 @@ public class Manage2SailEventResultsParser {
             result.setIsafId((String) jsonRoot.get("IsafId"));
             result.setName((String) jsonRoot.get("Name"));
             result.setXrrUrl(parseURL(jsonRoot, "XrrUrl"));
+            result.setTrackingDataHost((String) jsonRoot.get("TrackingDataHost"));
+            result.setTrackingDataPort(parseInteger(jsonRoot, "TrackingDataPort"));
             
             JSONArray jsonRegattas = (JSONArray) jsonRoot.get("Regattas");
             for (Object regattaObject: jsonRegattas) {
@@ -48,6 +50,21 @@ public class Manage2SailEventResultsParser {
                 regattaResult.setHtmlUrl(parseURL(jsonRegatta, "HtmlUrl"));
                 regattaResult.setPublishedAt(parseDate(jsonRegatta, "Published"));
                 regattaResult.setIsFinal((Boolean) jsonRegatta.get("Final"));
+                
+                JSONArray jsonRaces = (JSONArray) jsonRegatta.get("Races");
+                if(jsonRaces != null) {
+                    for (Object raceObject: jsonRaces) {
+                        RaceResultDescriptor raceResult = new RaceResultDescriptor(); 
+                        JSONObject jsonRace = (JSONObject) raceObject;
+                        raceResult.setId((String) jsonRace.get("Id"));
+                        raceResult.setName((String) jsonRace.get("Name"));
+                        raceResult.setStartTimeUTC(parseDate(jsonRace, "StartTimeUTC"));
+                        raceResult.setEndTimeUTC(parseDate(jsonRace, "EndTimeUTC"));
+                        raceResult.setState((String) jsonRace.get("State"));
+                        raceResult.setTracked((Boolean) jsonRace.get("IsTracked"));
+                        regattaResult.getRaceResults().add(raceResult);
+                    }
+                }
                 result.getRegattaResults().add(regattaResult);
             }
             is.close();
@@ -72,15 +89,23 @@ public class Manage2SailEventResultsParser {
         }
         return result;
     }
-    
+
+    private Integer parseInteger(JSONObject jsonNumber, String attributeName) {
+        Integer result = null;
+        Number asNumber = (Number) jsonNumber.get(attributeName);
+        if(asNumber != null) {
+            result = asNumber.intValue();
+        }
+        return result;
+    }
+
     private Date parseDate(JSONObject jsonDate, String attributeName) {
         Date result = null;
         String dateAsString = (String) jsonDate.get(attributeName);
-        if(dateAsString != null) {
+        if(dateAsString != null && !dateAsString.isEmpty()) {
             try {
                 result = DateParser.parseUTC(dateAsString);
             } catch (InvalidDateException e) {
-                e.printStackTrace();
             } 
         }
         return result;
@@ -89,11 +114,10 @@ public class Manage2SailEventResultsParser {
     private URL parseURL(JSONObject jsonURL, String attributeName) {
         URL result = null;
         String urlAsString = (String) jsonURL.get(attributeName);
-        if(urlAsString != null) {
+        if(urlAsString != null && !urlAsString.isEmpty()) {
             try {
                 result = new URL(urlAsString);
             } catch (MalformedURLException e) {
-                e.printStackTrace();
             }
         }
         return result;

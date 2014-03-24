@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -76,6 +77,10 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         });
         previousConfigurations = new HashMap<String, SwissTimingArchiveConfigurationDTO>();
         getConnectionHistory();
+
+        jsonUrlBox = new TextBox();
+        jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
+
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -88,22 +93,16 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
         
-        verticalPanel.setWidth("100%");
-        
-        grid = new Grid(4, 2);
+        grid = new Grid(3, 2);
         verticalPanel.add(grid);
-        verticalPanel.setCellWidth(grid, "100%");
 
-        Label jsonUrlLabel = new Label(stringMessages.jsonUrl());
-        grid.setWidget(0, 0, jsonUrlLabel);
-        grid.setWidget(1, 0, previousConfigurationsComboBox);
-        Label connection = new Label(stringMessages.historyOfConnections());
-        grid.setWidget(2, 0, connection);
-        jsonUrlBox = new TextBox();
-        jsonUrlBox.setWidth("50em");
-        grid.setWidget(3, 0, jsonUrlBox);
+        grid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
+        grid.setWidget(0, 1, previousConfigurationsComboBox);
+        grid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
+        grid.setWidget(1, 1, jsonUrlBox);
+
         Button btnListRaces = new Button(stringMessages.listRaces());
-        grid.setWidget(3, 1, btnListRaces);
+        grid.setWidget(2, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

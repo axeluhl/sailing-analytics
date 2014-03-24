@@ -15,17 +15,13 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
     
-    Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException;
+    Race getRace();
     
     Course getCourse(String raceID) throws UnknownHostException, IOException, InterruptedException;
     
-    boolean hasCourse(String raceID);
-
     StartList getStartList(String raceID) throws UnknownHostException, IOException, InterruptedException;
 
-    boolean hasStartlist(String raceID);
-
-    TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException;
+    TimePoint getStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException;
     
     Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
@@ -50,15 +46,7 @@ public interface SailMasterConnector {
      * Adds the listener and ensures that the connector is actually connected, even if no request has explicitly
      * been sent, so that the connector will at least receive spontaneous events.
      */
-    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException;
-    
-    /**
-     * Like {@link #addSailMasterListener(SailMasterListener)}, but only forwards race-specific events for the
-     * race identified by <code>raceID</code> to the <code>listener</code>. Clients still need to call
-     * {@link #trackRace(String)} with the <code>raceID</code> to make the connector actually receive the
-     * events for that race.
-     */
-    void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException;
+    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
     
     void removeSailMasterListener(SailMasterListener listener);
 
@@ -88,12 +76,6 @@ public interface SailMasterConnector {
      * @throws IOException 
      */
     void stop() throws IOException;
-
-    void trackRace(String raceID) throws ParseException;
-
-    void stopTrackingRace(String raceID);
-
-    void removeSailMasterListener(String raceID, SailMasterListener listener);
 
     boolean isStopped();
 }
