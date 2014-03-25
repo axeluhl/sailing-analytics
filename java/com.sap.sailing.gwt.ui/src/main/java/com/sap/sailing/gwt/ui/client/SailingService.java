@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -82,7 +83,7 @@ public interface SailingService extends RemoteService {
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword) throws Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+            boolean trackWind, boolean correctWindByDeclination) throws Exception;
     
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
@@ -207,11 +208,9 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
 
-    List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
+    SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws Exception;
 
-    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
-
-    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port);
 
     String[] getCountryCodes();
     

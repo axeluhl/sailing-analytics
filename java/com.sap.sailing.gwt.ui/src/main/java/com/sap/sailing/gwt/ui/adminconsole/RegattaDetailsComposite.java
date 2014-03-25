@@ -314,7 +314,7 @@ public class RegattaDetailsComposite extends Composite {
             }
             racesToRemove.append(raceColumnToRemove);
         }
-        if (Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
+        if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd,
                     new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                         @Override

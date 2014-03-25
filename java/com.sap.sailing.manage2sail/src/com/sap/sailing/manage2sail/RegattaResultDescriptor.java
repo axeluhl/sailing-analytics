@@ -1,7 +1,9 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.manage2sail;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.sap.sailing.domain.common.CompetitorGenderType;
 
@@ -18,7 +20,12 @@ public class RegattaResultDescriptor {
     private URL htmlUrl;
     private Date publishedAt;
     private Boolean isFinal;
+    private List<RaceResultDescriptor> raceResults;
 
+    public RegattaResultDescriptor() {
+        raceResults = new ArrayList<RaceResultDescriptor>();
+    }
+    
     public String getId() {
         return id;
     }
@@ -90,5 +97,13 @@ public class RegattaResultDescriptor {
     }
     public void setCompetitorGenderType(CompetitorGenderType competitorGenderType) {
         this.competitorGenderType = competitorGenderType;
+    }
+
+    public List<RaceResultDescriptor> getRaceResults() {
+        return raceResults;
+    }
+
+    public void setRaceResults(List<RaceResultDescriptor> raceResults) {
+        this.raceResults = raceResults;
     }
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -70,6 +71,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     }
     
     @Test
+    @Ignore("We have to use a smaller leaderboard with 1 short race and a small amount of competitors because of the perfomance of the test")
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);
         LeaderboardTablePO leaderboardTabel = leaderboard.getLeaderboardTable();
