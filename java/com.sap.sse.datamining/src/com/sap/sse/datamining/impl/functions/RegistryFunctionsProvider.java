@@ -44,12 +44,8 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         typesToCheck.add(dataType);
         for (int i = 0; i <= depth; i++) {
             for (Class<?> type : typesToCheck) {
-                for (Function<?> function : getFunctionsFor(type)) {
-                    if (function.isDimension()) {
-                        dimensions.add(function);
-                    }
-                    typesToAdd.add(function.getReturnType());
-                }
+                dimensions.addAll(getDimensionsFor(type));
+                typesToAdd.addAll(getReturnTypesOfFunctionsFor(type));
             }
             typesToCheck.clear();
             typesToCheck.addAll(typesToAdd);
@@ -58,6 +54,14 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         return dimensions;
     }
     
+    private Collection<Class<?>> getReturnTypesOfFunctionsFor(Class<?> type) {
+        Collection<Class<?>> returnTypes = new HashSet<>();
+        for (Function<?> function : getFunctionsFor(type)) {
+            returnTypes.add(function.getReturnType());
+        }
+        return returnTypes;
+    }
+
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
         return filterForDeclaringType(functionRegistry.getAllFunctions(), sourceType);
