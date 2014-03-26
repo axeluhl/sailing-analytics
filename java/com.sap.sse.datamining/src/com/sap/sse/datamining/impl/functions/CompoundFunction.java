@@ -37,8 +37,8 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     }
 
     @Override
-    public Class<?> getDeclaringClass() {
-        return getFirstFunction().getDeclaringClass();
+    public Class<?> getDeclaringType() {
+        return getFirstFunction().getDeclaringType();
     }
 
     @Override

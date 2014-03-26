@@ -36,6 +36,29 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     }
     
     @Override
+    public Collection<Function<?>> getTransitiveDimensionsFor(Class<?> dataType, int depth) {
+        Collection<Function<?>> dimensions = new HashSet<>();
+
+        Collection<Class<?>> typesToCheck = new HashSet<>();
+        Collection<Class<?>> typesToAdd = new HashSet<>();
+        typesToCheck.add(dataType);
+        for (int i = 0; i <= depth; i++) {
+            for (Class<?> type : typesToCheck) {
+                for (Function<?> function : getFunctionsFor(type)) {
+                    if (function.isDimension()) {
+                        dimensions.add(function);
+                    }
+                    typesToAdd.add(function.getReturnType());
+                }
+            }
+            typesToCheck.clear();
+            typesToCheck.addAll(typesToAdd);
+            typesToAdd.clear();
+        }
+        return dimensions;
+    }
+    
+    @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
         return filterForDeclaringType(functionRegistry.getAllRegisteredFunctions(), sourceType);
     }

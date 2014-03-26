@@ -32,7 +32,7 @@ public class FunctionDTOFactory {
     
     private static FunctionDTO createFunctionDTO(Function<?> function, String displayName) {
         String functionName = function.getSimpleName();
-        String sourceTypeName = function.getDeclaringClass().getSimpleName();
+        String sourceTypeName = function.getDeclaringType().getSimpleName();
         String returnTypeName = function.getReturnType().getSimpleName();
         List<String> parameterTypeNames = getParameterTypeNames(function);
         return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.isDimension());

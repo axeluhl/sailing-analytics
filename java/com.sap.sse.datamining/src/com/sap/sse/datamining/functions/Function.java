@@ -8,7 +8,7 @@ import com.sap.sse.datamining.shared.Unit;
 
 public interface Function<ReturnType> {
 
-    public Class<?> getDeclaringClass();
+    public Class<?> getDeclaringType();
     public Iterable<Class<?>> getParameters();
     public Class<ReturnType> getReturnType();
 

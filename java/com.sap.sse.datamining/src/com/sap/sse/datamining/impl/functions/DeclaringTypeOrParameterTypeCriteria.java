@@ -65,7 +65,7 @@ public class DeclaringTypeOrParameterTypeCriteria implements FilterCriteria<Func
     }
 
     public boolean isDeclaringTypeMatching(Function<?> function, Class<?> expectingType) {
-        return function.getDeclaringClass().equals(expectingType);
+        return function.getDeclaringType().equals(expectingType);
     }
 
 }

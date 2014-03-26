@@ -62,10 +62,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     private void putFunctionIntoMap(Function<?> function) {
-        if (!registeredFunctionsMappedByDeclaringClass.containsKey(function.getDeclaringClass())) {
-            registeredFunctionsMappedByDeclaringClass.put(function.getDeclaringClass(), new HashSet<Function<?>>());
+        if (!registeredFunctionsMappedByDeclaringClass.containsKey(function.getDeclaringType())) {
+            registeredFunctionsMappedByDeclaringClass.put(function.getDeclaringType(), new HashSet<Function<?>>());
         }
-        registeredFunctionsMappedByDeclaringClass.get(function.getDeclaringClass()).add(function);
+        registeredFunctionsMappedByDeclaringClass.get(function.getDeclaringType()).add(function);
     }
     
     @Override

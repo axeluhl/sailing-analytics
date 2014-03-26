@@ -50,7 +50,7 @@ public class TestCompoundFunction {
         assertThat(compoundFunction.isDimension(), is(true));
         //This is a workaround, because the assertion, that to types are equal checks for an instance of the given class instead.
         assertThat("The actual declaring class did'nt match the expected one.",
-                compoundFunction.getDeclaringClass().equals(MarkedContainer.class), is(true));
+                compoundFunction.getDeclaringType().equals(MarkedContainer.class), is(true));
         assertThat(compoundFunction.getSimpleName(), is("TestCompoundFunction"));
         assertThat(compoundFunction.getLocalizedName(Locale.ENGLISH, TestsUtil.getTestStringMessages()), is("TestCompoundFunction"));
         assertThat(compoundFunction.getResultUnit(), is(Unit.None));

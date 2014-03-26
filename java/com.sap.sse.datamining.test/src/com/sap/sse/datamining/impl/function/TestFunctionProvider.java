@@ -24,11 +24,13 @@ import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionR
 import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.test.function.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.test.function.test_classes.MarkedContainer;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
@@ -48,6 +50,8 @@ public class TestFunctionProvider {
         classesToScan.add(DataTypeWithContext.class);
         classesToScan.add(DataTypeWithContextProcessor.class);
         classesToScan.add(ExtendingInterface.class);
+        classesToScan.add(MarkedContainer.class);
+        classesToScan.add(ContainerElement.class);
         ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
@@ -114,6 +118,16 @@ public class TestFunctionProvider {
     public void testGetFunctionForNullDTO() {
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(null), is(nullValue()));
+    }
+    
+    @Test
+    public void testGetTransitiveDimension() throws ClassCastException, NoSuchMethodException, SecurityException {
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        
+        Collection<Function<?>> expectedDimensions = new HashSet<>();
+        expectedDimensions.add(FunctionFactory.createMethodWrappingFunction(ContainerElement.class.getMethod("getName",
+                new Class<?>[0])));
+        assertThat(functionProvider.getTransitiveDimensionsFor(MarkedContainer.class, 1), is(expectedDimensions));
     }
 
 }

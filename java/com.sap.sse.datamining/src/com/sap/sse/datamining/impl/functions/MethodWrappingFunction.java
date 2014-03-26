@@ -53,7 +53,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
-    public Class<?> getDeclaringClass() {
+    public Class<?> getDeclaringType() {
         return method.getDeclaringClass();
     }
     
@@ -112,7 +112,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
     }
 
     private String parametersAsString() {
