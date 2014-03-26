@@ -33,8 +33,8 @@ public class TestSimpleFunctionRegistryRegistrations {
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
-        assertThat(registry.getRegisteredFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
     
     @Test
@@ -46,7 +46,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod());
         expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMethodsOfExternalLibraryClass());
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
     }
 
     private void registerMethodsOfTestClassesViaFunctionRetrieversTo(FunctionRegistry registry) {
@@ -73,7 +73,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
     }
 
 }

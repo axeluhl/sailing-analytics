@@ -19,12 +19,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     
     private static final Logger LOGGER = Logger.getLogger(SimpleFunctionRegistry.class.getName());
     
-    private final Map<Class<?>, Collection<Function<?>>> registeredFunctionsMappedByDeclaringClass;
-    private final Collection<Function<?>> dimensions;
+    private final Map<Class<?>, Collection<Function<?>>> functionsMappedByDeclaringClass;
+    private final Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringClass;
 
     public SimpleFunctionRegistry() {
-        registeredFunctionsMappedByDeclaringClass = new HashMap<>();
-        dimensions = new HashSet<>();
+        functionsMappedByDeclaringClass = new HashMap<>();
+        dimensionsMappedByDeclaringClass = new HashMap<>();
     }
     
     @Override
@@ -52,39 +52,53 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     @Override
     public void register(Function<?> function) {
         putFunctionIntoMap(function);
-        addToDimensionsIfFunctionIsADimension(function);
-    }
-
-    private void addToDimensionsIfFunctionIsADimension(Function<?> function) {
-        if (function.isDimension()) {
-            dimensions.add(function);
-        }
+        putToDimensionsIfFunctionIsADimension(function);
     }
 
     private void putFunctionIntoMap(Function<?> function) {
-        if (!registeredFunctionsMappedByDeclaringClass.containsKey(function.getDeclaringType())) {
-            registeredFunctionsMappedByDeclaringClass.put(function.getDeclaringType(), new HashSet<Function<?>>());
+        Class<?> key = function.getDeclaringType();
+        if (!functionsMappedByDeclaringClass.containsKey(key)) {
+            functionsMappedByDeclaringClass.put(key, new HashSet<Function<?>>());
         }
-        registeredFunctionsMappedByDeclaringClass.get(function.getDeclaringType()).add(function);
+        functionsMappedByDeclaringClass.get(key).add(function);
+    }
+
+    private void putToDimensionsIfFunctionIsADimension(Function<?> function) {
+        if (function.isDimension()) {
+            Class<?> key = function.getDeclaringType();
+            if (!dimensionsMappedByDeclaringClass.containsKey(key)) {
+                dimensionsMappedByDeclaringClass.put(key, new HashSet<Function<?>>());
+            }
+            dimensionsMappedByDeclaringClass.get(key).add(function);
+        }
     }
     
     @Override
-    public Collection<Function<?>> getAllRegisteredFunctions() {
-        Set<Function<?>> registeredMethods = new HashSet<>();
-        for (Collection<Function<?>> registeredMethodsOfClass : registeredFunctionsMappedByDeclaringClass.values()) {
-            registeredMethods.addAll(registeredMethodsOfClass);
-        }
-        return registeredMethods;
+    public Collection<Function<?>> getAllFunctions() {
+        return collectAllFunctionsIn(functionsMappedByDeclaringClass);
     }
     
     @Override
-    public Iterable<Function<?>> getRegisteredFunctionsOf(Class<?> declaringClass) {
-        return registeredFunctionsMappedByDeclaringClass.get(declaringClass);
+    public Iterable<Function<?>> getFunctionsOf(Class<?> declaringClass) {
+        return functionsMappedByDeclaringClass.get(declaringClass);
     }
     
     @Override
     public Collection<Function<?>> getAllDimensions() {
-        return dimensions;
+        return collectAllFunctionsIn(dimensionsMappedByDeclaringClass);
+    }
+    
+    @Override
+    public Iterable<Function<?>> getDimensionsOf(Class<?> declaringClass) {
+        return dimensionsMappedByDeclaringClass.get(declaringClass);
+    }
+
+    private Collection<Function<?>> collectAllFunctionsIn(Map<Class<?>, Collection<Function<?>>> functionsMap) {
+        Set<Function<?>> registeredMethods = new HashSet<>();
+        for (Collection<Function<?>> registeredMethodsOfClass : functionsMap.values()) {
+            registeredMethods.addAll(registeredMethodsOfClass);
+        }
+        return registeredMethods;
     }
 
 }

@@ -60,7 +60,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return filterForDeclaringType(functionRegistry.getAllRegisteredFunctions(), sourceType);
+        return filterForDeclaringType(functionRegistry.getAllFunctions(), sourceType);
     }
     
     private Collection<Function<?>> filterForDeclaringType(Collection<Function<?>> functions, Class<?> sourceType) {
@@ -96,7 +96,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionDTOFilterCriteria(functionDTO);
         ParallelFilter<Function<?>> functionMatchesDTOFilter = createFilterForCriteria(functionDTOFilterCriteria);
         
-        Collection<Function<?>> functionsMatchingDTO = executeFilter(functionMatchesDTOFilter, functionRegistry.getAllRegisteredFunctions());
+        Collection<Function<?>> functionsMatchingDTO = executeFilter(functionMatchesDTOFilter, functionRegistry.getAllFunctions());
         if (moreThanOneFunctionMatchedDTO(functionsMatchingDTO)) {
             logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
         }

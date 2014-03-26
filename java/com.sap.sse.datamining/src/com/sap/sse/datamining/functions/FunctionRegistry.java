@@ -10,8 +10,9 @@ public interface FunctionRegistry {
     public void registerFunctionsRetrievedBy(ParallelFunctionRetriever functionRetriever);
     public void registerAll(Iterable<Function<?>> functions);
 
-    public Collection<Function<?>> getAllRegisteredFunctions();
-    public Iterable<Function<?>> getRegisteredFunctionsOf(Class<?> declaringClass);
+    public Collection<Function<?>> getAllFunctions();
+    public Iterable<Function<?>> getFunctionsOf(Class<?> declaringClass);
     public Collection<Function<?>> getAllDimensions();
+    public Iterable<Function<?>> getDimensionsOf(Class<?> declaringClass);
 
 }
