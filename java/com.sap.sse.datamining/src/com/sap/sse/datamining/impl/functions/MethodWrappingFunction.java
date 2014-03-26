@@ -2,9 +2,7 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -12,16 +10,12 @@ import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
-    private Method method;
-    
-    private String messageKey;
-    private int resultDecimals;
-    private Unit resultUnit;
+    private final Method method;
+    private Class<ReturnType> returnType;
+    private AdditionalFunctionData additionalData;
     
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
@@ -32,6 +26,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         checkThatReturnTypesMatch(method, returnType);
         
         this.method = method;
+        this.returnType = returnType;
         initializeAdditionalData();
     }
 
@@ -48,14 +43,12 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     private void initializeAdditionalData() {
         if (method.getAnnotation(Dimension.class) != null) {
-            messageKey = method.getAnnotation(Dimension.class).messageKey();
-            resultUnit = method.getAnnotation(Dimension.class).resultUnit();
-            resultDecimals = method.getAnnotation(Dimension.class).resultDecimals();
+            Dimension dimensionData = method.getAnnotation(Dimension.class);
+            additionalData = new AdditionalFunctionData(dimensionData.messageKey(), dimensionData.resultUnit(), dimensionData.resultDecimals());
         }
         if (method.getAnnotation(SideEffectFreeValue.class) != null) {
-            messageKey = method.getAnnotation(SideEffectFreeValue.class).messageKey();
-            resultUnit = method.getAnnotation(SideEffectFreeValue.class).resultUnit();
-            resultDecimals = method.getAnnotation(SideEffectFreeValue.class).resultDecimals();
+            SideEffectFreeValue valueData = method.getAnnotation(SideEffectFreeValue.class);
+            additionalData = new AdditionalFunctionData(valueData.messageKey(), valueData.resultUnit(), valueData.resultDecimals());
         }
     }
 
@@ -67,6 +60,11 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     @Override
     public Iterable<Class<?>> getParameters() {
         return Arrays.asList(method.getParameterTypes());
+    }
+    
+    @Override
+    public Class<ReturnType> getReturnType() {
+        return returnType;
     }
     
     @Override
@@ -87,50 +85,29 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public Unit getResultUnit() {
-        return resultUnit;
+        return additionalData.getResultUnit();
     }
 
     @Override
     public int getResultDecimals() {
-        return resultDecimals;
+        return additionalData.getResultDecimals();
     }
 
     @Override
-    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (messageKey == null || messageKey.isEmpty()) {
-            return getMethodName();
-        }
-        return stringMessages.get(locale, messageKey);
-    }
-    
-    private String getMethodName() {
+    public String getSimpleName() {
         return method.getName();
     }
     
     @Override
-    public FunctionDTO asDTO() {
-        return createDTO(getMethodName());
-    }
-
-    @Override
-    public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages) {
-        return createDTO(getLocalizedName(locale, stringMessages));
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        if (additionalData == null || additionalData.getMessageKey().isEmpty()) {
+            return getSimpleName();
+        }
+        return stringMessages.get(locale, additionalData.getMessageKey());
     }
     
-    private FunctionDTO createDTO(String displayName) {
-        String functionName = getMethodName();
-        String sourceTypeName = getDeclaringClass().getSimpleName();
-        String returnTypeName = method.getReturnType().getSimpleName();
-        List<String> parameterTypeNames = getParameterTypeNames();
-        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension());
-    }
-
-    private List<String> getParameterTypeNames() {
-        List<String> parameterTypeNames = new ArrayList<>();
-        for (Class<?> parameterType : method.getParameterTypes()) {
-            parameterTypeNames.add(parameterType.getSimpleName());
-        }
-        return parameterTypeNames;
+    private String getMethodName() {
+        return method.getName();
     }
 
     @Override

@@ -74,10 +74,14 @@ public class TestAbstractFilteringRetrievalProcessor {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
+        filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Integer>, Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;
+            }
+            @Override
+            protected Integer contextifyElement(Integer partialElement) {
+                return partialElement;
             }
         };
     }

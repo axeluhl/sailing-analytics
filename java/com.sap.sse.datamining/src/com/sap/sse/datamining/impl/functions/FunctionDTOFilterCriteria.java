@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.functions;
 
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -14,7 +15,7 @@ public class FunctionDTOFilterCriteria implements FilterCriteria<Function<?>> {
 
     @Override
     public boolean matches(Function<?> function) {
-        FunctionDTO functionDTO = function.asDTO();
+        FunctionDTO functionDTO = FunctionDTOFactory.createFunctionDTO(function);
         return functionDTOToMatch.equals(functionDTO);
     }
 

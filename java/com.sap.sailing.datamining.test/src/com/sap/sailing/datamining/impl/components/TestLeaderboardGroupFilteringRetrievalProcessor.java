@@ -16,6 +16,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.datamining.data.LeaderboardGroupWithContext;
+import com.sap.sailing.datamining.impl.data.HasLeaderboardGroupContextImpl;
+import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContextImpl;
 import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -30,16 +34,17 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
     private RacingEventService service;
     private Processor<RacingEventService> retriever;
     
-    private Collection<LeaderboardGroup> retrievedGroups;
+    private Collection<LeaderboardGroupWithContext> retrievedGroups;
     
     @Before
     public void initializeComponents() {
         service = mock(RacingEventService.class);
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
-        
-        Processor<LeaderboardGroup> receiver = new Processor<LeaderboardGroup>() {
+
+        retrievedGroups = new HashSet<>();
+        Processor<LeaderboardGroupWithContext> receiver = new Processor<LeaderboardGroupWithContext>() {
             @Override
-            public void onElement(LeaderboardGroup element) {
+            public void onElement(LeaderboardGroupWithContext element) {
                 retrievedGroups.add(element);
             }
             @Override
@@ -54,10 +59,10 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
             }
         };
         
-        FilterCriteria<LeaderboardGroup> criteria = new FilterCriteria<LeaderboardGroup>() {
+        FilterCriteria<LeaderboardGroupWithContext> criteria = new FilterCriteria<LeaderboardGroupWithContext>() {
             @Override
-            public boolean matches(LeaderboardGroup element) {
-                String name = element.getName();
+            public boolean matches(LeaderboardGroupWithContext element) {
+                String name = element.getLeaderboardGroupName();
                 return name == "LG1" || name == "LG2" || name == "LG3";
             }
         };
@@ -80,18 +85,23 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
         retriever.onElement(service);
         retriever.finish();
         
-        Collection<LeaderboardGroup> expectedGroups = getExpectedRetrievedGroups();
+        Collection<LeaderboardGroupWithContext> expectedGroups = getExpectedRetrievedGroups();
         assertThat(retrievedGroups, is(expectedGroups));
     }
 
-    private Collection<LeaderboardGroup> getExpectedRetrievedGroups() {
-        Collection<LeaderboardGroup> groups = new HashSet<>();
-        groups.add(new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>()));
-        groups.add(new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>()));
+    private Collection<LeaderboardGroupWithContext> getExpectedRetrievedGroups() {
+        Collection<LeaderboardGroupWithContext> groups = new HashSet<>();
+        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>())));
+        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>())));
+        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>())));
+        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>())));
+        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>())));
         return groups;
+    }
+
+    private LeaderboardGroupWithContext groupToGroupWithContext(LeaderboardGroupImpl leaderboardGroup) {
+        HasLeaderboardGroupContext context = new HasLeaderboardGroupContextImpl(leaderboardGroup);
+        return new LeaderboardGroupWithContextImpl(context);
     }
 
 }

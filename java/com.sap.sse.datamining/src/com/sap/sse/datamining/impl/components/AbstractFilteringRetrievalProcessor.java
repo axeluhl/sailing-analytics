@@ -10,10 +10,10 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 
-public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType> 
-             extends AbstractPartitioningParallelProcessor<InputType, ResultType, ResultType> {
+public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType, ResultTypeWithContext> 
+             extends AbstractPartitioningParallelProcessor<InputType, ResultType, ResultTypeWithContext> {
 
-    private final FilterCriteria<ResultType> criteria;
+    private final FilterCriteria<ResultTypeWithContext> criteria;
     
     private Lock retrievedDataAmountLock;
     private int retrievedDataAmount;
@@ -22,7 +22,7 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType>
     private int filteredDataAmount;
 
     public AbstractFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<ResultType>> resultReceivers, FilterCriteria<ResultType> criteria) {
+            Collection<Processor<ResultTypeWithContext>> resultReceivers, FilterCriteria<ResultTypeWithContext> criteria) {
         super(executor, resultReceivers);
         this.criteria = criteria;
         retrievedDataAmountLock = new ReentrantLock();
@@ -37,19 +37,22 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType>
     protected abstract Iterable<ResultType> retrieveData(InputType element);
     
     @Override
-    protected Callable<ResultType> createInstruction(final ResultType partialElement) {
-        return new Callable<ResultType>() {
+    protected Callable<ResultTypeWithContext> createInstruction(final ResultType partialElement) {
+        return new Callable<ResultTypeWithContext>() {
             @Override
-            public ResultType call() throws Exception {
+            public ResultTypeWithContext call() throws Exception {
                 incrementRetrievedDataAmount();
-                if (criteria.matches(partialElement)) {
+                ResultTypeWithContext elementWithContext = contextifyElement(partialElement);
+                if (criteria.matches(elementWithContext)) {
                     incrementFilteredDataAmount();
-                    return partialElement;
+                    return elementWithContext;
                 }
                 return createInvalidResult();
             }
         };
     }
+
+    protected abstract ResultTypeWithContext contextifyElement(ResultType partialElement);
 
     private void incrementRetrievedDataAmount() {
         retrievedDataAmountLock.lock();

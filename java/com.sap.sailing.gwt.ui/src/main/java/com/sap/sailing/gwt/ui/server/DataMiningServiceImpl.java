@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.datamining.client.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.QueryResult;
@@ -79,7 +80,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions) {
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(function.asDTO());
+            functionDTOs.add(FunctionDTOFactory.createFunctionDTO(function));
         }
         return functionDTOs;
     }

@@ -12,6 +12,7 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.factories.FunctionDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
@@ -91,7 +92,7 @@ public class TestFunctionProvider {
     public void testGetFunctionForDTO() {
         Method getRegattaNameMethod = FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName");
         Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
-        FunctionDTO getRegattaNameDTO = getRegattaName.asDTO(Locale.ENGLISH, stringMessages);
+        FunctionDTO getRegattaNameDTO = FunctionDTOFactory.createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
@@ -103,7 +104,7 @@ public class TestFunctionProvider {
     public void testGetFunctionForUnregisteredDTO() {
         Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
         Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
-        FunctionDTO incrementDTO = increment.asDTO(Locale.ENGLISH, stringMessages);
+        FunctionDTO incrementDTO = FunctionDTOFactory.createFunctionDTO(increment, Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(incrementDTO), is(nullValue()));
