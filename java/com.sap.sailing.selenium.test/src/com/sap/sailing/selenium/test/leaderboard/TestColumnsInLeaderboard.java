@@ -3,11 +3,9 @@ package com.sap.sailing.selenium.test.leaderboard;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -30,48 +28,37 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.Leaderboard
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
-    private static final String IDM_5O5_2013_JSON_URL =
-            "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
+    private static final String KIELER_WOCHE_2013_JSON_URL =
+            "http://secondary.traclive.dk/events/event_20130621_KielerWoch/jsonservice.php"; //$NON-NLS-1$
     
-    private static final String REGATTA = "IDM 2013"; //$NON-NLS-1$
+    private static final String REGATTA = "KW 2013 Offshore Kaiser-Pokal"; //$NON-NLS-1$
     
-    private static final String LEADERBOARD = "IDM 2013 (505)"; //$NON-NLS-1$
+    private static final String LEADERBOARD = "KW 2013 Offshore Kaiser-Pokal (ORC)"; //$NON-NLS-1$
     
-    private static final String EVENT = "IDM 5O5 2013"; //$NON-NLS-1$
-    private static final String BOAT_CLASS = "505"; //$NON-NLS-1$
-    private static final String RACE = "Race %d"; //$NON-NLS-1$
+    private static final String EVENT = "Kieler Woche 2013"; //$NON-NLS-1$
+    private static final String BOAT_CLASS = "ORC"; //$NON-NLS-1$
+    private static final String RACE = "Kaiserpokal"; //$NON-NLS-1$
     
     private RegattaDescriptor regatta;
 
-    private List<TrackableRaceDescriptor> trackableRaces;
-    private List<TrackedRaceDescriptor> trackedRaces;
-    private List<RaceDescriptor> raceColumns;
+    private TrackableRaceDescriptor trackableRace;
+    private TrackedRaceDescriptor trackedRace;
+    private RaceDescriptor raceColumn;
     
     
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
-
-        this.trackableRaces = new ArrayList<>();
-        this.trackedRaces = new ArrayList<>();
-        this.raceColumns = new ArrayList<>();
         
-        for(int i = 1; i <= 2; i++) {
-            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  String.format(RACE, i), BOAT_CLASS);
-            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, String.format(RACE, i));
-            RaceDescriptor raceColumn = new RaceDescriptor(String.format("R%d", i), "Default", false, false, 0.0);
-            
-            this.trackableRaces.add(trackableRace);
-            this.trackedRaces.add(trackedRace);
-            this.raceColumns.add(raceColumn);
-        }
+        this.trackableRace = new TrackableRaceDescriptor(EVENT,  RACE, BOAT_CLASS);
+        this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
+        this.raceColumn = new RaceDescriptor("R1", "Default", false, false, 0.0);
         
         clearState(getContextRoot());
         configureLeaderboard();
     }
     
     @Test
-    @Ignore("We have to use a smaller leaderboard with 1 short race and a small amount of competitors because of the perfomance of the test")
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);
         LeaderboardTablePO leaderboardTabel = leaderboard.getLeaderboardTable();
@@ -101,12 +88,6 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
                     // NOTE: We have to resolve the headers again for the assertion since there should be more now
                     //       because of the expansion
                     assertThat(entries.get(0).getNumberOfColumns(), equalTo(leaderboardTabel.getColumnHeaders().size()));
-                    
-                    // TODO: Write matchers for this assertions
-                    //LeaderboardEntry emptyEntry = leaderboardTabel.getEntry("");
-                    //assertThat(emptyEntry, allColumnsEmpty());
-                    //LeaderboardEntry filledEntry = leaderboardTabel.getEntry("");
-                    //assertThat(emptyEntry, allColumnsFilled());
                 }
             }
         } while(stateHasChanged);
@@ -122,33 +103,24 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
-        seriesDialog.addRaces(1, 2);
+        seriesDialog.addRaces(1, 1);
         seriesDialog.pressOk();
         
         // Start the tracking for the races and wait until they are ready to use
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
+        tracTracEvents.listTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
-        tracTracEvents.startTrackingForRace(this.trackableRaces.get(0));
-        tracTracEvents.startTrackingForRace(this.trackableRaces.get(1));
+        tracTracEvents.startTrackingForRace(this.trackableRace);
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.TRACKING);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //trackedRacesList.stopTracking(this.trackedRaces);
-        trackedRacesList.stopTracking(this.trackedRaces.get(0));
-        trackedRacesList.stopTracking(this.trackedRaces.get(1));
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.TRACKING);
+        trackedRacesList.stopTracking(this.trackedRace);
         
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
-        leaderboardDetails.linkRace(this.raceColumns.get(0), this.trackedRaces.get(0));
-        leaderboardDetails.linkRace(this.raceColumns.get(1), this.trackedRaces.get(1));
+        leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
     }
 }
