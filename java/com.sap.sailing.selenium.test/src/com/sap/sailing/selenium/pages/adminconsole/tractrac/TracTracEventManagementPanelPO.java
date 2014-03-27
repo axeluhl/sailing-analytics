@@ -7,9 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
@@ -254,7 +256,9 @@ public class TracTracEventManagementPanelPO extends PageArea {
         
         this.startTrackingButton.click();
         
-        if(ExpectedConditions.alertIsPresent() == null)
+        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
+        
+        if(condition.apply(this.driver) == null)
             waitForAjaxRequests();
     }
     
