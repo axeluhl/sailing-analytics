@@ -19,10 +19,7 @@ import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.functions.PartitionParallelExternalFunctionRetriever;
-import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
@@ -32,7 +29,7 @@ public class DataMiningActivator implements BundleActivator {
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
 
     private static BundleContext context;
-    private static Collection<ServiceReference<ClassesWithFunctionsService>> serviceReferences; 
+    private static Collection<ServiceReference<ClassesWithFunctionsService>> serviceReferences;
     
     private static DataMiningServer dataMiningServer;
     private static DataMiningStringMessages stringMessages;
@@ -42,7 +39,6 @@ public class DataMiningActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         DataMiningActivator.context = context;
         serviceReferences = getAllClassesWithMarkedMethodsServices();
-        
         stringMessages = DataMiningStringMessages.Util.getDefaultStringMessages();
         executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
                                           new LinkedBlockingQueue<Runnable>());
@@ -59,7 +55,7 @@ public class DataMiningActivator implements BundleActivator {
     }
 
     private FunctionRegistry createAndBuildFunctionRegistry() {
-        FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry(getExecutor());
 
         Set<Class<?>> internalClassesWithMarkedMethods = new HashSet<>();
         Set<Class<?>> externalLibraryClasses = new HashSet<>();
@@ -77,7 +73,8 @@ public class DataMiningActivator implements BundleActivator {
             }
         }
         
-        registerFunctions(internalClassesWithMarkedMethods, externalLibraryClasses, functionRegistry);
+        functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesWithMarkedMethods);
+        functionRegistry.registerAllWithExternalFunctionPolicy(externalLibraryClasses);
         return functionRegistry;
     }
 
@@ -108,17 +105,6 @@ public class DataMiningActivator implements BundleActivator {
             }
         }
         return specificServiceReferences;
-    }
-
-    private void registerFunctions(Set<Class<?>> internalClassesWithMarkedMethods,
-            Set<Class<?>> externalLibraryClasses, FunctionRegistry functionRegistry) {
-        ParallelFunctionRetriever internalMarkedFunctionsRetriever = new PartitioningParallelMarkedFunctionRetriever(
-                internalClassesWithMarkedMethods, getExecutor());
-        functionRegistry.registerFunctionsRetrievedBy(internalMarkedFunctionsRetriever);
-
-        ParallelFunctionRetriever externalLibraryFunctionsRetriever = new PartitionParallelExternalFunctionRetriever(
-                externalLibraryClasses, getExecutor());
-        functionRegistry.registerFunctionsRetrievedBy(externalLibraryFunctionsRetriever);
     }
 
     @Override

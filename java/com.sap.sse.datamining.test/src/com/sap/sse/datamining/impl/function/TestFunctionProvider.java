@@ -17,10 +17,7 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.functions.PartitionParallelExternalFunctionRetriever;
-import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
@@ -32,6 +29,7 @@ import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.MarkedContainer;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 
@@ -43,22 +41,20 @@ public class TestFunctionProvider {
     
     @Before
     public void initializeFunctionRegistry() {
-        functionRegistry = new SimpleFunctionRegistry();
+        functionRegistry = new SimpleFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
         
-        Collection<Class<?>> classesToScan = new HashSet<>();
-        classesToScan.add(SimpleClassWithMarkedMethods.class);
-        classesToScan.add(DataTypeWithContext.class);
-        classesToScan.add(DataTypeWithContextProcessor.class);
-        classesToScan.add(ExtendingInterface.class);
-        classesToScan.add(MarkedContainer.class);
-        classesToScan.add(ContainerElement.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
-        functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
+        Collection<Class<?>> internalClassesToScan = new HashSet<>();
+        internalClassesToScan.add(SimpleClassWithMarkedMethods.class);
+        internalClassesToScan.add(DataTypeWithContext.class);
+        internalClassesToScan.add(DataTypeWithContextProcessor.class);
+        internalClassesToScan.add(ExtendingInterface.class);
+        internalClassesToScan.add(MarkedContainer.class);
+        internalClassesToScan.add(ContainerElement.class);
+        functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
-        Collection<Class<?>> externalClasses = new HashSet<>();
-        externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
-        functionRegistry.registerFunctionsRetrievedBy(externalFunctionRetriever);
+        Collection<Class<?>> externalClassesToScan = new HashSet<>();
+        externalClassesToScan.add(ExternalLibraryClass.class);
+        functionRegistry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
 
     @Test
