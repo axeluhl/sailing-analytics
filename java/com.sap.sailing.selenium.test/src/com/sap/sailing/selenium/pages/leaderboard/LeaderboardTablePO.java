@@ -37,7 +37,7 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
         }
         
         public String getCompetitor() {
-            return getColumnContent(COMPETITOR_COLUMN).trim();
+            return getColumnContent(COMPETITOR_COLUMN);
         }
         
         public String getName() {
@@ -45,22 +45,10 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
         }
         
         // Overall details
-//        public int getTotalSailedDistance() {
-//        }
-//        public void getAverageSpeedOverGround() {
-//        }
-//        public void getMaximumSpeedOverGround() {
-//        }
-//        public int getTotalSailingTime() {
-//        }
-//        public int getTotalDownwindTime() {
-//        }
-//        public int getTotalUpwindTime() {
-//        }
-//        public int getTotalReachingLegsTime() {
-//        }
+        // ...
         
         // Race details
+        // ...
         
         public Integer getPointsForRace(String race) {
             String points = getColumnContent(race);
@@ -77,18 +65,21 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
         }
         
         // Leg details
+        // ...
         
         public Integer getTotalPoints() {
             return Integer.valueOf(getColumnContent(TOTAL_POINTS_COLUMN));
         }
     }
     
-    // Needed style classes to find columns in different levels (children of expanded columns)
-    private static final String FIRST_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BLK";  //$NON-NLS-1$
-    private static final String SECOND_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BFL"; //$NON-NLS-1$
-    private static final String THIRD_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BHL";  //$NON-NLS-1$
+    // Style classes to find columns in different levels (children of expanded columns)
+    // We don't use the style classes for the second and third level at the moment, but they may be needed if more
+    // functionality is added to the page object soon.
+    //private static final String FIRST_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BLK";  //$NON-NLS-1$
+    //private static final String SECOND_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BFL"; //$NON-NLS-1$
+    //private static final String THIRD_LEVEL_COLUMN_STYLE_CLASS = ".GCKY0V4BHL";  //$NON-NLS-1$
     
-    private static final String RACE_COLUMN_STYLE_CLASS = ".GCKY0V4BML";  //$NON-NLS-1$
+    //private static final String RACE_COLUMN_STYLE_CLASS = ".GCKY0V4BML";  //$NON-NLS-1$
     
     private static final String EXPANDABLE_COLUMN_STYLE_CLASS = "openColumn"; //$NON-NLS-1$
     
@@ -108,8 +99,9 @@ public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
             "cDhQrVCu60JVVexGZVmC4zjMHwTB01w+dVlVVSZRFKmzg8VxDIIgPMT879hMAS+XCwMej8ffAXEcbNuG/X5P+j4" +  //$NON-NLS-1$
             "is34bBKzXa9JPsM/4D78ABqXmiURzXL4AAAAASUVORK5CYII=";
     
-    private static final String RACE_COLUMN_PREDICATE = CSSHelper.containsCSSClassesPredicate(FIRST_LEVEL_COLUMN_STYLE_CLASS,
-            RACE_COLUMN_STYLE_CLASS);
+    // QUESTION: Do we need this predicate in the RACE_COLUMN_XPATH and in the RACE_NAMES_XPATH?
+    //private static final String RACE_COLUMN_PREDICATE = CSSHelper.containsCSSClassesPredicate(FIRST_LEVEL_COLUMN_STYLE_CLASS,
+    //        RACE_COLUMN_STYLE_CLASS);
     
     private static final String RACE_COLUMN_XPATH = "./thead/tr/th[//*[@__gwt_header] and .//span[" +
             CSSHelper.containsCSSClassPredicate(RACE_NAME_STYLE_CLASS) + " and text() = '%s']]";

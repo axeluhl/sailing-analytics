@@ -102,11 +102,11 @@ public class LeaderboardPage extends HostPage {
         throw new RuntimeException("Can not determine auto refresh state"); //$NON-NLS-1$
     }
     
-    public void refreshOnes() {
+    public void refresh() {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         Long finishedCalls = (Long) executor.executeScript(
                 "return window.PENDING_AJAX_CALLS.numberOfFinishedCalls(arguments[0])", "loadLeaderboardData");
-        System.out.println(finishedCalls.intValue());
+        
         this.playAndPauseAnchor.click();
         
         waitForAjaxRequestsExecuted("loadLeaderboardData", finishedCalls.intValue() + 1);
@@ -147,15 +147,8 @@ public class LeaderboardPage extends HostPage {
         checkbox.setSelected(false);
     }
     
-    
-    
-//    public Chart getCompetitorChart() {
-//        return new Chart(this.driver, findElementBySeleniumId("CompetitorChart"));
-//    }
-
-//    public void setAutoRefreshEnabled(boolean enabled) {
-//        if(isAutoRefreshEnabled() != enabled)
-//            this.autoRefreshToggleButton.click();
+//    public LineChart getCompetitorChart() {
+//        return new LineChart(this.driver, findElementBySeleniumId("CompetitorChart"));
 //    }
     
     @Override
