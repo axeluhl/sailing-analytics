@@ -30,7 +30,8 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     @Override
     public Widget initWidget() {
         expandedValuesGrid = new Grid(0, 2);
-
+        expandedValuesGrid.ensureDebugId("ExpandedValuesGrid");
+        
         VerticalPanel panel = new VerticalPanel();
         panel.add(createAddWidget());
         panel.add(expandedValuesGrid);
@@ -55,6 +56,7 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
 
         if (canRemoveItems) {
             PushButton removeButton = new PushButton(new Image(removeImage));
+            removeButton.ensureDebugId("RemoveButton");
             removeButton.setTitle(stringMessages.remove());
             removeButton.addClickHandler(new ClickHandler() {
     
@@ -66,7 +68,6 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
             });
             expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
         }
-
         expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(rowIndex, newValue));
     }
 
