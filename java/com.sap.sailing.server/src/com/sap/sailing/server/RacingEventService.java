@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -59,7 +60,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -341,8 +341,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param publicationUrl
-     *            The publication URL of the new event
+     * @param startDate
+     *            The start date of the event
+     * @param endDate
+     *            The end date of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param id
@@ -351,7 +353,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, UUID id);
+    Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
@@ -359,10 +361,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param id TODO
      * @param eventName
      *            The name of the event to update
+     * @param startDate
+     *            The start date of the event
+     * @param endDate
+     *            The end date of the event
      * @param venueName
      *            The name of the venue of the event
-     * @param publicationUrl
-     *            The publication URL of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param regattaNames
@@ -370,7 +374,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -444,10 +448,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
-    void setRegattaForRace(Regatta regatta, String raceIdAsString);
-
-    Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
+    Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
             UUID id);
+
+    void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
@@ -489,13 +493,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param startTime the new Start-Time
      * @return
      */
-    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
+    TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
+     * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     
@@ -524,7 +528,4 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
 
     void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
-
-    void replicateDataImportOperation(ImportMasterDataOperation op);
-
 }

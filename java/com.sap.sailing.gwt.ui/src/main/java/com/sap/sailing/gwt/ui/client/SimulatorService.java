@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
@@ -22,7 +21,6 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 
-@RemoteServiceRelativePath("simulator")
 public interface SimulatorService extends RemoteService {
 
     PositionDTO[] getRaceLocations();

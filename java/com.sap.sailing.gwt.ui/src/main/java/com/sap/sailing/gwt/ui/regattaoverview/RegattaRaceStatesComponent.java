@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -48,7 +49,6 @@ import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 /**
  * This component shows a table displaying the current state of races for a given event. 
@@ -184,27 +185,27 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getRaceStateEntriesForRaceGroup(eventId, settings.getVisibleCourseAreas(), settings.getVisibleRegattas(), 
-                settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(), new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
-
-            @Override
-            protected void handleFailure(Throwable cause) {
-
-            }
-
-            @Override
-            protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
-                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                Date serverTimeDuringRequest = null;
-                for (RegattaOverviewEntryDTO entryDTO : result) {
-                    if (entryDTO.currentServerTime != null) {
-                        serverTimeDuringRequest = entryDTO.currentServerTime;
-                    }
-                }
-                updateTable(result);
-                timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-            }
-
-        });
+                settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(),
+                new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
+                        new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
+                            @Override
+                            public void onFailure(Throwable cause) {
+                
+                            }
+                
+                            @Override
+                            public void onSuccess(List<RegattaOverviewEntryDTO> result) {
+                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                Date serverTimeDuringRequest = null;
+                                for (RegattaOverviewEntryDTO entryDTO : result) {
+                                    if (entryDTO.currentServerTime != null) {
+                                        serverTimeDuringRequest = entryDTO.currentServerTime;
+                                    }
+                                }
+                                updateTable(result);
+                                timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+                            }
+                        }));
     }
 
     private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {

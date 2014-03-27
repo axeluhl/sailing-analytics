@@ -23,17 +23,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -42,6 +39,9 @@ import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHa
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class RegattaOverviewPanel extends SimplePanel {
     private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
@@ -230,26 +230,27 @@ public class RegattaOverviewPanel extends SimplePanel {
         if (showLeaderboard) {
             final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
             final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
-            sailingService.getLeaderboardsByEvent(eventDTO, new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-                @Override
-                public void onSuccess(List<StrippedLeaderboardDTO> result) {
-                    leaderboardsTabPanel.clear();
-                    for (StrippedLeaderboardDTO leaderboard : result) {
-                        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
-                                new AsyncActionsExecutor(), leaderboardSettings, 
-                                /*preSelectedRace*/null, 
-                                competitorSelectionProvider, 
-                                null, leaderboard.name, 
-                                errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
-                        leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
-                    }
-                    leaderboardsTabPanel.setVisible(true);
-                    leaderboardsTabPanel.selectTab(0);
-                }
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-            });
+            sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
+                    new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+                        @Override
+                        public void onSuccess(List<StrippedLeaderboardDTO> result) {
+                            leaderboardsTabPanel.clear();
+                            for (StrippedLeaderboardDTO leaderboard : result) {
+                                LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
+                                        new AsyncActionsExecutor(), leaderboardSettings, 
+                                        /*preSelectedRace*/null, 
+                                        competitorSelectionProvider, 
+                                        null, leaderboard.name, 
+                                        errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
+                                leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+                            }
+                            leaderboardsTabPanel.setVisible(true);
+                            leaderboardsTabPanel.selectTab(0);
+                        }
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+                    }));
         } else {
             leaderboardsTabPanel.clear();
             leaderboardsTabPanel.setVisible(false);
@@ -275,23 +276,23 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveEvent() {
-        sailingService.getEventById(eventId, new MarkedAsyncCallback<EventDTO>() {
-
-            @Override
-            protected void handleFailure(Throwable cause) {
-                settingsButton.setEnabled(false);
-                errorReporter.reportError("Error trying to load event with id " + eventId + " : "
-                        + cause.getMessage());
-            }
-
-            @Override
-            protected void handleSuccess(EventDTO result) {
-                if (result != null) {
-                    setEvent(result);
-                    loadLeaderboard();
-                }
-            }
-        });
+        sailingService.getEventById(eventId, new MarkedAsyncCallback<EventDTO>(
+                new AsyncCallback<EventDTO>() {
+                    @Override
+                    public void onFailure(Throwable cause) {
+                        settingsButton.setEnabled(false);
+                        errorReporter.reportError("Error trying to load event with id " + eventId + " : "
+                                + cause.getMessage());
+                    }
+        
+                    @Override
+                    public void onSuccess(EventDTO result) {
+                        if (result != null) {
+                            setEvent(result);
+                            loadLeaderboard();
+                        }
+                    }
+                }));
     }
     
     private void fillEventAndVenueName() {
@@ -313,22 +314,22 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveRegattaStructure() {
-        sailingService.getRegattaStructureForEvent(eventId, new MarkedAsyncCallback<List<RaceGroupDTO>>() {
-
-            @Override
-            protected void handleFailure(Throwable cause) {
-                errorReporter.reportError("Error trying to load regattas for event with id " + eventId + " : "
-                        + cause.getMessage());
-            }
-
-            @Override
-            protected void handleSuccess(List<RaceGroupDTO> result) {
-                if (result != null) {
-                    setRaceGroups(result);
-                }
-            }
-            
-        });
+        sailingService.getRegattaStructureForEvent(eventId, new MarkedAsyncCallback<List<RaceGroupDTO>>(
+                new AsyncCallback<List<RaceGroupDTO>>() {
+                    @Override
+                    public void onFailure(Throwable cause) {
+                        errorReporter.reportError("Error trying to load regattas for event with id " + eventId + " : "
+                                + cause.getMessage());
+                    }
+        
+                    @Override
+                    public void onSuccess(List<RaceGroupDTO> result) {
+                        if (result != null) {
+                            setRaceGroups(result);
+                        }
+                    }
+                    
+                }));
     }
 
     protected void setRaceGroups(List<RaceGroupDTO> result) {

@@ -8,16 +8,15 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetLeaderboardDataEntriesAction extends DefaultAsyncAction<List<Triple<String, List<CompetitorDTO>, List<Double>>>> {
+public class GetLeaderboardDataEntriesAction implements AsyncAction<List<Triple<String, List<CompetitorDTO>, List<Double>>>> {
     private final SailingServiceAsync sailingService;
     private final DetailType detailType;
     private final String leaderboardName;
     private final Date date;
     
-    public GetLeaderboardDataEntriesAction(SailingServiceAsync sailingService, String leaderboardName, Date date, DetailType detailType,
-            AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback) {
-        super(callback);
+    public GetLeaderboardDataEntriesAction(SailingServiceAsync sailingService, String leaderboardName, Date date, DetailType detailType) {
         this.sailingService = sailingService;
         this.leaderboardName = leaderboardName;
         this.date = date;
@@ -25,8 +24,7 @@ public class GetLeaderboardDataEntriesAction extends DefaultAsyncAction<List<Tri
     }
 
     @Override
-    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        sailingService.getLeaderboardDataEntriesForAllRaceColumns(leaderboardName, date, detailType, 
-                (AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>>) getWrapperCallback(asyncActionsExecutor));
+    public void execute(AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback) {
+        sailingService.getLeaderboardDataEntriesForAllRaceColumns(leaderboardName, date, detailType, callback);
     }
 }

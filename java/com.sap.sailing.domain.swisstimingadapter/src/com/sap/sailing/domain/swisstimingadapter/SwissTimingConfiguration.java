@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 /**
- * Configuration parameters that can be used to connect to a SwissTiming event / race.
+ * Configuration parameters that can be used to connect to a SwissTiming event.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -9,9 +9,9 @@ package com.sap.sailing.domain.swisstimingadapter;
 public interface SwissTimingConfiguration {
     String getName();
     
+    String getJsonURL();
+    
     String getHostname();
     
     int getPort();
-    
-    boolean canSendRequests();
 }

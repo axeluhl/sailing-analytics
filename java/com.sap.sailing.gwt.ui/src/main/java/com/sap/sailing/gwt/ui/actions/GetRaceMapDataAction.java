@@ -10,8 +10,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
+public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
     private final SailingServiceAsync sailingService;
     private final Iterable<CompetitorDTO> allCompetitors;
     private final RegattaAndRaceIdentifier raceIdentifier;
@@ -20,10 +21,9 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     private final boolean extrapolate;
     private final Date date;
    
-    public GetRaceMapDataAction(SailingServiceAsync sailingService, Iterable<CompetitorDTO> allCompetitors, RegattaAndRaceIdentifier raceIdentifier,
-            Date date, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
-            boolean extrapolate, AsyncCallback<RaceMapDataDTO> callback) {
-        super(callback);
+    public GetRaceMapDataAction(SailingServiceAsync sailingService, Iterable<CompetitorDTO> allCompetitors,
+            RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate) {
         this.allCompetitors = allCompetitors;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -34,28 +34,28 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     }
     
     @Override
-    public void execute(final AsyncActionsExecutor asyncActionsExecutor) {
-        final AsyncCallback<RaceMapDataDTO> wrapperCallback = (AsyncCallback<RaceMapDataDTO>) getWrapperCallback(asyncActionsExecutor);
-        AsyncCallback<CompactRaceMapDataDTO> uncompactingCallback = new AsyncCallback<CompactRaceMapDataDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                wrapperCallback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(CompactRaceMapDataDTO result) {
-                wrapperCallback.onSuccess(result.getRaceMapDataDTO(allCompetitors));
-            }
-        };
+    public void execute(final AsyncCallback<RaceMapDataDTO> callback) {
         Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
         for (Map.Entry<CompetitorDTO, Date> fromEntry : from.entrySet()) {
             fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
         }
+        
         Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
         for (Map.Entry<CompetitorDTO, Date> toEntry : to.entrySet()) {
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
+        
         sailingService.getRaceMapData(raceIdentifier, date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                extrapolate, uncompactingCallback);
+                extrapolate, new AsyncCallback<CompactRaceMapDataDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(CompactRaceMapDataDTO result) {
+                        callback.onSuccess(result.getRaceMapDataDTO(allCompetitors));
+                    }
+                });
     }
 }

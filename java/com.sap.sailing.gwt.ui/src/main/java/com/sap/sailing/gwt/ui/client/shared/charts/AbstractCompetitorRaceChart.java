@@ -42,7 +42,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -57,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 /**
  * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
@@ -72,6 +72,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
  */
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
+    public static final String LODA_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    
     private static final int LINE_WIDTH = 1;
     
     private final Label noCompetitorsSelectedLabel;
@@ -218,7 +220,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
-                leaderboardGroupName, leaderboardName, new AsyncCallback<CompetitorsRaceDataDTO>() {
+                leaderboardGroupName, leaderboardName);
+        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LODA_COMPETITOR_CHART_DATA_CATEGORY,
+                new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
@@ -234,7 +238,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                             }
                         }
                     }
-
+        
                     @Override
                     public void onFailure(Throwable caught) {
                         hideLoading();
@@ -242,7 +246,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                                 timer.getPlayMode() == PlayModes.Live);
                     }
                 });
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
     }
     

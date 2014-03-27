@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -107,8 +106,6 @@ public class TrackedRacesListPO extends PageArea {
     private WebElement exportButton;
     
     //@FindBy(how = BySeleniumId.class, using = "ExportPopup")
-    
-    private static final Logger logger = Logger.getLogger(TrackedRacesListPO.class.getName());
     
     public TrackedRacesListPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -214,12 +211,10 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, int timeout) {
-        logger.info("Try to resolve status for races.");
         FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_POLLING_INTERVAL);
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
             public Object apply(List<TrackedRaceDescriptor> races) {
-                logger.info("Try to refresh and resolve status for races.");
                 try {
                     refresh();
                     

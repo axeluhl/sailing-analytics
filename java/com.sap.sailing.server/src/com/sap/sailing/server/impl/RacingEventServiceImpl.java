@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -93,6 +94,9 @@ import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -134,7 +138,6 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -602,13 +605,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(oldColumnName);
             if (raceColumn instanceof FlexibleRaceColumn) {
+                // remove race log under old identifier; the race log identifier changes
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    getMongoObjectFactory().removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                }
                 ((FlexibleRaceColumn) raceColumn).setName(newColumnName);
+                // store the race logs again under the new identifiers
+                storeRaceLogs(raceColumn);
                 updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Race column " + oldColumnName + " cannot be renamed");
             }
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    /**
+     * When a race column is renamed, its race log identifiers change. Therefore, the race logs need to be stored
+     * under the new identifier again to be consistent with the in-memory image again.
+     */
+    private void storeRaceLogs(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, getMongoObjectFactory());
+            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            raceLog.lockForRead();
+            try {
+                for (RaceLogEvent e : raceLog.getRawFixes()) {
+                    e.accept(storeVisitor);
+                }
+            } finally {
+                raceLog.unlockAfterRead();
+            }
         }
     }
 
@@ -654,7 +683,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
-        mongoObjectFactory.storeLeaderboard(leaderboard);
+        getMongoObjectFactory().storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 
@@ -1913,17 +1942,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
+    public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
         synchronized (eventsById) {
-            Event result = createEventWithoutReplication(eventName, venue, publicationUrl, isPublic, id);
-            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id));
+            Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
+            replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
             return result;
         }
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+        Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
                 throw new IllegalArgumentException("Event with ID " + result.getId()
@@ -1936,7 +1965,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void updateEvent(UUID id, String eventName, String venueName, String publicationUrl,
+    public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
             boolean isPublic, List<String> regattaNames) {
         synchronized (eventsById) {
             if (!eventsById.containsKey(id)) {
@@ -1944,14 +1973,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
             Event event = eventsById.get(id);
             event.setName(eventName);
-            event.setPublicationUrl(publicationUrl);
+            event.setStartDate(startDate);
+            event.setEndDate(endDate);
             event.setPublic(isPublic);
             event.getVenue().setName(venueName);
 
             // TODO need to update regattas if they are once linked to event objects
             mongoObjectFactory.storeEvent(event);
 
-            replicate(new UpdateEvent(id, eventName, venueName, publicationUrl, isPublic, regattaNames));
+            replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
         }
     }
 
@@ -2188,11 +2218,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
     
     @Override
-    public TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime) {
+    public TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
             return state.getStartTime();
         }
@@ -2212,11 +2243,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+    public Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
+            return new Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
         }
         return null;
     }
@@ -2297,10 +2328,4 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
         dataImportLock.setDeleteFromMapTimer(importOperationId);
     }
-
-    @Override
-    public void replicateDataImportOperation(ImportMasterDataOperation op) {
-        replicate(op);
-    }
-
 }

@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
     
@@ -69,7 +69,7 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
     
     public DeviceConfigurationCreateMatcherDialog(StringMessages stringMessages,
             Validator<DeviceConfigurationMatcherDTO> validator,
-            com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
         super("Create Device Configuration", "Specify for which devices the new configuration should apply", 
                 "Create", stringMessages.cancel(), validator, callback);
         this.devicesBoxes = new ArrayList<TextBox>();

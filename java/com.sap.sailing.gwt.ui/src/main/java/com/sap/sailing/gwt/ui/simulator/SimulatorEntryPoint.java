@@ -5,11 +5,13 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -18,7 +20,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
     private final String titleName = "Strategy Simulator";
 
-    private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
+    private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
     private int yRes = 20;
     private boolean autoUpdate = false;
@@ -36,6 +38,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        
+        registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        
         checkUrlParameters();
         createSimulatorPanel();
     }
@@ -129,7 +134,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes,
                 autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);

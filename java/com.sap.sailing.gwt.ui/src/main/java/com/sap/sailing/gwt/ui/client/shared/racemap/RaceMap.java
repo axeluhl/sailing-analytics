@@ -69,7 +69,6 @@ import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
@@ -105,9 +104,13 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+    public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
+    public static final String GET_WIND_DATA_CATEGORY = "getWindData";
+    
     private MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -426,108 +429,107 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     final int requestID = ++boatPositionRequestIDCounter;
 
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, new AsyncCallback<RaceMapDataDTO>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
-                  }
-
-                  @Override
-                  public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                    if (map != null && raceMapDataDTO != null) {
-                        quickRanks = raceMapDataDTO.quickRanks;
-                        // process response only if not received out of order
-                        if (startedProcessingRequestID < requestID) {
-                            startedProcessingRequestID = requestID;
-                            // Do boat specific actions
-                            Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                            long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
-                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this, timeForPositionTransitionMillis);
-                            showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                            showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
-                            if (douglasMarkers != null) {
-                                removeAllMarkDouglasPeuckerpoints();
-                            }
-                            if (maneuverMarkers != null) {
-                                removeAllManeuverMarkers();
-                            }
-                            
-                            // Do mark specific actions
-                            showCourseMarksOnMap(raceMapDataDTO.coursePositions);
-                            showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
-                            showStartAndFinishLines(raceMapDataDTO.coursePositions);
-                            showAdvantageLine(competitorsToShow, newTime);
-                                
-                            // Rezoom the map
-                            // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
-                            if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                                LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                                zoomMapToNewBounds(bounds);
-                                mapFirstZoomDone = true;
-                            } else if (!mapFirstZoomDone) { // Zoom once to the marks
-                                zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
-                                mapFirstZoomDone = true;
-                                /*
-                                 * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
-                                 * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
-                                 * triggered by the user. As a consequence the
-                                 * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
-                                 */
-                                // TODO bug 494: consider initial user-specific zoom settings
+                            newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
+                    asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY, new AsyncCallback<RaceMapDataDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
+                        }
+                        
+                        @Override
+                        public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
+                            if (map != null && raceMapDataDTO != null) {
+                                quickRanks = raceMapDataDTO.quickRanks;
+                                // process response only if not received out of order
+                                if (startedProcessingRequestID < requestID) {
+                                    startedProcessingRequestID = requestID;
+                                    // Do boat specific actions
+                                    Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
+                                    long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
+                                    fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this, timeForPositionTransitionMillis);
+                                    showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
+                                    showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
+                                    if (douglasMarkers != null) {
+                                        removeAllMarkDouglasPeuckerpoints();
+                                    }
+                                    if (maneuverMarkers != null) {
+                                        removeAllManeuverMarkers();
+                                    }
+                                    
+                                    // Do mark specific actions
+                                    showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                                    showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
+                                    showStartAndFinishLines(raceMapDataDTO.coursePositions);
+                                    showAdvantageLine(competitorsToShow, newTime);
+                                        
+                                    // Rezoom the map
+                                    // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
+                                    if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
+                                        LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                                        zoomMapToNewBounds(bounds);
+                                        mapFirstZoomDone = true;
+                                    } else if (!mapFirstZoomDone) { // Zoom once to the marks
+                                        zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
+                                        mapFirstZoomDone = true;
+                                        /*
+                                         * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
+                                         * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
+                                         * triggered by the user. As a consequence the
+                                         * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                                         */
+                                        // TODO bug 494: consider initial user-specific zoom settings
+                                    }
+                                }
+                            } else {
+                                lastTimeChangeBeforeInitialization = newTime;
                             }
                         }
-                    } else {
-                        lastTimeChangeBeforeInitialization = newTime;
-                    }
-                  }
-               });
-                    asyncActionsExecutor.execute(getRaceMapDataAction);
+                    });
+                    
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
-                        new AsyncCallback<WindInfoForRaceDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
-                                }
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames);
+                    asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
+                        }
 
-                                @Override
-                                public void onSuccess(WindInfoForRaceDTO windInfo) {
-                                    List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
-                                    if (windInfo != null) {
-                                        for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-                                            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                                            switch (windSource.getType()) {
-                                                case EXPEDITION:
-                                                    // we filter out measured wind sources with a very little confidence
-                                                    if (windTrackInfoDTO.minWindConfidence > 0.01) {
-                                                        windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
-                                                    }
-                                                    break;
-                                                case COMBINED:
-                                                    showCombinedWindOnMap(windSource, windTrackInfoDTO);
-                                                    if (windTrackInfoDTO != null) {
-                                                        lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
-                                                        showAdvantageLine(competitorsToShow, newTime);
-                                                    }
-                                                    break;
-                                            default:
-                                                // Which wind sources are requested is defined in a list above this
-                                                // action. So we throw here an exception to notice a missing source.
-                                                throw new UnsupportedOperationException(
-                                                        "There is currently no support for the enum value '"
-                                                                + windSource.getType() + "' in this method.");
+                        @Override
+                        public void onSuccess(WindInfoForRaceDTO windInfo) {
+                            List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
+                            if (windInfo != null) {
+                                for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                    WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+                                    switch (windSource.getType()) {
+                                        case EXPEDITION:
+                                            // we filter out measured wind sources with a very little confidence
+                                            if (windTrackInfoDTO.minWindConfidence > 0.01) {
+                                                windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
-                                        }
+                                            break;
+                                        case COMBINED:
+                                            showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                                            if (windTrackInfoDTO != null) {
+                                                lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
+                                                showAdvantageLine(competitorsToShow, newTime);
+                                            }
+                                            break;
+                                    default:
+                                        // Which wind sources are requested is defined in a list above this
+                                        // action. So we throw here an exception to notice a missing source.
+                                        throw new UnsupportedOperationException(
+                                                "There is currently no support for the enum value '"
+                                                        + windSource.getType() + "' in this method.");
                                     }
-                                    showWindSensorsOnMap(windSourcesToShow);
                                 }
-                            });
-                    
-                    asyncActionsExecutor.execute(getWindInfoAction);
+                            }
+                            showWindSensorsOnMap(windSourcesToShow);
+                        }
+                    });
                 }
             }
         }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -21,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattaDisplayer}, e.g., with
@@ -60,20 +60,21 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 racesToStopTracking.add(race.getRaceIdentifier());
             }
         }
-        sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>() {
-            @Override
-            public void handleFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
-            }
-
-            @Override
-            public void handleSuccess(Void result) {
-                regattaRefresher.fillRegattas();
-                for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                    listener.changeTrackingRace(racesToStopTracking, false);
-                }
-            }
-        });
+        sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>(
+                new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
+                    }
+        
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.changeTrackingRace(racesToStopTracking, false);
+                        }
+                    }
+                }));
     }
 
     private void removeAndUntrackRaces(final Iterable<RaceDTO> races) {
@@ -81,22 +82,22 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         for (RaceDTO race : races) {
             regattaNamesAndRaceNames.add((RegattaNameAndRaceName) race.getRaceIdentifier());
         }
-        sailingService.removeAndUntrackRaces(regattaNamesAndRaceNames,
-                new MarkedAsyncCallback<Void>() {
+        sailingService.removeAndUntrackRaces(regattaNamesAndRaceNames, new MarkedAsyncCallback<Void>(
+                new AsyncCallback<Void>() {
                     @Override
-                    public void handleFailure(Throwable caught) {
+                    public void onFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to remove races " + regattaNamesAndRaceNames +
                                 ": " + caught.getMessage());
                     }
 
                     @Override
-                    public void handleSuccess(Void result) {
+                    public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.changeTrackingRace(regattaNamesAndRaceNames, false);
                         }
                     }
-                });
+                }));
     }
 
     @Override
