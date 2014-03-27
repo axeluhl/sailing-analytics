@@ -72,6 +72,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
+        processorTimedOut = false;
         final long startTime = System.nanoTime();
         executor.execute(new Runnable() {
             @Override
@@ -80,7 +81,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                     firstProcessor.onElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
-                    LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
+                    if (processorTimedOut) {
+                        LOGGER.log(Level.INFO, "The query processing timed out.");
+                    } else {
+                        LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
+                    }
                 }
             }
         });
@@ -105,7 +110,6 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                 }
             }
             workIsDone = false;
-            processorTimedOut = false;
         }
     }
     
