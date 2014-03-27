@@ -29,13 +29,13 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker;
 import com.sap.sailing.gwt.ui.client.UserManagementService;
 import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sse.gwt.client.useragent.UserAgentChecker;
 import com.sap.sse.gwt.server.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
