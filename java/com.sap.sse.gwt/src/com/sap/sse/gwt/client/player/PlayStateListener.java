@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.player;
 
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public interface PlayStateListener {
     /**

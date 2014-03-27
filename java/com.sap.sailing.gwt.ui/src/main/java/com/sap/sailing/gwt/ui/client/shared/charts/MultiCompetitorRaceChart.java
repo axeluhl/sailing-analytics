@@ -7,12 +7,12 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to

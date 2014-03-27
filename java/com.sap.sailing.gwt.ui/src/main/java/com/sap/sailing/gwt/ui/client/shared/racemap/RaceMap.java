@@ -81,9 +81,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -105,6 +102,9 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {

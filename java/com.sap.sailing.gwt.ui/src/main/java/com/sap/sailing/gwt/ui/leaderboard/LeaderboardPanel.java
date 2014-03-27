@@ -74,15 +74,10 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
-import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -93,6 +88,11 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.player.PlayStateListener;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**

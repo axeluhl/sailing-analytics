@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesCalculationUtil {
 
