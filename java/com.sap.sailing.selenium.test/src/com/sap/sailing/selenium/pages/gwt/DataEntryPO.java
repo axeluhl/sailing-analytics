@@ -2,7 +2,7 @@ package com.sap.sailing.selenium.pages.gwt;
 
 import java.util.List;
 
-import org.openqa.selenium.By.ByTagName;
+import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
@@ -20,7 +20,7 @@ import com.sap.sailing.selenium.pages.common.CSSHelper;
 public class DataEntryPO extends CellTableRowPO {
     protected static final String CELL_TAG_NAME = "td"; //$NON-NLS-1$
     
-    @FindBy(how = ByTagName.class, using = CELL_TAG_NAME)
+    @FindBy(how = ByXPath.class, using = "./td")
     private List<WebElement> columns;
     
     public DataEntryPO(CellTablePO<?> table, WebElement element) {
@@ -36,7 +36,7 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     public String getColumnContent(int column) {
-        return this.columns.get(column).getText();
+        return this.columns.get(column).getText().trim();
     }
     
     public String getColumnContent(String name) {

@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.pages.gwt;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +49,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
-    private static final String LOADING_ANIMATION_XPATH = ".//td/div/div/div/img";
+    private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
     
     // It seems that the css class is not allways the same
     //private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
@@ -286,27 +285,17 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     protected List<WebElement> getRows() {
-        List<WebElement> bodies = this.context.findElements(By.tagName(BODY_TAG_NAME));
-        
-        for(WebElement body : bodies) {
-            if(!body.isDisplayed())
-                continue;
+        List<WebElement> rows = this.context.findElements(By.xpath("./tbody/tr"));
+        Iterator<WebElement> iterator = rows.iterator();
             
-            List<WebElement> rows = body.findElements(By.tagName("tr"));
+        while(iterator.hasNext()) {
+            WebElement row = iterator.next();
             
-            Iterator<WebElement> iterator = rows.iterator();
-            
-            while(iterator.hasNext()) {
-                WebElement row = iterator.next();
-                
-                if(isRowForLoadingIndicatorOrEmptyTableWidget(row))
-                    iterator.remove();
-            }
-            
-            return rows;
+            if(!row.isDisplayed() || isRowForLoadingIndicatorOrEmptyTableWidget(row))
+                iterator.remove();
         }
         
-        return Collections.emptyList();
+        return rows;
     }
     
     protected abstract T createDataEntry(WebElement element);
@@ -319,7 +308,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     private boolean isRowForLoadingIndicatorOrEmptyTableWidget(WebElement row) {
         List<WebElement> images = row.findElements(By.xpath(LOADING_ANIMATION_XPATH));
         
-        if(images.isEmpty() || images.size() > 1)
+        if(images.size() != 1)
             return false;
         
         String image = images.get(0).getAttribute("src");
