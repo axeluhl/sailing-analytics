@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.useragent;
 
 import java.util.HashMap;
 
-import com.sap.sailing.gwt.ui.client.UserAgentDetails.AgentTypes;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
 public class UserAgentCheckerImpl implements UserAgentChecker {
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.useragent;
 
 /**
  * This class holds user agent specific details like type and version.

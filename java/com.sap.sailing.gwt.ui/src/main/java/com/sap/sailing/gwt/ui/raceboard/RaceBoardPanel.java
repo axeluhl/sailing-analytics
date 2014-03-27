@@ -42,7 +42,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -72,6 +71,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.

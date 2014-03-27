@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.useragent;
 
 public interface UserAgentChecker {
     
