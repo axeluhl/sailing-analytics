@@ -1,13 +1,10 @@
 package com.sap.sse.datamining.functions;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface ClassesWithFunctionsService {
 
-    public boolean hasInternalClassesWithMarkedMethods();
-    public Collection<Class<?>> getInternalClassesWithMarkedMethods();
-
-    public boolean hasExternalLibraryClasses();
-    public Collection<Class<?>> getExternalLibraryClasses();
+    public Set<Class<?>> getInternalClassesWithMarkedMethods();
+    public Set<Class<?>> getExternalLibraryClasses();
 
 }
