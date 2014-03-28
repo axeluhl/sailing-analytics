@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
  * Displays a bit of wind history around the time notified to this time listener.

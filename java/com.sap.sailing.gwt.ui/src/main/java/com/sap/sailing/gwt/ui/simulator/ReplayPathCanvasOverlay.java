@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
