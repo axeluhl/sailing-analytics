@@ -5,5 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/gwt-servlet.jar" sourcepath="/com.google.gwt.osgi/lib/gwt-user.jar"/>
+    <classpathentry exported="true" kind="lib" path="WEB-INF/classes/"/>
+ 	<classpathentry kind="output" path="bin"/>
 </classpath>
