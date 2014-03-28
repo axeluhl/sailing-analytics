@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 
 public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
@@ -81,7 +82,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, getTracTracEvent().getRaces().iterator().next(), /* courseDesignUpdateURI */
+                        }, /* trackedRegattaRegistry */null, SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
                         getRaceSubscriber())) {
             receiver.subscribe();

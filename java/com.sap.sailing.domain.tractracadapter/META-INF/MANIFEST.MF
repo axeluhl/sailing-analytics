@@ -11,7 +11,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.tractracadapter,
- com.sap.sailing.domain.tractracadapter.impl;x-friends:="com.sap.sailing.domain.test,com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.server.test"
+ com.sap.sailing.domain.tractracadapter.impl;
+  x-friends:="com.sap.sailing.domain.test,
+   com.sap.sailing.domain.swisstimingadapter.test,
+   com.sap.sailing.server.test,
+   com.sap.sailing.mongodb.test"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.json.simple,
  org.json.simple.parser,

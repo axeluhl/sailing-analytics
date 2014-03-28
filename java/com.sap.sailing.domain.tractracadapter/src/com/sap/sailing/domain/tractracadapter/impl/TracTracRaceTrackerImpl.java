@@ -316,7 +316,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Start live and stored data streams
         Regatta effectiveRegatta = regatta;
         raceSubscribers = new HashMap<>();
-        for (IRace tractracRace : tractracEvent.getRaces()) {
+        final Iterable<IRace> tractracRaces = SynchronizationUtil.getRaces(tractracEvent);
+        for (IRace tractracRace : tractracRaces) {
             IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
             raceSubscribers.put(tractracRace, raceSubscriber);
             // Try to find a pre-associated event based on the Race ID
@@ -334,7 +335,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
-        for (IRace tractracRace : tractracEvent.getRaces()) {
+        for (IRace tractracRace : tractracRaces) {
             for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent,
                     delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, tractracRace,
                     tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscribers.get(tractracRace))) {

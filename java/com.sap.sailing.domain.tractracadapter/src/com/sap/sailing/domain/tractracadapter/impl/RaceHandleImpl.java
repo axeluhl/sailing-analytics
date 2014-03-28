@@ -32,7 +32,7 @@ public class RaceHandleImpl implements RacesHandle {
     @Override
     public Set<RaceDefinition> getRaces() {
         Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (IRace r : tractracEvent.getRaces()) {
+        for (IRace r : SynchronizationUtil.getRaces(tractracEvent)) {
             result.add(domainFactory.getAndWaitForRaceDefinition(r.getId()));
         }
         return result;
@@ -51,7 +51,7 @@ public class RaceHandleImpl implements RacesHandle {
     @Override
     public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
         Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (IRace race : tractracEvent.getRaces()) {
+        for (IRace race : SynchronizationUtil.getRaces(tractracEvent)) {
             result.add(domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds));
         }
         return result;

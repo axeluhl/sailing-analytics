@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
@@ -75,7 +77,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent().getRaces().get(0),
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, Util.get(SynchronizationUtil.getRaces(getTracTracEvent()), 0),
                 getTracTracEvent(),
                 EmptyWindStore.INSTANCE, 0l, /* delayToLiveInMillis */
                 /* simulator */ null, new DynamicRaceDefinitionSet() {

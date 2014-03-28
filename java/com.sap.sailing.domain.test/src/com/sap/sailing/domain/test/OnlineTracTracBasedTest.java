@@ -39,6 +39,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
@@ -103,7 +104,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent().getRaces().iterator()
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, SynchronizationUtil.getRaces(getTracTracEvent()).iterator()
                 .next(), getTracTracEvent(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null,
                 new DynamicRaceDefinitionSet() {
                     @Override
@@ -115,7 +116,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        IRace tractracRace = getTracTracEvent().getRaces().iterator().next();
+        IRace tractracRace = SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next();
         // we used to expect here that there is no RaceDefinition for the TracTrac race yet; however,
         // loading the race from an .mtb file stored locally, things work so fast that the race arrives through
         // a background thread (actually the RaceCourseReceiver) that it's initialized before we can check it here.
