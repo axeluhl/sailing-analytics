@@ -3,9 +3,9 @@ package com.sap.sailing.domain.racelogtracking.impl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneImeiSerializationHandler;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDSerializationHandler;
 
-public class SmartphoneImeiMongoHandler extends SmartphoneImeiSerializationHandler
+public class SmartphoneUUIDMongoHandler extends SmartphoneUUIDSerializationHandler
 implements DeviceIdentifierMongoHandler {
 
     @Override

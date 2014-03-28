@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking.test.mock;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 /**
  * A simplified implementation of the {@link TypeBasedServiceFinder} interface that, when the device type

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegi
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;

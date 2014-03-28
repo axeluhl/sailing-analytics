@@ -4,9 +4,19 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 
 /**
- * Handles serialization and deserialization of {@link DeviceIdentifier}s.
+ * Base interface for handlers of serialization and deserialization of {@link DeviceIdentifier}s.
  * Additional information is passed around to enable fallback mechanisms (see {@link PlaceHolderDeviceIdentifier})
- * in case no appropriate handler for a {@code type} is registered.
+ * in case no appropriate handler for a {@code type} is registered.<p>
+ * 
+ * Handlers that implement child-interfaces (e.g. {@link DeviceIdentifierStringSerializationHandler} have to be
+ * registered in the OSGi service registry for the respective child-interface.Also, the device identifier type has to be
+ * added as a property to that service registration, as in this example:<p>
+ * 
+ * <pre>
+ * Dictionary<String, String> properties = new Hashtable<String, String>();
+ * properties.put(TypeBasedServiceFinder.TYPE, type);
+ * context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneUUIDMongoHandler(), properties)}.
+ * </pre><p>
  * 
  * @author Fredrik Teschke
  * 

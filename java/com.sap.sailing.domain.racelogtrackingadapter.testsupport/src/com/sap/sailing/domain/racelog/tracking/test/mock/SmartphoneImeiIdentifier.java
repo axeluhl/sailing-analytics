@@ -1,4 +1,6 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.racelog.tracking.test.mock;
+
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 
 public class SmartphoneImeiIdentifier implements DeviceIdentifier {

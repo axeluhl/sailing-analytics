@@ -28,8 +28,9 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinder;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
@@ -40,7 +41,6 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSer
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 public class RaceLogSerializationTest {
     private JsonSerializer<RaceLogEvent> serializer;

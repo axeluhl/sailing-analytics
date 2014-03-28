@@ -7,7 +7,6 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 

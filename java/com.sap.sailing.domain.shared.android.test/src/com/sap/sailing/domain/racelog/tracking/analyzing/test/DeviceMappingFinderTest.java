@@ -23,8 +23,8 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 
 public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null);

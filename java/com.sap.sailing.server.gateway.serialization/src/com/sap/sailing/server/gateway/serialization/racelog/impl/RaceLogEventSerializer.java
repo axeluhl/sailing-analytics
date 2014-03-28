@@ -26,7 +26,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
@@ -37,12 +37,12 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
     public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
         return create(competitorSerializer, DeviceIdentifierJsonSerializer.create(
-                new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE));
+                new SmartphoneUUIDJsonHandler(), SmartphoneUUIDIdentifier.TYPE));
     }
     
     public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer,

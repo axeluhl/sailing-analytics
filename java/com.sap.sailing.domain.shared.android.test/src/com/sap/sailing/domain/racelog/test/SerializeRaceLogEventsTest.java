@@ -19,7 +19,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 
 /**

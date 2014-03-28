@@ -33,9 +33,9 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 
 public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     public StoreAndLoadDeviceIdentifierTest() throws UnknownHostException, MongoException {

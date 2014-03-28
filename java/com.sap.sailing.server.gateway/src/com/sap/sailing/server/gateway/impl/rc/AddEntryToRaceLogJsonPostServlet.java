@@ -30,6 +30,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
@@ -142,7 +143,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
     protected void sendResponse(HttpServletResponse response, final UUID clientUuid, RaceLog raceLog, 
             Iterable<RaceLogEvent> eventsToSendBackToClient) throws IOException {
-        JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
+        JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer(),
+                new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
         ServletOutputStream outputStream = response.getOutputStream();
         boolean first = true;
         outputStream.write('[');

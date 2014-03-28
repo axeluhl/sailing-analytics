@@ -1,9 +1,8 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelog.tracking.test.mock;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 
 public class SmartphoneImeiSerializationHandler {
     private SmartphoneImeiIdentifier castIdentifier(DeviceIdentifier identifier) throws TransformationException {

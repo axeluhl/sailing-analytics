@@ -14,7 +14,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -31,7 +31,7 @@ import com.sap.sailing.server.gateway.serialization.impl.GPSFixNmeaDTOJsonSerial
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 
 public class Activator implements BundleActivator {
 	private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -52,9 +52,9 @@ public class Activator implements BundleActivator {
     
     @Override
     public void start(BundleContext context) throws Exception {
-        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneImeiMongoHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
-        registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneImeiJsonHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
-        registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new SmartphoneImeiStringSerializationHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneUUIDMongoHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneUUIDJsonHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new SmartphoneUUIDStringSerializationHandler(), getDict(SmartphoneUUIDIdentifier.TYPE)));
         
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new PingDeviceIdentifierMongoHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new PingDeviceIdentifierJsonHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));

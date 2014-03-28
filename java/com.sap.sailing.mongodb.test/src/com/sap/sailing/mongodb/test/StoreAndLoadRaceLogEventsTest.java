@@ -50,8 +50,8 @@ import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 

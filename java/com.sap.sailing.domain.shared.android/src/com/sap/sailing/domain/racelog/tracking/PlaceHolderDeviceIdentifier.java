@@ -3,7 +3,8 @@ package com.sap.sailing.domain.racelog.tracking;
 
 
 /**
- * If the proper identifier cannot be resolved, for example because the OSGi context is not available
+ * If the proper identifier cannot be resolved (with an approriate {@link DeviceIdentifierSerializationHandler}),
+ * for example because the OSGi context is not available
  * on the smartphone receiving the {@code DevicieIdentifier} via its {@code RaceLog}, then this
  * class can be used as a placeholder, that will at least offer the {@code type} and {@code string representation}
  * of the original identifier.
