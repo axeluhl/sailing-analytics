@@ -4,13 +4,10 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -65,7 +62,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 }
             }
         };
-        List<TypeController> listeners = new ArrayList<TypeController>();
         Regatta regatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         trackedRegatta.addRaceListener(new RaceListener() {
@@ -78,24 +74,29 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, tractracRace, getTracTracEvent(),
-        /* delayToLiveInMillis */0l, /* simulator */ null, EmptyWindStore.INSTANCE,
-                new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                }, /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber)) {
-            for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
-                listeners.add(raceListener);
-            }
+        for (Receiver receiver : domainFactory
+                .getUpdateReceivers(trackedRegatta, getTracTracEvent(),
+                        /* delayToLiveInMillis */0l, /* simulator */null, EmptyWindStore.INSTANCE,
+                        new DynamicRaceDefinitionSet() {
+                            @Override
+                            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                            }
+                        }, /* trackedRegattaRegistry */null, getTracTracEvent().getRaces().iterator().next(), /* courseDesignUpdateURI */
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
+                        getRaceSubscriber())) {
+            receiver.subscribe();
+            getRaceSubscriber().start();
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, tractracRace,
-                getTracTracEvent(), /* delayToLiveInMillis */0l, /* simulator */ null, /* simulateWithStartTimeNow */
-                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                }, /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber));
+        addListenersForStoredDataAndStartController(domainFactory
+                .getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* delayToLiveInMillis */0l, /* simulator */
+                        null, /* simulateWithStartTimeNow */
+                        EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                            @Override
+                            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                            }
+                        }, /* trackedRegattaRegistry */null, getTracTracEvent().getRaces().iterator().next(), /* courseDesignUpdateURI */
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
+                        getRaceSubscriber()));
     }
 
     @Test
