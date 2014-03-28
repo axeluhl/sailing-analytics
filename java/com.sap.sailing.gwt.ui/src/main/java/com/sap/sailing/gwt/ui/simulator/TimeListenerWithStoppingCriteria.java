@@ -3,7 +3,7 @@
  */
 package com.sap.sailing.gwt.ui.simulator;
 
-import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sse.gwt.client.player.TimeListener;
 
 /**
  * A time listener that can be asked whether the timer shall be stopped.
