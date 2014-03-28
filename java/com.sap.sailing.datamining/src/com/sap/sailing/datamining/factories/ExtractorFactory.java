@@ -3,15 +3,15 @@ package com.sap.sailing.datamining.factories;
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
-import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.ParallelExtractor;
-import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.builders.ExtractionWorkerBuilder;
-import com.sap.sailing.datamining.impl.GroupDividingParallelExtractor;
-import com.sap.sailing.datamining.shared.Message;
-import com.sap.sailing.datamining.shared.Unit;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.impl.workers.builders.ExtractionWorkerBuilder;
+import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sse.datamining.components.ParallelExtractor;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.components.deprecated.GroupDividingParallelExtractor;
+import com.sap.sse.datamining.shared.Message;
+import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.workers.ExtractionWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class ExtractorFactory {
     

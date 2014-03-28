@@ -2,9 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,7 +12,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
@@ -25,7 +22,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
 
-    private Map<Fleet, TrackedRace> trackedRaces;
+    private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
     private Map<Fleet, RaceLog> raceLogs;
@@ -38,20 +35,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private transient RaceLogInformation raceLogInformation;
     private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
 
-    /**
-     * we don't want the TrackedRaces to be serialized during a master data export. Thus, we need this thread flag which
-     * is true only during master data export
-     */
-    private transient ThreadLocal<Boolean> ongoingMasterDataExport = new ThreadLocal<Boolean>() {
-        protected Boolean initialValue() {
-            return false;
-        };
-    };
-
     public AbstractRaceColumn() {
-        this.trackedRaces = new HashMap<Fleet, TrackedRace>();
+        this.trackedRaces = new TrackedRaces();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
         this.raceLogs = new HashMap<Fleet, RaceLog>();
+
     }
 
     @Override
@@ -171,48 +159,30 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleetImpl) {
+    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleet) {
         synchronized(raceLogs) {
             raceLogInformation = information;
             RaceLogStore store = information.getStore();
-            HashSet<RaceLogEventVisitor> listeners = new HashSet<RaceLogEventVisitor>();
-            RaceLog raceLogAvailable = raceLogs.get(fleetImpl);
-            if (raceLogAvailable != null) {
-                store.removeListenersAddedByStoreFrom(raceLogAvailable);
-                listeners = raceLogAvailable.removeAllListeners();
-                raceLogs.remove(fleetImpl);
-            }
-            
             raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
-            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleetImpl);
-            RaceLog raceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
-            
-            if (listeners.isEmpty()) {
+            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet);
+            RaceLog newOrLoadedRaceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
+            RaceLog raceLogAvailable = raceLogs.get(fleet);
+            if (raceLogAvailable == null) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                raceLog.addListener(listener);
+                newOrLoadedRaceLog.addListener(listener);
+                raceLogs.put(fleet, newOrLoadedRaceLog);
             } else {
-                raceLog.addAllListeners(listeners);
+                // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
+                raceLogAvailable.merge(newOrLoadedRaceLog);
             }
-            raceLogs.put(fleetImpl, raceLog);
         }
     }
 
     /**
      * When deserializing, replication listeners are registered on all race logs.
      */
-    @SuppressWarnings("unchecked")
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-
-        // Check if master data export is ongoing
-        boolean masterDataImportOngoing = ois.readBoolean();
-        if (masterDataImportOngoing) {
-            this.trackedRaces = new HashMap<Fleet, TrackedRace>();
-            this.raceIdentifiers = (Map<Fleet, RaceIdentifier>) ois.readObject();
-            this.raceLogs = (Map<Fleet, RaceLog>) ois.readObject();
-            this.raceLogIdentifierTemplate = (RaceLogIdentifierTemplate) ois.readObject();
-        } else {
-            ois.defaultReadObject();
-        }
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
@@ -222,18 +192,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
-        ongoingMasterDataExport.set(flagValue);
+        trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
-
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        if (ongoingMasterDataExport.get()) {
-            stream.writeBoolean(true);
-            stream.writeObject(raceIdentifiers);
-            stream.writeObject(raceLogs);
-            stream.writeObject(raceLogIdentifierTemplate);
-        } else {
-            stream.writeBoolean(false);
-            stream.defaultWriteObject();
-        }
-    }
+    
 }

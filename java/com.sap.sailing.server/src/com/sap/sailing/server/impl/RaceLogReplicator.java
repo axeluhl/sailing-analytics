@@ -38,7 +38,6 @@ public class RaceLogReplicator implements RaceColumnListener {
     @Override
     public void raceLogEventAdded(final RaceColumn raceColumn, final RaceLogIdentifier identifier, final RaceLogEvent event) {
         identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
-            
             @Override
             public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnRegatta(

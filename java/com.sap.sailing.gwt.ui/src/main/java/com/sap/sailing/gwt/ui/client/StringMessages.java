@@ -209,6 +209,7 @@ public interface StringMessages extends Messages {
     String locationNotAvailable();
     String startDateNotAvailable();
     String startDate();
+    String endDate();
     String unknownManeuver();
     String tailLengthMustBePositive();
     String failedToLoadRaceInformation(String message);
@@ -306,6 +307,8 @@ public interface StringMessages extends Messages {
     String boatClass();
     String setDelayToLive();
     String pleaseEnterNonEmptyVenue();
+    String pleaseEnterStartAndEndDate();
+    String startDateMustBeforeEndDate();
     String eventWithThisNameAlreadyExists();
     String venue();
     String pleaseSelectABoatClass();
@@ -766,7 +769,7 @@ public interface StringMessages extends Messages {
     String importRemoteHost();
     String importFetchRemoteLgs();
     String importUrlInvalid(String url);
-    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importGetLeaderboardsFailed(String host, String errorMessage);
     String importNoDataReturned();
     String importServerError();
     String importLeaderboardGroups();
@@ -775,8 +778,8 @@ public interface StringMessages extends Messages {
     String importSelectAtLeastOne();
     String deselectAll();
     String polarDiagramButton();
-    String timeSinceLastPositionFix();
-    String timeSinceLastPositionFixTooltip();
+    String ratioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval();
+    String ratioBetweenTimeSinceLastPositionFixAndAverageSamplingIntervalTooltip();
     String trackingQuality();
     String legType();
     String seriesLeaderboard();
@@ -920,7 +923,6 @@ public interface StringMessages extends Messages {
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
-    String createSwissTimingRace();
     String igtimiAccounts();
     String errorFetchingIgtimiAccounts(String message);
     String addIgtimiAccount();
@@ -995,4 +997,12 @@ public interface StringMessages extends Messages {
     String closeTimeRange();
     String setClosingTimePoint();
     String startOfTimeRangeMustLieBeforeEnd();
+    String start();
+    String overallProgress();
+    String showAddedScores();
+    String ratio();
+    String importWind();
+    String importWindTooltip();
+    String authorName();
+    String authorPriority();
 }

@@ -31,12 +31,13 @@ import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorCo
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
+    private TextBox seriesNameTextBox;
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
@@ -131,7 +132,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
             races.add(raceColumnDTO);
         }
-        return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
+        return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue());
@@ -162,19 +163,31 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         String seriesName = getSelectedSeries().getName();
         seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
         additionalWidgetPanel.add(seriesPanel);
+        
+        seriesNameTextBox = createTextBox(seriesName);
+        additionalWidgetPanel.add(seriesNameTextBox);
+        
         isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
+        isMedalCheckbox.ensureDebugId("MedalSeriesCheckbox");
         isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
+        
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        startWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
+        
         hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
         hasSplitFleetContiguousScoringCheckbox.setValue(selectedSeries.hasSplitFleetContiguousScoring());
         additionalWidgetPanel.add(hasSplitFleetContiguousScoringCheckbox);
+        
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
         additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
+        
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
         useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -183,10 +196,14 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
         });
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
-        additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
-        discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
+        
+        Widget discardThresholdBoxesWidget = discardThresholdBoxes.getWidget();
+        discardThresholdBoxesWidget.ensureDebugId("");
+        discardThresholdBoxesWidget.setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
+        additionalWidgetPanel.add(discardThresholdBoxesWidget);
         
         raceNamesEditor = new StringListInlineEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(regatta, stringMessages, resources.removeIcon(), seriesName));
+        raceNamesEditor.ensureDebugId("RaceNamesStringListEditorComposite");
         raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
@@ -231,13 +248,23 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         
         public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
             super(stringMessages, removeImage, Collections.<String>emptyList());
-            this.regatta = regatta;
-            this.addRacesFromListBox = createListBox(false);
-            this.addRacesToListBox = createListBox(false);
-            this.raceNamePrefixTextBox = createTextBox(null);
-            this.addRacesBtn = new Button(stringMessages.add());
-            this.addRacesHintLabel = new Label("");
+
             this.seriesName = seriesName;
+            this.regatta = regatta;
+            
+            this.addRacesFromListBox = createListBox(false);
+            this.addRacesFromListBox.ensureDebugId("AddRacesFromListBox");
+            
+            this.addRacesToListBox = createListBox(false);
+            this.addRacesToListBox.ensureDebugId("AddRacesToListBox");
+            
+            this.raceNamePrefixTextBox = createTextBox(null);
+            this.raceNamePrefixTextBox.ensureDebugId("RaceNamePrefixTextBox");
+            
+            this.addRacesBtn = new Button(stringMessages.add());
+            this.addRacesBtn.ensureDebugId("AddRacesButton");
+            
+            this.addRacesHintLabel = new Label("");
         }
         
         private List<String> resolveRaceNamesToAdd() {
@@ -335,7 +362,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 @Override
                 public void onChange(ChangeEvent event) {
                     updateHintLabel();
-                }
+            }
             });
             
             addRacesPanel.add(addRacesFromListBox);
@@ -359,7 +386,6 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             
             addRacesPanel.add(raceNamePrefixTextBox);
             addRacesBtn.addStyleName("inlineButton");
-            
             addRacesBtn.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -368,7 +394,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                         List<String> raceNamesToAdd = resolveRaceNamesToAdd();
                         for(String raceToAdd: raceNamesToAdd) {
                             addValue(raceToAdd);
-                        }
+                            }
                         validate();
 //                        updateFromToListboxesSelection();
 //                        updateHintLabel();

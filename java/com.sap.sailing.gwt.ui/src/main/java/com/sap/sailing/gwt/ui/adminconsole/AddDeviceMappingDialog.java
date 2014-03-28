@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     private final BetterDateTimeBox from;
@@ -46,7 +46,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             final StringMessages stringMessages, String leaderboardName, String raceColumnName, String fleetName,
             DialogCallback<DeviceMappingDTO> callback, final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
-                stringMessages.add(), stringMessages.cancel(), new Validator<DeviceMappingDTO>() {
+                stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
             @Override
             public String getErrorMessage(DeviceMappingDTO valueToValidate) {
                 if (valueToValidate.deviceType == null || valueToValidate.deviceType.isEmpty()) {

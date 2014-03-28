@@ -3,7 +3,6 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -32,8 +34,12 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -58,27 +64,48 @@ public class ImportMasterDataOperation extends
 
     private final boolean override;
 
-    public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, boolean override,
+    private final UUID importOperationId;
+
+    private DataImportProgress progress;
+
+    public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
             MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.baseDomainFactory = baseDomainFactory;
         this.masterData = topLevelMasterData;
         this.override = override;
+        this.importOperationId = importOperationId;
     }
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
-        for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
-            createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+        this.progress = toState.getDataImportLock().getProgress(importOperationId);
+        progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
+        toState.getDataImportLock().lock();
+        try {
+            progress.setNameOfCurrentSubProgress("Importing leaderboard groups");
+            progress.setCurrentSubProgressPct(0);
+            int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
+            int i = 0;
+            for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
+                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
+            }
+            progress.setNameOfCurrentSubProgress("Importing wind tracks");
+            progress.setOverAllProgressPct(0.5);
+            progress.setCurrentSubProgressPct(0);
+            createWindTracks(toState);
+            toState.getDataImportLock().getProgress(importOperationId).setResult(creationCount);
+            return creationCount;
+        } finally {
+            toState.getDataImportLock().unlock();
         }
-        createWindTracks(toState);
-        return creationCount;
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
             LeaderboardGroup leaderboardGroup) {
-        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = extractRaceLogEvents(leaderboardGroup);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(toState, leaderboardGroup);
@@ -111,7 +138,7 @@ public class ImportMasterDataOperation extends
             }
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
-                addRaceLogEvents(leaderboard, raceLogEvents);
+                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
             }
@@ -164,48 +191,40 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addRaceLogEvents(Leaderboard leaderboard,
-            Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents) {
+    /**
+     * Ensures that the race log events are stored to the receiving instance's database. The race logs have been received
+     * in serialized form on the {@link RaceColumn} objects, but the database doesn't yet know about them. This method uses
+     * a <code>MongoRaceLogStoreVisitor</code> to store all race log events to the database.
+     */
+    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
-                Iterable<RaceLogEvent> raceLogsForColumnAndFleet = raceLogEvents.get(raceColumn).get(fleet);
-                for (RaceLogEvent event : raceLogsForColumnAndFleet) {
-                    log.add(event);
-                }
-            }
-        }
-
-    }
-
-    private Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> extractRaceLogEvents(LeaderboardGroup group) {
-        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = new HashMap<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>>();
-        for (Leaderboard leaderboard : group.getLeaderboards()) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                HashMap<Fleet, Iterable<RaceLogEvent>> raceLogEventsForRaceColumn = new HashMap<Fleet, Iterable<RaceLogEvent>>();
-                raceLogEvents.put(raceColumn, raceLogEventsForRaceColumn);
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    raceLog.lockForRead();
-                    try {
-                        Iterable<RaceLogEvent> fixes = raceLog.getRawFixes();
-                        raceLogEventsForRaceColumn.put(fleet, fixes);
-                    } finally {
-                        raceLog.unlockAfterRead();
+                RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+                RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
+                log.lockForRead();
+                try {
+                    for (RaceLogEvent event : log.getRawFixes()) {
+                        event.accept(storeVisitor);
                     }
+                } finally {
+                    log.unlockAfterRead();
                 }
             }
         }
-        return raceLogEvents;
+
     }
 
     private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {
         if (newLeaderboard instanceof FlexibleLeaderboard) {
             for (RaceColumn raceColumn : newLeaderboard.getRaceColumns()) {
                 for (Fleet fleet : raceColumn.getFleets()) {
-                    DynamicTrackedRace trackedRace = toState.getTrackedRace((RegattaAndRaceIdentifier) raceColumn
-                            .getRaceIdentifier(fleet));
-                    raceColumn.setTrackedRace(fleet, trackedRace);
+                    RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+                    if (raceIdentifier != null) {
+                        DynamicTrackedRace trackedRace = toState
+                                .getTrackedRace((RegattaAndRaceIdentifier) raceIdentifier);
+                        raceColumn.setTrackedRace(fleet, trackedRace);
+                    }
                 }
             }
         }
@@ -237,12 +256,23 @@ public class ImportMasterDataOperation extends
     }
 
     private void createWindTracks(RacingEventService toState) {
+        int numOfWindTracks = masterData.getWindTrackMasterData().size();
+        int i = 0;
         for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
             DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
-            WindTrack windTrack = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
-            for (Wind fix : windMasterData.getFixes()) {
-                windTrack.add(fix);
+            WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
+            final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
+            windTrackToReadFrom.lockForRead();
+            try {
+                for (Wind fix : windTrackToReadFrom.getRawFixes()) {
+                    windTrackToWriteTo.add(fix);
+                }
+            } finally {
+                windTrackToReadFrom.unlockAfterRead();
             }
+            i++;
+            progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
+            progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
         }
     }
 
@@ -310,9 +340,17 @@ public class ImportMasterDataOperation extends
                         series, isPersistent, baseDomainFactory.createScoringScheme(scoringSchemeType),
                         defaultCourseAreaId).getA();
                 createdRegatta.setRegattaConfiguration(regatta.getRegattaConfiguration());
-                Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta);
+                Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta.getRegattaIdentifier());
                 if (raceIdStrings != null) {
-                    toState.setPersistentRegattaForRaceIDs(createdRegatta, raceIdStrings, override);
+                    for (String raceIdAsString : raceIdStrings) {
+                        if (!override && toState.getRememberedRegattaForRace(raceIdAsString) != null) {
+                            logger.info(String
+                                    .format("Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
+                                            raceIdAsString));
+                        } else {
+                            toState.setRegattaForRace(createdRegatta, raceIdAsString);
+                        }
+                    }
                 }
                 creationCount.addOneRegatta(createdRegatta.getId().toString());
             }
@@ -333,10 +371,11 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 String name = event.getName();
-                String pubString = event.getPublicationUrl();
+                TimePoint startDate = event.getStartDate();
+                TimePoint endDate = event.getEndDate();
                 String venueName = event.getVenue().getName();
                 boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, venueName, pubString, isPublic, id);
+                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id);
                 creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",

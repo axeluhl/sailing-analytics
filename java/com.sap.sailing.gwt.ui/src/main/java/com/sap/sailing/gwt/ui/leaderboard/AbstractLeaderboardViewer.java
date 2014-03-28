@@ -10,13 +10,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A base class for a leaderboard viewer.
@@ -87,7 +87,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
 
                 if (visible && component instanceof TimeListener) {
                     // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime());
+                    ((TimeListener) component).timeChanged(timer.getTime(), null);
                 }
                 if(component.hasSettings() && !hasSettingsWhenComponentIsInvisible) {
                     settingsButton.setEnabled(visible);

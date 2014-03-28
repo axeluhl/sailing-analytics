@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -40,7 +41,7 @@ public class Activator implements BundleActivator {
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     public Activator() {
-        clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
+        clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
         logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
         
@@ -60,7 +61,8 @@ public class Activator implements BundleActivator {
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
-        
+        context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
+                
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
         registrations.add(context.registerService(GPSFixMongoHandler.class,
@@ -70,7 +72,7 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(GPSFixMongoHandler.class,
                         new GPSFixMovingMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
                                 racingEventService.getDomainObjectFactory()), properties));
-
+        
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }

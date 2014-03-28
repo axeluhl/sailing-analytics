@@ -225,4 +225,9 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public RaceLogEvent getEventById(Serializable id) {
         return innerRaceLog.getEventById(id);
     }
+
+    @Override
+    public void merge(RaceLog other) {
+        innerRaceLog.merge(other);
+    }
 }

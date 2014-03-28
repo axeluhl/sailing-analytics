@@ -43,23 +43,25 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
+    public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
+    
     private static final int LINE_WIDTH = 1;
 
     private final WindChartSettings settings;
@@ -449,8 +451,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
-                    from, to, settings.getResolutionInMilliseconds(),
-                    null, new AsyncCallback<WindInfoForRaceDTO>() {
+                    from, to, settings.getResolutionInMilliseconds(), null);
+            asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
+                    new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
@@ -463,7 +466,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                             }
                             hideLoading();
                         }
-
+        
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
@@ -471,7 +474,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                             hideLoading();
                         }
                     });
-            asyncActionsExecutor.execute(getWindInfoAction);
         }
     }
     
@@ -502,20 +504,20 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      * everything for the currently selected race is loaded; otherwise, no-op.
      */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if(!isVisible()) {
             return;
         }
 
-        updateTimePlotLine(date);
+        updateTimePlotLine(newTime);
         
         switch(timer.getPlayMode()) {
             case Live:
             {
                 // is date before first cache entry or is cache empty?
-                if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                    loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
-                } else if (date.getTime() > timeOfLatestRequestInMillis) {
+                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                    loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
+                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                     loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
                 // otherwise the cache spans across date and so we don't need to load anything
@@ -528,10 +530,10 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
                 } else {
                     // replay mode during live play
-                    if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                        loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
-                    } else if (date.getTime() > timeOfLatestRequestInMillis) {
-                        loadData(new Date(timeOfLatestRequestInMillis), date, /* append */true);
+                    if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                        loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
+                    } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
+                        loadData(new Date(timeOfLatestRequestInMillis), newTime, /* append */true);
                     }                    
                 }
                 break;

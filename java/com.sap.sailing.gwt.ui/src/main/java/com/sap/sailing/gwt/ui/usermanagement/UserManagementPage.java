@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.usermanagement;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -13,11 +15,20 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.UserManagementService;
+import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public class UserManagementPage extends AbstractEntryPoint {
+    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        
+        registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
+
         VerticalPanel vp = new VerticalPanel();
         RootPanel.get().add(vp);
         TextBox usernameField = new TextBox();
@@ -41,6 +52,6 @@ public class UserManagementPage extends AbstractEntryPoint {
             }
         });
         vp.add(ok);
-        linkEnterToButton(ok, usernameField, passwordField);
+        DialogUtils.linkEnterToButton(ok, usernameField, passwordField);
     }
 }

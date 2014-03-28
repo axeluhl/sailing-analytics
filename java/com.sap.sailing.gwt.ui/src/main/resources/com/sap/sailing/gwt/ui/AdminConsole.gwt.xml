@@ -26,8 +26,9 @@
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
   <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
+  
   <inherits name="com.sap.sailing.domain.SailingDomain" />
-  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
   <inherits name="de.csenk.gwt.ws.WebSocket" />
   
   <!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
@@ -35,6 +36,10 @@
   <inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
   <inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   <stylesheet src="../AdminConsoleDateTimePicker.css" />
+  
+  <!-- Fancy Progressbar (without the rest of Bootstrap!) -->
+  <!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
+  <stylesheet src="../AdminConsoleProgressBar.css" />
   
   <super-source path="jre" />
 

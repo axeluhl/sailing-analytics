@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
         RegattaDisplayer, RaceSelectionChangeListener {
@@ -118,7 +119,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRacesTable");
+        raceTable.ensureDebugId("TrackedRacesCellTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -154,14 +155,14 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
-        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilter");
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
         filterPanel.add(filterablePanelRaces);
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
 
         btnRefresh = new Button(stringMessages.refresh());
-        btnRefresh.ensureDebugId("Refresh");
+        btnRefresh.ensureDebugId("RefreshButton");
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -382,19 +383,21 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
             sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter
-                                    .reportError("Exception trying to set the delay to live for the selected tracked races: "
-                                            + caught.getMessage());
-                        }
+                    new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to set the delay to live for the selected tracked races: "
+                                                    + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                            }
+                    ));
         }
     }
 

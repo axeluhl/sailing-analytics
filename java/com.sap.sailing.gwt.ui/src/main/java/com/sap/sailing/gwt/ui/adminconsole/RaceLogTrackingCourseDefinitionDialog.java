@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog {
     private class RaceLogCourseManagementWidget extends CourseManagementWidget {
@@ -30,7 +30,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             addMark.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new MarkEditDialog(stringMessages, new MarkDTO(null, null), true, new DialogCallback<MarkDTO>() {
+                    new MarkEditDialog(stringMessages, new MarkDTO(null, null), true, new DataEntryDialog.DialogCallback<MarkDTO>() {
                         @Override
                         public void ok(MarkDTO mark) {
                             sailingService.addMarkToRaceLog(leaderboardName, raceColumnName, fleetName, mark, new AsyncCallback<Void>() {
@@ -71,7 +71,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                 public void update(int index, final MarkDTO markDTO, String value) {
                     if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
                         new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()),
-                                stringMessages, new DialogCallback<PositionDTO>() {
+                                stringMessages, new DataEntryDialog.DialogCallback<PositionDTO>() {
 
                             @Override
                             public void ok(PositionDTO position) {

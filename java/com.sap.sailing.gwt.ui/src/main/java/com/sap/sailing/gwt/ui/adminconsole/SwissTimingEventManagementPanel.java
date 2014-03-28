@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
 /**
@@ -52,14 +54,14 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
  * 
  */
 public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
-    private final IntegerBox portIntegerbox;
-    private final TextBox hostnameTextbox;
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
     private final CellTable<SwissTimingRaceRecordDTO> raceTable;
     private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-    private final CheckBox canSendRequestsCheckbox;
+    private final TextBox jsonUrlBox;
+    private final TextBox hostnameTextbox;
+    private final IntegerBox portIntegerbox;
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -78,12 +80,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-        Grid connectionsGrid = new Grid(7, 2);
+
+        Grid connectionsGrid = new Grid(5, 2);
         verticalPanel.add(connectionsGrid);
-        verticalPanel.setCellWidth(connectionsGrid, "100%");
-        
-        Label lblPredefined = new Label(stringConstants.connections() +":");
-        connectionsGrid.setWidget(0, 0, lblPredefined);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
         previousConfigurationsComboBox = new ListBox();
@@ -102,31 +101,26 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         });
         fillConfigurations();
 
-        Label lblTrackNewEvent = new Label(stringConstants.defineNewConnection());
-        connectionsGrid.setWidget(2, 0, lblTrackNewEvent);
-        
-        Label lblHostname = new Label(stringConstants.hostname() + ":");
-        connectionsGrid.setWidget(3, 0, lblHostname);
-        
+        jsonUrlBox = new TextBox();
+        jsonUrlBox.setText("test"); // by using 'test' as the JSON URL you will get some useful content from a static json file 
+        jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
+
+        connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
+        connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
+        connectionsGrid.setWidget(1, 0, new Label("Manage2Sail Event-URL (json):"));
+        connectionsGrid.setWidget(1, 1, jsonUrlBox);
+
         hostnameTextbox = new TextBox();
-        hostnameTextbox.setText("");
-        connectionsGrid.setWidget(3, 1, hostnameTextbox);
-        
-        Label lblPort = new Label(stringConstants.port() + ":");
-        connectionsGrid.setWidget(4, 0, lblPort);
-        
         portIntegerbox = new IntegerBox();
-        connectionsGrid.setWidget(4, 1, portIntegerbox);
 
-        Label lblCanSendRequests = new Label(stringConstants.canSendRequests());
-        connectionsGrid.setWidget(5, 0, lblCanSendRequests);
+        connectionsGrid.setWidget(2, 0,  new Label(stringConstants.hostname() + ":"));
+        connectionsGrid.setWidget(2, 1, hostnameTextbox);
+        
+        connectionsGrid.setWidget(3, 0, new Label(stringConstants.port() + ":"));
+        connectionsGrid.setWidget(3, 1, portIntegerbox);
 
-        canSendRequestsCheckbox = new CheckBox();
-        canSendRequestsCheckbox.setValue(false);
-        connectionsGrid.setWidget(5, 1, canSendRequestsCheckbox);
-
-        Button btnListRaces = new Button(stringConstants.connectAndReadRaces());
-        connectionsGrid.setWidget(6, 1, btnListRaces);
+        Button btnListRaces = new Button(stringConstants.listRaces());
+        connectionsGrid.setWidget(4, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -137,37 +131,41 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.ID;
+                return object.raceName;
             }
         };
 
-        TextColumn<SwissTimingRaceRecordDTO> raceDescriptionColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+        TextColumn<SwissTimingRaceRecordDTO> raceIdColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.description;
+                return object.raceId;
             }
         };
         
         TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                String result = object.boatClass != null ? object.boatClass : "";
-                if(object.discipline != null) {
-                    result += " (" + object.discipline + ")";
-                }
-                return result;
+                return object.boatClass != null ? object.boatClass : "";
             }
         };
 
-        TextColumn<SwissTimingRaceRecordDTO> raceStateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+        TextColumn<SwissTimingRaceRecordDTO> genderColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                String result = object.hasCourse ? "C✓ " : "";
-                result += object.hasStartlist ? "S✓" : "";
-                return result;
+                return object.gender != null ? object.gender : "";
             }
         };
-        
+
+        // AXEL: DON'T DELETE
+//        TextColumn<SwissTimingRaceRecordDTO> stateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+//            @Override
+//            public String getValue(SwissTimingRaceRecordDTO object) {
+//                String result = object.hasCourse ? "C✓ " : "";
+//                result += object.hasStartlist ? "S✓" : "";
+//                return result;
+//            }
+//        };
+
         TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
@@ -229,15 +227,15 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceNameColumn.setSortable(true);
         raceStartTimeColumn.setSortable(true);
         boatClassColumn.setSortable(true);
-        raceDescriptionColumn.setSortable(true);
-        raceStateColumn.setSortable(true);
+        raceIdColumn.setSortable(true);
+        genderColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
-        raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
+        raceTable.addColumn(raceIdColumn, stringConstants.id());
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
-        raceTable.addColumn(raceStateColumn, stringConstants.status());
+        raceTable.addColumn(genderColumn, "Gender");
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
@@ -247,7 +245,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn,
-                raceDescriptionColumn, boatClassColumn, raceStateColumn);
+                raceIdColumn, boatClassColumn, genderColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
         
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -257,8 +255,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.add(t.ID);
-                strings.add(t.description);
+                strings.add(t.raceId);
+                strings.add(t.raceName);
                 strings.add(t.boatClass);
                 return strings;
             }
@@ -280,14 +278,14 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
             Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn,
-            Column<SwissTimingRaceRecordDTO, ?> raceDescriptionColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn,
-            final Column<SwissTimingRaceRecordDTO, ?> raceStateColumn) {
+            Column<SwissTimingRaceRecordDTO, ?> raceIdColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn,
+            final Column<SwissTimingRaceRecordDTO, ?> genderColumn) {
            
         ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return new NaturalComparator().compare(o1.ID,  o2.ID);
+                return new NaturalComparator().compare(o1.raceName,  o2.raceName);
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDTO>() {
@@ -297,11 +295,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         .compareTo(o2.raceStartTime);
             }
         });
-        result.setComparator(raceDescriptionColumn, new Comparator<SwissTimingRaceRecordDTO>()  {
+        result.setComparator(raceIdColumn, new Comparator<SwissTimingRaceRecordDTO>()  {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return o1.description == null ? -1 : o2.description == null ? 1 : 
-                    new NaturalComparator().compare(o1.description, o2.description);
+                return o1.raceId == null ? -1 : o2.raceId == null ? 1 : 
+                    new NaturalComparator().compare(o1.raceId, o2.raceId);
             }
         });
         result.setComparator(boatClassColumn, new Comparator<SwissTimingRaceRecordDTO>() {
@@ -310,10 +308,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return o1.boatClass == null ? -1 : o2.boatClass == null ? 1 : new NaturalComparator(false).compare(o1.boatClass, o2.boatClass);
             }
         });
-        result.setComparator(raceStateColumn, new Comparator<SwissTimingRaceRecordDTO>() {
+        result.setComparator(genderColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return raceStateColumn.getValue(o1).toString().compareTo(raceStateColumn.getValue(o2).toString());
+                return o1.gender == null ? -1 : o2.gender == null ? 1 : new NaturalComparator(false).compare(o1.gender, o2.gender);
             }
         });
         return result;
@@ -333,8 +331,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                     previousConfigurationsComboBox.removeItem(0);
                 }
                 for (SwissTimingConfigurationDTO stConfig : result) {
-                    previousConfigurations.put(stConfig.name, stConfig);
-                    previousConfigurationsComboBox.addItem(stConfig.name);
+                    previousConfigurations.put(stConfig.getName(), stConfig);
+                    previousConfigurationsComboBox.addItem(stConfig.getName());
                 }
                 if (!result.isEmpty()) {
                     updatePanelFromSelectedStoredConfiguration();
@@ -344,11 +342,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final String hostname = hostnameTextbox.getValue();
-        final int port = portIntegerbox.getValue();
-        final boolean canSendRequests = canSendRequestsCheckbox.getValue();
-        sailingService.listSwissTimingRaces(hostname, port, canSendRequests,
-                new AsyncCallback<List<SwissTimingRaceRecordDTO>>() {
+        final String jsonUrl = jsonUrlBox.getValue();
+        sailingService.getRacesOfSwissTimingEvent(jsonUrl, new AsyncCallback<SwissTimingEventRecordDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -356,10 +351,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
 
             @Override
-            public void onSuccess(final List<SwissTimingRaceRecordDTO> result) {
+            public void onSuccess(final SwissTimingEventRecordDTO result) {
                 availableSwissTimingRaces.clear();
                 if (result != null)
-                    availableSwissTimingRaces.addAll(result);
+                    availableSwissTimingRaces.addAll(result.races);
 
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
@@ -367,8 +362,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 filterablePanelEvents.getTextBox().setText(null);
 
                 // store a successful configuration in the database for later retrieval
-                final String configName = hostname+":"+port;
-                sailingService.storeSwissTimingConfiguration(configName, hostname, port, canSendRequests,
+                final String hostname = result.trackingDataHost;
+                final Integer port = result.trackingDataPort;
+                final String configName = result.eventName;
+                
+                sailingService.storeSwissTimingConfiguration(configName, jsonUrl, hostname, port, 
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -379,11 +377,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                SwissTimingConfigurationDTO stConfig = new SwissTimingConfigurationDTO(configName,
-                                        hostname, port, canSendRequests);
-                                if (previousConfigurations.put(stConfig.name, stConfig) == null) {
-                                    previousConfigurationsComboBox.addItem(stConfig.name);
+                                SwissTimingConfigurationDTO stConfig = new SwissTimingConfigurationDTO(configName, jsonUrl,
+                                        hostname, port);
+                                if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
+                                    previousConfigurationsComboBox.addItem(stConfig.getName());
                                 }
+                                updatePanelFromSelectedStoredConfiguration();
                             }
                         });
             }
@@ -392,7 +391,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String hostname = hostnameTextbox.getValue();
-        int port = portIntegerbox.getValue();
+        Integer port = portIntegerbox.getValue();
         final List<SwissTimingRaceRecordDTO> selectedRaces = new ArrayList<SwissTimingRaceRecordDTO>();
         for (final SwissTimingRaceRecordDTO race : this.raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(race)) {
@@ -406,7 +405,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         }
         sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
-                selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
+                selectedRaces, hostname, port, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -426,9 +425,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             SwissTimingConfigurationDTO stConfig = previousConfigurations.get(previousConfigurationsComboBox
                     .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
             if (stConfig != null) {
-                hostnameTextbox.setValue(stConfig.hostname);
-                portIntegerbox.setValue(stConfig.port);
-                canSendRequestsCheckbox.setValue(stConfig.canSendRequests);
+                hostnameTextbox.setValue(stConfig.getHostname());
+                portIntegerbox.setValue(stConfig.getPort());
             }
         }
     }

@@ -20,11 +20,14 @@ import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -51,6 +54,8 @@ public abstract class AbstractServerReplicationTest {
     private ReplicationServiceImpl masterReplicator;
     private ReplicationMasterDescriptor  masterDescriptor;
     
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
@@ -90,19 +95,19 @@ public abstract class AbstractServerReplicationTest {
             mongoDBService.getDB().dropDatabase();
         }
         resolveAgainst = DomainFactory.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestStart();
         if (master != null) {
             this.master = master;
         } else {
-            this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+            this.master = createNewMaster(mongoDBService, mongoObjectFactory);
         }
         if (replica != null) {
             this.replica = replica;
         } else {
             this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -118,9 +123,19 @@ public abstract class AbstractServerReplicationTest {
         this.replicaReplicator = replicaReplicator; 
         return result;
     }
-    
+
+    protected RacingEventServiceImpl createNewMaster(final MongoDBService mongoDBService,
+            final MongoObjectFactory mongoObjectFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
+                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+    }
+
     @After
     public void tearDown() throws Exception {
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestDone();
         masterReplicator.unregisterReplica(replicaDescriptor);
         masterDescriptor.stopConnection();
         try {

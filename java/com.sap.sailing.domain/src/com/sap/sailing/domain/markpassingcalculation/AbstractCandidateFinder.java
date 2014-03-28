@@ -1,20 +1,20 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.sap.sailing.domain.common.impl.Util.Pair;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
  * A CandidateFinder converts the incoming GPSFixes of competitors and marks into {@link Candidate}s for each
- * competitor. With new Fixes of an Object one can call the
- * {@link #calculateFixesAffectedByNewCompetitorFixes(Competitor, List)} or the
- * {@link #calculateFixesAffectedByNewMarkFixes(Mark, List)} methods. This determines those fixes that may have changed
- * their status as a {@link Candidate}. {@link #getCandidateDeltas(Competitor)} then returns the actual changes to the
- * list of Candidates as a Pair of Lists, one of the new Candidates and one of the Candidates that should be removed.
+ * competitor. {@link #calculateFixesAffectedByNewMarkFixes(Mark, List)} determines the fixes that may have changed
+ * their status as {@link Candidate} after new fixes for a mark arrive. This determines those fixes that may have
+ * changed their status as a {@link Candidate}. {@link #getCandidateDeltas(Competitor, Iterable)} then returns the
+ * actual changes to the list of Candidates as a Pair of Lists, one of the new Candidates and one of the Candidates that
+ * should be removed.
  * 
  * @author Nicolas Klose
  * 
@@ -22,25 +22,16 @@ import com.sap.sailing.domain.tracking.GPSFix;
 
 public interface AbstractCandidateFinder {
 
-    void calculateFixesAffectedByNewCompetitorFixes(Competitor c, Iterable<GPSFix> fixes);
-
-    void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
+    LinkedHashMap<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 
     /**
      * Before calling this method, there have to be fixes that may have changed their status as a Candidate. This is
-     * done by the the methods {@link #calculateFixesAffectedByNewCompetitorFixes(Competitor, Iterable)} and
-     * {@link #calculateFixesAffectedByNewMarkFixes(Mark, Iterable)}
+     * done by the the method {@link #calculateFixesAffectedByNewMarkFixes(Mark, Iterable)}
      * 
      * @param c
      * @return
      */
-    Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c);
-
-    /**
-     * @return the {@link Competitor}s that have affected Fixes, so the other Competitors can be ignored in the
-     *         following calculations.
-     */
-    Iterable<Competitor> getAffectedCompetitors();
+    Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
     /**
      * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the Candidates
@@ -50,5 +41,5 @@ public interface AbstractCandidateFinder {
      *            the competitor whose {@link Candidate}s should be returned
      * @return all of the Candidates for the specified competitor
      */
-    Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c);
+    Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
 }

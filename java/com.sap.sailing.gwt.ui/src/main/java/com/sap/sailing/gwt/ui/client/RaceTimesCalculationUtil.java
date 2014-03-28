@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesCalculationUtil {
 
@@ -13,15 +14,27 @@ public class RaceTimesCalculationUtil {
 
         switch (timer.getPlayMode()) {
         case Live:
-            if (raceTimesInfo.startOfRace != null) {
-                long extensionTime = calculateRaceExtensionTime(raceTimesInfo.startOfRace, raceTimesInfo.newestTrackingEvent);
-                
-                min = new Date(raceTimesInfo.startOfRace.getTime() - extensionTime);
-            } else if (raceTimesInfo.startOfTracking != null) {
+            if(raceTimesInfo.startOfRace != null) {
+                // we have a race start time
+                if(raceTimesInfo.newestTrackingEvent != null) {
+                    if(raceTimesInfo.startOfRace.after(raceTimesInfo.newestTrackingEvent)) {
+                        // race start is in the future
+                        long extensionTime = calculateRaceExtensionTime(raceTimesInfo.newestTrackingEvent, raceTimesInfo.startOfRace);
+                        min = new Date(raceTimesInfo.newestTrackingEvent.getTime() - extensionTime);
+                        max = raceTimesInfo.startOfRace;
+                    } else {
+                        // race start was in the past
+                        long extensionTime = calculateRaceExtensionTime(raceTimesInfo.startOfRace, raceTimesInfo.newestTrackingEvent);
+                        min = new Date(raceTimesInfo.startOfRace.getTime() - extensionTime);
+                        max = raceTimesInfo.newestTrackingEvent;
+                    }                    
+                } else {
+                    min = raceTimesInfo.startOfTracking;
+                    max = raceTimesInfo.startOfRace;
+                }
+            } else {
+                // we have NO race start time
                 min = raceTimesInfo.startOfTracking;
-            }
-            
-            if (raceTimesInfo.newestTrackingEvent != null) {
                 max = raceTimesInfo.newestTrackingEvent;
             }
             break;

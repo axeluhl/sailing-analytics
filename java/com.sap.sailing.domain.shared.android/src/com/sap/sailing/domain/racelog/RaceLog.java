@@ -117,4 +117,9 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * @return
      */
     NavigableSet<RaceLogEvent> getUnrevokedEventsDescending();
+
+    /**
+     * Merges all events from the <code>other</code> race log into this.
+     */
+    void merge(RaceLog other);
 }

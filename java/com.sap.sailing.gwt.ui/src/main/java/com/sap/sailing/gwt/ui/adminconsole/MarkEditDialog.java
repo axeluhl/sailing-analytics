@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.shared.HtmlPredefinedColor;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
     private final MarkDTO markToEdit; //color, shape, pattern, type
@@ -30,7 +30,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
             DialogCallback<MarkDTO> callback) {
         super(isNewMark ? stringMessages.add(stringMessages.mark()) : stringMessages.edit(stringMessages.mark()),
                 isNewMark ? stringMessages.add(stringMessages.mark()) : stringMessages.edit(stringMessages.mark()),
-                        stringMessages.ok(), stringMessages.cancel(), new Validator<MarkDTO>() {
+                        stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<MarkDTO>() {
                     @Override
                     public String getErrorMessage(MarkDTO valueToValidate) {
                         String result = null;

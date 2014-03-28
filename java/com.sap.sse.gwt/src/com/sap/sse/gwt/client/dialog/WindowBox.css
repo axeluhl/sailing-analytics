@@ -1,0 +1,79 @@
+.gwt-extras-WindowBox {
+	clip: rect(auto auto auto auto);
+}
+
+.gwt-extras-WindowBox .dialogMiddleCenter {
+  padding: 0px !important;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-container {
+  position: relative;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-controls {
+  position: absolute;
+  top: 12px;
+  right: 19px;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-controls a {
+  cursor: pointer;
+  display: block;
+  height: 18px;
+  width: 17px;
+}
+
+.gwt-extras-WindowBox .dialogMiddleCenterInner {
+	overflow: auto;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
+  background: transparent url(images/closeButton.png) left top no-repeat;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close:hover {
+  background: transparent url(images/closeButton.png) right top no-repeat;
+}
+
+.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize {
+  /*display: block;
+  height: 12px;
+  width: 12px;*/
+  background: transparent url(images/min-4panel.png) left top no-repeat;
+}
+
+.gwt-extras-WindowBox .dialogBottomRightInner {
+	width: 10px;
+	height: 10px;
+	background: url(images/resize_arrow.png) center center no-repeat;
+}
+
+.gwt-extras-WindowBox .media-synch-control {
+	background: #efefef;
+	padding: 10px;
+	margin: 10px 0 10px 0;
+}
+
+.gwt-extras-WindowBox .media-synch-control:after {
+   content: ".";
+   visibility: hidden;
+   display: block;
+   height: 0;
+   clear: both;
+}
+
+.gwt-extras-WindowBox .finetuning-panel {
+	margin: 10px 0;
+}
+
+.gwt-extras-WindowBox .finetuning-panel button {
+    margin: 0 0 0 5px;
+}
+
+.gwt-extras-WindowBox .confirm-button {
+	margin: 0 5px 0 0;
+}
+
+.gwt-extras-WindowBox .video-root-panel {
+	display: inline-block;
+}

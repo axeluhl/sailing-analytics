@@ -12,14 +12,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetTimePointDialog extends DataEntryDialog<Date> {
     private final BetterDateTimeBox time;
     private final StringMessages stringMessages;
     
     public SetTimePointDialog(final StringMessages stringMessages, String title, DialogCallback<Date> callback) {
-        super(title, title, stringMessages.ok(), stringMessages.cancel(), new Validator<Date>() {
+        super(title, title, stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<Date>() {
             @Override
             public String getErrorMessage(Date valueToValidate) {
                 if (valueToValidate == null) return stringMessages.pleaseEnterA(stringMessages.time());

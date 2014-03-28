@@ -25,12 +25,16 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean startsWithZeroScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final boolean hasSplitFleetContiguousScoring;
+    private final boolean seriesNameChanged;
+    private final String newSeriesName;
 
-    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
+    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
             List<FleetDTO> fleets) {
         super(regattaIdentifier, seriesName);
+        this.seriesNameChanged = !seriesName.equals(newSeriesName);
+        this.newSeriesName = newSeriesName;
         this.isMedal = isMedal;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.startsWithZeroScore = startsWithZeroScore;
@@ -44,7 +48,10 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         Series series = getSeries(toState);
         if (series == null) {
             series = createSeries(toState);
-        } 
+        }
+        if (seriesNameChanged) {
+            series.setName(newSeriesName);
+        }
         series.setIsMedal(isMedal);
         series.setResultDiscardingRule(resultDiscardingThresholds == null ?
                 null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));

@@ -40,7 +40,6 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
-import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayParser;
@@ -84,8 +83,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      * {@link #trackedRacePerRaceID} for storing data from subsequent messages.
      */
     private String currentRaceID;
-
-    private RaceType currentRaceType;
     
     /**
      * Reference time point for time specifications
@@ -175,7 +172,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void raceID(String raceID) {
         currentRaceID = raceID;
-        currentRaceType = domainFactory.getRaceTypeFromRaceID(currentRaceID);
     }
 
     private boolean isValid(int threeByteValue) {
@@ -237,7 +233,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceType);
+                    currentRaceID, null /* boat class */);
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();
@@ -310,7 +306,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE,
-                currentRaceID, trackedRegattaRegistry);
+                currentRaceID, null /* boat class */, trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);

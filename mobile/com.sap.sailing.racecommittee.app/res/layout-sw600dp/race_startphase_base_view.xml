@@ -74,9 +74,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="1dp"
                 android:text="@string/abort_starting_phase"
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+
+                <Button
+                    android:id="@+id/raceStartIn4Minutes"
+                    android:layout_width="197dp"
+                    android:layout_height="60dp"
+                    android:text="@string/race_start_in_4_minutes" />
+
+                <Button
+                    android:id="@+id/raceResetCourse"
+                    android:layout_width="197dp"
+                    android:layout_height="50dp"
+                    android:text="@string/race_reset_course" />
 
             <Button
                 android:id="@+id/race_startphase_base_reset_time_button"

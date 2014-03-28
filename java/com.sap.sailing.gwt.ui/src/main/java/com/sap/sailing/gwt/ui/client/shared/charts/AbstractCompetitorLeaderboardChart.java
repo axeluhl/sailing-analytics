@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -42,17 +41,20 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
  */
 public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
     CompetitorSelectionChangeListener, RequiresResize, TimeListener {
+    public static final String LODA_LEADERBOARD_CHART_DATA_CATEGORY = "loadLeaderboradChartData";
+    
     private static final int LINE_WIDTH = 1;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
     protected final Map<CompetitorDTO, Series> competitorSeries;
@@ -204,12 +206,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if(!isVisible()) {
             return;
         }
         
-        loadChartData(timer.getPlayMode() == PlayModes.Live ? null : date);
+        loadChartData(timer.getPlayMode() == PlayModes.Live ? null : newTime);
     }
     
     protected void loadChartData(Date date) {
@@ -217,8 +219,11 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             chart.showLoading(stringMessages.loadingCompetitorData());
         }
         
-        GetLeaderboardDataEntriesAction getLeaderboardDataEntriesAction = new GetLeaderboardDataEntriesAction(sailingService,
-                leaderboardName, /* date */ null, selectedDetailType, new AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>>() {
+        GetLeaderboardDataEntriesAction getLeaderboardDataEntriesAction = new GetLeaderboardDataEntriesAction(
+                sailingService, leaderboardName, /* date */ null, selectedDetailType);
+        
+        asyncActionsExecutor.execute(getLeaderboardDataEntriesAction, LODA_LEADERBOARD_CHART_DATA_CATEGORY,
+                new AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>>() {
                     @Override
                     public void onSuccess(List<Triple<String, List<CompetitorDTO>, List<Double>>> result) {
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
@@ -237,14 +242,14 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         default:
                             break;
                         }
-
+        
                         chart.setSizeToMatchContainer();
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
                         // positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called
                         chart.redraw();
                     }
-
+        
                     @Override
                     public void onFailure(Throwable caught) {
                         chart.hideLoading();
@@ -252,8 +257,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                                 timer.getPlayMode() == PlayModes.Live);
                     }
                 });
-        
-        asyncActionsExecutor.execute(getLeaderboardDataEntriesAction);
     }
 
     private void fillTotalRanksSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
@@ -362,17 +365,17 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     protected DetailType getSelectedDetailType() {

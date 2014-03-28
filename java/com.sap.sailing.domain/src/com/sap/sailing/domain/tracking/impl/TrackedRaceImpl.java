@@ -46,6 +46,7 @@ import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -111,8 +112,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
-
-    private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 270;
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
@@ -2043,9 +2042,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                 .compareTo(threeHullLengths) > 0) {
                     // if next is more then approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
-                    Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
-                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds);
-                    result.add(maneuver);
+                    Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
+                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
                     group.clear();
                     totalCourseChangeInDegrees = 0.0;
                     totalMilliseconds = 0l;
@@ -2060,17 +2058,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // change
             } while (iter.hasNext());
             if (!group.isEmpty()) {
-                result.add(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation, group,
-                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds));
+                Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation, group,
+                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
             }
         }
         return result;
     }
 
-    private Maneuver createManeuverFromGroupOfCourseChanges(Competitor competitor,
+    private Iterable<Maneuver> createManeuverFromGroupOfCourseChanges(Competitor competitor,
             SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<Pair<GPSFixMoving, CourseChange>> group,
             SpeedWithBearing speedWithBearingOnApproximationAtEnd, double totalCourseChangeInDegrees,
             long totalMilliseconds) throws NoWindException {
+        List<Maneuver> result = new ArrayList<>();
         MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
                 .asMillis()
                 - getApproximateManeuverDurationInMilliseconds() / 2);
@@ -2079,10 +2078,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 + getApproximateManeuverDurationInMilliseconds() / 2);
         TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver,
                 timePointAfterManeuver);
-        Position maneuverPosition = getTrack(competitor)
+        final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
+        Position maneuverPosition = competitorTrack
                 .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
-        Tack tackBeforeManeuver = getTack(maneuverPosition, timePointBeforeManeuver,
-                speedWithBearingOnApproximationAtBeginning.getBearing());
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
                 speedWithBearingOnApproximationAtEnd.getBearing());
         ManeuverType maneuverType;
@@ -2092,6 +2090,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
         NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
+        final NauticalSide courseChangedTo = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
         // detected as a penalty circle
         if (legBeforeManeuver != legAfterManeuver
@@ -2100,77 +2099,56 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             maneuverType = ManeuverType.MARK_PASSING;
             waypointPassed = legAfterManeuver.getLeg().getFrom();
-            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
-        } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
-            maneuverType = ManeuverType.PENALTY_CIRCLE;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
-            }
-        } else {
-            if (tackBeforeManeuver != tackAfterManeuver) {
-                LegType legType = legBeforeManeuver != null ? getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(
-                        timePointBeforeManeuver) : legAfterManeuver != null ? getTrackedLeg(legAfterManeuver.getLeg())
-                        .getLegType(timePointAfterManeuver) : null;
-                if (legType != null) {
-                    // tack or jibe
-                    switch (legType) {
-                    case UPWIND:
-                        maneuverType = ManeuverType.TACK;
-                        if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
-                                    maneuverTimePoint, timePointAfterManeuver);
-                        }
-                        break;
-                    case DOWNWIND:
-                        maneuverType = ManeuverType.JIBE;
-                        if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
-                                    maneuverTimePoint, timePointAfterManeuver);
-                        }
-                        break;
-                    default:
-                        maneuverType = ManeuverType.UNKNOWN;
-                        if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("Unknown maneuver for "
-                                    + competitor
-                                    + " at "
-                                    + maneuverTimePoint
-                                    + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg()
-                                            : " before start"));
-                        }
-                        break;
-                    }
-                } else {
-                    maneuverType = ManeuverType.UNKNOWN;
-                    logger.fine("Can't determine leg type because tracked legs for competitor " + competitor
-                            + " cannot be determined for time points " + timePointBeforeManeuver + " and "
-                            + timePointAfterManeuver);
+            sideToWhichWaypointWasPassed = courseChangedTo;
+            // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
+            result.add(new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
+                    sideToWhichWaypointWasPassed));
+        }
+        final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
+        final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
+        final SpeedWithBearing estimatedSpeedAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver);
+        if (wind != null && estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
+            BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+            final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
+            final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
+            boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getBearing());
+            boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getFrom());
+            if (tacked && jibed) {
+                maneuverType = ManeuverType.PENALTY_CIRCLE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (tacked) {
+                maneuverType = ManeuverType.TACK;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (jibed) {
+                maneuverType = ManeuverType.JIBE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
                 }
             } else {
                 // heading up or bearing away
-                Wind wind = getWind(maneuverPosition, maneuverTimePoint);
                 Bearing windBearing = wind.getBearing();
-                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning
-                        .getBearing());
-                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd
-                        .getBearing());
+                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
                 maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
                         : ManeuverType.BEAR_AWAY;
             }
-        }
-        final Maneuver maneuver;
-        if (maneuverType == ManeuverType.MARK_PASSING) {
-            maneuver = new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+            final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                     maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
-                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
-                    sideToWhichWaypointWasPassed);
-        } else {
-            maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
-                    speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                    totalCourseChangeInDegrees, maneuverLoss);
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+            result.add(maneuver);
         }
-        return maneuver;
+        return result;
     }
 
     /**

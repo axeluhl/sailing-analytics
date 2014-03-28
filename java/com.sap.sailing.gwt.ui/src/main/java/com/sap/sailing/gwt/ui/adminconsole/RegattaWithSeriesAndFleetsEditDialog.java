@@ -44,6 +44,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         courseAreaListBox.setEnabled(true);
         
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
+        regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
         regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() { 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -51,6 +52,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
             }
         });
         regattaConfigurationButton = new Button(stringMessages.edit());
+        regattaConfigurationButton.ensureDebugId("RacingProcedureConfigurationEditButton");
         regattaConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -64,7 +66,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
                     @Override
                     public void cancel() {
                     }
-                }).show();;
+                }).show();
             }
         });
         regattaConfigurationCheckbox.setValue(regatta.configuration != null);

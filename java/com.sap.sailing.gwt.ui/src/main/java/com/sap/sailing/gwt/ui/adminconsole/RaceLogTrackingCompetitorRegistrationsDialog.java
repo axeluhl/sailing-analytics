@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackingDialog {
     private CompetitorTableWrapper competitorTable;
@@ -122,7 +122,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
     }
 
     private void openAddCompetitorDialog() {
-        new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(), new DialogCallback<CompetitorDTO>() {
+        new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(), new DataEntryDialog.DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {

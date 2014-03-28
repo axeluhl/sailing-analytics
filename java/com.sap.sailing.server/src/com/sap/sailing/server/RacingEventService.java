@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -60,6 +62,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -204,6 +207,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Removes the regatta as well as all regatta leaderboards for that regatta
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    
+    /**
+     * Removes the given series
+     */
+    void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -336,8 +344,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param publicationUrl
-     *            The publication URL of the new event
+     * @param startDate
+     *            The start date of the event
+     * @param endDate
+     *            The end date of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param id
@@ -346,7 +356,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, UUID id);
+    Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
@@ -354,10 +364,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param id TODO
      * @param eventName
      *            The name of the event to update
+     * @param startDate
+     *            The start date of the event
+     * @param endDate
+     *            The end date of the event
      * @param venueName
      *            The name of the venue of the event
-     * @param publicationUrl
-     *            The publication URL of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param regattaNames
@@ -365,7 +377,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -384,8 +396,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     CourseArea getCourseArea(Serializable courseAreaId);
 
+    /**
+     * Adds the specified mediaTrack to the in-memory media library.
+     * Important note: Only if mediaTrack.dbId != null the mediaTrack will be persisted in the the database.
+     * @param mediaTrack
+     */
     void mediaTrackAdded(MediaTrack mediaTrack);
 
+    /**
+     * Calling mediaTrackAdded for every entry in the specified collection. 
+     * @param mediaTracks
+     */
     void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
@@ -398,6 +419,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
+    /**
+     * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
+     * Checks if the track already exists in the library and the database and adds/stores it
+     * accordingly. If a track already exists and override, its properties are checked for changes 
+     * @param mediaTrack
+     * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
+     * overwritten with the values from the track to be imported.
+     */
+    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
@@ -419,15 +450,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
-
-    /**
-     * 
-     * @param override If set to true, the mthod will override any existing connection
-     */
-    void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
     
-    Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
+    Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
             UUID id);
+
+    void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
@@ -469,13 +496,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param startTime the new Start-Time
      * @return
      */
-    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
+    TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
+     * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     
@@ -492,4 +519,26 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     CompetitorStore getCompetitorStore();
     
     TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
+
+    /**
+     * This lock exists to allow only one master data import at a time to avoid situation where multiple Imports
+     * override each other in unpredictable fashion
+     */
+    DataImportLockWithProgress getDataImportLock();
+
+    DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
+
+    void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage);
+
+    void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
+
+    void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
 }

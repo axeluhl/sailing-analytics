@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class PositionEntryDialog extends DataEntryDialog<PositionDTO> {
     private final DoubleBox lat;
@@ -17,7 +17,7 @@ public class PositionEntryDialog extends DataEntryDialog<PositionDTO> {
 
     public PositionEntryDialog(String title, final StringMessages stringMessages, DialogCallback<PositionDTO> callback) {
         super(title, title, stringMessages.save(), stringMessages.cancel(),
-                new Validator<PositionDTO>() {
+                new DataEntryDialog.Validator<PositionDTO>() {
                     @Override
                     public String getErrorMessage(PositionDTO valueToValidate) {
                         if (valueToValidate.latDeg == ERROR_VAL) {

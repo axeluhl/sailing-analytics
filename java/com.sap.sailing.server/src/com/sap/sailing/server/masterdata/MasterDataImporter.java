@@ -1,13 +1,17 @@
 package com.sap.sailing.server.masterdata;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
@@ -22,35 +26,46 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
     }
 
-    public MasterDataImportObjectCreationCount importMasterData(TopLevelMasterData topLevelMasterData, boolean override) {
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, override, creationCount,
-                baseDomainFactory);
-        creationCount = racingEventService.apply(op);
-        createMediaTracks(topLevelMasterData, override);
+    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override) throws IOException,
+            ClassNotFoundException {
+        ObjectInputStreamResolvingAgainstDomainFactory objectInputStream = racingEventService.getBaseDomainFactory()
+                .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
+        racingEventService
+                .createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03, "Reading Data", 0.5);
 
-        return creationCount;
+        @SuppressWarnings("unchecked")
+        final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
+        if (override) {
+            setAllowCompetitorsDataToBeReset(competitorIds);
+        }
+        TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+
+
+        racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
+                "Data-Transfer Complete, Initializing Import Operation", 0.5);
+
+        applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
     }
 
-    private void createMediaTracks(TopLevelMasterData topLevelMasterData, boolean override) {
-        Collection<MediaTrack> tracks = topLevelMasterData.getAllMediaTracks();
-        Collection<MediaTrack> existingMediaTracks = racingEventService.getAllMediaTracks();
-        Map<String, MediaTrack> existingMap = new HashMap<String, MediaTrack>();
-
-        for (MediaTrack oneTrack : existingMediaTracks) {
-            existingMap.put(oneTrack.dbId, oneTrack);
-        }
-
-        for (MediaTrack oneNewTrack : tracks) {
-            if (existingMap.containsKey(oneNewTrack.dbId)) {
-                if (override) {
-                    racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
-                } else {
-                    continue;
-                }
+    private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
+        CompetitorStore store = baseDomainFactory.getCompetitorStore();
+        for (Serializable id : competitorIds) {
+            Competitor competitor = baseDomainFactory.getExistingCompetitorById(id);
+            if (competitor != null) {
+                store.allowCompetitorResetToDefaults(competitor);
             }
-            racingEventService.mediaTrackAdded(oneNewTrack);
         }
+    }
+
+    private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
+            UUID importOperationId, boolean override) {
+        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
+                creationCount,
+                baseDomainFactory);
+        creationCount = racingEventService.apply(op);
+        racingEventService.mediaTracksImported(topLevelMasterData.getAllMediaTracks(), override);
+        return creationCount;
     }
 
 }

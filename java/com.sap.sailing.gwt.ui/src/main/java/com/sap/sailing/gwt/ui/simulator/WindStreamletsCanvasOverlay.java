@@ -17,11 +17,11 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing a wind field. The overlay covers the whole map and displays
@@ -120,7 +120,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     protected void drawWindField() {
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         } else {
             drawWindField(windFieldDTO.getMatrix());
         }
@@ -235,17 +235,17 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
 
         List<SimulatorWindDTO> windDTOToDraw = new ArrayList<SimulatorWindDTO>();
 
-        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(newTime.getTime()+1));
 
         if (!headMap.isEmpty()) {
             windDTOToDraw = headMap.get(headMap.lastKey());
         }
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
-                + date);
+                + newTime);
 
         drawWindField(windDTOToDraw);
 

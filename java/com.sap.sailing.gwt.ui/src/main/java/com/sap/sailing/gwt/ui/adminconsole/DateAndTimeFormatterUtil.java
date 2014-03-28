@@ -19,6 +19,10 @@ public class DateAndTimeFormatterUtil {
     private static DateTimeFormatRenderer hoursAndMinutesAndSecondsTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss"));
 
+    public static String formatDateRange(Date startDate, Date endDate) {
+        return defaultDateFormatter.render(startDate) + " - " + defaultDateFormatter.render(endDate);
+    }
+
     public static String formatElapsedTime(long timeInMilliseconds) {
         String result = "";
         int seconds = (int) (timeInMilliseconds / 1000) % 60 ;

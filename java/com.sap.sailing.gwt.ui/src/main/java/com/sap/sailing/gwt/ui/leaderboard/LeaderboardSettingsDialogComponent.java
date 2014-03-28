@@ -26,9 +26,9 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.IntegerBox;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;
@@ -45,18 +45,20 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
+    private final boolean showAddedScores;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
+    private CheckBox showAddedScoresCheckBox;
     
     protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
-            boolean autoExpandPreSelectedRace, 
+            boolean autoExpandPreSelectedRace, boolean showAddedScores,
             long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
@@ -74,6 +76,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.showAddedScores = showAddedScores;
     }
 
     @Override
@@ -97,6 +100,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(detailType));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
@@ -141,10 +145,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
+        // Make it possible to configure added points
+        FlowPanel addedScoresFlowPanel = new FlowPanel();
+        addedScoresFlowPanel.addStyleName("dialogInnerContent");
+        showAddedScoresCheckBox = dialog.createCheckbox(stringMessages.showAddedScores());
+        dialog.addTooltip(showAddedScoresCheckBox, stringMessages.showAddedScores());
+        showAddedScoresCheckBox.setValue(showAddedScores);
+        addedScoresFlowPanel.add(showAddedScoresCheckBox);
+        raceDetailDialog.add(addedScoresFlowPanel);
         return raceDetailDialog;
     }
 
@@ -157,6 +170,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentOverallDetailSelection.contains(type));
             overallDetailCheckboxes.put(type, checkbox);
             overallDetailDialogContent.add(checkbox);
@@ -179,6 +193,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 legDetailsToShow.add(legDetailsContent);
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
@@ -317,7 +332,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy);
+                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
+                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue());
     }
 
     @Override

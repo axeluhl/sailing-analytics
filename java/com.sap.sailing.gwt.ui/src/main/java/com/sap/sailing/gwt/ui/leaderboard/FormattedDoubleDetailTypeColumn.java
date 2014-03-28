@@ -17,18 +17,21 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
     /**
      * Creates a new column for the given {@link DetailType}. Have a look at
      * {@link DetailTypeFormatter#getUnit(DetailType)}, to see if the given type is supported.
-     * 
-     * @param detailType
-     * @param field
-     * @param headerStyle
-     * @param columnStyle
      */
     public FormattedDoubleDetailTypeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
         super(detailType, field, new TextCell(), headerStyle, columnStyle);
-        formatter = NumberFormatterFactory.getDecimalFormat(detailType.getPrecision());
-        this.minMaxRenderer = new MinMaxRenderer(this, getComparator());
+        formatter = createNumberFormatter(detailType);
+        this.minMaxRenderer = createMinMaxRenderer();
     }
 
+    protected MinMaxRenderer createMinMaxRenderer() {
+        return new MinMaxRenderer(this, getComparator());
+    }
+
+    private NumberFormat createNumberFormatter(DetailType detailType) {
+        return NumberFormatterFactory.getDecimalFormat(detailType.getPrecision());
+    }
+    
     protected MinMaxRenderer getMinMaxRenderer() {
         return minMaxRenderer;
     }

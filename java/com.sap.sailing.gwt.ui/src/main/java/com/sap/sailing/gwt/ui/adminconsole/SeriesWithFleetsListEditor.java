@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
     
@@ -31,6 +31,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         @Override
         protected Widget createAddWidget() {
             Button addSeriesButton = new Button(stringMessages.addSeries());
+            addSeriesButton.ensureDebugId("AddSeriesButton");
             addSeriesButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -45,6 +46,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
                             addValue(newSeries);
                         }
                     });
+                    dialog.ensureDebugId("SeriesCreateDialog");
                     dialog.show();
                 }
             });

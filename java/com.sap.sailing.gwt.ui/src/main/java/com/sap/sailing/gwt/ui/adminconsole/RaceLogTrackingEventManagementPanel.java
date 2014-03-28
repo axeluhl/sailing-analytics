@@ -18,9 +18,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -299,10 +299,10 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
         new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
-                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeDTO>() {
+                fleetDTO.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
             @Override
-            public void ok(RaceLogSetStartTimeDTO editedObject) {
-                sailingService.setStartTime(editedObject, new AsyncCallback<Boolean>() {
+            public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
+                sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());

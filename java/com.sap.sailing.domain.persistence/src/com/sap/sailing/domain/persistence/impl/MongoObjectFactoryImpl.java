@@ -140,11 +140,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     public void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
-        result.put(field.name(), timePoint.asMillis());
+        if (timePoint != null) {
+            result.put(field.name(), timePoint.asMillis());
+        }
     }
 
     public void storeTimed(Timed timed, DBObject result) {
-        storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
+        if (timed.getTimePoint() != null) {
+            storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
+        }
     }
 
     public void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
@@ -464,7 +468,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
-        eventDBObject.put(FieldNames.EVENT_PUBLICATION_URL.name(), event.getPublicationUrl());
+        storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
+        storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
@@ -538,7 +543,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattasCollection.remove(query);
     }
-
+    
     private BasicDBList storeSeries(Iterable<? extends Series> series) {
         BasicDBList dbSeries = new BasicDBList();
         for (Series s : series) {
@@ -617,159 +622,151 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
     }
 
+    private void storeRaceLogIdentifier(RaceLogIdentifier raceLogIdentifier, DBObject result) {
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+    }
+
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartTimeEvent startTimeEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPassChangeEvent passChangeEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPassChangeEvent(passChangeEvent));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent raceStatusEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRaceStatusEvent(raceStatusEvent));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCourseAreaChangedEvent(courseAreaChangedEvent));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseDesignChangedEvent courseDesignChangedEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCourseDesignChangedEvent(courseDesignChangedEvent));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningListChangedEvent finishPositioningListChangedEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningListChangedEvent(finishPositioningListChangedEvent));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningConfirmedEvent(finishPositioningConfirmedEvent));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPathfinderEvent pathfinderEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPathfinderEvent(pathfinderEvent));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogGateLineOpeningTimeEvent gateLineOpeningTimeEvent) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));       
+        storeRaceLogIdentifier(raceLogIdentifier, result);       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogGateLineOpeningTimeEvent(gateLineOpeningTimeEvent));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartProcedureChangedEvent event) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartProcedureChangedEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogProtestStartTimeEvent event) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogProtestStartTimeEvent(event));
         return result;
     }
     
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DeviceCompetitorMappingEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDeviceCompetitorMappingEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DeviceMarkMappingEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDeviceMarkMappingEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DenoteForTrackingEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDenoteForTrackingEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, StartTrackingEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTrackingEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RevokeEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRevokeEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RegisterCompetitorEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRegisterCompetitorEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DefineMarkEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDefineMarkEvent(event));
         return result;
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, CloseOpenEndedDeviceMappingEvent event) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
-
+        storeRaceLogIdentifier(raceLogIdentifier, result);
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCloseOpenEndedDeviceMappingEvent(event));
         return result;
     }
@@ -777,7 +774,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogWindFixEvent.class.getSimpleName());
         result.put(FieldNames.WIND.name(), storeWind(event.getWindFix()));
         return result;
@@ -786,7 +782,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogProtestStartTimeEvent(RaceLogProtestStartTimeEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogProtestStartTimeEvent.class.getSimpleName());
         storeTimePoint(event.getProtestStartTime(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
         return result;
@@ -795,7 +790,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogStartProcedureChangedEvent(RaceLogStartProcedureChangedEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartProcedureChangedEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_START_PROCEDURE_TYPE.name(), event.getStartProcedureType().name());
         return result;
@@ -804,9 +798,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogPathfinderEvent(RaceLogPathfinderEvent pathfinderEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(pathfinderEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPathfinderEvent.class.getSimpleName());
-
         result.put(FieldNames.RACE_LOG_PATHFINDER_ID.name(), pathfinderEvent.getPathfinderId());
         return result;
     }
@@ -831,7 +823,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
         storeRaceLogDeviceMappingEvent(event, result);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
@@ -841,7 +832,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogDeviceMarkMappingEvent(DeviceMarkMappingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
         storeRaceLogDeviceMappingEvent(event, result);
         result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
@@ -851,7 +841,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogDenoteForTrackingEvent(DenoteForTrackingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DenoteForTrackingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_NAME.name(), event.getRaceName());
         result.put(FieldNames.BOAT_CLASS_NAME.name(), event.getBoatClass().getName());
@@ -861,7 +850,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogStartTrackingEvent(StartTrackingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), StartTrackingEvent.class.getSimpleName());
         return result;
     }
@@ -869,7 +857,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogRevokeEvent(RevokeEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RevokeEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_REVOKED_EVENT_ID.name(), event.getRevokedEventId());
         return result;
@@ -878,7 +865,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogRegisterCompetitorEvent(RegisterCompetitorEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RegisterCompetitorEvent.class.getSimpleName());
         return result;
     }
@@ -886,7 +872,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogDefineMarkEvent(DefineMarkEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DefineMarkEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_MARK.name(), storeMark(event.getMark()));
         return result;
@@ -895,7 +880,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogCloseOpenEndedDeviceMappingEvent(CloseOpenEndedDeviceMappingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), CloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
         storeTimePoint(event.getClosingTimePoint(), result, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
@@ -905,9 +889,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBObject storeRaceLogFlagEvent(RaceLogFlagEvent flagEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(flagEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFlagEvent.class.getSimpleName());
-
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
@@ -917,9 +899,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(startTimeEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
-        
         storeTimePoint(startTimeEvent.getStartTime(), result, FieldNames.RACE_LOG_EVENT_START_TIME);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), startTimeEvent.getNextStatus().name());
         return result;
@@ -947,7 +927,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogPassChangeEvent(RaceLogPassChangeEvent passChangeEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(passChangeEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPassChangeEvent.class.getSimpleName());
         return result;
     }
@@ -955,9 +934,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogRaceStatusEvent(RaceLogRaceStatusEvent raceStatusEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(raceStatusEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRaceStatusEvent.class.getSimpleName());
-
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), raceStatusEvent.getNextStatus().name());
         return result;
     }
@@ -965,9 +942,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogCourseAreaChangedEvent(RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(courseAreaChangedEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseAreaChangedEvent.class.getSimpleName());
-
         result.put(FieldNames.COURSE_AREA_ID.name(), courseAreaChangedEvent.getCourseAreaId());
         return result;
     }
@@ -975,9 +950,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeRaceLogCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent courseDesignChangedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(courseDesignChangedEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
-        
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name(), courseDesignChangedEvent.getCourseDesign().getName());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
         return result;
@@ -986,9 +959,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogFinishPositioningListChangedEvent(RaceLogFinishPositioningListChangedEvent finishPositioningListChangedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
-        
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningListChangedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
 
         return result;
@@ -997,9 +968,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogFinishPositioningConfirmedEvent(RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
-        
         result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()));
 
         return result;
@@ -1008,9 +977,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Object storeRaceLogGateLineOpeningTimeEvent(RaceLogGateLineOpeningTimeEvent gateLineOpeningTimeEvent){
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(gateLineOpeningTimeEvent, result);
-
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogGateLineOpeningTimeEvent.class.getSimpleName());
-
         result.put(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTimes().getGateLaunchStopTime());
         result.put(FieldNames.RACE_LOG_GOLF_DOWN_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime());
         return result;
@@ -1018,19 +985,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     private BasicDBList storePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         BasicDBList dbList = new BasicDBList();
-        
         if (positionedCompetitors != null) {
             for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
                 dbList.add(storePositionedCompetitor(competitorPair));
             }
         }
-
         return dbList;
     }
     
     private DBObject storePositionedCompetitor(Triple<Serializable, String, MaxPointsReason> competitorTriple) {
         DBObject result = new BasicDBObject();
-        
         result.put(FieldNames.COMPETITOR_ID.name(), competitorTriple.getA());
         result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorTriple.getB());
         result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorTriple.getC().name());
@@ -1176,5 +1140,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     			.add(FieldNames.DEVICE_TYPE.name(), type)
     			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId)
     			.add(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation()).get();
+    }
+    
+    void storeRaceLogEventEvent(DBObject eventEntry) {
+        getRaceLogCollection().insert(eventEntry);
+        logger.fine("Inserted event entry into mongo race log collection");
+    }
+
+    @Override
+    public void removeRaceLog(RaceLogIdentifier identifier) {
+        DBObject query = new BasicDBObject();
+        storeRaceLogIdentifier(identifier, query);
+        getRaceLogCollection().remove(query);
     }
 }

@@ -37,8 +37,7 @@ import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class CourseManagementWidget implements IsWidget {
     /**
@@ -84,7 +83,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
                 List<MarkDTO> marks, DialogCallback<Pair<ControlPointDTO, PassingInstruction>> callback) {
             super(stringMessages.controlPoint(), stringMessages.selectOneMarkOrTwoMarksForGate(),
-                    stringMessages.ok(), stringMessages.cancel(), new Validator<Pair<ControlPointDTO, PassingInstruction>>() {
+                    stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<Pair<ControlPointDTO, PassingInstruction>>() {
                         @Override
                         public String getErrorMessage(Pair<ControlPointDTO, PassingInstruction> valueToValidate) {
                             if (valueToValidate.getA() == null) {
@@ -451,7 +450,7 @@ public abstract class CourseManagementWidget implements IsWidget {
 
     private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
             AdminConsoleTableResources tableRes, final boolean beforeSelection) {
-        new ControlPointCreationDialog(stringMessages, tableRes, marksTable.getDataProvider().getList(), new DialogCallback<Pair<ControlPointDTO, PassingInstruction>>() {
+        new ControlPointCreationDialog(stringMessages, tableRes, marksTable.getDataProvider().getList(), new DataEntryDialog.DialogCallback<Pair<ControlPointDTO, PassingInstruction>>() {
             @Override
             public void cancel() {
                 // dialog cancelled, do nothing

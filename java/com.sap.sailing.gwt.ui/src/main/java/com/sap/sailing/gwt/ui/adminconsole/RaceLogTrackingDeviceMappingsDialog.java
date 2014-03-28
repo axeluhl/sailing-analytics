@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     public static final double PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS = 0.1;
@@ -72,7 +72,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             @Override
             public void update(int index, final DeviceMappingDTO dto, String value) {
                 if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_CLOSE.equals(value)) {
-                    new SetTimePointDialog(stringMessages, stringMessages.setClosingTimePoint(), new DialogCallback<Date>() {
+                    new SetTimePointDialog(stringMessages, stringMessages.setClosingTimePoint(), new DataEntryDialog.DialogCallback<Date>() {
                         @Override
                         public void ok(Date editedObject) {
                             sailingService.closeOpenEndedDeviceMapping(leaderboardName, raceColumnName, fleetName,
@@ -254,7 +254,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
         new AddDeviceMappingDialog(sailingService, errorReporter, stringMessages,
-                leaderboardName, raceColumnName, fleetName, new DialogCallback<DeviceMappingDTO>() {
+                leaderboardName, raceColumnName, fleetName, new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
             @Override
             public void ok(final DeviceMappingDTO mapping) {
                 sailingService.addDeviceMappingToRaceLog(leaderboardName, raceColumnName, fleetName, mapping, new AsyncCallback<Void>() {

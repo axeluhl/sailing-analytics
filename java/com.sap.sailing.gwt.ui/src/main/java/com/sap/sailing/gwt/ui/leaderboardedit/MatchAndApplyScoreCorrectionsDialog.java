@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
     private static final RegExp sailIdPattern = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
@@ -421,7 +421,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
-                    leaderboardPanel.timeChanged(/* time point is ignored */ null); // reload leaderboard contents to reflect changes
+                    leaderboardPanel.timeChanged(/* time point is ignored */ null, null); // reload leaderboard contents to reflect changes
                     // leaderboard panel sets busy indicator to non-busy after done with updating
                 }
             });
