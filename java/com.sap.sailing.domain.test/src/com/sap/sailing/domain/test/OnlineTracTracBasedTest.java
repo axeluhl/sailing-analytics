@@ -39,9 +39,12 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
+import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
+import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
+import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 
 /**
  * Connects to TracTrac data. Subclasses should implement a @Before method which calls
@@ -115,7 +118,24 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        IRace tractracRace = SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next();
+        IRace tractracRace = getTracTracRace();
+        getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
+            @Override
+            public void stopped(IEvent event) {}
+            
+            @Override
+            public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
+                if (storedDataEvent.getProgress() == 1.0) {
+                    synchronized (semaphor) {
+                        storedDataLoaded = true;
+                        semaphor.notifyAll();
+                    }
+                }
+            }
+            
+            @Override
+            public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {}
+        });
         // we used to expect here that there is no RaceDefinition for the TracTrac race yet; however,
         // loading the race from an .mtb file stored locally, things work so fast that the race arrives through
         // a background thread (actually the RaceCourseReceiver) that it's initialized before we can check it here.
