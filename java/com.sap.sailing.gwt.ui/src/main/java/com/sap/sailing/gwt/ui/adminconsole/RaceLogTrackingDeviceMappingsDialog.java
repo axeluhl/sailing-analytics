@@ -252,11 +252,11 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         });
     }
     
-    private void addMapping() {
+    private void showAddMappingDialog(DeviceMappingDTO mapping) {
         new AddDeviceMappingDialog(sailingService, errorReporter, stringMessages,
                 leaderboardName, raceColumnName, fleetName, new DialogCallback<DeviceMappingDTO>() {
             @Override
-            public void ok(DeviceMappingDTO mapping) {
+            public void ok(final DeviceMappingDTO mapping) {
                 sailingService.addDeviceMappingToRaceLog(leaderboardName, raceColumnName, fleetName, mapping, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -265,6 +265,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                     
                     @Override
                     public void onFailure(Throwable caught) {
+                        showAddMappingDialog(mapping);
                         errorReporter.reportError("Could not add mapping: " + caught.getMessage());
                     }
                 });
@@ -272,6 +273,10 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
 
             @Override
             public void cancel() {}
-        }).show();
+        }, mapping).show();
+    }
+    
+    private void addMapping() {
+        showAddMappingDialog(null);
     }
 }

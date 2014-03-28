@@ -44,7 +44,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
 
     public AddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, String raceColumnName, String fleetName,
-            DialogCallback<DeviceMappingDTO> callback) {
+            DialogCallback<DeviceMappingDTO> callback, final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new Validator<DeviceMappingDTO>() {
             @Override
@@ -79,8 +79,14 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         sailingService.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> result) {
+                String typeToPreselect = mapping != null ? mapping.deviceType : null;
+                int i = 0;
                 for (String type : result) {
                     deviceType.addItem(type);
+                    if (type.equals(typeToPreselect)) {
+                        deviceType.setSelectedIndex(i);
+                    }
+                    i++;
                 }
             }
             
@@ -123,6 +129,15 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 competitorTable.refreshCompetitorList(result);
+                if (mapping != null && mapping.mappedTo instanceof CompetitorDTO) {
+                    //got new DTOs with new object identities, so have to go through them one by one
+                    CompetitorDTO old = (CompetitorDTO) mapping.mappedTo;
+                    for (CompetitorDTO inList : competitorTable.getAllCompetitors()) {
+                        if (old.getIdAsString().equals(inList.getIdAsString())) {
+                            competitorTable.getSelectionModel().setSelected(inList, true);
+                        }
+                    }
+                }
             }
             
             @Override
@@ -135,6 +150,15 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             @Override
             public void onSuccess(Collection<MarkDTO> result) {
                 markTable.refresh(result);
+                if (mapping != null && mapping.mappedTo instanceof MarkDTO) {
+                    //got new DTOs with new object identities, so have to go through them one by one
+                    MarkDTO old = (MarkDTO) mapping.mappedTo;
+                    for (MarkDTO inList : markTable.getDataProvider().getList()) {
+                        if (old.getIdAsString().equals(inList.getIdAsString())) {
+                            markTable.getSelectionModel().setSelected(inList, true);
+                        }
+                    }
+                }
             }
             
             @Override
@@ -142,6 +166,12 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
                 errorReporter.reportError("Could not load marks: " + caught.getMessage());
             }
         });
+        
+        if (mapping != null) {
+            deviceId.setValue(mapping.deviceId);
+            from.setValue(mapping.from);
+            to.setValue(mapping.to);
+        }
     }
     
     @Override
