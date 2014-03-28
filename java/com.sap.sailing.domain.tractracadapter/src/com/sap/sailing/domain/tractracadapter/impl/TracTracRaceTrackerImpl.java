@@ -234,17 +234,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
-        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())).getEvent(), domainFactory,
+        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory,
                 paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername,
                 tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
-    private TracTracRaceTrackerImpl(IEvent tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
+    private TracTracRaceTrackerImpl(IRace tractracRace, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
             RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
-        this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
+        this(tractracRace, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
                 tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
@@ -259,7 +259,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
             RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
-        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())).getEvent(), regatta,
+        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), regatta,
                 domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername,
                 tracTracPassword, raceStatus, trackedRegattaRegistry);
@@ -276,13 +276,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            events received such that they seem to be sent in "real-time." So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
      */
-    private TracTracRaceTrackerImpl(IEvent tractracEvent, final Regatta regatta, DomainFactory domainFactory,
+    private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         super();
-        this.tractracEvent = tractracEvent;
+        this.tractracEvent = tractracRace.getEvent();
         urls = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
@@ -295,19 +295,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         } else {
             simulator = null;
         }
-        // can happen that TracTrac event is null (occurs when there is no Internet connection)
-        // so lets raise some meaningful exception
-        if (tractracEvent == null) {
-            throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
-        }
-        
         // check if there is a directory configured where stored data files can be cached
         // only cache files for races in REPLAY state
         if (raceStatus != null && raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) {
             storedURI = checkForCachedStoredData(storedURI);
         }
         
-        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
+        logger.info("Starting race tracker: " + tractracRace.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
         
         // Initialize data controller using live and stored data sources
@@ -316,31 +310,27 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Start live and stored data streams
         Regatta effectiveRegatta = regatta;
         raceSubscribers = new HashMap<>();
-        final Iterable<IRace> tractracRaces = SynchronizationUtil.getRaces(tractracEvent);
-        for (IRace tractracRace : tractracRaces) {
-            IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
-            raceSubscribers.put(tractracRace, raceSubscriber);
-            // Try to find a pre-associated event based on the Race ID
-            if (effectiveRegatta == null) {
-                Serializable raceID = domainFactory.getRaceID(tractracRace);
-                effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
-            }
-            // removeRace may detach the domain regatta from the domain factory if that
-            // removed the last race; therefore, it's important to getOrCreate the
-            // domain regatta *after* calling removeRace
-            domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
+        IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
+        raceSubscribers.put(tractracRace, raceSubscriber);
+        // Try to find a pre-associated event based on the Race ID
+        if (effectiveRegatta == null) {
+            Serializable raceID = domainFactory.getRaceID(tractracRace);
+            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
         }
-        // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was found;
+        // removeRace may detach the domain regatta from the domain factory if that
+        // removed the last race; therefore, it's important to getOrCreate the
+        // domain regatta *after* calling removeRace
+        domainFactory.removeRace(tractracRace.getEvent(), tractracRace, trackedRegattaRegistry);
+        // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
+        // found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracRace.getEvent(), trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
-        for (IRace tractracRace : tractracRaces) {
-            for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent,
-                    delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, tractracRace,
-                    tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscribers.get(tractracRace))) {
-                receivers.add(receiver);
-            }
+        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
+                simulator, windStore, this, trackedRegattaRegistry, tractracRace, tracTracUpdateURI,
+                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscribers.get(tractracRace))) {
+            receivers.add(receiver);
         }
         addListenersForStoredDataAndStartController(receivers);
     }

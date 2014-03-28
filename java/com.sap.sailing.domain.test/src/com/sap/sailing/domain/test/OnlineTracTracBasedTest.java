@@ -104,15 +104,14 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, SynchronizationUtil.getRaces(getTracTracEvent()).iterator()
-                .next(), getTracTracEvent(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null,
-                new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                },
-                /* trackedRegattaRegistry */null, /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
-                null, getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, new DynamicRaceDefinitionSet() {
+            @Override
+            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+            }
+        },
+                /* trackedRegattaRegistry */null,
+                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
+                getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

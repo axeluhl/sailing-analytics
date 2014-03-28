@@ -26,7 +26,6 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 
 public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
@@ -76,28 +75,26 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         });
         for (Receiver receiver : domainFactory
-                .getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                        /* delayToLiveInMillis */0l, /* simulator */null, EmptyWindStore.INSTANCE,
-                        new DynamicRaceDefinitionSet() {
+                .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l,
+                        /* simulator */null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), /* courseDesignUpdateURI */
-                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
-                        getRaceSubscriber())) {
+                        },
+                        /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
+                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber())) {
             receiver.subscribe();
             getRaceSubscriber().start();
         }
         addListenersForStoredDataAndStartController(domainFactory
-                .getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* delayToLiveInMillis */0l, /* simulator */
-                        null, /* simulateWithStartTimeNow */
-                        EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l, null, /* simulator */
+                        EmptyWindStore.INSTANCE, /* simulateWithStartTimeNow */
+                        new DynamicRaceDefinitionSet() {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), /* courseDesignUpdateURI */
-                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
-                        getRaceSubscriber()));
+                        }, /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
+                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber()));
     }
 
     @Test

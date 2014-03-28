@@ -47,7 +47,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private IEvent event;
+    private IRace race;
     private IEventSubscriber eventSubscriber;
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
@@ -95,11 +95,11 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException {
         // Read event data from configuration file
         final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
-        event = race.getEvent();
+        this.race = race;
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
-        eventSubscriber = subscriberFactory.createEventSubscriber(event, liveUri, storedUri);
+        eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
         raceSubscriber = subscriberFactory.createRaceSubscriber(race);
-        assertNotNull(event);
+        assertNotNull(race);
         // Initialize data controller using live and stored data sources
         if (storedUri.toString().startsWith("file:")) {
             try {
@@ -140,7 +140,11 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     }
     
     protected IEvent getTracTracEvent() {
-        return event;
+        return race.getEvent();
+    }
+    
+    protected IRace getTracTracRace() {
+        return race;
     }
 
     public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {

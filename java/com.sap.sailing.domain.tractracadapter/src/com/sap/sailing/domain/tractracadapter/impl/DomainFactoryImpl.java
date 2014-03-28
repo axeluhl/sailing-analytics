@@ -385,10 +385,11 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace,
-            IEvent tractracEvent, WindStore windStore, long delayToLiveInMillis, Simulator simulator,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
-            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types) {
+            WindStore windStore, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, ReceiverType... types) {
+        IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -422,14 +423,14 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
-            IEvent tractracEvent, long delayToLiveInMillis, Simulator simulator,
-            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            IRace tractracRace, URI courseDesignUpdateURI, 
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        return getUpdateReceivers(trackedRegatta, tractracRace, tractracEvent, windStore, delayToLiveInMillis,
-                simulator, raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber,
-                raceSubscriber, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
-                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+            long delayToLiveInMillis, Simulator simulator, WindStore windStore,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, IRace tractracRace,
+            URI courseDesignUpdateURI, String tracTracUsername, 
+            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+        return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
+                raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
+                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override

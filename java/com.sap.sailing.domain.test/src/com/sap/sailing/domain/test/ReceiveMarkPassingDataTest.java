@@ -48,7 +48,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
      */
     @Before
     public void setupListener() {
-        final IRace race = SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next();
+        final IRace race = getTracTracRace();
         Receiver receiver = new Receiver() {
             @Override
             public void stopPreemptively() {
@@ -94,16 +94,16 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(
                         EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */null)),
-                        SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), getTracTracEvent(), EmptyWindStore.INSTANCE,
-                /* delayToLiveInMillis */ 0l,
-                /* simulator */null, new DynamicRaceDefinitionSet() {
+                        SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
+                /* simulator */null,
+                new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                },
-                /* trackedRegattaRegistry */null, /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
-                null, getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS,
-                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                }, /* trackedRegattaRegistry */null,
+                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
+                getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

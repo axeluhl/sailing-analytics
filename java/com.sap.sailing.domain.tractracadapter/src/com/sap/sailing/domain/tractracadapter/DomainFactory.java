@@ -162,10 +162,10 @@ public interface DomainFactory {
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            long delayToLiveInMillis, Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry, IRace tractracRace,
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, long delayToLiveInMillis,
+            Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
+            IRace tractracRace, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -205,10 +205,10 @@ public interface DomainFactory {
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, IEvent tractracEvent,
-            WindStore windStore, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, 
-            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, 
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
+            long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
+            URI courseDesignUpdateURI, String tracTracUsername, 
+            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
