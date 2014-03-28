@@ -1,11 +1,11 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.client.player;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Pair;
 
 public class TimeRangeModel implements TimeRangeProvider {
 

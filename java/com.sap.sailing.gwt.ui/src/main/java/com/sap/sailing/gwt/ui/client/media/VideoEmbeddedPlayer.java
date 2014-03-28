@@ -11,10 +11,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sse.gwt.client.dialog.WindowBox;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 

@@ -50,13 +50,13 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
@@ -491,7 +491,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
                 chart = createChart();
                 if (isZoomed) {
-                    Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                	com.sap.sse.common.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
                     onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
