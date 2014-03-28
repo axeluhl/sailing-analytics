@@ -44,7 +44,7 @@ public class DataMiningActivator implements BundleActivator {
                                           new LinkedBlockingQueue<Runnable>());
 
         FunctionRegistry functionRegistry = createAndBuildFunctionRegistry();
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         
         dataMiningServer = new DataMiningServerImpl(functionRegistry, functionProvider);
         registerDataMiningServer();

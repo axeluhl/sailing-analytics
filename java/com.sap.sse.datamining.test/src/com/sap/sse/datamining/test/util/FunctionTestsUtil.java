@@ -12,7 +12,6 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
@@ -90,7 +89,6 @@ public class FunctionTestsUtil extends ConcurrencyTestsUtil {
         dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
         dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
         dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
-        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
         return dimensions;
     }
     

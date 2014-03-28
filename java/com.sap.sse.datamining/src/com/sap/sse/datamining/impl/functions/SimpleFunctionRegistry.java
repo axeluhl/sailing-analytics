@@ -97,23 +97,25 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
     
     @Override
+    public Collection<Function<?>> getFunctionsOf(Class<?> declaringClass) {
+        Collection<Function<?>> functions = functionsMappedByDeclaringClass.get(declaringClass);
+        return functions != null ? functions : new HashSet<Function<?>>();
+    }
+    
+    @Override
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringClass) {
+        Collection<Function<?>> dimensions = dimensionsMappedByDeclaringClass.get(declaringClass);
+        return dimensions != null ? dimensions : new HashSet<Function<?>>();
+    }
+    
+    @Override
     public Collection<Function<?>> getAllFunctions() {
         return collectAllFunctionsIn(functionsMappedByDeclaringClass);
     }
     
     @Override
-    public Iterable<Function<?>> getFunctionsOf(Class<?> declaringClass) {
-        return functionsMappedByDeclaringClass.get(declaringClass);
-    }
-    
-    @Override
     public Collection<Function<?>> getAllDimensions() {
         return collectAllFunctionsIn(dimensionsMappedByDeclaringClass);
-    }
-    
-    @Override
-    public Iterable<Function<?>> getDimensionsOf(Class<?> declaringClass) {
-        return dimensionsMappedByDeclaringClass.get(declaringClass);
     }
 
     private Collection<Function<?>> collectAllFunctionsIn(Map<Class<?>, Collection<Function<?>>> functionsMap) {

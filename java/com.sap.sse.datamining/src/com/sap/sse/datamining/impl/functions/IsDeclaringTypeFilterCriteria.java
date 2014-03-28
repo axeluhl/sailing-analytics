@@ -7,11 +7,11 @@ import java.util.HashSet;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
 
-public class DeclaringTypeOrParameterTypeCriteria implements FilterCriteria<Function<?>> {
+public class IsDeclaringTypeFilterCriteria implements FilterCriteria<Function<?>> {
 
     private final Collection<Class<?>> expectingTypes;
 
-    public DeclaringTypeOrParameterTypeCriteria(Class<?> expectingType) {
+    public IsDeclaringTypeFilterCriteria(Class<?> expectingType) {
         this.expectingTypes = getSupertypesOf(expectingType);
         this.expectingTypes.add(expectingType);
     }
@@ -47,17 +47,7 @@ public class DeclaringTypeOrParameterTypeCriteria implements FilterCriteria<Func
     @Override
     public boolean matches(Function<?> function) {
         for (Class<?> expectingType : expectingTypes) {
-            if (isDeclaringTypeMatching(function, expectingType) ||
-                isAParameterTypeMatching(function, expectingType)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAParameterTypeMatching(Function<?> function, Class<?> expectingType) {
-        for (Class<?> parameterType : function.getParameters()) {
-            if (parameterType.equals(expectingType)) {
+            if (isDeclaringTypeMatching(function, expectingType)) {
                 return true;
             }
         }

@@ -24,7 +24,6 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.test.function.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.MarkedContainer;
@@ -46,7 +45,6 @@ public class TestFunctionProvider {
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(SimpleClassWithMarkedMethods.class);
         internalClassesToScan.add(DataTypeWithContext.class);
-        internalClassesToScan.add(DataTypeWithContextProcessor.class);
         internalClassesToScan.add(ExtendingInterface.class);
         internalClassesToScan.add(MarkedContainer.class);
         internalClassesToScan.add(ContainerElement.class);
@@ -59,10 +57,9 @@ public class TestFunctionProvider {
 
     @Test
     public void testGetDimensionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         
         Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
-        
         Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContext.class));
         assertThat(providedDimensions, is(expectedDimensions));
         
@@ -72,18 +69,13 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
-        Method getRegattaAndRaceName = FunctionTestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         
         Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        expectedFunctions.add(FunctionFactory.createMethodWrappingFunction(getRegattaAndRaceName));
-        
         Collection<Function<?>> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
         assertThat(providedFunctions, is(expectedFunctions));
         
         expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
-        expectedFunctions.add(FunctionFactory.createMethodWrappingFunction(getRegattaAndRaceName));
-        
         providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
         assertThat(providedFunctions, is(expectedFunctions));
     }
@@ -94,9 +86,9 @@ public class TestFunctionProvider {
         Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
         FunctionDTO getRegattaNameDTO = FunctionDTOFactory.createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
-        Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionFor(getRegattaNameDTO);
+        Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionForDTO(getRegattaNameDTO);
         assertThat(providedFunction, is(getRegattaName));
     }
     
@@ -106,19 +98,19 @@ public class TestFunctionProvider {
         Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
         FunctionDTO incrementDTO = FunctionDTOFactory.createFunctionDTO(increment, Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
-        assertThat(functionProvider.getFunctionFor(incrementDTO), is(nullValue()));
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        assertThat(functionProvider.getFunctionForDTO(incrementDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
-        assertThat(functionProvider.getFunctionFor(null), is(nullValue()));
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        assertThat(functionProvider.getFunctionForDTO(null), is(nullValue()));
     }
     
     @Test
     public void testGetTransitiveDimension() throws ClassCastException, NoSuchMethodException, SecurityException {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
         expectedDimensions.add(FunctionFactory.createMethodWrappingFunction(ContainerElement.class.getMethod("getName",

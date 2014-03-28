@@ -6,7 +6,7 @@ import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface FunctionProvider {
 
-    public Collection<Function<?>> getDimensionsFor(Class<?> dataType);
+    public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
 
     /**
      * Collects all dimensions for the given data type, where transitive dimensions will also be
@@ -25,6 +25,6 @@ public interface FunctionProvider {
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
      */
-    public Function<?> getFunctionFor(FunctionDTO functionDTO);
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
 }

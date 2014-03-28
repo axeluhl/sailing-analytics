@@ -13,7 +13,6 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
@@ -30,7 +29,6 @@ public class TestSimpleFunctionRegistryAccess {
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(SimpleClassWithMarkedMethods.class);
         internalClassesToScan.add(DataTypeWithContext.class);
-        internalClassesToScan.add(DataTypeWithContextProcessor.class);
         functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Class<?>> externalClassesToScan = new HashSet<>();
@@ -42,8 +40,8 @@ public class TestSimpleFunctionRegistryAccess {
     public void testGetAllDimensions() {
         Collection<Function<?>> modifiableExpectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
         modifiableExpectedDimensions.addAll(FunctionTestsUtil.getDimensionsFor(SimpleClassWithMarkedMethods.class));
-        Iterable<Function<?>> expectedDimensions = modifiableExpectedDimensions;
-        assertThat(functionRegistry.getAllDimensions(), is(expectedDimensions));
+        Collection<Function<?>> expectedDimensions = modifiableExpectedDimensions;
+        assertThat(functionRegistry.getAllDimensions(),  is(expectedDimensions));
     }
 
 }

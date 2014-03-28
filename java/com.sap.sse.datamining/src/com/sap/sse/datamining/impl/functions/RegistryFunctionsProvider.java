@@ -1,38 +1,25 @@
 package com.sap.sse.datamining.impl.functions;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.components.deprecated.PartitioningParallelFilter;
-import com.sap.sse.datamining.impl.workers.builders.FilterByCriteriaBuilder;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.workers.FiltrationWorker;
-import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class RegistryFunctionsProvider implements FunctionProvider {
     
     private static final Logger LOGGER = Logger.getLogger(RegistryFunctionsProvider.class.getName());
 
     private FunctionRegistry functionRegistry;
-    private ThreadPoolExecutor executor;
 
-    public RegistryFunctionsProvider(FunctionRegistry functionRegistry, ThreadPoolExecutor executor) {
+    public RegistryFunctionsProvider(FunctionRegistry functionRegistry) {
         this.functionRegistry = functionRegistry;
-        this.executor = executor;
-    }
-
-    @Override
-    public Collection<Function<?>> getDimensionsFor(Class<?> dataType) {
-        return filterForDeclaringType(functionRegistry.getAllDimensions(), dataType);
     }
     
     @Override
@@ -63,49 +50,96 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     }
 
     @Override
+    public Collection<Function<?>> getDimensionsFor(Class<?> sourceType) {
+        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
+        typesToRetrieve.add(sourceType);
+        return getDimensionsFor(typesToRetrieve);
+    }
+
+    private Collection<Function<?>> getDimensionsFor(Collection<Class<?>> typesToRetrieve) {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        for (Class<?> typeToRetrieve : typesToRetrieve) {
+            dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
+        }
+        return dimensions;
+    }
+
+    @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return filterForDeclaringType(functionRegistry.getAllFunctions(), sourceType);
+        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
+        typesToRetrieve.add(sourceType);
+        return getFunctionsFor(typesToRetrieve);
     }
     
-    private Collection<Function<?>> filterForDeclaringType(Collection<Function<?>> functions, Class<?> sourceType) {
-        FilterCriteria<Function<?>> declaringTypeFilterCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
-        ParallelFilter<Function<?>> functionsForDeclaringTypeFilter = createFilterForCriteria(declaringTypeFilterCriteria);
-        
-        return executeFilter(functionsForDeclaringTypeFilter, functions);
+    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve) {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        for (Class<?> typeToRetrieve : typesToRetrieve) {
+            dimensions.addAll(functionRegistry.getFunctionsOf(typeToRetrieve));
+        }
+        return dimensions;
     }
 
-    private Collection<Function<?>> executeFilter(ParallelFilter<Function<?>> functionFilter, Collection<Function<?>> functionsToFilter) {
-        Collection<Function<?>> filteredFunctions = new HashSet<>();
+    private Collection<Class<?>> getSupertypesOf(Class<?> type) {
+        Collection<Class<?>> supertypes = new HashSet<>();
         
-        try {
-            filteredFunctions = functionFilter.start(functionsToFilter).get();
-        } catch (InterruptedException | ExecutionException exception) {
-            LOGGER.log(Level.SEVERE, "Error filtering the functions", exception);
+        supertypes.addAll(getInterfacesOf(type));
+        if (isSuperclassValid(type)) {
+            supertypes.add(type.getSuperclass());
         }
         
-        return filteredFunctions;
+        supertypes.addAll(getSupertypesOf(supertypes));
+        return supertypes;
     }
 
-    private ParallelFilter<Function<?>> createFilterForCriteria(FilterCriteria<Function<?>> filterCriteria) {
-        WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(filterCriteria);
-        return new PartitioningParallelFilter<>(workerBuilder, executor);
+    private Collection<Class<?>> getInterfacesOf(Class<?> type) {
+        return Arrays.asList(type.getInterfaces());
+    }
+
+    private boolean isSuperclassValid(Class<?> subType) {
+        return subType.getSuperclass() != null && !subType.getSuperclass().equals(Object.class);
+    }
+
+    private Collection<Class<?>> getSupertypesOf(Collection<Class<?>> types) {
+        Collection<Class<?>> supertypes = new HashSet<>();
+        boolean supertypeAdded;
+        do {
+            Collection<Class<?>> supertypesToAdd = getSupertypesToAdd(types);
+            supertypeAdded = supertypes.addAll(supertypesToAdd);
+        } while (supertypeAdded);
+        return supertypes;
+    }
+
+    private Collection<Class<?>> getSupertypesToAdd(Collection<Class<?>> types) {
+        Collection<Class<?>> supertypesToAdd = new HashSet<>();
+        for (Class<?> supertype : types) {
+            supertypesToAdd.addAll(getSupertypesOf(supertype));
+        }
+        return supertypesToAdd;
     }
     
     @Override
-    public Function<?> getFunctionFor(FunctionDTO functionDTO) {
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
         if (functionDTO == null) {
             return null;
         }
         
-        FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionDTOFilterCriteria(functionDTO);
-        ParallelFilter<Function<?>> functionMatchesDTOFilter = createFilterForCriteria(functionDTOFilterCriteria);
-        
-        Collection<Function<?>> functionsMatchingDTO = executeFilter(functionMatchesDTOFilter, functionRegistry.getAllFunctions());
+        Collection<Function<?>> functionsMatchingDTO = getFunctionsForDTO(functionDTO);
         if (moreThanOneFunctionMatchedDTO(functionsMatchingDTO)) {
             logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
         }
         
         return getFunctionToReturn(functionsMatchingDTO);
+    }
+
+    private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
+        Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
+        FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriteria(functionDTO);
+        for (Function<?> function : functionRegistry.getAllFunctions()) {
+            if (functionDTOFilterCriteria.matches(function)) {
+                functionsMatchingDTO.add(function);
+            }
+        }
+        return functionsMatchingDTO;
     }
 
     private boolean moreThanOneFunctionMatchedDTO(Collection<Function<?>> functionsMatchingDTO) {

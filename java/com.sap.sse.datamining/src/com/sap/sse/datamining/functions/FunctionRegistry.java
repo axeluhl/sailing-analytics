@@ -12,8 +12,8 @@ public interface FunctionRegistry {
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan);
 
     public Collection<Function<?>> getAllFunctions();
-    public Iterable<Function<?>> getFunctionsOf(Class<?> declaringClass);
+    public Collection<Function<?>> getFunctionsOf(Class<?> declaringClass);
     public Collection<Function<?>> getAllDimensions();
-    public Iterable<Function<?>> getDimensionsOf(Class<?> declaringClass);
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringClass);
 
 }
