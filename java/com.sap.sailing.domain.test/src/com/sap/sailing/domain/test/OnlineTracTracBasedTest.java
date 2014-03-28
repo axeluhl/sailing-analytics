@@ -103,13 +103,15 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, tractracRace, getTracTracEvent(),
-        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
-            @Override
-            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-            }
-        },
-                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber, receiverTypes)) {
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent().getRaces().iterator()
+                .next(), getTracTracEvent(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null,
+                new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                    }
+                },
+                /* trackedRegattaRegistry */null, /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
+                null, getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -216,18 +218,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     protected void setTrackedRace(DynamicTrackedRace race) {
         this.trackedRace = race;
-    }
-
-    /**
-     * When all stored data has been transmitted, notify the semaphor for tests to start processing
-     */
-    @Override
-    public void storedDataEnd() {
-        super.storedDataEnd();
-        synchronized (semaphor) {
-            storedDataLoaded = true;
-            semaphor.notifyAll();
-        }
     }
 
     protected String getExpectedEventName() {
