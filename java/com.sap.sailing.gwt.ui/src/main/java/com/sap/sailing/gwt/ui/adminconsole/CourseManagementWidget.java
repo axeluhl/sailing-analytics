@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -74,17 +75,19 @@ public abstract class CourseManagementWidget implements IsWidget {
         }
     }
     
-    private class ControlPointCreationDialog extends DataEntryDialog<ControlPointDTO> {
+    private class ControlPointCreationDialog extends DataEntryDialog<Pair<ControlPointDTO, PassingInstruction>> {
         private final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marksTable;
         private final MultiSelectionModel<MarkDTO> selectionModel;
+        private final ListBox passingInstructions;
+        private final StringMessages stringMessages;
         
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
-                List<MarkDTO> marks, DialogCallback<ControlPointDTO> callback) {
+                List<MarkDTO> marks, DialogCallback<Pair<ControlPointDTO, PassingInstruction>> callback) {
             super(stringMessages.controlPoint(), stringMessages.selectOneMarkOrTwoMarksForGate(),
-                    stringMessages.ok(), stringMessages.cancel(), new Validator<ControlPointDTO>() {
+                    stringMessages.ok(), stringMessages.cancel(), new Validator<Pair<ControlPointDTO, PassingInstruction>>() {
                         @Override
-                        public String getErrorMessage(ControlPointDTO valueToValidate) {
-                            if (valueToValidate == null) {
+                        public String getErrorMessage(Pair<ControlPointDTO, PassingInstruction> valueToValidate) {
+                            if (valueToValidate.getA() == null) {
                                 return stringMessages.selectOneMarkOrTwoMarksForGate();
                             } else {
                                 return null;
@@ -92,6 +95,9 @@ public abstract class CourseManagementWidget implements IsWidget {
                         }
 
                     }, /* animationEnabled */ false, callback);
+            
+            this.stringMessages = stringMessages;
+            
             selectionModel = new MultiSelectionModel<MarkDTO>();
             selectionModel.addSelectionChangeHandler(new Handler() {
                 @Override
@@ -102,14 +108,22 @@ public abstract class CourseManagementWidget implements IsWidget {
             marksTable = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
                     selectionModel, CourseManagementWidget.this.sailingService, stringMessages, errorReporter);
             marksTable.getDataProvider().getList().addAll(marks);
+            
+            passingInstructions = createListBox(false);
+            passingInstructions.insertItem(PassingInstruction.None.name(), 0);
+            int i = 1;
+            for (PassingInstruction pi : PassingInstruction.relevantValues()) {
+                passingInstructions.insertItem(pi.name(), i++);
+            }
         }
 
         @Override
-        protected ControlPointDTO getResult() {
-            ControlPointDTO result = null;
+        protected Pair<ControlPointDTO, PassingInstruction> getResult() {
+            ControlPointDTO controlPoint = null;
             Set<MarkDTO> selection = selectionModel.getSelectedSet();
             if (selection.size() == 1) {
-                result = selectionModel.getSelectedSet().iterator().next();
+                controlPoint = selectionModel.getSelectedSet().iterator().next();
+                passingInstructions.setEnabled(true);
             } else if (selection.size() == 2) {
                 Iterator<MarkDTO> i = selectionModel.getSelectedSet().iterator();
                 MarkDTO first = i.next();
@@ -125,14 +139,29 @@ public abstract class CourseManagementWidget implements IsWidget {
                     right = first;
                 }
                 gateName = left.getName().replaceFirst(REGEX_FOR_LEFT, "");
-                result = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
+                controlPoint = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
+                
+                passingInstructions.setSelectedIndex(0);
+                passingInstructions.setEnabled(false);
             }
-            return result;
+            
+            PassingInstruction passingInstruction = PassingInstruction.valueOf(
+                    passingInstructions.getValue(passingInstructions.getSelectedIndex()));
+            
+            return new Pair<ControlPointDTO, PassingInstruction>(controlPoint, passingInstruction);
         }
 
         @Override
         protected Widget getAdditionalWidget() {
-            return marksTable.getTable();
+            Grid grid = new Grid(2,1);
+            grid.setWidget(0, 0, marksTable);
+            
+            HorizontalPanel passingInstructionsRow = new HorizontalPanel();
+            grid.setWidget(1, 0, passingInstructionsRow);
+            passingInstructionsRow.add(new Label(stringMessages.passingInstructions() + ":"));
+            passingInstructionsRow.add(passingInstructions);
+            
+            return grid;
         }
     }
     
@@ -422,14 +451,14 @@ public abstract class CourseManagementWidget implements IsWidget {
 
     private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
             AdminConsoleTableResources tableRes, final boolean beforeSelection) {
-        new ControlPointCreationDialog(stringMessages, tableRes, marksTable.getDataProvider().getList(), new DialogCallback<ControlPointDTO>() {
+        new ControlPointCreationDialog(stringMessages, tableRes, marksTable.getDataProvider().getList(), new DialogCallback<Pair<ControlPointDTO, PassingInstruction>>() {
             @Override
             public void cancel() {
                 // dialog cancelled, do nothing
             }
 
             @Override
-            public void ok(ControlPointDTO result) {
+            public void ok(Pair<ControlPointDTO, PassingInstruction> result) {
                 Set<ControlPointAndOldAndNewMark> selectedElements = controlPointsSelectionModel.getSelectedSet();
                 int index = -1;
                 if (controlPointDataProvider.getList().isEmpty()) {
@@ -439,8 +468,8 @@ public abstract class CourseManagementWidget implements IsWidget {
                     index = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
                 }
                 if (index != -1) {
-                    for (MarkDTO markDTO : result.getMarks()) {
-                        controlPointDataProvider.getList().add(index++, new ControlPointAndOldAndNewMark(result, null, markDTO));
+                    for (MarkDTO markDTO : result.getA().getMarks()) {
+                        controlPointDataProvider.getList().add(index++, new ControlPointAndOldAndNewMark(result.getA(), result.getB(), markDTO));
                     }
                 }
                 handleControlPointSelectionChange();
