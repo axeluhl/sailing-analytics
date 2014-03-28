@@ -70,17 +70,16 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
     private void loadRace(String paramsFile, String storedDataFile) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException, SubscriberInitializationException {
-        final String raceName = "505 Race 2 from Kieler Woche 2011";
-        logger.info("Loading race "+raceName);
+        logger.info("Loading race from params file "+paramsFile);
         URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/"+paramsFile).getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS });
-        logger.info("Recording wind for " + raceName);
+        logger.info("Recording wind for race loaded from params file " + paramsFile);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), new WindSourceImpl(WindSourceType.WEB));
-        logger.info("Fixing mark positions for " + raceName);
+        logger.info("Fixing mark positions for race loaded from params file " + paramsFile);
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        logger.info("Loaded race " + raceName);
+        logger.info("Loaded race from params file " + paramsFile);
     }
 }

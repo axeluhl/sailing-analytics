@@ -49,10 +49,8 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException {
         super.setUp();
-//        URI storedUri = new URI("file:////"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
-//        super.setUp(new URL("file:////"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
-        URI storedUri = new URI("http://traclive.dk/events/event_20110609_KielerWoch/datafiles/event_20110609_KielerWoch-505_Race_2.mtb");
-        super.setUp(new URL("http://traclive.dk/events/event_20110609_KielerWoch/event_20110609_KielerWoch-505_Race_2.txt"),
+        URI storedUri = new URI("file:////"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:////"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
