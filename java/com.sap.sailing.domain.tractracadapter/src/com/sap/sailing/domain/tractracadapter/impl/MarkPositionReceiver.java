@@ -80,7 +80,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
         }
         Mark mark = getDomainFactory().getMark(new ControlPointAdapter(event.getA()), event.getC());
         // FIXME this receiver receives mark position changes only for one race; post them to that one race only! 
-        for (IRace tractracRace : getTracTracEvent().getRaces()) {
+        for (IRace tractracRace : SynchronizationUtil.getRaces(getTracTracEvent())) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
                 GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());

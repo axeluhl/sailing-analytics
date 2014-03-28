@@ -95,7 +95,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, getTracTracEvent().getRaces().iterator().next(), /* courseDesignUpdateURI */
+                        }, /* trackedRegattaRegistry */null, SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(),
                         getRaceSubscriber()));
     }
