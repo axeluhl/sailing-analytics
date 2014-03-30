@@ -12,16 +12,20 @@ import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public class RegistryFunctionsProvider implements FunctionProvider {
+public class RegistryFunctionProvider implements FunctionProvider {
     
-    private static final Logger LOGGER = Logger.getLogger(RegistryFunctionsProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RegistryFunctionProvider.class.getName());
 
-    private FunctionRegistry functionRegistry;
+    private final Collection<FunctionRegistry> functionRegistries;
 
-    public RegistryFunctionsProvider(FunctionRegistry functionRegistry) {
-        this.functionRegistry = functionRegistry;
+    public RegistryFunctionProvider(FunctionRegistry... functionRegistry) {
+        this(Arrays.asList(functionRegistry));
     }
     
+    public RegistryFunctionProvider(Collection<FunctionRegistry> functionRegistries) {
+        this.functionRegistries = new HashSet<>(functionRegistries);
+    }
+
     @Override
     public Collection<Function<?>> getTransitiveDimensionsFor(Class<?> dataType, int depth) {
         Collection<Function<?>> dimensions = new HashSet<>();
@@ -58,8 +62,10 @@ public class RegistryFunctionsProvider implements FunctionProvider {
 
     private Collection<Function<?>> getDimensionsFor(Collection<Class<?>> typesToRetrieve) {
         Collection<Function<?>> dimensions = new HashSet<>();
-        for (Class<?> typeToRetrieve : typesToRetrieve) {
-            dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
+        for (FunctionRegistry functionRegistry : functionRegistries) {
+            for (Class<?> typeToRetrieve : typesToRetrieve) {
+                dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
+            }   
         }
         return dimensions;
     }
@@ -73,8 +79,10 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     
     private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve) {
         Collection<Function<?>> dimensions = new HashSet<>();
-        for (Class<?> typeToRetrieve : typesToRetrieve) {
-            dimensions.addAll(functionRegistry.getFunctionsOf(typeToRetrieve));
+        for (FunctionRegistry functionRegistry : functionRegistries) {
+            for (Class<?> typeToRetrieve : typesToRetrieve) {
+                dimensions.addAll(functionRegistry.getFunctionsOf(typeToRetrieve));
+            }
         }
         return dimensions;
     }
@@ -134,9 +142,11 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
         FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriteria(functionDTO);
-        for (Function<?> function : functionRegistry.getAllFunctions()) {
-            if (functionDTOFilterCriteria.matches(function)) {
-                functionsMatchingDTO.add(function);
+        for (FunctionRegistry functionRegistry : functionRegistries) {
+            for (Function<?> function : functionRegistry.getAllFunctions()) {
+                if (functionDTOFilterCriteria.matches(function)) {
+                    functionsMatchingDTO.add(function);
+                }
             }
         }
         return functionsMatchingDTO;

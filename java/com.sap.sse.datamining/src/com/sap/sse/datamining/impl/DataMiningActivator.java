@@ -20,7 +20,7 @@ import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
+import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class DataMiningActivator implements BundleActivator {
@@ -44,7 +44,7 @@ public class DataMiningActivator implements BundleActivator {
                                           new LinkedBlockingQueue<Runnable>());
 
         FunctionRegistry functionRegistry = createAndBuildFunctionRegistry();
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         
         dataMiningServer = new DataMiningServerImpl(functionRegistry, functionProvider);
         registerDataMiningServer();
