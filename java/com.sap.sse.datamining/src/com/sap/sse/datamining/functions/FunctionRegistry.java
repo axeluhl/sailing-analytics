@@ -7,11 +7,13 @@ public interface FunctionRegistry {
 
     public void register(Method method);
     public void register(Function<?> function);
-    public void registerFunctionsRetrievedBy(ParallelFunctionRetriever functionRetriever);
     public void registerAll(Iterable<Function<?>> functions);
+    public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> classesToScan);
+    public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan);
 
-    public Collection<Function<?>> getAllRegisteredFunctions();
-    public Iterable<Function<?>> getRegisteredFunctionsOf(Class<?> declaringClass);
+    public Collection<Function<?>> getAllFunctions();
+    public Collection<Function<?>> getFunctionsOf(Class<?> declaringClass);
     public Collection<Function<?>> getAllDimensions();
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringClass);
 
 }

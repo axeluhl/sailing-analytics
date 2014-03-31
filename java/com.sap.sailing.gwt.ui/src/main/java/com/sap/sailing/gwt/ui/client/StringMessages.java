@@ -923,7 +923,6 @@ public interface StringMessages extends Messages {
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
-    String createSwissTimingRace();
     String igtimiAccounts();
     String errorFetchingIgtimiAccounts(String message);
     String addIgtimiAccount();
@@ -972,4 +971,6 @@ public interface StringMessages extends Messages {
     String ratio();
     String importWind();
     String importWindTooltip();
+    String authorName();
+    String authorPriority();
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorsFilterSets {
     private List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;

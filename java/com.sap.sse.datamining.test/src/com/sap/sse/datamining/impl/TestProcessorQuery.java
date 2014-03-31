@@ -122,10 +122,14 @@ public class TestProcessorQuery {
                 return element.getValue() >= 10;
             }
         };
-        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
             @Override
             protected Iterable<Number> retrieveData(Iterable<Number> element) {
                 return element;
+            }
+            @Override
+            protected Number contextifyElement(Number partialElement) {
+                return partialElement;
             }
         };
         

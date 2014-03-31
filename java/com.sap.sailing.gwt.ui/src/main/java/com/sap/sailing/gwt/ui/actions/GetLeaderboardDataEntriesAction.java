@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
 public class GetLeaderboardDataEntriesAction implements AsyncAction<List<Triple<String, List<CompetitorDTO>, List<Double>>>> {
     private final SailingServiceAsync sailingService;

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDialog.LeaderboardGroupDescriptor> {
     protected StringMessages stringMessages;

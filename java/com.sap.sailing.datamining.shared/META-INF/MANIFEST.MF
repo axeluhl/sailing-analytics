@@ -4,7 +4,7 @@ Bundle-Name: Datamining-Shared
 Bundle-SymbolicName: com.sap.sailing.datamining.shared
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.datamining.shared,

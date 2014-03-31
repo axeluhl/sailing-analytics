@@ -26,9 +26,9 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
             @Override
             public InputType call() throws Exception {
                 if (filterCriteria.matches(element)) {
+                    increaseFilteredDataAmount();
                     return element;
                 } else {
-                    increaseFilteredDataAmount();
                     return ParallelFilteringProcessor.super.createInvalidResult();
                 }
             }

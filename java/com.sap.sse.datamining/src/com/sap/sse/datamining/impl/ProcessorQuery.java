@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
@@ -7,6 +8,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +74,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
+        processorTimedOut = false;
         final long startTime = System.nanoTime();
         executor.execute(new Runnable() {
             @Override
@@ -80,7 +83,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                     firstProcessor.onElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
-                    LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
+                    if (processorTimedOut) {
+                        LOGGER.log(Level.INFO, "The query processing timed out.");
+                    } else {
+                        LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
+                    }
                 }
             }
         });
@@ -105,7 +112,6 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                 }
             }
             workIsDone = false;
-            processorTimedOut = false;
         }
     }
     
@@ -130,11 +136,22 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     
     private class ProcessResultReceiver implements Processor<Map<GroupKey, AggregatedType>> {
         
+        private final ReentrantLock resultsLock;
         private Map<GroupKey, AggregatedType> results;
+        
+        public ProcessResultReceiver() {
+            resultsLock = new ReentrantLock();
+            results = new HashMap<>();
+        }
 
         @Override
         public void onElement(Map<GroupKey, AggregatedType> groupedAggregations) {
-            results = groupedAggregations;
+            resultsLock.lock();
+            try {
+                results.putAll(groupedAggregations);
+            } finally {
+                resultsLock.unlock();
+            }
         }
 
         @Override

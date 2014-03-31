@@ -17,6 +17,24 @@ Initially we had trouble with Jenkins and the GIT plug-in. However, https://issu
 
 Note, though that the Xvnc plug-in in version 1.16 seems to be causing some trouble (https://issues.jenkins-ci.org/browse/JENKINS-22105). Downgrading to 1.14 helps. The 1.14 .hpi file can be obtained, e.g., here: http://www.filewatcher.com/m/xvnc.hpi.21882-0.html.
 
+Make sure that the environment used to run Hudson/Jenkins uses a UTF-8 locale. Under Linux, it's a good idea to set the environment variables
+<pre>
+    export LC_ALL=en_US.UTF-8
+    export LANG=us_US.UTF-8
+</pre>
+which can, depending on how your Hudson/Jenkins is started, be included, e.g., in `/etc/init/jenkins` which then should have a section that looks like this:
+<pre>
+script
+    [ -r /etc/default/jenkins ] && . /etc/default/jenkins
+    export JENKINS_HOME
+    export LC_ALL=en_US.UTF-8
+    export LANG=us_US.UTF-8
+    exec start-stop-daemon --start -c $JENKINS_USER --exec $JAVA --name jenkins \
+        -- $JAVA_ARGS -jar $JENKINS_WAR $JENKINS_ARGS --logfile=$JENKINS_LOG
+end script
+</pre>
+Other options for setting the locale include adding the LC_ALL and LANG variables to the `/etc/environment` file.
+
 The basic idea of setting up a build job is to create a so-called "free-style software project" which then executes our `configuration/buildAndUpdateProduct.sh` script using the `build` parameter. Top-down, the following adjustments to a default free-style job that are required for a successful build are these:
 
 * select "Git"

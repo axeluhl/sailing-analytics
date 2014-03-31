@@ -5,16 +5,16 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface Function<ReturnType> {
 
-    public Class<?> getDeclaringClass();
+    public Class<?> getDeclaringType();
     public Iterable<Class<?>> getParameters();
+    public Class<ReturnType> getReturnType();
 
     public boolean isDimension();
+    
+    public String getSimpleName();
     
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages);
     
@@ -33,19 +33,6 @@ public interface Function<ReturnType> {
      *         {@link IllegalAccessException} or {@link IllegalArgumentException} was thrown.
      */
     public ReturnType tryToInvoke(Object instance, Object... parameters);
-
-    /**
-     * Creates the corresponding DTO for this function, with the function name as display name.
-     */
-    public FunctionDTO asDTO();
-    
-    /**
-     * Creates the corresponding DTO for this function, with the retrieved string message for the given locale and the
-     * contained message key. The message key is provided with the {@link Dimension} or {@link SideEffectFreeValue}
-     * annotation.<br>
-     * If the function has no message key, the function name is used as display name.
-     */
-    public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages);
     
     public Unit getResultUnit();
     

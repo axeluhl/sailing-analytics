@@ -13,12 +13,10 @@ import org.junit.Test;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
-import com.sap.sse.datamining.impl.functions.PartitionParallelExternalFunctionRetriever;
-import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistryRegistrations {
@@ -27,45 +25,43 @@ public class TestSimpleFunctionRegistryRegistrations {
     public void testSimpleRegistration() {
         Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         
-        FunctionRegistry registry = new SimpleFunctionRegistry();
+        FunctionRegistry registry = new SimpleFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
         registry.register(dimension);
         
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
-        assertThat(registry.getRegisteredFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
     
     @Test
     public void testRegistrationByFunctionRetrievers() {
-        FunctionRegistry registry = new SimpleFunctionRegistry();
-        registerMethodsOfTestClassesViaFunctionRetrieversTo(registry);
+        FunctionRegistry registry = new SimpleFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
+        registerMethodsOfTestClasses(registry);
 
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod());
         expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMethodsOfExternalLibraryClass());
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
     }
 
-    private void registerMethodsOfTestClassesViaFunctionRetrieversTo(FunctionRegistry registry) {
-        Collection<Class<?>> classesToScan = new HashSet<>();
-        classesToScan.add(SimpleClassWithMarkedMethods.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
-        registry.registerFunctionsRetrievedBy(markedFunctionRetriever);
+    private void registerMethodsOfTestClasses(FunctionRegistry registry) {
+        Collection<Class<?>> internalClassesToScan = new HashSet<>();
+        internalClassesToScan.add(SimpleClassWithMarkedMethods.class);
+        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
-        Collection<Class<?>> externalClasses = new HashSet<>();
-        externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
-        registry.registerFunctionsRetrievedBy(externalFunctionRetriever);
+        Collection<Class<?>> externalClassesToScan = new HashSet<>();
+        externalClassesToScan.add(ExternalLibraryClass.class);
+        registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
     
     @Test
     public void testTheMultipleRegistrationOfTheSameFunction() {
         Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         
-        FunctionRegistry registry = new SimpleFunctionRegistry();
+        FunctionRegistry registry = new SimpleFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
         registry.register(dimension);
         registry.register(dimension);
         registry.register(dimension);
@@ -73,7 +69,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllFunctions(), is(expectedRegisteredFunctions));
     }
 
 }

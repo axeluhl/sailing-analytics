@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.DeclaringTypeOrParameterTypeCriteria;
+import com.sap.sse.datamining.impl.functions.IsDeclaringTypeFilterCriteria;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
@@ -36,7 +36,7 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
 
     @Test
     public void testMatchingTypeWithBigHierarchy() {
-        FilterCriteria<Function<?>> criteria = new DeclaringTypeOrParameterTypeCriteria(DataTypeWithContextImpl.class);
+        FilterCriteria<Function<?>> criteria = new IsDeclaringTypeFilterCriteria(DataTypeWithContextImpl.class);
 
         assertThat(criteria.matches(getSpeedInKnotsValue), is(true));
         assertThat(criteria.matches(getRaceNameLengthValue), is(true));
