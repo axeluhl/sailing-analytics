@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.WithID;
 
@@ -11,5 +13,5 @@ import com.sap.sailing.domain.common.WithID;
  *
  */
 public interface CourseArea extends Named, WithID, IsManagedBySharedDomainFactory {
-
+    UUID getId();
 }

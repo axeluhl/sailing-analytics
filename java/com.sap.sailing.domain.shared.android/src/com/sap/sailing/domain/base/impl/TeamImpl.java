@@ -2,15 +2,14 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
-public class TeamImpl extends NamedImpl implements Team {
+public class TeamImpl extends NamedImpl implements DynamicTeam {
     private static final long serialVersionUID = 4646922280429210183L;
-    private final Iterable<? extends Person> sailors;
+    private final Iterable<? extends DynamicPerson> sailors;
     private final Person coach;
     
-    public TeamImpl(String name, Iterable<? extends Person> sailors, Person coach) {
+    public TeamImpl(String name, Iterable<? extends DynamicPerson> sailors, Person coach) {
         super(name);
         this.sailors = sailors;
         this.coach = coach;
@@ -37,6 +36,13 @@ public class TeamImpl extends NamedImpl implements Team {
             return getCoach().getNationality();
         }
         return null;
+    }
+
+    @Override
+    public void setNationality(Nationality newNationality) {
+        for (Person sailor : getSailors()) {
+            ((DynamicPerson) sailor).setNationality(newNationality);
+        }
     }
 
 }

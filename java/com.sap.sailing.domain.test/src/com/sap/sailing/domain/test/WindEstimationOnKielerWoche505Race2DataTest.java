@@ -4,9 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.ParseException;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
@@ -36,11 +40,12 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
     }
     
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
-        super.setUp("event_20110609_KielerWoch",
-        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
-                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
+                /* liveUri */ null, /* storedUri */ storedUri,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         MillisecondsTimePoint timePointForFixes = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
         getTrackedRace().recordWind(
@@ -102,6 +107,6 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 15.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
-        assertEquals(237., estimatedWindDirection.getFrom().getDegrees(), 4.); // expect wind from 241 +/- 3 degrees
+        assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 4.); // expect wind from 241 +/- 3 degrees
     }
 }

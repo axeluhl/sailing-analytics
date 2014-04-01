@@ -220,7 +220,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         	if (isVisible) {
     			this.startStreamlets();
     			if (timer.getTime().compareTo(this.windParams.getStartTime()) != 0) {
-    				this.timeChanged(timer.getTime());
+    				this.timeChanged(timer.getTime(), null);
     			}
     			this.visible = isVisible;
         	} else {
@@ -262,8 +262,8 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     @Override
-    public void timeChanged(final Date date) {
-    	int step = (int)((date.getTime() - this.windParams.getStartTime().getTime()) / this.windParams.getTimeStep().getTime());
+    public void timeChanged(final Date newDate, Date oldDate) {
+    	int step = (int)((newDate.getTime() - this.windParams.getStartTime().getTime()) / this.windParams.getTimeStep().getTime());
     	this.setStreamletsStep(step);
     }
 

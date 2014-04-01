@@ -199,8 +199,14 @@ public class RaceTimesInfoProvider {
         return firstStartedAndUnfinishedRace;
     }
 
+    private Set<RaceTimesInfoProviderListener> getListeners() {
+        synchronized (listeners) {
+            return new HashSet<RaceTimesInfoProviderListener>(listeners);
+        }
+    }
+
     private void notifyListeners(long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
-        for (RaceTimesInfoProviderListener listener : listeners) {
+        for (RaceTimesInfoProviderListener listener : getListeners()) {
             listener.raceTimesInfosReceived(getRaceTimesInfos(), clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
     }

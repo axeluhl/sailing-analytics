@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
@@ -26,6 +27,8 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
@@ -66,9 +69,9 @@ import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
+import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -101,9 +104,13 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+    public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
+    public static final String GET_WIND_DATA_CATEGORY = "getWindData";
+    
     private MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -174,6 +181,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * html5 canvases used for competitor info display on the map
      */
     private final Map<CompetitorDTO, CompetitorInfoOverlay> competitorInfoOverlays;
+    
+    private SmallTransparentInfoOverlay countDownOverlay;
 
     /**
      * Map overlays with html5 canvas used to display wind sensors
@@ -246,13 +255,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     /**
      * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
-     * the last {@link #timeChanged(Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
+     * the last {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
      */
     private List<QuickRankDTO> quickRanks;
 
     private final CombinedWindPanel combinedWindPanel;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
+
+    /**
+     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
+     */
+    private LatLngBounds currentMapBounds;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
@@ -333,34 +347,39 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      map.triggerResize();
+                      // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-                      Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
-                      for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                              boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime());
-                              if (usedExistingMarker) {
-                                  competitorDTOsOfUnusedMarkers.remove(competitorDTO);
-                              }
-                      }
-                      for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
-                          BoatOverlay boatOverlay = boatOverlays.get(unusedMarkerCompetitorDTO);
-                          boatOverlay.removeFromMap();
-                          boatOverlays.remove(unusedMarkerCompetitorDTO);
-                      }
                   }
               });
-              
               map.addDragEndHandler(new DragEndMapHandler() {
                   @Override
                   public void onEvent(DragEndMapEvent event) {
+                      // stop automatic zoom after a manual drag event
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
               });
+              map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                  @Override
+                  public void onEvent(BoundsChangeMapEvent event) {
+                      if (!isAutoZoomInProgress() && !map.getBounds().equals(currentMapBounds)) {
+                          // remove the canvas animations for boats 
+                          for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                              boatOverlay.removeCanvasPositionAndRotationTransition();
+                          }
+                          // remove the canvas animations for the info overlays of the selected boats 
+                          for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                              infoOverlay.removeCanvasPositionAndRotationTransition();
+                          }
+                      }
+                      currentMapBounds = map.getBounds();
+                  }
+              });
+              
               //If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
-                  timeChanged(lastTimeChangeBeforeInitialization);
+                  timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
               }
               //Data has been initialized
@@ -369,11 +388,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
         
     public void redraw() {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
+    }
+    
+    Map<CompetitorDTO, BoatOverlay> getBoatOverlays() {
+        return Collections.unmodifiableMap(boatOverlays);
+    }
+    
+    MapWidget getMap() {
+        return map;
     }
     
     @Override
@@ -390,119 +417,119 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void timeChanged(final Date date) {
-        if (date != null && isMapInitialized) {
+    public void timeChanged(final Date newTime, final Date oldTime) {
+        if (newTime != null && isMapInitialized) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
-                            fixesAndTails.computeFromAndTo(date, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
+                            fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            date, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
-                  }
-
-                  @Override
-                  public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                    if (map != null && raceMapDataDTO != null) {
-                        quickRanks = raceMapDataDTO.quickRanks;
-                        // process response only if not received out of order
-                        if (startedProcessingRequestID < requestID) {
-                            startedProcessingRequestID = requestID;
-                            // Do boat specific actions
-                            Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this);
-                            showBoatsOnMap(date, getCompetitorsToShow());
-                            showCompetitorInfoOnMap(date, competitorSelection.getSelectedCompetitors());
-                            if (douglasMarkers != null) {
-                                removeAllMarkDouglasPeuckerpoints();
-                            }
-                            if (maneuverMarkers != null) {
-                                removeAllManeuverMarkers();
-                            }
-                            
-                            // Do mark specific actions
-                            showCourseMarksOnMap(raceMapDataDTO.coursePositions);
-                            showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
-                            showStartAndFinishLines(raceMapDataDTO.coursePositions);
-                            showAdvantageLine(competitorsToShow, date);
-                                
-                            // Rezoom the map
-                            // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
-                            if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                                LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                                zoomMapToNewBounds(bounds);
-                                mapFirstZoomDone = true;
-                            } else if (!mapFirstZoomDone) { // Zoom once to the marks
-                                zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
-                                mapFirstZoomDone = true;
-                                /*
-                                 * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
-                                 * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
-                                 * triggered by the user. As a consequence the
-                                 * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
-                                 */
-                                // TODO bug 494: consider initial user-specific zoom settings
+                            newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
+                    asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY, new AsyncCallback<RaceMapDataDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
+                        }
+                        
+                        @Override
+                        public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
+                            if (map != null && raceMapDataDTO != null) {
+                                quickRanks = raceMapDataDTO.quickRanks;
+                                // process response only if not received out of order
+                                if (startedProcessingRequestID < requestID) {
+                                    startedProcessingRequestID = requestID;
+                                    // Do boat specific actions
+                                    Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
+                                    long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
+                                    fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this, timeForPositionTransitionMillis);
+                                    showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
+                                    showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
+                                    if (douglasMarkers != null) {
+                                        removeAllMarkDouglasPeuckerpoints();
+                                    }
+                                    if (maneuverMarkers != null) {
+                                        removeAllManeuverMarkers();
+                                    }
+                                    
+                                    // Do mark specific actions
+                                    showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                                    showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
+                                    showStartAndFinishLines(raceMapDataDTO.coursePositions);
+                                    showAdvantageLine(competitorsToShow, newTime);
+                                        
+                                    // Rezoom the map
+                                    // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
+                                    if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
+                                        LatLngBounds bounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                                        zoomMapToNewBounds(bounds);
+                                        mapFirstZoomDone = true;
+                                    } else if (!mapFirstZoomDone) { // Zoom once to the marks
+                                        zoomMapToNewBounds(new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this));
+                                        mapFirstZoomDone = true;
+                                        /*
+                                         * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
+                                         * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
+                                         * triggered by the user. As a consequence the
+                                         * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                                         */
+                                        // TODO bug 494: consider initial user-specific zoom settings
+                                    }
+                                }
+                            } else {
+                                lastTimeChangeBeforeInitialization = newTime;
                             }
                         }
-                    } else {
-                        lastTimeChangeBeforeInitialization = date;
-                    }
-                  }
-               });
-                    asyncActionsExecutor.execute(getRaceMapDataAction);
+                    });
+                    
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
-                        new AsyncCallback<WindInfoForRaceDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
-                                }
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames);
+                    asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
+                        }
 
-                                @Override
-                                public void onSuccess(WindInfoForRaceDTO windInfo) {
-                                    List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
-                                    if (windInfo != null) {
-                                        for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-                                            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                                            switch (windSource.getType()) {
-                                                case EXPEDITION:
-                                                    // we filter out measured wind sources with a very little confidence
-                                                    if (windTrackInfoDTO.minWindConfidence > 0.01) {
-                                                        windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
-                                                    }
-                                                    break;
-                                                case COMBINED:
-                                                    showCombinedWindOnMap(windSource, windTrackInfoDTO);
-                                                    if (windTrackInfoDTO != null) {
-                                                        lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
-                                                        showAdvantageLine(competitorsToShow, date);
-                                                    }
-                                                    break;
-                                            default:
-                                                // Which wind sources are requested is defined in a list above this
-                                                // action. So we throw here an exception to notice a missing source.
-                                                throw new UnsupportedOperationException(
-                                                        "There is currently no support for the enum value '"
-                                                                + windSource.getType() + "' in this method.");
+                        @Override
+                        public void onSuccess(WindInfoForRaceDTO windInfo) {
+                            List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
+                            if (windInfo != null) {
+                                for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                    WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+                                    switch (windSource.getType()) {
+                                        case EXPEDITION:
+                                            // we filter out measured wind sources with a very little confidence
+                                            if (windTrackInfoDTO.minWindConfidence > 0.01) {
+                                                windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
-                                        }
+                                            break;
+                                        case COMBINED:
+                                            showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                                            if (windTrackInfoDTO != null) {
+                                                lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
+                                                showAdvantageLine(competitorsToShow, newTime);
+                                            }
+                                            break;
+                                    default:
+                                        // Which wind sources are requested is defined in a list above this
+                                        // action. So we throw here an exception to notice a missing source.
+                                        throw new UnsupportedOperationException(
+                                                "There is currently no support for the enum value '"
+                                                        + windSource.getType() + "' in this method.");
                                     }
-                                    showWindSensorsOnMap(windSourcesToShow);
                                 }
-                            });
-                    
-                    asyncActionsExecutor.execute(getWindInfoAction);
+                            }
+                            showWindSensorsOnMap(windSourcesToShow);
+                        }
+                    });
                 }
             }
         }
@@ -628,23 +655,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showCompetitorInfoOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
+    protected void showCompetitorInfoOnMap(final Date newTime, final long timeForPositionTransitionMillis, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
             if (settings.isShowSelectedCompetitorsInfo()) {
                 Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(
                         competitorInfoOverlays.keySet());
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
                     if (fixesAndTails.hasFixesFor(competitorDTO)) {
-                        GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
+                        GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, newTime);
                         if (lastBoatFix != null) {
                             CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             if (competitorInfoOverlay == null) {
-                                competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX, competitorDTO);
+                                competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
-                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.draw();
                             }
                             toRemoveCompetorInfoOverlays.remove(competitorDTO);
@@ -665,11 +692,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
+
+    private long calculateTimeForPositionTransition(final Date newTime, final Date oldTime) {
+        final long timeForPositionTransitionMillis;
+        boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > 3*timer.getRefreshInterval();
+        if (timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
+            // choose 130% of the refresh interval as transition period to make it unlikely that the transition
+            // stops before the next update has been received
+            timeForPositionTransitionMillis = 1300 * timer.getRefreshInterval() / 1000; 
+        } else {
+            timeForPositionTransitionMillis = -1; // -1 means 'no transition
+        }
+        return timeForPositionTransitionMillis;
+    }
     
-    protected void showBoatsOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
+    protected void showBoatsOnMap(final Date newTime, final long timeForPositionTransitionMillis, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
-            Date tailsFromTime = new Date(date.getTime() - settings.getEffectiveTailLengthInMilliseconds());
-            Date tailsToTime = date;
+            Date tailsFromTime = new Date(newTime.getTime() - settings.getEffectiveTailLengthInMilliseconds());
+            Date tailsToTime = newTime;
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(fixesAndTails.getCompetitorsWithTails());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
             for (CompetitorDTO competitorDTO : competitorsToShow) {
@@ -679,10 +719,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                         tail.setMap(map);
                     } else {
-                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
+                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
+                                (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
+                        PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
+                        tail.setOptions(newOptions);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime, timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
@@ -841,6 +884,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
+    
+    final StringBuilder startLineAdvantageText = new StringBuilder();
+    final StringBuilder finishLineAdvantageText = new StringBuilder();
+
+    /**
+     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
+     * active while auto-zooming whereas stopping them seems the better option for manual zooms.
+     */
+    private boolean autoZoomInProgress;
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
@@ -848,10 +900,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             int legOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
             // draw the start line
+            updateCountdownCanvas(courseDTO.startMarkPositions);
             if (legOfLeadingCompetitor <= 1 && 
-                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions.size() == 2) {
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
                 LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
                 LatLng startLinePoint2 = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg); 
+                if (courseDTO.startLineAngleToCombinedWind != null) {
+                    startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                            NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleToCombinedWind)),
+                            courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
+                            NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
+                } else {
+                    startLineAdvantageText.delete(0, startLineAdvantageText.length());
+                }
                 if (startLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
@@ -870,8 +932,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            // TODO bug 1026: add start line bias to tool tip; requires wind data to be available at this point
-                            map.setTitle(stringMessages.startLine());
+                            map.setTitle(stringMessages.startLine()+startLineAdvantageText);
                         }
                     });
                     startLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -887,8 +948,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.getPath().insertAt(0, startLinePoint1);
                     startLine.getPath().insertAt(1, startLinePoint2);
                 }
-            }
-            else {
+            } else {
                 if (startLine != null) {
                     startLine.setMap(null);
                     startLine = null;
@@ -896,10 +956,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             // draw the finish line
             if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
-                settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions.size() == 2) {
+                settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions != null && courseDTO.finishMarkPositions.size() == 2) {
                 LatLng finishLinePoint1 = LatLng.newInstance(courseDTO.finishMarkPositions.get(0).latDeg, courseDTO.finishMarkPositions.get(0).lngDeg); 
                 LatLng finishLinePoint2 = LatLng.newInstance(courseDTO.finishMarkPositions.get(1).latDeg, courseDTO.finishMarkPositions.get(1).lngDeg); 
-                if(finishLine == null) {
+                if (courseDTO.startLineAngleToCombinedWind != null) {
+                    finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
+                            courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
+                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
+                } else {
+                    finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
+                }
+                if (finishLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
                     options.setGeodesic(true);
@@ -917,7 +986,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            map.setTitle(stringMessages.finishLine());
+                            map.setTitle(stringMessages.finishLine()+finishLineAdvantageText);
                         }
                     });
                     finishLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -991,17 +1060,57 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
+    /**
+     * If, according to {@link #lastRaceTimesInfo} and {@link #timer} the race is
+     * still in the pre-start phase, show a {@link SmallTransparentInfoOverlay} at the
+     * start line that shows the count down.
+     */
+    private void updateCountdownCanvas(List<PositionDTO> startMarkPositions) {
+        if (!settings.isShowSelectedCompetitorsInfo() || startMarkPositions == null || startMarkPositions.isEmpty()
+                || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
+            if (countDownOverlay != null) {
+                countDownOverlay.removeFromMap();
+                countDownOverlay = null;
+            }
+        } else {
+            long timeToStartInMs = lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime();
+            String countDownText = timeToStartInMs > 1000 ? stringMessages.timeToStart(DateAndTimeFormatterUtil
+                    .formatElapsedTime(timeToStartInMs)) : stringMessages.start();
+            if (countDownOverlay == null) {
+                countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
+                        countDownText);
+                countDownOverlay.addToMap();
+            } else {
+                countDownOverlay.setInfoText(countDownText);
+            }
+            countDownOverlay.setPosition(startMarkPositions.get(startMarkPositions.size() - 1), -1);
+            countDownOverlay.draw();
+        }
+    }
+
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+            setAutoZoomInProgress(true);
             map.setCenter(newBounds.getCenter());
-            //map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
             map.fitBounds(newBounds);
             settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+            setAutoZoomInProgress(false);
         }
     }
     
-    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date) {
+    private void setAutoZoomInProgress(boolean autoZoomInProgress) {
+        this.autoZoomInProgress = autoZoomInProgress;
+    }
+    
+    boolean isAutoZoomInProgress() {
+        return autoZoomInProgress;
+    }
+    
+    /**
+     * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
+     */
+    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date, long timeForPositionTransitionMillis) {
         boolean usedExistingCanvas = false;
         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
         if (lastBoatFix != null) {
@@ -1010,15 +1119,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
                 boatOverlays.put(competitorDTO, boatOverlay);
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.addToMap();
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.draw();
             }
         }
+
         return usedExistingCanvas;
     }
 
@@ -1027,7 +1137,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     protected CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
-        final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, raceMapImageManager, markDTO);
+        final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, markDTO);
         courseMarkOverlay.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
@@ -1039,16 +1149,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
-        return new CompetitorInfoOverlay(map, zIndex, competitorDTO, raceMapImageManager);
+        String infoText = competitorDTO.getSailID() == null || competitorDTO.getSailID().isEmpty() ? competitorDTO.getName() : competitorDTO.getSailID();
+        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO), infoText);
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO));
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                if(lastInfoWindow != null) {
+                if (lastInfoWindow != null) {
                     lastInfoWindow.close();
                 }
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
@@ -1193,9 +1304,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
         }
+        SpeedWithBearingDTO speedWithBearing = lastFix.speedWithBearing;
+        if (speedWithBearing == null) {
+            // TODO should we show the boat at all?
+            speedWithBearing = new SpeedWithBearingDTO(0, 0);
+        }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
-                NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
+                NumberFormatterFactory.getDecimalFormat(1).format(speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         if (lastFix.degreesBoatToTheWind != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
@@ -1404,10 +1520,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
-                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
-                timeChanged(timer.getTime());
+                timeChanged(timer.getTime(), null);
             }
         } else {
             // only change highlighting
@@ -1415,15 +1531,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
                 // data for newly selected competitor supposedly missing; refresh
-                timeChanged(timer.getTime());
+                timeChanged(timer.getTime(), null);
             }
         }
-        //Trigger auto-zoom if needed
+        // Now update tails for all competitors because selection change may also affect all unselected competitors
+        for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
+            Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            if (tail != null) {
+                PolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                tail.setOptions(newOptions);
+            }
+        }
+        // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
@@ -1435,13 +1559,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (isShowAnyHelperLines()) {
             // helper lines depend on which competitor is visible, because the *visible* leader is used for
             // deciding which helper lines to show:
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         } else {
             // try a more incremental update otherwise
             if (settings.isShowOnlySelectedCompetitors()) {
                 // if selection is now empty, show all competitors
                 if (Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
-                    timeChanged(timer.getTime());
+                    timeChanged(timer.getTime(), null);
                 } else {
                     // otherwise remove only deselected competitor's boat images and tail
                     BoatOverlay removedBoatOverlay = boatOverlays.remove(competitor);
@@ -1449,7 +1573,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         removedBoatOverlay.removeFromMap();
                     }
                     fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
+                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1458,7 +1582,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             }
         }
         //Trigger auto-zoom if needed
@@ -1681,23 +1805,38 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
     
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
-    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+    public PolylineOptions createTailStyle(CompetitorDTO competitor, boolean isHighlighted) {
         PolylineOptions options = PolylineOptions.newInstance();
         options.setClickable(true);
         options.setGeodesic(true);
-        options.setStrokeWeight(1);
-        options.setStrokeOpacity(0.5);
-        options.setStrokeColor(competitorSelection.getColor(competitor));
+        options.setStrokeOpacity(1.0);
+        boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
+        if (isHighlighted || noCompetitorSelected) {
+            options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
+        } else {
+            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
+        }
+        if (isHighlighted) {
+            options.setStrokeWeight(2);
+        } else {
+            options.setStrokeWeight(1);
+        }
         options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
+        return options;
+    }
+    
+    @Override
+    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+        PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
 
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));

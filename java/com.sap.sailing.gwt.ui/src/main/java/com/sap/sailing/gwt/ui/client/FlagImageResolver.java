@@ -8,13 +8,13 @@ import com.google.gwt.resources.client.ImageResource;
 
 public class FlagImageResolver {
 
-	private static final String NONE = "none";
+    private static final String NONE = "none";
 
     private static Map<String, ImageResource> flagImagesMap;
 	
     private static FlagImageResources flagImageResources = GWT.create(FlagImageResources.class);
 
-	public static String[] flagImageNames = { "ad", "ae", "af", "ag", "ai", "al", "am", "an",
+    public static String[] flagImageNames = { "ad", "ae", "af", "ag", "ai", "al", "am", "an",
 		"ao", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd",
 		"be", "bf", "bg", "bh", "bi", "bj", "bm", "bn", "bo", "br", "bs",
 		"bt", "bv", "bw", "by", "bz", "ca", "catalonia", "cc", "cd", "cf",

@@ -25,7 +25,7 @@ public class RaceMapZoomSettings {
         }
 
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            return calculator.calculateNewBounds(forMap);
+            return calculator == null ? null : calculator.calculateNewBounds(forMap);
         }
     };
 

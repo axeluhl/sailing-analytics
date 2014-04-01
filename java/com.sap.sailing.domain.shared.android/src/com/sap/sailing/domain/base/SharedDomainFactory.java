@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
-public interface SharedDomainFactory {
+public interface SharedDomainFactory extends CompetitorFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -46,15 +49,15 @@ public interface SharedDomainFactory {
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
      */
-    Gate createGate(Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 
-    Gate createGate(Serializable id, Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name);
 
     /**
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
-    Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide);
+    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction);
 
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 
@@ -72,15 +75,24 @@ public interface SharedDomainFactory {
      */
     BoatClass getOrCreateBoatClass(String name);
 
-    Competitor getExistingCompetitorById(Serializable competitorId);
-
-    Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
-
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
+    /**
+     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
+     */
+    CompetitorStore getCompetitorStore();
+   
+    /**
+     * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
+     * is created.
+     */
+    CourseArea getOrCreateCourseArea(UUID id, String name);
     
-    CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
-    
+    /**
+     * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
+     */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
-
-
+    
+    /**
+     * Hm.
+     */
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers);
 }

@@ -20,7 +20,7 @@ public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
      */
     public static final String CATEGORY_GLOBAL = ""; //$NON-NLS-1$
     
-    private static final String JAVASCRIPT = "return (window.PENDING_AJAX_CALLS.numberOfPendingCalls(%s) === 0)"; //$NON-NLS-1$
+    private static final String JAVASCRIPT = "return (window.PENDING_AJAX_CALLS.numberOfPendingCalls(arguments[0]) === 0)"; //$NON-NLS-1$
     
     private String category;
     
@@ -54,6 +54,6 @@ public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
     public Boolean apply(WebDriver driver) {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         
-        return (Boolean) executor.executeScript(String.format(JAVASCRIPT, this.category));
+        return (Boolean) executor.executeScript(JAVASCRIPT, this.category);
     }
 }

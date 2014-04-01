@@ -17,8 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -36,7 +34,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -86,7 +83,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword);
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, tracTracUsername, tracTracPassword, "");
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -97,7 +94,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     }
 
     private void startTrackingOnMaster() throws Exception {
-        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException {

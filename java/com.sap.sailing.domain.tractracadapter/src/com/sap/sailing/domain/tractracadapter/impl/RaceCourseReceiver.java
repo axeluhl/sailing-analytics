@@ -16,10 +16,11 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -106,12 +107,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
-        Map<Integer, NauticalSide> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
-        List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
+        Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
+        List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
-            NauticalSide nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
+            PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 
@@ -166,6 +167,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
+        if(!Activator.getInstance().isUseTracTracMarkPassings()){
+            new MarkPassingCalculator(trackedRace, true);
+        }
     }
 
 }

@@ -40,7 +40,7 @@ The Maven plug-in for the GWT compilation doesn't reliably perform a dependency 
 
 which basically does something like
 
-    `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.without-proxy clean install 2>&1 | tee log`
+    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.without-proxy clean install 2>&1 | tee log
 
 Inside the SAP VPN you may want to use a different profile which accounts for the proxies that have to be used:
 
@@ -51,6 +51,27 @@ The buildAndUpdateProduct.sh script can be found in the top-level configuration/
 When building on sapsailing.com you should stick with the buildAndUpdateProduct.sh script. It makes a lot of settings that are necessary, such as specifying the settings.xml file to use for the Maven build. For the Selenium tests to succeed you have to make sure the DISPLAY environment variable is set to ":2.0" to send test browsers to a VNC display. Should the GWT build fail because it cannot open enough files, ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble the resource sets which consist of many files that all need to be opened concurrently. Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf and is set to 16384. This specified the maximum amount to which a user's shell can set this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when running "screen" the shells usually are no login shells. You need to make sure you run ~trac/.bash_profile in the build shell to set the limit of open files to at least 4096. Then issue the respective buildAndUpdateProduct.sh command line.
 
 All these build lines also creates a log file with all error messages, just in case the screen buffer is not sufficient to hold all scrolling error messages.
+
+## Automated Builds using Hudson
+
+The project uses a Hudson build server installation that can be reached at [hudson.sapsailing.com](http://hudson.sapsailing.com). Please ask a project administrator for an account. This Hudson server builds all new commits pushed to the master branch, performs the JUnit tests and publishes the JUnit test results. New jobs for other branches can easily be created by copying from the SAPSailingAnalytics-master job and updating the git branch to be checked out for build. This way, you can create your own job for your own branch. Don't forget to set yourself as the e-mail recipient for failing builds.
+
+As a special feature, release builds can automatically be performed and published to [releases.sapsailing.com](http:///releases.sapsailing.com) by pushing the tag named "release" to the version that you want to release. This can be done using the following series of git commands:
+
+    git tag -f release
+    git push origin release:release
+
+You can follow the build triggered by this [here](http://hudson.sapsailing.com/job/SAPSailingAnalytics-release/).
+
+### Plotting test results with the Measurement Plugin
+
+By default the duration of each test is published and can be viewed in comparison with older builds. It is possible to publish other values using the Measurement Plugin, which reads them out of a `MeasurementXMLFile`. 
+
+```
+MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + getClass().getSimpleName() + ".xml", getClass().getSimpleName(), getClass().getName());
+MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+performanceReportCase.addMeasurement(new Measurement("MeasurementName", measurementValue));
+```
 
 ## Product, Features and Target Platform
 The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle. The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.

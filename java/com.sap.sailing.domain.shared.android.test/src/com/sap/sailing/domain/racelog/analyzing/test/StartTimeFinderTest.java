@@ -5,11 +5,14 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 
@@ -19,13 +22,13 @@ public class StartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<StartTimeF
     protected StartTimeFinder createAnalyzer(RaceLog raceLog) {
         return new StartTimeFinder(raceLog);
     }
-    
+
     @Override
-    protected TimePoint setupTargetEventsForPassAwareTests(int passId) {
-        RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1, passId);
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId,
+            RaceLogEventAuthor author) {
+        RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1, passId, author);
         when(event.getStartTime()).thenReturn(mock(TimePoint.class));
-        raceLog.add(event);
-        return event.getStartTime();
+        return new TargetPair(Arrays.asList(event), event.getStartTime());
     }
     
     @Test

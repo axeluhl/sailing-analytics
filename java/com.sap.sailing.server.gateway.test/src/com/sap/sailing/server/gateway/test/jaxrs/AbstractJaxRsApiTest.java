@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
@@ -36,8 +37,7 @@ public abstract class AbstractJaxRsApiTest {
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     public void setUp() {
-        service = MongoDBService.INSTANCE;
-        service.setConfiguration(MongoDBConfiguration.getDefaultTestConfiguration());
+        service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
 
         racingEventService = new RacingEventServiceImpl();
@@ -70,7 +70,7 @@ public abstract class AbstractJaxRsApiTest {
         BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

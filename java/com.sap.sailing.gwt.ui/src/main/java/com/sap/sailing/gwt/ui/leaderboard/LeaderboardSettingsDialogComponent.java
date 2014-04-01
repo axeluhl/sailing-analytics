@@ -22,13 +22,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;
@@ -45,20 +45,20 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
-    private final boolean showOverallLeaderboardOnSamePage;
+    private final boolean showAddedScores;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
-    private CheckBox showOverallLeaderboardOnSamePageCheckbox;
+    private CheckBox showAddedScoresCheckBox;
     
     protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
-            boolean autoExpandPreSelectedRace, boolean showOverallLeaderboardOnSamePage,
+            boolean autoExpandPreSelectedRace, boolean showAddedScores,
             long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
@@ -76,14 +76,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.showOverallLeaderboardOnSamePage = showOverallLeaderboardOnSamePage;
+        this.showAddedScores = showAddedScores;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.add(createSelectedRacesPanel(dialog));
-        dialogPanel.add(createOverallLeaderboardSelectionPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
@@ -101,6 +100,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(detailType));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
@@ -145,10 +145,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
+        // Make it possible to configure added points
+        FlowPanel addedScoresFlowPanel = new FlowPanel();
+        addedScoresFlowPanel.addStyleName("dialogInnerContent");
+        showAddedScoresCheckBox = dialog.createCheckbox(stringMessages.showAddedScores());
+        dialog.addTooltip(showAddedScoresCheckBox, stringMessages.showAddedScores());
+        showAddedScoresCheckBox.setValue(showAddedScores);
+        addedScoresFlowPanel.add(showAddedScoresCheckBox);
+        raceDetailDialog.add(addedScoresFlowPanel);
         return raceDetailDialog;
     }
 
@@ -161,6 +170,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentOverallDetailSelection.contains(type));
             overallDetailCheckboxes.put(type, checkbox);
             overallDetailDialogContent.add(checkbox);
@@ -183,6 +193,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 legDetailsToShow.add(legDetailsContent);
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
@@ -278,19 +289,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return selectedRacesPanel;
     }
 
-    private FlowPanel createOverallLeaderboardSelectionPanel(DataEntryDialog<?> dialog) {
-        FlowPanel overallLeaderboardSelectionPanel = new FlowPanel();
-        overallLeaderboardSelectionPanel.addStyleName("SettingsDialogComponent");
-        overallLeaderboardSelectionPanel.add(dialog.createHeadline(stringMessages.overallLeaderboardSelection(), true));
-        FlowPanel overallLeaderboardSelectionContent = new FlowPanel();
-        overallLeaderboardSelectionContent.addStyleName("dialogInnerContent");
-        overallLeaderboardSelectionPanel.add(overallLeaderboardSelectionContent);
-        showOverallLeaderboardOnSamePageCheckbox = dialog.createCheckbox(stringMessages.showOverallLeaderboardOnSamePage());
-        showOverallLeaderboardOnSamePageCheckbox.setValue(showOverallLeaderboardOnSamePage);
-        overallLeaderboardSelectionContent.add(showOverallLeaderboardOnSamePageCheckbox);
-        return overallLeaderboardSelectionPanel;
-    }
-
     @Override
     public LeaderboardSettings getResult() {
         List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
@@ -334,7 +332,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy, showOverallLeaderboardOnSamePageCheckbox.getValue());
+                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
+                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue());
     }
 
     @Override

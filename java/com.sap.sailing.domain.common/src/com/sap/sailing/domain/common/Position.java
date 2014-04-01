@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+
 public interface Position extends Serializable {
     double getLatRad();
 
@@ -47,6 +48,12 @@ public interface Position extends Serializable {
     /**
      * @return an unsigned distance
      */
+    Distance absoluteCrossTrackError(Position p, Bearing bearing);
+    
+    /**
+     * @return a signed distance; positive distances mean that this position is to the right (starboard) of the
+     * line one gets when traveling from <code>p</code> with <code>bearing</code>
+     */
     Distance crossTrackError(Position p, Bearing bearing);
 
     /**
@@ -56,5 +63,12 @@ public interface Position extends Serializable {
      * if the angle between this position and the great circle is 90 degrees then there is
      * no solution, and a <code>NaN</code> or exception will result.
      */
+
     Distance alongTrackDistance(Position from, Bearing bearing);
+    
+    /**
+     * Computes the distance from this position to the line between <code>left<code> and <code>right<code>. This distance
+     * is positive if <code>left<code> is actually the position farther to the left, as seen from this position.
+     */
+    Distance getDistanceToLine(Position left, Position right);
 }

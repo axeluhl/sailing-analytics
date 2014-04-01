@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -25,11 +27,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public int[] discardThresholds;
     public String regattaName;
     public String displayName;
-    public String defaultCourseAreaIdAsString;
+    public UUID defaultCourseAreaId;
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
-    public boolean isMetaLeaderboard;
-    public boolean isRegattaLeaderboard;
+    public LeaderboardType type; 
 
     private Long delayToLiveInMillisForLatestRace;
 
@@ -328,7 +329,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
             return false;
         if (hasCarriedPoints != other.hasCarriedPoints)
             return false;
-        if (isMetaLeaderboard != other.isMetaLeaderboard)
+        if (type != other.type)
             return false;
         if (scoringScheme != other.scoringScheme)
             return false;

@@ -1,5 +1,6 @@
 @import url(fontface.css);
 @import url(CommonControls.css);
+@import url(ViewerToolbar.css);
 
 /** Add css rules here for your application. */
 /*
@@ -47,10 +48,6 @@ h1 {
 table {
   border-collapse: separate; }
 
-.leaderboardMargin {
-	margin: 5px;
-}
-
 .leaderboardContent {
 }
 
@@ -90,10 +87,6 @@ input.magnifier{
 body, table td, select, button {
     font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
     font-size: 14px;
-}
-
-.busyIndicator-simpleBusyIndicator {
-	margin-top: 7px;
 }
 
 .errorLabel {

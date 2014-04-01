@@ -55,4 +55,9 @@ obtain the current state of a peer using the {@link com.sap.runlet.operationaltr
 operation.
 </p>
 
+Consider using {@link com.sap.sailing.operationaltransformation.OperationalTransformer} as the basis for your transformation
+logic. It generically works with {@link com.sap.sailing.operationaltransformation.OperationWithTransformationSupport} if you
+can afford to have your operation classes implement the transformation logic. The benefit of doing so is that adding more
+operations requires you to consider the transformation logic.
+
 </body>

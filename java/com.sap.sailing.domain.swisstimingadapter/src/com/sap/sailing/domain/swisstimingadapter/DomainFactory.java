@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -16,26 +17,28 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.WindStore;
 
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
+    /**
+     * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use what can be
+     * reached from <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance
+     * used by all other services linked to the <code>RacingEventService</code>.
+     */
     final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
-    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
+    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType);
+    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
     
-    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, RaceType raceType);
+    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
 
-    Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType);
-    
-    Competitor getCompetitorByBoatIDAndRaceID(String boatID, String raceID);
+    Competitor getCompetitorByBoatIDAndRaceIDOrBoatClass(String boatID, String raceID, BoatClass boatClass);
     
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
@@ -48,13 +51,12 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     void removeRace(String raceID);
-    
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
-            boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, WindStore windStore,
-            RaceSpecificMessageLoader messageLoader);
 
     RaceType getRaceTypeFromRaceID(String raceID);
+
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
+            String raceDescription, BoatClass boatClass, long delayToLiveInMillis,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 

@@ -28,7 +28,6 @@ public class RaceLogReplicator implements RaceColumnListener {
     @Override
     public void raceLogEventAdded(final RaceColumn raceColumn, final RaceLogIdentifier identifier, final RaceLogEvent event) {
         identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
-            
             @Override
             public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnRegatta(
@@ -74,6 +73,10 @@ public class RaceLogReplicator implements RaceColumnListener {
 
     @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
     }
 
     @Override

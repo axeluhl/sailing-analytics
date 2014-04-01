@@ -15,5 +15,4 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedWithAbst
     public Bearing getBearing() {
         return bearing;
     }
-
 }

@@ -2,20 +2,33 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Color;
+
+/**
+ * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
+ * {@link #getBoatClass() boat class} (whose equality and hash code, in turn, depends on its name) and the
+ * {@link #getThreeLetterIocCountryCode() IOC country code}. Note that the three latter properties are subject
+ * to change for a competitor while the ID remains unchanged.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
 public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
     private static final long serialVersionUID = -4997852354821083154L;
+    private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
-    private String countryName;
+    private Color color;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
     
     CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
+        this.color = color;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
@@ -27,8 +40,12 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * getIdAsString().hashCode();
+        int result = super.hashCode();
+        result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
+        result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
+        result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
+        result = prime * result + ((color == null) ? 0 : color.hashCode());
+        result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         return result;
     }
 
@@ -36,15 +53,35 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
         CompetitorDTOImpl other = (CompetitorDTOImpl) obj;
-        if (getIdAsString() == null) {
-            if (other.getIdAsString() != null)
+        if (boatClass == null) {
+            if (other.boatClass != null)
                 return false;
-        } else if (!getIdAsString().equals(other.getIdAsString()))
+        } else if (!boatClass.equals(other.boatClass))
+            return false;
+        if (idAsString == null) {
+            if (other.idAsString != null)
+                return false;
+        } else if (!idAsString.equals(other.idAsString))
+            return false;
+        if (sailID == null) {
+            if (other.sailID != null)
+                return false;
+        } else if (!sailID.equals(other.sailID))
+            return false;
+        if (threeLetterIocCountryCode == null) {
+            if (other.threeLetterIocCountryCode != null)
+                return false;
+        } else if (!threeLetterIocCountryCode.equals(other.threeLetterIocCountryCode))
+            return false;
+        if (color == null) {
+            if (other.color != null)
+                return false;
+        } else if (!color.equals(other.color))
             return false;
         return true;
     }
@@ -84,4 +121,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
+    public Color getColor() {
+        return color;
+    }
 }

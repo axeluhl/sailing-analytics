@@ -3,8 +3,11 @@ package com.sap.sailing.domain.tracking;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -12,7 +15,7 @@ public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Mark mark, GPSFix fix);
     
     /**
-     * @return True if the specified wind has been accepteed and added to this race's windtrack and database, else false.
+     * @return True if the specified wind has been accepted and added to this race's wind track and database, else false.
      */
     boolean recordWind(Wind wind, WindSource windSource);
 
@@ -97,4 +100,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
+
+    Bearing getCrossingBearing(Waypoint w, TimePoint t);
+
+    Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w);
 }

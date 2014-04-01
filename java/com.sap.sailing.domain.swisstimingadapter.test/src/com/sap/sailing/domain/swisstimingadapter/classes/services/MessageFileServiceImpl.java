@@ -14,11 +14,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
@@ -183,7 +183,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         List<Race> result = new ArrayList<Race>();
         for (int i = 0; i < count; i++) {
             String[] idAndDescription = message.getSections()[2 + i].split(";");
-            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], null /* boat class */));
         }
         return new RACMessage(result);
     }
@@ -258,7 +258,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         // Add Strings of stringmessageList into a ArrayList of type SailMasterMessage
         List<SailMasterMessage> sailMasterMessageList = new ArrayList<SailMasterMessage>();
         for (String s : strList) {
-            sailMasterMessageList.add(new SailMasterMessageImpl(s, new Long(0)));
+            sailMasterMessageList.add(new SailMasterMessageImpl(s));
         }
         return sailMasterMessageList;
     }

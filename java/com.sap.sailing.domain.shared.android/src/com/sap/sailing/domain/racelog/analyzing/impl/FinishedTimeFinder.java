@@ -18,7 +18,7 @@ public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                 if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
-                    return statusEvent.getTimePoint();
+                    return statusEvent.getLogicalTimePoint();
                 }
             }
         }

@@ -1,5 +1,7 @@
 package com.sap.sailing.mongodb;
 
+import com.sap.sailing.mongodb.internal.MongoDBServiceImpl;
+
 /**
  * A readonly Mongo Database connection configuration
  * @author Frank
@@ -68,6 +70,13 @@ public class MongoDBConfiguration {
         this.hostName = hostName;
         this.port = port;
         this.databaseName = databaseName;
+    }
+    
+    /**
+     * Creates and returns a DB service for this configuration
+     */
+    public MongoDBService getService() {
+        return new MongoDBServiceImpl(this);
     }
 
     public String getHostName() {

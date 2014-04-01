@@ -4,10 +4,8 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public interface WindTrack extends Track<Wind> {
+public interface WindTrack extends DynamicTrack<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
-
-    void add(Wind wind);
 
     /**
      * Estimates a wind force and direction based on tracked wind data.<p>

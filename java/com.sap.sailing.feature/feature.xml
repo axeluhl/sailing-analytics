@@ -39,7 +39,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.sap.sailing.operationaltransformation"
          download-size="0"
@@ -153,6 +153,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sse.gwt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.sap.sailing.gwt.ui"
          download-size="0"
          install-size="0"
@@ -167,7 +174,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sailing.xcelsiusadapter"
+         id="com.sap.sailing.xmlexport"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -205,7 +212,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.sap.sailing.kiworesultimport"
          download-size="0"
@@ -247,7 +254,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.sap.sailing.velum.resultimport"
          download-size="0"
@@ -268,4 +275,19 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.domain.igtimiadapter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.domain.igtimiadapter.persistence"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

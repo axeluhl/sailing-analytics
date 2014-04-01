@@ -8,18 +8,22 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.MergingRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
@@ -27,14 +31,16 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
-    // private static final String TAG = ManagedRacesDataParser.class.getName();
 
-    private JsonDeserializer<RaceGroup> deserializer;
-    private Context context;
+    private final JsonDeserializer<RaceGroup> deserializer;
+    private final ConfigurationLoader<RegattaConfiguration> globalConfigurationLoader;
+    private final RaceLogEventAuthor author;
 
-    public ManagedRacesDataParser(Context context, JsonDeserializer<RaceGroup> deserializer) {
+    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
+            JsonDeserializer<RaceGroup> deserializer) {
+        this.author = author;
+        this.globalConfigurationLoader = globalConfiguration;
         this.deserializer = deserializer;
-        this.context = context;
     }
 
     public Collection<ManagedRace> parse(Reader reader) throws Exception {
@@ -66,10 +72,15 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        StartProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
-        return new ManagedRaceImpl(new ManagedRaceIdentifierImpl(name,
-                new FleetIdentifierImpl(fleet, series, raceGroup)), startType, raceLog);
-
+        ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
+        RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();
+        if (localConfiguration != null) {
+            configurationLoader = new MergingRegattaConfigurationLoader(localConfiguration, globalConfigurationLoader);
+        }
+        FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
+        ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
+        RaceState state = RaceStateImpl.create(raceLog, author, configurationLoader);
+        return new ManagedRaceImpl(identifier, state);
     }
 
 }

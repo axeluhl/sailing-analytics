@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -29,6 +31,17 @@ public interface Regatta extends Named, WithID {
      * @param newCourseArea {@link CourseArea} to be set.
      */
     void setDefaultCourseArea(CourseArea newCourseArea);
+
+    /**
+     * Gets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
+     */
+    RegattaConfiguration getRegattaConfiguration();
+    
+    /**
+     * Sets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
+     * @param configuration
+     */
+    void setRegattaConfiguration(RegattaConfiguration configuration);
     
     /**
      * A regatta consists of one or more series.
@@ -36,6 +49,11 @@ public interface Regatta extends Named, WithID {
      * @return an unmodifiable iterable sequence of the series of which this regatta consists.
      */
     Iterable<? extends Series> getSeries();
+    
+    /**
+     * Adds the provided series to this regatta if a series with the name does not exist already.
+     */
+    void addSeries(Series series);
     
     /**
      * @return the first series from {@link #getSeries} whose {@link Series#getName() name} equals
@@ -65,6 +83,12 @@ public interface Regatta extends Named, WithID {
     BoatClass getBoatClass();
     
     Iterable<Competitor> getCompetitors();
+    
+    /**
+     * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to
+     * make sure that all raceLogs and race associations get removed for all race columns in this series.
+     */
+    void removeSeries(Series series);
 
     void addRace(RaceDefinition race);
 
@@ -100,4 +124,11 @@ public interface Regatta extends Named, WithID {
      *         keeps discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
+
+    RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
+    
+    /**
+     * @return the associated event. Can be null.
+     */
+    Event getEvent();
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -24,7 +25,7 @@ public class RegattaRaceStatesSettingsJsonDeSerializer implements GwtJsonDeSeria
         
         JSONArray visibleCourseAreas = new JSONArray();
         for (int i = 0 ; i < settings.getVisibleCourseAreas().size() ; i++) {
-            visibleCourseAreas.set(i, new JSONString(settings.getVisibleCourseAreas().get(i)));
+            visibleCourseAreas.set(i, new JSONString(settings.getVisibleCourseAreas().get(i).toString()));
         }
         result.put(FIELD_VISIBLE_COURSE_AREAS, visibleCourseAreas);
         
@@ -47,10 +48,10 @@ public class RegattaRaceStatesSettingsJsonDeSerializer implements GwtJsonDeSeria
         JSONBoolean showOnlyRacesOfSameDay = (JSONBoolean) object.get(FIELD_SHOW_ONLY_RACES_OF_SAME_DAY);
         
         JSONArray jsonVisibleCourseAreas = (JSONArray) object.get(FIELD_VISIBLE_COURSE_AREAS);
-        List<String> visibleCourseAreas = new ArrayList<String>();
+        List<UUID> visibleCourseAreas = new ArrayList<UUID>();
         for (int i = 0 ; i < jsonVisibleCourseAreas.size() ; i++) {
             JSONString jsonCourseArea = (JSONString) jsonVisibleCourseAreas.get(i);
-            visibleCourseAreas.add(jsonCourseArea.stringValue());
+            visibleCourseAreas.add(UUID.fromString(jsonCourseArea.stringValue()));
         }
         
         JSONArray jsonVisibleRegattas = (JSONArray) object.get(FIELD_VISIBLE_REGATTAS);

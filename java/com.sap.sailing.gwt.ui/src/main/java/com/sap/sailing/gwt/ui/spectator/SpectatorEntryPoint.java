@@ -1,21 +1,26 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.gwt.server.GwtHttpRequestUtils;
 
 /**
  * 
@@ -23,10 +28,14 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
  *
  */
 public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+
+        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
@@ -38,13 +47,14 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             groupName = null;
         } else {
             groupName = groupParamValue;
+            Window.setTitle(groupName);
             sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
                 }
                 @Override
-                public void onSuccess(LeaderboardGroupDTO group) {}
+                public void onSuccess(LeaderboardGroupDTO group) {                }
             });
         }
         String root = Window.Location.getParameter("root");

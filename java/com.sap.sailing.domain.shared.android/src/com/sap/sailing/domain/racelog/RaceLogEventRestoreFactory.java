@@ -5,56 +5,55 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventRestoreFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     RaceLogEventRestoreFactory INSTANCE = new RaceLogEventRestoreFactoryImpl();
 
-    RaceLogFlagEvent createFlagEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
-            List<Competitor> involvedBoats, int passId, Flags upperFlag, Flags lowerFlag, boolean isDisplayed);
+    RaceLogFlagEvent createFlagEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> involvedBoats, int passId, Flags upperFlag, Flags lowerFlag, boolean isDisplayed);
 
-    RaceLogStartTimeEvent createStartTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
-            List<Competitor> involvedBoats, int passId, TimePoint startTime);
+    RaceLogStartTimeEvent createStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime);
 
-    RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
-            List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
+    RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
 
-    RaceLogPassChangeEvent createPassChangeEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
-            List<Competitor> competitors, int passId);
+    RaceLogPassChangeEvent createPassChangeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId);
 
-    RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
+    RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
 
-    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
+    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
 
     RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId,
-            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors,
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, 
-            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, 
+            int passId, CompetitorResults positionedCompetitors);
 
-    RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
-            List<Competitor> competitors, int passId, String pathfinderId);
+    RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, String pathfinderId);
 
-    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTime);
+    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, Long gateLaunchStopTime, 
+            Long golfDownTime);
 
-    RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
+    RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type);
     
-    RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
+    RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
 
-    RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
-            List<Competitor> competitors, Integer passId, Wind wind);
+    RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, Integer passId, Wind wind);
 }

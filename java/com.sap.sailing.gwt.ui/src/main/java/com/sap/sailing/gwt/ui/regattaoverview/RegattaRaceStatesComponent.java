@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -27,6 +28,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -38,7 +40,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -47,7 +49,6 @@ import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -56,11 +57,13 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 /**
  * This component shows a table displaying the current state of races for a given event. 
@@ -83,7 +86,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
-    private final String eventIdAsString;
+    private final UUID eventId;
 
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
@@ -120,17 +123,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
      *            timer passed for this argument will be synchronized.
      */
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
+            final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.eventIdAsString = eventIdAsString;
+        this.eventId = eventId;
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
 
         this.eventDTO = null;
         this.raceGroupDTOs = null;
         
-        this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventIdAsString;
+        this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventId.toString();
 
         this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
 
@@ -177,32 +180,32 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     /**
      */
     protected void loadAndUpdateEventLog() {
-        if (eventIdAsString == null || eventDTO == null || raceGroupDTOs == null) {
+        if (eventId == null || eventDTO == null || raceGroupDTOs == null) {
             return;
         }
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getRaceStateEntriesForRaceGroup(eventIdAsString, settings.getVisibleCourseAreas(), settings.getVisibleRegattas(), 
-                settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(), new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
-
-            @Override
-            protected void handleFailure(Throwable cause) {
-
-            }
-
-            @Override
-            protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
-                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                Date serverTimeDuringRequest = null;
-                for (RegattaOverviewEntryDTO entryDTO : result) {
-                    if (entryDTO.currentServerTime != null) {
-                        serverTimeDuringRequest = entryDTO.currentServerTime;
-                    }
-                }
-                updateTable(result);
-                timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-            }
-
-        });
+        sailingService.getRaceStateEntriesForRaceGroup(eventId, settings.getVisibleCourseAreas(), settings.getVisibleRegattas(), 
+                settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(),
+                new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
+                        new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
+                            @Override
+                            public void onFailure(Throwable cause) {
+                
+                            }
+                
+                            @Override
+                            public void onSuccess(List<RegattaOverviewEntryDTO> result) {
+                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                                Date serverTimeDuringRequest = null;
+                                for (RegattaOverviewEntryDTO entryDTO : result) {
+                                    if (entryDTO.currentServerTime != null) {
+                                        serverTimeDuringRequest = entryDTO.currentServerTime;
+                                    }
+                                }
+                                updateTable(result);
+                                timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+                            }
+                        }));
     }
 
     private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {
@@ -415,13 +418,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                if (object.raceInfo.lastCourseDesign.waypoints.size() > 0) {
+                RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+                if (courseDTO != null && courseDTO.waypoints.size() > 0) {
                     DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
                     courseViewDialogBox.center();
                     courseViewDialogBox.setGlassEnabled(true);
                     courseViewDialogBox.setAnimationEnabled(true);
                     courseViewDialogBox.show();
-                } 
+                }
             }
         });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -574,7 +578,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
-        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, eventIdAsString,
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, eventId,
                 Collections.unmodifiableList(eventDTO.venue.getCourseAreas()),
                 Collections.unmodifiableList(raceGroupDTOs));
     }
@@ -662,7 +666,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null && eventIdAsString != null) {
+        if (localStorage != null && eventId != null) {
             // delete old value
             localStorage.removeItem(localStorageRegattaOverviewEventKey);
 
@@ -725,16 +729,22 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getWaypointNameLabel(WaypointDTO waypointDTO) {
         String result = waypointDTO.getName();
-        result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
+        result += (waypointDTO.passingInstructions == null) ? "" : ", to " + getPassingInstructionsAsText(waypointDTO.passingInstructions);
         return result;
     }
 
-    private String getNauticalSideAsText(NauticalSide passingSide) {
-        switch (passingSide) {
-        case PORT:
+    private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
+        switch (passingInstructions) {
+        case Port:
             return stringMessages.portSide();
-        case STARBOARD:
+        case Starboard:
             return stringMessages.starboardSide();
+        case Gate:
+            return stringMessages.gate();
+        case Line:
+            return stringMessages.line();
+        case Offset:
+            return stringMessages.offset();
         default:
             return "";
         }

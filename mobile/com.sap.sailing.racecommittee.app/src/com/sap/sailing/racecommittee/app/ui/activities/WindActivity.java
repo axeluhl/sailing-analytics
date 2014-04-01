@@ -139,17 +139,18 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(Locale.US));
         bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(Locale.US));
 
-        double enteredWindSpeed = AppPreferences.getWindSpeed(this);
+        AppPreferences preferences = AppPreferences.on(getApplicationContext());
+        double enteredWindSpeed = preferences.getWindSpeed();
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
-        double enteredWindBearingFrom = AppPreferences.getWindBearingFromDirection(this);
+        double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
         compassView.setDirection((float)enteredWindBearingFrom);
         windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
     }
 
     private void buildAlertMessageNoGps() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+        builder.setMessage(R.string.wind_gps_is_disabled)
         .setCancelable(false)
         .setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(final DialogInterface dialog, final int id) {
@@ -169,8 +170,9 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     protected void saveEntriesInPreferences(Wind wind) {
         // Wind.getBearing() returns a value that assumes that the wind flows in that direction
         // But for this app we need to display the direction the wind is coming from
-        AppPreferences.setWindBearingFromDirection(getBaseContext(), wind.getBearing().reverse().getDegrees());
-        AppPreferences.setWindSpeed(getBaseContext(), wind.getKnots());
+        AppPreferences preferences = AppPreferences.on(getApplicationContext());
+        preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
+        preferences.setWindSpeed(wind.getKnots());
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,12 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -27,27 +34,33 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 
 public class OfflineDataManager extends DataManager {
 
     private static boolean isInitialized = false;
+    private final Context context;
 
-    public OfflineDataManager(Context context, DataStore dataStore) {
-        super(context, dataStore);
-
+    protected OfflineDataManager(Context context, DataStore dataStore, SharedDomainFactory domainFactory) {
+        super(context, dataStore, domainFactory);
+        this.context = context;
         if (!isInitialized) {
             isInitialized = true;
             fillDataStore(dataStore);
@@ -55,37 +68,47 @@ public class OfflineDataManager extends DataManager {
     }
 
     private void fillDataStore(DataStore dataStore) {
-        dataStore
-                .addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, UUID.randomUUID()));
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, UUID.randomUUID()));
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, UUID.randomUUID()));
-        EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, UUID.randomUUID());
-        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
-        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
+        Calendar cal = Calendar.getInstance();
+        cal.set(2012, 12, 1);
+        final TimePoint startDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2012, 12, 5);
+        final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID()));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID()));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID()));
+        EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID());
+        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
+        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
 
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
-                medal));
+                medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), 1,
-                new MillisecondsTimePoint(new Date().getTime() - 1000)));
+        final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
+        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
+        
+        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
+                1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
-        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()), 1,
-                RaceLogRaceStatus.FINISHING));
+        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
+                AppPreferences.on(context).getAuthor(),
+                1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+        ManagedRace q1 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -93,16 +116,18 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+        ManagedRace q2 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+        ManagedRace q3 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -189,6 +214,17 @@ public class OfflineDataManager extends DataManager {
                         return managedRace.getCompetitors();
                     }
                 });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback, new Callable<DeviceConfiguration>() {
+            @Override
+            public DeviceConfiguration call() throws Exception {
+                throw new IllegalStateException("No remote configuration in offline mode.");
+            }
+        });
     }
 
 }

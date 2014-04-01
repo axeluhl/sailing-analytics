@@ -1,18 +1,14 @@
 package com.sap.sailing.selenium.core;
 
 import java.lang.reflect.Field;
-
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.pagefactory.ElementLocator;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.google.common.base.Function;
@@ -38,7 +34,7 @@ public class SeleniumElementLocator implements ElementLocator {
 
     private WebElement element;
     private List<WebElement> elements;
-
+    
     /**
      * <p>Creates a new element locator for the given field using the specified context and timeout for the search.</p>
      * 
@@ -46,11 +42,11 @@ public class SeleniumElementLocator implements ElementLocator {
      *   The context for search of the element or the list of elements.
      * @param field
      *   The field for which an element or an element list should be lazily locate.
-     * @param timeOut
-     *   The maximum amount of time to wait for the element or the list of elements.
+     * @param timeOutSeconds
+     *   The maximum amount of time to wait for the element or the list of elements in seconds
      */
-    public SeleniumElementLocator(SearchContext context, Field field, int timeOut) {
-        this(context, field, timeOut, 250);
+    public SeleniumElementLocator(SearchContext context, Field field, int timeOutSeconds) {
+        this(context, field, timeOutSeconds, 250);
     }
 
     /**
@@ -61,17 +57,17 @@ public class SeleniumElementLocator implements ElementLocator {
      *   The context for search of the element or the list of elements.
      * @param field
      *   The field for which an element or an element list should be lazily locate.
-     * @param timeOut
-     *   The maximum amount of time to wait for the element or the list of elements.
-     * @param interval
-     *   The frequency with which to check the search context.
+     * @param timeOutSeconds
+     *   The maximum amount of time to wait for the element or the list of elements in seconds
+     * @param intervalMillis
+     *   The frequency with which to check the search context in milliseconds
      */
-    public SeleniumElementLocator(SearchContext context, Field field, int timeOut, int interval) {
+    public SeleniumElementLocator(SearchContext context, Field field, int timeOutSeconds, int intervalMillis) {
         this.context = context;
 
         this.wait = new FluentWait<>(this.context);
-        this.wait.withTimeout(timeOut, TimeUnit.SECONDS);
-        this.wait.pollingEvery(interval, TimeUnit.MILLISECONDS);
+        this.wait.withTimeout(timeOutSeconds, TimeUnit.SECONDS);
+        this.wait.pollingEvery(intervalMillis, TimeUnit.MILLISECONDS);
         this.wait.ignoring(NoSuchElementException.class);
 
         Annotations annotations = new Annotations(field);
@@ -96,9 +92,7 @@ public class SeleniumElementLocator implements ElementLocator {
         this.element = this.wait.until(new Function<SearchContext, WebElement>() {
             @Override
             public WebElement apply(SearchContext context) {
-                WebElement element = context.findElement(SeleniumElementLocator.this.getBy());
-
-                return (isElementUsable(element) ? element : null);
+                return context.findElement(SeleniumElementLocator.this.getBy());
             }
         });
 
@@ -139,16 +133,8 @@ public class SeleniumElementLocator implements ElementLocator {
         return this.by;
     }
     
-    /**
-     * <p>By default, elements are considered as "found" if they are in the DOM and displayed. You can override this
-     *   method in order to change whether or not an element is considered as loaded.</p>
-     * 
-     * @param element
-     *   The element to use.
-     * @return
-     *   {@code true} if the element is usable and {@code false} otherwise.
-     */
-    protected boolean isElementUsable(WebElement element) {
-        return element.isDisplayed();
+    @Override
+    public String toString() {
+        return "SeleniumElementLocator->" + this.by;
     }
 }

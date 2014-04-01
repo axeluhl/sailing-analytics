@@ -120,7 +120,7 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
 
     protected void drawWindField() {
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         } else {
             drawWindField(windFieldDTO.getMatrix());
         }
@@ -235,17 +235,17 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newDate, Date oldDate) {
 
         List<SimulatorWindDTO> windDTOToDraw = new ArrayList<SimulatorWindDTO>();
 
-        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(newDate.getTime()+1));
 
         if (!headMap.isEmpty()) {
             windDTOToDraw = headMap.get(headMap.lastKey());
         }
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
-                + date);
+                + newDate);
 
         drawWindField(windDTOToDraw);
 

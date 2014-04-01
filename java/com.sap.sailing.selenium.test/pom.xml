@@ -70,9 +70,22 @@
                                     <artifactId>com.sap.sailing.feature.runtime</artifactId>
                                     <version>0.0.0</version>
                                 </dependency>
+                                
+                                <!-- This bundle should only be deployed in a test environment! -->
+                                <dependency>
+                                    <type>eclipse-plugin</type>
+                                    <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
+                                    <version>0.0.0</version>
+                                </dependency>
                             </dependencies>
                             
                             <bundleStartLevel>
+                                <bundle>
+                                    <id>com.sap.sailing.server.gateway.test.support</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                
                                 <bundle>
                                     <id>com.sap.sailing.ess40.resultimport</id>
                                     <level>3</level>
@@ -81,6 +94,11 @@
                                 <bundle>
                                     <id>com.sap.sailing.freg.resultimport</id>
                                     <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sse.gwt</id>
+                                    <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
@@ -126,7 +144,22 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
-                                    <id>com.sap.sailing.xcelsiusadapter</id>
+                                    <id>com.sap.sailing.datamining.shared</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.datamining</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.domain.igtimiadapter</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.xmlexport</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>

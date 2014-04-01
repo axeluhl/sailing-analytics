@@ -2,19 +2,31 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public class LeaderboardEditPage extends AbstractEntryPoint {
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
+        
+        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+
+        sailingService.getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
+                new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 String leaderboardName = Window.Location.getParameter("name");
@@ -23,6 +35,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages, userAgent);
+                    leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {
@@ -33,7 +46,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
             public void onFailure(Throwable t) {
                 reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
             }
-        });
+        }));
     }
 
 }

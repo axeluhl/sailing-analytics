@@ -1,7 +1,13 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,18 +17,25 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -32,9 +45,9 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
-import static org.junit.Assert.*;
-
 public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServerReplicationTest {
+    private static final Logger logger = Logger.getLogger(DelayedLeaderboardCorrectionsReplicationTest.class.getName());
+    
     private static final String Q2 = "Q2";
     private ReplicationService replicaReplicator;
     private ReplicationMasterDescriptor masterDescriptor;
@@ -61,8 +74,9 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // then start initial load, wait until finished; then link a tracked race to leaderboard's RaceColumn on master and
         // verify that on the replica it is associated to the RaceColumn as well, and the DelayedLeaderboardCorrections are
         // resolved properly on the replica.
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        final DomainFactory domainFactory = new DomainFactoryImpl();
+        BoatClass boatClass = domainFactory.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        DynamicCompetitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
@@ -70,7 +84,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 return new RegattaNameAndRaceName("Kieler Woche (5o5)", "Yellow Race 2");
             }
         };
-        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
+        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, domainFactory);
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 19, 44 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
@@ -87,11 +101,14 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // re-load new master from persistence
-        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
-        replica = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
+        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, domainFactory);
+        DomainFactoryImpl replicaDomainFactory = new DomainFactoryImpl();
+        replica = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, replicaDomainFactory);
         final Leaderboard masterLeaderboardReloaded = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboardReloaded);
-        // expecting the correction to only be in the DelayedLeaderboardCorrection object but not the leaderboard itself
+        // expecting the correction to not be in the leaderboard because the competitor was not found in the
+        // domain factory's competitor store while loading and therefore the score correction could not immediately
+        // be applied to the leaderboard's real score correction
         assertEquals(MaxPointsReason.NONE, masterLeaderboardReloaded.getMaxPointsReason(hasso,
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
@@ -99,19 +116,38 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
+        // starting to replicate will clear the competitor store used by the replica in this test;
+        // the competitor will have to be looked up again after it was received by the replica.
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         Thread.sleep(1000);
 
         Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         assertNotNull(replicaLeaderboard);
         assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2));
-        // so far, the replica should also only have the delayed corrections:
+        // so far, the replica should also only have the delayed corrections since during deserializing them the
+        // replicatedHasso competitor was not yet known to the replica's competitor store:
         assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hasso,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
+        logger.info("hasso object ID hash: "+System.identityHashCode(hasso));
+        Leaderboard newMasterLeaderboard = master.getLeaderboardByName(masterLeaderboard.getName());
+        SettableScoreCorrection newMasterScoreCorrections = newMasterLeaderboard.getScoreCorrection();
+        RaceColumn newMasterQ2 = newMasterLeaderboard.getRaceColumnByName(Q2);
+        newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2);
+        StringBuilder unexpectedCompetitors = new StringBuilder();
+        unexpectedCompetitors.append("Unexpected competitors having score corrections (expected no competitor to have a real score correction at this point: ");
+        for (Competitor unexpectedCompetitor : newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2)) {
+            unexpectedCompetitors.append(unexpectedCompetitor);
+            unexpectedCompetitors.append(" with object ID ");
+            unexpectedCompetitors.append(System.identityHashCode(unexpectedCompetitor));
+            unexpectedCompetitors.append(", ");
+        }
+        assertTrue(unexpectedCompetitors.toString(), Util.isEmpty(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2))); // no score corrections applied yet
         // now connect the tracked race again to the leaderboard column in the re-loaded environment
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
+        logger.info("got score correction for competitor "+System.identityHashCode(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2).iterator().next()));
+        assertTrue(Util.contains(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2), hasso)); // now score corrections must have been applied from Delayed... 
         // now the delayed corrections are expected to have been resolved:
         assertEquals(MaxPointsReason.DNF, master.getLeaderboardByName(leaderboardName).getMaxPointsReason(hasso,
                 master.getLeaderboardByName(leaderboardName).getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
@@ -121,8 +157,10 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
     }
     
-    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
-        return new RacingEventServiceImpl(MongoDBService.INSTANCE) {
+    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace,
+            DomainFactory domainFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, domainFactory), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;

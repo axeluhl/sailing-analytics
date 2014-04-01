@@ -7,29 +7,24 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
-import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
+import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
+/**
+ * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.
+ * This includes for example the {@link RaceLogRaceStatus} indicating the current race's start.
+ */
+public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
@@ -37,7 +32,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     
     private final WindSource raceCommitteeWindSource;
 
-    private RaceStatusAnalyzer statusAnalyzer;
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
 
@@ -51,7 +45,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         trackedRace.invalidateStartTime();
         trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-        statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         startTimeFinder = new StartTimeFinder(raceLog);
         initializeWindTrack(raceLog);
         analyze();
@@ -94,14 +87,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     private void analyze() {
-        analyzeStatus();
         analyzeCourseDesign(null);
-    }
-
-    private void analyzeStatus() {
-        /* RaceLogRaceStatus newStatus = */statusAnalyzer.analyze();
-
-        // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
@@ -140,8 +126,8 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
-        /* this will send tractrac the original start time */
-        trackedRace.onStartTimeChangedByRaceCommittee(trackedRace.getStartTimeReceived());
+        /* reset start time */
+        trackedRace.onStartTimeChangedByRaceCommittee(null);
     }
 
     @Override
@@ -150,53 +136,8 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     @Override
-    public void visit(RaceLogRaceStatusEvent event) {
-        analyzeStatus();
-    }
-
-    @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         analyzeCourseDesign(event.getCourseDesign());
-    }
-
-    @Override
-    public void visit(RaceLogFlagEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogFinishPositioningListChangedEvent event) {
-        // score correction is handled by the leaderboard
-    }
-
-    @Override
-    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-        // score correction is handled by the leaderboard
-    }
-
-    @Override
-    public void visit(RaceLogPathfinderEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogGateLineOpeningTimeEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogStartProcedureChangedEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogProtestStartTimeEvent event) {
-        
     }
 
     @Override

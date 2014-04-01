@@ -1,13 +1,26 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 
 public class SwissTimingReplayServiceFactoryImpl implements SwissTimingReplayServiceFactory {
-
-    @Override
-    public SwissTimingReplayService createSwissTimingReplayService() {
-        return new SwissTimingReplayServiceImpl();
+    private final Map<DomainFactory, SwissTimingReplayService> servicesForDomainFactories;
+    
+    public SwissTimingReplayServiceFactoryImpl() {
+        servicesForDomainFactories = new HashMap<>();
     }
 
+    @Override
+    public SwissTimingReplayService createSwissTimingReplayService(DomainFactory domainFactory) {
+        SwissTimingReplayService result = servicesForDomainFactories.get(domainFactory);
+        if (result == null) {
+            result = new SwissTimingReplayServiceImpl(domainFactory);
+            servicesForDomainFactories.put(domainFactory, result);
+        }
+        return result;
+    }
 }

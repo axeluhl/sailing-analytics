@@ -8,18 +8,32 @@
  *   completes. With this counter a test which triggers a request (which can cause additional request) can wait until
  *   the counter reaches 0 again.</p>
  * 
- * TODO: Write some additional documentation for categories!
- * 
  * @author
  *   D049941
  */
-// TODO: Support categories of requests!
 var PENDING_AJAX_CALLS = PENDING_AJAX_CALLS || function() {
-    /* Private variable bound through closure which is initialized the counter to be 1. This is important because the
-     * GWT bootstrap process in itself can take a bit of time. So, at a minimum we have to wait until the module is
-     * fully loaded. Otherwise, we will get the occasional timing/synchronization failure during test runs.
-     */ 
-    var pendingCalls = 1;
+    /* Private variable bound through closure which holds the categories of AJAX requests. The counter for the global
+     * category (empty string) is initialized to be 1. This is important because the GWT bootstrap process in itself can
+     * take a bit of time. So, at a minimum we have to wait until the module is fully loaded. Otherwise, we will get the
+     * occasional timing/synchronization failure during test runs.
+     */
+    var categories = {
+        "" : {
+            pendingCalls : 1,
+            finishedCalls : 0
+        }
+    };
+    
+    function getCategory(category) {
+        if(!(category in categories)) {
+            categories[category] = {
+                pendingCalls : 0,
+                finishedCalls : 0
+            }
+        }
+        
+        return categories[category];
+    };
     
     return {
         /**
@@ -31,7 +45,19 @@ var PENDING_AJAX_CALLS = PENDING_AJAX_CALLS || function() {
          *   The number of pending Ajax requests.
          */
         numberOfPendingCalls : function(category) {
-            return pendingCalls;
+            return getCategory(category).pendingCalls;
+        },
+        
+        /**
+         * <p></p>
+         * 
+         * @param {string} category
+         *   The category of finished Ajax requests.
+         * @returns {int}
+         *   The number of finished Ajax requests.
+         */
+        numberOfFinishedCalls : function(category) {
+            return getCategory(category).finishedCalls;
         },
         
         /**
@@ -41,7 +67,8 @@ var PENDING_AJAX_CALLS = PENDING_AJAX_CALLS || function() {
          *    The category of the Ajax request.
          */
         decrementPendingCalls : function(category) {
-            pendingCalls--;
+            getCategory(category).pendingCalls--;
+            getCategory(category).finishedCalls++;
         },
         
         /**
@@ -52,7 +79,7 @@ var PENDING_AJAX_CALLS = PENDING_AJAX_CALLS || function() {
          *   The category of the Ajax request.
          */
         incrementPendingCalls : function(category) {
-            pendingCalls++;
+            getCategory(category).pendingCalls++;
         }
     }
 }();

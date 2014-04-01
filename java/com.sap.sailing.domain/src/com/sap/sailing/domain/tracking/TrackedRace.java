@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
@@ -449,6 +450,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
@@ -557,25 +559,18 @@ public interface TrackedRace extends Serializable {
     void addStartTimeChangedListener(StartTimeChangedListener listener);
 
     /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
-
-    /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
      * <p>
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
-    Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart);
+    Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart);
 
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
@@ -585,8 +580,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -602,13 +596,49 @@ public interface TrackedRace extends Serializable {
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
     
     /**
+     * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     * 
+     */
+    Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
-    Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);
+    Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
+    
+    /**
+     * The speed of the competitor when crossing the start line. It will return null if there are no recorded
+     * mark passings for this competitor (competitor did not yet or never pass the start line).
+     */
+    Speed getSpeedWhenCrossingStartLine(Competitor competitor);
 
     /**
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
      */
     TimePoint getStartTimeReceived();
-
+    
+    /**
+     * @return <code>null</code> if the start waypoint does not have two marks or the course
+     * is empty or the start waypoint is the only waypoint
+     */
+    LineDetails getStartLine(TimePoint at);
+    
+    /**
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course
+     * is empty or the finish waypoint is the only waypoint
+     */
+    LineDetails getFinishLine(TimePoint at);
+    
+    /**
+     * Length of course if there are mark passings for competitors.
+     */
+    Distance getCourseLength();
+    
+    /**
+     * The average wind speed with confidence for this race. It uses the timepoint of the race end as
+     * a reference point.
+     */
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
 }

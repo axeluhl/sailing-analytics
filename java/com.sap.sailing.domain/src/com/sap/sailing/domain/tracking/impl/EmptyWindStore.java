@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -14,7 +13,7 @@ public class EmptyWindStore implements WindStore {
     public static EmptyWindStore INSTANCE = new EmptyWindStore();
     
     @Override
-    public WindTrack getWindTrack(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource,
+    public WindTrack getWindTrack(String regattaName, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         switch (windSource.getType()) {
         case COURSE_BASED:
@@ -28,7 +27,7 @@ public class EmptyWindStore implements WindStore {
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedRegatta trackedRegatta,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName,
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
         return Collections.emptyMap();
     }

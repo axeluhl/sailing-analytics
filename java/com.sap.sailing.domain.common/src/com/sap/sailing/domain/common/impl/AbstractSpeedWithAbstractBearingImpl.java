@@ -34,6 +34,11 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
     }
 
     @Override
+    public SpeedWithBearing add(SpeedWithBearing other) {
+        return AbstractSpeedWithAbstractBearingImpl.add(this, other);
+    }
+
+    @Override
     public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
         return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(this, targetSpeedWithBearing);
     }
@@ -79,5 +84,13 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
     @Override
     public Speed projectTo(Position position, Bearing projectTo) {
         return projectTo(this, position, projectTo);
+    }
+
+    public static SpeedWithBearing add(SpeedWithBearing first, SpeedWithBearing other) {
+        double x = first.getMetersPerSecond()*Math.cos(first.getBearing().getRadians()) + other.getMetersPerSecond()*Math.cos(other.getBearing().getRadians());
+        double y = first.getMetersPerSecond()*Math.sin(first.getBearing().getRadians()) + other.getMetersPerSecond()*Math.sin(other.getBearing().getRadians());
+        double metersPerSecond = Math.sqrt(x*x+y*y);
+        double directionRad = (2*Math.PI+Math.atan2(y, x))%(2*Math.PI);
+        return new MeterPerSecondSpeedWithDegreeBearingImpl(metersPerSecond, new RadianBearingImpl(directionRad));
     }
 }

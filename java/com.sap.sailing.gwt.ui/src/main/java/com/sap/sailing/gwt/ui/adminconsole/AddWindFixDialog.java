@@ -10,10 +10,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
     private final StringMessages stringMessages;
@@ -63,7 +63,7 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
-        if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.get(0) != null) {
+        if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.size() > 0 && courseDTO.waypointPositions.get(0) != null) {
             PositionDTO positionDTO = courseDTO.waypointPositions.get(0);
             latDegBox = createDoubleBox(positionDTO.latDeg, 10);
             lngDegBox = createDoubleBox(positionDTO.lngDeg, 10);

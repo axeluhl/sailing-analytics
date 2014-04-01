@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -39,7 +39,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
-import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayParser;
@@ -83,8 +82,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      * {@link #trackedRacePerRaceID} for storing data from subsequent messages.
      */
     private String currentRaceID;
-
-    private RaceType currentRaceType;
     
     /**
      * Reference time point for time specifications
@@ -174,7 +171,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void raceID(String raceID) {
         currentRaceID = raceID;
-        currentRaceType = domainFactory.getRaceTypeFromRaceID(currentRaceID);
     }
 
     private boolean isValid(int threeByteValue) {
@@ -236,7 +232,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceType);
+                    currentRaceID, null /* boat class */);
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();
@@ -293,9 +289,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Course course = race.getCourse();
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
-                    for(ControlPoint cp: currentCourseDefinition) {
-                        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(cp, null));
+                    List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
+                    for (ControlPoint cp : currentCourseDefinition) {
+                        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {
@@ -309,7 +305,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE,
-                currentRaceID, trackedRegattaRegistry);
+                currentRaceID, null /* boat class */, trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
@@ -389,13 +385,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 newStatus = TrackedRaceStatusEnum.LOADING;
             }
             trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
-        }
-    }
-
-    @Override
-    public void eot() {
-        for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
-            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
     }
 }

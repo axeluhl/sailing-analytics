@@ -60,8 +60,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonLeaderboards.add(leaderboardName);
         }
 
-        byte[] json = jsonLeaderboards.toJSONString().getBytes();
-        return Response.ok(json).build();
+        String json = jsonLeaderboards.toJSONString();
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
    
     @GET
@@ -91,8 +91,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 StringWriter sw = new StringWriter();
                 jsonLeaderboard.writeJSONString(sw);
 
-                byte[] json = sw.getBuffer().toString().getBytes();
-                response = Response.ok(json).build();
+                String json = sw.getBuffer().toString();
+                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type(MediaType.TEXT_PLAIN).build();
             }

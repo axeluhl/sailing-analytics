@@ -2,7 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 public enum FieldNames {
     // SwissTiming configuration parameters:
-    ST_CONFIG_NAME, ST_CONFIG_HOSTNAME, ST_CONFIG_PORT, ST_CONFIG_CAN_SEND_REQUESTS, ST_ARCHIVE_JSON_URL,
+    ST_CONFIG_NAME, ST_CONFIG_HOSTNAME, ST_CONFIG_PORT, ST_CONFIG_JSON_URL, ST_ARCHIVE_JSON_URL,
     
     // last message count field:
     LAST_MESSAGE_COUNT,

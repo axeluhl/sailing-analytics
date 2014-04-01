@@ -15,15 +15,15 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -162,8 +162,8 @@ public class ReplicationPanel extends FlowPanel {
                             public void onFailure(Throwable e) {
                                 addButton.setEnabled(true);
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(), e.getMessage()));
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(), e.getMessage()));
                                 updateReplicaList();
                             }
 

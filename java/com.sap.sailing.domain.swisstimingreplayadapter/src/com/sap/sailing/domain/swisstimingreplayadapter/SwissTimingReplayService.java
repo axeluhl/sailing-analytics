@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
@@ -41,6 +40,6 @@ public interface SwissTimingReplayService {
      *            the regatta to which the race shall be added; if <code>null</code>, a default regatta will be
      *            created/used
      */
-    void loadRaceData(String link, DomainFactory domainFactory, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry);
+    void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry);
 
 }

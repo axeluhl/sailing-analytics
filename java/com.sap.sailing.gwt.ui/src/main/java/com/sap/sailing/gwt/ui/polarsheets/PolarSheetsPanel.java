@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -80,7 +81,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
 
         VerticalPanel leftPanel = addFilteredTrackedRacesList();
         leftScrollPanel = new ScrollPanel(leftPanel);
-        addWest(leftScrollPanel, 400);
+        addWest(leftScrollPanel, Window.getClientWidth() * 0.3);
         polarSheetsGenerationLabel = createPolarSheetGenerationStatusLabel();
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
@@ -237,7 +238,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
             
             @Override
             public void run() {
-                setWidgetSize(leftScrollPanel, polarSheetsTrackedRacesList.getOffsetWidth() - 520);
+                setWidgetSize(leftScrollPanel, Window.getClientWidth() * 0.3);
                 Timer timer = new Timer() {
                     
                     @Override

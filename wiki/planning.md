@@ -2,11 +2,17 @@
 
 During our workshop of 2013-09-30, three major areas of development were identified as candidates for focus topics for the next few months. These are:
 
-* [[General quality improvement, including major UI renovation and a mobile version of the SAP Sailing Analytics|wiki/planning/businesscases/QualityImprovements]]
+* [[Data Consistency|wiki/planning/businesscases/DataConsistency]]
+
+* [[UI-Renovation|wiki/planning/businesscases/UIRenovation]]
 
 * [[ORC / IRC support|wiki/planning/businesscases/ORC]]
 
 * [[Smartphone Tracking|wiki/planning/businesscases/SmartphoneTracking]]
+
+* [[Sponsorship Engine|wiki/planning/businesscases/SponsorshipEngine]]
+
+* [[Race Committee App|wiki/planning/businesscases/RaceCommitteeApp]]
 
 The links above lead to short write-ups of the respective business case behind the topic, listing the pros and cons and discussing the risks.
 
@@ -53,3 +59,7 @@ The links above lead to short write-ups of the respective business case behind t
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
 
 [[Microcopter Integration|wiki/planning/Microcopter]]
+
+[[Race Rendering Technology|wiki/planning/RaceRenderingTechnology]]
+
+[[Satellite Internet Connection|wiki/planning/SatelliteInternetConnection]]

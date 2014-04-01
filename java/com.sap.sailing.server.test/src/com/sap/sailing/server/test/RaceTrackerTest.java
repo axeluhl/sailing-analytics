@@ -25,8 +25,8 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
@@ -41,6 +41,7 @@ public class RaceTrackerTest {
     private final String tracTracPassword;
     private RacingEventServiceImpl service;
     private RacesHandle raceHandle;
+    private TracTracAdapterFactoryImpl tracTracAdapterFactory;
     
     public RaceTrackerTest() throws MalformedURLException, URISyntaxException {
         // for live simulation:
@@ -68,7 +69,10 @@ public class RaceTrackerTest {
     public void setUp() throws Exception {
         service = new RacingEventServiceImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000, tracTracUsername, tracTracPassword);
+        tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
+        raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         logger.info("Calling raceHandle.getRaces()");
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained races: "+races);
@@ -124,7 +128,9 @@ public class RaceTrackerTest {
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
         service.removeRegatta(raceHandle.getRegatta());
-        RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000, tracTracUsername, tracTracPassword);
+        RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedRegatta, newTrackedRegatta);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
@@ -148,7 +154,9 @@ public class RaceTrackerTest {
         logger.entering(getClass().getName(), "testTrackingSameRaceWithoutStopping");
         TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
-        RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000, tracTracUsername, tracTracPassword);
+        RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

@@ -12,9 +12,6 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
-
-
-
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -109,7 +106,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         
         Mongo mySecondMongo = newMongo();
         DB secondDatabase = mySecondMongo.getDB(dbConfiguration.getDatabaseName());
-        WindTrack result = new DomainObjectFactoryImpl(secondDatabase).loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
+        WindTrack result = new DomainObjectFactoryImpl(secondDatabase, com.sap.sailing.domain.base.DomainFactory.INSTANCE).loadWindTrack(domainEvent.getName(), race, windSource, /* millisecondsOverWhichToAverage */
                 30000);
         double myBearingDeg = 123.4;
         result.lockForRead();

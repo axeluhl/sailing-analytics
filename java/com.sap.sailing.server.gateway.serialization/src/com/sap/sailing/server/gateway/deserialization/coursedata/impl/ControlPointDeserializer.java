@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.deserialization.coursedata.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -27,7 +27,7 @@ public class ControlPointDeserializer implements JsonDeserializer<ControlPoint> 
         String classFieldValue = object.get(BaseControlPointJsonSerializer.FIELD_CLASS).toString();
         ControlPoint controlPoint = null;
         
-        if (classFieldValue.equals(Gate.class.getSimpleName())) {
+        if (classFieldValue.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
             controlPoint = gateDeserializer.deserialize(object);
         } else if (classFieldValue.equals(Mark.class.getSimpleName())) {
             controlPoint = markDeserializer.deserialize(object);

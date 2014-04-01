@@ -45,7 +45,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
         final Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap = windLinesDTO.getWindLinesMap();
 
         if (windLinesMap == null) {
@@ -61,13 +61,13 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         for (final Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
             List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
 
-            final SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(date.getTime() + 1));
+            final SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(newTime.getTime() + 1));
 
             if (!headMap.isEmpty()) {
                 positionDTOToDraw = headMap.get(headMap.lastKey());
             }
             logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionDTOToDraw.size() + " points"
-                    + " @ " + date);
+                    + " @ " + newTime);
 
             drawWindLine(positionDTOToDraw, ++index);
         }
@@ -140,7 +140,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     protected void drawWindLine() {
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 

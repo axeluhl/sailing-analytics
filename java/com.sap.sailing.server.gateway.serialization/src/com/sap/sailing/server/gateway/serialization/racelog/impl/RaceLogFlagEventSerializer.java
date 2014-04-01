@@ -29,8 +29,8 @@ public class RaceLogFlagEventSerializer extends BaseRaceLogEventSerializer {
         RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) object;
 
         JSONObject result = super.serialize(flagEvent);
-        result.put(FIELD_UPPER_FLAG, flagEvent.getUpperFlag().toString());
-        result.put(FIELD_LOWER_FLAG, flagEvent.getLowerFlag().toString());
+        result.put(FIELD_UPPER_FLAG, flagEvent.getUpperFlag().name());
+        result.put(FIELD_LOWER_FLAG, flagEvent.getLowerFlag().name());
         result.put(FIELD_DISPLAYED, flagEvent.isDisplayed());
 
         return result;

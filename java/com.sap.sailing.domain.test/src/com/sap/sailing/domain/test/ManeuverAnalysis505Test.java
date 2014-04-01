@@ -2,9 +2,12 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,22 +30,23 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
-
     public ManeuverAnalysis505Test() throws MalformedURLException, URISyntaxException {
         super();
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
         super.setUp();
-        super.setUp("event_20110609_KielerWoch",
-        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
-                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
+                /* liveUri */ null, /* storedUri */ storedUri,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
                 new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+                new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")),
+                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(55))),
+                new WindSourceImpl(WindSourceType.WEB));
     }
     
     /**
@@ -97,8 +101,14 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:49:06")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:41")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:45")), JIBE_TOLERANCE);
 
+        /*
+         * Findel's track has an interesting challenge. When Findel, at 15:53:30, rounds the leeward gate, this has to
+         * be recognized as a HEAD_UP by the algorithm, and the wind has to be set to point to 55deg exactly during the
+         * maneuver (to protect against a somewhat off estimation that reads 43deg which would cause this to be
+         * recognized as a jibe) whereas Findel's course *before* the maneuver was 48deg, then heading up by 111deg.
+         */
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:45")), PENALTYCIRCLE_TOLERANCE);
 

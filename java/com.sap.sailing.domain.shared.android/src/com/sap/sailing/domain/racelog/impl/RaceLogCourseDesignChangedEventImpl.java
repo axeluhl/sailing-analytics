@@ -7,16 +7,17 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 
 public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implements RaceLogCourseDesignChangedEvent {
     private static final long serialVersionUID = 1565936170747420547L;
    
-    private CourseBase courseDesign;
+    private final CourseBase courseDesign;
 
     public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt,
-            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseBase courseDesign) {
-        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
+            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseBase courseDesign) {
+        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.courseDesign = courseDesign;
     }
 
@@ -30,4 +31,8 @@ public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implem
         return courseDesign;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "courseDesign=" + courseDesign != null ? courseDesign.getName() : "null";
+    }
 }

@@ -22,6 +22,9 @@
   <inherits name="com.google.gwt.logging.Logging"/>
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->
@@ -42,6 +45,7 @@
   <source path='client'/>
   <source path='controls'/>
   <source path='components'/>
+  <source path='leaderboard'/>
   <source path='regattaoverview'/>
   <source path='shared'/>
   <source path='test'/>

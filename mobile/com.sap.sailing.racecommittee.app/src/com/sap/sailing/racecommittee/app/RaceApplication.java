@@ -1,19 +1,22 @@
 package com.sap.sailing.racecommittee.app;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
-import java.util.Date;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
 import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
+import com.sap.sailing.racecommittee.app.utils.LoggingExceptionHandler;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 /**
- * Register a additional exception handler for uncaught exception to have some crash logging.
+ * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
+ * <p>Offers a static {@link StringContext} to handle i18n in ugly cases.</p>
+ * <p>Sets the default preference values (if not set)</p> 
  */
 public class RaceApplication extends Application {
 
@@ -28,34 +31,29 @@ public class RaceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ExLog.i(TAG, "Application is starting");
+        ExLog.i(TAG, "Application is starting.");
         
         Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler(Thread
                 .getDefaultUncaughtExceptionHandler()));
         
         LifecycleLogger.enableLifecycleLogging(AppConstants.ENABLE_LIFECYCLE_LOGGING);
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
+
+        new PreferenceHelper(this).setupPreferences();
     }
-
-    private static class LoggingExceptionHandler implements UncaughtExceptionHandler {
-
-        private UncaughtExceptionHandler defaultHandler;
-
-        public LoggingExceptionHandler(UncaughtExceptionHandler defaultHandler) {
-            this.defaultHandler = defaultHandler;
+    
+    public static PackageInfo getPackageInfo(Context app) {
+        try {
+            return app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            return null;
         }
-
-        public void uncaughtException(Thread thread, Throwable ex) {
-            FileLoggingTask task = new FileLoggingTask();
-            if (task.tryStartFileLogging("sap_rc_crash_%s.txt")) {
-                task.log(String.format("%s - Exception occured on thread %s:", new Date(), thread.getId()));
-                task.logException(ex);
-            } else {
-                Log.e(TAG, "Could not log uncaught exception to file.");
-            }
-            defaultHandler.uncaughtException(thread, ex);
-        }
-
+    }
+    
+    public static void restartApp(Context context) {
+        Intent i = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(i);
     }
 
 }

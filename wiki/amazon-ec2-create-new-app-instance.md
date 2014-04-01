@@ -15,31 +15,18 @@ Select a subnet that matches the one of the database server (in most cases this 
 
 <img src="/wiki/images/amazon/StartInstance3.JPG" width="70%" height="70%"/>
 
-Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data". This configuration should at least contain `MONGODB_*` and `REPLICATION_*` parameters. Here one example:
+Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data" (Advanced Data). Here one example that loads a specific release package.
+
+<img src="/wiki/images/amazon/UserDataDetails.JPG" width="70%" height="70%"/>
 
 <pre>
-BUILD_BEFORE_START=True
-BUILD_FROM=master
-RUN_TESTS=False
+INSTALL_FROM_RELEASE=master-201311062138
+USE_ENVIRONMENT=live-server
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-SERVER_NAME=LIVE1
-MEMORY=1024m
-REPLICATION_HOST=172.31.25.253
-REPLICATION_CHANNEL=sapsailinganalytics-live
-TELNET_PORT=14888
-SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
-MONGODB_PORT=10202
-EXPEDITION_PORT=2010
-REPLICATE_ON_START=False
-REPLICATE_MASTER_SERVLET_HOST=
-REPLICATE_MASTER_SERVLET_PORT=
-REPLICATE_MASTER_QUEUE_HOST=
-REPLICATE_MASTER_QUEUE_PORT=
-SERVER_STARTUP_NOTIFY=
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 </pre>
 
-It does not really matter which SERVER_PORT you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port!
+It does not really matter which SERVER_PORT (if you specify one) you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port!
 
 Provide your instance with an useful name.
 
@@ -53,9 +40,11 @@ Configure the key. Make sure to always use the "Administrator" key.
 
 <img src="/wiki/images/amazon/StartInstance7.JPG" width="70%" height="70%"/>
 
-Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costy.
+Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costly.
 
 <img src="/wiki/images/amazon/StartInstance12.JPG" width="70%" height="70%"/>
+
+Should the reachability status check fail, your instance will not be reachable, and the best option is to terminate and re-create that instance. Sorry.
 
 Your application is now ready. Check that everything is green.
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <PreferenceCategory android:title="By-Name Course Designer" >
+		
+	    <com.sap.sailing.racecommittee.app.ui.views.EditSetPreference
+	        android:key="@string/preference_course_designer_by_name_course_names_key"
+	        android:defaultValue="@array/preference_course_designer_by_name_course_names_default"
+	        android:title="@string/settings_course_designer_by_name_course_names_header"
+	        android:summary="@string/empty" />
+		
+    </PreferenceCategory>
+    
+    <!--<PreferenceCategory android:title="By-Map Course Designer" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="By-Marks Course Designer (ESS)" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+    </PreferenceCategory> -->
+
+</PreferenceScreen>

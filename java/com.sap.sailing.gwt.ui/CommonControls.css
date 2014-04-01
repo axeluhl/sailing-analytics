@@ -372,6 +372,18 @@ body ::-webkit-scrollbar-track {
 .timePanel-controls-time .dateLabel,
 .timePanel-controls-time .timeLabel {
     padding: 4px 20px 0 0;
+    float:left;
+}
+
+.timePanel-controls-timeToStart {
+    float:left;
+    padding: 0 0 0 0;
+    border-left: 1px solid #fcbb22;
+}
+
+.timePanel-controls-timeToStart .timeToStartLabel {
+    float:left;
+	padding: 4px 20px 0 20px;
 }
 
 .timePanel-controls-timeDelay {
@@ -680,7 +692,21 @@ body ::-webkit-scrollbar-track {
 
 .minMaxBackgroundBar {
   left: 0px;
-  background-image: url(images/greyBar.png);
+  background-image: url(images/yellowBar.png);
+  background-position: left;
+  background-repeat: no-repeat;
+}
+
+.minMaxBackgroundBarBad {
+  left: 0px;
+  background-image: url(images/redBar.png);
+  background-position: left;
+  background-repeat: no-repeat;
+}
+
+.minMaxBackgroundBarGood {
+  left: 0px;
+  background-image: url(images/greenBar.png);
   background-position: left;
   background-repeat: no-repeat;
 }

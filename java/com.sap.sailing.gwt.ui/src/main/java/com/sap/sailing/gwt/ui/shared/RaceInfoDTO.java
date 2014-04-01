@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RaceInfoDTO implements IsSerializable {
     public interface RaceInfoExtensionDTO extends IsSerializable {
@@ -55,7 +55,7 @@ public class RaceInfoDTO implements IsSerializable {
     public RaceCourseDTO lastCourseDesign;
     public String lastCourseName;
     public WindDTO lastWind;
-    public StartProcedureType startProcedure;
+    public RacingProcedureType startProcedure;
     public RaceInfoExtensionDTO startProcedureDTO;
     
     // for GWT serialization

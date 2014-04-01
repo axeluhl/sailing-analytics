@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public interface TrackedLeg extends Serializable {
     Leg getLeg();
@@ -56,4 +57,23 @@ public interface TrackedLeg extends Serializable {
      * If any of the positions of the two adjacent marks cannot be found, <code>null</code> is returned.
      */
     Distance getGreatCircleDistance(TimePoint timePoint);
+
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * collinear with the wind's bearing, <code>pos1</code> is projected onto the line crossing <code>pos2</code> in the
+     * wind's bearing, and the distance from the projection to <code>pos2</code> is returned. Otherwise, it is assumed
+     * that the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is
+     * returned. The distance returned from this method is always positive. See also {@link #getWindwardDistance}.
+     * 
+     * @param at
+     *            the wind estimation is performed for this point in time
+     */
+    Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
+    
+    /**
+     * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint)}, but this method considers the leg's
+     * direction and will return a negative distance if <code>pos1</code> is already "ahead" of <code>pos2</code> in the
+     * leg's direction, or a positive distance otherwise.
+     */
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 }

@@ -2,13 +2,13 @@ package com.sap.sailing.racecommittee.app.ui.views;
 
 import java.util.Calendar;
 
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
-
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public class DigitalClock extends TextView implements TickListener {
 

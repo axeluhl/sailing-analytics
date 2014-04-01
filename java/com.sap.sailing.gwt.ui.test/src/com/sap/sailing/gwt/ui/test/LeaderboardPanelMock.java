@@ -11,16 +11,17 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class LeaderboardPanelMock extends LeaderboardPanel {
 
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
-            StringMessages stringConstants) {
-        super(sailingService, null, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
-        /* showMetaLeaderboardsOnSamePage */ false), new CompetitorSelectionModel(
-                /* hasMultiSelection */true), leaderboardName, errorReporter, stringConstants, null, /* showRaceDetails */ true);
+            StringMessages stringMessages) {
+        super(sailingService, new AsyncActionsExecutor(), LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false), new CompetitorSelectionModel(
+                /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
     }
 
     @Override

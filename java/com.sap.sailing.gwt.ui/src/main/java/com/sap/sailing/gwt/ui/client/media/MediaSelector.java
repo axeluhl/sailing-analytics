@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
@@ -46,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class MediaSelector implements PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
@@ -261,8 +261,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     @Override
-    public void timeChanged(Date raceTime) {
-        this.currentRaceTime = raceTime;
+    public void timeChanged(Date newRaceTime, Date oldRaceTime) {
+        this.currentRaceTime = newRaceTime;
         if (activeAudioPlayer != null) {
             activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);

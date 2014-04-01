@@ -1,30 +1,22 @@
 package com.sap.sailing.server.masterdata;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
+import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.MediaTrackJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 public class MasterDataImporter {
-    
     private final DomainFactory baseDomainFactory;
     
     private final RacingEventService racingEventService;
@@ -34,51 +26,45 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
     }
 
+    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override) throws IOException,
+            ClassNotFoundException {
+        ObjectInputStreamResolvingAgainstDomainFactory objectInputStream = racingEventService.getBaseDomainFactory()
+                .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
+        racingEventService
+                .createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03, "Reading Data", 0.5);
 
-
-    public MasterDataImportObjectCreationCount importMasterData(String response, boolean override) {
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(baseDomainFactory);
-        JSONParser parser = new JSONParser();
-        try {
-            JSONObject masterDataOverall = (JSONObject) parser.parse(response);
-            JSONArray leaderboardGroupsMasterDataJsonArray = (JSONArray) masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_PER_LG);
-            for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-                JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-                LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                        .deserialize(leaderBoardGroupMasterDataJson);
-                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override, creationCount);
-                creationCount = racingEventService.apply(op);
-            }
-            JsonDeserializer<MediaTrack> mediaTrackDeserializer = new MediaTrackJsonDeserializer();
-            JSONArray mediaTracks = (JSONArray) masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_MEDIA);
-            List<MediaTrack> tracks = new ArrayList<MediaTrack>();
-            for (Object obj : mediaTracks) {
-                tracks.add(mediaTrackDeserializer.deserialize((JSONObject) obj));
-            }
-            Collection<MediaTrack> existingMediaTracks = racingEventService.getAllMediaTracks();
-            Map<String, MediaTrack> existingMap = new HashMap<String, MediaTrack>();
-            
-            for (MediaTrack oneTrack : existingMediaTracks) {
-                existingMap.put(oneTrack.dbId, oneTrack);
-            }
-            
-            for (MediaTrack oneNewTrack : tracks) {
-                if (existingMap.containsKey(oneNewTrack.dbId)) {
-                    if (override) {
-                        racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
-                    } else {
-                        continue;
-                    }
-                }
-                racingEventService.mediaTrackAdded(oneNewTrack);
-            }
-        } catch (org.json.simple.parser.ParseException e) {
-            throw new RuntimeException(e);
-        } catch (JsonDeserializationException e) {
-            throw new RuntimeException(e);
+        @SuppressWarnings("unchecked")
+        final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
+        if (override) {
+            setAllowCompetitorsDataToBeReset(competitorIds);
         }
+        TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+
+
+        racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
+                "Data-Transfer Complete, Initializing Import Operation", 0.5);
+
+        applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
+    }
+
+    private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
+        CompetitorStore store = baseDomainFactory.getCompetitorStore();
+        for (Serializable id : competitorIds) {
+            Competitor competitor = baseDomainFactory.getExistingCompetitorById(id);
+            if (competitor != null) {
+                store.allowCompetitorResetToDefaults(competitor);
+            }
+        }
+    }
+
+    private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
+            UUID importOperationId, boolean override) {
+        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
+                creationCount,
+                baseDomainFactory);
+        creationCount = racingEventService.apply(op);
+        racingEventService.mediaTracksImported(topLevelMasterData.getAllMediaTracks(), override);
         return creationCount;
     }
 

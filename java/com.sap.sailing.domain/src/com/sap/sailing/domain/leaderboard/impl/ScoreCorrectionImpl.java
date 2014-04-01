@@ -339,7 +339,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, final TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            final RaceColumn raceColumn, final TimePoint timePoint, final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             ScoringScheme scoringScheme) {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
@@ -357,6 +357,19 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 result = correctedNonMaxedScore;
             }
         }
+        // also compute uncorrected score
+        Double resultUncorrected = 0.0;
+        try {
+            resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRankProvider.call(), new Callable<Integer>() {
+                                        @Override
+                                        public Integer call() {
+                                            return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
+                                        }
+                            }, numberOfCompetitorsInLeaderboardFetcher);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        final Double uncorrectedScore = resultUncorrected;
         final Double correctedScore = result;
         return new Result() {
             @Override
@@ -377,6 +390,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             @Override
             public TimePoint getTimePoint() {
                 return timePoint;
+            }
+
+            @Override
+            public Double getUncorrectedScore() {
+                return uncorrectedScore;
             }
         };
     }
@@ -419,7 +437,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             public Integer call() {
                                 return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                             }
-                        });
+                        }, numberOfCompetitorsInLeaderboardFetcher);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -471,6 +489,34 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     protected Leaderboard getLeaderboard() {
         return leaderboard;
+    }
+
+    @Override
+    public Iterable<RaceColumn> getRaceColumnsThatHaveCorrections() {
+        Set<RaceColumn> result = new HashSet<>();
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+            result.add(correctedScoresKey.getB());
+        }
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+            result.add(maxPointsReasonsKey.getB());
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorsThatHaveCorrectionsIn(RaceColumn raceColumn) {
+        Set<Competitor> result = new HashSet<>();
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+            if (raceColumn == correctedScoresKey.getB()) {
+                result.add(correctedScoresKey.getA());
+            }
+        }
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+            if (raceColumn == maxPointsReasonsKey.getB()) {
+                result.add(maxPointsReasonsKey.getA());
+            }
+        }
+        return result;
     }
 
 }

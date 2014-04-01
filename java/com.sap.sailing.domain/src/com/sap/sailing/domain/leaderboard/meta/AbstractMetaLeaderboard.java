@@ -2,9 +2,13 @@ package com.sap.sailing.domain.leaderboard.meta;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -48,10 +52,22 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
-    private transient WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
+    
+    /**
+     * Weak hash maps cannot be serialized. Therefore, this field is serialized as a {@link HashMap} in {@link #writeObject(ObjectOutputStream)}
+     * and de-serialized into a new {@link WeakHashMap} in {@link #readObject(ObjectInputStream)} again.
+     */
+    private transient WeakHashMap<Leaderboard, MetaLeaderboardColumn> columnsForLeaderboards;
+    
+    /**
+     * Weak hash maps cannot be serialized. Therefore, this field is serialized as a {@link HashMap} in {@link #writeObject(ObjectOutputStream)}
+     * and de-serialized into a new {@link WeakHashMap} in {@link #readObject(ObjectInputStream)} again.
+     */
     private transient WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
     
-    private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
+    private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener, Serializable {
+        private static final long serialVersionUID = 915433462154943441L;
+
         @Override
         public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
@@ -88,12 +104,20 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return new MetaLeaderboardScoreCorrection(this);
     }
 
-
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeObject(new HashMap<Leaderboard, MetaLeaderboardColumn>(columnsForLeaderboards));
+        oos.writeObject(new HashMap<Leaderboard, ScoreCorrectionListener>(scoreCorrectionChangeForwardersByLeaderboard));
+    }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        columnsForLeaderboards = new WeakHashMap<>();
-        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
+        @SuppressWarnings("unchecked")
+        Map<? extends Leaderboard, ? extends MetaLeaderboardColumn> columnsForLeaderboardAsStrongMap = (Map<? extends Leaderboard, ? extends MetaLeaderboardColumn>) ois.readObject();
+        columnsForLeaderboards = new WeakHashMap<Leaderboard, MetaLeaderboardColumn>(columnsForLeaderboardAsStrongMap);
+        @SuppressWarnings("unchecked")
+        Map<? extends Leaderboard, ? extends ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboardAsStrongMap = (Map<? extends Leaderboard, ? extends ScoreCorrectionListener>) ois.readObject();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>(scoreCorrectionChangeForwardersByLeaderboardAsStrongMap);
     }
 
     public abstract Iterable<Leaderboard> getLeaderboards();
@@ -134,7 +158,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
-        RaceColumn result = columnsForLeaderboards.get(leaderboard);
+        MetaLeaderboardColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
             result.addRaceColumnListener(this);

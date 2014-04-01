@@ -6,11 +6,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +27,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -45,8 +46,15 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -56,14 +64,15 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -77,19 +86,23 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
-import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -106,19 +119,14 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.JSONService;
-import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
@@ -126,14 +134,19 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
+import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
@@ -143,13 +156,15 @@ import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOpe
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
-import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
+public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -158,11 +173,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private final DomainFactory tractracDomainFactory;
-
-    private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
-
-    private final ExpeditionWindTrackerFactory windTrackerFactory;
+    private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
@@ -184,23 +195,36 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
     protected final ConcurrentHashMap<Object, RaceTracker> raceTrackersByID;
+    
+    /**
+     * {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} will check
+     * {@link #raceTrackersByID} for the presence of a tracker and won't create a new tracker if one for the
+     * connectivity parameters' ID already exists. This check and creation and addition to {@link #raceTrackersByID}
+     * requires locking in the face of concurrent calls to
+     * {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)}. Using <code>synchronized</code> is
+     * not ideal due to its coarse-grained locking style which allows for little concurrency. Instead, this map is used
+     * to keep locks for any ID that any invocation of the
+     * {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} method is currently working on.
+     * Fetching or creating and putting a lock to this map happens in a synchronized method ({@link #getOrCreateRaceTrackersByIdLock}).
+     * When done, the {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} method cleans up by
+     * removing the lock again from this map, again using a synchronized method ({@link #removeRaceTrackersByIdLock}).
+     */
+    private final ConcurrentHashMap<Object, NamedReentrantReadWriteLock> raceTrackersByIDLocks;
 
     /**
      * Leaderboards managed by this racing event service
-     */
+    */
     private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    private final CompetitorStore competitorStore;
 
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
 
     private final MongoObjectFactory mongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
-
-    private final SwissTimingFactory swissTimingFactory;
-
-    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
     private final ConcurrentHashMap<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
 
@@ -212,12 +236,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private final ConcurrentHashMap<String, Regatta> persistentRegattasForRaceIDs;
 
-    /**
-     * The globally used configuration of the time delay (in milliseconds) to the 'live' timepoint used for each new
-     * tracked race.
-     */
-    private long delayToLiveInMillis;
-
     private final RaceLogReplicator raceLogReplicator;
 
     private final RaceLogScoringReplicator raceLogScoringReplicator;
@@ -225,82 +243,166 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final MediaDB mediaDB;
 
     private final MediaLibrary mediaLibrary;
+    
+    /**
+     * Currently valid pairs of {@link DeviceConfigurationMatcher}s and {@link DeviceConfiguration}s. 
+     * The contents of this map is persisted and replicated. See {@link DeviceConfigurationMapImpl}.
+     */
+    protected final DeviceConfigurationMapImpl configurationMap;
 
+    private final WindStore windStore;
+
+    /**
+     * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
+     * unpredictable fashion
+     */
+    private final DataImportLockWithProgress dataImportLock;
+
+    /**
+     * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
+     * object so that service lookups become possible.
+     */
+    private BundleContext bundleContext;
+
+    /**
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
+     * competitor store} for competitor management. This base domain factory is then also used for the construction of
+     * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
+     * removes all previously persistent competitors. This is the default for testing and for backward compatibility with
+     * prior releases that did not support a persistent competitor collection.
+     */
     public RacingEventServiceImpl() {
-        this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE
-                .getDefaultMongoObjectFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB());
+        this(true, null);
+    }
+    
+    public RacingEventServiceImpl(WindStore windStore) {
+        this(true, windStore);
+    }
+    
+    void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+    
+    /**
+     * Like {@link #RacingEventServiceImpl()}, but allows callers to specify that the persistent competitor collection
+     * be cleared before the service starts.
+     * 
+     * @param clearPersistentCompetitorStore
+     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the correcponding
+     *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors
+     *            created and stored during previous service executions will initially be loaded.
+     */
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), null);
+    }
+    
+    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), windStore);
+    }
+    
+    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore) {
+        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore);
     }
 
     /**
-     * Uses the default factories for the tracking adapters
+     * Uses the default factories for the tracking adapters and the {@link DomainFactory base domain factory} of the
+     * {@link PersistenceFactory#getDefaultDomainObjectFactory() default domain object factory}. This constructor should
+     * be used for testing because it provides a transient {@link CompetitorStore} as required for competitor persistence.
      */
-    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            MediaDB mediaDB) {
-        this(domainObjectFactory, mongoObjectFactory, SwissTimingFactory.INSTANCE,
-                com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE, DomainFactory.INSTANCE, mediaDB);
+    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore) {
+        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore);
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            SwissTimingFactory swissTimingFactory,
-            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
-            DomainFactory tractracDomainFactory, MediaDB mediaDb) {
-        assert swissTimingDomainFactory.getBaseDomainFactory() == tractracDomainFactory.getBaseDomainFactory();
+            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
         logger.info("Created " + this);
-        this.tractracDomainFactory = tractracDomainFactory;
+        if (windStore == null) {
+            try {
+                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
+        }
+        this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        this.swissTimingFactory = swissTimingFactory;
-        this.swissTimingDomainFactory = swissTimingDomainFactory;
-        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
+        this.mediaDB = mediaDb;
+        this.competitorStore = competitorStore;
+        this.windStore = windStore;
+        this.dataImportLock = new DataImportLockWithProgress();
+        
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
-        raceTrackersByRegatta = new ConcurrentHashMap<Regatta, Set<RaceTracker>>();
-        raceTrackersByID = new ConcurrentHashMap<Object, RaceTracker>();
-        leaderboardGroupsByName = new ConcurrentHashMap<String, LeaderboardGroup>();
+        regattaTrackingCache = new ConcurrentHashMap<>();
+        raceTrackersByRegatta = new ConcurrentHashMap<>();
+        raceTrackersByID = new ConcurrentHashMap<>();
+        raceTrackersByIDLocks = new ConcurrentHashMap<>();
+        leaderboardGroupsByName = new ConcurrentHashMap<>();
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
-        operationExecutionListeners = new ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener>();
-        courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
-        persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
-        delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
+        operationExecutionListeners = new ConcurrentHashMap<>();
+        courseListeners = new ConcurrentHashMap<>();
+        persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
-        this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
+        this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
+        loadStoredDeviceConfigurations();
     }
 
-    public RacingEventServiceImpl(MongoDBService mongoDBService) {
-        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
+    @Override
+    public void clearState() throws Exception {
+        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
+            removeLeaderboardGroup(leaderboardGroupName);
+        }
+        
+        for(String leaderboardName : this.leaderboardsByName.keySet()) {
+            removeLeaderboard(leaderboardName);
+        }
+        
+        for(Regatta regatta : this.regattasByName.values()) {
+            stopTracking(regatta);
+            removeRegatta(regatta);
+        }
+        
+        for(Event event : this.eventsById.values()) {
+            removeEvent(event.getId());
+        }
+        
+        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
+            mediaTrackDeleted(mediaTrack);
+        }
+        
+        this.competitorStore.clear();
+        
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
     }
-
-    public RacingEventServiceImpl(MongoDBService mongoDBService, SwissTimingFactory swissTimingFactory,
-            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
-            DomainFactory tractracDomainFactory, MediaDB mediaDB) {
-        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), swissTimingFactory, swissTimingDomainFactory,
-                tractracDomainFactory, mediaDB);
-    }
-
+    
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
-        return getTracTracDomainFactory().getBaseDomainFactory();
+        return baseDomainFactory;
     }
-
+    
     @Override
-    public com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory() {
-        return swissTimingDomainFactory;
+    public MongoObjectFactory getMongoObjectFactory() {
+        return mongoObjectFactory;
+    }
+    
+    @Override
+    public DomainObjectFactory getDomainObjectFactory() {
+        return domainObjectFactory;
     }
 
     private void loadRaceIDToRegattaAssociations() {
@@ -309,11 +411,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+            logger.info("Putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
             regatta.addRaceColumnListener(raceLogScoringReplicator);
+            
+            for (Event event : this.getAllEvents()) {
+                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    if (regatta.getDefaultCourseArea() != null && courseArea.getId().equals(regatta.getDefaultCourseArea().getId())) {
+                        logger.info("Associating loaded regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
+                        event.addRegatta(regatta);
+                    }
+                }
+            }
         }
     }
 
@@ -343,12 +454,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             mediaTrackAdded(mediaTrack);
         }
     }
+    
+    private void loadStoredDeviceConfigurations() {
+        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : domainObjectFactory.loadAllDeviceConfigurations()) {
+            synchronized (configurationMap) {
+                configurationMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
 
     @Override
     public void addLeaderboard(Leaderboard leaderboard) {
         synchronized (leaderboardsByName) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
-
             // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
             if (leaderboard instanceof FlexibleLeaderboard) {
                 leaderboard.addRaceColumnListener(raceLogReplicator);
@@ -487,13 +605,39 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(oldColumnName);
             if (raceColumn instanceof FlexibleRaceColumn) {
+                // remove race log under old identifier; the race log identifier changes
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    getMongoObjectFactory().removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                }
                 ((FlexibleRaceColumn) raceColumn).setName(newColumnName);
+                // store the race logs again under the new identifiers
+                storeRaceLogs(raceColumn);
                 updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Race column " + oldColumnName + " cannot be renamed");
             }
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    /**
+     * When a race column is renamed, its race log identifiers change. Therefore, the race logs need to be stored
+     * under the new identifier again to be consistent with the in-memory image again.
+     */
+    private void storeRaceLogs(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, getMongoObjectFactory());
+            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            raceLog.lockForRead();
+            try {
+                for (RaceLogEvent e : raceLog.getRawFixes()) {
+                    e.accept(storeVisitor);
+                }
+            } finally {
+                raceLog.unlockAfterRead();
+            }
         }
     }
 
@@ -539,7 +683,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
-        mongoObjectFactory.storeLeaderboard(leaderboard);
+        getMongoObjectFactory().storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 
@@ -637,15 +781,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-    private DomainFactory getTracTracDomainFactory() {
-        return tractracDomainFactory;
-    }
-
-    @Override
-    public SwissTimingFactory getSwissTimingFactory() {
-        return swissTimingFactory;
-    }
-
     @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
@@ -681,24 +816,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore,
-            long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword) throws Exception {
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
-                domainObjectFactory);
-        JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, true);
-        Regatta regatta = null;
-        for (RaceRecord rr : jsonService.getRaceRecords()) {
-            URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, courseDesignUpdateURI, raceLogStore, windStore,
-                    timeoutInMilliseconds, tracTracUsername, tracTracPassword).getRegatta();
-        }
-        return regatta;
-    }
-
-    @Override
     public Regatta getOrCreateDefaultRegatta(String baseRegattaName, String boatClassName, Serializable id) {
         String defaultRegattaName = RegattaImpl.getDefaultName(baseRegattaName, boatClassName);
-
         Regatta result = regattasByName.get(defaultRegattaName);
         if (result == null) {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
@@ -708,7 +827,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     baseRegattaName,
                     getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                     this,
-                    com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT),
                     id, null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
@@ -752,57 +871,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-        return new Pair<Regatta, Boolean>(regatta, wasCreated);
-    }
-
-    @Override
-    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
-            throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        logger.info("Retrieving TracTrac race records from " + jsonURL);
-        JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, loadClientParams);
-        logger.info("OK retrieving TracTrac race records from " + jsonURL);
-        return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
-    }
-
-    @Override
-    public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
-            int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException,
-            ParseException {
-        List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port,
-                swissTimingAdapterPersistence, canSendRequests);
-        for (Race race : swissTimingConnector.getRaces()) {
-            String raceID = race.getRaceID();
-            TimePoint startTime = swissTimingConnector.getStartTime(raceID);
-            boolean hasCourse = swissTimingConnector.hasCourse(raceID);
-            boolean hasStartlist = swissTimingConnector.hasStartlist(raceID);
-            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
-                    race.getDescription(), startTime == null ? null : startTime.asDate(),
-                            hasCourse, hasStartlist));
+        for (Event event : getAllEvents()) {
+            for (CourseArea eventCourseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && eventCourseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
         }
-        return result;
-    }
-
-    @Override
-    public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds)
-            throws Exception {
-        return addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, canSendRequests, delayToLiveInMillis, swissTimingFactory, swissTimingDomainFactory, logStore,
-                windStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds);
-    }
-
-    @Override
-    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
-            RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
-            String tracTracPassword) throws Exception {
-        return addRace(
-                /* regattaToAddTo */null,
-                getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
-                        courseDesignUpdateURI,
-                        /* startOfTracking */null,
-                        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false,
-                        raceLogStore, windStore, tracTracUsername, tracTracPassword), windStore, timeoutInMilliseconds);
+        return new Pair<Regatta, Boolean>(regatta, wasCreated);
     }
 
     @Override
@@ -832,59 +908,89 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void raceRemoved(Regatta regatta, RaceDefinition raceDefinition) {
         raceDefinition.getCourse().removeCourseListener(courseListeners.remove(raceDefinition));
     }
+    
+    private NamedReentrantReadWriteLock lockRaceTrackersById(Object trackerId) {
+        NamedReentrantReadWriteLock lock;
+        synchronized (raceTrackersByIDLocks) {
+            lock = raceTrackersByIDLocks.get(trackerId);
+            if (lock == null) {
+                lock = new NamedReentrantReadWriteLock("raceTrackersByIDLock for "+trackerId, /* fair */ false);
+                raceTrackersByIDLocks.put(trackerId, lock);
+            }
+        }
+        LockUtil.lockForWrite(lock);
+        return lock;
+    }
+    
+    /**
+     * @param lock
+     *            need to pass the lock obtained from {@link #lockRaceTrackersById(Object)} because a competing thread
+     *            may already have removed the lock from the {@link #raceTrackersByIDLocks} map
+     */
+    private synchronized void unlockRaceTrackersById(Object trackerId, NamedReentrantReadWriteLock lock) {
+        LockUtil.unlockAfterWrite(lock);
+        synchronized (raceTrackersByIDLocks) {
+            raceTrackersByIDLocks.remove(trackerId);
+        }
+    }
 
     @Override
     public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
-            WindStore windStore, long timeoutInMilliseconds) throws Exception {
-        RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
-        if (tracker == null) {
-            Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
-            if (regatta == null) {
-                // create tracker and use an existing or create a default regatta
-                tracker = params.createRaceTracker(this);
-            } else {
-                // use the regatta selected by the RaceIdentifier regattaToAddTo
-                tracker = params.createRaceTracker(regatta, this);
-                assert tracker.getRegatta() == regatta;
-            }
-            synchronized (raceTrackersByRegatta) {
-                raceTrackersByID.put(params.getTrackerID(), tracker);
-                Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
-                if (trackers == null) {
-                    trackers = new HashSet<RaceTracker>();
-                    raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
+            long timeoutInMilliseconds) throws Exception {
+        final Object trackerID = params.getTrackerID();
+        NamedReentrantReadWriteLock raceTrackersByIdLock = lockRaceTrackersById(trackerID);
+        try {
+            RaceTracker tracker = raceTrackersByID.get(trackerID);
+            if (tracker == null) {
+                Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
+                if (regatta == null) {
+                    // create tracker and use an existing or create a default regatta
+                    tracker = params.createRaceTracker(this, windStore);
+                } else {
+                    // use the regatta selected by the RaceIdentifier regattaToAddTo
+                    tracker = params.createRaceTracker(regatta, this, windStore);
+                    assert tracker.getRegatta() == regatta;
                 }
-                trackers.add(tracker);
-            }
-            // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in
-            // EventImpl constructor
-            String regattaName = tracker.getRegatta().getName();
-            Regatta regattaWithName = regattasByName.get(regattaName);
-            // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in
-            // EventImpl constructor
-            if (regattaWithName != null) {
-                if (regattaWithName != tracker.getRegatta()) {
-                    if (Util.isEmpty(regattaWithName.getAllRaces())) {
-                        // probably, tracker removed the last races from the old regatta and created a new one
-                        cacheAndReplicateDefaultRegatta(tracker.getRegatta());
-                    } else {
-                        throw new RuntimeException("Internal error. Two Event objects with equal name " + regattaName);
+                synchronized (raceTrackersByRegatta) {
+                    raceTrackersByID.put(trackerID, tracker);
+                    Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
+                    if (trackers == null) {
+                        trackers = new HashSet<RaceTracker>();
+                        raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
                     }
+                    trackers.add(tracker);
+                }
+                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
+                String regattaName = tracker.getRegatta().getName();
+                Regatta regattaWithName = regattasByName.get(regattaName);
+                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
+                if (regattaWithName != null) {
+                    if (regattaWithName != tracker.getRegatta()) {
+                        if (Util.isEmpty(regattaWithName.getAllRaces())) {
+                            // probably, tracker removed the last races from the old regatta and created a new one
+                            regattasByName.remove(regattaName);
+                            cacheAndReplicateDefaultRegatta(tracker.getRegatta());
+                        } else {
+                            throw new RuntimeException("Internal error. Two Event objects with equal name " + regattaName);
+                        }
+                    }
+                } else {
+                    cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
             } else {
-                cacheAndReplicateDefaultRegatta(tracker.getRegatta());
+                WindStore existingTrackersWindStore = tracker.getWindStore();
+                if (!existingTrackersWindStore.equals(windStore)) {
+                    logger.warning("Wind store mismatch. Requested wind store: " + windStore
+                            + ". Wind store in use by existing tracker: " + existingTrackersWindStore);
+                }
             }
-        } else {
-            WindStore existingTrackersWindStore = tracker.getWindStore();
-            if (!existingTrackersWindStore.equals(windStore)) {
-                logger.warning("Wind store mismatch. Requested wind store: " + windStore
-                        + ". Wind store in use by existing tracker: " + existingTrackersWindStore);
+            if (timeoutInMilliseconds != -1) {
+                scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
             }
+            return tracker.getRacesHandle();
+        } finally {
+            unlockRaceTrackersById(trackerID, raceTrackersByIdLock);
         }
-        if (timeoutInMilliseconds != -1) {
-            scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
-        }
-        return tracker.getRacesHandle();
     }
 
     /**
@@ -921,7 +1027,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     s.getName(),
                     new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
-                            : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
+                            : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s.hasSplitFleetContiguousScoring()));
         }
         return new RegattaCreationParametersDTO(result);
     }
@@ -957,19 +1063,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null);
-    }
-
-    @Override
-    public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, RaceLogStore raceLogStore,
-            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername,
-            String tracTracPassword) throws Exception {
-        return addRace(
-                regattaToAddTo,
-                getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
-                        courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                        simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword),
-                windStore, timeoutInMilliseconds);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -1174,7 +1267,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     /**
-     * The tracker will initially try to connect to the TracTrac infrastructure to obtain basic race master data. If
+     * The tracker will initially try to connect to the tracking infrastructure to obtain basic race master data. If
      * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
      * check after the timeout expires if race master data was successfully received. If so, the tracker continues
      * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop() stopping}.
@@ -1270,20 +1363,40 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
     }
+    
+    @Override
+    public void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException {
+        Regatta regatta = series.getRegatta();
+        regatta.removeSeries(series);
+        if (regatta.isPersistent()) {
+            mongoObjectFactory.storeRegatta(regatta);
+        }
+    }
 
     @Override
-    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId) {
+    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
+           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
-        synchronized (regatta) {
-            CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
-            if (newCourseArea != regatta.getDefaultCourseArea()) {
-                regatta.setDefaultCourseArea(newCourseArea);
-                mongoObjectFactory.storeRegatta(regatta);
-            }
-
-            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId));
+        CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
+        if (newCourseArea != regatta.getDefaultCourseArea()) {
+            regatta.setDefaultCourseArea(newCourseArea);
         }
+        regatta.setRegattaConfiguration(newRegattaConfiguration);
+        if (series != null) {
+            for (Series seriesObj : series) {
+                regatta.addSeries(seriesObj);
+            }
+        }
+        for (Event event : getAllEvents()) {
+            event.removeRegatta(regatta);
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
+        mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }
 
@@ -1303,34 +1416,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
-            boolean regattaChanged = false;
             for (Series series : regatta.getSeries()) {
                 for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
                     for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
                             raceColumn.releaseTrackedRace(fleet);
-                            regattaChanged = true;
                         }
                     }
                 }
             }
-            if (regattaChanged) {
-                updateStoredRegatta(regatta);
-            }
             for (Leaderboard leaderboard : getLeaderboards().values()) {
-                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by
-                                                                  // the code above
-                    boolean changed = false;
+                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by the code above
                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                         for (Fleet fleet : raceColumn.getFleets()) {
                             if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column
-                                changed = true; // untouched, e.g., for later re-load
+                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                             }
                         }
-                    }
-                    if (changed) {
-                        updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                     }
                 }
             }
@@ -1386,16 +1488,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination)
-            throws SocketException {
-        windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        }
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
-        if (windTracker != null) {
-            windTracker.stop();
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+            if (windTracker != null) {
+                windTracker.stop();
+            }
         }
     }
 
@@ -1404,9 +1509,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
-                if (windTracker != null) {
-                    result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+                    WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                    if (windTracker != null) {
+                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                    }
                 }
             }
         }
@@ -1449,20 +1556,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         logger.info("Removing regatta " + regatta.getName() + " from regattaTrackingCache");
         DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.remove(regatta);
         stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
-    }
-
-    @Override
-    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage) {
-        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, null);
-        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, null);
-        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, null);
-        if (swissTimingAdapterPersistence.getRace(stlSMMessage.getRaceID()) != null) {
-            throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
-        } else {
-            swissTimingAdapterPersistence.storeSailMasterMessage(racSMMessage);
-            swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
-            swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
-        }
     }
 
     @Override
@@ -1638,24 +1731,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
-    @Override
-    public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
-        UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-        receiver.addListener(listener, validMessagesOnly);
-    }
-
-    @Override
-    public void removeExpeditionListener(ExpeditionListener listener) {
-        UDPExpeditionReceiver receiver;
-        try {
-            receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-            receiver.removeListener(listener);
-        } catch (SocketException e) {
-            logger.info("Failed to remove expedition listener " + listener
-                    + "; exception while trying to retrieve wind receiver: " + e.getMessage());
-        }
-    }
-
     private ScheduledExecutorService getScheduler() {
         return scheduler;
     }
@@ -1731,30 +1806,37 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
-
         logger.info("Serializing leaderboards...");
         oos.writeObject(leaderboardsByName);
         logoutput.append("Serialized " + leaderboardsByName.size() + " leaderboards\n");
         for (Leaderboard lg : leaderboardsByName.values()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
-
         logger.info("Serializing media library...");
         mediaLibrary.serialize(oos);
         logoutput.append("Serialized " + mediaLibrary.allTracks().size() + " media tracks\n");
         for (MediaTrack lg : mediaLibrary.allTracks()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
-
+        logger.info("Serializing persisted competitors...");
+        oos.writeObject(competitorStore);
+        logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
         logger.info(logoutput.toString());
-    }
+        
+        logger.info("Serializing configuration map...");
+        oos.writeObject(configurationMap);
+        logoutput.append("Serialized " + configurationMap.size() + " configuration entries\n");
+        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+            logoutput.append(String.format("%3s\n", matcher.toString()));
+        }
+        
+        logger.info(logoutput.toString());    }
 
     @SuppressWarnings("unchecked")
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
             InterruptedException {
-
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
@@ -1773,20 +1855,24 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
 
+            logger.info("Clearing all data structures...");
             regattaTrackingCache.clear();
             leaderboardGroupsByName.clear();
             leaderboardsByName.clear();
             eventsById.clear();
             mediaLibrary.clear();
+            competitorStore.clear();
 
             StringBuffer logoutput = new StringBuffer();
 
+            logger.info("Reading all events...");
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
             logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
             for (Event event : eventsById.values()) {
                 logoutput.append(String.format("%3s\n", event.toString()));
             }
 
+            logger.info("Reading all regattas...");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
             for (Regatta regatta : regattasByName.values()) {
@@ -1795,19 +1881,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
             // old leaderboards takes place which then don't match the new ones
+            logger.info("Reading all dynamic tracked regattas...");
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
             }
 
+            logger.info("Reading all of the regatta tracking cache...");
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
             logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
 
+            logger.info("Reading leaderboard groups...");
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
             for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
                 logoutput.append(String.format("%3s\n", lg.toString()));
             }
 
+            logger.info("Reading leaderboards by name...");
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
             logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
@@ -1822,41 +1912,47 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
 
+            logger.info("Reading media library...");
             mediaLibrary.deserialize(ois);
             logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
             for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
+            
 
+            // only copy the competitors from the deserialized competitor store; don't use it because it will have set
+            // a default Mongo object factory
+            logger.info("Reading competitors...");
+            for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
+                DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+            }
+            logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
+
+            logger.info("Reading device configurations...");
+            configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
+            logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
+            for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+                logoutput.append(String.format("%3s\n", matcher.toString()));
+            }
             logger.info(logoutput.toString());
-            logger.info("Done with initial replication on " + this);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
     }
 
     @Override
-    public long getDelayToLiveInMillis() {
-        return delayToLiveInMillis;
-    }
-
-    @Override
-    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        this.delayToLiveInMillis = delayToLiveInMillis;
-    }
-
-    @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
+    public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
         synchronized (eventsById) {
-            Event result = createEventWithoutReplication(eventName, venue, publicationUrl, isPublic, id);
-            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id));
+            Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
+            replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
             return result;
         }
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+        Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
                 throw new IllegalArgumentException("Event with ID " + result.getId()
@@ -1869,7 +1965,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void updateEvent(UUID id, String eventName, String venueName, String publicationUrl,
+    public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
             boolean isPublic, List<String> regattaNames) {
         synchronized (eventsById) {
             if (!eventsById.containsKey(id)) {
@@ -1877,14 +1973,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             Event event = eventsById.get(id);
             event.setName(eventName);
-            event.setPublicationUrl(publicationUrl);
+            event.setStartDate(startDate);
+            event.setEndDate(endDate);
             event.setPublic(isPublic);
             event.getVenue().setName(venueName);
 
             // TODO need to update regattas if they are once linked to event objects
             mongoObjectFactory.storeEvent(event);
 
-            replicate(new UpdateEvent(id, eventName, venueName, publicationUrl, isPublic, regattaNames));
+            replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
         }
     }
 
@@ -1927,8 +2024,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * <code>regatta</code> will be returned.
      */
     private void setRegattaForRace(Regatta regatta, RaceDefinition race) {
-        persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
-        mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
+        setRegattaForRace(regatta, race.getId().toString());
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, String raceIdAsString) {
+        persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
+        mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
     }
 
     @Override
@@ -2007,6 +2109,39 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
+    public void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override) {
+        for (MediaTrack trackToImport : mediaTracksToImport) {
+            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
+            if (existingTrack == null) {
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.durationInMillis, trackToImport.mimeType.name());
+                mediaTrackAdded(trackToImport);
+            } else if (override) {
+                    
+                // Using fine-grained update methods.
+                // Rationale: Changes on more than one track property are rare 
+                //            and don't justify the introduction of a new set 
+                //            of methods (including replication).
+                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+                    existingTrack.title = trackToImport.title;
+                    mediaTrackTitleChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+                    existingTrack.url = trackToImport.url;
+                    mediaTrackUrlChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+                    existingTrack.startTime = trackToImport.startTime;
+                    mediaTrackStartTimeChanged(existingTrack);
+                }
+                if (existingTrack.durationInMillis != trackToImport.durationInMillis) {
+                    existingTrack.durationInMillis = trackToImport.durationInMillis;
+                    mediaTrackDurationChanged(existingTrack);
+                }
+            }
+        }
+    }
+    
+    @Override
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
@@ -2028,12 +2163,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
-        Leaderboard leaderboard = getLeaderboardByName(selectedLeaderboardName);
+    public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnDTO.getName());
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleet.getName());
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
                 RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.setOrReloadRaceLogInformation(raceColumn.getRaceLogInformation(), fleetImpl);
@@ -2045,32 +2180,152 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
-            throws Exception {
-        JSONService service = getTracTracDomainFactory()
-                .parseJSONURLForOneRaceRecord(jsonURL, raceId, loadClientParams);
-        if (!service.getRaceRecords().isEmpty()) {
-            return service.getRaceRecords().get(0);
+    public ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs() {
+        return persistentRegattasForRaceIDs;
+    }
+
+
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
+    }
+    @Override
+    public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {
+        return configurationMap.getByMatch(identifier);
+    }
+
+    @Override
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+        synchronized (configurationMap) {
+            configurationMap.put(matcher, configuration);
+        }
+        mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
+        replicate(new CreateOrUpdateDeviceConfiguration(matcher, configuration));
+    }
+
+    @Override
+    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+        synchronized (configurationMap) {
+            configurationMap.remove(matcher);
+        }
+        mongoObjectFactory.removeDeviceConfiguration(matcher);
+        replicate(new RemoveDeviceConfiguration(matcher));
+    }
+
+    @Override
+    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations() {
+        return new HashMap<DeviceConfigurationMatcher, DeviceConfiguration>(configurationMap);
+    }
+    
+    @Override
+    public TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            state.setRacingProcedure(logicalTimePoint, racingProcedure);
+            state.forceNewStartTime(logicalTimePoint, startTime);
+            return state.getStartTime();
+        }
+        return null;
+    }
+    
+    public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                return raceColumn.getRaceLog(fleetImpl);
+            }
         }
         return null;
     }
 
     @Override
-    public ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs() {
-        return persistentRegattasForRaceIDs;
+    public Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            return new Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+        }
+        return null;
+    }
+
+    private Iterable<WindTrackerFactory> getWindTrackerFactories() {
+        final Set<WindTrackerFactory> result;
+        if (bundleContext == null) {
+            result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+        } else {
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+                    bundleContext, WindTrackerFactory.class.getName(), null);
+            tracker.open();
+            result = new HashSet<>();
+            for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
+                result.add(factory);
+            }
+        }
+        return result;
     }
 
     @Override
-    public void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override) {
-        for (String raceIdAsString : raceIdStrings) {
-            if (!override && persistentRegattasForRaceIDs.contains(raceIdAsString)) {
-                logger.info(String.format(
-                        "Persistent regatta wasnt set for race id %1$s, because override was not turned on.",
-                        raceIdAsString));
-            } else {
-                persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
-            }
+    public DataImportLockWithProgress getDataImportLock() {
+        return dataImportLock;
+    }
+
+    @Override
+    public DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
+            double overallProgressPct, String subProgressName, double subProgressPct) {
+        // Create/Update locally
+        DataImportProgress progress = createOrUpdateDataImportProgressWithoutReplication(importOperationId,
+                overallProgressPct, subProgressName, subProgressPct);
+        // Create/Update on replicas
+        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgressName,
+                subProgressPct));
+        return progress;
+    }
+
+    @Override
+    public DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
+            double overallProgressPct, String subProgressName, double subProgressPct) {
+        DataImportProgress progress = dataImportLock.getProgress(importOperationId);
+        boolean newObject = false;
+        if (progress == null) {
+            progress = new DataImportProgressImpl(importOperationId);
+            newObject = true;
+        }
+        progress.setOverAllProgressPct(overallProgressPct);
+        progress.setNameOfCurrentSubProgress(subProgressName);
+        progress.setCurrentSubProgressPct(subProgressPct);
+        if (newObject) {
+            dataImportLock.addProgress(importOperationId, progress);
+        }
+        return progress;
+    }
+
+    @Override
+    public void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage) {
+        DataImportProgress progress = dataImportLock.getProgress(importOperationId);
+        if (progress != null) {
+            progress.setFailed();
+            progress.setErrorMessage(errorMessage);
         }
     }
 
+    @Override
+    public void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage) {
+        setDataImportFailedWithoutReplication(importOperationId, errorMessage);
+        replicate(new DataImportFailed(importOperationId, errorMessage));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId) {
+        setDataImportDeleteProgressFromMapTimerWithoutReplication(importOperationId);
+        replicate(new SetDataImportDeleteProgressFromMapTimer(importOperationId));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
+        dataImportLock.setDeleteFromMapTimer(importOperationId);
+    }
 }

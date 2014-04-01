@@ -16,13 +16,21 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -45,6 +53,8 @@ public abstract class AbstractServerReplicationTest {
     private ReplicationServiceImpl masterReplicator;
     private ReplicationMasterDescriptor  masterDescriptor;
     
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
@@ -84,15 +94,19 @@ public abstract class AbstractServerReplicationTest {
             mongoDBService.getDB().dropDatabase();
         }
         resolveAgainst = DomainFactory.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestStart();
         if (master != null) {
             this.master = master;
         } else {
-            this.master = new RacingEventServiceImpl(mongoDBService);
+            this.master = createNewMaster(mongoDBService, mongoObjectFactory);
         }
         if (replica != null) {
             this.replica = replica;
         } else {
-            this.replica = new RacingEventServiceImpl(mongoDBService);
+            this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                    // replica gets its own base DomainFactory:
+                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -108,9 +122,19 @@ public abstract class AbstractServerReplicationTest {
         this.replicaReplicator = replicaReplicator; 
         return result;
     }
-    
+
+    protected RacingEventServiceImpl createNewMaster(final MongoDBService mongoDBService,
+            final MongoObjectFactory mongoObjectFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
+                EmptyWindStore.INSTANCE);
+    }
+
     @After
     public void tearDown() throws Exception {
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestDone();
         masterReplicator.unregisterReplica(replicaDescriptor);
         masterDescriptor.stopConnection();
         try {
@@ -178,7 +202,10 @@ public abstract class AbstractServerReplicationTest {
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
-                                master.serializeForInitialReplication(new ObjectOutputStream(s.getOutputStream()));
+                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(s.getOutputStream());
+                                final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
+                                master.serializeForInitialReplication(oos);
+                                gzipOutputStream.finish();
                             } else if (request.contains("STOP")) {
                                 stop = true;
                             }
@@ -214,7 +241,7 @@ public abstract class AbstractServerReplicationTest {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer);
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer, DomainFactory.INSTANCE);
             new Thread(replicator).start();
             return replicator;
         }

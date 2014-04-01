@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -25,16 +24,16 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
     private final RaceLogStore raceLogStore;
-    private final WindStore windStore;
     private final DomainFactory domainFactory;
     private final long delayToLiveInMillis;
     private final boolean simulateWithStartTimeNow;
     private final String tracTracUsername;
     private final String tracTracPassword;
+    private final String raceStatus;
 
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, 
-            RaceLogStore raceLogStore, WindStore windStore, DomainFactory domainFactory, String tracTracUsername, String tracTracPassword) {
+            RaceLogStore raceLogStore, DomainFactory domainFactory, String tracTracUsername, String tracTracPassword, String raceStatus) {
         super();
         this.paramURL = paramURL;
         this.liveURI = liveURI;
@@ -43,27 +42,27 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         this.delayToLiveInMillis = delayToLiveInMillis;
-        this.windStore = windStore;
         this.domainFactory = domainFactory;
         this.simulateWithStartTimeNow = simulateWithStartTimeNow;
         this.raceLogStore = raceLogStore;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
+        this.raceStatus = raceStatus;
     }
 
     @Override
-    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException,
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
         return tracker;
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry)
+    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore)
             throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
         return tracker;
     }
 

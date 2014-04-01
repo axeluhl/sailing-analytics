@@ -10,6 +10,7 @@
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+  <inherits name='com.google.gwt.debug.Debug'/>
   <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
@@ -19,6 +20,9 @@
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->

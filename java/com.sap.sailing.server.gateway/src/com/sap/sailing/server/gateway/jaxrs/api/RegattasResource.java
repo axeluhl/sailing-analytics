@@ -49,6 +49,8 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJs
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
@@ -79,8 +81,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         for (Regatta regatta : getService().getAllRegattas()) {
             regattasJson.add(regattaJsonSerializer.serialize(regatta));
         }
-        byte[] json = regattasJson.toJSONString().getBytes();
-        return Response.ok(json).build();
+        String json = regattasJson.toJSONString();
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
     
     @GET
@@ -96,8 +98,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             
-            byte[] json = serializedRegatta.toJSONString().getBytes();
-            response = Response.ok(json).build();
+            String json = serializedRegatta.toJSONString();
+            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
@@ -117,13 +119,14 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(
-                    new TeamJsonSerializer(new PersonJsonSerializer(nationalityJsonSerializer)));
+            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+                    new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
+                    new BoatClassJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 
-            byte[] json = serializedRegatta.toJSONString().getBytes();
-            response = Response.ok(json).build();
+            String json = serializedRegatta.toJSONString();
+            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
@@ -216,8 +219,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
                 jsonRace.put("competitors", jsonCompetitors);
 
-                byte[] json = jsonRace.toJSONString().getBytes();
-                response = Response.ok(json).build();
+                String json = jsonRace.toJSONString();
+                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;
@@ -305,8 +308,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
                 jsonRace.put("marks", jsonMarks);
 
-                byte[] json = jsonRace.toJSONString().getBytes();
-                response = Response.ok(json).build();
+                String json = jsonRace.toJSONString();
+                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;
@@ -338,8 +341,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                                         new GateJsonSerializer(new MarkJsonSerializer()))));
                 
                 JSONObject jsonCourse = serializer.serialize(course);
-                byte[] json = jsonCourse.toJSONString().getBytes();
-                response = Response.ok(json).build();
+                String json = jsonCourse.toJSONString();
+                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
             }                
         }
         return response;
@@ -433,8 +436,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 Date now = new Date();
                 jsonRaceTimes.put("currentServerTime-ms", now.getTime());
                 
-                byte[] json = jsonRaceTimes.toJSONString().getBytes();
-                response = Response.ok(json).build();
+                String json = jsonRaceTimes.toJSONString();
+                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;
@@ -479,8 +482,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 serializer.setToTime(to);
 
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
-                byte[] json = jsonWindTracks.toJSONString().getBytes();
-                return Response.ok(json).build();
+                String json = jsonWindTracks.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;
@@ -560,8 +563,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
                 jsonRaceResults.put("legs", jsonLegs);
 
-                byte[] json = jsonRaceResults.toJSONString().getBytes();
-                return Response.ok(json).build();
+                String json = jsonRaceResults.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;

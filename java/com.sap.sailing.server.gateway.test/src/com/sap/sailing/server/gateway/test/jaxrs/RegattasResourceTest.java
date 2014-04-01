@@ -51,7 +51,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         
         Response regattasResponse = spyResource.getRegattas();
         
-        String jsonString = decodeResponseFromByteArray(regattasResponse);
+        String jsonString = (String) regattasResponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
         JSONArray array= (JSONArray) obj;
 

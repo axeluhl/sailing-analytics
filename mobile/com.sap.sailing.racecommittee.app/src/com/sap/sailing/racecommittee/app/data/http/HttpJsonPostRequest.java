@@ -13,13 +13,17 @@ public class HttpJsonPostRequest extends HttpRequest {
 
     private String requestBody;
 
+    public HttpJsonPostRequest(URL requestUrl) {
+        this(requestUrl, null);
+    }
+    
     public HttpJsonPostRequest(URL requestUrl, String body) {
         super(requestUrl);
         this.requestBody = body;
     }
 
     @Override
-    protected BufferedInputStream execute(HttpURLConnection connection) throws IOException {
+    protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
         connection.setDoOutput(true);
         connection.setChunkedStreamingMode(0);
 
@@ -34,6 +38,8 @@ public class HttpJsonPostRequest extends HttpRequest {
     }
 
     private void sendBody(OutputStream outputStream) throws IOException {
-        outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
+        if (requestBody != null) {
+            outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
+        }
     }
 }

@@ -12,3 +12,5 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test"
+Import-Package: org.osgi.framework;version="1.7.0"
+Bundle-Activator: com.sap.sailing.domain.swisstimingadapter.impl.Activator

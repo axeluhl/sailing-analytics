@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -57,7 +58,7 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                 new NationalityImpl("NED"),
@@ -101,7 +102,7 @@ public abstract class TrackBasedTest {
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
         MarkImpl right = new MarkImpl("Right lee gate buoy");
-        ControlPoint leeGate = new GateImpl(left, right, "Lee Gate");
+        ControlPoint leeGate = new ControlPointWithTwoMarksImpl(left, right, "Lee Gate");
         Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));

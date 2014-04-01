@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.impl;
 import java.util.Comparator;
 import java.util.Date;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 
 public abstract class AbstractTimePoint implements TimePoint {
@@ -33,6 +34,33 @@ public abstract class AbstractTimePoint implements TimePoint {
         return result;
     }
     
+    @Override
+    public TimePoint plus(Duration duration) {
+        final TimePoint result;
+        if (duration != null) {
+            result = plus(duration.asMillis());
+        } else {
+            result = this;
+        }
+        return result;
+    }
+
+    @Override
+    public TimePoint minus(Duration duration) {
+        final TimePoint result;
+        if (duration != null) {
+            result = minus(duration.asMillis());
+        } else {
+            result = this;
+        }
+        return result;
+    }
+
+    @Override
+    public Duration until(TimePoint later) {
+        return new MillisecondsDurationImpl(later.asMillis()-asMillis());
+    }
+
     @Override
     public TimePoint plus(long milliseconds) {
         return new MillisecondsTimePoint(asMillis()+milliseconds);

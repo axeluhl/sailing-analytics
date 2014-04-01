@@ -12,27 +12,29 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogCourseDesignChangedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -40,9 +42,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 
 public class RaceLogCourseDesignChangedEventSerializerTest {
@@ -51,21 +50,20 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     private RaceLogCourseDesignChangedEventDeserializer deserializer;
     private RaceLogCourseDesignChangedEvent event;
     private TimePoint now;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
-        NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-        serializer = new RaceLogCourseDesignChangedEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(nationalityJsonSerializer))),
-                new CourseBaseJsonSerializer(new WaypointJsonSerializer(new ControlPointJsonSerializer(
-                        new MarkJsonSerializer(), new GateJsonSerializer(new MarkJsonSerializer())))));
-        deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CompetitorDeserializer(factory),
+        serializer = new RaceLogCourseDesignChangedEventSerializer(CompetitorJsonSerializer.create(), new CourseBaseJsonSerializer(
+                new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
+                        new GateJsonSerializer(new MarkJsonSerializer())))));
+        deserializer = new RaceLogCourseDesignChangedEventDeserializer(CompetitorJsonDeserializer.create(DomainFactory.INSTANCE),
                 new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, createCourseData());
+        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, author, 0, createCourseData());
     }
 
     @Test
@@ -76,7 +74,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
 
@@ -86,30 +84,30 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     protected CourseBase createCourseData() {
         CourseBase course = new CourseDataImpl("Test Course");
 
-        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
+        course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
                 MarkType.BUOY, "black", "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
                 "green", "round", "circle"), "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white",
-                "conical", "bold"), NauticalSide.PORT));
+                "conical", "bold"), PassingInstruction.Port));
 
         return course;
     }
 
     protected void compareCourseData(CourseBase serializedCourse, CourseBase deserializedCourse) {
-        assertEquals(serializedCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(deserializedCourse.getFirstWaypoint().getPassingSide(), null);
-        Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
-        Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        assertEquals(serializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(deserializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
+        Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
 
-        Gate serializedGate = (Gate) serializedCourse.getFirstWaypoint().getControlPoint();
-        Gate deserializedGate = (Gate) deserializedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks serializedGate = (ControlPointWithTwoMarks) serializedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks deserializedGate = (ControlPointWithTwoMarks) deserializedCourse.getFirstWaypoint().getControlPoint();
 
         assertEquals(serializedGate.getName(), deserializedGate.getName());
         compareMarks(serializedGate.getLeft(), deserializedGate.getLeft());
         compareMarks(serializedGate.getRight(), deserializedGate.getRight());
 
-        assertEquals(serializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(deserializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(serializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(deserializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
 

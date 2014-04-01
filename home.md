@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
+This is the <img src="http://www.sapsailing.com/images/sap-logo.png"/> Sailing Analytics Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
@@ -11,13 +11,14 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * Production Environment
-  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
   * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
+  * [[Building and Deploying|wiki/building-and-deploying]]
+  * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Server Replication|wiki/server-replication]]
@@ -25,6 +26,10 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Development Environment|wiki/development-environment]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+* Information for Webdesigners
+  * [[Layout repository|wiki/webdesign]]
+  * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
+  * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
@@ -42,7 +47,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
-* [Maven Repository Browser](http://maven.sapsailing.com/maven/)
+* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/racecommittee-app-environment]])
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
 * [Traffic and CPU for app01](http://mrtg.sapsailing.com/)

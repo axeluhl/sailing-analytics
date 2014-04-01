@@ -24,7 +24,9 @@ import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
@@ -44,6 +46,8 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 
 public class UDPExpeditionReceiverTest {
+    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    
     private String[] validLines;
     private String[] someValidWithFourInvalidLines;
     final List<ExpeditionMessage> messages = new ArrayList<ExpeditionMessage>();

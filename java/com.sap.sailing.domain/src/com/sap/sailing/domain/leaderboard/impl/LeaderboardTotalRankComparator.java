@@ -10,6 +10,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -140,7 +141,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                 }
-                if (preemptiveColumnResult == 0) {
+                if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
                     preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
                 }
                 if (preemptiveColumnResult != 0) {
@@ -161,6 +162,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     if (result == 0) {
                         // compare by last race:
                         result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
+                        if (result == 0) {
+                            try {
+                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                            } catch (NoWindException e) {
+                                throw new NoWindError(e);
+                            }
+                        }
                     }
                 }
             }

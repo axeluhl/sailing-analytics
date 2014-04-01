@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 
+import org.junit.After;
 import org.junit.Before;
 
 import com.mongodb.DB;
@@ -20,8 +21,7 @@ public abstract class AbstractMongoDBTest {
     
     public AbstractMongoDBTest() throws UnknownHostException, MongoException {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
-        service = MongoDBService.INSTANCE;
-        service.setConfiguration(getDBConfiguration());
+        service = getDBConfiguration().getService();
         mongo = newMongo();
         db = service.getDB();
     }
@@ -37,8 +37,14 @@ public abstract class AbstractMongoDBTest {
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         assertNotNull(mongo);
+        db.requestStart();
         dropAllCollections(db);
         assertNotNull(db);
+    }
+    
+    @After
+    public void tearDown() {
+        db.requestDone();
     }
 
     private void dropAllCollections(DB theDB) throws InterruptedException {

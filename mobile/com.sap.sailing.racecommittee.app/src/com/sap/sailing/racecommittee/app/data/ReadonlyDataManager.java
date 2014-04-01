@@ -11,6 +11,8 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -117,4 +119,16 @@ public interface ReadonlyDataManager {
      */
     public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
             LoadClient<Collection<Competitor>> callback);
+    
+    /**
+     * Creates a new {@link LoaderCallbacks} object for loading a client's configuration.
+     * 
+     * @param callback
+     *            {@link LoadClient} implementing your data handling code.
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback);
 }

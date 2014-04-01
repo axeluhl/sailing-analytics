@@ -1,6 +1,10 @@
 package com.sap.sailing.racecommittee.app;
 
 
+import java.io.File;
+
+import android.os.Environment;
+
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class AppConstants {
@@ -12,11 +16,12 @@ public class AppConstants {
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
     public final static String RACE_ID_KEY = "raceUuid";
     public final static String SERVICE_UNIQUE_ID = "serviceUID";
-    public final static String RACING_EVENT_TIME = "racingEventTime";
     public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
-    public final static String EXTRAS_SERIALIZED_EVENT = "json";
+    public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";
+    public final static String EXTRAS_JSON_SERIALIZED_EVENT = "json";
     public final static String EXTRAS_EVENT_SENDER_RESPONSE_HANDLER_CALLBACK = "responseHandlerCallback";
     public final static String EXTRAS_URL = "url";
+    public final static String EXTRAS_CALLBACK_CLASS = "callbackClass";
     public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";
@@ -28,7 +33,13 @@ public class AppConstants {
     public final static String INTENT_ACTION_ALARM_ACTION = "com.sap.sailing.racecommittee.app.action.alarmAction";
     public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = "com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction";
 
-    public final static String ApplicationFolder = "/racecommittee";
+    private final static String ApplicationFolder = "/racecommittee";
+    
+    public static File getExternalApplicationFolder() {
+        File dir = new File(Environment.getExternalStorageDirectory() + ApplicationFolder);
+        dir.mkdirs();
+        return dir;
+    }
 
     // Login activity
     public final static String EventIdTag = "EventId";

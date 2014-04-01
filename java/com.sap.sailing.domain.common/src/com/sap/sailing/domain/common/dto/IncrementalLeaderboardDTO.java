@@ -338,7 +338,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 this.setComment(previousVersion.getComment());
             }
             if (this.defaultCourseAreaIdAsStringUnchanged) {
-                this.defaultCourseAreaIdAsString = previousVersion.defaultCourseAreaIdAsString;
+                this.defaultCourseAreaId = previousVersion.defaultCourseAreaId;
             }
             if (this.defaultCourseAreaNameUnchanged) {
                 this.defaultCourseAreaName = previousVersion.defaultCourseAreaName;
@@ -497,8 +497,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             this.displayName = null;
             this.displayNameUnchanged = true;
         }
-        if (Util.equalsWithNull(this.defaultCourseAreaIdAsString, previousVersion.defaultCourseAreaIdAsString)) {
-            this.defaultCourseAreaIdAsString = null;
+        if (Util.equalsWithNull(this.defaultCourseAreaId, previousVersion.defaultCourseAreaId)) {
+            this.defaultCourseAreaId = null;
             this.defaultCourseAreaIdAsStringUnchanged = true;
         }
         if (Util.equalsWithNull(this.defaultCourseAreaName, previousVersion.defaultCourseAreaName)) {
@@ -508,7 +508,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
         // for this stripping run, remembers the mapping of real CompetitorDTO objects to the compact form that only holds an int as reference to the
         // previous version's competitors list; those will be used to replace the real CompetitorDTO objects where possible and will be replaced the other
-        // way in apply(...).
+        // way in applyThisToPreviousVersionByUpdatingThis(...).
         Map<CompetitorDTO, CompetitorDTO> compactCompetitorMap = new HashMap<CompetitorDTO, CompetitorDTO>();
         int i=0;
         for (CompetitorDTO competitor : competitors) {

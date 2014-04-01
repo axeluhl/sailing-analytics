@@ -2,8 +2,10 @@ package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +13,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 
 public class EventReplicationTest extends AbstractServerReplicationTest {
@@ -19,18 +23,39 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
     public void testEventReplication() throws InterruptedException {
         final String eventName = "ESS Masquat";
         final String venueName = "Masquat, Oman";
-        final String publicationUrl = "http://ess40.sapsailing.com";
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         final boolean isPublic = false;
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
+        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
 
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertNotNull(replicatedEvent);
         assertEquals(replicatedEvent.getName(), eventName);
-        assertEquals(replicatedEvent.getPublicationUrl(), publicationUrl);
+        assertEquals(replicatedEvent.getStartDate(), eventStartDate);
+        assertEquals(replicatedEvent.getEndDate(), eventEndDate);
+        assertEquals(replicatedEvent.getVenue().getName(), venueName);
+    }
+
+    @Test
+    public void testEventReplicationWithNullStartAndEndDate() throws InterruptedException {
+        final String eventName = "ESS Masquat";
+        final String venueName = "Masquat, Oman";
+        final boolean isPublic = false;
+        List<String> regattas = new ArrayList<String>();
+        regattas.add("Day1");
+        regattas.add("Day2");
+        Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
+
+        Thread.sleep(1000);
+        Event replicatedEvent = replica.getEvent(masterEvent.getId());
+        assertNotNull(replicatedEvent);
+        assertEquals(replicatedEvent.getName(), eventName);
+        assertNull(replicatedEvent.getStartDate());
+        assertNull(replicatedEvent.getEndDate());
         assertEquals(replicatedEvent.getVenue().getName(), venueName);
     }
 
@@ -38,10 +63,11 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
     public void testCourseAreaReplication() throws InterruptedException {
         final String eventName = "ESS Singapur";
         final String venueName = "Singapur, Singapur";
-        final String publicationUrl = "http://ess40.sapsailing.com";
         final boolean isPublic = false;
         final String courseArea = "Alpha";
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
 
         Thread.sleep(1000);

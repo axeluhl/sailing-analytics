@@ -2,14 +2,19 @@ package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
 
+import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -77,6 +82,7 @@ public interface MongoObjectFactory {
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
      * {@link Event} to which the regatta belongs.
+     * @param oldSeriesNameNewName 
      */
     void storeRegatta(Regatta regatta);
 
@@ -85,5 +91,25 @@ public interface MongoObjectFactory {
     void storeRegattaForRaceID(String id, Regatta regatta);
 
     void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
+    
+    /**
+     * Stores a competitor, including the team and boat. This should not be done for competitors for which
+     * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
+     * where this data is otherwise not recoverable.
+     * @param competitor the competitor to store/update in the database
+     */
+    void storeCompetitor(Competitor competitor);
+
+    void removeAllCompetitors();
+
+    void removeCompetitor(Competitor competitor);
+
+    DB getDatabase();
+
+    void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+
+    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+
+    void removeRaceLog(RaceLogIdentifier identifier);
 
 }

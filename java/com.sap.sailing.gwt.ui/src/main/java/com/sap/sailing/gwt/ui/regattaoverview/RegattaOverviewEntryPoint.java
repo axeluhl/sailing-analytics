@@ -2,11 +2,14 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -15,6 +18,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -31,9 +37,13 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
 
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
+
+        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         containerPanel = new DockLayoutPanel(Unit.PX);
@@ -42,7 +52,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.regattaOverview(), stringMessages, this);
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.eventOverview(), stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             containerPanel.addNorth(logoAndTitlePanel, 68);
         } else {
@@ -51,9 +61,13 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         }
 
         String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
+        if (eventIdAsString == null) {
+            Window.alert("Missing parameter");
+            return;
+        }
 
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(eventIdAsString);
+        createAndAddRegattaPanel(UUID.fromString(eventIdAsString));
         toggleDetailPanel(false);
         
         regattaPanel.setEntryClickedHandler(new EntryHandler() { 
@@ -74,9 +88,9 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         containerPanel.setWidgetHidden(detailPanel, !visibile);
     }
 
-    private void createAndAddRegattaPanel(String eventIdAsString) {
+    private void createAndAddRegattaPanel(UUID eventId) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventIdAsString, settings);
+        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventId, settings, userAgent);
         Panel centerPanel = new FlowPanel();
         centerPanel.add(regattaPanel);
         ScrollPanel scrollPanel = new ScrollPanel(centerPanel);
@@ -94,7 +108,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     }
 
     public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
-        List<String> visibleCourseAreas = new ArrayList<String>();
+        List<UUID> visibleCourseAreas = new ArrayList<UUID>();
         List<String> visibleRegattas = new ArrayList<String>();
 
         boolean showOnlyCurrentlyRunningRaces = Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES) == null 
@@ -104,7 +118,9 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
                 && Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY).equalsIgnoreCase("true");
 
         if (Window.Location.getParameterMap().containsKey(PARAM_COURSE_AREA)) {
-            visibleCourseAreas.addAll(Window.Location.getParameterMap().get(PARAM_COURSE_AREA));
+            for (String value : Window.Location.getParameterMap().get(PARAM_COURSE_AREA)) {
+                visibleCourseAreas.add(UUID.fromString(value));
+            }
         }
 
         if (Window.Location.getParameterMap().containsKey(PARAM_REGATTA)) {
@@ -114,7 +130,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         return new RegattaRaceStatesSettings(visibleCourseAreas, visibleRegattas, showOnlyRacesOfSameDay, showOnlyCurrentlyRunningRaces);
     }
 
-    public static String getUrl(String eventIdAsString, RegattaRaceStatesSettings settings, 
+    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings, 
             boolean isSetVisibleCourseAreasInUrl, boolean isSetVisibleRegattasInUrl) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String showOnlyCurrentlyRunningRaces = "&" + PARAM_ONLY_RUNNING_RACES + "=" + (settings.isShowOnlyCurrentlyRunningRaces() ? "true" : "false");
@@ -122,11 +138,11 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
         StringBuilder visibleCourseAreas = new StringBuilder();
         if (isSetVisibleCourseAreasInUrl) {
-            for (String visibleCourseArea : settings.getVisibleCourseAreas()) {
+            for (UUID visibleCourseArea : settings.getVisibleCourseAreas()) {
                 visibleCourseAreas.append('&');
                 visibleCourseAreas.append(PARAM_COURSE_AREA);
                 visibleCourseAreas.append('=');
-                visibleCourseAreas.append(visibleCourseArea);
+                visibleCourseAreas.append(visibleCourseArea.toString());
             }
         }
         StringBuilder visibleRegattas = new StringBuilder();
@@ -138,7 +154,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
                 visibleRegattas.append(visibleRegatta);
             }
         }
-        String link = URLEncoder.encode("/gwt/RegattaOverview.html?" + PARAM_EVENT+ "=" + eventIdAsString
+        String link = URLEncoder.encode("/gwt/RegattaOverview.html?" + PARAM_EVENT+ "=" + eventId.toString()
                 + visibleCourseAreas.toString()
                 + visibleRegattas.toString()
                 + showOnlyCurrentlyRunningRaces

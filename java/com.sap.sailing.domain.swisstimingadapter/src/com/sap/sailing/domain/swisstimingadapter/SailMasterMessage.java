@@ -8,7 +8,8 @@ public interface SailMasterMessage {
     String getMessage();
 
     /**
-     * @return the {@link #getMessage()} result split along occurrences of the "|" character ("pipe")
+     * @return the {@link #getMessage()} result split along occurrences of the "|" character ("pipe"). The element with index 0
+     * is usually the message type field.
      */
     String[] getSections();
     
@@ -27,5 +28,11 @@ public interface SailMasterMessage {
      */
     String getRaceID();
 
+    /**
+     * The sequence number as added to each message as a prefix by
+     * the SwissTiming SAP Gateway. This sequence number can be used
+     * in a <code>LSN</code> message to query race messages starting
+     * from a specific message onwards.
+     */
     Long getSequenceNumber();
 }

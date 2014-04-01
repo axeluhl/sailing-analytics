@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.filter.TextFilter;
-import com.sap.sailing.domain.common.filter.TextOperator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sse.common.filter.TextFilter;
+import com.sap.sse.common.filter.TextOperator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractCompetitorTextFilterUIFactory implements FilterUIFactory<CompetitorDTO> {
     

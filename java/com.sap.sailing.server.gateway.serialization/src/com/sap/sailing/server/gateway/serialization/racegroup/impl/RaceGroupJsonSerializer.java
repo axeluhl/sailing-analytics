@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
@@ -13,17 +14,21 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_NAME = "name";
     public static final String FIELD_COURSE_AREA = "courseArea";
     public static final String FIELD_BOAT_CLASS = "boatClass";
+    public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
 
-    private JsonSerializer<BoatClass> boatClassSerializer;
-    private JsonSerializer<CourseArea> courseAreaSerializer;
+    private final JsonSerializer<BoatClass> boatClassSerializer;
+    private final JsonSerializer<CourseArea> courseAreaSerializer;
+    private final JsonSerializer<RegattaConfiguration> configurationSerializer;
 
     public RaceGroupJsonSerializer(
             JsonSerializer<BoatClass> boatClassSerializer,
             JsonSerializer<CourseArea> courseAreaSerializer,
+            JsonSerializer<RegattaConfiguration> configurationSerializer,
             ExtensionJsonSerializer<RaceGroup, ?> extensionSerializer) {
         super(extensionSerializer);
         this.courseAreaSerializer = courseAreaSerializer;
         this.boatClassSerializer = boatClassSerializer;
+        this.configurationSerializer = configurationSerializer;
     }
 
     @Override
@@ -38,6 +43,11 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
 
         if (object.getBoatClass() != null) {
             result.put(FIELD_BOAT_CLASS, boatClassSerializer.serialize(object.getBoatClass()));
+        }
+        
+        if (object.getRegattaConfiguration() != null) {
+            result.put(FIELD_REGATTA_CONFIGURATION, 
+                    configurationSerializer.serialize(object.getRegattaConfiguration()));
         }
 
         return result;

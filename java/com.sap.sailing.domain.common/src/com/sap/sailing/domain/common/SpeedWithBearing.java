@@ -29,4 +29,8 @@ public interface SpeedWithBearing extends Speed {
      */
     Speed projectTo(Position position, Bearing bearing);
 
+    /**
+     * Adds two directed speeds onto each other using vector addition.
+     */
+    SpeedWithBearing add(SpeedWithBearing other);
 }

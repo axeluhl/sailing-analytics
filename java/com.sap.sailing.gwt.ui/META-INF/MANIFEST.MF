@@ -4,10 +4,9 @@ Bundle-Name: Sailing App GWT UI
 Bundle-SymbolicName: com.sap.sailing.gwt.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
- com.sap.sailing.server.gateway,
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.mongodb,
@@ -25,15 +24,22 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.freg.resultimport,
  com.sap.sailing.domain.swisstimingreplayadapter,
  com.sap.sailing.simulator;bundle-version="1.0.0",
- com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
  de.csenk.gwt.ws,
- com.google.gwt.osgi;bundle-version="2.5.1"
+ com.google.gwt.osgi;bundle-version="2.6.0",
+ com.sap.sailing.domain.igtimiadapter,
+ com.sap.sailing.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.datamining;bundle-version="1.0.0",
+ com.sap.sse.gwt;bundle-version="1.0.0",
+ com.sap.sailing.manage2sail;bundle-version="1.0.0",
+ com.sap.sse.common;bundle-version="1.0.0",
+ com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sse.datamining;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.6.0",
- javax.servlet.http;version="2.6.0",
  javax.servlet.descriptor;version="2.6.0",
+ javax.servlet.http;version="2.6.0",
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework,
@@ -42,5 +48,6 @@ Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-servlet.jar,
  WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
- WEB-INF/lib/gwt-ajaxloader.jar
+ WEB-INF/lib/gwt-ajaxloader.jar,
+ WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
 TrackLifecycle: true

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
@@ -19,7 +20,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     /**
      * The fixes, ordered by their time points
      */
-    private final NavigableSet<Timed> fixes;
+    private final ArrayListNavigableSet<Timed> fixes;
 
     private final NamedReentrantReadWriteLock readWriteLock;
 
@@ -44,7 +45,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE), nameForReadWriteLock);
     }
     
-    protected TrackImpl(NavigableSet<Timed> fixes, String nameForReadWriteLock) {
+    protected TrackImpl(ArrayListNavigableSet<Timed> fixes, String nameForReadWriteLock) {
         this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
     }
@@ -126,6 +127,11 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public NavigableSet<FixType> getFixes() {
         assertReadLock();
         return new UnmodifiableNavigableSet<FixType>(getInternalFixes());
+    }
+    
+    @Override
+    public Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
+        return getFixes().subSet(getDummyFix(from), fromInclusive, getDummyFix(to), toInclusive);
     }
 
     /**
@@ -253,6 +259,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return result;
     }
 
+    @Override
+    public Iterator<FixType> getFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
+        Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().headSet(
+                getDummyFix(startingAt), inclusive).descendingIterator();
+        return result;
+    }
+
     /**
      * Creates a dummy fix that conforms to <code>FixType</code>. This in particular means that subclasses
      * instantiating <code>FixType</code> with a specific class need to redefine this method so as to return
@@ -274,4 +288,54 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return result;
     }
 
+    @Override
+    public Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
+        Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().headSet(
+                getDummyFix(startingAt), inclusive).descendingIterator();
+        return result;
+    }
+
+    protected boolean add(FixType fix) {
+        lockForWrite();
+        try {
+            return getInternalRawFixes().add(fix);
+        } finally {
+            unlockAfterWrite();
+        }
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenFixes() {
+        lockForRead();
+        try {
+            final Duration result;
+            final int size = getFixes().size();
+            if (size > 1) {
+                result = getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
+            }
+            return result;
+        } finally {
+            unlockAfterRead();
+        }
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenRawFixes() {
+        lockForRead();
+        try {
+            final Duration result;
+            final int size = getRawFixes().size();
+            if (size > 1) {
+                result = getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
+            }
+            return result;
+        } finally {
+            unlockAfterRead();
+        }
+    }
 }

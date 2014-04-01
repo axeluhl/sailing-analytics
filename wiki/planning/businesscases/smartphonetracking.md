@@ -56,3 +56,20 @@ If the approach is generally successful, we'll end up in some substantial suppor
 ## Prototype
 
 Some prototypical work has already been launched to investigate the technical challenges closer. See [[here|wiki/smartphone-tracking]] for the status of this work.
+
+## Estimation
+
+Scope:
+* Features as listed above
+* Android platform only
+
+
+We assume that a professional smartphone tracking app should be built by an external agency according to our specifications and in conjunction with the [race committee app](http://wiki.sapsailing.com/wiki/planning/businesscases/racecommitteeapp). Efforts therefore are to be divided into those for the agency and those for our team. We assume that parts of the prototype can be used, particularly back-end components such as the replicating race log that is shared with the race committee app.
+
+ * Agency and Team: Problem description and architecture and domain knowledge transfer, three weeks
+ * Agency: UI design, two weeks
+ * Team: UI design sign-off and iterations, one week
+ * Agency: App implementation including an integration with the RCApp where necessary, eight weeks
+ * Team: back-end architecture support, three weeks
+
+Summary: Agency 13 weeks, Team 7 weeks

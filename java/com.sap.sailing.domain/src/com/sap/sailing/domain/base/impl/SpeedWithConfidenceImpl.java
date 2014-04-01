@@ -15,36 +15,4 @@ public class SpeedWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Doubl
     public ScalableValue<Double, Speed> getScalableValue() {
         return new ScalableSpeed(getObject());
     }
-    
-    private static class ScalableSpeed implements ScalableValue<Double, Speed> {
-        private final double knots;
-        
-        public ScalableSpeed(Speed speed) {
-            this.knots = speed.getKnots();
-        }
-        
-        private ScalableSpeed(double knots) {
-            this.knots = knots;
-        }
-
-        @Override
-        public ScalableValue<Double, Speed> multiply(double factor) {
-            return new ScalableSpeed(factor*knots);
-        }
-
-        @Override
-        public ScalableValue<Double, Speed> add(ScalableValue<Double, Speed> t) {
-            return new ScalableSpeed(knots+t.getValue());
-        }
-
-        @Override
-        public Speed divide(double divisor) {
-            return new KnotSpeedImpl(knots / divisor);
-        }
-
-        @Override
-        public Double getValue() {
-            return knots;
-        }
-    }
 }

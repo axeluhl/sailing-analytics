@@ -16,12 +16,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
@@ -33,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
-public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener {
 
     public enum FilterMode {
         ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);
@@ -91,7 +91,8 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : managedRacesById.values()) {
-            onRaceStateStatusChanged(race.getState());
+            //onRaceStateStatusChanged(race.getState());
+            stateListener.onStatusChanged(race.getState());
         }
     }
 
@@ -129,13 +130,15 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
 
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().registerStateChangeListener(this);
+            //managedRace.getState().registerStateChangeListener(this);
+            managedRace.getState().addChangedListener(stateListener);
         }
     }
 
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().unregisterStateChangeListener(this);
+            //managedRace.getState().unregisterStateChangeListener(this);
+            managedRace.getState().removeChangedListener(stateListener);
         }
     }
 
@@ -177,7 +180,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         adapter.notifyDataSetChanged();
     }
 
-    private void dataChanged(RaceState changedState) {
+    private void dataChanged(ReadonlyRaceState changedState) {
         List<RaceListDataType> adapterItems = adapter.getItems();
         for (int i = 0; i < adapterItems.size(); ++i) {
             if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
@@ -221,21 +224,22 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
             fragment.show(getFragmentManager(), null);
         }
     }
-
-    @Override
-    public void onRaceStateStatusChanged(RaceState state) {
-        dataChanged(state);
-        filterChanged();
-    }
-
-    @Override
-    public void onRaceStateCourseDesignChanged(RaceState state) {
-        // not interested
-    }
-
-    @Override
-    public void onRaceStateProtestStartTimeChanged(RaceState state) {
-        // TODO: show protest time changes in status bar oder show update indicator!
-    }
+    
+    private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
+        public void update(ReadonlyRaceState state) {
+            dataChanged(state); 
+            filterChanged();
+        }
+        
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            update(state);
+        };
+        
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            update(state);
+        };
+    };
 
 }

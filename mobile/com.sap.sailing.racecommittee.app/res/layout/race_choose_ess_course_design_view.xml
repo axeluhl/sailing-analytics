@@ -1,48 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dslv="http://schemas.android.com/apk**/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
-    android:orientation="vertical" >
-    <LinearLayout 
+    android:orientation="vertical"
+    tools:ignore="ResAuto" >
+
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical|center_horizontal">
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal" >
+
         <TextView
-    	        android:text="@string/previous_course"
-    	        android:id="@+id/textPreviousCourse"
-    	        android:layout_width="300dp"
-    	        android:layout_height="wrap_content"
-            	android:layout_weight="1"
-            	android:textSize="14pt"
-            	android:textStyle="bold"
-            	android:gravity="center_vertical|center_horizontal"/>
+            android:id="@+id/textPreviousCourse"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/previous_course"
+            android:textSize="14pt"
+            android:textStyle="bold" />
+
         <TextView
-    	        android:text="@string/make_new_course"
-    	        android:id="@+id/textMakeNewCourse"
-    	        android:layout_width="350dp"
-    	        android:layout_height="wrap_content"
-            	android:layout_weight="1"
-            	android:textSize="14pt"
-            	android:textStyle="bold"
-            	android:gravity="center_vertical|center_horizontal"/>
+            android:id="@+id/textMakeNewCourse"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/make_new_course"
+            android:textSize="14pt"
+            android:textStyle="bold" />
+
         <TextView
-    	        android:text="@string/course_design_assets"
-    	        android:id="@+id/textCourseAssets"
-    	        android:layout_width="400dp"
-    	        android:layout_height="wrap_content"
-            	android:layout_weight="1"
-            	android:textSize="14pt"
-            	android:textStyle="bold"
-            	android:gravity="center_vertical|center_horizontal"/>
+            android:id="@+id/textCourseAssets"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/course_design_assets"
+            android:textSize="14pt"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="500dp"
-        
         android:gravity="center_vertical|center_horizontal"
         android:orientation="horizontal" >
 
@@ -81,31 +86,32 @@
             android:numColumns="auto_fit"
             android:stretchMode="columnWidth"
             android:verticalSpacing="10dp" />
-
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" 
-        android:paddingTop="20dp"
+        android:orientation="horizontal"
         android:paddingBottom="10dp"
-        android:paddingLeft="20dp">
+        android:paddingLeft="20dp"
+        android:paddingTop="20dp" >
 
         <Button
             android:id="@+id/publishCourseDesignButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:text="@string/publish"
-            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-            android:layout_marginRight="20dp" />
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
         <Button
             android:id="@+id/unpublishCourseDesignButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:text="@string/unpublish"
-            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-            android:layout_marginRight="20dp" />
-        
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+
         <Button
             android:id="@+id/takePreviousCourseDesignButton"
             android:layout_width="wrap_content"

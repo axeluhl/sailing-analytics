@@ -9,7 +9,6 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -201,33 +201,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedMarkPosition == null) {
             return null;
         }
-        return getWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
+        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
     }
 
-    /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
-     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
-     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is returned.
-     * 
-     * @param at the wind estimation is performed for this point in time
-     */
-    @Override
-    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
-        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
-            Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
-            if (wind == null) {
-                return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
-            } else {
-                Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                return projectionToLineThroughPos2.getDistance(pos2);
-            }
-        } else {
-            // reaching leg, return distance projected onto leg's bearing
-            return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
-        }
-    }
-    
     /**
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
      * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
@@ -261,7 +237,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing
      * to all positions on the course, only variable over time.
      */
-    private Wind getWind(Position p, TimePoint at) {
+    Wind getWind(Position p, TimePoint at) {
         return getTrackedRace().getWind(p, at);
     }
 
@@ -290,7 +266,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 }
                 Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, /* extrapolate */ false);
                 if (endPos != null) {
-                    Distance d = getWindwardDistance(
+                    Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
                             getTrackedRace().getTrack(getCompetitor())
                                     .getEstimatedPosition(start.getTimePoint(), false), endPos, to);
                     result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
@@ -381,15 +357,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                            Distance distanceToNextMark = getTrackedRace().getTrackedLeg(getCompetitor(), leg)
-                                    .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                            Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
+                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint);
                             result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
                             result = new MeterDistance(result.getMeters()
-                                    + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
-                                            .getWindwardDistance(currentPosition, leaderPosition, timePoint)
+                                    + getTrackedRace().getTrackedLeg(leg)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint)
                                             .getMeters());
                             break;
                         }
@@ -509,7 +485,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (ourEstimatedPosition == null || leaderEstimatedPosition == null) {
                             return null;
                         } else {
-                            Distance windwardDistanceToGo = getWindwardDistance(ourEstimatedPosition,
+                            Distance windwardDistanceToGo = getTrackedLeg().getAbsoluteWindwardDistance(ourEstimatedPosition,
                                     leaderEstimatedPosition, timePoint);
                             return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
                         }
@@ -610,21 +586,25 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (speedWhenSpeedStartedToDrop != null) {
             TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
-            // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
-            // extrapolated positions onto it:
-            Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
-            // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project resulting position
-            // onto the average maneuver course; compare to the projected position actually reached at the time point of maximum speed after
-            // maneuver:
-            Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */ false);
-            Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = 
-                    speedWhenSpeedStartedToDrop.travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop, timePointWhenSpeedLevelledOffAfterManeuver);
-            Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track.getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
-            Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver =
-                    extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-            Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver =
-                    actualPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-            result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver.getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
+            if (speedAfterManeuver != null) {
+                // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
+                // extrapolated positions onto it:
+                Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+                // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project resulting position
+                // onto the average maneuver course; compare to the projected position actually reached at the time point of maximum speed after
+                // maneuver:
+                Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */ false);
+                Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = 
+                        speedWhenSpeedStartedToDrop.travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop, timePointWhenSpeedLevelledOffAfterManeuver);
+                Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track.getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
+                Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver =
+                        extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+                Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver =
+                        actualPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+                result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver.getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
+            } else {
+                result = null;
+            }
         } else {
             result = null;
         }
@@ -665,7 +645,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             while (fixIter.hasNext()) {
                 fix = fixIter.next();
                 final SpeedWithBearing estimatedSpeedAtFix = track.getEstimatedSpeed(fix.getTimePoint());
-                if (lastFix != null) {
+                if (lastFix != null && lastSpeed != null && lastLastSpeed != null && estimatedSpeedAtFix != null) {
                     if (lastSpeed.compareTo(lastLastSpeed) > 0 && lastSpeed.compareTo(estimatedSpeedAtFix) > 0) {
                         maxima.add(lastFix);
                     } else if (lastSpeed.compareTo(lastLastSpeed) < 0 && lastSpeed.compareTo(estimatedSpeedAtFix) < 0) {
@@ -761,5 +741,28 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         }
         return bestSpeedMinimum;
+    }
+    
+    @Override
+    public Bearing getBeatAngle(TimePoint at) throws NoWindException {
+        Bearing beatAngle = null;
+        
+        Bearing projectToBearing;
+        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
+            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+            if (wind == null) {
+                throw new NoWindException("Need at least wind direction to determine windward speed");
+            }
+            projectToBearing = wind.getBearing();
+        } else {
+            projectToBearing = getTrackedLeg().getLegBearing(at);
+        }
+        
+        SpeedWithBearing speed = getSpeedOverGround(at);
+        if (speed != null) {
+            beatAngle = projectToBearing.getDifferenceTo(speed.getBearing());
+        }
+        
+        return beatAngle;
     }
 }

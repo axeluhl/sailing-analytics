@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
 
-    <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
-    <string name="choose_running_course">Choose running course</string>
     <string name="service_info">SAP Race Committee Service</string>
     <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
     <string name="service_text_num_races">Currently monitoring %d races.</string>
@@ -16,42 +15,30 @@
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
-    <string name="race_first_finisher" formatted="false">First finisher at %s</string>
-    <string name="race_first_finisher_and_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
+    <string name="race_first_finisher">First finisher at %1$s</string>
+    <string name="race_first_finisher_and_time_limit">First finisher at %1$s, Race finishing limit is at %2$s</string>
     <string name="race_time_limit">Race finishing limit is at %s</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
     <string name="choose_abort_mode">Select the flags you want to display</string>
     <string name="choose_abort_flag_mode">Select the aborting flag mode</string>
-    <string name="choose_flag">Choose action</string>
     <string name="flags_up">UP</string>
     <string name="flags_down">DOWN</string>
     <string name="ap_or_november">Choose the aborting flag</string>
     <string name="choose_start_mode_flag">Choose a start mode flag</string>
     <string name="abort_starting_phase">Abort the starting phase</string>
     <string name="abort_running_race">Abort the race</string>
-    <string name="choose_xray_flag_up">Set Individual Recall</string>
-    <string name="choose_golf_flag_down">Unset Golf Flag</string>
-    <string name="choose_xray_flag_down">Unset Individual Recall</string>
+    <string name="choose_xray_flag_up">Display Individual Recall</string>
+    <string name="choose_xray_flag_down">Remove Individual Recall</string>
     <string name="choose_first_substitute_flag">General Recall</string>
     <string name="choose_blue_flag">Begin finish phase</string>
-    <string name="flag_papa">Papa</string>
-    <string name="flag_zulu">Zulu</string>
-    <string name="flag_india">India</string>
-    <string name="flag_black">Black</string>
     <string name="flag_ap">AP Flag</string>
     <string name="flag_november">November</string>
-    <string name="flag_Xray">Xray</string>
     <string name="flag_jury">Jury</string>
-    <string name="flag_blue">Finish</string>
-    <string name="flag_golf">Gate start</string>
-    <string name="flag_foxtrott">Fixed line start</string>
     <string name="label_login_events">Select an event:</string>
     <string name="label_login_course_area">Select a course area:</string>
-    <string name="please_pick_a_time">Please schedule the start time to</string>
-    <string name="select_raceStartType">Select a race starting mode</string>
-    <string name="time_until_start">Time to start (with time selected above)</string>
-    <string name="label_race">Race: </string>
-    <string name="login_type_officer">Login as race officer on the selected course.</string>
+    <string name="login_type_officer_on_start_vessel">Login as race officer on the selected course\'s start vessel.</string>
+    <string name="login_type_officer_on_finish_vessel">Login as race officer on the selected course\'s finish vessel.</string>
+    <string name="login_type_shore_control">Login as shore control.</string>
     <string name="login_type_viewer">Login as view-only (demo mode) user.</string>
     <string name="racelist_unscheduled">Not yet scheduled</string>
     <string name="racelist_scheduled">Scheduled for %s</string>
@@ -64,81 +51,42 @@
     <string name="racingview_header">Course %s Races</string>
     <string name="running_on_unknown">(click to set course)</string>
     <string name="empty"></string>
-    <string name="check_pending_events">Check Pending Events</string>
-    <string name="unknown">Unknown</string>
-    <string name="last_sent">Last sent: </string>
-    <string name="pending_events">Pending Events:</string>
-    <string name="reload_data">Reload Data</string>
-    <string name="race_information">Race Information</string>
-    <string name="start_mode_flag">Start mode flag</string>
-    <string name="class_flag">Class flag</string>
     <string name="updateIndicator">Update indicator</string>
     <string name="reset_race">Reset race</string>
-    <string name="postpone_race">Postpone race</string>
     <string name="postpone">Postpone</string>
-    <string name="fixedLine">Fixed line start</string>
-    <string name="gateStart_mode">Gate start</string>
-    <string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
-    <string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
-    <string name="confirmation_first_substitute_display">Are you sure to display general recall?</string>
-    <string name="finishing_limit_template">Race finishing limit is at %s</string>
-    <string name="race_running_since_template" formatted="false">%s runs since %s</string>
+    <string name="race_running_since_template">%1$s runs since %2$s</string>
     <string name="race_reset_confirmation_header">You are about to reset the race</string>
     <string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. All information regarding the race state has to be entered again. Only the entered course information are kept. We strongly recommend to not reset the race.</string>
     <string name="race_reset_confirmation_title">Reset race</string>
     <string name="race_reset_reset_button">Reset anyway</string>
-    <string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
     <string name="race_finished_start_time">Race started at:</string>
     <string name="race_finished_end_time">Race finished at:</string>
-    <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
-    <string name="race_startphase_flagup">Flag is going up&#8230;</string>
-    <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
-    <string name="race_startphase_countdown_mode_display">%1$s until %2$s flag is displayed</string>
-    <string name="race_startphase_ess_countdown_ap_flag_removed">%1$s until AP flag is removed</string>
-    <string name="race_startphase_ess_countdown_one_flag_display">%1$s until One flag is displayed</string>
-    <string name="race_startphase_ess_countdown_two_flag_display">%1$s until Two flag is displayed</string>
-    <string name="race_startphase_ess_countdown_three_flag_display">%1$s until Three flag is displayed</string>
-    <string name="race_startphase_countdown_class_remove">%1$s until %2$s class flag is removed and race starts</string>
-    <string name="race_startphase_ess_countdown_one_flag_remove">%1$s until One flag is removed and race starts</string>
-    <string name="race_startphase_countdown_class_display">%1$s until %2$s class flag is displayed</string>
+    <string name="race_startphase_countdown_mode_remove">%1$s until %2$s is removed</string>
+    <string name="race_startphase_countdown_mode_display">%1$s until %2$s is displayed</string>
     <string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
-    <string name="race_startphase_gate_class_over_golf_display">%1$s until Class flag over Golf flag is displayed</string>
-    <string name="race_startphase_gate_class_removed">%1$s until Class flag is removed and race starts</string>
-    <string name="race_startphase_gate_papa_display">%1$s until Papa flag is displayed</string>
-    <string name="race_startphase_gate_papa_removed">%1$s until Papa flag is removed</string>
-    <string name="set_pathfinder">Set Pathfinder</string>
+    <string name="set_pathfinder">Pathfinder</string>
     <string name="set_pathfinder_title">Choose the pathfinder</string>
     <string name="protest_dialog_title">Set the protest start time</string>
-    <string name="finishing_dialog_title">Set the time when the first finisher crossed the finish line</string>
     <string name="finished_dialog_title">Set the time when the race finished</string>
     <string name="protest_start_time">Protest start time: %s</string>
-    <string name="protest_flag_set">Protest flag is displayed for group %s.</string>
-    <string name="choose_running_course_lr">Please choose the course</string>
-    <string name="running_course_selection">Course selection</string>
-    <string name="lr_course_1">Course 1</string>
-    <string name="lr_course_2">Course 2</string>
-    <string name="no_pathfinder_selected">No pathfinder selected</string>
-    <string name="set_line_opening_time">Set gate time</string>
-    <string name="no_line_opening_time_selected">no time selected</string>
-    <string name="set_gate_line_opening_time_title">Set the gate line opening time</string>
+    <string name="no_pathfinder_selected">No Pathfinder selected</string>
+    <string name="set_line_opening_time">Gate Launch</string>
+    <string name="no_line_opening_time_selected">No time selected</string>
+    <string name="set_gate_line_opening_time_title">Set the Gate Launch time</string>
     <string name="choose_line_open_min">min</string>
     <string name="previous_course">Previous course</string>
     <string name="make_new_course">Create a course</string>
     <string name="course_design_assets">Course design assets</string>
     <string name="course_design_dialog_title">Set up a course design</string>
     <string name="pick_a_rounding_direction">Pick a rounding direction</string>
-    <string name="change_course_element">Change waypoint</string>
     <string name="select_penalty_reason">Select penalty reason</string>
 
     <string-array name="rounding_directions">
         <item>Port</item>
         <item>Starboard</item>
         <item>Gate</item>
-    </string-array>
-    <string-array name="course_element_changers">
-        <item>Move up</item>
-        <item>Move down</item>
-        <item>Delete item</item>
+        <item >Line</item>
+        <item >Offset</item>
     </string-array>
 
     <string name="publish">Publish</string>
@@ -154,8 +102,6 @@
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
     <string name="options_menu_live">Connection Information</string>
-    <string name="options_menu_info">Expert</string>
-    <string name="options_menu_wind">Enter Wind Data</string>
     <string name="options_menu_reload">Reload</string>
     <string name="options_menu_settings">Settings</string>
     <string name="results_capturing_title">Race Results</string>
@@ -176,46 +122,28 @@
     <string name="check_all_data">3. Check all data</string>
     <string name="in_degrees">in degrees</string>
     <string name="in_knots">in knots</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
     <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
     <string name="waiting_for_gps">Waiting for GPS Signal&#8230;</string>
-    <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
     
 	<!-- SETTINGS -->
-    <string name="settings_category_general">General Settings</string>    
+    <string name="settings_category_general">Other</string>    
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
-    <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
     <string name="settings_general_language_header">Select Language</string>
     <string name="settings_general_language_description">Select the language. You might need to restart the app to have changes applied.</string>
     
-    <string name="settings_category_race">Race Settings</string>
-    <string name="override_default_start_procedure_type_header">Override default start procedure type</string>
-    <string name="override_default_start_procedure_type_description">Check the box if races should use the start procedure type defined below as a default.</string>
     <string name="override_default_start_procedure_type_select_header">Default start procedure type when overriden</string>
     <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
-    <string name="settings_time_frame_header">Race time frame after finish</string>
-    <string name="settings_time_frame_description">Time limit in minutes.</string>
     
-    <string name="settings_category_advanced">Advanced Settings</string>
+    <string name="settings_please_reload">Please execute action \'Reload\' to apply changes.</string>
     <string name="settings_advanced_service_header">Webservice URL</string>
-    <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
-    <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
     <string name="settings_advanced_mail_header">Positioning mail recipient</string>
-    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
-    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
-    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
-    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
     
-    <string name="settings_general_manageareas_default">Alpha</string>
-    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
-    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
-    <item name="settings_time_frame_default" type="integer">30</item>
-    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
-    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
-    <!-- SETTINGS -->
+    <string name="settings_category_polling">Polling</string>
+    <string name="settings_polling_active_header">Activate Polling</string>
+    <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
+    <string name="settings_polling_interval_header">Polling Interval (seconds)</string>
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
@@ -225,21 +153,9 @@
     <string name="generic_load_failure">There was an error loading the requested data:\n\"%s\"\nDo you want to retry?</string>
     <string name="set_course_layout">Set the course layout</string>
     
-    <string-array name="course_routes">
-        <item>0,Windward/Leeward</item>
-        <item>1,Windward/Leeward</item>
-        <item>2,Windward/Leeward</item>
-        <item>3,Windward/Leeward</item>
-        <item>4,Trapezoid</item>
-        <item>5,Trapezoid</item>
-        <item>6,Triangle</item>
-        <item>7,Triangle</item>
-        <item>8,Windward/Leeward</item>
-    </string-array>
-    
     <string name="loading_failure">Load failure</string>
 	<string name="wind_unknown">(click to set wind)</string>
-	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	<string name="wind_info">(%1$s kn, %2$s)</string>
 	<string name="login">Login</string>
 	<string name="login_onto_course_area">Login onto course area</string>
 	<string name="please_select_a_login_type">Please select a login type.</string>
@@ -250,13 +166,15 @@
 	<string name="race_reset_time_schedule_race">Schedule race</string>
 	<string name="race_reset_time_startmode_starttime">Select start mode and start time</string>
 	<string name="today">Today</string>
-	<string name="start">Start</string>
+	<string name="start">Set start time</string>
 	
-	<string name="application_information">Application Information</string>
-	<string name="application_version">Version</string>
-	<string name="application_install_date">Install Date</string>
-	<string name="persistence_information">Persistence Status</string>
-	<string name="persistence_waiting_events">Waiting events</string>
+	<string name="application_information" translatable="false">Application Information</string>
+	<string name="application_identifier" translatable="false">Identifier</string>
+	<string name="application_install_date" translatable="false">Install Date</string>
+	<string name="persistence_information" translatable="false">Persistence Status</string>
+	<string name="persistence_waiting_clear_events" translatable="false">Clear events</string>
+	<string name="persistence_waiting_events" translatable="false">Waiting events</string>
+	<string name="application_version" translatable="false">Version</string>
 	
 	<string name="generic_error">Error</string>
 	
@@ -270,4 +188,68 @@
 	<string name="logout_dialog_message">Logging out stops automatic monitoring for all races.</string>
 	<string name="logout">Logout</string>
 	
+	<string name="loading_configuration">Loading configuration&#8230;</string>
+	<string name="loading_configuration_failed">There was an error loading the configuration.</string>
+	<string name="loading_configuration_not_found">There was no remote configuration found for this device.</string>
+	<string name="loading_configuration_succeded">Remote configuration applied.</string>
+	
+	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>
+	
+	<string name="settings_category_regatta_defaults">Regatta Configuration (default)</string>
+	<string name="settings_category_regattas">Regatta Configuration (specific)</string>
+	<string name="settings_category_course_designer">Course Designer Configuration</string>
+	<string name="override_default_course_designer_type_select_header">Course Designer type</string>
+	
+	<string name="settings_course_designer_by_name_course_names_header">Course Names</string>
+	<string name="enter_new_item">Enter new item</string>
+	<string name="add">Add</string>
+	<string name="there_are_no_items_yet_">There are no items yet.</string>
+	
+	<string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmode Flags</string>
+	<string name="preference_racing_procedure_classflag_header">Class Flag</string>
+	<string name="preference_racing_procedure_hasxray_header">Individual Recall</string>
+	<string name="preference_racing_procedure_hasxray_description">Activate this option to enable individual recall</string>
+	<string name="preference_racing_procedure_gatestart_haspathfinder_description">Activate this option to enable choosing the Pathfinder</string>
+	<string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
+	<string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Activate this option to enable choosing the additional Golf-Down time</string>
+	<string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">Additional Golf-down time</string>
+	<string name="device_identifier">Device identifier</string>
+	<string name="synchronize_connection_settings_header">Synchronize with server</string>
+	<string name="synchronize_connection_settings_description">When creating a configuration on the server, click here to synchronize your app and connection settings via QRCode.</string>
+	<string name="update_app_header">Force update</string>
+	<string name="update_app_description">Force an update from the server. It\'s a better idea to use the synchronize option.</string>
+	
+	<string name="options_menu_info">Expert Information</string>
+	
+	<string name="auto_update_install">Install</string>
+	<string name="auto_update_install_anyway">Install anyway</string>
+	<string name="gate_launch">Gate Launch</string>
+	<string name="golf_down">Golf Down</string>
+	
+	<string name="preference_regatta_specific_title">Regatta Configuration - %1$s</string>
+	<string name="preference_regatta_specific_save_title">Save %1$s configuration</string>
+	<string name="preference_regatta_specific_save_description">This will save the shown configuration for all races of %1$s.</string>
+	<string name="auto_update">Auto-Update</string>
+	<string name="auto_update_checking_version">Checking for version information on server&#8230;</string>
+	<string name="auto_update_downloading_version">Trying to download auto-update info from %1$s</string>
+	<string name="auto_update_version_file_url_invalid">The version file link was not valid.</string>
+	<string name="auto_update_click_install">Click \'Install\' to perform the update to version %1$d.</string>
+	<string name="auto_update_force_install">You already have installed the version offered by the server (version %1$d).</string>
+	<string name="auto_update_already_up_to_date">You are already up to date!</string>
+	<string name="auto_update_downloading_apk">Downloading APK from server&#8230;</string>
+	<string name="auto_update_apk_link_invalid">The download link was not valid.</string>
+	<string name="auto_update_apk_file_error">The download file couldn\'t be created.</string>
+	<string name="auto_update_error">Error while trying to auto-update.</string>
+	<string name="auto_update_completed">Auto-Update completed</string>
+	<string name="auto_update_completed_text">The automatic update has been completed. You should now re-synchronize your connection settings with the server.</string>
+	<string name="auto_update_completed_take_me_there">Take me there</string>
+	<string name="wind_gps_is_disabled">Your GPS seems to be disabled, do you want to enable it?</string>
+	<string name="rrs26_start_mode_changed_to">Start mode flag changed to %1$s</string>
+	<string name="preference_there_are_no_regattas">There are no regattas loaded.</string>
+	<string name="configure_regatta">Configure regatta %1$s</string>
+
+	<string name="race_start_in_4_minutes">Race start in exactly 4 minutes</string>
+	<string name="race_reset_course">Reset course</string>
+	
+	<string name="no_course_active">No course active</string>
 </resources>

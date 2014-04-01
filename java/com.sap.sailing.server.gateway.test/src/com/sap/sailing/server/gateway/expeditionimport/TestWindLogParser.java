@@ -24,6 +24,15 @@ public class TestWindLogParser {
         assertWind(wind, 11.2, 257.2, 54.430272, 10.172062);
     }
 
+    @Test
+    public void testCompleteRowPermutatedColumns() throws Exception {
+        List<Wind> windImport = WindLogParser.importWind(getClass().getResourceAsStream("CompleteRowPermutatedColumns.csv"));
+        assertThat(windImport.size(), is(1));
+        Wind wind = windImport.get(0);
+        assertWind(wind, 11.2, 257.2, 54.430272, 10.172062);
+        assertThat(wind.getTimePoint().asMillis(), is(1372231373011L)); 
+    }
+
 	@Test
     public void testWindFirst() throws Exception {
         List<Wind> windImport = WindLogParser.importWind(getClass().getResourceAsStream("WindFirst.csv"));

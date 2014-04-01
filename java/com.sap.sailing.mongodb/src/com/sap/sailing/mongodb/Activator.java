@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.mongodb.internal.MongoDBServiceImpl;
+
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
@@ -35,7 +37,7 @@ public class Activator implements BundleActivator {
         }
 
         MongoDBConfiguration newConfiguration = new MongoDBConfiguration(hostName, port, databaseName); 
-        MongoDBService.INSTANCE.setConfiguration(newConfiguration);
+        ((MongoDBServiceImpl) MongoDBService.INSTANCE).setConfiguration(newConfiguration);
     }
     
     @Override

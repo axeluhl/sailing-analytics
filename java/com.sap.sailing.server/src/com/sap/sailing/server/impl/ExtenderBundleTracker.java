@@ -8,11 +8,11 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTracker;
 
 /**
- * Bundle tracker for tracking of the lifecycle of important runtime bundles
- * based on the extender pattern. 
- * In order to track a bundle just add 'TrackLifecycle: true' to its OSGI manifest (MANIFEST.MF).
+ * Bundle tracker for tracking of the lifecycle of important runtime bundles based on the extender pattern. In order to
+ * track a bundle just add 'TrackLifecycle: true' to its OSGI manifest (MANIFEST.MF).
+ * 
  * @author Frank (C5163874)
- *
+ * 
  */
 public class ExtenderBundleTracker extends BundleTracker<Bundle> {
 
