@@ -102,7 +102,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         fillConfigurations();
 
         jsonUrlBox = new TextBox();
-        jsonUrlBox.setText("test"); // by using 'test' as the JSON URL you will get some useful content from a static json file 
         jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
 
         connectionsGrid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
@@ -427,6 +426,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             if (stConfig != null) {
                 hostnameTextbox.setValue(stConfig.getHostname());
                 portIntegerbox.setValue(stConfig.getPort());
+                jsonUrlBox.setValue(stConfig.getJsonURL());
             }
         }
     }

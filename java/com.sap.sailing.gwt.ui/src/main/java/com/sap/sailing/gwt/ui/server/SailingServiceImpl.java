@@ -267,7 +267,6 @@ import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
-import com.sap.sailing.manage2sail.TestManage2SailEventResultsParser;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -2174,19 +2173,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
         // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
-        EventResultDescriptor eventResult = null;
-        if("test".equalsIgnoreCase(eventJsonURL)) {
-            eventResult = TestManage2SailEventResultsParser.getTestEventResult();
-        } else {
-            URL url = new URL(eventJsonURL);
-            URLConnection eventResultConn = url.openConnection();
-            Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-            eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
-        }
+        URL url = new URL(eventJsonURL);
+        URLConnection eventResultConn = url.openConnection();
+        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
+        EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
                 for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
-                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), race.getStartTimeUTC());
+                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), null);
                     swissTimingRaceRecordDTO.boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getClassName();
                     swissTimingRaceRecordDTO.gender = regattaResult.getCompetitorGenderType().name();
                     swissTimingRaceRecordDTO.hasCourse = false;
