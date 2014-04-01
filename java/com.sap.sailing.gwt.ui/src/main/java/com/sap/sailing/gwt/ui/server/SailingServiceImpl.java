@@ -2209,7 +2209,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 + " with hostname " + hostname + " and port " + port);
         for (SwissTimingRaceRecordDTO rr : rrs) {
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(rr.boatClass);
-            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, 
+            String raceDescription = rr.regattaName != null ? rr.regattaName : ""; 
+            raceDescription += rr.seriesName != null ? "/" + rr.seriesName : "";
+            raceDescription += rr.raceName;
+            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, raceDescription, 
                     boatClass, hostname, port,
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
