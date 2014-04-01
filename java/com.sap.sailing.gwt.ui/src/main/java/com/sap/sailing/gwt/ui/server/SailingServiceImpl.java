@@ -2180,7 +2180,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
                 for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
-                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), null);
+                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), 
+                    		regattaResult.getName(), race.getSeriesName(), race.getFleetName(), race.getStatus(), null);
                     swissTimingRaceRecordDTO.boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getClassName();
                     swissTimingRaceRecordDTO.gender = regattaResult.getCompetitorGenderType().name();
                     swissTimingRaceRecordDTO.hasCourse = false;
