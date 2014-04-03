@@ -16,4 +16,8 @@ public interface WindStepping extends Serializable{
 
     double getDistanceToLevelFloor(double speed);
 
+    int hashCode();
+
+    boolean equals(Object obj);
+
 }

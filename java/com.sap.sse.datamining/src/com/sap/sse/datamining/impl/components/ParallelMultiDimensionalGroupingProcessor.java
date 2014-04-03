@@ -1,16 +1,13 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class ParallelMultiDimensionalGroupingProcessor<DataType>
              extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
@@ -47,23 +44,10 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
         return new Callable<GroupedDataEntry<DataType>>() {
             @Override
             public GroupedDataEntry<DataType> call() throws Exception {
-                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element, dimensions.iterator()), element);
+                return new GroupedDataEntry<DataType>(GroupKeyFactory.createCompoundKeyFor(element,
+                        dimensions.iterator()), element);
             }
         };
-    }
-
-    private GroupKey createCompoundKeyFor(DataType input, Iterator<Function<?>> dimensionsIterator) {
-        Function<?> mainDimension = dimensionsIterator.next();
-        GroupKey key = createGroupKeyFor(input, mainDimension);
-        if (dimensionsIterator.hasNext()) {
-            key = new CompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
-        }
-        return key;
-    }
-
-    private GroupKey createGroupKeyFor(DataType input, Function<?> mainDimension) {
-        Object keyValue = mainDimension.tryToInvoke(input);
-        return new GenericGroupKey<Object>(keyValue);
     }
 
     @Override

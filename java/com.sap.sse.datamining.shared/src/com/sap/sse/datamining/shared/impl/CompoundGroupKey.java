@@ -4,6 +4,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 
 public class CompoundGroupKey extends AbstractGroupKey {
+
     private static final long serialVersionUID = -7902450253393172550L;
     
     private GroupKey mainKey;
