@@ -62,6 +62,9 @@ public class PolarDataMinerTest {
         GPSFixMoving fix2_2 = createMockedFix(13, 30, 54.425394, 10.177404, 41.8, 10.1);
         Competitor competitor2 = mock(Competitor.class);
         
+        GPSFixMoving fix3_1 = createMockedFix(13, 45, 54.873740, 10.193648, 43.2, 10);
+        Competitor competitor3 = mock(Competitor.class);
+
         Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor = new HashMap<Competitor, Set<GPSFixMoving>>();
         
         Set<GPSFixMoving> setForCompetitor1 = new HashSet<GPSFixMoving>();
@@ -74,7 +77,11 @@ public class PolarDataMinerTest {
         setForCompetitor2.add(fix2_2);
         fixesPerCompetitor.put(competitor2, setForCompetitor2);
         
+        Set<GPSFixMoving> setForCompetitor3 = new HashSet<GPSFixMoving>();
+        setForCompetitor2.add(fix3_1);
+        fixesPerCompetitor.put(competitor3, setForCompetitor3);
         
+
         TrackedRace trackedRace = createMockedTrackedRace(fixesPerCompetitor);
         
         for (Entry<Competitor, Set<GPSFixMoving>> entry : fixesPerCompetitor.entrySet()) {
@@ -101,6 +108,10 @@ public class PolarDataMinerTest {
         Speed estimatedSpeed2 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-42));
         assertThat(estimatedSpeed2, is(notNullValue()));
         assertThat(estimatedSpeed2.getKnots(), is(closeTo(10.05, EPSILON)));
+
+        Speed estimatedSpeed3 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-42.8));
+        assertThat(estimatedSpeed3, is(notNullValue()));
+        assertThat(estimatedSpeed3.getKnots(), is(closeTo(10, EPSILON)));
     }
 
     private GPSFixMoving createMockedFix(int hour, int minute, double lat, double lng, double bearingRaw, double speed) {

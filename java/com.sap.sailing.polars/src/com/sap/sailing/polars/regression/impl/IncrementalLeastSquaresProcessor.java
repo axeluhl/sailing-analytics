@@ -33,11 +33,19 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
 
     @Override
     public double getEstimatedY(double x) throws NotEnoughDataHasBeenAddedException {
-        if (numberOfPointsAdded < 2) {
+        if (numberOfPointsAdded < 1) {
             throw new NotEnoughDataHasBeenAddedException();
         }
 
-        return alpha0 + alpha1 * x;
+        double result;
+        if (numberOfPointsAdded < 2) {
+            // Return the y value of the only added data point.
+            result = meanOfY;
+        } else {
+            result = alpha0 + alpha1 * x;
+        }
+
+        return result;
     }
 
     @Override

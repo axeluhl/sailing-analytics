@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.regression.test;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -151,7 +152,12 @@ public class IncrementalLinearRegressionTest {
         processor.getEstimatedY(15);
     }
 
-    @Test(expected = NotEnoughDataHasBeenAddedException.class)
+    /**
+     * Assert that y is constant for only one added data point
+     * 
+     * @throws NotEnoughDataHasBeenAddedException
+     */
+    @Test
     public void testRegressionWithOneDataPoint() throws NotEnoughDataHasBeenAddedException {
         IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
 
@@ -159,7 +165,8 @@ public class IncrementalLinearRegressionTest {
         double y1 = 5;
         processor.addMeasuredPoint(x1, y1);
 
-        processor.getEstimatedY(x1);
+        double y = processor.getEstimatedY(20);
+        assertThat(y, is(y1));
     }
     
     /*
