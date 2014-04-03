@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionalGroupingProcessor;
-import com.sap.sse.datamining.shared.GroupKey;
 
 public class PolarDataMiner {
 
@@ -56,7 +56,7 @@ public class PolarDataMiner {
         List<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>>();
         grouperResultReceivers.add(incrementalRegressionProcessor);
 
-        Collection<Function<?>> dimensions = getClusterKeyDimensions();
+        Collection<Function<?>> dimensions = PolarDataDimensionCollectionFactory.getClusterKeyDimensions();
 
         Processor<GPSFixMovingWithPolarContext> groupingProcessor = new ParallelMultiDimensionalGroupingProcessor<GPSFixMovingWithPolarContext>(
                 executor, grouperResultReceivers, dimensions);
@@ -79,21 +79,6 @@ public class PolarDataMiner {
     }
 
 
-
-    public Collection<Function<?>> getClusterKeyDimensions() throws NoSuchMethodException {
-        Collection<Function<?>> dimensions = new ArrayList<>();
-        Function<RoundedAngleToTheWind> angleFunction = FunctionFactory
-                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedAngleToTheWind",
-                        new Class<?>[0]));
-        Function<WindSpeedLevel> windSpeedFunction = FunctionFactory.createMethodWrappingFunction(PolarClusterKey.class
-                .getMethod("getWindSpeedLevel", new Class<?>[0]));
-
-        dimensions.add(angleFunction);
-        dimensions.add(windSpeedFunction);
-        return dimensions;
-    }
-
-
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
         enrichingProcessor.onElement(new Triple<GPSFixMoving, TrackedRace, Competitor>(fix, trackedRace, competitor));
     }
@@ -104,8 +89,8 @@ public class PolarDataMiner {
         return isActive || hasQueue;
     }
 
-    public Set<GPSFixMovingWithPolarContext> getContainer(GroupKey compoundKey) {
-        return incrementalRegressionProcessor.getContainer(compoundKey);
+    public Speed estimateBoatSpeed(Speed windSpeed, Bearing angleToTheWind) throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.estimateBoatSpeed(windSpeed, angleToTheWind);
     }
 
 }

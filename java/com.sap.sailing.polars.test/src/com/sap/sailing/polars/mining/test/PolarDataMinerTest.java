@@ -1,15 +1,22 @@
 package com.sap.sailing.polars.mining.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -18,13 +25,15 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -32,26 +41,50 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.polars.mining.GPSFixMovingWithPolarContext;
-import com.sap.sailing.polars.mining.PolarClusterKey;
 import com.sap.sailing.polars.mining.PolarDataMiner;
-import com.sap.sailing.polars.mining.RoundedAngleToTheWind;
-import com.sap.sailing.polars.mining.WindSpeedLevel;
-import com.sap.sse.datamining.factories.GroupKeyFactory;
-import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 public class PolarDataMinerTest {
 
     private static final int MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 30;
+    private static final double EPSILON = 1E-4;
 
     @Test
-    public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException {
+    public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException,
+            NotEnoughDataHasBeenAddedException {
         PolarDataMiner miner = new PolarDataMiner();
 
-        GPSFixMoving fix = createMockedFix();
-        Competitor competitor = mock(Competitor.class);
-        TrackedRace trackedRace = createMockedTrackedRace(competitor, fix);
-        miner.addFix(fix, competitor, trackedRace);
+        GPSFixMoving fix1_1 = createMockedFix(13, 00, 54.431952, 10.186767, 45, 10.5);
+        GPSFixMoving fix1_2 = createMockedFix(13, 30, 54.485034, 10.538303, 44.8, 10.6);
+        Competitor competitor1 = mock(Competitor.class);
+        
+        GPSFixMoving fix2_1 = createMockedFix(13, 00, 54.443942, 10.172739, 42.2, 10);
+        GPSFixMoving fix2_2 = createMockedFix(13, 30, 54.425394, 10.177404, 41.8, 10.1);
+        Competitor competitor2 = mock(Competitor.class);
+        
+        Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor = new HashMap<Competitor, Set<GPSFixMoving>>();
+        
+        Set<GPSFixMoving> setForCompetitor1 = new HashSet<GPSFixMoving>();
+        setForCompetitor1.add(fix1_1);
+        setForCompetitor1.add(fix1_2);
+        fixesPerCompetitor.put(competitor1, setForCompetitor1);
+        
+        Set<GPSFixMoving> setForCompetitor2 = new HashSet<GPSFixMoving>();
+        setForCompetitor2.add(fix2_1);
+        setForCompetitor2.add(fix2_2);
+        fixesPerCompetitor.put(competitor2, setForCompetitor2);
+        
+        
+        TrackedRace trackedRace = createMockedTrackedRace(fixesPerCompetitor);
+        
+        for (Entry<Competitor, Set<GPSFixMoving>> entry : fixesPerCompetitor.entrySet()) {
+            Competitor competitor = entry.getKey();
+            Set<GPSFixMoving> fixSet = entry.getValue();
+            for (GPSFixMoving fix : fixSet) {
+                miner.addFix(fix, competitor, trackedRace);
+            }
+        }
+        
         int millisLeft = 500000;
         while (miner.isCurrentlyActiveAndOrHasQueue() && millisLeft > 0) {
             Thread.sleep(100);
@@ -60,50 +93,49 @@ public class PolarDataMinerTest {
                 throw new TimeoutException();
             }
         }
-        PolarClusterKey key = new PolarClusterKey() {
 
-            @Override
-            public WindSpeedLevel getWindSpeedLevel() {
-                return new WindSpeedLevel(7, PolarSheetGenerationSettingsImpl.createStandardPolarSettings()
-                        .getWindStepping());
-            }
+        Speed estimatedSpeed1 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-44.9));
+        assertThat(estimatedSpeed1, is(notNullValue()));
+        assertThat(estimatedSpeed1.getKnots(), is(closeTo(10.55, EPSILON)));
 
-            @Override
-            public RoundedAngleToTheWind getRoundedAngleToTheWind() {
-                return new RoundedAngleToTheWind(-45);
-            }
-        };
-        GroupKey compoundKey = GroupKeyFactory.createCompoundKeyFor(key, miner.getClusterKeyDimensions().iterator());
-        Set<GPSFixMovingWithPolarContext> fixWithPolarContext = miner.getContainer(compoundKey);
-        Assert.assertNotNull(fixWithPolarContext);
+        Speed estimatedSpeed2 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-42));
+        assertThat(estimatedSpeed2, is(notNullValue()));
+        assertThat(estimatedSpeed2.getKnots(), is(closeTo(10.05, EPSILON)));
     }
 
-    private GPSFixMoving createMockedFix() {
+    private GPSFixMoving createMockedFix(int hour, int minute, double lat, double lng, double bearingRaw, double speed) {
         GPSFixMoving fix = mock(GPSFixMoving.class);
-        when(fix.getPosition()).thenReturn(new DegreePosition(54.431952, 10.186767));
+        when(fix.getPosition()).thenReturn(new DegreePosition(lat, lng));
         Calendar cal = Calendar.getInstance();
-        cal.set(2014, 4, 3, 13, 00);
+        cal.set(2014, 4, 3, hour, minute);
         TimePoint fixTimePoint = new MillisecondsTimePoint(cal.getTime());
         when(fix.getTimePoint()).thenReturn(fixTimePoint);
-        Bearing bearing = new DegreeBearingImpl(45);
-        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(10.5, bearing);
+        Bearing bearing = new DegreeBearingImpl(bearingRaw);
+        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(speed, bearing);
         when(fix.getSpeed()).thenReturn(speedWithBearing);
         return fix;
     }
 
-    private TrackedRace createMockedTrackedRace(Competitor competitor, GPSFixMoving fix) {
+    private TrackedRace createMockedTrackedRace(Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor) {
         TrackedRace trackedRace = mock(TrackedRace.class);
 
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor,
-                MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED);
-        track.add(fix);
-        when(trackedRace.getTrack(competitor)).thenReturn(track);
+        for (Entry<Competitor, Set<GPSFixMoving>> competitorEntry : fixesPerCompetitor.entrySet()) {
+            Competitor competitor = competitorEntry.getKey();
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Competitor>(
+                    competitor, MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED);
+            when(trackedRace.getTrack(competitor)).thenReturn(track);
+            for (GPSFixMoving fix : competitorEntry.getValue()) {
+                track.add(fix);
+            }
+        }
 
         RaceDefinition mockedRaceDefinition = createMockedRaceDefinition();
         when(trackedRace.getRace()).thenReturn(mockedRaceDefinition);
 
-        MarkPassing markpassing = createMockedStartMarkPassing();
-        when(trackedRace.getMarkPassing(eq(competitor), any(Waypoint.class))).thenReturn(markpassing);
+        for (Competitor competitor : fixesPerCompetitor.keySet()) {
+            MarkPassing markpassing = createMockedStartMarkPassing();
+            when(trackedRace.getMarkPassing(eq(competitor), any(Waypoint.class))).thenReturn(markpassing);
+        }
 
         Calendar cal = Calendar.getInstance();
         cal.set(2014, 4, 3, 12, 00);
@@ -118,8 +150,9 @@ public class PolarDataMinerTest {
         Bearing windBearing = new DegreeBearingImpl(0);
         SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(15, windBearing);
         
-        Wind wind = new WindImpl(fix.getPosition(), fix.getTimePoint(), windSpeed);
-        when(trackedRace.getWind(fix.getPosition(), fix.getTimePoint())).thenReturn(wind);
+        Wind wind = new WindImpl(new DegreePosition(54.431952, 10.186767), startOfRace, windSpeed);
+        // Always return same wind
+        when(trackedRace.getWind(any(Position.class), any(TimePoint.class))).thenReturn(wind);
 
         return trackedRace;
     }

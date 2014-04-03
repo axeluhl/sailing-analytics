@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindStepping;
 
 public class WindSpeedLevel {
@@ -7,9 +8,16 @@ public class WindSpeedLevel {
     private final int level;
     private final WindStepping stepping;
 
-    public WindSpeedLevel(int level, WindStepping stepping) {
-        this.level = level;
+    public WindSpeedLevel(Speed windSpeed, WindStepping stepping) {
+        this.level = stepping.getLevelIndexForValue(windSpeed.getKnots());
         this.stepping = stepping;
+    }
+
+    @Override
+    public String toString() {
+        // FIXME right now the toString equals for different steppings. This will resolve in an equal groupkey in the
+        // datamining framework. The current approach is to use only the default WindStepping.
+        return "" + level;
     }
 
     @Override

@@ -1,11 +1,18 @@
 package com.sap.sailing.polars.mining;
 
+import com.sap.sailing.domain.common.Bearing;
+
 public class RoundedAngleToTheWind {
 
     private final int angle;
 
-    public RoundedAngleToTheWind(int angle) {
-        this.angle = angle;
+    public RoundedAngleToTheWind(Bearing angleToTheWind) {
+        this.angle = (int) Math.round(angleToTheWind.getDegrees());
+    }
+
+    @Override
+    public String toString() {
+        return "" + angle;
     }
 
     @Override

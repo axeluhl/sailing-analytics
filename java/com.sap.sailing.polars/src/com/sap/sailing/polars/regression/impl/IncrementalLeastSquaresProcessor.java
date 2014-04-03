@@ -12,7 +12,6 @@ import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
  * 
  * The difference is that some parts of the equation are memorized as fields and updated incrementally.
  * 
- * 
  * @author Frederik Petersen (D054528)
  * 
  */
@@ -33,7 +32,7 @@ public class IncrementalLeastSquaresProcessor implements IncrementalLinearRegres
     private int numberOfPointsAdded = 0;
 
     @Override
-    public double getY(double x) throws NotEnoughDataHasBeenAddedException {
+    public double getEstimatedY(double x) throws NotEnoughDataHasBeenAddedException {
         if (numberOfPointsAdded < 2) {
             throw new NotEnoughDataHasBeenAddedException();
         }

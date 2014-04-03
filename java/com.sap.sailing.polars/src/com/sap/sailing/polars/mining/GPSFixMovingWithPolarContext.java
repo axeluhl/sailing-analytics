@@ -3,6 +3,7 @@ package com.sap.sailing.polars.mining;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -38,19 +39,30 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     @Override
     public RoundedAngleToTheWind getRoundedAngleToTheWind() {
+        return new RoundedAngleToTheWind(getAngleToTheWind());
+    }
+
+    public Bearing getAngleToTheWind() {
         SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
         Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
-        int angle = (int) Math.round(bearing.getDifferenceTo(wind.getBearing()).getDegrees());
-        return new RoundedAngleToTheWind(angle);
+        return bearing.getDifferenceTo(wind.getBearing());
     }
 
     @Override
     public WindSpeedLevel getWindSpeedLevel() {
-        Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint());
+        Speed windSpeed = getWindSpeed();
         WindSteppingWithMaxDistance stepping = defaultPolarSheetGenerationSettings.getWindStepping();
-        int level = stepping.getLevelIndexForValue(wind.getKnots());
-        return new WindSpeedLevel(level, stepping);
+        return new WindSpeedLevel(windSpeed, stepping);
+    }
+
+    public Speed getWindSpeed() {
+        Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint());
+        return wind;
+    }
+
+    public Speed getBoatSpeed() {
+        return race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
     }
 
 }

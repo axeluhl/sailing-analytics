@@ -2,7 +2,7 @@ package com.sap.sailing.polars.regression;
 
 public interface IncrementalLinearRegressionProcessor {
     
-    double getY(double x) throws NotEnoughDataHasBeenAddedException;
+    double getEstimatedY(double x) throws NotEnoughDataHasBeenAddedException;
     
     void addMeasuredPoint(double x, double y);
 

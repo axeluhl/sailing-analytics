@@ -33,13 +33,13 @@ public class IncrementalLinearRegressionTest {
         double y2 = 14;
         processor.addMeasuredPoint(x2, y2);
 
-        double y = processor.getY(x1);
+        double y = processor.getEstimatedY(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getY(x2);
+        y = processor.getEstimatedY(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
 
-        y = processor.getY(4.5);
+        y = processor.getEstimatedY(4.5);
         assertThat(y, new IsCloseTo(10.5, EPSILON));
     }
 
@@ -51,7 +51,7 @@ public class IncrementalLinearRegressionTest {
             processor.addMeasuredPoint(i, i);
         }
 
-        double y = processor.getY(-2);
+        double y = processor.getEstimatedY(-2);
         assertThat(y, new IsCloseTo(-2, EPSILON));
 
         // 2 Points off the line
@@ -59,9 +59,9 @@ public class IncrementalLinearRegressionTest {
         processor.addMeasuredPoint(8, -3);
 
 
-        y = processor.getY(-2);
+        y = processor.getEstimatedY(-2);
         assertThat(y, new IsCloseTo(-2, VAGUE_EPSILON));
-        y = processor.getY(20);
+        y = processor.getEstimatedY(20);
         assertThat(y, new IsCloseTo(20, VAGUE_EPSILON));
     }
 
@@ -75,9 +75,9 @@ public class IncrementalLinearRegressionTest {
             processor.addMeasuredPoint(i, y);
         }
 
-        double y = processor.getY(-2);
+        double y = processor.getEstimatedY(-2);
         assertThat(y, new IsCloseTo(-2, VAGUE_EPSILON));
-        y = processor.getY(20);
+        y = processor.getEstimatedY(20);
         assertThat(y, new IsCloseTo(20, VAGUE_EPSILON));
     }
 
@@ -93,10 +93,10 @@ public class IncrementalLinearRegressionTest {
         double y2 = 0;
         processor.addMeasuredPoint(x2, y2);
 
-        double y = processor.getY(x1);
+        double y = processor.getEstimatedY(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getY(x2);
+        y = processor.getEstimatedY(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
     }
 
@@ -112,13 +112,13 @@ public class IncrementalLinearRegressionTest {
         double y2 = 5;
         processor.addMeasuredPoint(x2, y2);
 
-        double y = processor.getY(x1);
+        double y = processor.getEstimatedY(x1);
         assertThat(y, new IsCloseTo(y1, EPSILON));
 
-        y = processor.getY(x2);
+        y = processor.getEstimatedY(x2);
         assertThat(y, new IsCloseTo(y2, EPSILON));
 
-        y = processor.getY(0);
+        y = processor.getEstimatedY(0);
         assertThat(y, new IsCloseTo(0, EPSILON));
     }
 
@@ -133,7 +133,7 @@ public class IncrementalLinearRegressionTest {
             double xTimesI = x1 * i;
             processor.addMeasuredPoint(xTimesI, yTimesI);
             if (i > 0) {
-                double y = processor.getY(xTimesI);
+                double y = processor.getEstimatedY(xTimesI);
                 assertThat(y, new IsCloseTo(yTimesI, EPSILON));
             }
         }
@@ -141,14 +141,14 @@ public class IncrementalLinearRegressionTest {
         processor.addMeasuredPoint(-x1, y1);
         processor.addMeasuredPoint(x1, -y1);
 
-        double y = processor.getY(0);
+        double y = processor.getEstimatedY(0);
         assertThat(y, new IsCloseTo(0, EPSILON));
     }
 
     @Test(expected = NotEnoughDataHasBeenAddedException.class)
     public void testNoDataExceptionThrowing() throws NotEnoughDataHasBeenAddedException {
         IncrementalLinearRegressionProcessor processor = createRegressionProcessor();
-        processor.getY(15);
+        processor.getEstimatedY(15);
     }
 
     @Test(expected = NotEnoughDataHasBeenAddedException.class)
@@ -159,7 +159,7 @@ public class IncrementalLinearRegressionTest {
         double y1 = 5;
         processor.addMeasuredPoint(x1, y1);
 
-        processor.getY(x1);
+        processor.getEstimatedY(x1);
     }
     
     /*
@@ -198,8 +198,8 @@ public class IncrementalLinearRegressionTest {
         assertThat(regression.getSlope(), new IsCloseTo(1.00211681802045, EPSILON));
         assertThat(regression.getIntercept(), new IsCloseTo(-0.262323073774029, EPSILON));
         // ------------ End certified data tests
-        assertThat(regression.getY(0), new IsCloseTo(-0.262323073774029, EPSILON));
-        assertThat(regression.getY(1), new IsCloseTo(1.00211681802045 - 0.26232307377402, EPSILON));
+        assertThat(regression.getEstimatedY(0), new IsCloseTo(-0.262323073774029, EPSILON));
+        assertThat(regression.getEstimatedY(1), new IsCloseTo(1.00211681802045 - 0.26232307377402, EPSILON));
     }
 
     @Test
