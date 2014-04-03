@@ -166,6 +166,9 @@ public class TestProcessorQuery {
                 receivedElementOrFinished = true;
             }
             @Override
+            public void onFailure(Throwable failure) {
+            }
+            @Override
             public void finish() throws InterruptedException {
                 receivedElementOrFinished = true;
             }

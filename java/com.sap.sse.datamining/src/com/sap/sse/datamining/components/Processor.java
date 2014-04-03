@@ -7,6 +7,16 @@ public interface Processor<InputType> {
     public void onElement(InputType element);
 
     /**
+     * This method handles the throwing of Throwables, so they don't get lost because of the 
+     * multi-threading.<br>
+     * The standard implementation would be a forwarding to the last processor,
+     * that collects the failures, until the processing is finished. Than the failures will be
+     * handled.
+     * @param failure
+     */
+    void onFailure(Throwable failure);
+
+    /**
      * Tells this Processor, that there will be no incoming data.<br />
      * The called Processor will finish his work and call <code>finish()</code> on all subsequent processors.
      * 

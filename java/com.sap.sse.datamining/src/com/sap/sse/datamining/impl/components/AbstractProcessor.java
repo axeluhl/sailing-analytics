@@ -20,6 +20,13 @@ public abstract class AbstractProcessor<InputType, ResultType> implements Proces
         ResultType result = processElement(element);
         forwardResultToTheReceivers(result);
     }
+    
+    @Override
+    public void onFailure(Throwable failure) {
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            resultReceiver.onFailure(failure);
+        }
+    }
 
     private void forwardResultToTheReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {

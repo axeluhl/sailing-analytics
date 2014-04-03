@@ -1,10 +1,12 @@
 package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -129,9 +131,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     private class FunctionsReceiver implements Processor<Collection<Function<?>>> {
         
         private final Lock functionsRegistrationLock;
+        
+        private final List<Throwable> occuredFailures;
 
         public FunctionsReceiver() {
             functionsRegistrationLock = new ReentrantLock();
+            occuredFailures = new ArrayList<>();
         }
 
         @Override
@@ -143,9 +148,17 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 functionsRegistrationLock.unlock();
             }
         }
+        
+        @Override
+        public void onFailure(Throwable failure) {
+            occuredFailures.add(failure);
+        }
 
         @Override
         public void finish() throws InterruptedException {
+            for (Throwable failure : occuredFailures) {
+                LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+            }
         }
 
         @Override

@@ -1,6 +1,8 @@
 package com.sap.sse.datamining.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
@@ -93,12 +95,20 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         });
         waitTillWorkIsDone(timeoutInMillis);
         final long endTime = System.nanoTime();
+        
+        logOccuredFailures();
 
         long calculationTimeInNanos = endTime - startTime;
         AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
         additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
         return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+    }
+
+    private void logOccuredFailures() {
+        for (Throwable failure : resultReceiver.getOccuredFailures()) {
+            LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+        }
     }
 
     private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
@@ -138,10 +148,12 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         
         private final ReentrantLock resultsLock;
         private Map<GroupKey, AggregatedType> results;
+        private List<Throwable> occuredFailures;
         
         public ProcessResultReceiver() {
             resultsLock = new ReentrantLock();
             results = new HashMap<>();
+            occuredFailures = new ArrayList<>();
         }
 
         @Override
@@ -152,6 +164,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             } finally {
                 resultsLock.unlock();
             }
+        }
+        
+        @Override
+        public void onFailure(Throwable failure) {
+            occuredFailures.add(failure);
         }
 
         @Override
@@ -164,11 +181,16 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         
         @Override
         public void abort() {
-            results = null;
+            results = new HashMap<>();
+            occuredFailures = new ArrayList<>();
         }
         
         public Map<GroupKey, AggregatedType> getResult() {
             return results;
+        }
+        
+        public List<Throwable> getOccuredFailures() {
+            return occuredFailures;
         }
 
         @Override

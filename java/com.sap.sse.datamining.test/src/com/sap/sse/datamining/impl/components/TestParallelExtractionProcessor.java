@@ -45,6 +45,9 @@ public class TestParallelExtractionProcessor {
                 receivedValues.put(element.getKey(), element.getDataEntry());
             }
             @Override
+            public void onFailure(Throwable failure) {
+            }
+            @Override
             public void finish() throws InterruptedException {
             }
             @Override

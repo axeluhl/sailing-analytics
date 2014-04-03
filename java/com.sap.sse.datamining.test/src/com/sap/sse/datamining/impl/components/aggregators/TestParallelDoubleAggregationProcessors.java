@@ -184,6 +184,9 @@ public class TestParallelDoubleAggregationProcessors {
                 receivedAggregations = element;
             }
             @Override
+            public void onFailure(Throwable failure) {
+            }
+            @Override
             public void finish() throws InterruptedException {
             }
             @Override
