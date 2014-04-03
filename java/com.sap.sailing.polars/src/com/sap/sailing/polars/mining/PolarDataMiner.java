@@ -3,6 +3,8 @@ package com.sap.sailing.polars.mining;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionalGroupingProcessor;
+import com.sap.sse.datamining.shared.GroupKey;
 
 public class PolarDataMiner {
 
@@ -33,6 +36,7 @@ public class PolarDataMiner {
 
 
     private AbstractEnrichingProcessor<Triple<GPSFixMoving, TrackedRace, Competitor>, GPSFixMovingWithPolarContext> enrichingProcessor;
+    private IncrementalRegressionProcessor incrementalRegressionProcessor;
 
     public PolarDataMiner() {
         defaultPolarSheetGenerationSettings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
@@ -48,19 +52,11 @@ public class PolarDataMiner {
 
     private void setUpWorkflow() throws ClassCastException, NoSuchMethodException,
             SecurityException {
-        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>> incrementalRegressionProcessor = new IncrementalRegressionProcessor();
-        Collection<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>> grouperResultReceivers = Arrays
-                .asList(incrementalRegressionProcessor);
+        incrementalRegressionProcessor = new IncrementalRegressionProcessor();
+        List<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>>();
+        grouperResultReceivers.add(incrementalRegressionProcessor);
 
-        Collection<Function<?>> dimensions = new ArrayList<>();
-        Function<RoundedAngleToTheWind> angleFunction = FunctionFactory
-                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedAngleToTheWind",
-                        new Class<?>[0]));
-        Function<WindSpeedLevel> windSpeedFunction = FunctionFactory.createMethodWrappingFunction(PolarClusterKey.class
-                .getMethod("getWindSpeedLevel", new Class<?>[0]));
-
-        dimensions.add(angleFunction);
-        dimensions.add(windSpeedFunction);
+        Collection<Function<?>> dimensions = getClusterKeyDimensions();
 
         Processor<GPSFixMovingWithPolarContext> groupingProcessor = new ParallelMultiDimensionalGroupingProcessor<GPSFixMovingWithPolarContext>(
                 executor, grouperResultReceivers, dimensions);
@@ -83,6 +79,21 @@ public class PolarDataMiner {
     }
 
 
+
+    public Collection<Function<?>> getClusterKeyDimensions() throws NoSuchMethodException {
+        Collection<Function<?>> dimensions = new ArrayList<>();
+        Function<RoundedAngleToTheWind> angleFunction = FunctionFactory
+                .createMethodWrappingFunction(PolarClusterKey.class.getMethod("getRoundedAngleToTheWind",
+                        new Class<?>[0]));
+        Function<WindSpeedLevel> windSpeedFunction = FunctionFactory.createMethodWrappingFunction(PolarClusterKey.class
+                .getMethod("getWindSpeedLevel", new Class<?>[0]));
+
+        dimensions.add(angleFunction);
+        dimensions.add(windSpeedFunction);
+        return dimensions;
+    }
+
+
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
         enrichingProcessor.onElement(new Triple<GPSFixMoving, TrackedRace, Competitor>(fix, trackedRace, competitor));
     }
@@ -91,6 +102,10 @@ public class PolarDataMiner {
         boolean isActive = executor.getActiveCount() > 0;
         boolean hasQueue = executor.getQueue().size() > 0;
         return isActive || hasQueue;
+    }
+
+    public Set<GPSFixMovingWithPolarContext> getContainer(GroupKey compoundKey) {
+        return incrementalRegressionProcessor.getContainer(compoundKey);
     }
 
 }

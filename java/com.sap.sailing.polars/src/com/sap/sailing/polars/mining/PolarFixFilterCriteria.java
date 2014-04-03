@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -34,11 +35,14 @@ public class PolarFixFilterCriteria implements FilterCriteria<GPSFixMovingWithPo
 
     private TimePoint calculateFinishTime(TrackedRace race, Competitor competitor) {
         TimePoint finishTime = race.getEndOfRace();
-        MarkPassing finishPassing = race.getMarkPassing(competitor, race.getRace().getCourse().getLastWaypoint());
-        if (finishPassing != null) {
-            TimePoint passedFinishTimePoint = finishPassing.getTimePoint();
-            if (passedFinishTimePoint.before(finishTime)) {
-                finishTime = passedFinishTimePoint;
+        Course course = race.getRace().getCourse();
+        if (course.getLastWaypoint() != course.getFirstWaypoint()) {
+            MarkPassing finishPassing = race.getMarkPassing(competitor, course.getLastWaypoint());
+            if (finishPassing != null) {
+                TimePoint passedFinishTimePoint = finishPassing.getTimePoint();
+                if (passedFinishTimePoint.before(finishTime)) {
+                    finishTime = passedFinishTimePoint;
+                }
             }
         }
         return finishTime;

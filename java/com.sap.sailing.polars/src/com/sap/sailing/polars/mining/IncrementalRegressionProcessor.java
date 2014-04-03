@@ -40,4 +40,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
+    public Set<GPSFixMovingWithPolarContext> getContainer(GroupKey compoundKey) {
+        return container.get(compoundKey);
+    }
+
 }

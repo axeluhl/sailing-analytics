@@ -6,8 +6,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -22,19 +24,28 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.polars.mining.GPSFixMovingWithPolarContext;
+import com.sap.sailing.polars.mining.PolarClusterKey;
 import com.sap.sailing.polars.mining.PolarDataMiner;
+import com.sap.sailing.polars.mining.RoundedAngleToTheWind;
+import com.sap.sailing.polars.mining.WindSpeedLevel;
+import com.sap.sse.datamining.factories.GroupKeyFactory;
+import com.sap.sse.datamining.shared.GroupKey;
 
 public class PolarDataMinerTest {
 
     private static final int MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 30;
 
     @Test
-    public void testGrouping() throws InterruptedException, TimeoutException {
+    public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException {
         PolarDataMiner miner = new PolarDataMiner();
 
         GPSFixMoving fix = createMockedFix();
@@ -43,13 +54,28 @@ public class PolarDataMinerTest {
         miner.addFix(fix, competitor, trackedRace);
         int millisLeft = 500000;
         while (miner.isCurrentlyActiveAndOrHasQueue() && millisLeft > 0) {
-            System.out.println("Executor active");
             Thread.sleep(100);
             millisLeft = millisLeft - 100;
             if (miner.isCurrentlyActiveAndOrHasQueue() && millisLeft <= 0) {
                 throw new TimeoutException();
             }
         }
+        PolarClusterKey key = new PolarClusterKey() {
+
+            @Override
+            public WindSpeedLevel getWindSpeedLevel() {
+                return new WindSpeedLevel(7, PolarSheetGenerationSettingsImpl.createStandardPolarSettings()
+                        .getWindStepping());
+            }
+
+            @Override
+            public RoundedAngleToTheWind getRoundedAngleToTheWind() {
+                return new RoundedAngleToTheWind(-45);
+            }
+        };
+        GroupKey compoundKey = GroupKeyFactory.createCompoundKeyFor(key, miner.getClusterKeyDimensions().iterator());
+        Set<GPSFixMovingWithPolarContext> fixWithPolarContext = miner.getContainer(compoundKey);
+        Assert.assertNotNull(fixWithPolarContext);
     }
 
     private GPSFixMoving createMockedFix() {
@@ -88,6 +114,12 @@ public class PolarDataMinerTest {
 
         when(trackedRace.getStartOfRace()).thenReturn(startOfRace);
         when(trackedRace.getEndOfRace()).thenReturn(endOfRace);
+        
+        Bearing windBearing = new DegreeBearingImpl(0);
+        SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(15, windBearing);
+        
+        Wind wind = new WindImpl(fix.getPosition(), fix.getTimePoint(), windSpeed);
+        when(trackedRace.getWind(fix.getPosition(), fix.getTimePoint())).thenReturn(wind);
 
         return trackedRace;
     }
