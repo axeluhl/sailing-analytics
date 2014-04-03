@@ -147,6 +147,10 @@ var VectorField = function(data) {
 	this.rcEnd = data.rcEnd;
 	this.resY = data.resY;
 	this.resX = data.resX;
+	this.bdXi = 1.0 / 2.0 / (this.resY - 1);
+	this.bdPhi = 1.0 + 2*this.bdXi;
+	this.bdA = { lat:this.rcEnd.lat+(this.rcEnd.lat-this.rcStart.lat)*this.bdXi, lng:this.rcEnd.lng+(this.rcEnd.lng-this.rcStart.lng)*this.bdXi };
+	this.bdB = { lat:(this.rcStart.lat-this.rcEnd.lat)*this.bdPhi, lng:(this.rcStart.lng-this.rcEnd.lng)*this.bdPhi };
 	this.xScale = data.xScale;
 	this.x0 = data.boundsSW.lng;
 	this.x1 = data.boundsNE.lng;
@@ -177,8 +181,8 @@ var VectorField = function(data) {
 VectorField.prototype.getRandomPosition = function() {
 	var rndY = Math.random();
 	var rndX = Math.random() - 0.5;
-	var latP = rndY * this.rcStart.lat + (1.0 - rndY) * this.rcEnd.lat + rndX * this.gvX.lat;
-	var lngP = rndY * this.rcStart.lng + (1.0 - rndY) * this.rcEnd.lng + rndX * this.gvX.lng;
+	var latP = this.bdA.lat + rndY * this.bdB.lat + rndX * this.gvX.lat;
+	var lngP = this.bdA.lng + rndY * this.bdB.lng + rndX * this.gvX.lng;
 	return {lat:latP, lng:lngP};
 };
 

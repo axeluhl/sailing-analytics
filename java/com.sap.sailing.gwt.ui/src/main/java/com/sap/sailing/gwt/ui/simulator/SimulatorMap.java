@@ -209,6 +209,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (timePanel != null) {
                 timePanel.setMinMax(new Date(startTime), new Date(startTime + maxDurationTime), true);
                 timePanel.resetTimeSlider();
+                timePanel.timeChanged(windParams.getStartTime(), null);
             }
 
             /**
@@ -636,7 +637,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
-                //timer.setTime(windParams.getStartTime().getTime());
+                timePanel.timeChanged(windParams.getStartTime(), null);
 
                 busyIndicator.setBusy(false);
             }
