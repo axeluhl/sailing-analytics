@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+		.panel {
+			width: 100%;
+			background-color: rgb(255,255,255);
+			border: solid 1px black;
+		}
+    </ui:style>
+ 
+	<g:VerticalPanel styleName="{style.panel}">
+	    <g:HTMLPanel>
+	        <div id="searchBox">
+	            <h2>Search:</h2>
+	            <label for="queryInput">Query:</label>
+	            <g:TextBox ui:field="queryInput"/>
+	            <g:Button ui:field="searchButton" text="Go!"/>
+	        </div>
+	        <div id="searchResults">
+	            <h2>Results:</h2>
+	            <ul ui:field="results"/>
+	        </div>
+	    </g:HTMLPanel>
+    </g:VerticalPanel> 
+</ui:UiBinder>    

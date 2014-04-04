@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+		.panel {
+			width: 100%;
+			background-color: rgba(255,0,0,0.5);
+			border: solid 1px black;
+		}
+    </ui:style>
+ 
+	<g:VerticalPanel styleName="{style.panel}">
+    	<g:HTML>
+    		Hello Home content
+    	</g:HTML>
+    	<g:TextBox ui:field="testBox"/>
+    	<g:Button ui:field="gotoEventsPageButton" text="goto events page"/>
+    </g:VerticalPanel> 
+</ui:UiBinder>    
