@@ -336,6 +336,17 @@ VectorField.prototype.particleWeight = function(p,v) {
 	return v.length() / this.maxLength + 0.1;	
 }
 
+VectorField.prototype.getColors = function() {
+	var colors = [];
+	var alpha = 0.7;
+	var greyValue = 255;
+	for (var i = 0; i < 256; i++) {
+		colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (alpha*i/255.0) + ')';
+		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
+	}
+	return colors;
+}
+
 VectorField.prototype.lineWidth = function(s) {
 	return 1.0;
 }
@@ -449,6 +460,17 @@ RectField.prototype.particleWeight = function(p,v) {
 	return 1.0 - v.length() / this.maxLength;	
 }
 
+RectField.prototype.getColors = function() {
+	var colors = [];
+	var alpha = 1.0;
+	var greyValue = 255;
+	for (var i = 0; i < 256; i++) {
+		colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (alpha*i/255.0) + ')';
+		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
+	}
+	return colors;
+}
+
 RectField.prototype.lineWidth = function(s) {
 	return 1.0;
 }
@@ -546,15 +568,10 @@ var Swarm = function(canvas, field, opt_projection) {
 	this.updateBounds(null);
 	
 	this.makeNewParticles(null, true);
-	this.colors = [];
 	this.rgb = '40, 40, 40';
 	this.background = 'rgb(' + this.rgb + ')';
-	var greyValue = 255;
-	for (var i = 0; i < 256; i++) {
-		this.colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (0.7*i/255.0) + ')';
-		//this.colors[i] = 'rgba(' + (255) + ',' + (255) + ',' + (255) + ',' + 1.0 + ')';
-		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
-	}
+	this.colors = this.field.getColors();
+
 	if (this.projection) {
 		this.startOffsetX = this.projection.offsetX;
 		this.startOffsetY = this.projection.offsetY;

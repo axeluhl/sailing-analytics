@@ -24,7 +24,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
     private int yRes = 20;
-    private int border = 10;
+    private int border = 0;
     private boolean autoUpdate = false;
     private char mode = SailingSimulatorConstants.ModeEvent;  // default mode: 'e'vent
     private char event = SailingSimulatorConstants.EventKielerWoche; // default event: 'k'ieler woche
@@ -131,6 +131,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             if (windDisplayStr.contains("y")) {
                 showStreamlets2 = true;
                 injectWindDataJS = true;
+            }
+            if ((showStreamlets2)&&(this.border==0)) {
+            	this.border = 10;
             }
             if (windDisplayStr.contains("b")) {
                 seedLines = 'b';
