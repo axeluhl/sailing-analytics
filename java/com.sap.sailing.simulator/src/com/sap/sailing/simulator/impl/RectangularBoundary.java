@@ -278,6 +278,16 @@ public class RectangularBoundary implements Boundary {
     }
     
     @Override
+    public int getBorderY() {
+    	return this.borderY;
+    }
+    
+    @Override
+    public int getBorderX() {
+    	return this.borderX;
+    }
+    
+    @Override
     public Bearing getNorth() {
         return north;
     }

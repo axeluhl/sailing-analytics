@@ -29,6 +29,8 @@ public interface Boundary extends Serializable {
     
 	public int getResY();
 	public int getResX();
+	public int getBorderY();
+	public int getBorderX();
     
 	Bearing getNorth();
 	Bearing getSouth();
