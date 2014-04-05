@@ -97,6 +97,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private ColorPalette colorPalette;
     private int xRes;
     private int yRes;
+    private int border;
     private boolean warningAlreadyShown = false;
     private SimulatorMainPanel parent = null;
     private PathPolyline pathPolyline = null;
@@ -288,7 +289,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     }
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, Timer timer,
             WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode,
             SimulatorMainPanel parent) {
         this.simulatorService = simulatorSvc;
@@ -296,6 +297,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.errorReporter = errorReporter;
         this.xRes = xRes;
         this.yRes = yRes;
+        this.border = border;
         this.timer = timer;
         this.timePanel = null;
         timer.addTimeListener(this);
@@ -316,13 +318,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.parent = parent;    
     }
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, Timer timer,
             TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.xRes = xRes;
         this.yRes = yRes;
+        this.border = border;
         this.timer = timer;
         this.timePanel = timePanel;
         timer.addTimeListener(this);
@@ -586,6 +589,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
+        windParams.setBorder(border);
         busyIndicator.setBusy(true);
         timer.setTime(windParams.getStartTime().getTime());
 
@@ -703,6 +707,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
+        windParams.setBorder(border);
 
         busyIndicator.setBusy(true);
         timer.setTime(windParams.getStartTime().getTime());

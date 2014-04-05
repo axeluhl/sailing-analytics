@@ -159,15 +159,17 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     public void extendWindDataJSON() {
     	
     	List<SimulatorWindDTO> data = this.windFieldDTO.getMatrix();
-    	int steps = data.size() / (this.windParams.getxRes() * this.windParams.getyRes());
     	String jsonData = "data:[";
     	int p = 0;
+		int imax = this.windParams.getyRes() + 2*this.windParams.getBorderY();
+		int jmax = this.windParams.getxRes() + 2*this.windParams.getBorderX();
+    	int steps = data.size() / (imax * jmax);
     	double maxWindSpeed = 0;
     	for(int s=0; s<steps; s++) {
     		jsonData +="[";
-    		for(int i=0; i<this.windParams.getyRes(); i++) {
+    		for(int i=0; i<imax; i++) {
     			jsonData +="[";
-        		for(int j=0; j<this.windParams.getxRes(); j++) {
+        		for(int j=0; j<jmax; j++) {
         			SimulatorWindDTO wind = data.get(p);
         			p++;
    					if (wind.trueWindSpeedInKnots > maxWindSpeed) {
@@ -176,11 +178,11 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
    					double y = wind.trueWindSpeedInKnots*Math.cos(wind.trueWindBearingDeg*Math.PI/180.0);
    					double x = wind.trueWindSpeedInKnots*Math.sin(wind.trueWindBearingDeg*Math.PI/180.0);
    					jsonData += x + "," + y;
-        			if (j<(this.windParams.getxRes()-1)) {
+        			if (j<(jmax-1)) {
         				jsonData += ",";
         			}
         		}
-    			if (i<(this.windParams.getyRes()-1)) {
+    			if (i<(imax-1)) {
     				jsonData += "],";
     			} else {
     				jsonData += "]";    				
