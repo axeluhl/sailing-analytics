@@ -7,11 +7,34 @@ public final class WindChartPointRecalculator {
     private WindChartPointRecalculator() { }
     
     public static Point stayClosestToPreviousPoint(Point previousPoint, Point newPoint) {
+        double previousY = previousPoint.getY().doubleValue();
+        double newY = newPoint.getY().doubleValue();
+        
+        double deltaPreviousNew = Math.abs(previousY - newY);
+        double deltaPreviosNewUp = Math.abs(previousY - (newY + 360));
+        double deltaPreviosNewDown = Math.abs(previousY - (newY - 360));
+        
+        if (isStrictlyLessThan(deltaPreviosNewUp, deltaPreviousNew, deltaPreviosNewDown)) {
+            return new Point(newPoint.getX(), newPoint.getY().doubleValue() + 360);
+        }
+        if (isStrictlyLessThan(deltaPreviosNewDown, deltaPreviousNew, deltaPreviosNewUp)) {
+            return new Point(newPoint.getX(), newPoint.getY().doubleValue() - 360);
+        }
+        
         return newPoint;
     }
     
-    public static Point recalculateDirectionPoint(Double yMin, Double yMax, Point directionPoint) {
-        double y = directionPoint.getY().doubleValue();
+    private static boolean isStrictlyLessThan(double valueToCheck, double... valuesToCompare) {
+        for (double value : valuesToCompare) {
+            if (value <= valueToCheck) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static Point keepOverallDeltaMinimal(Double yMin, Double yMax, Point newPoint) {
+        double y = newPoint.getY().doubleValue();
 
         if (yMax != null && yMin != null && (y < yMin || y > yMax)) {
             double deltaMin = Math.abs(yMin - y);
@@ -25,11 +48,11 @@ public final class WindChartPointRecalculator {
 
             if (isRecalculationNeeded(deltaMin, deltaMax, deltaMinDown, deltaMaxUp)) {
                 y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
-                return new Point(directionPoint.getX(), y);
+                return new Point(newPoint.getX(), y);
             }
         }
         
-        return directionPoint;
+        return newPoint;
     }
 
     private static boolean isRecalculationNeeded(double deltaMin, double deltaMax, double deltaMinDown, double deltaMaxUp) {

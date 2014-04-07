@@ -350,7 +350,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         newDirectionPoint.setName(name);
                     }
                     
-                    newDirectionPoint = WindChartPointRecalculator.recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
+                    newDirectionPoint = WindChartPointRecalculator.keepOverallDeltaMinimal(directionMin, directionMax, newDirectionPoint);
                     directionPoints[currentPointIndex] = newDirectionPoint;
 
                     double direction = newDirectionPoint.getY().doubleValue();
