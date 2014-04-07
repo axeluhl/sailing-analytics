@@ -48,7 +48,7 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
 
     @Override
     public boolean getHasTwoPoints() {
-        return controlPoint.getControlPoints().size() == 2;
+        return controlPoint.isMultiple();
     }
 
     @Override
