@@ -5,6 +5,7 @@ package com.tractrac.subscription.app.eventtest;
  * and open the template in the editor.
  */
 import com.tractrac.model.lib.api.ModelLocator;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IEventFactory;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
@@ -27,10 +28,11 @@ public class Main {
 	/**
 	 * @param args
 	 *          the command line arguments
+	 * @throws CreateModelException 
 	 */
 	public static void main(String[] args) throws URISyntaxException,
 			MalformedURLException, FileNotFoundException, IOException,
-			SubscriberInitializationException {
+			SubscriberInitializationException, CreateModelException {
 
 		URI paramURI = parseArguments(args);
 
