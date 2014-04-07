@@ -50,7 +50,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
  			@Override
 			public void onEvent(CenterChangeMapEvent event) {
 				// TODO Auto-generated method stub
-				draw();				
+				drawCenterChanged();				
 			};
         });
         
@@ -86,6 +86,10 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         });
     }
 
+    protected void drawCenterChanged() {
+    	draw();
+    }
+    
     @Override
     protected void draw() {
         if (mapProjection != null) {

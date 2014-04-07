@@ -35,6 +35,7 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private boolean showGrid;
 
     private boolean showStreamlets;
+    private boolean showStreamlets2;
 
     private boolean showLines;
     
@@ -147,6 +148,14 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     public void setShowStreamlets(boolean showStreamlets) {
         this.showStreamlets = showStreamlets;
+    }
+
+    public boolean isShowStreamlets2() {
+        return showStreamlets2;
+    }
+
+    public void setShowStreamlets2(boolean showStreamlets2) {
+        this.showStreamlets2 = showStreamlets2;
     }
 
     public boolean isShowLines() {
