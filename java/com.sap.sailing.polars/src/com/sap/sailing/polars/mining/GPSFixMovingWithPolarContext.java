@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.mining;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
@@ -63,6 +64,11 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     public Speed getBoatSpeed() {
         return race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return race.getRace().getBoatClass();
     }
 
 }

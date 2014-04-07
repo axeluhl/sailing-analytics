@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
@@ -89,8 +90,9 @@ public class PolarDataMiner {
         return isActive || hasQueue;
     }
 
-    public Speed estimateBoatSpeed(Speed windSpeed, Bearing angleToTheWind) throws NotEnoughDataHasBeenAddedException {
-        return incrementalRegressionProcessor.estimateBoatSpeed(windSpeed, angleToTheWind);
+    public Speed estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
+            throws NotEnoughDataHasBeenAddedException {
+        return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind);
     }
 
 }

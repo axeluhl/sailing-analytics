@@ -3,6 +3,7 @@ package com.sap.sailing.polars.mining;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -52,7 +53,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
-    public Speed estimateBoatSpeed(final Speed windSpeed, final Bearing angleToTheWind)
+    public Speed estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed, final Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         PolarClusterKey key = new PolarClusterKey() {
 
@@ -65,6 +66,11 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             @Override
             public RoundedAngleToTheWind getRoundedAngleToTheWind() {
                 return new RoundedAngleToTheWind(angleToTheWind);
+            }
+
+            @Override
+            public BoatClass getBoatClass() {
+                return boatClass;
             }
         };
         GroupKey compoundKey;

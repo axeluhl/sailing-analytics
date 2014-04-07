@@ -54,6 +54,8 @@ public class PolarDataMinerTest {
             NotEnoughDataHasBeenAddedException {
         PolarDataMiner miner = new PolarDataMiner();
 
+        BoatClass mockedBoatClass = mock(BoatClass.class);
+
         GPSFixMoving fix1_1 = createMockedFix(13, 00, 54.431952, 10.186767, 45, 10.5);
         GPSFixMoving fix1_2 = createMockedFix(13, 30, 54.485034, 10.538303, 44.8, 10.6);
         Competitor competitor1 = mock(Competitor.class);
@@ -82,7 +84,7 @@ public class PolarDataMinerTest {
         fixesPerCompetitor.put(competitor3, setForCompetitor3);
         
 
-        TrackedRace trackedRace = createMockedTrackedRace(fixesPerCompetitor);
+        TrackedRace trackedRace = createMockedTrackedRace(fixesPerCompetitor, mockedBoatClass);
         
         for (Entry<Competitor, Set<GPSFixMoving>> entry : fixesPerCompetitor.entrySet()) {
             Competitor competitor = entry.getKey();
@@ -101,15 +103,18 @@ public class PolarDataMinerTest {
             }
         }
 
-        Speed estimatedSpeed1 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-44.9));
+        Speed estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
+                -44.9));
         assertThat(estimatedSpeed1, is(notNullValue()));
         assertThat(estimatedSpeed1.getKnots(), is(closeTo(10.55, EPSILON)));
 
-        Speed estimatedSpeed2 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-42));
+        Speed estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
+                -42));
         assertThat(estimatedSpeed2, is(notNullValue()));
         assertThat(estimatedSpeed2.getKnots(), is(closeTo(10.05, EPSILON)));
 
-        Speed estimatedSpeed3 = miner.estimateBoatSpeed(new KnotSpeedImpl(15), new DegreeBearingImpl(-42.8));
+        Speed estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
+                -42.8));
         assertThat(estimatedSpeed3, is(notNullValue()));
         assertThat(estimatedSpeed3.getKnots(), is(closeTo(10, EPSILON)));
     }
@@ -127,7 +132,8 @@ public class PolarDataMinerTest {
         return fix;
     }
 
-    private TrackedRace createMockedTrackedRace(Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor) {
+    private TrackedRace createMockedTrackedRace(Map<Competitor, Set<GPSFixMoving>> fixesPerCompetitor,
+            BoatClass mockedBoatClass) {
         TrackedRace trackedRace = mock(TrackedRace.class);
 
         for (Entry<Competitor, Set<GPSFixMoving>> competitorEntry : fixesPerCompetitor.entrySet()) {
@@ -141,6 +147,7 @@ public class PolarDataMinerTest {
         }
 
         RaceDefinition mockedRaceDefinition = createMockedRaceDefinition();
+        when(mockedRaceDefinition.getBoatClass()).thenReturn(mockedBoatClass);
         when(trackedRace.getRace()).thenReturn(mockedRaceDefinition);
 
         for (Competitor competitor : fixesPerCompetitor.keySet()) {
