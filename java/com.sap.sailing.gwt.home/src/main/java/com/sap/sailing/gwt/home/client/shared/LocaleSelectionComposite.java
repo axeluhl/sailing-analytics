@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;

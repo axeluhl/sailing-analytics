@@ -1,10 +1,6 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.aboutuspage;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.GwtEvent.Type;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
@@ -16,15 +12,13 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
-import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
+import com.sap.sailing.gwt.home.client.RootPagePresenter;
+import com.sap.sailing.gwt.home.client.shared.PageNameTokens;
 
-public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, StartPagePresenter.MyProxy> {
+public class AboutUsPagePresenter extends Presenter<AboutUsPagePresenter.MyView, AboutUsPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
     
     public interface MyView extends View {
-        HasClickHandlers getGotoEventsPageButton();
-
-        TextBox getTestBox();
     }
 
     /**
@@ -35,28 +29,15 @@ public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, Sta
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
 
     @ProxyCodeSplit
-    @NameToken(PageNameTokens.startPage)
-    public interface MyProxy extends ProxyPlace<StartPagePresenter> {
+    @NameToken(PageNameTokens.aboutUsPage)
+    public interface MyProxy extends ProxyPlace<AboutUsPagePresenter> {
     }
 
     @Inject
-    public StartPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager) {
+    public AboutUsPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager) {
         super(eventBus, view, proxy);
         
         this.placeManager = placeManager;
-    }
-
-    @Override
-    protected void onBind() {
-      super.onBind();
-      registerHandler(getView().getGotoEventsPageButton().addClickHandler(
-          new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-            	PlaceRequest nextPlace = new PlaceRequest.Builder().nameToken(PageNameTokens.eventsPage).build();
-            	placeManager.revealPlace(nextPlace, false);
-            }
-          }));
     }
 
     @Override

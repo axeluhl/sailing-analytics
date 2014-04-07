@@ -1,12 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:oui="urn:import:com.sap.sailing.gwt.home.client">
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:style>
 		.panel {
 		    width: 100%;
 		    height: 55px;
-			background-color: #333333;
+			background-color: #FFFFFF;
 		}
 		.panel:after {
 			clear: both;
@@ -28,10 +28,10 @@
 			<g:Label ui:field="titleLabel" />
     	</g:FlowPanel>
     	<g:FlowPanel styleName="{style.menu}">
-			<oui:MainMenu />
+			<s:MainMenu />
     	</g:FlowPanel>
     	<g:FlowPanel styleName="{style.languageSelection}">
-    		<oui:LocaleSelectionComposite ui:field="localeSelectionComposite" />
+    		<s:LocaleSelectionComposite ui:field="localeSelectionComposite" />
     	</g:FlowPanel>
 		
      </g:FlowPanel>

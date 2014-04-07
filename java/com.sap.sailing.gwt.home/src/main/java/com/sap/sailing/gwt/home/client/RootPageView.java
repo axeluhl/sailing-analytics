@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.gwtplatform.mvp.client.ViewImpl;
 import com.sap.sailing.gwt.home.client.RootPagePresenter.MyView;
+import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,

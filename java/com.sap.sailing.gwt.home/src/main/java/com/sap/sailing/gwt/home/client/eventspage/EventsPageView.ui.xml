@@ -11,8 +11,9 @@
  
 	<g:VerticalPanel styleName="{style.panel}">
 	    <g:HTMLPanel>
-	        <div id="searchBox">
-	            <h2>Search:</h2>
+	        Events page
+	        <div id="searchEventsInput">
+	            <h2>Search event:</h2>
 	            <label for="queryInput">Query:</label>
 	            <g:TextBox ui:field="queryInput"/>
 	            <g:Button ui:field="searchButton" text="Go!"/>

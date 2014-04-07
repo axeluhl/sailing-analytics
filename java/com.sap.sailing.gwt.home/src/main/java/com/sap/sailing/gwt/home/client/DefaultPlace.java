@@ -11,8 +11,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used in {@link GwtpnestedsamplePlaceManager} and is bind
- * in {@link ClientModule}. It's purpose is to bind the default place to a
+ * This annotation is used in {@link MyPlaceManager} and is bind
+ * in {@link MyModule}. It's purpose is to bind the default place to a
  * default presenter.
  */
 @BindingAnnotation

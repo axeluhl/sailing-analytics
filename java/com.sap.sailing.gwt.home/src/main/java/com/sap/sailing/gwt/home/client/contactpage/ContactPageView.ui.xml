@@ -4,16 +4,14 @@
     <ui:style>
 		.panel {
 			width: 100%;
-			background-color: rgba(255,0,0,0.5);
+			background-color: rgb(255,255,255);
 			border: solid 1px black;
 		}
     </ui:style>
  
 	<g:VerticalPanel styleName="{style.panel}">
     	<g:HTML>
-    		Hello Home content
+    		Contact content
     	</g:HTML>
-    	<g:TextBox ui:field="testBox"/>
-    	<g:Button ui:field="gotoEventsPageButton" text="goto events page"/>
     </g:VerticalPanel> 
 </ui:UiBinder>    

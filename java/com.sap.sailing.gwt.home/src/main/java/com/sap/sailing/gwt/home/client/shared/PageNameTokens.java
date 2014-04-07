@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.shared;
 
 public class PageNameTokens {
 	public static final String startPage = "!start";
