@@ -71,10 +71,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
-        
-//        registerASyncService((ServiceDefTarget) sailingService, "sailing");
-//        registerASyncService((ServiceDefTarget) mediaService, "media");
-//        registerASyncService((ServiceDefTarget) userManagementService, "usermanagement");
     }
 
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {

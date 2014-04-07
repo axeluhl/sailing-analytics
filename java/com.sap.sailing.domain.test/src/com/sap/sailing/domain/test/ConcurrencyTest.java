@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ConcurrencyTest extends OnlineTracTracBasedTest {
@@ -38,7 +39,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         // load Race8 of RC44 Cup in Sweden
         super.setUp("event_20110815_RCSwedenCu",

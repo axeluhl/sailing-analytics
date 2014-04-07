@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.tractrac.model.lib.api.ModelLocator;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
@@ -63,9 +64,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     /**
      * Default set-up for an STG training session in Weymouth, 2011
      * @throws SubscriberInitializationException 
+     * @throws CreateModelException 
      */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
         setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
@@ -92,7 +94,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         return raceSubscriber;
     }
 
-    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException {
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         // Read event data from configuration file
         final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
         this.race = race;

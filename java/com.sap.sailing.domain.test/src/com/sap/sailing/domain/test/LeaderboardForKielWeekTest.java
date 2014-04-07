@@ -28,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
@@ -40,7 +41,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException, SubscriberInitializationException {
+    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
         leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }),
                 new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
@@ -69,7 +70,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     private void loadRace(String paramsFile, String storedDataFile) throws MalformedURLException, IOException, InterruptedException,
-            URISyntaxException, SubscriberInitializationException {
+            URISyntaxException, SubscriberInitializationException, CreateModelException {
         logger.info("Loading race from params file "+paramsFile);
         URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/"+paramsFile).getCanonicalPath()),

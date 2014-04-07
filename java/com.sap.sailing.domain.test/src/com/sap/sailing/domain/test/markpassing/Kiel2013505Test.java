@@ -7,6 +7,7 @@ import java.text.ParseException;
 
 import org.junit.Ignore;
 
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class Kiel2013505Test extends AbstractMarkPassingTest {
@@ -16,7 +17,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
     }
 
     @Ignore
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException {
+    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("5");
     }
 

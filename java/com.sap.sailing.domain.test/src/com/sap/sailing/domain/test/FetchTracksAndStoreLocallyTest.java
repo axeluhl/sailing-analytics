@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
@@ -49,7 +50,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
      * objects and appended to the {@link DynamicTrackedRace}s.
      * @throws SubscriberInitializationException 
      */
-    private void setUp(String regattaName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException {
+    private void setUp(String regattaName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUpWithoutLaunchingController(regattaName, raceId);
         final RaceChangeListener positionListener = new AbstractRaceChangeListener() {
             @Override
@@ -79,7 +80,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void storeEntireKielWeek() throws InterruptedException, FileNotFoundException, IOException, URISyntaxException, SubscriberInitializationException {
+    public void storeEntireKielWeek() throws InterruptedException, FileNotFoundException, IOException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         for (String raceId : new String[] {
                 "7dce540a-98e4-11e0-85be-406186cbf87c", "6659efe8-98f1-11e0-85be-406186cbf87c",
                 "be1dc2fe-98fb-11e0-85be-406186cbf87c", "c3ec93e4-98fc-11e0-85be-406186cbf87c",
@@ -138,17 +139,17 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
     }
     
     @Ignore
-    public void store505Race2() throws InterruptedException, FileNotFoundException, IOException, URISyntaxException, SubscriberInitializationException {
+    public void store505Race2() throws InterruptedException, FileNotFoundException, IOException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         storeRace("event_20110609_KielerWoch", "357c700a-9d9a-11e0-85be-406186cbf87c");
     }
 
     private void storeRace(String regattaName, String raceId) throws MalformedURLException, IOException, InterruptedException,
-            URISyntaxException, FileNotFoundException, SubscriberInitializationException {
+            URISyntaxException, FileNotFoundException, SubscriberInitializationException, CreateModelException {
         setUp(regattaName, raceId);
         storeTracks();
     }
     
-    public static void main(String[] args) throws URISyntaxException, FileNotFoundException, IOException, InterruptedException, SubscriberInitializationException {
+    public static void main(String[] args) throws URISyntaxException, FileNotFoundException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
         FetchTracksAndStoreLocallyTest thiz = new FetchTracksAndStoreLocallyTest();
         for (int i=1; i<args.length; i++) {
             thiz.storeRace(args[0], args[i]);

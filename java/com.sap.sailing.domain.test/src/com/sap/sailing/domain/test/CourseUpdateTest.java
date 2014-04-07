@@ -48,6 +48,7 @@ import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlRoute;
@@ -72,7 +73,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);

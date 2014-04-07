@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.ExportImpl;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
@@ -36,7 +37,7 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, SubscriberInitializationException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
         URI storedUri = new URI("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
