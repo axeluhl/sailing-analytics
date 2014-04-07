@@ -199,7 +199,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
         }
 
-        Position[][] grid = bd.extractGrid(params.getxRes(), params.getyRes());
+        Position[][] grid = bd.extractGrid(params.getxRes(), params.getyRes(), params.getBorderY(), params.getBorderX());
         wf.setPositionGrid(grid);
 
         TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());// new
@@ -274,9 +274,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             wf.setGridAreaGps(gridAreaGps);
         }
 
-        int[] gridRes = new int[2];
+        int[] gridRes = new int[4];
         gridRes[0] = params.getxRes();
         gridRes[1] = params.getyRes();
+        gridRes[2] = params.getBorderY();
+        gridRes[3] = params.getBorderX();        
         wf.setGridResolution(gridRes);
 
         wf.generate(startTime, null, timeStep);
@@ -771,11 +773,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         	// SouthWest
         	jsonField += "boundsSW:{lat:" + positionGrid[0][0].getLatDeg() + ",lng:" + positionGrid[0][0].getLngDeg() + "},";
         	// NorthEast
-        	jsonField += "boundsNE:{lat:" + positionGrid[params.getyRes()-1][params.getxRes()-1].getLatDeg() + ",lng:" + positionGrid[params.getyRes()-1][params.getxRes()-1].getLngDeg() + "},";
+        	jsonField += "boundsNE:{lat:" + positionGrid[params.getyRes()+2*params.getBorderY()-1][params.getxRes()+2*params.getBorderX()-1].getLatDeg() + ",lng:" + positionGrid[params.getyRes()+2*params.getBorderY()-1][params.getxRes()+2*params.getBorderX()-1].getLngDeg() + "},";
         	//this.resY = field.resY;
         	jsonField += "resY:" + params.getyRes() + ",";
         	//this.resX = field.resX;
         	jsonField += "resX:" + params.getxRes() + ",";
+        	// border
+        	jsonField += "borderY:" + params.getBorderY() + ",";
+        	jsonField += "borderX:" + params.getBorderX() + ",";
         	//this.xScale = field.xScale;
         	jsonField += "xScale:1.5,";
 

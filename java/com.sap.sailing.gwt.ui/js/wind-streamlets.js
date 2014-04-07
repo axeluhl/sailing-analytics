@@ -147,6 +147,12 @@ var VectorField = function(data) {
 	this.rcEnd = data.rcEnd;
 	this.resY = data.resY;
 	this.resX = data.resX;
+	this.borderY = data.borderY;
+	this.borderX = data.borderX;
+	this.bdXi = (data.borderY + 0.5) / (this.resY - 1);
+	this.bdPhi = 1.0 + 2*this.bdXi;
+	this.bdA = { lat:this.rcEnd.lat+(this.rcEnd.lat-this.rcStart.lat)*this.bdXi, lng:this.rcEnd.lng+(this.rcEnd.lng-this.rcStart.lng)*this.bdXi };
+	this.bdB = { lat:(this.rcStart.lat-this.rcEnd.lat)*this.bdPhi, lng:(this.rcStart.lng-this.rcEnd.lng)*this.bdPhi };
 	this.xScale = data.xScale;
 	this.x0 = data.boundsSW.lng;
 	this.x1 = data.boundsNE.lng;
@@ -171,21 +177,26 @@ var VectorField = function(data) {
     var nrmLng = difLat/difLen;
     this.nvX = { lat: nrmLat/this.xScale/difLen*(this.resX-1), lng: nrmLng/this.xScale/difLen*(this.resX-1) };
     this.gvX = { lat: nrmLat*this.xScale*difLen, lng: nrmLng/this.lngScale*this.xScale*difLen };
-    
+	this.bdC = { lat:this.gvX.lat*(this.resX+2*this.borderX-1)/(this.resX-1), lng:this.gvX.lng*(this.resX+2*this.borderX-1)/(this.resX-1)};    
 };
 
 VectorField.prototype.getRandomPosition = function() {
 	var rndY = Math.random();
 	var rndX = Math.random() - 0.5;
-	var latP = rndY * this.rcStart.lat + (1.0 - rndY) * this.rcEnd.lat + rndX * this.gvX.lat;
-	var lngP = rndY * this.rcStart.lng + (1.0 - rndY) * this.rcEnd.lng + rndX * this.gvX.lng;
+	var latP = this.bdA.lat + rndY * this.bdB.lat + rndX * this.bdC.lat;
+	var lngP = this.bdA.lng + rndY * this.bdB.lng + rndX * this.bdC.lng;
+	
+	if (!this.inBounds(lngP, latP)) {
+		console.log("random-position: out of bounds");
+	}
+	
 	return {lat:latP, lng:lngP};
 };
 
 
 VectorField.prototype.inBounds = function(lng, lat) {
 	var idx = this.getIndex(lat, lng);
-	var inBool = (idx.x >= 0) && (idx.x < this.resX) && (idx.y >= 0) && (idx.y < this.resY);
+	var inBool = (idx.x >= 0) && (idx.x < (this.resX+2*this.borderX)) && (idx.y >= 0) && (idx.y < (this.resY+2*this.borderY));
 	return inBool;
 };
 
@@ -194,7 +205,7 @@ VectorField.prototype.interpolate = function(lat, lng) {
 	var idx = this.getNeighbors(lat, lng);
 	var idxOff = 0;
 	
-	if ((idx.xTop >= this.resX)||(idx.yTop >= this.resY)) {
+	if ((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY))) {
 		console.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
 	}
 	
@@ -211,7 +222,7 @@ VectorField.prototype.interpolate2 = function(lat, lng) {
 	var idx = this.getNeighbors(lat, lng);
 	var idxOff = 0;
 	
-	if ((idx.xTop >= this.resX)||(idx.yTop >= this.resY)) {
+	if ((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY))) {
 		console.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
 	}
 	
@@ -277,8 +288,8 @@ VectorField.prototype.getIndex = function(lat, lng) {
 	var posR = { lat: lat - this.rcStart.lat, lng: (lng - this.rcStart.lng) * this.lngScale };
 
 	// closest grid point
-	var yIdx = Math.round( posR.lat * this.nvY.lat + posR.lng * this.nvY.lng );
-	var xIdx = Math.round( posR.lat * this.nvX.lat + posR.lng * this.nvX.lng + (this.resX - 1) / 2. );
+	var yIdx = Math.round( posR.lat * this.nvY.lat + posR.lng * this.nvY.lng ) + this.borderY;
+	var xIdx = Math.round( posR.lat * this.nvX.lat + posR.lng * this.nvX.lng + (this.resX - 1) / 2. ) + this.borderX;
 
 	return { x: xIdx, y: yIdx };
 };
@@ -289,8 +300,8 @@ VectorField.prototype.getNeighbors = function(lat, lng) {
 	var posR = { lat: lat - this.rcStart.lat, lng: (lng - this.rcStart.lng) * this.lngScale };
 	
 	// surrounding grid points
-	var yFlt = posR.lat * this.nvY.lat + posR.lng * this.nvY.lng;
-	var xFlt = posR.lat * this.nvX.lat + posR.lng * this.nvX.lng + (this.resX - 1) / 2.;
+	var yFlt = posR.lat * this.nvY.lat + posR.lng * this.nvY.lng + this.borderY;
+	var xFlt = posR.lat * this.nvX.lat + posR.lng * this.nvX.lng + (this.resX - 1) / 2. + this.borderX;
 	var yBot = Math.floor( yFlt );
 	var xBot = Math.floor( xFlt );
 	var yTop = Math.ceil( yFlt );
@@ -306,12 +317,12 @@ VectorField.prototype.getNeighbors = function(lat, lng) {
 		yBot = 0;
 	}
 
-	if (xTop >= this.resX) {
-		xTop = this.resX-1;
+	if (xTop >= (this.resX+2*this.borderX)) {
+		xTop = this.resX+2*this.borderX-1;
 	}
 
-	if (yTop >= this.resY) {
-		yTop = this.resY-1;
+	if (yTop >= (this.resY+2*this.borderY)) {
+		yTop = this.resY+2*this.borderY-1;
 	}
 
 	return { xTop: xTop, yTop:yTop, xBot:xBot, yBot:yBot, xMod:xMod, yMod:yMod };	
@@ -323,6 +334,17 @@ VectorField.prototype.motionScale = function(zoomLevel) {
 
 VectorField.prototype.particleWeight = function(p,v) {
 	return v.length() / this.maxLength + 0.1;	
+}
+
+VectorField.prototype.getColors = function() {
+	var colors = [];
+	var alpha = 0.7;
+	var greyValue = 255;
+	for (var i = 0; i < 256; i++) {
+		colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (alpha*i/255.0) + ')';
+		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
+	}
+	return colors;
 }
 
 VectorField.prototype.lineWidth = function(s) {
@@ -438,6 +460,17 @@ RectField.prototype.particleWeight = function(p,v) {
 	return 1.0 - v.length() / this.maxLength;	
 }
 
+RectField.prototype.getColors = function() {
+	var colors = [];
+	var alpha = 1.0;
+	var greyValue = 255;
+	for (var i = 0; i < 256; i++) {
+		colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (alpha*i/255.0) + ')';
+		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
+	}
+	return colors;
+}
+
 RectField.prototype.lineWidth = function(s) {
 	return 1.0;
 }
@@ -535,15 +568,10 @@ var Swarm = function(canvas, field, opt_projection) {
 	this.updateBounds(null);
 	
 	this.makeNewParticles(null, true);
-	this.colors = [];
 	this.rgb = '40, 40, 40';
 	this.background = 'rgb(' + this.rgb + ')';
-	var greyValue = 255;
-	for (var i = 0; i < 256; i++) {
-		this.colors[i] = 'rgba(' + (greyValue) + ',' + (greyValue) + ',' + (greyValue) + ',' + (i/255) + ')';
-		//this.colors[i] = 'rgba(' + (255) + ',' + (255) + ',' + (255) + ',' + 1.0 + ')';
-		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
-	}
+	this.colors = this.field.getColors();
+
 	if (this.projection) {
 		this.startOffsetX = this.projection.offsetX;
 		this.startOffsetY = this.projection.offsetY;

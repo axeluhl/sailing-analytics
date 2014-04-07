@@ -225,7 +225,7 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, boolean autoUpdate,
             char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS) {
         super();
 
@@ -310,7 +310,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, timer, timePanel,
                 windParams, busyIndicator, mode, this);
         simulatorMap.setSize("100%", "100%");
 
