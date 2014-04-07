@@ -6,6 +6,10 @@ public final class WindChartPointRecalculator {
     
     private WindChartPointRecalculator() { }
     
+    public static Point stayClosestToPreviousPoint(Point previousPoint, Point newPoint) {
+        return newPoint;
+    }
+    
     public static Point recalculateDirectionPoint(Double yMin, Double yMax, Point directionPoint) {
         double y = directionPoint.getY().doubleValue();
 
