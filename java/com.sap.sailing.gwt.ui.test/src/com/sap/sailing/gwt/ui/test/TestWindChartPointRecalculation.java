@@ -11,29 +11,29 @@ import static org.hamcrest.core.IsEqual.*;
 import org.junit.Test;
 import org.moxieapps.gwt.highcharts.client.Point;
 
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartPointRecalculator;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 
 public class TestWindChartPointRecalculation {
 
     @Test
     public void testRecalculaion() {
         Point notToBeRecalculated = new Point(10, 100);
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(90.0, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(null, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(90.0, null, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(100.27458, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(90.0, 100.75639, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(90.0, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(null, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(90.0, null, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(100.27458, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(90.0, 100.75639, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
         
         //Test for special case, which caused a wrong recalculation, because of the wrong use of Math.abs()
         notToBeRecalculated = new Point(10, 179.8537);
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(180.12356, 190.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(170.0, 179.5372, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(180.12356, 190.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(170.0, 179.5372, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
         
         Point toBeMovedDown = new Point(10, 356);
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(4.0, 23.0, toBeMovedDown).getY(), equalTo(new Point(10, 356.0 - 360.0).getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(4.0, 23.0, toBeMovedDown).getY(), equalTo(new Point(10, 356.0 - 360.0).getY()));
         
         Point toBeMovedUp = new Point(10, 5);
-        assertThat(WindChartPointRecalculator.keepOverallDeltaMinimal(356.0, 359.83364, toBeMovedUp).getY(), equalTo(new Point(10, 5.0 + 360.0).getY()));
+        assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(356.0, 359.83364, toBeMovedUp).getY(), equalTo(new Point(10, 5.0 + 360.0).getY()));
     }
     
     @Test
@@ -60,7 +60,7 @@ public class TestWindChartPointRecalculation {
         Double max = null;
         for (Double yValue : pointYValues) {
             Point p = new Point(10, yValue);
-            p = WindChartPointRecalculator.keepOverallDeltaMinimal(min, max, p);
+            p = ChartPointRecalculator.keepOverallDeltaMinimal(min, max, p);
             Double newYValue = p.getY().doubleValue();
             recalculatedPointYValues.add(newYValue);
             

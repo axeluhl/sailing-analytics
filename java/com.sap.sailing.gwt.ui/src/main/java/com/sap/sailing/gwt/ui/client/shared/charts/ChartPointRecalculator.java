@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import org.moxieapps.gwt.highcharts.client.Point;
 
-public final class WindChartPointRecalculator {
+public final class ChartPointRecalculator {
     
-    private WindChartPointRecalculator() { }
+    private ChartPointRecalculator() { }
     
     public static Point stayClosestToPreviousPoint(Point previousPoint, Point newPoint) {
         double previousY = previousPoint.getY().doubleValue();
