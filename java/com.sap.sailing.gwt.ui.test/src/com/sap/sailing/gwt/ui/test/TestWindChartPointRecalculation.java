@@ -14,9 +14,14 @@ import org.moxieapps.gwt.highcharts.client.Point;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 
 public class TestWindChartPointRecalculation {
+    
+    @Test
+    public void testClosestToPreviousPointRecalculation() {
+        fail("Not yet implemented");
+    }
 
     @Test
-    public void testRecalculaion() {
+    public void testOverallDeltaMinimalRecalculaion() {
         Point notToBeRecalculated = new Point(10, 100);
         assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(90.0, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
         assertThat(ChartPointRecalculator.keepOverallDeltaMinimal(null, 110.0, notToBeRecalculated).getY(), equalTo(notToBeRecalculated.getY()));
@@ -37,7 +42,7 @@ public class TestWindChartPointRecalculation {
     }
     
     @Test
-    public void testContinuousWrapAround() {
+    public void testOverallDeltaMinimalWithContinuousWrapAround() {
         //Test multiple wrap around between 350� and 30�
         List<Double> pointYValues = Arrays.asList(356.74, 10.54, 30.192, 20.625, 5.647, 350.526);
         List<Double> expectedPointYValues = Arrays.asList(356.74, 10.54 + 360, 30.192 + 360, 20.625 + 360, 5.647 + 360, 350.526);
