@@ -100,7 +100,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         this.race = race;
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
-        raceSubscriber = subscriberFactory.createRaceSubscriber(race);
+        raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
         assertNotNull(race);
         // Initialize data controller using live and stored data sources
         if (storedUri.toString().startsWith("file:")) {
