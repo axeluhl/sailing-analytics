@@ -118,8 +118,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                 getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
             receivers.add(r);
         }
-        addListenersForStoredDataAndStartController(receivers);
-        IRace tractracRace = getTracTracRace();
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
             @Override
             public void stopped(IEvent event) {}
@@ -137,6 +135,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             @Override
             public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {}
         });
+        addListenersForStoredDataAndStartController(receivers);
+        IRace tractracRace = getTracTracRace();
         // we used to expect here that there is no RaceDefinition for the TracTrac race yet; however,
         // loading the race from an .mtb file stored locally, things work so fast that the race arrives through
         // a background thread (actually the RaceCourseReceiver) that it's initialized before we can check it here.
