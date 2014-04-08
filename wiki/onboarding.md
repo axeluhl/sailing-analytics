@@ -40,6 +40,7 @@ This document describes the onboarding process for a new team member (developer)
 #### Steps to build and run the Race Analysis Suite 
  
 1. Get the content of the git repository
+- Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
 - Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`
  
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
@@ -63,8 +64,8 @@ This document describes the onboarding process for a new team member (developer)
 
 4. Run the Race Analysis Suite
   - Start the MongoDB
-  - Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)')
-  - Start the GWT UI 
+  - Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the run dropdown
+  - Run "SailingGWT" in the run dropdown 
 
 5. Within the Race Analysis Suite
   - For TracTrac Events: (Date 27.11.2012) Use Live URI tcp://10.18.22.156:4412, Stored URI tcp://10.18.22.156:4413, JSON URL  http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php
