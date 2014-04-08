@@ -108,12 +108,11 @@ public class DomainFactoryImpl implements DomainFactory {
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Regatta>();
     
     /**
-     * A cache based on weak references to the TracTrac event, allowing for quick Event lookup as long as the
-     * TracTrac event remains referenced. This is intended to reduce the number of times the dominant boat
-     * class needs to be determined for an regatta. Synchronization for additions / removals is tied to the
+     * A cache based on weak references to the TracTrac race, allowing for quick race lookup as long as the
+     * TracTrac race remains referenced. Synchronization for additions / removals is tied to the
      * synchronization for {@link #regattaCache}.
      */
-    private final WeakIdentityHashMap<IEvent, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
+    private final WeakIdentityHashMap<IRace, Regatta> weakDefaultRegattaCache = new WeakIdentityHashMap<>();
     
     /**
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
@@ -345,7 +344,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IEvent event, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IRace race, TrackedRegattaRegistry trackedRegattaRegistry) {
         synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -360,22 +359,25 @@ public class DomainFactoryImpl implements DomainFactory {
             
             // try a quick look-up in the weak cache using the TracTrac event as key; only if that delivers no result,
             // compute the dominant boat class which requires a lot more effort
-            Regatta result = weakRegattaCache.get(event);
+            Regatta result = weakDefaultRegattaCache.get(race);
             if (result == null) {
-                Collection<ICompetitorClass> competitorClassList = event.getCompetitorClasses();
+                Collection<ICompetitorClass> competitorClassList = new ArrayList<>();
+                for (IRaceCompetitor competitor : race.getRaceCompetitors()) {
+                    competitorClassList.add(competitor.getCompetitor().getCompetitorClass());
+                }
                 BoatClass boatClass = getDominantBoatClass(competitorClassList);
-                Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
+                Pair<String, String> key = new Pair<String, String>(race.getName(), boatClass == null ? null
                         : boatClass.getName());
                 result = regattaCache.get(key);
                 // FIXME When a Regatta is removed from RacingEventService, it isn't removed here. We use a "stale" regatta here.
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
-                    result = new RegattaImpl(raceLogStore, event.getName(), boatClass, trackedRegattaRegistry,
+                    result = new RegattaImpl(raceLogStore, race.getName(), boatClass, trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
-                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), event.getId(), null);
+                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
                     regattaCache.put(key, result);
-                    weakRegattaCache.put(event, result);
+                    weakDefaultRegattaCache.put(race, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);
                 }
             }
@@ -468,7 +470,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     if (oldSize > 0 && Util.size(regatta.getAllRaces()) == 0) {
                         logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from TracTrac DomainFactoryImpl");
                         regattaCache.remove(key);
-                        weakRegattaCache.remove(tractracEvent);
+                        weakDefaultRegattaCache.remove(tractracRace);
                     }
                     TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
                     if (trackedRegatta != null) {

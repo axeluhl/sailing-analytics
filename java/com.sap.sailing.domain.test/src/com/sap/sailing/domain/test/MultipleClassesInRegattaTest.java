@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,8 +14,6 @@ import java.net.URL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-
 
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -82,7 +80,7 @@ public class MultipleClassesInRegattaTest {
         assertEquals("505", kiwotest2.getRegatta().getBoatClass().getName());
         assertEquals("49er", kiwotest3.getRegatta().getBoatClass().getName());
         assertEquals("STG", weym470may112014_2.getRegatta().getBoatClass().getName());
-        assertSame(weym470may112014_2.getRegatta(), kiwotest1.getRegatta());
+        assertNotSame(weym470may112014_2.getRegatta(), kiwotest1.getRegatta()); // expecting that each race gets a distinct default regatta
         assertNotSame(kiwotest1.getRegatta(), kiwotest2.getRegatta());
         assertNotSame(kiwotest1.getRegatta(), kiwotest3.getRegatta());
         assertNotSame(kiwotest2.getRegatta(), kiwotest3.getRegatta());

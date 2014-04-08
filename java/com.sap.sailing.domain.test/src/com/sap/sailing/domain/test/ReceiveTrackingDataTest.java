@@ -62,7 +62,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 }
             }
         };
-        Regatta regatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
+        Regatta regatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         trackedRegatta.addRaceListener(new RaceListener() {
             @Override

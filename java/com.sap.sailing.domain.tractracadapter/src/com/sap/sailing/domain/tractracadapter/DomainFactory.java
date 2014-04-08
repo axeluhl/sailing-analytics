@@ -100,7 +100,7 @@ public interface DomainFactory {
      * boat class exists yet.
      * @param trackedRegattaRegistry TODO
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IEvent event, TrackedRegattaRegistry trackedRegattaRegistry);
+    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
