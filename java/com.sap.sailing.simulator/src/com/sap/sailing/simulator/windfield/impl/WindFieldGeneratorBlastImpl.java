@@ -67,8 +67,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
             return;
         }
 
-        int nrow = positions.length;
-        int ncol = positions[0].length;
+        int nrow = this.boundary.getResY() + 2*this.boundary.getBorderY();
+        int ncol = this.boundary.getResX() + 2*this.boundary.getBorderX();
 
         timeUnits = nrow + defaultTimeUnits;
         if (startTime != null && endTime != null) {
@@ -107,7 +107,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         int blastSize = (int) Math.min(getBlastSize(), windParameters.maxBlastSize);
         logger.fine("Blast Size:" + blastSize);
         int nrow = timeUnits;
-        int ncol = positions[0].length;
+        int ncol = this.boundary.getResX() + 2*this.boundary.getBorderX();
         int hSpanStart = Math.max(0, colIndex - blastSize / 2);
         int hSpanEnd = Math.min(colIndex + blastSize - blastSize / 2, ncol - 1);
         int vSpan = Math.min(rowIndex + blastSize, nrow - 1);
@@ -184,8 +184,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         Position p = timedPosition.getPosition();
         Pair<Integer, Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
-            int rowIndex = positionIndex.getA();
-            int colIndex = positionIndex.getB();
+            int rowIndex = positionIndex.getA() + this.boundary.getBorderY();
+            int colIndex = positionIndex.getB() + this.boundary.getBorderX();
             int timeIndex = 0;
             if (timedPosition.getTimePoint() != null) {
                 timeIndex = getTimeIndex(timedPosition.getTimePoint());

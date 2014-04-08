@@ -23,10 +23,15 @@ public interface Boundary extends Serializable {
 	boolean isWithinBoundaries(Position P);
 	
 	//List<Position> extractLattice(int hPoints, int vPoints);
-	Position[][] extractGrid(int hPoints, int vPoints);
+	Position[][] extractGrid(int hPoints, int vPoints, int borderY, int borderX);
 	//List<Position> extractLattice(Distance hStep, Distance vstep); 
 	public Pair<Integer,Integer> getGridIndex(Position x);
-
+    
+	public int getResY();
+	public int getResX();
+	public int getBorderY();
+	public int getBorderX();
+    
 	Bearing getNorth();
 	Bearing getSouth();
 	Bearing getEast();
