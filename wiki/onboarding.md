@@ -40,7 +40,7 @@ This document describes the onboarding process for a new team member (developer)
 #### Steps to build and run the Race Analysis Suite 
  
 1. Get the content of the git repository
-- Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Git Bash (Not with Putty!!!)
+- Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
 - Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`
  
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
