@@ -156,41 +156,31 @@ public abstract class AbstractSeleniumTest {
      */
     protected void captureScreenshot(String filename) {
         URL screenshotFolder = this.environment.getScreenshotFolder();
-        
-        if(screenshotFolder == null)
-            return;
-        
-        WebDriver driver = getWebDriver();
-        
-        if(RemoteWebDriver.class.equals(driver.getClass())) {
-            driver = new Augmenter().augment(driver);
-        }
-        
-        InputStream source = getScreenshotNotSupportedImage();
-        
-        if(driver instanceof TakesScreenshot) {
-            source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
-        }
-        
-        
-        try {
-            URL destination = new URL(screenshotFolder, getClass().getName() + "/" + filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
-            
-            Path path = Paths.get(destination.toURI());
-            Path parent = path.getParent();
-            
-            if(parent != null) {
-                Files.createDirectories(parent);
+        if (screenshotFolder != null) {
+            WebDriver driver = getWebDriver();
+            if (RemoteWebDriver.class.equals(driver.getClass())) {
+                driver = new Augmenter().augment(driver);
             }
-            
-            Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
-            
-            // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
-            System.out.println(String.format(ATTACHMENT_FORMAT, destination));
-        } catch(URISyntaxException exception) {
-            // This should never happen, but it's a checked exception.
-        } catch(IOException exception) {
-            throw new RuntimeException(exception);
+            InputStream source = getScreenshotNotSupportedImage();
+            if (driver instanceof TakesScreenshot) {
+                source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+            }
+            try {
+                URL destination = new URL(screenshotFolder, getClass().getName()
+                        + "/" + filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+                Path path = Paths.get(destination.toURI());
+                Path parent = path.getParent();
+                if (parent != null) {
+                    Files.createDirectories(parent);
+                }
+                Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
+                // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
+                System.out.println(String.format(ATTACHMENT_FORMAT, destination));
+            } catch (URISyntaxException exception) {
+                // This should never happen, but it's a checked exception.
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
         }
     }
     
