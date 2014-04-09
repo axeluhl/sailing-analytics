@@ -22,7 +22,6 @@ public class CSSHelper {
     
     public static String containsCSSClassesPredicate(String... classNames) {
         StringBuilder builder = new StringBuilder(70 * classNames.length);
-        
         for(String className : classNames) {
             builder.append(containsCSSClassPredicate(className));
             builder.append(" and ");
@@ -32,28 +31,27 @@ public class CSSHelper {
     
     public static List<String> getCSSClassNames(WebElement element) {
         String cssClasses = element.getAttribute(CSSConstants.CSS_CLASS_ATTRIBUTE_NAME);
-        
-        if(cssClasses == null)
-            return Collections.emptyList();
-        
-        ArrayList<String> cssClassNames = new ArrayList<>();
-        
-        for(String part : cssClasses.split(" ")) {
-            String cssClass = part.trim();
-            
-            if(!cssClass.isEmpty())
-                cssClassNames.add(cssClass);
+        final List<String> result;
+        if (cssClasses == null) {
+            result = Collections.emptyList();
+        } else {
+            ArrayList<String> cssClassNames = new ArrayList<>();
+            for (String part : cssClasses.split(" ")) {
+                String cssClass = part.trim();
+                if (!cssClass.isEmpty()) {
+                    cssClassNames.add(cssClass);
+                }
+            }
+            result = cssClassNames;
         }
-        
-        return cssClassNames;
+        return result;
     }
     
     public static boolean hasCSSClass(WebElement element, String cssClass) {
-        if(cssClass == null || cssClass.isEmpty())
+        if (cssClass == null || cssClass.isEmpty()) {
             return true;
-        
+        }
         List<String> cssClasses = getCSSClassNames(element);
-        
         return cssClasses.contains(cssClass);
     }
     
