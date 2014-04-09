@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.*;
 
 import org.junit.Test;
@@ -15,9 +16,32 @@ import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 
 public class TestWindChartPointRecalculation {
     
+    private static final List<Double> MULTIPLE_WRAP_AROUNDS = Arrays.asList(356.74, 10.54, 30.192, 20.625, 5.647, 350.526);
+    private static final List<Double> EXPECTED_RECALCULATED_VALUES_FOR_MULTIPLE_WRAP_AROUNDS = Arrays.asList(356.74, 10.54 + 360, 30.192 + 360, 20.625 + 360, 5.647 + 360, 350.526);
+    
+    private static final List<Double> CONTINOUS_WRAP_AROUNDS = Arrays.asList(5.34, 358.97, 10.42, 50.0, 110.65, 140.54, 210.85, 280.38, 330.5, 358.97,
+            7.24, 48.0, 112.65, 135.54, 215.85, 278.38, 333.5, 356.97,
+            8.24, 48.245, 112.57, 133.54, 215.637, 278.38, 333.5, 356.97);
+    private static final List<Double> EXPECTED_RECALCULATED_VALUES_FOR_CONTINOUS_WRAP_AROUNDS = Arrays.asList(5.34, 358.97 - 360, 10.42, 50.0, 110.65, 140.54, 210.85 - 360, 280.38 - 360, 330.5 - 360, 358.97 - 360,
+            7.24, 48.0, 112.65, 135.54, 215.85 - 360, 278.38 - 360, 333.5 - 360, 356.97 - 360,
+            8.24, 48.245, 112.57, 133.54, 215.637 - 360, 278.38 - 360, 333.5 - 360, 356.97 - 360);
+
     @Test
     public void testClosestToPreviousPointRecalculation() {
-        fail("Not yet implemented");
+        Point previousPoint = new Point(9, 20);
+        
+        Point notToBeRecalculated = new Point(10, 100);
+        assertThat(ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, notToBeRecalculated), is(notToBeRecalculated));
+        
+        notToBeRecalculated = new Point(10, 5);
+        assertThat(ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, notToBeRecalculated), is(notToBeRecalculated));
+        
+        Point toBeMovedDown = new Point(10, 358);
+        assertThat(ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, toBeMovedDown).getY().intValue(), is(-2));
+        
+        previousPoint = new Point(9, 350);
+        Point toBeMovedUp = new Point(10, 2);
+        assertThat(ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, toBeMovedUp).getY().intValue(), is(362));
     }
 
     @Test
@@ -42,24 +66,38 @@ public class TestWindChartPointRecalculation {
     }
     
     @Test
-    public void testOverallDeltaMinimalWithContinuousWrapAround() {
-        //Test multiple wrap around between 350� and 30�
-        List<Double> pointYValues = Arrays.asList(356.74, 10.54, 30.192, 20.625, 5.647, 350.526);
-        List<Double> expectedPointYValues = Arrays.asList(356.74, 10.54 + 360, 30.192 + 360, 20.625 + 360, 5.647 + 360, 350.526);
-        assertThat(recalculatePoints(pointYValues), equalTo(expectedPointYValues));
+    public void testClosestToPreviousPointWithMultipleAndContiniusWrapArounds() {
+      //Test multiple wrap around between 350 and 30
+        assertThat(recalculatePointsClosestToPreviousPoint(MULTIPLE_WRAP_AROUNDS), equalTo(EXPECTED_RECALCULATED_VALUES_FOR_MULTIPLE_WRAP_AROUNDS));
         
-        //Test multiple round trips from 0� to 360�
-        pointYValues = Arrays.asList(5.34, 358.97, 10.42, 50.0, 110.65, 140.54, 210.85, 280.38, 330.5, 358.97,
-                                     7.24, 48.0, 112.65, 135.54, 215.85, 278.38, 333.5, 356.97,
-                                     8.24, 48.245, 112.57, 133.54, 215.637, 278.38, 333.5, 356.97);
-        expectedPointYValues = Arrays.asList(5.34, 358.97 - 360, 10.42, 50.0, 110.65, 140.54, 210.85 - 360, 280.38 - 360, 330.5 - 360, 358.97 - 360,
-                                             7.24, 48.0, 112.65, 135.54, 215.85 - 360, 278.38 - 360, 333.5 - 360, 356.97 - 360,
-                                             8.24, 48.245, 112.57, 133.54, 215.637 - 360, 278.38 - 360, 333.5 - 360, 356.97 - 360);
-
-        assertThat(recalculatePoints(pointYValues), equalTo(expectedPointYValues));
+        //Test multiple round trips from 0 to 360
+        assertThat(recalculatePointsClosestToPreviousPoint(CONTINOUS_WRAP_AROUNDS), equalTo(EXPECTED_RECALCULATED_VALUES_FOR_CONTINOUS_WRAP_AROUNDS));
+    }
+    
+    private List<Double> recalculatePointsClosestToPreviousPoint(List<Double> points) {
+        List<Double> racalculatedPoints = new ArrayList<Double>();
+        Point previousPoint = null;
+        for (Double yValue : points) {
+            Point newPoint = new Point(10, yValue);
+            if (previousPoint != null) {
+                newPoint = ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, newPoint);
+            }
+            racalculatedPoints.add(newPoint.getY().doubleValue());
+            previousPoint = newPoint;
+        }
+        return racalculatedPoints;
     }
 
-    private List<Double> recalculatePoints(List<Double> pointYValues) {
+    @Test
+    public void testOverallDeltaMinimalWithMultipleAndContinuousWrapArounds() {
+        //Test multiple wrap around between 350 and 30
+        assertThat(recalculatePointsWithOverallDeltaMinimal(MULTIPLE_WRAP_AROUNDS), equalTo(EXPECTED_RECALCULATED_VALUES_FOR_MULTIPLE_WRAP_AROUNDS));
+        
+        //Test multiple round trips from 0 to 360
+        assertThat(recalculatePointsWithOverallDeltaMinimal(CONTINOUS_WRAP_AROUNDS), equalTo(EXPECTED_RECALCULATED_VALUES_FOR_CONTINOUS_WRAP_AROUNDS));
+    }
+
+    private List<Double> recalculatePointsWithOverallDeltaMinimal(List<Double> pointYValues) {
         List<Double> recalculatedPointYValues = new ArrayList<Double>();
         Double min = null;
         Double max = null;
