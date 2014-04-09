@@ -204,45 +204,43 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         for (Competitor c : getRace().getCompetitors()) {
             TimePoint startTime;
             TimePoint secondPass;
-            try {
+            if (givenPasses.get(c).get(start) != null && givenPasses.get(c).get(second) != null) {
                 startTime = givenPasses.get(c).get(start).getTimePoint();
                 secondPass = givenPasses.get(c).get(second).getTimePoint();
-            } catch (NullPointerException e) {
-                continue;
-            }
-            TimePoint delta = new MillisecondsTimePoint(startTime.plus(secondPass.asMillis()).asMillis() / 2);
-            List<GPSFix> fixes = new ArrayList<GPSFix>();
-            try {
-                getTrackedRace().getTrack(c).lockForRead();
-                for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                    if (fix.getTimePoint().before(delta)) {
-                        fixes.add(fix);
+                TimePoint delta = new MillisecondsTimePoint(startTime.plus(secondPass.asMillis()).asMillis() / 2);
+                List<GPSFix> fixes = new ArrayList<GPSFix>();
+                try {
+                    getTrackedRace().getTrack(c).lockForRead();
+                    for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
+                        if (fix.getTimePoint().before(delta)) {
+                            fixes.add(fix);
+                        }
+                    }
+                } finally {
+                    getTrackedRace().getTrack(c).unlockAfterRead();
+                }
+                Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+                chooser.calculateMarkPassDeltas(c, f);
+                boolean gotPassed = true;
+                boolean gotOther = false;
+                // System.out.println(c);
+                for (Waypoint w : getRace().getCourse().getWaypoints()) {
+                    MarkPassing old = givenPasses.get(c).get(w);
+                    MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
+                    // System.out.println(newm);
+                    if (waypoints.indexOf(w) <= waypoint) {
+                        if ((old == null) != (newm == null)) {
+                            gotPassed = false;
+                        }
+                    } else {
+                        if (newm != null) {
+                            gotOther = true;
+                        }
                     }
                 }
-            } finally {
-                getTrackedRace().getTrack(c).unlockAfterRead();
-            }
-            Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
-            chooser.calculateMarkPassDeltas(c, f);
-            boolean gotPassed = true;
-            boolean gotOther = false;
-         //   System.out.println(c);
-            for (Waypoint w : getRace().getCourse().getWaypoints()) {
-                MarkPassing old = givenPasses.get(c).get(w);
-                MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
-             //   System.out.println(newm);
-                if (waypoints.indexOf(w) <= waypoint) {
-                    if ((old == null) != (newm == null)) {
-                        gotPassed = false;
-                    }
-                } else {
-                    if (newm != null) {
-                        gotOther = true;
-                    }
+                if (!gotPassed || gotOther) {
+                    mistakes++;
                 }
-            }
-            if (!gotPassed || gotOther) {
-                mistakes++;
             }
         }
         Assert.assertTrue(mistakes == 0);
