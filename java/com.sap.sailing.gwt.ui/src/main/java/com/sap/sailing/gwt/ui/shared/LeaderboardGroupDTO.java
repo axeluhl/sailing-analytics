@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class LeaderboardGroupDTO extends NamedDTO {
     private static final long serialVersionUID = -2923229069598593687L;

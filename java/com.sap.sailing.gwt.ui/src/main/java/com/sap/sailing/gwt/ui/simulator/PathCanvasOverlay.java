@@ -16,9 +16,9 @@ import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * This class implements the layer which displays the optimal path on the path. Currently there is a single path to be

@@ -36,6 +36,8 @@
 	<source path='actions'/>
 	<source path='simulator'/>
 	
+	<script src="../js/wind-streamlets.js" /> 
+	
 	<inherits name='com.google.gwt.logging.Logging'/>
   	<set-property name="gwt.logging.enabled" value="FALSE"/>
   	<!-- Set logging level to INFO -->
