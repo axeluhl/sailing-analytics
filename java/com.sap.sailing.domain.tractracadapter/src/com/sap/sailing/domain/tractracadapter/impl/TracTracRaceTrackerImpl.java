@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -179,7 +178,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final IRace tractracRace;
     private final com.sap.sailing.domain.base.Regatta regatta;
     private final IEventSubscriber eventSubscriber;
-    private final Map<IRace, IRaceSubscriber> raceSubscribers;
+    private final IRaceSubscriber raceSubscriber;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
@@ -311,10 +310,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, storedURI);
         // Start live and stored data streams
         Regatta effectiveRegatta = regatta;
-        raceSubscribers = new HashMap<>();
-        IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
+        raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
         raceSubscriber.subscribeConnectionStatus(this);
-        raceSubscribers.put(tractracRace, raceSubscriber);
         // Try to find a pre-associated event based on the Race ID
         if (effectiveRegatta == null) {
             Serializable raceID = domainFactory.getRaceID(tractracRace);
@@ -332,7 +329,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, tractracRace, tracTracUpdateURI,
-                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscribers.get(tractracRace))) {
+                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber)) {
             receivers.add(receiver);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -421,9 +418,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (Receiver receiver : listenersForStoredData) {
             receiver.subscribe();
         }
-        for (IRaceSubscriber raceSubscriber : raceSubscribers.values()) {
-            raceSubscriber.start();
-        }
+        eventSubscriber.start();
+        raceSubscriber.start();
     }
     
     @Override
@@ -437,9 +433,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
-        for (IRaceSubscriber raceSubscriber : raceSubscribers.values()) {
-            raceSubscriber.stop();
-        }
+        raceSubscriber.stop();
+        eventSubscriber.stop();
         for (Receiver receiver : receivers) {
             if (stopReceiversPreemtively) {
                 receiver.stopPreemptively();
@@ -447,6 +442,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 receiver.stopAfterProcessingQueuedEvents();
             }
         }
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
+        updateStatusOfTrackedRaces();
     }
 
     /**
