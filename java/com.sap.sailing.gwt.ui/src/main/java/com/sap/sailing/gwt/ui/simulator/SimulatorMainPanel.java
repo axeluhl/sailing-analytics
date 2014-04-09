@@ -304,8 +304,6 @@ public class SimulatorMainPanel extends SimplePanel {
         timer.setTime(windParams.getStartTime().getTime());
         int secondsTimeStep = (int) windParams.getTimeStep().getTime() / 1000;
         timer.setPlaySpeedFactor(secondsTimeStep);
-        timer.setAutoAdvance(true);
-
         timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);

@@ -215,8 +215,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
                 startPlaying();
                 break;
             case Paused:
-                // fall through to Stopped
-            case Stopped:
                 pausePlaying();
             default:
                 break;
@@ -463,8 +461,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
             break;
         case Paused:
-            // fall through to Stopped
-        case Stopped:
             if (!mediaPlayer.isMediaPaused()) {
                 mediaPlayer.pauseMedia();
             }
