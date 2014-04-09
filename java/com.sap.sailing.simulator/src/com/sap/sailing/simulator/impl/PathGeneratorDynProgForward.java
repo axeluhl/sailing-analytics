@@ -162,7 +162,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         }
 
         // generate grid positions using sgridh and sgridv
-        Position[][] sailGrid = boundary.extractGrid(spatialGridsizeHorizontal, spatialGridsizeVertical);
+        Position[][] sailGrid = boundary.extractGrid(spatialGridsizeHorizontal, spatialGridsizeVertical, 0, 0);
 
         // optimization grid indexes:
         // vertical steps: 0, ..., v-1

@@ -49,7 +49,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
         int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
         // steps
-        Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
+        Position[][] sailGrid = boundary.extractGrid(gridh, gridv, 0, 0);
 
         // create adjacency graph including start and end
         Map<Position, List<Position>> graph = new HashMap<Position, List<Position>>();

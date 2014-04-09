@@ -159,6 +159,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 break;
         }
         chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
+        chart.ensureDebugId("CompetitorChart");
         final String unit = DetailTypeFormatter.getUnit(getSelectedDetailType());
         final String label = unit.isEmpty() ? "" : "[" + unit + "]";
         chart.getYAxis().setAxisTitleText(label);

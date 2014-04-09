@@ -12,6 +12,8 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     private int xRes;
     private int yRes;
+    private int borderY;
+    private int borderX;
 
     private Date startTime;
     private Date endTime;
@@ -78,6 +80,19 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     public void setyRes(int yRes) {
         this.yRes = yRes;
+    }
+
+    public int getBorderY() {
+        return borderY;
+    }
+    
+    public int getBorderX() {
+    	return borderX;
+    }
+
+    public void setBorder(int border) {
+        this.borderY = border;
+        this.borderX = (int)Math.round(border * ((double)xRes) / ((double)yRes));
     }
 
     public Date getStartTime() {

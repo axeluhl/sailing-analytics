@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;
@@ -207,18 +208,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     @Override
     public void fillRegattas() {
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onSuccess(List<RegattaDTO> result) {
-                for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
-                    regattaDisplayer.fillRegattas(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                reportError("Remote Procedure Call getRegattas() - Failure");
-            }
-        });
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+                new AsyncCallback<List<RegattaDTO>>() {
+                    @Override
+                    public void onSuccess(List<RegattaDTO> result) {
+                        for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
+                            regattaDisplayer.fillRegattas(result);
+                        }
+                    }
+        
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        reportError("Remote Procedure Call getRegattas() - Failure");
+                    }
+                }));
     }
 }
