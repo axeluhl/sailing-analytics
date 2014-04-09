@@ -52,23 +52,20 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
-        
         this.trackableRaces = new ArrayList<>();
         this.trackedRaces = new ArrayList<>();
         this.leaderboardRaces = new ArrayList<>();
-        
-        for(int i = 1; i <= 5; i++) {
-            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  String.format(RACE, i), BOAT_CLASS);
-            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, String.format(RACE, i));
+        for (int i = 1; i <= 5; i++) {
+            String raceName = String.format(RACE, i);
+            TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  raceName, BOAT_CLASS);
+            TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, raceName);
             RaceDescriptor leaderboardRace = new RaceDescriptor(String.format("R%s", i), "Default", false, false, 0);
             
             this.trackableRaces.add(trackableRace);
             this.trackedRaces.add(trackedRace);
             this.leaderboardRaces.add(leaderboardRace);
         }
-        
         clearState(getContextRoot());
-        
         configureLeaderboard();
     }
     
@@ -238,7 +235,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
         //       selection (Firefox on Windows)
         //trackedRacesList.stopTracking(this.trackedRaces);
-        for(TrackedRaceDescriptor race : this.trackedRaces) {
+        for (TrackedRaceDescriptor race : this.trackedRaces) {
             trackedRacesList.stopTracking(race);
         }
     }

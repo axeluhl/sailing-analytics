@@ -40,7 +40,7 @@
      </system-property>
      <system-property>
         <name>webdriver.firefox.bin</name>
-        <value>D:\Internet\Firefox\firefox.exe</value>
+        <value>/usr/bin/firefox</value>
      </system-property>
   </system-properties>
   
