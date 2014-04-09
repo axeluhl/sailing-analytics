@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.home.client.shared;
 
-public class PageNameTokens {
+public class PageNameConstants {
 	public static final String startPage = "!start";
 	public static final String eventsPage = "!events";
+	public static final String eventPage = "!event";
 	public static final String aboutUsPage = "!aboutus";
 	public static final String contactPage = "!contact";
 
@@ -13,7 +14,11 @@ public class PageNameTokens {
 	public static String getEventsPage() {
 		return eventsPage;
 	}
-	
+
+	public static String getEventPage() {
+		return eventPage;
+	}
+
 	public static String getAboutUsPage() {
 		return aboutUsPage;
 	}

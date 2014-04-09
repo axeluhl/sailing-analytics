@@ -11,4 +11,6 @@ public interface SailingEventsService extends RemoteService {
 
 	List<EventDTO> getEvents();
 
+	EventDTO getEventById(String eventId);
+
 }

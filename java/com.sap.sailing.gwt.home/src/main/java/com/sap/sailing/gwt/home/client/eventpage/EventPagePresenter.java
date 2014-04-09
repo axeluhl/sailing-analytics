@@ -1,6 +1,4 @@
-package com.sap.sailing.gwt.home.client.eventspage;
-
-import java.util.List;
+package com.sap.sailing.gwt.home.client.eventpage;
 
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.user.client.Window;
@@ -16,19 +14,21 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
+import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import com.sap.sailing.gwt.home.client.RootPagePresenter;
 import com.sap.sailing.gwt.home.client.SailingEventsServiceAsync;
 import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 
-public class EventsPagePresenter extends Presenter<EventsPagePresenter.MyView, EventsPagePresenter.MyProxy> {
+public class EventPagePresenter extends Presenter<EventPagePresenter.MyView, EventPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
     private final SailingEventsServiceAsync sailingEventsService; 
 
-    private List<EventDTO> events; 
+    private EventDTO event;
+    private String eventIdParam; 
 
     public interface MyView extends View {
-    	public void setEvents(List<EventDTO> events);
+    	public void setEvent(EventDTO event);
     }
 
     /**
@@ -39,12 +39,12 @@ public class EventsPagePresenter extends Presenter<EventsPagePresenter.MyView, E
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
 
     @ProxyCodeSplit
-    @NameToken(PageNameConstants.eventsPage)
-    public interface MyProxy extends ProxyPlace<EventsPagePresenter> {
+    @NameToken(PageNameConstants.eventPage)
+    public interface MyProxy extends ProxyPlace<EventPagePresenter> {
     }
 
     @Inject
-    public EventsPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
+    public EventPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
     		SailingEventsServiceAsync sailingEventsService) {
         super(eventBus, view, proxy);
         
@@ -57,15 +57,21 @@ public class EventsPagePresenter extends Presenter<EventsPagePresenter.MyView, E
         RevealContentEvent.fire(this, RootPagePresenter.TYPE_SetMainContent, this);
     }
 
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+      super.prepareFromRequest(request);
+      eventIdParam = request.getParameter("id", "");
+    }
+    
 	@Override
 	protected void onReset() {
 		super.onReset();
 		
-		sailingEventsService.getEvents(new AsyncCallback<List<EventDTO>>() {
+		sailingEventsService.getEventById(eventIdParam, new AsyncCallback<EventDTO>() {
 			@Override
-			public void onSuccess(List<EventDTO> result) {
-				events = result;
-				getView().setEvents(events);
+			public void onSuccess(EventDTO result) {
+				event = result;
+				getView().setEvent(event);
 			}
 			
 			@Override

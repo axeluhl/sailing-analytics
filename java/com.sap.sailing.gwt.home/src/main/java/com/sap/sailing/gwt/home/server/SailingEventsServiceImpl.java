@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -34,6 +35,17 @@ public class SailingEventsServiceImpl extends ProxiedRemoteServiceServlet implem
         for (Event event : getRacingEventService().getAllEvents()) {
             EventDTO eventDTO = convertToEventDTO(event);
             result.add(eventDTO);
+        }
+        return result;
+    }
+
+    @Override
+    public EventDTO getEventById(String id) {
+        EventDTO result = null;
+    	UUID eventUUID = UUID.fromString(id);
+        Event event = getRacingEventService().getEvent(eventUUID);
+        if (event != null) {
+            result = convertToEventDTO(event);
         }
         return result;
     }

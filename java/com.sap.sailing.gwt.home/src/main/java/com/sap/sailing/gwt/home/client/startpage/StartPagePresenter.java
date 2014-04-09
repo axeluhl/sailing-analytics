@@ -13,7 +13,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.sap.sailing.gwt.home.client.RootPagePresenter;
-import com.sap.sailing.gwt.home.client.shared.PageNameTokens;
+import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 
 public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, StartPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
@@ -29,7 +29,7 @@ public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, Sta
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
 
     @ProxyCodeSplit
-    @NameToken(PageNameTokens.startPage)
+    @NameToken(PageNameConstants.startPage)
     public interface MyProxy extends ProxyPlace<StartPagePresenter> {
     }
 

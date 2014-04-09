@@ -13,18 +13,9 @@
  
 	<g:VerticalPanel styleName="{style.panel}">
 	    <g:HTMLPanel>
-	        Events page
-	        <div id="searchEventsInput">
-	            <h2>Search event:</h2>
-	            <label for="queryInput">Query:</label>
-	            <g:TextBox ui:field="queryInput"/>
-	            <g:Button ui:field="searchButton" text="Go!"/>
-	        </div>
-	        <div id="searchResults">
-	            <h2>Events:</h2>
-	            <g:FlowPanel ui:field="eventListPanel"/>
-	        </div>
-	    	<e:EventsTable ui:field="eventsTable" />
+	        Event page 
+	        <h1 ui:field="title"/>
+	        
 		</g:HTMLPanel>
     </g:VerticalPanel> 
 </ui:UiBinder>    

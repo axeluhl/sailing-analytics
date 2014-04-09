@@ -11,4 +11,6 @@ import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 public interface SailingEventsServiceAsync {
 
 	void getEvents(AsyncCallback<List<EventDTO>> callback);
+
+	void getEventById(String eventId, AsyncCallback<EventDTO> callback);
 }
