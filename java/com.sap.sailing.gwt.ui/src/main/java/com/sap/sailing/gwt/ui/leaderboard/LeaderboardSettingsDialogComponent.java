@@ -300,7 +300,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             Map<DetailType, CheckBox> registry) {
         CheckBox checkbox = createCheckbox(dialog, detailType, selected);
         registry.put(detailType, checkbox);
-        
         return checkbox;
     }
     
@@ -308,7 +307,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
                 DetailTypeFormatter.getTooltip(detailType));
         checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + "CheckBox");
-        
         return checkbox;
     }
     
@@ -317,7 +315,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + "CheckBox");
         checkbox.setValue(selected);
         dialog.addTooltip(checkbox, tooltip);
-        
         return checkbox;
     }
 
@@ -373,16 +370,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return new Validator<LeaderboardSettings>() {
             @Override
             public String getErrorMessage(LeaderboardSettings valueToValidate) {
+                final String result;
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                    return stringMessages.selectAtLeastOneLegDetail();
+                    result = stringMessages.selectAtLeastOneLegDetail();
                 } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                    return stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
+                    result = stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
                 } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N
                         && (numberOfLastRacesToShowBox.getValue() == null || numberOfLastRacesToShowBox.getValue() < 0)) {
-                    return stringMessages.numberOfRacesMustBeNonNegativeNumber();
+                    result = stringMessages.numberOfRacesMustBeNonNegativeNumber();
                 } else {
-                    return null;
+                    result = null;
                 }
+                return result;
             }
         };
     }
