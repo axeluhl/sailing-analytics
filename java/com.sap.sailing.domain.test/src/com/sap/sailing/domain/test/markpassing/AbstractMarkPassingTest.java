@@ -190,7 +190,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         incorrect += incorrectPasses;
         skipped += wronglyNotComputed;
         extra += wronglyComputed;
-        assertTrue(accuracy >= 0.8);
+        assertTrue("Expected accuracy to be at least 0.8 but was "+accuracy, accuracy >= 0.8);
     }
 
     private void testMiddleOfRace(int waypoint) {
