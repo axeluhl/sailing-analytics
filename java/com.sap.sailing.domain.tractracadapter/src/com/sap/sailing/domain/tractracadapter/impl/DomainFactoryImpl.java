@@ -403,7 +403,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber));
+                        trackedRegatta, tractracEvent, tractracRace, simulator, this, eventSubscriber, raceSubscriber));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(

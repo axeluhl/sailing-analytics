@@ -176,6 +176,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 1000;
     
     private final IEvent tractracEvent;
+    private final IRace tractracRace;
     private final com.sap.sailing.domain.base.Regatta regatta;
     private final IEventSubscriber eventSubscriber;
     private final Map<IRace, IRaceSubscriber> raceSubscribers;
@@ -282,6 +283,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         super();
+        this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
         urls = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
@@ -407,7 +409,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public RacesHandle getRacesHandle() {
-        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedRegatta(), this);
+        return new RaceHandleImpl(domainFactory, tractracRace, getTrackedRegatta(), this);
     }
     
     @Override

@@ -39,15 +39,17 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     private static final Logger logger = Logger.getLogger(MarkPositionReceiver.class.getName());
     
     private int received;
-
+    private final IRace tractracRace;
     final IControlPointPositionListener listener;
 
     /**
+     * @param tractracRace TODO
      */
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
         // assumption: there is currently only one race per TracTrac Event object
+        this.tractracRace = tractracRace;
         if (tractracEvent.getRaces().isEmpty()) {
             throw new IllegalArgumentException("Can't receive mark positions from event "+tractracEvent.getName()+" that has no race");
         }
@@ -79,20 +81,17 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
             }
         }
         Mark mark = getDomainFactory().getMark(new ControlPointAdapter(event.getA()), event.getC());
-        // FIXME this receiver receives mark position changes only for one race; post them to that one race only! 
-        for (IRace tractracRace : SynchronizationUtil.getRaces(getTracTracEvent())) {
-            DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
-            if (trackedRace != null) {
-                GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
-                if (getSimulator() != null) {
-                    getSimulator().scheduleMarkPosition(mark, markPosition);
-                } else {
-                    trackedRace.recordFix(mark, markPosition);
-                }
+        DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
+        if (trackedRace != null) {
+            GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
+            if (getSimulator() != null) {
+                getSimulator().scheduleMarkPosition(mark, markPosition);
             } else {
-                logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
-                        + ". Dropping mark position event " + event);
+                trackedRace.recordFix(mark, markPosition);
             }
+        } else {
+            logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
+                    + ". Dropping mark position event " + event);
         }
     }
 
