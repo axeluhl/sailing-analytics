@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.polars.NoPolarDataAvailableException;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.SpeedWithConfidenceWithIntegerRelationJsonSerializer;
 
@@ -37,7 +37,7 @@ public class PolarResource extends AbstractSailingServerResource {
             SpeedWithConfidenceWithIntegerRelationJsonSerializer serializer = new SpeedWithConfidenceWithIntegerRelationJsonSerializer();
             JSONObject jsonObj = serializer.serialize(speedWithConfidence);
             responseBuilder = Response.ok(jsonObj.toJSONString(), MediaType.APPLICATION_JSON);
-        } catch (NoPolarDataAvailableException e) {
+        } catch (NotEnoughDataHasBeenAddedException e) {
             responseBuilder = Response.noContent();
         }
 

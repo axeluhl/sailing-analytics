@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sse.datamining;uses:="com.sap.sse.datamining.functions,com.sap.sse.datamining.shared",
  com.sap.sse.datamining.components;uses:="com.sap.sse.datamining.shared",
+ com.sap.sse.datamining.data,
  com.sap.sse.datamining.data.deprecated,
  com.sap.sse.datamining.factories;uses:="com.sap.sse.datamining.impl.functions",
  com.sap.sse.datamining.functions;uses:="com.sap.sse.datamining.shared.dto,com.sap.sse.datamining.i18n,com.sap.sse.datamining.components",
@@ -23,6 +24,7 @@ Export-Package: com.sap.sse.datamining;uses:="com.sap.sse.datamining.functions,c
  com.sap.sse.datamining.impl.components.deprecated,
  com.sap.sse.datamining.impl.criterias;uses:="com.sap.sse.datamining.data,com.sap.sse.datamining.functions,com.sap.sse.datamining.components",
  com.sap.sse.datamining.impl.criterias.deprecated,
+ com.sap.sse.datamining.impl.data,
  com.sap.sse.datamining.impl.data.deprecated;uses:="com.sap.sse.datamining.data",
  com.sap.sse.datamining.impl.deprecated,
  com.sap.sse.datamining.impl.i18n;uses:="com.sap.sse.datamining.shared,com.sap.sse.datamining.i18n",

@@ -47,7 +47,7 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
         SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
         Wind wind = race.getWind(fix.getPosition(), fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
-        return bearing.getDifferenceTo(wind.getBearing());
+        return wind.getFrom().getDifferenceTo(bearing);
     }
 
     @Override

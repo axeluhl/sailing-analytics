@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Speed;
@@ -90,7 +91,7 @@ public class PolarDataMiner {
         return isActive || hasQueue;
     }
 
-    public Speed estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
+    public SpeedWithConfidence<Integer> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         return incrementalRegressionProcessor.estimateBoatSpeed(boatClass, windSpeed, angleToTheWind);
     }

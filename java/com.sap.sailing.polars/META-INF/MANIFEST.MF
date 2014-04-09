@@ -8,9 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Export-Package: 
  com.sap.sailing.polars,
+ com.sap.sailing.polars.analysis,
  com.sap.sailing.polars.data,
  com.sap.sailing.polars.factory,
- com.sap.sailing.polars.analysis
+ com.sap.sailing.polars.regression
 Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0",

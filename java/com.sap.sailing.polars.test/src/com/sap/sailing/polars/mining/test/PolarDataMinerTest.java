@@ -23,10 +23,10 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -103,20 +103,20 @@ public class PolarDataMinerTest {
             }
         }
 
-        Speed estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
-                -44.9));
+        SpeedWithConfidence<Integer> estimatedSpeed1 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+                new DegreeBearingImpl(44.9));
         assertThat(estimatedSpeed1, is(notNullValue()));
-        assertThat(estimatedSpeed1.getKnots(), is(closeTo(10.55, EPSILON)));
+        assertThat(estimatedSpeed1.getObject().getKnots(), is(closeTo(10.55, EPSILON)));
 
-        Speed estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
-                -42));
+        SpeedWithConfidence<Integer> estimatedSpeed2 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+                new DegreeBearingImpl(42));
         assertThat(estimatedSpeed2, is(notNullValue()));
-        assertThat(estimatedSpeed2.getKnots(), is(closeTo(10.05, EPSILON)));
+        assertThat(estimatedSpeed2.getObject().getKnots(), is(closeTo(10.05, EPSILON)));
 
-        Speed estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15), new DegreeBearingImpl(
-                -42.8));
+        SpeedWithConfidence<Integer> estimatedSpeed3 = miner.estimateBoatSpeed(mockedBoatClass, new KnotSpeedImpl(15),
+                new DegreeBearingImpl(42.8));
         assertThat(estimatedSpeed3, is(notNullValue()));
-        assertThat(estimatedSpeed3.getKnots(), is(closeTo(10, EPSILON)));
+        assertThat(estimatedSpeed3.getObject().getKnots(), is(closeTo(10, EPSILON)));
     }
 
     private GPSFixMoving createMockedFix(int hour, int minute, double lat, double lng, double bearingRaw, double speed) {
@@ -165,7 +165,7 @@ public class PolarDataMinerTest {
         when(trackedRace.getStartOfRace()).thenReturn(startOfRace);
         when(trackedRace.getEndOfRace()).thenReturn(endOfRace);
         
-        Bearing windBearing = new DegreeBearingImpl(0);
+        Bearing windBearing = new DegreeBearingImpl(180);
         SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(15, windBearing);
         
         Wind wind = new WindImpl(new DegreePosition(54.431952, 10.186767), startOfRace, windSpeed);

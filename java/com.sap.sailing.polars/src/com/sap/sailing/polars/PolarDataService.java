@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.data.PolarFix;
+import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 
 /**
  * Public Facade interface allowing access to the polars of {@link TrackedRace}s and per {@link BoatClass}.
@@ -31,10 +32,10 @@ public interface PolarDataService {
      * @param bearingToTheWind
      *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
-     * @throws NoPolarDataAvailableException
+     * @throws NotEnoughDataHasBeenAddedException
      */
     SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
-            throws NoPolarDataAvailableException;
+            throws NotEnoughDataHasBeenAddedException;
 
     /**
      * Generates a polar sheet for geven races and settings using the provided executor for the worker threads. This

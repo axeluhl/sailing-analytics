@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -53,7 +55,8 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         return null;
     }
 
-    public Speed estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed, final Bearing angleToTheWind)
+    public SpeedWithConfidence<Integer> estimateBoatSpeed(final BoatClass boatClass, final Speed windSpeed,
+            final Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         PolarClusterKey key = new PolarClusterKey() {
 
@@ -85,7 +88,9 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         if (boatSpeedEstimator == null) {
             throw new NotEnoughDataHasBeenAddedException();
         }
-        return new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(), angleToTheWind.getDegrees()));
+        KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
+                angleToTheWind.getDegrees()));
+        return new SpeedWithConfidenceImpl<Integer>(speedWithoutConfidence, /* FIXME */1.0, /* FIXME */0);
     }
 
 }
