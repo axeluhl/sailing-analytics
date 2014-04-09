@@ -30,10 +30,15 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     Button searchButton;
     @UiField
     UListElement results;
-    
+
+    @UiField(provided=true)
+    EventsTable eventsTable;
+
     public EventsPageView() {
         super();
 
+        eventsTable = new EventsTable();
+        
         initWidget(uiBinder.createAndBindUi(this));
         queryInput.getElement().setId("queryInput");
     }
@@ -70,6 +75,8 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
 		for(EventDTO event: events) {
             results.appendChild(createResultsItem(event.getName()));
 		}
+		
+		eventsTable.setEvents(events);
 	}
 
 }
