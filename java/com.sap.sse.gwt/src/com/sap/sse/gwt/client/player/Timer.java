@@ -76,11 +76,6 @@ public class Timer {
     private double playSpeedFactor;
 
     /**
-     * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
-     */
-    private boolean autoAdvance;
-
-    /**
      * The clocks of a client cannot be expected to be synchronized to the same time source as the server clock.
      * Therefore, there is a good chance for a significant time difference between client and server. While this does
      * not matter in replay mode where the client requests data for some arbitrary point in time, in live mode the
@@ -103,7 +98,7 @@ public class Timer {
      */
     public enum PlayModes { Live, Replay }; 
 
-    public enum PlayStates { Stopped, Playing, Paused }; 
+    public enum PlayStates { Playing, Paused }; 
 
     /**
      * The timer is created in stopped state unless created with <code>playMode==PlayModes.Live</code>, using the
@@ -129,10 +124,9 @@ public class Timer {
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
-        playState = PlayStates.Stopped;
+        playState = PlayStates.Paused;
         setPlaySpeedFactor(1.0);
         livePlayDelayInMillis = 0l;
-        autoAdvance = true;
         setPlayMode(playMode);
     }
     
@@ -251,28 +245,13 @@ public class Timer {
         }
     }
 
-    /**
-     * Puts the timer into the stopped state. If it was in live mode, puts it into replay mode.
-     */
-    public void stop() {
-        if (playState == PlayStates.Playing) {
-            playState = PlayStates.Stopped;
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-            setPlayMode(PlayModes.Replay);
-        }
-    }
-
     public void play() {
         if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 setTime(getLiveTimePointInMillis());
             }
-            if (autoAdvance) {
-                startAutoAdvance();
-            }
+            startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
@@ -337,14 +316,6 @@ public class Timer {
 
     public PlayModes getPlayMode() {
         return playMode;
-    }
-
-    public boolean isAutoAdvance() {
-        return autoAdvance;
-    }
-
-    public void setAutoAdvance(boolean autoAdvance) {
-        this.autoAdvance = autoAdvance;
     }
 
     public long getLiveTimePointInMillis() {
