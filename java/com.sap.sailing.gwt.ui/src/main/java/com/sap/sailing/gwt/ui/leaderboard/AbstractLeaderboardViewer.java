@@ -52,7 +52,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         mainPanel.setSize("100%", "100%");
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
-        if(!hideToolbar) {
+        if (!hideToolbar) {
             componentsNavigationPanel = new FlowPanel();
             componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
             mainPanel.add(componentsNavigationPanel);
@@ -63,8 +63,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
         if (!hideToolbar) {
-            final String componentName = componentDisplayName != null ? componentDisplayName : component
-                    .getLocalizedShortName();
+            final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
             final CheckBox checkBox = new CheckBox(componentName);
             checkBox.ensureDebugId(debugIdPrefix + "DisplayCheckBox");
@@ -80,7 +79,6 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
                 public void onValueChange(ValueChangeEvent<Boolean> newValue) {
                     boolean visible = checkBox.getValue();
                     component.setVisible(visible);
-
                     if (visible && component instanceof TimeListener) {
                         // trigger the component to update its data
                         ((TimeListener) component).timeChanged(timer.getTime(), null);
