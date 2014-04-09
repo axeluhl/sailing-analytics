@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.pages.common;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -46,12 +49,24 @@ public abstract class DataEntryDialogPO extends PageArea {
         return this.cancelButton.isEnabled();
     }
     
-    // QUESTION: What should we do, if the button is not enabled?
     public void pressOk() {
+        pressOk(false);
+    }
+    
+    public void pressOk(boolean accept) {
         this.okButton.click();
         
-        // Wait, since we do a callback usually
-        waitForAjaxRequests();
+        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
+        Alert alert = condition.apply(this.driver);
+        
+        if(alert != null && accept) {
+            alert.accept();
+        }
+        
+        if(alert == null || accept) {
+            // Wait, since we do a callback usually
+            waitForAjaxRequests();
+        }
     }
     
     public void pressCancel() {
