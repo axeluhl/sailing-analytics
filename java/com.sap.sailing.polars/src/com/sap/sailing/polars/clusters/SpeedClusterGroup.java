@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.windcluster;
+package com.sap.sailing.polars.clusters;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,15 +12,21 @@ import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
 
-public class SpeedCluster extends FixClusterGroup<Speed> {
+public class SpeedClusterGroup extends FixClusterGroup<Speed> {
 
     /**
+     * A {@link SpeedClusterGroup} lets the user set the level mids for all its clusters. The Boundaries will
+     * automatically be determined. They are in the middle between each level mid but only if the distance between level
+     * mid and boundary is smaller or equal {@code maxDistance}
+     * 
      * 
      * @param name
-     * @param levelMidsInKnots sorted low -> high. E.g. 2 4 6 10 15 20 30
-     * @param maxDistanceInKnots the clusters will max span <-maxDistanceInKnots-|mid|-maxDistanceinKnots->
+     * @param levelMidsInKnots
+     *            sorted low -> high. E.g. [2,4,6,10,15,20,30]
+     * @param maxDistanceInKnots
+     *            the clusters will max span <-maxDistanceInKnots-|mid|-maxDistanceinKnots->
      */
-    public SpeedCluster(String name, double[] levelMidsInKnots, double maxDistanceInKnots) {
+    public SpeedClusterGroup(String name, double[] levelMidsInKnots, double maxDistanceInKnots) {
         super(name, createClustersForLevelMids(levelMidsInKnots, maxDistanceInKnots));
     }
 
@@ -34,7 +40,7 @@ public class SpeedCluster extends FixClusterGroup<Speed> {
                     upperBoundary);
             clusterList.add(cluster);
         }
-        return null;
+        return clusterList;
     }
 
     private static ClusterBoundary<Speed> createUpperBoundary(double[] levelMidsInKnots, double maxDistanceInKnots,
