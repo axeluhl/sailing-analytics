@@ -47,7 +47,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
 
     @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
-
         if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
             queue.add(end);
         }
