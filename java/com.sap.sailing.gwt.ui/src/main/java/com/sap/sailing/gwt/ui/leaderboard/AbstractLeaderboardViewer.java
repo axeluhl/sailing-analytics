@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
@@ -20,8 +21,8 @@ import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * A base class for a leaderboard viewer.
+ * 
  * @author Frank Mittag (c163874)
- *
  */
 public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected final StringMessages stringMessages;
@@ -49,69 +50,62 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected FlowPanel createViewerPanel() {
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
-        
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
-
-        if(!hideToolbar) {
+        if (!hideToolbar) {
             componentsNavigationPanel = new FlowPanel();
             componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
             mainPanel.add(componentsNavigationPanel);
         }
-        
         return mainPanel;
     }
     
     protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
-        if(hideToolbar) {
-            return;
-        }
-        
-        final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName(); 
-        final CheckBox checkBox= new CheckBox(componentName);
-        final Button settingsButton = new Button("");
-        
-        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-        
-        checkBox.setEnabled(isCheckboxEnabled);
-        checkBox.setValue(component.isVisible());
-        checkBox.setTitle(stringMessages.showHideComponent(componentName));
-        checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
-
-        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
-                boolean visible = checkBox.getValue();
-                component.setVisible(visible);
-
-                if (visible && component instanceof TimeListener) {
-                    // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime(), null);
-                }
-                if(component.hasSettings() && !hasSettingsWhenComponentIsInvisible) {
-                    settingsButton.setEnabled(visible);
-                }
-            }
-        });
-
-        componentsNavigationPanel.add(checkBox);
-
-        if(component.hasSettings()) {
-            settingsButton.addClickHandler(new ClickHandler() {
+        if (!hideToolbar) {
+            final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
+            final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
+            final CheckBox checkBox = new CheckBox(componentName);
+            checkBox.ensureDebugId(debugIdPrefix + "DisplayCheckBox");
+            final Button settingsButton = new Button("");
+            settingsButton.ensureDebugId(debugIdPrefix + "SettingsButton");
+            checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
+            checkBox.setEnabled(isCheckboxEnabled);
+            checkBox.setValue(component.isVisible());
+            checkBox.setTitle(stringMessages.showHideComponent(componentName));
+            checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
+            checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<SettingsType>(component, stringMessages).show();
-                } 
+                public void onValueChange(ValueChangeEvent<Boolean> newValue) {
+                    boolean visible = checkBox.getValue();
+                    component.setVisible(visible);
+                    if (visible && component instanceof TimeListener) {
+                        // trigger the component to update its data
+                        ((TimeListener) component).timeChanged(timer.getTime(), null);
+                    }
+                    if (component.hasSettings() && !hasSettingsWhenComponentIsInvisible) {
+                        settingsButton.setEnabled(visible);
+                    }
+                }
             });
-        } 
-        
-        settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
-        settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
-        settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsButton.setTitle(stringMessages.settingsForComponent(componentName));
-        
-        componentsNavigationPanel.add(settingsButton);
+            componentsNavigationPanel.add(checkBox);
+            if (component.hasSettings()) {
+                settingsButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component,
+                                stringMessages);
+                        dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
+                        dialog.show();
+                    }
+                });
+            }
+            settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
+            settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
+            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+            settingsButton.setTitle(stringMessages.settingsForComponent(componentName));
+            componentsNavigationPanel.add(settingsButton);
+        }
     }
 }
 

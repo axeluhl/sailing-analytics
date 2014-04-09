@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -790,20 +791,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 getSailingService().getLeaderboardByName(getLeaderboardName(),
                         timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        previousLeaderboard.getId(), new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                            @Override
-                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
-                                callWhenExpansionDataIsLoaded.run();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError(
-                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                        true /* silentMode */);
-                            }
-                        });
+                        previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                                new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                                    @Override
+                                    public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                        updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
+                                        callWhenExpansionDataIsLoaded.run();
+                                    }
+        
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError(
+                                                stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                                true /* silentMode */);
+                                    }
+                                }));
             }
         }
 
@@ -1435,7 +1437,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
-        leaderboardTable.ensureDebugId("LeaderboardTable");
+        leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -1470,7 +1472,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         // the information panel
         informationPanel = new FlowPanel();
-		informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
+        informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
         informationPanel.add(scoreCorrectionCommentLabel);
@@ -1485,8 +1487,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         // the toolbar panel
         DockPanel toolbarPanel = new DockPanel();
-		toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
+        toolbarPanel.ensureDebugId("ToolbarPanel");
+        toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+        busyIndicator.ensureDebugId("BusyIndicator");
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
@@ -1507,12 +1511,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         pauseIcon = resources.autoRefreshEnabledIcon();
         playIcon = resources.autoRefreshDisabledIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
+        refreshAndSettingsPanel.ensureDebugId("RefreshAndSettingsPanel");
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         FlowPanel refreshPanel = new FlowPanel();
         refreshPanel.addStyleName("refreshPanel");
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
+        playPause.ensureDebugId("PlayAndPauseAnchor");
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
@@ -1750,7 +1756,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
                     /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
-            asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
+            this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
