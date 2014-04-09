@@ -26,6 +26,7 @@ This document describes the onboarding process for a new team member (developer)
 #### Accounts
 
 1. Git Account
+  * For access to the external git at ssh://trac@sapsailing.com/home/trac/git please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead.
   * Register yourself as a Git user in the SAP-Git under: https://git.wdf.sap.corp:8080/
   * Ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
