@@ -17,7 +17,7 @@ public class RectangularBoundaryTest {
         Position p2 = new DegreePosition(24.522137, -90.774536);
 
         Boundary b = new RectangularBoundary(p1, p2, 0.1);
-        Position[][] grid = b.extractGrid(20,20);
+        Position[][] grid = b.extractGrid(20,20,0,0);
         assertEquals("Number of lattice points",400,grid.length*grid[0].length);
     	
     }
