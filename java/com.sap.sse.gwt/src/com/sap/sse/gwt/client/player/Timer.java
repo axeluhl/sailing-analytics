@@ -122,7 +122,11 @@ public class Timer {
      * updated by a call to {@link #adjustClientServerOffset(long, Date, long)}. 
      */
     public Timer(PlayModes playMode) {
-        this(playMode, 1000);
+        this(playMode, getDefaultPlayStateForPlayMode(playMode));
+    }
+    
+    public Timer(PlayModes playMode, PlayStates playState) {
+        this(playMode, playState, 1000 /* refreshIntervalInMillis */);
     }
     
     /**
@@ -131,17 +135,25 @@ public class Timer {
      * {@link #refreshInterval delay between automatic updates} should the timer be
      * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to zero seconds.
      */
-    public Timer(PlayModes playMode, long refreshInterval) {
-        this.refreshInterval = refreshInterval;
+    public Timer(PlayModes playMode, long refreshIntervalInMillis) {
+        this(playMode, getDefaultPlayStateForPlayMode(playMode), refreshIntervalInMillis);
+    }
+    
+    public Timer(PlayModes playMode, PlayStates playState, long refreshIntervalInMillis) {
+        this.refreshInterval = refreshIntervalInMillis;
         // Using the client's clock is only a default; the time offset between client and server is adjusted when
         // information about the server time is present; see adjustClientServerOffset(...)
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
-        playState = PlayStates.Paused;
         setPlaySpeedFactor(1.0);
         livePlayDelayInMillis = 0l;
-        setPlayMode(playMode);
+        this.playMode = playMode;
+        setPlayState(playState, /* updatePlayMode */ false);
+    }
+    
+    private static PlayStates getDefaultPlayStateForPlayMode(PlayModes playMode) {
+        return playMode == PlayModes.Live ? PlayStates.Playing : PlayStates.Paused;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -238,37 +250,45 @@ public class Timer {
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
-            if (newPlayMode == PlayModes.Live) {
-                play();
-            }
+        }
+        if (newPlayMode == PlayModes.Live) {
+            play();
         }
     }    
 
+    /**
+     * @param updatePlayMode
+     *            if <code>true</code>, the play mode will be {@link #setPlayMode(PlayModes) updated} according to the
+     *            desired new play state. In particular, if the new play state is {@link PlayStates#Paused}, the play
+     *            mode will then automatically be set to {@link PlayModes#Replay}.
+     */
+    private void setPlayState(PlayStates newPlayState, boolean updatePlayMode) {
+        if (this.playState != newPlayState) {
+            this.playState = newPlayState; // if newPlayState is Paused then this will cause the repeating command to stop executing
+            if (newPlayState == PlayStates.Playing) {
+                if (playMode == PlayModes.Live) {
+                    setTime(getLiveTimePointInMillis());
+                }
+                startAutoAdvance();
+            } else if (updatePlayMode) {
+                setPlayMode(PlayModes.Replay);
+            }
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playState, playMode);
+            }
+        }
+    }
+    
     /**
      * Pauses this timer after the next time advance. Registered {@link PlayStateListener}s will be notified. If the
      * play mode was {@link PlayModes#Live}, it'll be set to {@link PlayModes#Replay}.
      */
     public void pause() {
-        if (playState == PlayStates.Playing) {
-            playState = PlayStates.Paused; // this will cause the repeating command to stop executing
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-            setPlayMode(PlayModes.Replay);
-        }
+        setPlayState(PlayStates.Paused, /* updatePlayMode */ true);
     }
 
     public void play() {
-        if (playState != PlayStates.Playing) {
-            playState = PlayStates.Playing;
-            if (playMode == PlayModes.Live) {
-                setTime(getLiveTimePointInMillis());
-            }
-            startAutoAdvance();
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-        }
+        setPlayState(PlayStates.Playing, /* updatePlayMode */ true);
     }
 
     private void startAutoAdvance() {
@@ -290,7 +310,7 @@ public class Timer {
                     scheduleAdvancerCommand(this);
                     return false; // stop this command; use the newly-scheduled one instead that uses the new frequency
                 } else {
-                    return playState == PlayStates.Playing ? true: false;
+                    return playState == PlayStates.Playing;
                 }
             }
 
