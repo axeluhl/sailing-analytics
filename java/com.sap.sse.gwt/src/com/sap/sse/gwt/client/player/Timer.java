@@ -10,10 +10,24 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 /**
  * Manages a timer and can auto-advance it at a given acceleration/deceleration rate, with a given delay compared to
  * real time. It can be {@link #pause() paused} and {@link #resume() resumed}. It can be in one of two play modes:
- * {@link PlayModes#Live} and {@link PlayModes#Replay}. In live play mode the timer is always in state {@link PlayStates#Playing}
- * and adjusts the time to now-{@link #livePlayDelayInMillis}. As soon as it's paused or stopped it enters
- * {@link PlayModes#Replay}. By entering {@link PlayModes#Live} with {@link #setPlayMode(PlayModes)}, the timer starts
- * playing right away.
+ * {@link PlayModes#Live live} and {@link PlayModes#Replay replay}. By entering {@link PlayModes#Live live} with
+ * {@link #setPlayMode(PlayModes)}, the timer starts playing right away and adjusts the time to now-
+ * {@link #livePlayDelayInMillis}. As soon as it's paused it enters {@link PlayModes#Replay replay}. The timer can
+ * be created in {@link PlayModes#Live live mode} and in {@link PlayStates#Paused paused state}. This can be useful
+ * to perform a single "live" query to the server. Note, however, that this state cannot be reached again by calls
+ * to {@link #pause()} and {@link #play()} and {@link #setPlayMode(PlayModes)} because those methods, when called,
+ * will guarantee that the timer is in play state {@link PlayStates#Playing} when put to {@link PlayModes#Live live mode}
+ * and in {@link PlayModes#Replay replay mode} when in the {@link PlayStates#Paused paused state}.<p>
+ * 
+ * The timer runs on a client which has a system clock of its own, as accessed by {@link System#currentTimeMillis()} on
+ * the client. It is reasonable to assume that the client time does usually not equal the server time. Sometimes there
+ * is a small offset of a few milliseconds, sometimes the offset can be minutes or even hours or days if the client
+ * device hasn't set the system date/time information correctly. When this timer is in {@link PlayModes#Live live} mode,
+ * usually it's the server time that matters, and several calls to the server will, instead of passing an actual time point,
+ * pass <code>null</code> to request "live" data from the server. In order to still know what time point the server data
+ * belongs to, the timer maintains an offset between client and server time and in live mode can produce time stamps that
+ * will come close to the server time, within the bounds of the network latency, usually a few milliseconds. The offset is
+ * managed using the {@link #adjustClientServerOffset(long, Date, long)} method.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -216,7 +230,7 @@ public class Timer {
     }
 
     /**
-     * When setting the play mode to live, the timer will automatically be put into play state playing.
+     * When setting the play mode to live, the timer will automatically be put into play state {@link PlayStates#Playing}.
      */
     public void setPlayMode(PlayModes newPlayMode) {
         if (this.playMode != newPlayMode) {
@@ -231,9 +245,8 @@ public class Timer {
     }    
 
     /**
-     * Pauses this timer after the next time advance. {@link #playing} is set to <code>false</code> if not already
-     * paused, and registered {@link PlayStateListener}s will be notified. If the play mode was live, it'll be set to
-     * replay.
+     * Pauses this timer after the next time advance. Registered {@link PlayStateListener}s will be notified. If the
+     * play mode was {@link PlayModes#Live}, it'll be set to {@link PlayModes#Replay}.
      */
     public void pause() {
         if (playState == PlayStates.Playing) {
