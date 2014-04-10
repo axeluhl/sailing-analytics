@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -63,26 +64,27 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         
         overallLeaderboardPanel = null;
         if(showOverallLeaderboard) {
-            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
-                @Override
-                public void onSuccess(List<String> result) {
-                    if(result.size() == 1) {
-                        String overallLeaderboardName = result.get(0);
-                        overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                                leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
-                                leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                                false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
-                        mainPanel.add(overallLeaderboardPanel);
-                        addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
-                                /* hasSettingsWhenComponentIsInvisible*/ true);
-                    }
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    // DO NOTHING
-                }
-            });
+            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(
+                    new AsyncCallback<List<String>>() {
+                        @Override
+                        public void onSuccess(List<String> result) {
+                            if(result.size() == 1) {
+                                String overallLeaderboardName = result.get(0);
+                                overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                                        leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
+                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                                        false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
+                                mainPanel.add(overallLeaderboardPanel);
+                                addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
+                                        /* hasSettingsWhenComponentIsInvisible*/ true);
+                            }
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // DO NOTHING
+                        }
+            }));
         }
     }
     

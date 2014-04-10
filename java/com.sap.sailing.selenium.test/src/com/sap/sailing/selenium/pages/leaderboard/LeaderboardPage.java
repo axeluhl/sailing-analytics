@@ -1,16 +1,16 @@
 package com.sap.sailing.selenium.pages.leaderboard;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.HostPage;
-
 import com.sap.sailing.selenium.pages.common.CSSConstants;
 import com.sap.sailing.selenium.pages.common.HTMLConstants;
+import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
 /**
  * <p>The page object representing the leaderboard.</p>
@@ -19,9 +19,9 @@ import com.sap.sailing.selenium.pages.common.HTMLConstants;
  *   D049941
  */
 public class LeaderboardPage extends HostPage {
-    private static final String PAGE_TITLE = "SAP Sailing Analytics Leaderboard"; //$NON-NLS-1$
     
     private static final String LEADERBOAR_PARAMTER_NAME = "name"; //$NON-NLS-1$
+    private static final String SHOW_RACE_DETAILS_PARAMTER_NAME = "showRaceDetails"; //$NON-NLS-1$
     
     private static final String AUTO_REFRESH_ENABLED_IMAGE = "url(\"data:image/png;base64," +           //$NON-NLS-1$
             "iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAR0lEQVR42mOoqan5T2vMMGoJxZZUV1fPB9IOWDC" + //$NON-NLS-1$
@@ -31,6 +31,10 @@ public class LeaderboardPage extends HostPage {
             "iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAhElEQVR42mOoqan5T2vMMGoJVSyprq6eD6TX09o" + //$NON-NLS-1$
             "nDQxAAKQDgBbep6klIFBfXy9QW1vbT1NLYKCqqsoAKH6eppbAADD4CoDy72lqCTQIFYhNGGRbAgPEJAyKLSEmYV" + //$NON-NLS-1$
             "DFEhgAWpQwdH1C0ziheeqiaT6haY6nedlF01KYXvXJaB0/MJYAANIIBwANoTb3AAAAAElFTkSuQmCC\")";        //$NON-NLS-1$
+    
+    public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard) {
+        return goToPage(driver, root, leaderboard, false);
+    }
     
     /**
      * <p>Goes to the specified leaderboard and returns the representing page object.</p>
@@ -44,29 +48,49 @@ public class LeaderboardPage extends HostPage {
      * @return
      *   The page object for the administration console.
      */
-    public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard) {
+    public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard, boolean raceDetails) {
         driver.get(root + "gwt/Leaderboard.html?" + getLeaderboard(leaderboard) + //$NON-NLS-1$
-                "&" + getGWTCodeServer()); //$NON-NLS-1$
+                "&" + getGWTCodeServer() + "&" + getShowRaceDeatails(raceDetails)); //$NON-NLS-1$
         
-        return new LeaderboardPage(driver);
+        return new LeaderboardPage(driver, leaderboard);
     }
     
     private static String getLeaderboard(String leaderboard) {
         return LEADERBOAR_PARAMTER_NAME + "=" + leaderboard; //$NON-NLS-1$
     }
     
-    @FindBy(how = BySeleniumId.class, using = "AutoRefreshToggleButton")
-    private WebElement autoRefreshToggleButton;
+    private static String getShowRaceDeatails(boolean raceDetails) {
+        return SHOW_RACE_DETAILS_PARAMTER_NAME + "=" + raceDetails; //$NON-NLS-1$
+    }
     
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardTable")
-    private WebElement leaderboardTable;
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardDisplayCheckBox")
+    private WebElement leaderboardDisplayCheckBox;
     
-    private LeaderboardPage(WebDriver driver) {
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardSettingsButton")
+    private WebElement leaderboardSettingsButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "CompetitorChartsDisplayCheckBox")
+    private WebElement competitorChartsDisplayCheckBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "CompetitorChartsSettingsButton")
+    private WebElement competitorChartsSettingsButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "PlayAndPauseAnchor")
+    private WebElement playAndPauseAnchor;
+    
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardCellTable")
+    private WebElement leaderboardCellTable;
+    
+    private LeaderboardPage(WebDriver driver, String leaderboard) {
         super(driver);
+        
+        if(!this.driver.getTitle().equals(leaderboard)) {
+            throw new IllegalStateException("This is not the leaderboard"); //$NON-NLS-1$
+        }
     }
     
     public boolean isAutoRefreshEnabled() {
-        WebElement image = this.autoRefreshToggleButton.findElement(By.tagName(HTMLConstants.IMAGE_TAG_NAME));
+        WebElement image = this.playAndPauseAnchor.findElement(By.tagName(HTMLConstants.IMAGE_TAG_NAME));
         String background = image.getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
         
         if(AUTO_REFRESH_ENABLED_IMAGE.equals(background))
@@ -78,18 +102,60 @@ public class LeaderboardPage extends HostPage {
         throw new RuntimeException("Can not determine auto refresh state"); //$NON-NLS-1$
     }
     
-    public void setAutoRefreshEnabled(boolean enabled) {
-        if(isAutoRefreshEnabled() != enabled)
-            this.autoRefreshToggleButton.click();
+    public void refresh() {
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        Long finishedCalls = (Long) executor.executeScript(
+                "return window.PENDING_AJAX_CALLS.numberOfFinishedCalls(arguments[0])", "loadLeaderboardData");
+        
+        this.playAndPauseAnchor.click();
+        
+        waitForAjaxRequestsExecuted("loadLeaderboardData", finishedCalls.intValue() + 1);
+        
+        this.playAndPauseAnchor.click();
     }
     
-    /**
-     * <p>Verifies that the current page is the leaderboard by checking the title of the page.</p>
-     */
+    public CompetitorChartsSettingsDialogPO getCompetitorChartsSettings() {
+        this.competitorChartsSettingsButton.click();
+        
+        return new CompetitorChartsSettingsDialogPO(this.driver,
+                findElementBySeleniumId(this.driver, "CompetitorChartsSettingsDialog"));
+    }
+    
+    public LeaderboardSettingsDialogPO getLeaderboardSettings() {
+        this.leaderboardSettingsButton.click();
+        
+        return new LeaderboardSettingsDialogPO(this.driver,
+                findElementBySeleniumId(this.driver, "LeaderboardSettingsDialog"));
+    }
+    
+    public LeaderboardTablePO getLeaderboardTable() {
+        return new LeaderboardTablePO(this.driver, this.leaderboardCellTable);
+    }
+
+    public void showCompetitorChart(String chart) {
+        this.competitorChartsSettingsButton.click();
+        CompetitorChartsSettingsDialogPO dialog = new CompetitorChartsSettingsDialogPO(this.driver,
+                findElementBySeleniumId(this.driver, "CompetitorChartsSettingsDialog"));
+        dialog.selectChartType(chart);
+        
+        CheckBoxPO checkbox = new CheckBoxPO(this.driver, this.competitorChartsDisplayCheckBox);
+        checkbox.setSelected(true);
+    }
+    
+    public void hideCompetitorChart() {
+        CheckBoxPO checkbox = new CheckBoxPO(this.driver, this.competitorChartsDisplayCheckBox);
+        checkbox.setSelected(false);
+    }
+    
+//    public LineChart getCompetitorChart() {
+//        return new LineChart(this.driver, findElementBySeleniumId("CompetitorChart"));
+//    }
+    
     @Override
-    protected void verify() {
-        if(!PAGE_TITLE.equals(this.driver.getTitle())) {
-            throw new IllegalStateException("This is not the leaderboard"); //$NON-NLS-1$
-        }
+    protected void initElements() {
+        super.initElements();
+        
+        // Wait for the initial loading of the data
+        waitForAjaxRequestsExecuted("loadLeaderboardData", 1);
     }
 }
