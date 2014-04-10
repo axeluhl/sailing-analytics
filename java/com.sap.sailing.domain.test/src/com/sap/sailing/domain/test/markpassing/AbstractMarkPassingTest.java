@@ -94,9 +94,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     private void testWholeRace() {
-
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
-
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
         final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), true);

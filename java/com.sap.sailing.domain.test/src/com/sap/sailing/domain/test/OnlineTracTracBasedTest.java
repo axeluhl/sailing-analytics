@@ -162,7 +162,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         trackedRace = getTrackedRegatta().getTrackedRace(race);
     }
 
-
     private void setStoredDataLoaded(boolean storedDataLoaded) {
         this.storedDataLoaded = storedDataLoaded;
     }
