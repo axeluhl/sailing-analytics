@@ -31,7 +31,7 @@ This document describes the onboarding process for a new team member (developer)
   * Ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
-  * Bugzilla url: http://sapsailing.com/bugzilla/
+  * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/
 3. Race Analysis user
   * Add yourself as an user to the Race Analysis suite by adding a Jetty user in the file java\target\configuration\jetty\etc\realm.properties
 4. Wiki
