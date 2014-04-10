@@ -361,13 +361,10 @@ public class DomainFactoryImpl implements DomainFactory {
             // compute the dominant boat class which requires a lot more effort
             Regatta result = weakDefaultRegattaCache.get(race);
             if (result == null) {
-                Collection<ICompetitorClass> competitorClassList = new ArrayList<>();
-                for (IRaceCompetitor competitor : race.getRaceCompetitors()) {
-                    competitorClassList.add(competitor.getCompetitor().getCompetitorClass());
-                }
-                BoatClass boatClass = getDominantBoatClass(competitorClassList);
-                Pair<String, String> key = new Pair<String, String>(race.getName(), boatClass == null ? null
-                        : boatClass.getName());
+                Pair<String, BoatClass> defaultRegattaNameAndBoatClass = getDefaultRegattaNameAndBoatClass(race);
+                BoatClass boatClass = defaultRegattaNameAndBoatClass.getB();
+                Pair<String, String> key = new Pair<String, String>(defaultRegattaNameAndBoatClass.getA(),
+                        boatClass == null ? null : boatClass.getName());
                 result = regattaCache.get(key);
                 // FIXME When a Regatta is removed from RacingEventService, it isn't removed here. We use a "stale" regatta here.
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
@@ -383,6 +380,15 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    private Pair<String, BoatClass> getDefaultRegattaNameAndBoatClass(IRace race) {
+        Collection<ICompetitorClass> competitorClassList = new ArrayList<>();
+        for (IRaceCompetitor competitor : race.getRaceCompetitors()) {
+            competitorClassList.add(competitor.getCompetitor().getCompetitorClass());
+        }
+        Pair<String, BoatClass> defaultRegattaNameAndBoatClass = new Pair<String, BoatClass>(race.getName(), getDominantBoatClass(competitorClassList));
+        return defaultRegattaNameAndBoatClass;
     }
     
     @Override
@@ -452,12 +458,14 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         if (raceDefinition != null) {
             Collection<ICompetitorClass> competitorClassList = new ArrayList<ICompetitorClass>();
-            for (ICompetitor c : tractracEvent.getCompetitors()) {
-                competitorClassList.add(c.getCompetitorClass());
+            for (IRaceCompetitor c : tractracRace.getRaceCompetitors()) {
+                competitorClassList.add(c.getCompetitor().getCompetitorClass());
             }
-            BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
-                    : boatClass.getName());
+            // FIXME this only removes the race from its default regatta, not any explicit regatta
+            Pair<String, BoatClass> defaultRegattaNameAndBoatClass = getDefaultRegattaNameAndBoatClass(tractracRace);
+            Pair<String, String> key = new Pair<String, String>(defaultRegattaNameAndBoatClass.getA(),
+                    defaultRegattaNameAndBoatClass.getB() == null ? null :
+                        defaultRegattaNameAndBoatClass.getB().getName());
             synchronized (regattaCache) {
                 Regatta regatta = regattaCache.get(key);
                 if (regatta != null) {

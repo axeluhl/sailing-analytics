@@ -960,10 +960,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     }
                     trackers.add(tracker);
                 }
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 String regattaName = tracker.getRegatta().getName();
                 Regatta regattaWithName = regattasByName.get(regattaName);
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 if (regattaWithName != null) {
                     if (regattaWithName != tracker.getRegatta()) {
                         if (Util.isEmpty(regattaWithName.getAllRaces())) {
