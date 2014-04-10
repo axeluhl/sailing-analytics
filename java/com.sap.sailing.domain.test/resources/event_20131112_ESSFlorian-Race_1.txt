@@ -366,7 +366,7 @@ ControlPoint9Name:Yellow
 ControlPoint9HasTwoPoints:0
 ControlPoint9ShortName:Y
 ControlPoint9DataSheet:Type=Buoy###BREAKLINE###Color=Yellow###BREAKLINE###Shape=Conical###BREAKLINE###Name=Yellow
-ControlPoint9Mark1Lon:-48.558780
+ControlPoint9Mark1Lon:-48.558777
 ControlPoint9Mark1Lat:-27.575673
 
 ControlPoint10UUID:4bea7160-2dc9-0131-275e-60a44ce903c3
@@ -376,7 +376,7 @@ ControlPoint10ShortName:S
 ControlPoint10DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
 ControlPoint10Mark1Lon:-48.561523
 ControlPoint10Mark1Lat:-27.584017
-ControlPoint10Mark2Lon:-48.558780
+ControlPoint10Mark2Lon:-48.558777
 ControlPoint10Mark2Lat:-27.575673
 
 ControlPoint11UUID:4f74d870-2dca-0131-27ae-60a44ce903c3
@@ -384,18 +384,18 @@ ControlPoint11Name:Red-Green
 ControlPoint11HasTwoPoints:1
 ControlPoint11ShortName:RG
 ControlPoint11DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Green###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Green###BREAKLINE###P2.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint11Mark1Lon:-48.559185
-ControlPoint11Mark1Lat:-27.583568
-ControlPoint11Mark2Lon:-48.560898
-ControlPoint11Mark2Lat:-27.585495
+ControlPoint11Mark1Lon:-48.559833
+ControlPoint11Mark1Lat:-27.575753
+ControlPoint11Mark2Lon:-48.562709999999996
+ControlPoint11Mark2Lat:-27.586253
 
 ControlPoint12UUID:5427c7d2-83be-11e2-88c0-10bf48d758ce
 ControlPoint12Name:Red
 ControlPoint12HasTwoPoints:0
 ControlPoint12ShortName:R
 ControlPoint12DataSheet:Type=Buoy###BREAKLINE###Color=Red###BREAKLINE###Shape=Conical###BREAKLINE###Name=Red
-ControlPoint12Mark1Lon:-48.559185
-ControlPoint12Mark1Lat:-27.583568
+ControlPoint12Mark1Lon:-48.559833
+ControlPoint12Mark1Lat:-27.575753
 
 ControlPoint13UUID:60e54960-2dc8-0131-2722-60a44ce903c3
 ControlPoint13Name:Black Gate
@@ -412,8 +412,8 @@ ControlPoint14Name:Red-Orange
 ControlPoint14HasTwoPoints:1
 ControlPoint14ShortName:RO
 ControlPoint14DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Orange###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Orange###BREAKLINE###P2.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint14Mark1Lon:-48.559185
-ControlPoint14Mark1Lat:-27.583568
+ControlPoint14Mark1Lon:-48.559833
+ControlPoint14Mark1Lat:-27.575753
 ControlPoint14Mark2Lon:-48.561082
 ControlPoint14Mark2Lat:-27.585780
 
@@ -422,9 +422,9 @@ ControlPoint15Name:Red-Yellow
 ControlPoint15HasTwoPoints:1
 ControlPoint15ShortName:RY
 ControlPoint15DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Red###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Red###BREAKLINE###P1.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint15Mark1Lon:-48.559185
-ControlPoint15Mark1Lat:-27.583568
-ControlPoint15Mark2Lon:-48.558780
+ControlPoint15Mark1Lon:-48.559833
+ControlPoint15Mark1Lat:-27.575753
+ControlPoint15Mark2Lon:-48.558777
 ControlPoint15Mark2Lat:-27.575673
 
 ControlPoint16UUID:785c3e44-83be-11e2-88c0-10bf48d758ce
@@ -432,16 +432,16 @@ ControlPoint16Name:Green
 ControlPoint16HasTwoPoints:0
 ControlPoint16ShortName:G
 ControlPoint16DataSheet:Type=Buoy###BREAKLINE###Color=Green###BREAKLINE###Shape=Conical###BREAKLINE###Name=Green
-ControlPoint16Mark1Lon:-48.560898
-ControlPoint16Mark1Lat:-27.585495
+ControlPoint16Mark1Lon:-48.562709999999996
+ControlPoint16Mark1Lat:-27.586253
 
 ControlPoint17UUID:7c057f10-2dc9-0131-2768-60a44ce903c3
 ControlPoint17Name:Green-Orange
 ControlPoint17HasTwoPoints:1
 ControlPoint17ShortName:GO
 ControlPoint17DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Orange###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Orange###BREAKLINE###P2.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint17Mark1Lon:-48.560898
-ControlPoint17Mark1Lat:-27.585495
+ControlPoint17Mark1Lon:-48.562709999999996
+ControlPoint17Mark1Lat:-27.586253
 ControlPoint17Mark2Lon:-48.561082
 ControlPoint17Mark2Lat:-27.585780
 
@@ -470,8 +470,8 @@ ControlPoint20Name:Green-WhiteP
 ControlPoint20HasTwoPoints:1
 ControlPoint20ShortName:GP
 ControlPoint20DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=White###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=White P###BREAKLINE###P2.UUID=e9ec42f8-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint20Mark1Lon:-48.560898
-ControlPoint20Mark1Lat:-27.585495
+ControlPoint20Mark1Lon:-48.562709999999996
+ControlPoint20Mark1Lat:-27.586253
 ControlPoint20Mark2Lon:-48.560910
 ControlPoint20Mark2Lat:-27.585353
 
@@ -496,8 +496,8 @@ ControlPoint23Name:Green-WhiteS
 ControlPoint23HasTwoPoints:1
 ControlPoint23ShortName:GS
 ControlPoint23DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=White###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=White S###BREAKLINE###P2.UUID=bf6777e6-83bd-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint23Mark1Lon:-48.560898
-ControlPoint23Mark1Lat:-27.585495
+ControlPoint23Mark1Lon:-48.562709999999996
+ControlPoint23Mark1Lat:-27.586253
 ControlPoint23Mark2Lon:-48.561337
 ControlPoint23Mark2Lat:-27.585883
 
@@ -514,8 +514,8 @@ ControlPoint25Name:Black Conical-Green
 ControlPoint25HasTwoPoints:1
 ControlPoint25ShortName:S
 ControlPoint25DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Green###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Green###BREAKLINE###P2.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint25Mark1Lon:-48.561523
-ControlPoint25Mark1Lat:-27.584017
+ControlPoint25Mark1Lon:-48.562709999999996
+ControlPoint25Mark1Lat:-27.586253
 ControlPoint25Mark2Lon:-48.560898
 ControlPoint25Mark2Lat:-27.585495
 
@@ -524,9 +524,9 @@ ControlPoint26Name:Green-Yellow
 ControlPoint26HasTwoPoints:1
 ControlPoint26ShortName:GY
 ControlPoint26DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Green###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Green###BREAKLINE###P1.UUID=785c3e44-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
-ControlPoint26Mark1Lon:-48.560898
-ControlPoint26Mark1Lat:-27.585495
-ControlPoint26Mark2Lon:-48.558780
+ControlPoint26Mark1Lon:-48.562709999999996
+ControlPoint26Mark1Lat:-27.586253
+ControlPoint26Mark2Lon:-48.558777
 ControlPoint26Mark2Lat:-27.575673
 
 ControlPoint27UUID:e9ec42f8-83bd-11e2-88c0-10bf48d758ce
@@ -544,7 +544,7 @@ ControlPoint28ShortName:OY
 ControlPoint28DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Orange###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Name=Orange###BREAKLINE###P1.UUID=1286f15e-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Yellow###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Yellow###BREAKLINE###P2.UUID=3fdd2402-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
 ControlPoint28Mark1Lon:-48.561082
 ControlPoint28Mark1Lat:-27.585780
-ControlPoint28Mark2Lon:-48.558780
+ControlPoint28Mark2Lon:-48.558777
 ControlPoint28Mark2Lat:-27.575673
 
 ControlPoint29UUID:fc09f220-2dc8-0131-2740-60a44ce903c3
@@ -554,8 +554,8 @@ ControlPoint29ShortName:S
 ControlPoint29DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Red###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Red###BREAKLINE###P2.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
 ControlPoint29Mark1Lon:-48.561523
 ControlPoint29Mark1Lat:-27.584017
-ControlPoint29Mark2Lon:-48.559185
-ControlPoint29Mark2Lat:-27.583568
+ControlPoint29Mark2Lon:-48.559833
+ControlPoint29Mark2Lat:-27.575753
 
 
 SegmentFile:segments.php
