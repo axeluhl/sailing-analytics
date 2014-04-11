@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.core.impl;
 
-import java.net.URL;
+import java.io.File;
 
 import org.openqa.selenium.WebDriver;
 
@@ -17,7 +17,7 @@ public class TestEnvironmentImpl implements TestEnvironment {
     private WebDriver driver;
     private WindowManager manager;
     private String root;
-    private URL screenshots;
+    private File screenshotsFolder;
     
     /**
      * <p>Creates a new description of the test environment in which a test is executed.</p>
@@ -26,13 +26,13 @@ public class TestEnvironmentImpl implements TestEnvironment {
      *   The web driver used for the execution of the test.
      * @param root
      *   The context root (base URL) against the tests should be executed.
-     * @param screenshots
+     * @param screenshotsFolder
      *   The folder where screenshots should be stored.
      */
-    public TestEnvironmentImpl(WebDriver driver, String root, URL screenshots) {
+    public TestEnvironmentImpl(WebDriver driver, String root, File screenshotsFolder) {
         this.driver = driver;
         this.root = root;
-        this.screenshots = screenshots;
+        this.screenshotsFolder = screenshotsFolder;
         
         this.manager = new WindowManager(driver);
     }
@@ -53,8 +53,8 @@ public class TestEnvironmentImpl implements TestEnvironment {
     }
     
     @Override
-    public URL getScreenshotFolder() {
-        return this.screenshots;
+    public File getScreenshotFolder() {
+        return this.screenshotsFolder;
     }
 
     /**
@@ -64,6 +64,6 @@ public class TestEnvironmentImpl implements TestEnvironment {
         this.driver.quit();
         this.driver = null;
         this.root = null;
-        this.screenshots = null;
+        this.screenshotsFolder = null;
     }
 }

@@ -1,14 +1,13 @@
 package com.sap.sailing.selenium.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
@@ -154,7 +153,7 @@ public abstract class AbstractSeleniumTest {
      *   if an I/O error occurs.
      */
     protected void captureScreenshot(String filename) {
-        URL screenshotFolder = this.environment.getScreenshotFolder();
+        File screenshotFolder = this.environment.getScreenshotFolder();
         if (screenshotFolder != null) {
             WebDriver driver = getWebDriver();
             if (RemoteWebDriver.class.equals(driver.getClass())) {
@@ -165,18 +164,13 @@ public abstract class AbstractSeleniumTest {
                 source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
             }
             try {
-                URL destination = new URL(screenshotFolder, getClass().getName()
-                        + "/" + filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
-                Path path = Paths.get(destination.toURI());
-                Path parent = path.getParent();
-                if (parent != null) {
-                    Files.createDirectories(parent);
-                }
+                File destinationDir = new File(screenshotFolder, getClass().getName());
+                destinationDir.mkdirs();
+                File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+                Path path = destination.toPath();
                 Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
                 // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
-                System.out.println(String.format(ATTACHMENT_FORMAT, destination));
-            } catch (URISyntaxException exception) {
-                // This should never happen, but it's a checked exception.
+                System.out.println(String.format(ATTACHMENT_FORMAT, destination.getCanonicalFile().toURI()));
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
