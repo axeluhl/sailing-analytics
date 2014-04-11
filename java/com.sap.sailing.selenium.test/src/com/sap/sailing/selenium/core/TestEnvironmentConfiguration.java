@@ -140,9 +140,9 @@ public class TestEnvironmentConfiguration {
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
-        List<DriverDefinition> driverDefenitions = createDriverDefinitions(testEnvironmentNode);
+        List<DriverDefinition> driverDefinitions = createDriverDefinitions(testEnvironmentNode);
         
-        return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefenitions);
+        return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefinitions);
     }
     
     private static synchronized Document readTestConfiguration() throws ParserConfigurationException,
@@ -229,11 +229,11 @@ public class TestEnvironmentConfiguration {
     private List<DriverDefinition> definitions;
         
     private TestEnvironmentConfiguration(String root, String screenshots, Map<String, String> properties,
-            List<DriverDefinition> defenitions) {
+            List<DriverDefinition> definitions) {
         this.root = root;
         this.screenshotsFolder = screenshots;
         this.properties = properties;
-        this.definitions = defenitions;
+        this.definitions = definitions;
     }
     
     /**

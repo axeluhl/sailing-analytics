@@ -256,9 +256,9 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
             TestClass test = getTestClass();
             URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(resolveScreenshotFolder(screenshotsFolder)) : null);
             
-            for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
+            for (DriverDefinition definition : configuration.getDriverDefinitions()) {
                 SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
-                        screenshotsStorage, defenition);
+                        screenshotsStorage, definition);
                 
                 this.children.add(child);
             }
