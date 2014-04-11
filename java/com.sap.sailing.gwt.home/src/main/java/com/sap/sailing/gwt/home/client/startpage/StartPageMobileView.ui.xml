@@ -11,7 +11,7 @@
  
 	<g:VerticalPanel styleName="{style.panel}">
     	<g:HTML>
-    		Home content DESKTOP
+    		Home content MOBILE
     	</g:HTML>
     </g:VerticalPanel> 
 </ui:UiBinder>    

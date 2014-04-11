@@ -23,19 +23,43 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	
 	<inherits name="com.google.gwt.inject.Inject" />
-	    
+	<!-- 
     <inherits name='com.gwtplatform.mvp.Mvp' />
+	 -->    
+    
+    <inherits name="com.gwtplatform.mvp.MvpWithFormFactor" />
+    <inherits name='com.gwtplatform.dispatch.Dispatch' />
     
 	<!-- Specify the app entry point class.                         -->
+	<!-- 
 	<entry-point class='com.sap.sailing.gwt.home.client.HomeEntryPoint'/>
+	 -->
 	
 	<!-- Specify the paths for translatable code  -->
 	<extend-property name="locale" values="de"/>
 	
 	<!-- gwtp configurations -->
 	<set-configuration-property name="verifyNewerVersion" value="false"/>
+	<!-- 
   	<set-configuration-property name="gin.ginjector" value="com.sap.sailing.gwt.home.client.MyGinjector" />
-	
+	 -->
+
+	<!-- Form factor specific modules -->
+    <set-configuration-property name="gin.ginjector.module.desktop"
+                                value="com.sap.sailing.gwt.home.client.gin.DesktopModule" />
+    <set-configuration-property name="gin.ginjector.module.mobile"
+                                value="com.sap.sailing.gwt.home.client.gin.MobileModule" />
+    <!-- 
+    <set-configuration-property name="gin.ginjector.module.tablet"
+                                value="com.sap.sailing.gwt.home.client.gin.TabletModule" />
+     -->
+
+    <!-- Shared modules -->
+    <set-configuration-property name="gin.ginjector.modules"
+                                value="com.gwtplatform.dispatch.client.gin.DispatchAsyncModule" />
+    <extend-configuration-property name="gin.ginjector.modules"
+                                   value="com.sap.sailing.gwt.home.client.gin.SharedModule" />
+  		
 	<source path='client'/>
 	<source path='shared'/>
 </module>

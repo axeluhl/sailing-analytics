@@ -1,7 +1,8 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.app;
+
+import javax.inject.Singleton;
 
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
-import com.gwtplatform.mvp.client.gin.DefaultModule;
 import com.sap.sailing.gwt.home.client.aboutuspage.AboutUsPagePresenter;
 import com.sap.sailing.gwt.home.client.aboutuspage.AboutUsPageView;
 import com.sap.sailing.gwt.home.client.contactpage.ContactPagePresenter;
@@ -10,20 +11,20 @@ import com.sap.sailing.gwt.home.client.eventpage.EventPagePresenter;
 import com.sap.sailing.gwt.home.client.eventpage.EventPageView;
 import com.sap.sailing.gwt.home.client.eventspage.EventsPagePresenter;
 import com.sap.sailing.gwt.home.client.eventspage.EventsPageView;
-import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 import com.sap.sailing.gwt.home.client.startpage.StartPagePresenter;
 import com.sap.sailing.gwt.home.client.startpage.StartPageView;
 
-public class MyModule extends AbstractPresenterModule {
+public class ApplicationDesktopModule extends AbstractPresenterModule {
     @Override
     protected void configure() {
-        install(new DefaultModule(MyPlaceManager.class));
-
-        bindConstant().annotatedWith(DefaultPlace.class).to(PageNameConstants.startPage);
+        // root page presenters
+        bind(ApplicationDesktopPresenter.class).in(Singleton.class);
+        bind(ApplicationDesktopView.class).in(Singleton.class);
+        bind(AbstractRootPagePresenter.MyProxy.class).asEagerSingleton();
+        bind(AbstractRootPagePresenter.MyView.class).to(ApplicationDesktopView.class);
+        bind(AbstractRootPagePresenter.class).to(ApplicationDesktopPresenter.class);
 
         // Presenters
-        bindPresenter(RootPagePresenter.class, RootPagePresenter.MyView.class, RootPageView.class, RootPagePresenter.MyProxy.class);
-
         bindPresenter(StartPagePresenter.class, StartPagePresenter.MyView.class, StartPageView.class,
         		StartPagePresenter.MyProxy.class);
         bindPresenter(EventsPagePresenter.class, EventsPagePresenter.MyView.class, EventsPageView.class,

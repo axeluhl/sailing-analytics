@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
@@ -13,18 +13,13 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
-/**
- * This is the top-level presenter of the hierarchy. Other presenters reveal themselves within this presenter.
- * <p />
- * The goal of this sample is to show how to use nested presenters. These can be useful to decouple multiple presenters
- * that need to be displayed on the screen simultaneously.
- */
-public class RootPagePresenter extends Presenter<RootPagePresenter.MyView, RootPagePresenter.MyProxy> {
+public abstract class AbstractRootPagePresenter extends Presenter<AbstractRootPagePresenter.MyView, AbstractRootPagePresenter.MyProxy> {
+
     /**
      * {@link RootPagePresenter}'s proxy.
      */
     @ProxyStandard
-    public interface MyProxy extends Proxy<RootPagePresenter> {
+    public interface MyProxy extends Proxy<AbstractRootPagePresenter> {
     }
 
     /**
@@ -41,7 +36,7 @@ public class RootPagePresenter extends Presenter<RootPagePresenter.MyView, RootP
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
 
     @Inject
-    public RootPagePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
+    public AbstractRootPagePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
         super(eventBus, view, proxy);
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client;
+package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -9,23 +9,26 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.gwtplatform.mvp.client.ViewImpl;
-import com.sap.sailing.gwt.home.client.RootPagePresenter.MyView;
+import com.sap.sailing.gwt.home.client.shared.FooterPanel;
 import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
- * {@link RootPageView} will add its content of the target inside the {@code mainContantPanel}.
+ * {@link ApplicationMobileView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class RootPageView extends ViewImpl implements MyView {
-    interface MainPageViewUiBinder extends UiBinder<Widget, RootPageView> {
+public class ApplicationMobileView extends ViewImpl implements AbstractRootPagePresenter.MyView {
+    interface ApplicationMobileViewUiBinder extends UiBinder<Widget, ApplicationMobileView> {
     }
 
-    private static MainPageViewUiBinder uiBinder = GWT.create(MainPageViewUiBinder.class);
+    private static ApplicationMobileViewUiBinder uiBinder = GWT.create(ApplicationMobileViewUiBinder.class);
 
     public final Widget widget;
 
     @UiField(provided=true)
     HeaderPanel headerPanel;
+
+    @UiField(provided=true)
+    FooterPanel footerPanel;
 
     @UiField
     FlowPanel mainContentPanel;
@@ -33,8 +36,9 @@ public class RootPageView extends ViewImpl implements MyView {
     @UiField
     Element loadingMessage;
 
-    public RootPageView() {
+    public ApplicationMobileView() {
         headerPanel = new HeaderPanel();
+        footerPanel = new FooterPanel();
         
         widget = uiBinder.createAndBindUi(this);
     }
@@ -46,7 +50,7 @@ public class RootPageView extends ViewImpl implements MyView {
 
     @Override
     public void setInSlot(Object slot, IsWidget content) {
-        if (slot == RootPagePresenter.TYPE_SetMainContent) {
+        if (slot == AbstractRootPagePresenter.TYPE_SetMainContent) {
             setMainContent(content);
         } else {
             super.setInSlot(slot, content);

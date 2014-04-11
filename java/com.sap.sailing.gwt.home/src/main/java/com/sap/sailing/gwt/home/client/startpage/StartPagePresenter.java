@@ -12,7 +12,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
-import com.sap.sailing.gwt.home.client.RootPagePresenter;
+import com.sap.sailing.gwt.home.client.app.AbstractRootPagePresenter;
 import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 
 public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, StartPagePresenter.MyProxy> {
@@ -42,6 +42,6 @@ public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, Sta
 
     @Override
     protected void revealInParent() {
-        RevealContentEvent.fire(this, RootPagePresenter.TYPE_SetMainContent, this);
+        RevealContentEvent.fire(this, AbstractRootPagePresenter.TYPE_SetMainContent, this);
     }
 }
