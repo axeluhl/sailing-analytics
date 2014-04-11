@@ -16,10 +16,12 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
@@ -54,7 +56,10 @@ public class PolarDataMiner {
 
     private void setUpWorkflow() throws ClassCastException, NoSuchMethodException,
             SecurityException {
-        incrementalRegressionProcessor = new IncrementalRegressionProcessor();
+        WindSteppingWithMaxDistance stepping = defaultPolarSheetGenerationSettings.getWindStepping();
+        final ClusterGroup<Speed> speedClusterGroup = SpeedClusterGroupFromWindSteppingCreator
+                .createSpeedClusterGroupFrom(stepping);
+        incrementalRegressionProcessor = new IncrementalRegressionProcessor(speedClusterGroup);
         List<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>> grouperResultReceivers = new ArrayList<Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>>>();
         grouperResultReceivers.add(incrementalRegressionProcessor);
 
@@ -69,13 +74,15 @@ public class PolarDataMiner {
 
         Collection<Processor<GPSFixMovingWithPolarContext>> enrichingResultReceivers = Arrays
                 .asList(filteringProcessor);
+
+
         enrichingProcessor = new AbstractEnrichingProcessor<Triple<GPSFixMoving, TrackedRace, Competitor>, GPSFixMovingWithPolarContext>(
                 executor, enrichingResultReceivers) {
 
             @Override
             protected GPSFixMovingWithPolarContext enrich(Triple<GPSFixMoving, TrackedRace, Competitor> element) {
                 return new GPSFixMovingWithPolarContext(element.getA(), element.getB(), element.getC(),
-                        defaultPolarSheetGenerationSettings);
+                        speedClusterGroup);
             }
         };
     }

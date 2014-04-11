@@ -9,11 +9,12 @@ import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.polars.regression.BoatSpeedEstimator;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -21,6 +22,12 @@ import com.sap.sse.datamining.shared.GroupKey;
 public class IncrementalRegressionProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>> {
 
     private final Map<GroupKey, BoatSpeedEstimator> boatSpeedEstimators = new HashMap<GroupKey, BoatSpeedEstimator>();
+
+    private final ClusterGroup<Speed> speedClusterGroup;
+
+    public IncrementalRegressionProcessor(ClusterGroup<Speed> speedClusterGroup) {
+        this.speedClusterGroup = speedClusterGroup;
+    }
 
     @Override
     public void onElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
@@ -59,13 +66,6 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             final Bearing angleToTheWind)
             throws NotEnoughDataHasBeenAddedException {
         PolarClusterKey key = new PolarClusterKey() {
-
-            @Override
-            public WindSpeedLevel getWindSpeedLevel() {
-                return new WindSpeedLevel(windSpeed, PolarSheetGenerationSettingsImpl.createStandardPolarSettings()
-                        .getWindStepping());
-            }
-
             @Override
             public RoundedAngleToTheWind getRoundedAngleToTheWind() {
                 return new RoundedAngleToTheWind(angleToTheWind);
@@ -74,6 +74,11 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
             @Override
             public BoatClass getBoatClass() {
                 return boatClass;
+            }
+
+            @Override
+            public Cluster<Speed> getWindSpeedCluster() {
+                return speedClusterGroup.getClusterFor(windSpeed);
             }
         };
         GroupKey compoundKey;

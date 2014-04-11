@@ -3,27 +3,27 @@ package com.sap.sailing.polars.mining;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.data.ClusterGroup;
 
 public class GPSFixMovingWithPolarContext implements PolarClusterKey {
 
     private final GPSFixMoving fix;
     private final TrackedRace race;
     private final Competitor competitor;
-    private final PolarSheetGenerationSettings defaultPolarSheetGenerationSettings;
+    private final ClusterGroup<Speed> windSpeedClusterGroup;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
-            PolarSheetGenerationSettings defaultPolarSheetGenerationSettings) {
+            ClusterGroup<Speed> windSpeedClusterGroup) {
         this.fix = fix;
         this.race = race;
         this.competitor = competitor;
-        this.defaultPolarSheetGenerationSettings = defaultPolarSheetGenerationSettings;
+        this.windSpeedClusterGroup = windSpeedClusterGroup;
     }
 
     public GPSFixMoving getFix() {
@@ -51,10 +51,9 @@ public class GPSFixMovingWithPolarContext implements PolarClusterKey {
     }
 
     @Override
-    public WindSpeedLevel getWindSpeedLevel() {
+    public Cluster<Speed> getWindSpeedCluster() {
         Speed windSpeed = getWindSpeed();
-        WindSteppingWithMaxDistance stepping = defaultPolarSheetGenerationSettings.getWindStepping();
-        return new WindSpeedLevel(windSpeed, stepping);
+        return windSpeedClusterGroup.getClusterFor(windSpeed);
     }
 
     public Speed getWindSpeed() {
