@@ -19,7 +19,7 @@
     The folder where screenshots (attachments) are stored.
   -->
   <screenshots-folder>
-    file:///home/hudson/repo/jobs/SAPSailingAnalytics-selenium/workspace/java/com.sap.sailing.selenium.test/bin/surefire-reports/
+    ./java/com.sap.sailing.selenium.test/bin/surefire-reports/
   </screenshots-folder>
   <!--
   <screenshots-folder>file://{user.dir}/bin/surefire-reports/</screenshots-folder>
