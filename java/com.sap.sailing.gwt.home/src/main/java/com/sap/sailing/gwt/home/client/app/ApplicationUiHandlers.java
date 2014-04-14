@@ -6,9 +6,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * {@link ApplicationDesktopView}'s {@link UiHandlers}.
  */
 public interface ApplicationUiHandlers extends UiHandlers {
-    void revealAllProductsList();
-
-    void revealFavoriteProductsList();
-
-    void revealSpecialsList();
+    void revealEvents();
 }

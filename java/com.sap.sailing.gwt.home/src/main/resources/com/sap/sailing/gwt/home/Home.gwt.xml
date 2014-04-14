@@ -49,10 +49,8 @@
                                 value="com.sap.sailing.gwt.home.client.gin.DesktopModule" />
     <set-configuration-property name="gin.ginjector.module.mobile"
                                 value="com.sap.sailing.gwt.home.client.gin.MobileModule" />
-    <!-- 
     <set-configuration-property name="gin.ginjector.module.tablet"
                                 value="com.sap.sailing.gwt.home.client.gin.TabletModule" />
-     -->
 
     <!-- Shared modules -->
     <set-configuration-property name="gin.ginjector.modules"

@@ -1,14 +1,14 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
         xmlns:g="urn:import:com.google.gwt.user.client.ui">
-
-	<ui:with type="com.sap.sailing.gwt.home.client.shared.PageNameConstants" field="pageNames"></ui:with>
+	<ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+	<ui:with field="pageNames" type="com.sap.sailing.gwt.home.client.shared.PageNameConstants" />
 
     <g:HTMLPanel>
-    	<g:InlineHyperlink targetHistoryToken="{pageNames.getStartPage}">Home</g:InlineHyperlink> |
-        <g:InlineHyperlink targetHistoryToken="{pageNames.getEventsPage}">Events</g:InlineHyperlink> |
-        <g:InlineHyperlink targetHistoryToken="{pageNames.getAboutUsPage}">About Us</g:InlineHyperlink> |
-        <g:InlineHyperlink targetHistoryToken="{pageNames.getContactPage}">Contact</g:InlineHyperlink>
+    	<g:InlineHyperlink targetHistoryToken="{pageNames.getStartPage}" text="{i18n.home}" /> |
+        <g:InlineHyperlink targetHistoryToken="{pageNames.getEventsPage}" text="{i18n.events}" /> |
+        <g:InlineHyperlink targetHistoryToken="{pageNames.getAboutUsPage}" text="{i18n.aboutUs}" /> |
+        <g:InlineHyperlink targetHistoryToken="{pageNames.getContactPage}" text="{i18n.contact}" />
 	</g:HTMLPanel>
 </ui:UiBinder>
 
