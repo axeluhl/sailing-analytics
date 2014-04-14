@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.eventpage;
+package com.sap.sailing.gwt.home.client.app.event;
 
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.user.client.Window;

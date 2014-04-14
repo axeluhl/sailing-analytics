@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.eventpage;
+package com.sap.sailing.gwt.home.client.app.event;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.HeadingElement;

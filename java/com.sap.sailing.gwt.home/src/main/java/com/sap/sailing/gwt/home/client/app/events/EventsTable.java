@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.eventspage;
+package com.sap.sailing.gwt.home.client.app.events;
 
 import java.util.Comparator;
 import java.util.List;

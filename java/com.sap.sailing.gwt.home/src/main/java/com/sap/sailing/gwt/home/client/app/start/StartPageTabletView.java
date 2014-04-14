@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.startpage;
+package com.sap.sailing.gwt.home.client.app.start;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -6,13 +6,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StartPageMobileView extends Composite implements StartPagePresenter.MyView {
+public class StartPageTabletView extends Composite implements StartPagePresenter.MyView {
     private static StartPageMobileViewUiBinder uiBinder = GWT.create(StartPageMobileViewUiBinder.class);
 
-    interface StartPageMobileViewUiBinder extends UiBinder<Widget, StartPageMobileView> {
+    interface StartPageMobileViewUiBinder extends UiBinder<Widget, StartPageTabletView> {
     }
 
-    public StartPageMobileView() {
+    public StartPageTabletView() {
         super();
 
         initWidget(uiBinder.createAndBindUi(this));

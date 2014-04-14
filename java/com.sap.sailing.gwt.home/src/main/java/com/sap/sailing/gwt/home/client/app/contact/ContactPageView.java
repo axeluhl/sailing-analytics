@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.startpage;
+package com.sap.sailing.gwt.home.client.app.contact;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -6,13 +6,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StartPageView extends Composite implements StartPagePresenter.MyView {
-    private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
+public class ContactPageView extends Composite implements ContactPagePresenter.MyView {
+    private static ContactPageViewUiBinder uiBinder = GWT.create(ContactPageViewUiBinder.class);
 
-    interface StartPageViewUiBinder extends UiBinder<Widget, StartPageView> {
+    interface ContactPageViewUiBinder extends UiBinder<Widget, ContactPageView> {
     }
 
-    public StartPageView() {
+    public ContactPageView() {
         super();
 
         initWidget(uiBinder.createAndBindUi(this));

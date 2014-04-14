@@ -3,16 +3,16 @@ package com.sap.sailing.gwt.home.client.app;
 import javax.inject.Singleton;
 
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
-import com.sap.sailing.gwt.home.client.aboutuspage.AboutUsPagePresenter;
-import com.sap.sailing.gwt.home.client.aboutuspage.AboutUsPageView;
-import com.sap.sailing.gwt.home.client.contactpage.ContactPagePresenter;
-import com.sap.sailing.gwt.home.client.contactpage.ContactPageView;
-import com.sap.sailing.gwt.home.client.eventpage.EventPagePresenter;
-import com.sap.sailing.gwt.home.client.eventpage.EventPageView;
-import com.sap.sailing.gwt.home.client.eventspage.EventsPagePresenter;
-import com.sap.sailing.gwt.home.client.eventspage.EventsPageView;
-import com.sap.sailing.gwt.home.client.startpage.StartPageMobileView;
-import com.sap.sailing.gwt.home.client.startpage.StartPagePresenter;
+import com.sap.sailing.gwt.home.client.app.aboutus.AboutUsPagePresenter;
+import com.sap.sailing.gwt.home.client.app.aboutus.AboutUsPageView;
+import com.sap.sailing.gwt.home.client.app.contact.ContactPagePresenter;
+import com.sap.sailing.gwt.home.client.app.contact.ContactPageView;
+import com.sap.sailing.gwt.home.client.app.event.EventPagePresenter;
+import com.sap.sailing.gwt.home.client.app.event.EventPageView;
+import com.sap.sailing.gwt.home.client.app.events.EventsPagePresenter;
+import com.sap.sailing.gwt.home.client.app.events.EventsPageView;
+import com.sap.sailing.gwt.home.client.app.start.StartPageMobileView;
+import com.sap.sailing.gwt.home.client.app.start.StartPagePresenter;
 
 public class ApplicationMobileModule extends AbstractPresenterModule {
     @Override

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.startpage;
+package com.sap.sailing.gwt.home.client.app.contact;
 
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
@@ -15,7 +15,7 @@ import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.sap.sailing.gwt.home.client.app.AbstractRootPagePresenter;
 import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 
-public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, StartPagePresenter.MyProxy> {
+public class ContactPagePresenter extends Presenter<ContactPagePresenter.MyView, ContactPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
     
     public interface MyView extends View {
@@ -29,12 +29,12 @@ public class StartPagePresenter extends Presenter<StartPagePresenter.MyView, Sta
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
 
     @ProxyCodeSplit
-    @NameToken(PageNameConstants.startPage)
-    public interface MyProxy extends ProxyPlace<StartPagePresenter> {
+    @NameToken(PageNameConstants.contactPage)
+    public interface MyProxy extends ProxyPlace<ContactPagePresenter> {
     }
 
     @Inject
-    public StartPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager) {
+    public ContactPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager) {
         super(eventBus, view, proxy);
         
         this.placeManager = placeManager;

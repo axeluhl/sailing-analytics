@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.eventspage;
+package com.sap.sailing.gwt.home.client.app.events;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
-import com.sap.sailing.gwt.home.client.eventpage.EventParameterTokens;
+import com.sap.sailing.gwt.home.client.app.event.EventParameterTokens;
 import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 

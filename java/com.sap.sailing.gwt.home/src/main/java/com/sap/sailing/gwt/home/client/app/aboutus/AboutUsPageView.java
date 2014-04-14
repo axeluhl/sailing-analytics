@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.aboutuspage;
+package com.sap.sailing.gwt.home.client.app.aboutus;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
