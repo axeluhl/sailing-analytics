@@ -108,8 +108,8 @@ Mercator.prototype.calibrate = function() {
 
 Mercator.prototype.sphere2plane = function(lat, lng) {
 	var p = lng*Math.PI/180.0;
-	var latrad = lat*Math.PI/180.0;
-	var q = Math.log((1.0+Math.sin(latrad))/Math.cos(latrad));
+	var latsin = Math.sin(lat*Math.PI/180.0);
+	var q = 0.5*Math.log((1.0+latsin)/(1.0-latsin));
 	return {x:p, y:q};
 };
 
@@ -186,7 +186,7 @@ VectorField.prototype.getRandomPosition = function() {
 	var latP = this.bdA.lat + rndY * this.bdB.lat + rndX * this.bdC.lat;
 	var lngP = this.bdA.lng + rndY * this.bdB.lng + rndX * this.bdC.lng;
 	
-	if (!this.inBounds(lngP, latP)) {
+	if (swarmDebug&&(!this.inBounds(lngP, latP))) {
 		console.log("random-position: out of bounds");
 	}
 	
@@ -203,9 +203,8 @@ VectorField.prototype.inBounds = function(lng, lat) {
 VectorField.prototype.interpolate = function(lat, lng) {
 
 	var idx = this.getNeighbors(lat, lng);
-	var idxOff = 0;
 	
-	if ((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY))) {
+	if (swarmDebug&&((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY)))) {
 		console.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
 	}
 	
@@ -220,9 +219,8 @@ VectorField.prototype.interpolate = function(lat, lng) {
 VectorField.prototype.interpolate2 = function(lat, lng) {
 
 	var idx = this.getNeighbors(lat, lng);
-	var idxOff = 0;
 	
-	if ((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY))) {
+	if (swarmDebug&&((idx.xTop >= (this.resX+2*this.borderX))||(idx.yTop >= (this.resY+2*this.borderY)))) {
 		console.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
 	}
 	
@@ -246,19 +244,19 @@ VectorField.prototype.setStep = function(step) {
 	} else {
 		this.step = step;
 	}
-}
+};
 
 VectorField.prototype.nextStep = function() {
 	if (this.step < (this.data.data.length-1)) {
 		this.step++;
 	}
-}
+};
 
 VectorField.prototype.prevStep = function() {
 	if (this.step > 0) {
 		this.step--;
 	}
-}
+};
 
 VectorField.prototype.getValue = function(lat, lng, opt_result) {
 
@@ -334,7 +332,7 @@ VectorField.prototype.motionScale = function(zoomLevel) {
 
 VectorField.prototype.particleWeight = function(p,v) {
 	return v.length() / this.maxLength + 0.1;	
-}
+};
 
 VectorField.prototype.getColors = function() {
 	var colors = [];
@@ -345,11 +343,11 @@ VectorField.prototype.getColors = function() {
 		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
 	}
 	return colors;
-}
+};
 
 VectorField.prototype.lineWidth = function(s) {
 	return 1.0;
-}
+};
 
 /**
  * for compatibility with vector fields aligned with lat/lng-grid
@@ -458,7 +456,7 @@ RectField.prototype.motionScale = function(zoomLevel) {
 
 RectField.prototype.particleWeight = function(p,v) {
 	return 1.0 - v.length() / this.maxLength;	
-}
+};
 
 RectField.prototype.getColors = function() {
 	var colors = [];
@@ -469,11 +467,11 @@ RectField.prototype.getColors = function() {
 		//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
 	}
 	return colors;
-}
+};
 
 RectField.prototype.lineWidth = function(s) {
 	return 1.0;
-}
+};
 
 var Animator = function() {
 	this.animating = true;
@@ -640,7 +638,9 @@ Swarm.prototype.updateBounds = function() {
 
 	this.numParticles = Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.numParticleFactor;
 	//this.numParticles = Math.sqrt(boundsWidthpx*boundsWidthpx + boundsHeightpx*boundsHeightpx) * this.field.numParticleFactor;
-	console.log("numParticles: "+this.numParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
+	if (swarmDebug) {
+		console.log("numParticles: "+this.numParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
+	}
 };
 
 Swarm.prototype.isVisible = function(pos) {
@@ -772,6 +772,7 @@ var swarmData;
 var swarmField;
 var swarmAnimator;
 var swarmProjection;
+var swarmDebug = false;
 
 function initStreamlets(map, canvas) {
 
@@ -805,11 +806,7 @@ function initStreamlets(map, canvas) {
 
 	};
 
-	swarmProjection = new Mercator(map, canvas); //, field);
-
-	//var isMacFF = navigator.platform.indexOf('Mac') != -1 && navigator.userAgent.indexOf('Firefox') != -1;
-	var isWinFF = navigator.platform.indexOf('Win') != -1 && navigator.userAgent.indexOf('Firefox') != -1;
-	var isWinIE = navigator.platform.indexOf('Win') != -1 && navigator.userAgent.indexOf('MSIE') != -1;
+	swarmProjection = new Mercator(map, canvas);
 
 	var swarm = new Swarm(canvas, swarmField, swarmProjection);
 
@@ -818,7 +815,7 @@ function initStreamlets(map, canvas) {
 
 	updateStreamlets = function(upd_data) {
 		if (!(upd_data === undefined)) {
-			swarmAnimator.state = 'stop'
+			swarmAnimator.state = 'stop';
 			swarmAnimator = new Animator();
 			swarmField = new VectorField(windFieldSim);
 			swarm = new Swarm(canvas, swarmField, swarmProjection);
@@ -836,7 +833,7 @@ function initStreamlets(map, canvas) {
 	stopStreamlets = function() {
 		swarmAnimator.state = 'stop';
 		swarmProjection.clearCanvas();
-	}
+	};
 	
 	if (swarmProjection.fieldNW === undefined) {
 		google.maps.event.addListener(map, 'bounds_changed', updateStreamlets);
