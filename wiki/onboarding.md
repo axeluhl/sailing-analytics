@@ -6,7 +6,7 @@ This document describes the onboarding process for a new team member (developer)
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Classic 4.2.1 (Juno)), http://www.eclipse.org
+1. Eclipse (e.g. Eclipse Classic 4.3.x (Kepler)), http://www.eclipse.org
 2. Eclipse Extensions
   * Install Eclipse GWT should be version 2.6 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
