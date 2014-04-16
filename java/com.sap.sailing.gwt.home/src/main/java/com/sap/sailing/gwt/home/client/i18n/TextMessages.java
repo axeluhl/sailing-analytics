@@ -8,4 +8,7 @@ public interface TextMessages extends Messages {
     String events();
     String aboutUs();
     String contact();
+
+    String german();
+    String english();
 }
