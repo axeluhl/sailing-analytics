@@ -132,7 +132,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
                 showStreamlets2 = true;
                 injectWindDataJS = true;
             }
-            if ((showStreamlets2)&&(this.border==0)) {
+            if ((showStreamlets2)&&(border==null)) {
             	this.border = 10;
             }
             if (windDisplayStr.contains("b")) {
