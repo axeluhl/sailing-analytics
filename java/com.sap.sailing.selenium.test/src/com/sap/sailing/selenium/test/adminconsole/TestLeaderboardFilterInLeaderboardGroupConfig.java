@@ -34,7 +34,7 @@ public class TestLeaderboardFilterInLeaderboardGroupConfig extends AbstractSelen
         leaderboardConfiguration.createFlexibleLeaderboard("Test");
 
         leaderboardGroupConfiguration = adminConsole.goToLeaderboardGroupConfiguration();
-        LeaderboardGroupDetailsPanelPO leaderboardGroupDetails = leaderboardGroupConfiguration.getLeaderboardGroupDetails();
+        LeaderboardGroupDetailsPanelPO leaderboardGroupDetails = leaderboardGroupConfiguration.getLeaderboardGroupDetails("Test");
         leaderboardGroupDetails.refreshLeaderboards();
         DataEntryPO leaderboardEntry = leaderboardGroupDetails.findLeaderboardEntry("Test");
         assertNotNull(leaderboardEntry);

@@ -49,6 +49,7 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
         Label chartSelectionLabel = new Label(stringMessages.chooseChart());
         mainPanel.add(chartSelectionLabel);
         chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        chartTypeSelectionListBox.ensureDebugId("ChartTypeListBox");
         int i = 0;
         for (DetailType detailType : availableDetailsTypes) {
             chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());

@@ -21,9 +21,8 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * 
  */
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
-    private LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
+    private final LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
     private final Pair<Object, GPSFix> end;
-    int i = 0;
 
     public MarkPassingUpdateListener(TrackedRace race, Pair<Object, GPSFix> end) {
         race.addListener(this);
@@ -47,7 +46,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
 
     @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
-
         if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
             queue.add(end);
         }

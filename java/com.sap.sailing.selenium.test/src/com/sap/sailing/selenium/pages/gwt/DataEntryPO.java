@@ -2,46 +2,59 @@ package com.sap.sailing.selenium.pages.gwt;
 
 import java.util.List;
 
-import org.openqa.selenium.By.ByTagName;
+import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.interactions.Action;
-import org.openqa.selenium.interactions.ClickAction;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.CompositeAction;
 import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.interactions.KeyDownAction;
 import org.openqa.selenium.interactions.KeyUpAction;
 import org.openqa.selenium.interactions.Keyboard;
 import org.openqa.selenium.interactions.Mouse;
-import org.openqa.selenium.interactions.MoveToOffsetAction;
-
-import org.openqa.selenium.internal.Locatable;
 
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.common.CSSHelper;
 
 public class DataEntryPO extends CellTableRowPO {
     protected static final String CELL_TAG_NAME = "td"; //$NON-NLS-1$
     
-    @FindBy(how = ByTagName.class, using = CELL_TAG_NAME)
+    @FindBy(how = ByXPath.class, using = "./td")
     private List<WebElement> columns;
     
     public DataEntryPO(CellTablePO<?> table, WebElement element) {
         super(table, element);
     }
     
-    public DataEntryPO() {
+    protected DataEntryPO() {
         super();
     }
     
+    public int getNumberOfColumns() {
+        return this.columns.size();
+    }
+    
     public String getColumnContent(int column) {
-        return this.columns.get(column).getText();
+        return this.columns.get(column).getText().trim();
     }
     
     public String getColumnContent(String name) {
         return getColumnContent(this.table.getColumnIndex(name));
+    }
+    
+    /**
+     * <p>Returns an identifier for data entry that uniquely identifies the entry in the containing table. The default
+     *   implementation simply returns the underlying web element, but subclasses should overwrite this method and
+     *   return a more meaningful value. An example would be the String value of one ore more columns.</p>
+     * 
+     * @return
+     *   An identifier that uniquely identifies the entry in the containing table.
+     */
+    public Object getIdentifier() {
+        // TODO: Test if its valid to return the context (the web element)
+        //       To verify this take the key of an entry and ask the table for the entry with this key!
+        return this.context;
     }
     
     public boolean isSelected() {
@@ -68,26 +81,33 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     protected Action getSelectAction() {
-        HasInputDevices devices = (HasInputDevices) this.driver;
-        Mouse mouse = devices.getMouse();
-        Locatable locatable = getLocatableForSelect();
+        Actions actions = new Actions(this.driver);
+        actions.moveToElement(getElementForSelect(), 1, 1);
+        actions.click();
         
-        CompositeAction action = new CompositeAction();
-        action.addAction(new MoveToOffsetAction(mouse, locatable, 1, 1));
-        action.addAction(new ClickAction(mouse, null));
-        
-        return action;
+        return actions.build();
     }
     
-    protected Locatable getLocatableForSelect() {
-        return (Locatable) (this.columns.isEmpty() ? this.context : this.columns.get(0));
+    /**
+     * <p>Returns the element on which to click to select or deselect the data entry in the table. The default
+     *   implementation returns the first column or the row if there are no columns. It may be necessary to overwrite
+     *   this method for the case the first column contains a widget that should not be clicked accidentally.</p>
+     * 
+     * @return
+     *   The element on which to click to select or deselect the data entry in the table.
+     */
+    protected WebElement getElementForSelect() {
+        return (this.columns.isEmpty() ? getWebElement() : this.columns.get(0));
     }
     
     protected Action getModifiedSelectAction() {
-        CompositeAction action = getModifiedCompositeActionAction();
-        action.addAction(getSelectAction());
+        Actions actions = new Actions(this.driver);
+        actions.keyDown(Keys.CONTROL);
+        actions.moveToElement(getElementForSelect(), 1, 1);
+        actions.click();
+        actions.keyUp(Keys.CONTROL);
         
-        return action;
+        return actions.build();
     }
     
     protected CompositeAction getModifiedCompositeActionAction() {
