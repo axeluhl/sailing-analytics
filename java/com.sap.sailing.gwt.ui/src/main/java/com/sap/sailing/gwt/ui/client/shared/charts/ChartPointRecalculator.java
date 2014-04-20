@@ -9,28 +9,24 @@ public final class ChartPointRecalculator {
     public static Point stayClosestToPreviousPoint(Point previousPoint, Point newPoint) {
         double previousY = previousPoint.getY().doubleValue();
         double newY = newPoint.getY().doubleValue();
-        
-        double deltaPreviousNew = Math.abs(previousY - newY);
-        double deltaPreviosNewUp = Math.abs(previousY - (newY + 360));
-        double deltaPreviosNewDown = Math.abs(previousY - (newY - 360));
-        
-        if (isStrictlyLessThan(deltaPreviosNewUp, deltaPreviousNew, deltaPreviosNewDown)) {
-            return new Point(newPoint.getX(), newPoint.getY().doubleValue() + 360);
-        }
-        if (isStrictlyLessThan(deltaPreviosNewDown, deltaPreviousNew, deltaPreviosNewUp)) {
-            return new Point(newPoint.getX(), newPoint.getY().doubleValue() - 360);
-        }
-        
-        return newPoint;
-    }
-    
-    private static boolean isStrictlyLessThan(double valueToCheck, double... valuesToCompare) {
-        for (double value : valuesToCompare) {
-            if (value <= valueToCheck) {
-                return false;
+
+        double bestNewY = newY;
+        boolean hasBeenMoved;
+        do {
+            hasBeenMoved = false;
+            double deltaPreviousYToNewY = Math.abs(previousY - bestNewY);
+            double deltaPreviousYToNewYUp = Math.abs(previousY - (bestNewY + 360));
+            double deltaPreviousYToNewYDown = Math.abs(previousY - (bestNewY - 360));
+            
+            if (deltaPreviousYToNewYUp < deltaPreviousYToNewY ||
+                deltaPreviousYToNewYDown < deltaPreviousYToNewY) {
+                bestNewY = deltaPreviousYToNewYUp <= deltaPreviousYToNewYDown ?
+                           bestNewY + 360 : bestNewY - 360;
+                hasBeenMoved = true;
             }
-        }
-        return true;
+        } while (hasBeenMoved);
+        
+        return new Point(newPoint.getX(), bestNewY);
     }
 
     public static Point keepOverallDeltaMinimal(Double yMin, Double yMax, Point newPoint) {
