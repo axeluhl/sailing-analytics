@@ -2,16 +2,14 @@ package com.sap.sailing.gwt.home.client.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 
 public class HeaderPanel extends Composite {
-    @UiField Label titleLabel;
-    
-    @UiField LocaleSelectionComposite localeSelectionComposite;
+//    @UiField Label titleLabel;
+//    
+//    @UiField LocaleSelection localeSelection;
 
     private static HeaderPanelUiBinder uiBinder = GWT.create(HeaderPanelUiBinder.class);
 
@@ -23,11 +21,11 @@ public class HeaderPanel extends Composite {
  
         initWidget(uiBinder.createAndBindUi(this));
         
-        titleLabel.setText("SAP Sailing Analytics");
+//        titleLabel.setText("SAP Sailing Analytics");
     }
 
     public void setTitle(String title) {
-        titleLabel.setText(title);
+//        titleLabel.setText(title);
     }
     
 }

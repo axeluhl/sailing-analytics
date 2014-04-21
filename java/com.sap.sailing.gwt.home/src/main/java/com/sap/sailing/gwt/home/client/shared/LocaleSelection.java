@@ -10,15 +10,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LocaleSelectionComposite extends Composite {
+public class LocaleSelection extends Composite {
     private static LocaleSelectionCompositeUiBinder uiBinder = GWT.create(LocaleSelectionCompositeUiBinder.class);
 
-    interface LocaleSelectionCompositeUiBinder extends UiBinder<Widget, LocaleSelectionComposite> {
+    interface LocaleSelectionCompositeUiBinder extends UiBinder<Widget, LocaleSelection> {
     }
 
     @UiField(provided=true) ListBox localeSelection;
     
-    public LocaleSelectionComposite() {
+    public LocaleSelection() {
         localeSelection = new ListBox(false);
         localeSelection.addItem("Deutsch");
         localeSelection.addItem("English");
