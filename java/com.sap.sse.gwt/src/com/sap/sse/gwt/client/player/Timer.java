@@ -10,10 +10,24 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 /**
  * Manages a timer and can auto-advance it at a given acceleration/deceleration rate, with a given delay compared to
  * real time. It can be {@link #pause() paused} and {@link #resume() resumed}. It can be in one of two play modes:
- * {@link PlayModes#Live} and {@link PlayModes#Replay}. In live play mode the timer is always in state {@link PlayStates#Playing}
- * and adjusts the time to now-{@link #livePlayDelayInMillis}. As soon as it's paused or stopped it enters
- * {@link PlayModes#Replay}. By entering {@link PlayModes#Live} with {@link #setPlayMode(PlayModes)}, the timer starts
- * playing right away.
+ * {@link PlayModes#Live live} and {@link PlayModes#Replay replay}. By entering {@link PlayModes#Live live} with
+ * {@link #setPlayMode(PlayModes)}, the timer starts playing right away and adjusts the time to now-
+ * {@link #livePlayDelayInMillis}. As soon as it's paused it enters {@link PlayModes#Replay replay}. The timer can
+ * be created in {@link PlayModes#Live live mode} and in {@link PlayStates#Paused paused state}. This can be useful
+ * to perform a single "live" query to the server. Note, however, that this state cannot be reached again by calls
+ * to {@link #pause()} and {@link #play()} and {@link #setPlayMode(PlayModes)} because those methods, when called,
+ * will guarantee that the timer is in play state {@link PlayStates#Playing} when put to {@link PlayModes#Live live mode}
+ * and in {@link PlayModes#Replay replay mode} when in the {@link PlayStates#Paused paused state}.<p>
+ * 
+ * The timer runs on a client which has a system clock of its own, as accessed by {@link System#currentTimeMillis()} on
+ * the client. It is reasonable to assume that the client time does usually not equal the server time. Sometimes there
+ * is a small offset of a few milliseconds, sometimes the offset can be minutes or even hours or days if the client
+ * device hasn't set the system date/time information correctly. When this timer is in {@link PlayModes#Live live} mode,
+ * usually it's the server time that matters, and several calls to the server will, instead of passing an actual time point,
+ * pass <code>null</code> to request "live" data from the server. In order to still know what time point the server data
+ * belongs to, the timer maintains an offset between client and server time and in live mode can produce time stamps that
+ * will come close to the server time, within the bounds of the network latency, usually a few milliseconds. The offset is
+ * managed using the {@link #adjustClientServerOffset(long, Date, long)} method.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -76,11 +90,6 @@ public class Timer {
     private double playSpeedFactor;
 
     /**
-     * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
-     */
-    private boolean autoAdvance;
-
-    /**
      * The clocks of a client cannot be expected to be synchronized to the same time source as the server clock.
      * Therefore, there is a good chance for a significant time difference between client and server. While this does
      * not matter in replay mode where the client requests data for some arbitrary point in time, in live mode the
@@ -103,7 +112,7 @@ public class Timer {
      */
     public enum PlayModes { Live, Replay }; 
 
-    public enum PlayStates { Stopped, Playing, Paused }; 
+    public enum PlayStates { Playing, Paused }; 
 
     /**
      * The timer is created in stopped state unless created with <code>playMode==PlayModes.Live</code>, using the
@@ -113,7 +122,11 @@ public class Timer {
      * updated by a call to {@link #adjustClientServerOffset(long, Date, long)}. 
      */
     public Timer(PlayModes playMode) {
-        this(playMode, 1000);
+        this(playMode, getDefaultPlayStateForPlayMode(playMode));
+    }
+    
+    public Timer(PlayModes playMode, PlayStates playState) {
+        this(playMode, playState, 1000 /* refreshIntervalInMillis */);
     }
     
     /**
@@ -122,18 +135,25 @@ public class Timer {
      * {@link #refreshInterval delay between automatic updates} should the timer be
      * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to zero seconds.
      */
-    public Timer(PlayModes playMode, long refreshInterval) {
-        this.refreshInterval = refreshInterval;
+    public Timer(PlayModes playMode, long refreshIntervalInMillis) {
+        this(playMode, getDefaultPlayStateForPlayMode(playMode), refreshIntervalInMillis);
+    }
+    
+    public Timer(PlayModes playMode, PlayStates playState, long refreshIntervalInMillis) {
+        this.refreshInterval = refreshIntervalInMillis;
         // Using the client's clock is only a default; the time offset between client and server is adjusted when
         // information about the server time is present; see adjustClientServerOffset(...)
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
-        playState = PlayStates.Stopped;
         setPlaySpeedFactor(1.0);
         livePlayDelayInMillis = 0l;
-        autoAdvance = true;
-        setPlayMode(playMode);
+        this.playMode = playMode;
+        setPlayState(playState, /* updatePlayMode */ false);
+    }
+    
+    private static PlayStates getDefaultPlayStateForPlayMode(PlayModes playMode) {
+        return playMode == PlayModes.Live ? PlayStates.Playing : PlayStates.Paused;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -222,7 +242,7 @@ public class Timer {
     }
 
     /**
-     * When setting the play mode to live, the timer will automatically be put into play state playing.
+     * When setting the play mode to live, the timer will automatically be put into play state {@link PlayStates#Playing}.
      */
     public void setPlayMode(PlayModes newPlayMode) {
         if (this.playMode != newPlayMode) {
@@ -230,53 +250,45 @@ public class Timer {
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
-            if (newPlayMode == PlayModes.Live) {
-                play();
-            }
+        }
+        if (newPlayMode == PlayModes.Live) {
+            play();
         }
     }    
 
     /**
-     * Pauses this timer after the next time advance. {@link #playing} is set to <code>false</code> if not already
-     * paused, and registered {@link PlayStateListener}s will be notified. If the play mode was live, it'll be set to
-     * replay.
+     * @param updatePlayMode
+     *            if <code>true</code>, the play mode will be {@link #setPlayMode(PlayModes) updated} according to the
+     *            desired new play state. In particular, if the new play state is {@link PlayStates#Paused}, the play
+     *            mode will then automatically be set to {@link PlayModes#Replay}.
      */
-    public void pause() {
-        if (playState == PlayStates.Playing) {
-            playState = PlayStates.Paused; // this will cause the repeating command to stop executing
+    private void setPlayState(PlayStates newPlayState, boolean updatePlayMode) {
+        if (this.playState != newPlayState) {
+            this.playState = newPlayState; // if newPlayState is Paused then this will cause the repeating command to stop executing
+            if (newPlayState == PlayStates.Playing) {
+                if (playMode == PlayModes.Live) {
+                    setTime(getLiveTimePointInMillis());
+                }
+                startAutoAdvance();
+            } else if (updatePlayMode) {
+                setPlayMode(PlayModes.Replay);
+            }
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
-            setPlayMode(PlayModes.Replay);
         }
     }
-
+    
     /**
-     * Puts the timer into the stopped state. If it was in live mode, puts it into replay mode.
+     * Pauses this timer after the next time advance. Registered {@link PlayStateListener}s will be notified. If the
+     * play mode was {@link PlayModes#Live}, it'll be set to {@link PlayModes#Replay}.
      */
-    public void stop() {
-        if (playState == PlayStates.Playing) {
-            playState = PlayStates.Stopped;
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-            setPlayMode(PlayModes.Replay);
-        }
+    public void pause() {
+        setPlayState(PlayStates.Paused, /* updatePlayMode */ true);
     }
 
     public void play() {
-        if (playState != PlayStates.Playing) {
-            playState = PlayStates.Playing;
-            if (playMode == PlayModes.Live) {
-                setTime(getLiveTimePointInMillis());
-            }
-            if (autoAdvance) {
-                startAutoAdvance();
-            }
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-        }
+        setPlayState(PlayStates.Playing, /* updatePlayMode */ true);
     }
 
     private void startAutoAdvance() {
@@ -298,7 +310,7 @@ public class Timer {
                     scheduleAdvancerCommand(this);
                     return false; // stop this command; use the newly-scheduled one instead that uses the new frequency
                 } else {
-                    return playState == PlayStates.Playing ? true: false;
+                    return playState == PlayStates.Playing;
                 }
             }
 
@@ -337,14 +349,6 @@ public class Timer {
 
     public PlayModes getPlayMode() {
         return playMode;
-    }
-
-    public boolean isAutoAdvance() {
-        return autoAdvance;
-    }
-
-    public void setAutoAdvance(boolean autoAdvance) {
-        this.autoAdvance = autoAdvance;
     }
 
     public long getLiveTimePointInMillis() {

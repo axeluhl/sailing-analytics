@@ -28,32 +28,32 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using a {@link AbstractCandidateFinder} and a
- * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}
- * s. The chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
+ * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s.
+ * The chooser then finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
  * this sequence. If <code>listen</code> is true, a {@link MarkPassingUpdateListener} is initialized which puts new
- * fixes into a queue. Additionally a new Thread is started, which takes the fixes out of the queue and sorts them so
+ * fixes into a queue. Additionally a new thread is started, which takes the fixes out of the queue and sorts them so
  * that each object (Competitor or Mark) has a list of Fixes in <code>combinedFixes</code>. If <code>suspended</code> is
  * false, the new Fixes are handed to the <code>executor</code> as FutureTasks, first to calculate the affected Fixes
  * and then the actual MarkPassings (See {@link CandidateFinder} and {@link CandidateChooser}). Then the listening
  * process begins again with the queue being emptied. This continues until the <code>end</code> Object is put in the
- * queue by the {@link MarkPassingUpdateListener}, signalising that the race is over.
+ * queue by the {@link MarkPassingUpdateListener}, signaling that the race is over.
  * 
  * @author Nicolas Klose
  * 
  */
-
 public class MarkPassingCalculator {
-    private AbstractCandidateFinder finder;
-    private AbstractCandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
-    private MarkPassingUpdateListener listener;
     private final static Pair<Object, GPSFix> end = new Pair<Object, GPSFix>(null, null);
-    private boolean suspended = false;
     private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
             .availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
     /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1));
+
+    private MarkPassingUpdateListener listener;
+    private AbstractCandidateFinder finder;
+    private AbstractCandidateChooser chooser;
+    private boolean suspended = false;
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
         if (listen) {
@@ -70,7 +70,6 @@ public class MarkPassingCalculator {
     }
 
     private class Listen implements Runnable {
-
         @Override
         public void run() {
             logger.fine("MarkPassingCalculator is listening for new Fixes.");

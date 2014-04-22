@@ -158,14 +158,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             @Override
             public void onClick(ClickEvent event) {
                 switch(TimePanel.this.timer.getPlayState()) {
-                    case Stopped:
+                    case Paused:
                         TimePanel.this.timer.play();
                         break;
                     case Playing:
                         TimePanel.this.timer.pause();
-                        break;
-                    case Paused:
-                    TimePanel.this.timer.play();
                         break;
                 }
             }
@@ -313,7 +310,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
                         break;
                     case Replay:
-                        timer.stop();
+                        timer.pause();
                         break;
                     }
                 }
@@ -420,7 +417,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
             break;
         case Paused:
-        case Stopped:
             updatePlayPauseButtonsVisibility(playMode);
             playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);
