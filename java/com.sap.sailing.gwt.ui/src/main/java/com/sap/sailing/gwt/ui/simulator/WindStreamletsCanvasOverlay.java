@@ -309,11 +309,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     	for(int idx=0; idx<particles.length; idx++) {
     		LatLng q = field.getRandomPosition();
-    		particles[idx] = new Particle();
-    		particles[idx].pos = q;
-    		particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
-    		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
-    		particles[idx].alpha = 0;
+    		Particle particle = new Particle();
+    		particle.pos = q;
+    		particle.age = Math.max(2, (int)Math.round(Math.random()*40));
+    		particle.pxOld = projection.latlng2pixel(particle.pos);
+    		particle.alpha = 0;
+    		particle.v = field.getValue(q);
+    		particles[idx] = particle;
+
     	}
 
     	Scheduler scheduler = Scheduler.get();
@@ -331,15 +334,16 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     	ctxt.setGlobalCompositeOperation("source-over");
     	ctxt.setFillStyle("white");
     	for(int idx=0; idx<particles.length; idx++) {
-    		if (particles[idx].age == 0) {
+    		Particle particle = particles[idx];
+    		if (particle.age == 0) {
     			continue;
     		}
     		ctxt.setLineWidth(1.0);
-    		ctxt.setStrokeStyle(color[particles[idx].alpha]);
+    		ctxt.setStrokeStyle(color[particle.alpha]);
     		ctxt.beginPath();
-    		ctxt.moveTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
-    		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
-    		ctxt.lineTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
+    		ctxt.moveTo(particle.pxOld.getX(), particle.pxOld.getY());
+    		particle.pxOld = projection.latlng2pixel(particle.pos);
+    		ctxt.lineTo(particle.pxOld.getX(), particle.pxOld.getY());
     		ctxt.stroke();
     	}    	
     }
@@ -348,23 +352,36 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     	double off = 0.01;
     	for(int idx=0; idx<particles.length; idx++) {
-    		if (particles[idx].age <= 0) {
-    			particles[idx].pos = field.getRandomPosition();
-    			particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
-    			particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
-    			particles[idx].alpha = 0;
+    		Particle particle = particles[idx];
+    		Point v = null;
+    		if (particle.age <= 0) {
+    			boolean done = false;
+    			while (!done) {
+    				particle.pos = field.getRandomPosition();
+    				v = field.getValue(particle.pos);
+    				double weight = field.particleWeight(particle.pos, v);
+    				if ((weight >= Math.random())&&(v != null)) {
+    					particle.age = Math.max(2, (int)Math.round(Math.random()*40));
+    					particle.pxOld = projection.latlng2pixel(particle.pos);
+    					particle.alpha = 0;
+    					particle.v = v;
+    					done = true;
+    				}
+    			}
     		}
-    		if (particles[idx].age > 0) {
-    			Point v = field.getValue(particles[idx].pos);
-    			if (v == null) {
-    				particles[idx].age = 0;
+    		if (particle.age > 0) {
+    			if (particle.v == null) {
+    				particle.age = 0;
     			} else {
-    				double lat = particles[idx].pos.getLatitude() + off*v.getY();
-    				double lng = particles[idx].pos.getLongitude() + off*v.getX();
-    				double s = RectField.length(v) / field.getMaxLength();
-    				particles[idx].alpha = (int)Math.min(255, 90 + Math.round(350 * s));
-    				particles[idx].pos = LatLng.newInstance(lat, lng);
-    				particles[idx].age--;
+    				double lat = particle.pos.getLatitude() + off*particle.v.getY();
+    				double lng = particle.pos.getLongitude() + off*particle.v.getX();
+    				double s = RectField.length(particle.v) / field.getMaxLength();
+    				particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
+    				particle.pos = LatLng.newInstance(lat, lng);
+    				particle.age--;
+    				if (particle.age > 0) {
+    					particle.v = field.getValue(particle.pos);
+    				}
     			}
     		}
 

@@ -135,13 +135,13 @@ public class RectField {
 
 	/*RectField.prototype.motionScale = function(zoomLevel) {
 		return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
+	};*/
+
+	public double particleWeight(LatLng p, Point v) {
+		return 1.0 - length(v) / this.maxLength;	
 	};
 
-	RectField.prototype.particleWeight = function(p,v) {
-		return 1.0 - v.length() / this.maxLength;	
-	};
-
-	RectField.prototype.getColors = function() {
+	/*RectField.prototype.getColors = function() {
 		var colors = [];
 		var alpha = 1.0;
 		var greyValue = 255;

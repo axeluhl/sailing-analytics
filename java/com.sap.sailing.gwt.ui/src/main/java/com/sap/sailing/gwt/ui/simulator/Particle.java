@@ -9,5 +9,6 @@ public class Particle {
 	public Point pxOld;
 	public int alpha;
 	public int age;
+	public Point v;
 
 }
