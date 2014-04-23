@@ -4,12 +4,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -23,7 +27,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
+public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria, Scheduler.RepeatingCommand {
 
     /** The wind field that is to be displayed in the overlay */
     protected WindFieldDTO windFieldDTO;
@@ -32,6 +36,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     private boolean visible = false;
     private Timer timer;
+    
+    private String[] color;
+    private Mercator projection;
+    private RectField field;
+    private int nParticles;
+    private Particle[] particles;
+    private LatLng pNE;
+    private LatLng pSW;
 
     private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
 
@@ -41,6 +53,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;
+        
+    	this.nParticles = this.simulatorMap.getMainPanel().particles;
+
         
         windFieldDTO = null;
 
@@ -254,11 +269,115 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     @Override
     protected void draw() {
         super.draw();
-        if (mapProjection != null && windFieldDTO != null) {
-        	// drawing is done by external JavaScript for Streamlets
+        if (mapProjection != null) {
+        	if ((nParticles > 0)&&(projection == null)) {
+        		this.gwtSwarmTest();
+        	}
+        	if (windFieldDTO != null) { 
+        		// drawing is done by external JavaScript for Streamlets
+        	}
         }
     }
+    
+    public void gwtSwarmTest() {
+    	
+    	projection = new Mercator(this, map);
+    	
+    	if (field == null) {
+    		SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
+    		String jsonStr = bundle.windStreamletsDataJS().getText();
+    		field = RectField.read(jsonStr.substring(19, jsonStr.length()-1), false);
+        
+    		map.setZoom(5);
+        	map.panTo(field.getCenter());
+        	
+        	projection.calibrate();
+    	}
+    	    	
+    	color = new String[256];
+    	for(int alpha=0; alpha<=255; alpha++) {
+    		color[alpha] = "rgba(255,255,255,"+(((double)alpha)/255.0)+")";
+    	}
+    	
+    	Context2d ctxt = canvas.getContext2d();
+    	ctxt.setFillStyle("white");
+    	//ctxt.fillRect(100, 100, 300, 300);
+    	
+    	particles = new Particle[nParticles];
 
+    	pNE = map.getBounds().getNorthEast();
+    	pSW = map.getBounds().getSouthWest();
+
+    	for(int idx=0; idx<particles.length; idx++) {
+    		LatLng q = field.getRandomPosition();
+    		particles[idx] = new Particle();
+    		particles[idx].pos = q;
+    		particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
+    		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
+    		particles[idx].alpha = 0;
+    	}
+
+    	Scheduler scheduler = Scheduler.get();
+    	scheduler.scheduleFixedPeriod(this, 40);    	    	
+    }
+    
+    public void drawSwarm() {
+    	Context2d ctxt = canvas.getContext2d();
+    	
+    	ctxt.setGlobalAlpha(0.05);
+    	ctxt.setGlobalCompositeOperation("destination-out");
+    	ctxt.setFillStyle("black");
+    	ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
+    	ctxt.setGlobalAlpha(1.0);
+    	ctxt.setGlobalCompositeOperation("source-over");
+    	ctxt.setFillStyle("white");
+    	for(int idx=0; idx<particles.length; idx++) {
+    		if (particles[idx].age == 0) {
+    			continue;
+    		}
+    		//ctxt.fillRect(x.getX(), x.getY(), 2, 2);
+    		ctxt.setLineWidth(1.0);
+    		ctxt.setStrokeStyle(color[particles[idx].alpha]);
+        	ctxt.beginPath();
+			ctxt.moveTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
+    		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
+			ctxt.lineTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
+			ctxt.stroke();
+    	}    	
+    }
+    
+    public boolean execute() {
+
+    	double off = 0.01;
+    	for(int idx=0; idx<particles.length; idx++) {
+    		if (particles[idx].age <= 0) {
+    			particles[idx].pos = field.getRandomPosition();
+        		particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
+        		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
+        		particles[idx].alpha = 0;
+    		}
+    		if (particles[idx].age > 0) {
+    		Point v = field.getValue(particles[idx].pos);
+    		if (v == null) {
+    			particles[idx].age = 0;
+    		} else {
+    		//p[idx].pos = LatLng.newInstance(p[idx].pos.getLatitude()+off, p[idx].pos.getLongitude()+off);
+    		double lat = particles[idx].pos.getLatitude() + off*v.getY();
+    		double lng = particles[idx].pos.getLongitude() + off*v.getX();
+    		double s = RectField.length(v) / field.getMaxLength();
+    		particles[idx].alpha = (int)Math.min(255, 90 + Math.round(350 * s));
+    		particles[idx].pos = LatLng.newInstance(lat, lng);
+    		particles[idx].age--;
+    		}
+    		}
+    		
+    	}    	
+    	
+    	drawSwarm();
+    	//System.out.println("loop execute");
+    	return true;
+    }
+    
     private void clear() {
         this.stopStreamlets();        
     }
