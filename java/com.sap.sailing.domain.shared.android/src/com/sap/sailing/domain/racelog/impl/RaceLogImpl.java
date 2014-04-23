@@ -15,8 +15,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.Revokable;
 import com.sap.sailing.domain.racelog.RevokeEvent;
@@ -147,28 +151,37 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private void revokeIfNecessary(RaceLogEvent newEvent) {
         if (newEvent instanceof RevokeEvent) {
             RevokeEvent revokeEvent = (RevokeEvent) newEvent;
-            lockForRead();
-            RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
-            unlockAfterRead();
+            try {
+                checkIfSuccessfullyRevokes(revokeEvent);
 
-            if (revokedEvent == null) {
-                logger.log(Level.FINE, "RevokeEvent added, that refers to non-existent event to be revoked");
-                return;
+                lockForWrite();
+                revokedEventIds.add(revokeEvent.getRevokedEventId());
+                unlockAfterWrite();
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, e.getMessage());
             }
-            
-            if (! (revokedEvent instanceof Revokable)) {
-                logger.log(Level.FINE, "RevokeEvent trying to revoke non-revokable event");
-                return;
-            }
-            
-            if (getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) <= 0) {
-                logger.log(Level.FINE, "RevokeEvent does not have sufficient priority");
-                return;
-            }
-            
-            lockForWrite();
-            revokedEventIds.add(revokeEvent.getRevokedEventId());
-            unlockAfterWrite();
+        }
+    }
+    
+    private void checkIfSuccessfullyRevokes(RevokeEvent revokeEvent) throws NotRevokableException {
+        lockForRead();
+        RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+        unlockAfterRead();
+
+        if (revokedEvent == null) {
+            throw new NotRevokableException("RevokeEvent added, that refers to non-existent event to be revoked");
+        }
+
+        if (revokedEventIds.contains(revokedEvent.getId())) {
+            throw new NotRevokableException("Event has already been revoked");
+        }
+
+        if (! (revokedEvent instanceof Revokable)) {
+            throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
+        }
+
+        if (getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) <= 0) {
+            throw new NotRevokableException("RevokeEvent does not have sufficient priority");
         }
     }
 
@@ -386,5 +399,16 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             other.unlockAfterRead();
             unlockAfterWrite();
         }
+    }
+    
+    @Override
+    public void revokeEvent(RaceLogEventAuthor author, Revokable toRevoke) throws NotRevokableException {
+        if (toRevoke == null) {
+            throw new NotRevokableException("Received null as event to revoke");
+        }
+        RevokeEvent revokeEvent = RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), author,
+                getCurrentPassId(), toRevoke.getId());
+        checkIfSuccessfullyRevokes(revokeEvent);
+        add(revokeEvent);
     }
 }

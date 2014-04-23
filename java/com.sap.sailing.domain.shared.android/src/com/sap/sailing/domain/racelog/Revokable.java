@@ -13,6 +13,6 @@ package com.sap.sailing.domain.racelog;
  * @author Fredrik Teschke
  *
  */
-public interface Revokable {
+public interface Revokable extends RaceLogEvent {
 
 }
