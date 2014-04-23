@@ -2059,6 +2059,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 fleetDTO.courseDefinitionInRaceLog = raceLogTrackingState.isForTracking() ?
                         new LastPublishedCourseDesignFinder(raceLog).analyze() != null : false;
                 
+                fleetDTO.competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
+                
                 if (! raceLogTrackingState.isForTracking()) {
                     oneRaceLogDenotableForTracking = true;
                 }

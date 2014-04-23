@@ -1006,4 +1006,5 @@ public interface StringMessages extends Messages {
     String authorName();
     String authorPriority();
     String removeDenotation();
+    String competitorRegistrationsMissingProceed(String namesOfRaces);
 }

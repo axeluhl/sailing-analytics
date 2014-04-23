@@ -295,6 +295,21 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     
     private void startTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races) {
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
+        
+        //prompt user if competitor registrations are missing for same races
+        String namesOfRacesMissingRegistrations = "";
+        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
+            if (! race.getB().competitorRegistrationsExist) {
+                namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
+            }
+        }
+        if (! namesOfRacesMissingRegistrations.isEmpty()) {
+            boolean proceed = Window.confirm(stringMessages.competitorRegistrationsMissingProceed(
+                    namesOfRacesMissingRegistrations));
+            if (! proceed) {
+                return;
+            }
+        }
 
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
             final RaceColumnDTO raceColumn = race.getA();
