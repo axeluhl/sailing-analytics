@@ -1,5 +1,7 @@
 package com.sap.sailing.manage2sail;
 
+import java.util.Date;
+
 public class RaceResultDescriptor {
     private String id;
     private String name;
@@ -7,6 +9,7 @@ public class RaceResultDescriptor {
     private String seriesName;
     private String fleetName;
     private Boolean isTracked;
+    private Date startTime;
     	
 	/** Possible states: Scheduled, StartSequence, Racing, Finished, GeneralRecall, Postponed, Abandoned */
 	private String status;
@@ -66,4 +69,12 @@ public class RaceResultDescriptor {
     public void setTracked(Boolean isTracked) {
         this.isTracked = isTracked;
     }
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
 }

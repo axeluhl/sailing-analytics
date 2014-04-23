@@ -66,6 +66,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                         raceResult.setSeriesName((String) jsonRace.get("Series"));
                         raceResult.setFleetName((String) jsonRace.get("Fleet"));
                         raceResult.setTracked((Boolean) jsonRace.get("IsTracked"));
+                        raceResult.setStartTime(parseDate(jsonRace, "StartTime"));
                         regattaResult.getRaceResults().add(raceResult);
                     }
                 }
