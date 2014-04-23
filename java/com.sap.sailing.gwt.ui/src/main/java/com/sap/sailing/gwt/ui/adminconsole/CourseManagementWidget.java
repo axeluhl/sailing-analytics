@@ -101,6 +101,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             selectionModel.addSelectionChangeHandler(new Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
+                    updatePassingInstructions();
                     validate();
                 }
             });
@@ -109,10 +110,21 @@ public abstract class CourseManagementWidget implements IsWidget {
             marksTable.getDataProvider().getList().addAll(marks);
             
             passingInstructions = createListBox(false);
-            passingInstructions.insertItem(PassingInstruction.None.name(), 0);
-            int i = 1;
+            updatePassingInstructions();
+        }
+        
+        private void updatePassingInstructions() {
+            passingInstructions.clear();
+            
+            int numSelectedMarks = selectionModel.getSelectedSet().size();
+            int i = 0;
+            passingInstructions.insertItem(PassingInstruction.None.name(), i++);
             for (PassingInstruction pi : PassingInstruction.relevantValues()) {
-                passingInstructions.insertItem(pi.name(), i++);
+                for (int numApplicableMarks : pi.applicability) {
+                    if (numApplicableMarks == numSelectedMarks) {
+                        passingInstructions.insertItem(pi.name(), i++);
+                    }
+                }
             }
         }
 
@@ -122,7 +134,6 @@ public abstract class CourseManagementWidget implements IsWidget {
             Set<MarkDTO> selection = selectionModel.getSelectedSet();
             if (selection.size() == 1) {
                 controlPoint = selectionModel.getSelectedSet().iterator().next();
-                passingInstructions.setEnabled(true);
             } else if (selection.size() == 2) {
                 Iterator<MarkDTO> i = selectionModel.getSelectedSet().iterator();
                 MarkDTO first = i.next();
@@ -139,13 +150,11 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }
                 gateName = left.getName().replaceFirst(REGEX_FOR_LEFT, "");
                 controlPoint = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
-                
-                passingInstructions.setSelectedIndex(0);
-                passingInstructions.setEnabled(false);
             }
             
-            PassingInstruction passingInstruction = PassingInstruction.valueOf(
-                    passingInstructions.getValue(passingInstructions.getSelectedIndex()));
+            PassingInstruction passingInstruction = 
+                    passingInstructions.getSelectedIndex() == -1 ? PassingInstruction.None :
+                        PassingInstruction.valueOf(passingInstructions.getValue(passingInstructions.getSelectedIndex()));
             
             return new Pair<ControlPointDTO, PassingInstruction>(controlPoint, passingInstruction);
         }
