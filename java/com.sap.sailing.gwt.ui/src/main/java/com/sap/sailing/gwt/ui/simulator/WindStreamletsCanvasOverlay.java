@@ -280,29 +280,28 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
     
     public void gwtSwarmTest() {
-    	
+
     	projection = new Mercator(this, map);
-    	
+
     	if (field == null) {
     		SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
     		String jsonStr = bundle.windStreamletsDataJS().getText();
     		field = RectField.read(jsonStr.substring(19, jsonStr.length()-1), false);
-        
+
     		map.setZoom(5);
-        	map.panTo(field.getCenter());
-        	
-        	projection.calibrate();
+    		map.panTo(field.getCenter());
+
+    		projection.calibrate();
     	}
-    	    	
+
     	color = new String[256];
     	for(int alpha=0; alpha<=255; alpha++) {
     		color[alpha] = "rgba(255,255,255,"+(((double)alpha)/255.0)+")";
     	}
-    	
+
     	Context2d ctxt = canvas.getContext2d();
     	ctxt.setFillStyle("white");
-    	//ctxt.fillRect(100, 100, 300, 300);
-    	
+
     	particles = new Particle[nParticles];
 
     	pNE = map.getBounds().getNorthEast();
@@ -320,10 +319,10 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     	Scheduler scheduler = Scheduler.get();
     	scheduler.scheduleFixedPeriod(this, 40);    	    	
     }
-    
+
     public void drawSwarm() {
     	Context2d ctxt = canvas.getContext2d();
-    	
+
     	ctxt.setGlobalAlpha(0.05);
     	ctxt.setGlobalCompositeOperation("destination-out");
     	ctxt.setFillStyle("black");
@@ -335,49 +334,47 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     		if (particles[idx].age == 0) {
     			continue;
     		}
-    		//ctxt.fillRect(x.getX(), x.getY(), 2, 2);
     		ctxt.setLineWidth(1.0);
     		ctxt.setStrokeStyle(color[particles[idx].alpha]);
-        	ctxt.beginPath();
-			ctxt.moveTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
+    		ctxt.beginPath();
+    		ctxt.moveTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
     		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
-			ctxt.lineTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
-			ctxt.stroke();
+    		ctxt.lineTo(particles[idx].pxOld.getX(), particles[idx].pxOld.getY());
+    		ctxt.stroke();
     	}    	
     }
-    
+
     public boolean execute() {
 
     	double off = 0.01;
     	for(int idx=0; idx<particles.length; idx++) {
     		if (particles[idx].age <= 0) {
     			particles[idx].pos = field.getRandomPosition();
-        		particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
-        		particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
-        		particles[idx].alpha = 0;
+    			particles[idx].age = Math.max(2, (int)Math.round(Math.random()*40));
+    			particles[idx].pxOld = projection.latlng2pixel(particles[idx].pos);
+    			particles[idx].alpha = 0;
     		}
     		if (particles[idx].age > 0) {
-    		Point v = field.getValue(particles[idx].pos);
-    		if (v == null) {
-    			particles[idx].age = 0;
-    		} else {
-    		//p[idx].pos = LatLng.newInstance(p[idx].pos.getLatitude()+off, p[idx].pos.getLongitude()+off);
-    		double lat = particles[idx].pos.getLatitude() + off*v.getY();
-    		double lng = particles[idx].pos.getLongitude() + off*v.getX();
-    		double s = RectField.length(v) / field.getMaxLength();
-    		particles[idx].alpha = (int)Math.min(255, 90 + Math.round(350 * s));
-    		particles[idx].pos = LatLng.newInstance(lat, lng);
-    		particles[idx].age--;
+    			Point v = field.getValue(particles[idx].pos);
+    			if (v == null) {
+    				particles[idx].age = 0;
+    			} else {
+    				double lat = particles[idx].pos.getLatitude() + off*v.getY();
+    				double lng = particles[idx].pos.getLongitude() + off*v.getX();
+    				double s = RectField.length(v) / field.getMaxLength();
+    				particles[idx].alpha = (int)Math.min(255, 90 + Math.round(350 * s));
+    				particles[idx].pos = LatLng.newInstance(lat, lng);
+    				particles[idx].age--;
+    			}
     		}
-    		}
-    		
+
     	}    	
-    	
+
     	drawSwarm();
-    	//System.out.println("loop execute");
+
     	return true;
     }
-    
+
     private void clear() {
         this.stopStreamlets();        
     }
