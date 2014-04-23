@@ -161,6 +161,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -2031,8 +2032,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.discardThresholds = null;
         }
-        leaderboardDTO.isDenotedForRaceLogTracking = false;
-        leaderboardDTO.raceLogTrackersCanBeAdded = false;
+        leaderboardDTO.isDenotableForRaceLogTracking = leaderboard instanceof RegattaLeaderboard;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceDTO raceDTO = null;
@@ -2054,13 +2054,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
                 fleetDTO.courseDefinitionInRaceLog = new LastPublishedCourseDesignFinder(raceLog).analyze() != null;
                 
-                if (getRaceLogTrackingAdapter().isDenotedForRaceLogTracking(getService(), raceColumn, fleet)) {
-                    leaderboardDTO.isDenotedForRaceLogTracking = true;
-                }
-                
-                if (getRaceLogTrackingAdapter().canRaceLogTrackerBeAdded(getService(), raceColumn, fleet)) {
-                    leaderboardDTO.raceLogTrackersCanBeAdded = true;
-                    fleetDTO.raceLogTrackerCanBeAdded = true;
+                if (! raceLog.isEmpty()) {
+                    leaderboardDTO.isDenotableForRaceLogTracking = false;
                 }
             }
         }
@@ -4024,40 +4019,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     }
     
-    private void addRaceLogTracker(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) throws Exception {
-    	RegattaIdentifier regatta = null;
-    	if (leaderboard instanceof RegattaLeaderboard) {
-    		regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
-    	}
-    	
-    	getRaceLogTrackingAdapter().addRace(getService(), regatta, leaderboard, raceColumn, fleet, -1);
-    }
-
-    @Override
-    public void addRaceLogTracker(String leaderboardName,
-    		String raceColumnName, String fleetName) throws Exception {
-    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-    	RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
-    	Fleet fleet = raceColumn.getFleetByName(fleetName);
-    	
-    	addRaceLogTracker(leaderboard, raceColumn, fleet);
-    }
-    
-    @Override
-    public void addRaceLogTrackers(String leaderboardName) throws Exception {
-    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-    	RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
-    	
-    	Map<RaceColumn, Collection<Fleet>> canBeLoaded = adapter.listRaceLogTrackersThatCanBeAdded(getService(), leaderboard);
-    	for (RaceColumn raceColumn : canBeLoaded.keySet()) {
-    		if (canBeLoaded.get(raceColumn) != null) {
-    			for (Fleet fleet : canBeLoaded.get(raceColumn)) {
-    				addRaceLogTracker(leaderboard, raceColumn, fleet);
-    			}
-    		}
-    	}
-    }
-    
     @Override
     public void denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws Exception {
@@ -4065,29 +4026,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
     	Fleet fleet = raceColumn.getFleetByName(fleetName);
     	
-    	getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+    	getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
     }
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard);
+        getRaceLogTrackingAdapter().denoteLeaderboardForRaceLogTracking(getService(), leaderboard);
     }
     
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         return raceColumn.getRaceLog(fleet);
-    }
-    
-    @Override
-    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), raceLog.getCurrentPassId());
-        
-        raceLog.add(event);
     }
     
     @Override
@@ -4396,5 +4347,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     getService().getServerAuthor(), raceLog.getCurrentPassId(), idToRevoke);
             raceLog.add(event);
         }
+    }
+    
+    @Override
+    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+            throws NotDenotedForRaceLogTrackingException, Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        
+        getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet);
     }
 }

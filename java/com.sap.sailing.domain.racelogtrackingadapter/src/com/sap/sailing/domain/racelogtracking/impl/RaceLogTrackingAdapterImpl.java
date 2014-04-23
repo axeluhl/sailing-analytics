@@ -1,10 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,37 +7,34 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BaseRaceColumnListener;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Function;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
-import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
@@ -63,54 +55,52 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public RacesHandle addRace(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
-            RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception, RaceNotCreatedException {
+    public void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+            throws NotDenotedForRaceLogTrackingException, Exception {
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+        assert raceLogTrackingState.isForTracking() : new NotDenotedForRaceLogTrackingException();
+        RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
+        
+        if (! isRaceLogRaceTrackerAttached(service, raceLog)) {
+            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+        }
+        
+        if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
+                    service.getServerAuthor(), raceLog.getCurrentPassId());
+            raceLog.add(event);
+        }
+    }  
+
+    /**
+     * Adds a {@link RaceLogRaceTracker}. If a {@link StartTrackingEvent} is already present in the {@code RaceLog}
+     * linked to the {@code raceColumn} and {@code fleet}, a {@code TrackedRace} is created immediately and tracking begins.
+     * Otherwise, the {@code RaceLogRaceTracker} waits until a {@code StartTrackingEvent} is added to perform these actions.
+     * The race first has to be denoted for racelog tracking.
+     */
+    private RacesHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
+            RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds) throws RaceLogRaceTrackerExistsException, Exception {
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        assert ! isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
+                leaderboard.getName() + " - " + raceColumn.getName() + " - " + fleet.getName());
+        
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
         RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
                 leaderboard, delayToLiveInMillis, domainFactory);
         return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
     }
 
-    private Map<RaceColumn, Collection<Fleet>> findInLeaderboard(Leaderboard leaderboard,
-            Function<Pair<RaceColumn, Fleet>, Boolean> includeInResult) {
-        Map<RaceColumn, Collection<Fleet>> result = new HashMap<>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                if (includeInResult.perform(new Pair<>(raceColumn, fleet))) {
-                    Collection<Fleet> coll = result.get(raceColumn);
-                    if (coll == null) {
-                        coll = new ArrayList<>();
-                        result.put(raceColumn, coll);
-                    }
-                    coll.add(fleet);
-                }
-            }
-        }
-        return result;
-    }
-
     @Override
-    public Map<RaceColumn, Collection<Fleet>> listRaceLogTrackersThatCanBeAdded(final RacingEventService service,
-            Leaderboard leaderboard) {
-        return findInLeaderboard(leaderboard, new Function<Util.Pair<RaceColumn, Fleet>, Boolean>() {
-            @Override
-            public Boolean perform(Pair<RaceColumn, Fleet> in) {
-                return canRaceLogTrackerBeAdded(service, in.getA(), in.getB());
-            }
-        });
-    }
-
-    @Override
-    public void denoteForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, String raceName) throws NotDenotableForTrackingException {
+    public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
+            Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
 
         BoatClass boatClass = null;
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            throw new NotDenotableForTrackingException("Can only denote RegattaLeaderboards for RaceLog-tracking");
+            throw new NotDenotableForRaceLogTrackingException("Can only denote races in RegattaLeaderboards for RaceLog-tracking");
         }
 
         if (raceName == null) {
@@ -118,8 +108,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
 
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        assert raceLog != null : new NotDenotableForTrackingException("No RaceLog found in place");
-        assert raceLog.isEmpty() : new NotDenotableForTrackingException("RaceLog is not empty");
+        assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
+        assert raceLog.isEmpty() : new NotDenotableForRaceLogTrackingException("RaceLog is not empty");
 
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDenoteForTrackingEvent(MillisecondsTimePoint.now(),
                 service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass);
@@ -127,98 +117,50 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void denoteForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
-            throws NotDenotableForTrackingException {
+    public void denoteLeaderboardForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
+            throws NotDenotableForRaceLogTrackingException {
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
-                denoteForRaceLogTracking(service, leaderboard, column, fleet, null);
+                RaceLog raceLog = column.getRaceLog(fleet);
+                if (raceLog == null || ! column.getRaceLog(fleet).isEmpty()) {
+                    throw new NotDenotableForRaceLogTrackingException("Not all racelogs in the leaderboard are empty");
+                }
+            }
+        }
+        
+        for (RaceColumn column : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : column.getFleets()) {
+                denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
             }
         }
 
         // add listener, that also denotes all newly added RaceLogs for tracking
-        leaderboard.addRaceColumnListener(new RaceColumnListener() {
-            private static final long serialVersionUID = 3229728745966607941L;
+        leaderboard.addRaceColumnListener(new BaseRaceColumnListener() {
+            private static final long serialVersionUID = 2058141016872230058L;
 
-            @Override
-            public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {}
-            
-            @Override
-            public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {}
-            
-            @Override
-            public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
-                    ResultDiscardingRule newDiscardingRule) {}
-            
-            @Override
-            public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {}
-            
-            @Override
-            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {}
-            
-            @Override
-            public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {}
-            
             @Override
             public void raceColumnAddedToContainer(RaceColumn raceColumn) {
                 for (Fleet fleet : raceColumn.getFleets()) {
                     try {
-                        denoteForRaceLogTracking(service, leaderboard, raceColumn, fleet, null);
-                    } catch (NotDenotableForTrackingException e) {
+                        denoteRaceForRaceLogTracking(service, leaderboard, raceColumn, fleet, null);
+                    } catch (NotDenotableForRaceLogTrackingException e) {
                         logger.log(Level.WARNING, "Listener could not denote newly added RaceLog for racelog-tracking");
                         e.printStackTrace();
                     }
                 }
             }
-            
-            @Override
-            public boolean isTransient() {
-                return true;
-            }
-            
-            @Override
-            public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) { }
-            
-            @Override
-            public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {}
-            
-            @Override
-            public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
-                    boolean firstColumnIsNonDiscardableCarryForward) {}
-            
-            @Override
-            public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {}
-            
-            @Override
-            public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {}
-            
-            @Override
-            public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {}
-            
-            @Override
-            public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-                return true;
-            }
         });
     }
 
     @Override
-    public boolean canRaceLogTrackerBeAdded(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
-        if (raceColumn.getTrackedRace(fleet) == null) {
-            RaceLog raceLog = raceColumn.getRaceLog(fleet);
-            if (service.getRaceTrackerById(raceLog.getId()) == null) {
-                RaceLogTrackingState state = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-                return state.isForTracking();
-            }
-        }
-        return false;
+    public boolean isRaceLogRaceTrackerAttached(RacingEventService service, RaceLog raceLog) {
+        return service.getRaceTrackerById(raceLog.getId()) != null;
     }
 
     @Override
-    public boolean isDenotedForRaceLogTracking(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
-        return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze().isForTracking();
+    public RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
+        return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze();
     }
-    
-
     
     private Waypoint duplicateWaypoint(Waypoint waypoint, Map<ControlPoint, ControlPoint> controlPointDuplicationCache,
             Map<Mark, Mark> markDuplicationCache, SharedDomainFactory baseDomainFactory) {
@@ -292,5 +234,5 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 service.getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
         raceLog.add(mapping);
         service.getGPSFixStore().storeFix(device, gpsFix);
-    }    
+    }  
 }

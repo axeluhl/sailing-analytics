@@ -8,7 +8,6 @@ public class FleetDTO extends NamedDTO {
     private Color color;
     private int orderNo;
     
-    public boolean raceLogTrackerCanBeAdded;
     public RaceLogTrackingState raceLogTrackingState;
     public boolean raceLogTrackerExists;
     public boolean courseDefinitionInRaceLog;

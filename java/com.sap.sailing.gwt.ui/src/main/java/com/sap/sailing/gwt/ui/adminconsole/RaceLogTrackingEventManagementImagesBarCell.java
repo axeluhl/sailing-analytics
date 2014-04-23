@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
-    public static final String ACTION_ADD_RACELOG_TRACKERS = "ACTION_ADD_RACELOG_TRACKERS";
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
     
@@ -29,11 +28,9 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
 
         StrippedLeaderboardDTO leaderboard = (StrippedLeaderboardDTO) getContext().getKey();
-        if (! leaderboard.isDenotedForRaceLogTracking) {
+        
+        if (leaderboard.isDenotableForRaceLogTracking) {
             result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(), makeImagePrototype(resources.denoteForRaceLogTracking())));
-        }
-        if (leaderboard.raceLogTrackersCanBeAdded) {
-            result.add(new ImageSpec(ACTION_ADD_RACELOG_TRACKERS, stringMessages.addRaceLogTrackers(), makeImagePrototype(resources.addRaceLogTracker())));
         }
 
         return result;

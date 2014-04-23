@@ -31,8 +31,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
     public LeaderboardType type;
-    public boolean isDenotedForRaceLogTracking = false;
-    public boolean raceLogTrackersCanBeAdded = false;
+    public boolean isDenotableForRaceLogTracking;
 
     private Long delayToLiveInMillisForLatestRace;
 

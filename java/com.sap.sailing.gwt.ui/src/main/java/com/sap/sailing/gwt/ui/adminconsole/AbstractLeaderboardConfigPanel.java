@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -69,7 +69,7 @@ TrackedRaceChangedListener {
 
     protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
-    protected final SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
+    protected final SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
     protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
@@ -117,7 +117,8 @@ TrackedRaceChangedListener {
     }
 
     public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            final ErrorReporter errorReporter, StringMessages theStringConstants) {
+            final ErrorReporter errorReporter, StringMessages theStringConstants,
+            SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
@@ -236,7 +237,7 @@ TrackedRaceChangedListener {
 
         addColumnsToRacesTable(raceColumnTable);
         
-        raceColumnTableSelectionModel = new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
+        this.raceColumnTableSelectionModel = raceColumnTableSelectionModel;
         raceColumnTable.setSelectionModel(raceColumnTableSelectionModel);
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -420,8 +421,10 @@ TrackedRaceChangedListener {
     }
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality getSelectedRaceColumnWithFleet() {
-        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceInLeaderboardAndFleetName = raceColumnTableSelectionModel.getSelectedObject();
-        return raceInLeaderboardAndFleetName;
+        if (raceColumnTableSelectionModel.getSelectedSet().isEmpty()) {
+            return null;
+        }
+        return raceColumnTableSelectionModel.getSelectedSet().iterator().next();
     }
 
     protected String getSelectedLeaderboardName() {

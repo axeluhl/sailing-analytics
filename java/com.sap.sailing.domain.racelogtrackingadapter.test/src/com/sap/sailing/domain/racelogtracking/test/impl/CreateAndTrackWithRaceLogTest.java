@@ -2,7 +2,6 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sailing.domain.common.impl.Util.size;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,9 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -49,7 +46,6 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServi
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -100,7 +96,7 @@ public class CreateAndTrackWithRaceLogTest {
     public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);		
         exception.expect(RaceNotCreatedException.class);
-        adapter.addRace(service, regatta.getRegattaIdentifier(), leaderboard, column, fleet, -1);
+        adapter.startTracking(service, leaderboard, column, fleet);
     }
 
     private void testSize(Track<?> track, int expected) {
@@ -115,13 +111,9 @@ public class CreateAndTrackWithRaceLogTest {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RaceLog raceLog = column.getRaceLog(fleet);
 
-        //before denoting, it is not listed as loadable
-        Map<RaceColumn, Collection<Fleet>> loadable = adapter.listRaceLogTrackersThatCanBeAdded(service, leaderboard);
-        assertEquals(0, loadable.size());
-
         //can denote racelog for tracking
         assertTrue(raceLog.isEmpty());
-        adapter.denoteForRaceLogTracking(service, leaderboard, column, fleet, "race");
+        adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
         assertFalse(raceLog.isEmpty());
 
         //add a mapping and one fix in, one out of mapping
@@ -131,24 +123,13 @@ public class CreateAndTrackWithRaceLogTest {
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(5), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(15), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
 
-        //then listed as loadable
-        loadable = adapter.listRaceLogTrackersThatCanBeAdded(service, leaderboard);
-        assertEquals(1, loadable.size());
-        assertEquals(1, loadable.get(column).size());
-
-        //now can add
-        RacesHandle handle = adapter.addRace(service, regatta.getRegattaIdentifier(), leaderboard, column, fleet, -1);
-
-        //no trackedrace yet
-        assertNull(column.getTrackedRace(fleet));
-
         CourseBase course = new CourseDataImpl("test");
         course.addWaypoint(0, new WaypointImpl(new MarkImpl("mark")));
         raceLog.add(factory.createCourseDesignChangedEvent(t(), author, 0, course));
         raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
 
         //start tracking
-        raceLog.add(factory.createStartTrackingEvent(t(), author, 0));
+        adapter.startTracking(service, leaderboard, column, fleet);
 
         //now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);
@@ -171,7 +152,7 @@ public class CreateAndTrackWithRaceLogTest {
         testSize(race.getTrack(comp1), 5);
 
         //stop tracking, then no more fixes arrive at race
-        handle.getRaceTracker().stop();
+        service.getRaceTrackerById(raceLog.getId()).stop();
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(8), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
         testSize(race.getTrack(comp1), 5);
     }

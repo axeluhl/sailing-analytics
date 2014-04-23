@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -33,12 +33,14 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
-import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.Revokable;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -396,15 +398,18 @@ public interface SailingService extends RemoteService {
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
     
-    void addRaceLogTrackers(String leaderboardName) throws Exception, RaceNotCreatedException;
-    
-    void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception, RaceNotCreatedException;
-    
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
-    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName);
+    /**
+     * Performs all the necessary steps to start tracking the race.
+     * The {@code RaceLog} needs to be denoted for racelog-tracking beforehand.
+     * 
+     * @see RaceLogTrackingAdapter#startTracking
+     */
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+            throws NotDenotedForRaceLogTrackingException, Exception;
     
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
     
@@ -441,5 +446,9 @@ public interface SailingService extends RemoteService {
     void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping,
             Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException;
     
+    /**
+     * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
+     * This only affects such events that implement {@link Revokable}.
+     */
     void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds);
 }

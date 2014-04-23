@@ -29,6 +29,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -86,7 +87,7 @@ TrackedRaceChangedListener {
 
     public LeaderboardConfigPanel(final SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails) {
-        super(sailingService, adminConsole, errorReporter, theStringConstants);
+        super(sailingService, adminConsole, errorReporter, theStringConstants, new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         this.showRaceDetails = showRaceDetails;
     }
     
@@ -548,7 +549,7 @@ TrackedRaceChangedListener {
      */
     private void moveSelectedRaceColumnDown() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        final String selectedRaceColumnName = raceColumnTableSelectionModel.getSelectedObject().getA().getRaceColumnName();
+        final String selectedRaceColumnName = getSelectedRaceColumnWithFleet().getA().getRaceColumnName();
         sailingService.moveLeaderboardColumnDown(getSelectedLeaderboardName(), selectedRaceColumnName,
                 new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
@@ -572,7 +573,7 @@ TrackedRaceChangedListener {
      */
     private void moveSelectedRaceColumnUp() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        final String selectedRaceColumnName = raceColumnTableSelectionModel.getSelectedObject().getA().getRaceColumnName();
+        final String selectedRaceColumnName = getSelectedRaceColumnWithFleet().getA().getRaceColumnName();
         sailingService.moveLeaderboardColumnUp(getSelectedLeaderboardName(), selectedRaceColumnName,
                 new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {

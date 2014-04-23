@@ -526,11 +526,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void addRaceLogTrackers(String leaderboardName, AsyncCallback<Void> callback);
-
-    void addRaceLogTracker(String leaderboardName, String raceColumnName,
-            String fleetName, AsyncCallback<Void> callback);
-
     void denoteForRaceLogTracking(String leaderboardName,
             String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);

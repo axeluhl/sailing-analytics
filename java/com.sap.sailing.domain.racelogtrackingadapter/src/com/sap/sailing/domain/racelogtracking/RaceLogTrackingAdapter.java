@@ -1,17 +1,12 @@
 package com.sap.sailing.domain.racelogtracking;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Map;
-
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -20,61 +15,55 @@ import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public interface RaceLogTrackingAdapter {
+public interface RaceLogTrackingAdapter {    
     /**
-     * Can be called either to track a new race, or optionally to load a race that is already in the
-     * {@link RaceLogTrackingState#TRACKING} state, but was closed.
+     * Performs the necessary steps to ensure that the race is tracked (aka that a {@link TrackedRace}
+     * is created from the data in this {@code RaceLog}).<p>
+     * The following steps are performed to achieve this: 
+     * <ul>
+     * <li>Is the racelog denoted for tracking? If not, throw exception.</li>
+     * <li>Is a {@link RaceLogRaceTracker} already listening for this racelog? If not, add one.</li>
+     * <li>Is a {@link StartTrackingEvent} present in the racelog? If not, add one</li>
+     * </ul>
      */
-    RacesHandle addRace(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
-            RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException, Exception;
+    void startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+            throws NotDenotedForRaceLogTrackingException, Exception;
+    
+    RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
 
     /**
-     * Lists all races for this leaderboards according to the rules in
-     * {@link #canRaceBeAdded(RacingEventService, Leaderboard, RaceColumn, Fleet)}.
+     * Is a {@link RaceLogRaceTracker} already listening on this {@code raceLog}?
      */
-    Map<RaceColumn, Collection<Fleet>> listRaceLogTrackersThatCanBeAdded(RacingEventService service, Leaderboard leaderboard);
-
-    /**
-     * Returns {@code true}, if a {@link DenoteForTrackingEvent} exists within the {@link RaceLog}, and if it does not
-     * not already have an attached {@link TrackedRace}, and if there is no {@link RaceLogRaceTracker} registered for it
-     * already.
-     */
-    boolean isDenotedForRaceLogTracking(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
-
-    /**
-     * Returns {@code true}, if a {@link DenoteForTrackingEvent} exists within the {@link RaceLog}, and if it does not
-     * not already have an attached {@link TrackedRace}, and if there is no {@link RaceLogRaceTracker} registered for it
-     * already.
-     */
-    boolean canRaceLogTrackerBeAdded(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
+    boolean isRaceLogRaceTrackerAttached(RacingEventService service, RaceLog raceLog);
 
     /**
      * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link DenoteForTrackingEvent}.
      * 
-     * @throws NotDenotableForTrackingException
+     * @throws NotDenotableForRaceLogTrackingException
      *             Fails, if no {@link RaceLog}, or a non-empty {@link RaceLog}, or one with attached
      *             {@link TrackedRace} is found already in place.
      *             Also fails, if the {@code leaderboard} is not a {@link RegattaLeaderboard}.
      */
-    void denoteForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, String raceName) throws NotDenotableForTrackingException;
+    void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
+            Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
 
     /**
      * Denotes the entire {@link Leaderboard} for racelog-tracking, by calling the
-     * {@link #denoteForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
-     * {@link RaceLog}.
+     * {@link #denoteRaceForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
+     * {@link RaceLog}.<p>
+     * 
+     * Will fail if there one or more of the attached {@code RaceLogs} are not empty.<p>
      * 
      * Also, a listener is registered, that denotes every {@link RaceLog} that is added at a later time as well.
      */
-    void denoteForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
-            throws NotDenotableForTrackingException;
+    void denoteLeaderboardForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
+            throws NotDenotableForRaceLogTrackingException;
     
     /**
      * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
