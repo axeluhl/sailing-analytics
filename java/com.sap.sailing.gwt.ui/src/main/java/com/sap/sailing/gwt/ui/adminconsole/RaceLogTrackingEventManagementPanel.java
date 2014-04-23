@@ -122,6 +122,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
                 if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(object.getA(), object.getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REMOVE_DENOTATION.equals(value)) {
+                    removeDenotation(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
                             getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
@@ -267,12 +269,26 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             @Override
             public void onSuccess(Void result) {
                 loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
-                raceColumnTableSelectionModel.clear();
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private void removeDenotation(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
+        final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
+        sailingService.removeDenotationForRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not remove denotation: " + caught.getMessage());
             }
         });
     }
@@ -290,7 +306,6 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 public void onSuccess(Void result) {
                     loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
                     trackedRacesListComposite.regattaRefresher.fillRegattas();
-                    raceColumnTableSelectionModel.clear();
                 }
 
                 @Override

@@ -162,6 +162,8 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -185,6 +187,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.racelog.Revokable;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
@@ -2032,7 +2035,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.discardThresholds = null;
         }
-        leaderboardDTO.isDenotableForRaceLogTracking = leaderboard instanceof RegattaLeaderboard;
+        boolean oneRaceLogDenotableForTracking = false;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceDTO raceDTO = null;
@@ -2050,14 +2053,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                fleetDTO.raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+                RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+                fleetDTO.raceLogTrackingState = raceLogTrackingState;
                 fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
-                fleetDTO.courseDefinitionInRaceLog = new LastPublishedCourseDesignFinder(raceLog).analyze() != null;
+                fleetDTO.courseDefinitionInRaceLog = raceLogTrackingState.isForTracking() ?
+                        new LastPublishedCourseDesignFinder(raceLog).analyze() != null : false;
                 
-                if (! raceLog.isEmpty()) {
-                    leaderboardDTO.isDenotableForRaceLogTracking = false;
+                if (! raceLogTrackingState.isForTracking()) {
+                    oneRaceLogDenotableForTracking = true;
                 }
             }
+        }
+        if (oneRaceLogDenotableForTracking) {
+            leaderboardDTO.isDenotableForRaceLogTracking = leaderboard instanceof RegattaLeaderboard;
         }
         return leaderboardDTO;
     }
@@ -4030,9 +4038,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
+    }
+    
+    @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
-        getRaceLogTrackingAdapter().denoteLeaderboardForRaceLogTracking(getService(), leaderboard);
+        getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard);
     }
     
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
@@ -4051,8 +4065,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void unregisterCompetitor(RaceLog raceLog, Competitor competitor) {
         for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
             if (event instanceof RegisterCompetitorEvent && ((RegisterCompetitorEvent) event).getCompetitor().equals(competitor)) {
-                raceLog.add(RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
-                        getService().getServerAuthor(), raceLog.getCurrentPassId(), event.getId()));
+                try {
+                    raceLog.revokeEvent(getService().getServerAuthor(), (RegisterCompetitorEvent) event);
+                } catch (NotRevokableException e) {}
             }
         }
     }
@@ -4340,12 +4355,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<Serializable> eventIds) {
+            List<Serializable> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
-                    getService().getServerAuthor(), raceLog.getCurrentPassId(), idToRevoke);
-            raceLog.add(event);
+            RaceLogEvent event = raceLog.getEventById(idToRevoke);
+            if (event instanceof Revokable) {
+                raceLog.revokeEvent(getService().getServerAuthor(), (Revokable) event);
+            }
         }
     }
     

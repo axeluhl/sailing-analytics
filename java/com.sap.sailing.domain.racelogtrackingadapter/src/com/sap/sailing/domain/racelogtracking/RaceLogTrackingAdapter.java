@@ -52,17 +52,20 @@ public interface RaceLogTrackingAdapter {
      */
     void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
+    
+    /**
+     * Revoke the {@link DenoteForTrackingEvent}, and if it exists the {@link StartTrackingEvent}.
+     * This does not affect existing an {@link RaceLogRaceTracker}
+     * or {@link TrackedRace} for this {@code RaceLog}.
+     */
+    void removeDenotationForRaceLogTracking(RacingEventService service, RaceLog raceLog);
 
     /**
      * Denotes the entire {@link Leaderboard} for racelog-tracking, by calling the
      * {@link #denoteRaceForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
-     * {@link RaceLog}.<p>
-     * 
-     * Will fail if there one or more of the attached {@code RaceLogs} are not empty.<p>
-     * 
-     * Also, a listener is registered, that denotes every {@link RaceLog} that is added at a later time as well.
+     * {@link RaceLog}.
      */
-    void denoteLeaderboardForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
+    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
             throws NotDenotableForRaceLogTrackingException;
     
     /**

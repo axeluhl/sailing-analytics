@@ -36,11 +36,14 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -399,6 +402,14 @@ public interface SailingService extends RemoteService {
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
     
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+    
+    /**
+     * Revoke the {@link DenoteForTrackingEvent}. This does not affect an existing {@code RaceLogRaceTracker}
+     * or {@link TrackedRace} for this {@code RaceLog}.
+     * 
+     * @see RaceLogTrackingAdapter#removeDenotationForRaceLogTracking
+     */
+    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName);
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
@@ -450,5 +461,6 @@ public interface SailingService extends RemoteService {
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
      */
-    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds);
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
+            throws NotRevokableException;
 }

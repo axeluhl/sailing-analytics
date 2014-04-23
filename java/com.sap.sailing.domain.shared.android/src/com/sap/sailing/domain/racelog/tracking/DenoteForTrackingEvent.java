@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.tracking;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.Revokable;
 
 /**
  * The existence of this event in a {@link RaceLog} indicates that the necessary data
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
  * @author Fredrik Teschke
  *
  */
-public interface DenoteForTrackingEvent extends RaceLogEvent {
+public interface DenoteForTrackingEvent extends RaceLogEvent, Revokable {
     String getRaceName();
     BoatClass getBoatClass();
 }

@@ -1005,4 +1005,5 @@ public interface StringMessages extends Messages {
     String importWindTooltip();
     String authorName();
     String authorPriority();
+    String removeDenotation();
 }

@@ -31,12 +31,12 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -352,10 +352,9 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         Course course = new CourseImpl(raceInfo.getA() + " course", courseBase.getWaypoints());
 
         if (raceColumn.getTrackedRace(fleet) != null) {
-            if (event != null) {
-                raceLog.add(RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
-                        getParams().getService().getServerAuthor(), raceLog.getCurrentPassId(), event.getId()));
-            }
+            try {
+                raceLog.revokeEvent(params.getService().getServerAuthor(), event);
+            } catch (NotRevokableException e) {}
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
 

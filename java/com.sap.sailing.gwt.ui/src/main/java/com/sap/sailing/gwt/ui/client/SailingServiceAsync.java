@@ -574,5 +574,8 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
+
+    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Void> callback);
 }
 
