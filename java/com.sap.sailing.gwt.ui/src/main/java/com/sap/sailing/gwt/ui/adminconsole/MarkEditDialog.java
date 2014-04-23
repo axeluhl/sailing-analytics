@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.HtmlPredefinedColor;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.Pattern;
 import com.sap.sailing.gwt.ui.shared.racemap.Shape;
@@ -23,7 +23,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
     private final ListBox shape;
     private final ListBox pattern;
     private final ListBox type;
-    private final ListBox color;
+    private final TextBox color;
     private final StringMessages stringMessages;
     
     public MarkEditDialog(final StringMessages stringMessages, MarkDTO markToEdit, boolean isNewMark,
@@ -36,6 +36,12 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
                         String result = null;
                         if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                             result = stringMessages.pleaseEnterAName();
+                        } else if (valueToValidate.color != null && ! valueToValidate.color.isEmpty()) {
+                            try {
+                                new RGBColor(valueToValidate.color);
+                            } catch (IllegalArgumentException iae) {
+                                result = valueToValidate.color;
+                            }
                         }
                         return result;
                     }
@@ -46,7 +52,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         this.name = createTextBox(markToEdit.getName());
         this.shape = createAndSelectListBox(Shape.values(), markToEdit.shape, true);
         this.type = createAndSelectListBox(MarkType.values(), markToEdit.type == null ? null : markToEdit.type.name(), false);
-        this.color = createAndSelectListBox(HtmlPredefinedColor.values(), markToEdit.color, true);
+        this.color = createTextBox(markToEdit.color);
         this.pattern = createAndSelectListBox(Pattern.values(), markToEdit.pattern, true);
     }
     
@@ -83,7 +89,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         MarkDTO result = new MarkDTO(markToEdit.getIdAsString(), name.getText());
         result.shape = shape.getItemText(shape.getSelectedIndex());
         result.type = MarkType.valueOf(type.getItemText(type.getSelectedIndex()));
-        result.color = color.getItemText(color.getSelectedIndex());
+        result.color = color.getText();
         result.pattern = pattern.getItemText(pattern.getSelectedIndex());
         return result;
     }

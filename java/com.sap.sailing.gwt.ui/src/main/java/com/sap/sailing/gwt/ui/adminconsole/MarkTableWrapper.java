@@ -12,6 +12,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.SelectionModel;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,12 +49,12 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         };
         table.addColumn(markPositionColumn, stringMessages.position());
         
-        TextColumn<MarkDTO> markColorColumn = new TextColumn<MarkDTO>() {
+        Column<MarkDTO, SafeHtml> markColorColumn = new ColorColumn<>(new ColorRetriever<MarkDTO>() {
             @Override
-            public String getValue(MarkDTO markDTO) {
-                return markDTO.color != null ? markDTO.color : "";
+            public Color getColor(MarkDTO t) {
+                return t.color != null && ! t.color.isEmpty() ? new RGBColor(t.color) : null;
             }
-        };
+        });
         table.addColumn(markColorColumn, stringMessages.color());
 
         TextColumn<MarkDTO> markShapeColumn = new TextColumn<MarkDTO>() {

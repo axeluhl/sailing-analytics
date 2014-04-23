@@ -16,8 +16,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -90,20 +92,12 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
             }
         });
 
-        Column<CompetitorDTO, SafeHtml> displayColorColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+        Column<CompetitorDTO, SafeHtml> displayColorColumn = new ColorColumn<>(new ColorRetriever<CompetitorDTO>() {
             @Override
-            public SafeHtml getValue(CompetitorDTO competitor) {
-                SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                if (competitor.getColor() != null) {
-                    sb.appendHtmlConstant("<span style=\"color: " + competitor.getColor() + ";\">");
-                    sb.appendHtmlConstant(competitor.getColor().getAsHtml());
-                    sb.appendHtmlConstant("</span>");
-                } else {
-                    sb.appendHtmlConstant("&nbsp;");
-                }
-                return sb.toSafeHtml();
+            public Color getColor(CompetitorDTO t) {
+                return t.getColor();
             }
-        };
+        });
 
         TextColumn<CompetitorDTO> competitorIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
