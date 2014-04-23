@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
 
 /**
  * Event type for mapping {@link DeviceIdentifier devices} to {@code items} ({@link Competitor competitors} or {@link Mark marks}).
@@ -15,6 +16,8 @@ import com.sap.sailing.domain.racelog.Revokable;
  * <p>
  * If one end of the time range enclosed by {@link #getFrom()} and {@link #getTo()} is open, this can be closed
  * by a {@link CloseOpenEndedDeviceMappingEvent}.
+ * 
+ * @see DefinedMarkFinder for rules by which {@link DeviceMapping}s are derived from these events.
  * @author Fredrik Teschke
  */
 public interface DeviceMappingEvent<ItemType extends WithID> extends RaceLogEvent, Revokable {

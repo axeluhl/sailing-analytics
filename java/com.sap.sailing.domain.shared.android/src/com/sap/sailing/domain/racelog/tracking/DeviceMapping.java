@@ -6,9 +6,10 @@ import java.util.List;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMappingFinder;
 
 /**
- * Refer to the documentation of {@link DeviceMappingEvent} for details on how have-open ranges are resolved.
+ * @see DeviceMappingFinder {@code DeviceMappings} are derived from {@code DeviceMappingEvents}.
  * @author Fredrik Teschke
  */
 public interface DeviceMapping<ItemType extends WithID> extends Timed {

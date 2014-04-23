@@ -4360,7 +4360,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Serializable> eventIds) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Serializable idToRevoke : eventIds) {
+            raceLog.lockForRead();
             RaceLogEvent event = raceLog.getEventById(idToRevoke);
+            raceLog.unlockAfterRead();
             if (event instanceof Revokable) {
                 raceLog.revokeEvent(getService().getServerAuthor(), (Revokable) event);
             }

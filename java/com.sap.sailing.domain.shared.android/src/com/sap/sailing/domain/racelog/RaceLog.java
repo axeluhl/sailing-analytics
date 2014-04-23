@@ -104,6 +104,7 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     
     /**
      * Search for the event by its {@link RaceLogEvent#getId() id}.
+     * Caller needs to hold the read lock.
      */
     RaceLogEvent getEventById(Serializable id);
     
