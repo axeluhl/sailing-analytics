@@ -12,17 +12,15 @@ public class SwissTimingRaceRecordDTO implements IsSerializable {
     public String seriesName;
     public String fleetName;
     public String raceStatus;
+    public String xrrEntriesUrl;
     
     public String boatClass;
     public String gender;
-
-    public boolean hasCourse;
-    public boolean hasStartlist;
     
     public SwissTimingRaceRecordDTO() {}
     
     public SwissTimingRaceRecordDTO(String raceId, String raceName, String regattaName, String seriesName, String fleetName,
-    		String raceStatus, Date raceStartTime) {
+    		String raceStatus, Date raceStartTime, String xrrEntriesUrl) {
         super();
         this.raceId = raceId;
         this.raceName = raceName;
@@ -31,6 +29,7 @@ public class SwissTimingRaceRecordDTO implements IsSerializable {
         this.fleetName = fleetName;
         this.raceStatus = raceStatus;
         this.raceStartTime = raceStartTime;
+        this.xrrEntriesUrl = xrrEntriesUrl;
     }
 
 	@Override
@@ -40,7 +39,6 @@ public class SwissTimingRaceRecordDTO implements IsSerializable {
 				+ ", regattaName=" + regattaName + ", seriesName=" + seriesName
 				+ ", fleetName=" + fleetName + ", raceStatus=" + raceStatus
 				+ ", boatClass=" + boatClass + ", gender=" + gender
-				+ ", hasCourse=" + hasCourse + ", hasStartlist=" + hasStartlist
 				+ "]";
 	}
 }

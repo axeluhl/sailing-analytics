@@ -50,6 +50,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                 regattaResult.setPdfUrl(parseURL(jsonRegatta, "PdfUrl"));
                 regattaResult.setXrrPreliminaryUrl(parseURL(jsonRegatta, "XrrPreliminaryUrl"));
                 regattaResult.setXrrFinalUrl(parseURL(jsonRegatta, "XrrFinalUrl"));
+                regattaResult.setXrrEntriesUrl(parseURL(jsonRegatta, "XrrEntriesUrl"));
                 regattaResult.setHtmlUrl(parseURL(jsonRegatta, "HtmlUrl"));
                 regattaResult.setPublishedAt(parseDate(jsonRegatta, "Published"));
                 regattaResult.setIsFinal((Boolean) jsonRegatta.get("Final"));

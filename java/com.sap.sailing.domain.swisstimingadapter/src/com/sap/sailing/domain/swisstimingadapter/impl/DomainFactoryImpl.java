@@ -349,9 +349,9 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
-            String raceDescription, BoatClass boatClass, long delayToLiveInMillis,
+            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore) {
-        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceDescription, boatClass, delayToLiveInMillis, 
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceDescription, boatClass, startList, delayToLiveInMillis, 
                 swissTimingFactory, domainFactory, raceLogStore);
     }
 

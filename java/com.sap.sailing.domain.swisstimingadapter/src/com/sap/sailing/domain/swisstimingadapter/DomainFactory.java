@@ -55,7 +55,7 @@ public interface DomainFactory {
     RaceType getRaceTypeFromRaceID(String raceID);
 
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
-            String raceDescription, BoatClass boatClass, long delayToLiveInMillis,
+            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);

@@ -93,11 +93,28 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID,
-                raceDescription, boatClass, hostname, port, windStore, domainFactory, factory, trackedRegattaRegistry,
+                raceDescription, boatClass, hostname, port, null, windStore, domainFactory, factory, trackedRegattaRegistry,
+                delayToLiveInMillis);
+    }
+
+    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore raceLogStore,
+            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID,
+                raceDescription, boatClass, hostname, port, startList, windStore, domainFactory, factory, trackedRegattaRegistry,
+                delayToLiveInMillis);
+    }
+
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
+            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        this(regatta, raceID, raceDescription, boatClass, hostname, port, null, windStore, domainFactory, factory, trackedRegattaRegistry,
                 delayToLiveInMillis);
     }
     
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
@@ -107,6 +124,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceDescription, boatClass);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
+        this.startList = startList;
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         this.windStore = windStore;

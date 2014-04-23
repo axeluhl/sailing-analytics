@@ -176,16 +176,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         };
 
-        // AXEL: DON'T DELETE
-//        TextColumn<SwissTimingRaceRecordDTO> stateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
-//            @Override
-//            public String getValue(SwissTimingRaceRecordDTO object) {
-//                String result = object.hasCourse ? "C✓ " : "";
-//                result += object.hasStartlist ? "S✓" : "";
-//                return result;
-//            }
-//        };
-
         TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {

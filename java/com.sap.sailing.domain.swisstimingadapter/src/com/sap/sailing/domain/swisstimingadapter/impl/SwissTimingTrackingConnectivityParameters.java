@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -21,9 +22,10 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final DomainFactory domainFactory;
     private final RaceLogStore raceLogStore;
     private final long delayToLiveInMillis;
+    private final StartList startList;
     
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceDescription, BoatClass boatClass,
-            long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
+    		StartList startList, long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore) {
         super();
         this.hostname = hostname;
@@ -31,6 +33,7 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.raceID = raceID;
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
+        this.startList = startList;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.swissTimingFactory = swissTimingFactory;
         this.domainFactory = domainFactory;
@@ -39,7 +42,7 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, raceDescription, boatClass, hostname, port, delayToLiveInMillis, raceLogStore, windStore, domainFactory,
+        return swissTimingFactory.createRaceTracker(raceID, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, domainFactory,
                 trackedRegattaRegistry);
     }
 

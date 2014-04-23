@@ -16,6 +16,7 @@ import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -86,10 +87,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
-            long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, DomainFactory domainFactory,
+    		StartList startList, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, raceDescription, boatClass, hostname, port, raceLogStore, windStore, domainFactory, this,
+        return new SwissTimingRaceTrackerImpl(raceID, raceDescription, boatClass, hostname, port, startList, raceLogStore, windStore, domainFactory, this,
                 trackedRegattaRegistry, delayToLiveInMillis);
     }
 
