@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -66,20 +67,20 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Long getTimeInMilliSeconds(TimePoint timePoint) {
-        Long result;
+    public Duration getTime(TimePoint timePoint) {
+        Duration result;
         MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                 getTrackedLeg().getLeg().getFrom());
         if (passedStartWaypoint != null && !passedStartWaypoint.getTimePoint().after(timePoint)) {
             MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                     getTrackedLeg().getLeg().getTo());
             if (passedEndWaypoint != null) {
-                result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+                result = passedStartWaypoint.getTimePoint().until(passedEndWaypoint.getTimePoint());
             } else {
                 if (getTrackedRace().getEndOfTracking() != null && timePoint.after(getTrackedRace().getEndOfTracking())) {
                     result = null;
                 } else {
-                    result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+                    result = passedStartWaypoint.getTimePoint().until(timePoint);
                 }
             }
         } else {
