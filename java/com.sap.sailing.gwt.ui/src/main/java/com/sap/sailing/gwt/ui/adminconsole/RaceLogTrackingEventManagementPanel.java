@@ -5,7 +5,9 @@ import java.util.Set;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -82,12 +84,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     
     @Override
     protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
-        TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceNameColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
-            @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
-                return object.getA().getName();
-            }
-        };
+        Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn = getRaceLinkColumn();
+        
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> fleetNameColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {

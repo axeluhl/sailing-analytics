@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -28,6 +32,9 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -498,5 +505,29 @@ TrackedRaceChangedListener {
     @Override
     public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null : leaderboardSelectionModel.getSelectedSet().iterator().next();
+    }
+    
+    protected static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+    
+    protected Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> getRaceLinkColumn() {
+        return new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
+            @Override
+            public SafeHtml getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceInLeaderboardDTOAndFleetName) {
+                if (raceInLeaderboardDTOAndFleetName.getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB()) != null) {
+                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
+                            .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
+                    
+                    Map<String, String> params = new HashMap<>();
+                    params.put("leaderboardName", getSelectedLeaderboard().name);
+                    params.put("regattaName", raceIdentifier.getRegattaName());
+                    params.put("raceName", raceIdentifier.getRaceName());
+                    params.put("canReplayDuringLiveRaces", "true");
+                    String link = EntryPointLinkFactory.createRaceBoardLink(params);
+                    return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
+                } else {
+                    return SafeHtmlUtils.fromString(raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
+                }
+            }
+        };
     }
 }
