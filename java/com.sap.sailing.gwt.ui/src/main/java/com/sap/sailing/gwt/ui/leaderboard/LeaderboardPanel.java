@@ -1461,7 +1461,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
         setShowAddedScores(settings.isShowAddedScores());
-        loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        }
 
         if (this.preSelectedRace == null) {
             isEmbedded = false;
@@ -1645,7 +1647,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
+        // If the timer is currently in a mode that causes null to be used as the leaderboard request time stamp,
+        // don't let a live play delay change cause another load request by unregistering this panel as timer
+        // listener before and re-registering it after adjusting the live play delay.
+        if (useNullAsTimePoint()) {
+            timer.removeTimeListener(this);
+        }
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
+        if (useNullAsTimePoint()) {
+            timer.addTimeListener(this);
+        }
     }
 
     private boolean isAutoExpandPreSelectedRace() {
@@ -1754,7 +1765,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
-                    getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
+                    getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
                     /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
@@ -1776,6 +1787,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             getBusyIndicator().setBusy(false);
         }
+    }
+
+    /**
+     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(Date) loading the leaderboard contents}, <code>null</code>
+     * is used as time point. The condition for this is encapsulated in this method so others can find out. For example, when a time change
+     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(Date)} would be required
+     * as <code>null</code> will be passed in any case, not being affected by local time offsets.
+     */
+    private boolean useNullAsTimePoint() {
+        return timer.getPlayMode() == PlayModes.Live;
     }
 
     private boolean needsDataLoading() {
@@ -2511,7 +2532,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime(), null);
+        if (timer.isInitialized()) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     @Override
