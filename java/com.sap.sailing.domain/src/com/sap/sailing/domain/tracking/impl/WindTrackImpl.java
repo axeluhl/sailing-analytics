@@ -165,6 +165,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     /**
      * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
+     * It does so by collecting (smoothened, outliers removed)) wind fixes around the <code>at</code> time point up to
+     * an interval length as specified by {@link #getMillisecondsOverWhichToAverageWind()}. At least one fix that is
+     * closest to <code>at</code> will be picked up. If the track is empty, <code>null</code> is returned. Otherwise,
+     * the wind fixes in the interval constructed are averaged using a {@link ConfidenceBasedWindAverager}.
+     * 
+     * <p>
      * However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this
      * carefully if they can guarantee there are no concurrency issues with the internal fixes while iterating over the
      * result of {@link #getInternalFixes()}.
