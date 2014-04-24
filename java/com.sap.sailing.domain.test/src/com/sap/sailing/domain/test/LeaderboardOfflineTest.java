@@ -148,17 +148,17 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                     InterruptedException {
             }
         };
-        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
         assertNotNull(leaderboardDTO);
-        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // assert it's cached
+        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // assert it's cached
         leaderboard.getRaceColumnByName(columnName).releaseTrackedRace(defaultFleet); // this should clear the cache
-        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
         assertNotSame(leaderboardDTO, leaderboardDTO2);
-        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
         leaderboard.getRaceColumnByName(columnName).setTrackedRace(defaultFleet, testRaces.iterator().next()); // clear cache again; requires listener(s) to still be attached
-        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE);
         assertNotSame(leaderboardDTO2, leaderboardDTO3);
-        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
     }
 
     @Test

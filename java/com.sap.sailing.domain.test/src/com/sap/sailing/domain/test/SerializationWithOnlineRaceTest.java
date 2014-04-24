@@ -34,8 +34,8 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
-public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
-    public SerializationTestWithOnlineRace() throws MalformedURLException, URISyntaxException {
+public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
+    public SerializationWithOnlineRaceTest() throws MalformedURLException, URISyntaxException {
         super();
     }
 
