@@ -1647,7 +1647,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
+        // If the timer is currently in a mode that causes null to be used as the leaderboard request time stamp,
+        // don't let a live play delay change cause another load request by unregistering this panel as timer
+        // listener before and re-registering it after adjusting the live play delay.
+        if (useNullAsTimePoint()) {
+            timer.removeTimeListener(this);
+        }
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
+        if (useNullAsTimePoint()) {
+            timer.addTimeListener(this);
+        }
     }
 
     private boolean isAutoExpandPreSelectedRace() {
