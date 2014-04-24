@@ -10,11 +10,17 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RaceCourseDTO implements IsSerializable {
     public List<WaypointDTO> waypoints;
+    public List<MarkDTO> marks;
 
     RaceCourseDTO() {}
 
     public RaceCourseDTO(List<WaypointDTO> waypoints) {
+        this(waypoints, null);
+    }
+
+    public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> marks) {
         this.waypoints = waypoints;
+        this.marks = marks;
     }
 
     public List<ControlPointDTO> getControlPoints() {
@@ -26,6 +32,10 @@ public class RaceCourseDTO implements IsSerializable {
     }
 
     public Collection<MarkDTO> getMarks() {
+        if (marks != null) {
+            return marks;
+        }
+
         Map<String, MarkDTO> marks = new HashMap<String, MarkDTO>();
         for(WaypointDTO waypoint: waypoints) {
             for(MarkDTO mark: waypoint.marks) {

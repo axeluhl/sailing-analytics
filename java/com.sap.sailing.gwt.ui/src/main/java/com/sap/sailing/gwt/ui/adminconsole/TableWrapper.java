@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -54,5 +56,11 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     
     public ListDataProvider<T> getDataProvider() {
         return dataProvider;
+    }
+    
+    public void refresh(Collection<T> newItems) {
+        dataProvider.getList().clear();
+        dataProvider.getList().addAll(newItems);
+        dataProvider.flush();
     }
 }

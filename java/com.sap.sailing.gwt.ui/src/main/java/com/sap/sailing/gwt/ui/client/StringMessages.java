@@ -364,11 +364,12 @@ public interface StringMessages extends Messages {
     String controlPoint();
     String errorUpdatingRaceCourse(String message);
     String successfullyUpdatedCourse();
-    String selectOneMarkOrTwoMarksForGate();
+    String selectTwoMarksForGate();
     String errorTryingToObtainTheMarksOfTheRace(String message);
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
+    String addGate();
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
@@ -1007,4 +1008,6 @@ public interface StringMessages extends Messages {
     String authorPriority();
     String removeDenotation();
     String competitorRegistrationsMissingProceed(String namesOfRaces);
+    String pleaseSelectAControlPoint();
+    String twoMarkControlPoint();
 }

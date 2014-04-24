@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,13 +8,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -51,7 +47,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                     }).show();
                 }
             });
-            courseActionsPanel.insert(addMark, courseActionsPanel.getWidgetIndex(RaceLogCourseManagementWidget.this.saveButton));
+            marksBtnsPanel.add(addMark);
             
             
             Button cancel = new Button(stringMessages.cancel());
@@ -61,7 +57,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                     hide();
                 }
             });
-            courseActionsPanel.insert(cancel, courseActionsPanel.getWidgetIndex(RaceLogCourseManagementWidget.this.saveButton));
+            buttonsPanel.add(cancel);
             
             ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn =
                     new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
@@ -96,12 +92,13 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                     }
                 }
             });
-            marksTable.getTable().addColumn(actionColumn);
+            marks.getTable().addColumn(actionColumn);
         }
 
         @Override
-        protected void saveCourse(List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
-            sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName, controlPoints, new AsyncCallback<Void>() {
+        protected void save() {
+            sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName,
+                    createWaypointPairs(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     hide();
@@ -119,10 +116,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             sailingService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<RaceCourseDTO>() {
                 @Override
                 public void onSuccess(RaceCourseDTO result) {
-                    updateWaypointTable(result);
-                    if (result.waypoints.isEmpty()) {
-                        insertWaypointBefore.setEnabled(true);
-                    }
+                    updateWaypointsAndControlPoints(result);
                 }
                 
                 @Override
@@ -134,7 +128,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<MarkDTO>>() {
                 @Override
                 public void onSuccess(Collection<MarkDTO> result) {
-                    marksTable.refresh(result);
+                    marks.refresh(result);
                 }
                 
                 @Override

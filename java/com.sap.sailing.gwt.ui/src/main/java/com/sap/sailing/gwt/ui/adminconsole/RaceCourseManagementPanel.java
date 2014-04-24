@@ -1,17 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 
 /**
@@ -30,10 +26,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         super(sailingService, errorReporter, regattaRefresher, stringMessages);
         
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
-            
             @Override
-            protected void saveCourse(List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
-                sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
+            protected void save() {
+                sailingService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
@@ -50,13 +45,13 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public void refresh() {
                 if (singleSelectedRace != null && selectedRaceDTO != null) {
-//                    courseActionsPanel.setVisible(true);
+                    mainPanel.setVisible(true);
                     // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
                     sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
-                            updateWaypointTable(raceCourseDTO);
-                            marksTable.refresh(raceCourseDTO.getMarks());
+                            updateWaypointsAndControlPoints(raceCourseDTO);
+                            marks.refresh(raceCourseDTO.getMarks());
                         }
             
                         @Override
@@ -67,7 +62,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                         }
                     });
                 } else {
-                    courseActionsPanel.setVisible(false);
+                    mainPanel.setVisible(false);
                 }
             }
         };

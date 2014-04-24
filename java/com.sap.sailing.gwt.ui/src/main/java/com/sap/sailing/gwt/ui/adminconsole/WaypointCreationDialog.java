@@ -1,0 +1,108 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {    
+    private final ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>> controlPointsWrapper;
+    private final ListBox passingInstructions;
+    private final StringMessages stringMessages;
+    
+    public WaypointCreationDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            final StringMessages stringMessages, AdminConsoleTableResources tableRes,
+            List<ControlPointDTO> controlPoints, DialogCallback<WaypointDTO> callback) {
+        super(stringMessages.waypoint(), stringMessages.waypoint(),
+                stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<WaypointDTO>() {
+                    @Override
+                    public String getErrorMessage(WaypointDTO valueToValidate) {
+                        if (valueToValidate.controlPoint == null) {
+                            return stringMessages.pleaseSelectAControlPoint();
+                        }
+                        return null;
+                    }
+
+                }, /* animationEnabled */ false, callback);
+        
+        this.stringMessages = stringMessages;
+        
+        controlPointsWrapper = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
+                new SingleSelectionModel<ControlPointDTO>(), sailingService, stringMessages, errorReporter);
+        controlPointsWrapper.getDataProvider().getList().addAll(controlPoints);
+        
+        passingInstructions = createListBox(false);
+        updatePassingInstructions();
+        
+        controlPointsWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updatePassingInstructions();
+                validate();
+            }
+        });
+    }
+    
+    private void updatePassingInstructions() {
+        passingInstructions.clear();
+        
+        int numMarks = controlPointsWrapper.getSelectionModel().getSelectedObject() != null ?
+                Util.size(controlPointsWrapper.getSelectionModel().getSelectedObject().getMarks()) : 0;
+                
+        int i = 0;
+        passingInstructions.insertItem(PassingInstruction.None.name(), i++);
+        for (PassingInstruction pi : PassingInstruction.relevantValues()) {
+            for (int numApplicableMarks : pi.applicability) {
+                if (numApplicableMarks == numMarks) {
+                    passingInstructions.insertItem(pi.name(), i++);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected WaypointDTO getResult() {
+        PassingInstruction pi = passingInstructions.getSelectedIndex() > 0 ?
+                PassingInstruction.valueOf(passingInstructions.getItemText(passingInstructions.getSelectedIndex()))
+                : PassingInstruction.None;
+        
+        ControlPointDTO controlPoint = controlPointsWrapper.getSelectionModel().getSelectedObject();
+        List<MarkDTO> marks = new ArrayList<MarkDTO>();
+        String name = null;
+        if (controlPoint != null) {
+            Util.addAll(controlPoint.getMarks(), marks);
+            name = controlPoint.getName();
+        }
+        return new WaypointDTO(name, controlPoint, marks, pi);
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        Grid grid = new Grid(2,1);
+        
+        grid.setWidget(0, 0, controlPointsWrapper);
+        
+        HorizontalPanel passingInstructionsRow = new HorizontalPanel();
+        grid.setWidget(1, 0, passingInstructionsRow);
+        passingInstructionsRow.add(new Label(stringMessages.passingInstructions() + ":"));
+        passingInstructionsRow.add(passingInstructions);
+        
+        return grid;
+    }
+}
