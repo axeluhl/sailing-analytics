@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
@@ -105,26 +106,42 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
     
-    private Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType) {
-        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, raceType));
-    }
-
-    private Competitor getCompetitorByBoatIDAndBoatClass(String boatID, BoatClass boatClass) {
-        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, boatClass));
+    @Override
+    public Competitor createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
+        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        Competitor result = competitorStore.getExistingCompetitorByIdAsString(competitor.getID());
+        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
+            DynamicBoat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
+            List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
+            for (CrewMember crewMember: competitor.getCrew()) {
+            	DynamicPerson person = new PersonImpl(crewMember.getName().trim(), getOrCreateNationality(crewMember.getNationality()),
+            			/* dateOfBirth */ null, crewMember.getPosition());
+                teamMembers.add(person);
+            }
+            DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
+            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, team, boat);
+        }
+        return result;
     }
 
     @Override
-    public Competitor getCompetitorByBoatIDAndRaceIDOrBoatClass(String boatID, String raceID, BoatClass boatClass) {
-        Competitor result = null;
-        if(boatClass != null) {
-            result = getCompetitorByBoatIDAndBoatClass(boatID, boatClass);
-        } else {
-            RaceType raceType = getRaceTypeFromRaceID(raceID);
-            if (raceType != null) {
-                result = getCompetitorByBoatIDAndRaceType(boatID, raceType);
-            }
+    public Competitor createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass) {
+    	Competitor result = null;
+        DynamicBoat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
+        List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
+        for (String teamMemberName : competitor.getName().split("[-+&]")) {
+            teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
+                    /* dateOfBirth */ null, teamMemberName.trim()));
         }
+        DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
+        result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
+                competitor.getName(), null /*displayColor*/, team, boat);
         return result;
+    }
+
+    @Override
+    public Competitor createCompetitorWithoutID(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass) {
+        return createCompetitorWithoutID(new CompetitorWithoutID(boatID, threeLetterIOCCode, name), raceId, boatClass);
     }
 
     private String getCompetitorID(String boatID, String raceId, BoatClass boatClass) {
@@ -140,35 +157,14 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private String getCompetitorID(String boatID, RaceType raceType) {
+    @Override
+    public String getCompetitorID(String boatID, RaceType raceType) {
         return boatID + "/" + raceType.getRaceCode();
     }
 
-    private String getCompetitorID(String boatID, BoatClass boatClass) {
+    @Override
+    public String getCompetitorID(String boatID, BoatClass boatClass) {
         return boatID + "/" + boatClass.getName();
-    }
-    
-    @Override
-    public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass) {
-        Competitor result = getCompetitorByBoatIDAndRaceIDOrBoatClass(competitor.getBoatID(), raceId, boatClass);
-        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
-        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
-            DynamicBoat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
-            List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
-            for (String teamMemberName : competitor.getName().split("[-+&]")) {
-                teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
-                        /* dateOfBirth */ null, teamMemberName.trim()));
-            }
-            DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = competitorStore.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
-                    competitor.getName(), null /*displayColor*/, team, boat);
-        }
-        return result;
-    }
-
-    @Override
-    public Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass) {
-        return getOrCreateCompetitor(new CompetitorImpl(boatID, threeLetterIOCCode, name), raceId, boatClass);
     }
 
     @Override
@@ -246,7 +242,12 @@ public class DomainFactoryImpl implements DomainFactory {
     private Iterable<Competitor> createCompetitorList(StartList startList, String raceId, BoatClass boatClass) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor, raceId, boatClass);
+        	Competitor domainCompetitor;
+        	if(swissTimingCompetitor.getID() != null) {
+                domainCompetitor = createCompetitorWithID(swissTimingCompetitor, boatClass);
+        	} else {
+                domainCompetitor = createCompetitorWithoutID(swissTimingCompetitor, raceId, boatClass);
+        	}
             result.add(domainCompetitor);
         }
         return result;

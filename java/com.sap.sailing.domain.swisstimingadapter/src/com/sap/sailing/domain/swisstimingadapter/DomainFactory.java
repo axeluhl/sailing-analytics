@@ -34,12 +34,16 @@ public interface DomainFactory {
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
-    
-    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
+    Competitor createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
 
-    Competitor getCompetitorByBoatIDAndRaceIDOrBoatClass(String boatID, String raceID, BoatClass boatClass);
+    Competitor createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
+
+    Competitor createCompetitorWithoutID(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
     
+    String getCompetitorID(String boatID, RaceType raceType);
+
+    String getCompetitorID(String boatID, BoatClass boatClass);
+
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
     com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID);

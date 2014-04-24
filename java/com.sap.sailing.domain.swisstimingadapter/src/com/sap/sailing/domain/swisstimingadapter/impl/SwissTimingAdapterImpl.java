@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.schema.Boat;
+import com.sap.sailing.xrr.resultimport.schema.Crew;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.Person;
@@ -108,7 +110,17 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                         			if(team != null) {
                         				Boat boat = boats.get(team.getBoatID());
                         				if(boat != null) {
-                                			competitors.add(new CompetitorImpl(boat.getBoatName(), "XYZ" /* threeLetterIOCCode*/, team.getTeamName()));
+                        					List<CrewMember> crew = new ArrayList<CrewMember>(); 
+                        					for(Crew crewMember: team.getCrew()) {
+                            					Person person = persons.get(crewMember.getPersonID());
+                        						crew.add(new CrewMemberImpl(person.getGivenName() + " " + person.getFamilyName(),
+                        								person.getNOC().name(), crewMember.getPosition().name()));
+                        					}
+                        					Crew firstCrewMember = team.getCrew().get(0);
+                        					Person person = persons.get(firstCrewMember.getPersonID());
+                        					String nationality = person.getNOC().name();
+                        					CompetitorWithID competitor = new CompetitorWithID(team.getTeamID(), boat.getSailNumber(), nationality, team.getTeamName(), crew);
+                                			competitors.add(competitor);
                         				}
                         			}
                         		}

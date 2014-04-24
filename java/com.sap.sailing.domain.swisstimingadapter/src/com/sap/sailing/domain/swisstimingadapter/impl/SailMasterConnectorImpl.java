@@ -647,7 +647,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         int count = Integer.valueOf(startListMessage.getSections()[2]);
         for (int i=0; i<count; i++) {
             String[] competitorDetails = startListMessage.getSections()[3+i].split(";");
-            competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
+            competitors.add(new CompetitorWithoutID(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new StartListImpl(startListMessage.getSections()[1], competitors);
     }
