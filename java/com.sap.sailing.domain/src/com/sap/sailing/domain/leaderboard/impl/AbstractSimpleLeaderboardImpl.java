@@ -936,10 +936,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                         }
                                     } else {
                                         // Although the competitor has started the leg, no value was produced. This
-                                        // means that
-                                        // the competitor didn't finish the leg before tracking ended. No useful value
-                                        // can
-                                        // be obtained for this competitor anymore.
+                                        // means that the competitor didn't finish the leg before tracking ended. No useful value
+                                        // can be obtained for this competitor anymore.
                                         result = null;
                                         break outerLoop;
                                     }
