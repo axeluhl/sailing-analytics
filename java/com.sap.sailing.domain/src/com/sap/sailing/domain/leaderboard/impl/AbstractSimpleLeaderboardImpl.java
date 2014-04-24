@@ -1103,8 +1103,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses,
-            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
@@ -1241,8 +1241,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 result.competitorDisplayNames.put(competitorDTO, displayName);
             }
         }
-        logger.info("computeLeaderboardByName("+this.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
-                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
+        logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
+                + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
+                + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         return result;
     }
 
@@ -1637,10 +1638,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
         LiveLeaderboardUpdater liveLeaderboardUpdater = getLiveLeaderboardUpdater(trackedRegattaRegistry,
                 baseDomainFactory);
-        return liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
+        return liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
     }
 
     private LiveLeaderboardUpdater getLiveLeaderboardUpdater(TrackedRegattaRegistry trackedRegattaRegistry,
@@ -1677,8 +1678,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     @Override
-    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException, InterruptedException, ExecutionException {
+    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            InterruptedException, ExecutionException {
         LeaderboardDTO result = null;
         if (timePoint == null) {
             // date==null means live mode; however, if we're after the end of all races and after all score
@@ -1694,7 +1697,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
                 timePoint = null;
-                result = this.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, trackedRegattaRegistry, baseDomainFactory);
+                result = this.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, trackedRegattaRegistry, baseDomainFactory);
             }
         }
         if (timePoint != null) {
@@ -1702,7 +1705,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             // which is OK because the cache is invalidated whenever any of the tracked races attached to the
             // leaderboard changes.
             result = getLeaderboardDTOCache().getLeaderboardByName(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
-                    baseDomainFactory, trackedRegattaRegistry);
+                    addOverallDetails, baseDomainFactory, trackedRegattaRegistry);
         }
         return result;
     }

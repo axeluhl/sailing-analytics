@@ -71,8 +71,9 @@ public interface Leaderboard extends Named {
     }
     
     LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory)
-            throws NoWindException;
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
+            DomainFactory baseDomainFactory) throws NoWindException;
 
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
@@ -452,6 +453,7 @@ public interface Leaderboard extends Named {
      *            point at which to evaluate the leaderboard status
      * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            the names of the race columns of which to expand the details in the result
+     * @param addOverallDetails TODO
      * @param trackedRegattaRegistry
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
@@ -459,7 +461,7 @@ public interface Leaderboard extends Named {
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
