@@ -913,6 +913,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
+        return getTotalTimeSailedInLegType(competitor, legType, timePoint, new HashMap<TrackedLeg, LegType>());
+    }
+    
+    private Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint, Map<TrackedLeg, LegType> legTypeCache) throws NoWindException {
         Duration result = null;
         // TODO should we ensure that competitor participated in all race columns?
         outerLoop:
@@ -921,14 +925,23 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 trackedRace.getRace().getCourse().lockForRead();
                 try {
                     for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
-                        if (trackedLeg.hasStartedLeg(timePoint)) {
+                        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, leg);
+                        if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
                             // find out leg type at the time the competitor started the leg
                             try {
-                                LegType trackedLegType = trackedRace.getTrackedLeg(leg).getLegType(
-                                        trackedLeg.getStartTime());
+                                final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
+                                LegType trackedLegType = legTypeCache.get(trackedLeg);
+                                if (trackedLegType == null) {
+                                    final TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                                    TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                                    if (finishTime == null) {
+                                        finishTime = timePoint;
+                                    }
+                                    trackedLegType = trackedLeg.getLegType(startTime.plus(startTime.until(finishTime).divide(2))); // middle of the leg
+                                    legTypeCache.put(trackedLeg, trackedLegType);
+                                }
                                 if (legType == trackedLegType) {
-                                    Duration timeSpentOnDownwind = trackedLeg.getTime(timePoint);
+                                    Duration timeSpentOnDownwind = trackedLegOfCompetitor.getTime(timePoint);
                                     if (timeSpentOnDownwind != null) {
                                         if (result == null) {
                                             result = timeSpentOnDownwind;
@@ -959,8 +972,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint) {
-        Long result = null;
+    public Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint) {
+        Duration result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
@@ -983,11 +996,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 to = timePoint;
                             }
                         }
-                        long timeSpent = to.asMillis() - from.asMillis();
+                        Duration timeSpent = from.until(to);
                         if (result == null) {
                             result = timeSpent;
                         } else {
-                            result += timeSpent;
+                            result=result.plus(timeSpent);
                         }
                     }
                 }
@@ -1240,14 +1253,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             row.maximumSpeedOverGroundInKnots = maximumSpeedOverGround.getB().getKnots();
             row.whenMaximumSpeedOverGroundWasAchieved = maximumSpeedOverGround.getA().getTimePoint().asDate();
         }
-        final Duration totalTimeSailedDownwind = this.getTotalTimeSailedInLegType(competitor, LegType.DOWNWIND, timePoint);
+        Map<TrackedLeg, LegType> legTypeCache = new HashMap<>();
+        final Duration totalTimeSailedDownwind = this.getTotalTimeSailedInLegType(competitor, LegType.DOWNWIND, timePoint, legTypeCache);
         row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwind==null?null:totalTimeSailedDownwind.asSeconds();
-        final Duration totalTimeSailedUpwind = this.getTotalTimeSailedInLegType(competitor, LegType.UPWIND, timePoint);
+        final Duration totalTimeSailedUpwind = this.getTotalTimeSailedInLegType(competitor, LegType.UPWIND, timePoint, legTypeCache);
         row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwind==null?null:totalTimeSailedUpwind.asSeconds();
-        final Duration totalTimeSailedReaching = this.getTotalTimeSailedInLegType(competitor, LegType.REACHING, timePoint);
+        final Duration totalTimeSailedReaching = this.getTotalTimeSailedInLegType(competitor, LegType.REACHING, timePoint, legTypeCache);
         row.totalTimeSailedReachingInSeconds = totalTimeSailedReaching==null?null:totalTimeSailedReaching.asSeconds();
-        final Long totalTimeSailedInMilliseconds = this.getTotalTimeSailedInMilliseconds(competitor, timePoint);
-        row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
+        final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
+        row.totalTimeSailedInSeconds = totalTimeSailed==null?null:totalTimeSailed.asSeconds();
         final Distance totalDistanceTraveledInMeters = this.getTotalDistanceTraveled(competitor, timePoint);
         row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
     }

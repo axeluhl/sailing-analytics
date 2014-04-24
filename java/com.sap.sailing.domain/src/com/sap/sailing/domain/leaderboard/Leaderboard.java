@@ -396,7 +396,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard
      */
-    Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
+    Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint);
     
     /**
      * Computes the distance the <code>competitor</code> has sailed in the tracked races in this leaderboard, starting

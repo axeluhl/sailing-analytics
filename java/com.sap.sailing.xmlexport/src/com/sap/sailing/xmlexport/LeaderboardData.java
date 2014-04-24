@@ -427,8 +427,8 @@ public class LeaderboardData extends ExportAction {
         
         if (leaderboard.getTimePointOfLatestModification() != null) {
             TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-            Long totalTimeSailed = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed);
+            Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed.asMillis());
             addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
             Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
             addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
@@ -449,7 +449,7 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
         } else {
             TimePoint now = MillisecondsTimePoint.now();
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, now));
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailed(competitor, now).asMillis());
             addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, now, true));
             Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, now);
             addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
