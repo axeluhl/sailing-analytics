@@ -57,7 +57,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -1119,9 +1118,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, FutureTask<Void>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, FutureTask<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
-            final RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
+            result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
@@ -1138,21 +1137,19 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
+            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(new Callable<List<CompetitorDTO>>() {
                 @Override
-                public Void call() throws Exception {
-                    result.setCompetitorsFromBestToWorst(raceColumnDTO,
-                            baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
-                    return null;
+                public List<CompetitorDTO> call() throws Exception {
+                    return baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint));
                 }
             });
             executor.execute(task);
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, FutureTask<Void>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, FutureTask<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
-                raceColumnAndTaskToJoin.getValue().get();
+                result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {
