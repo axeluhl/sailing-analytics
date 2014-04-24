@@ -1107,8 +1107,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
-        LeaderboardDTO result = null;
-        result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+        final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator());
@@ -1118,28 +1117,55 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
             result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
         }
-        for (RaceColumn raceColumn : this.getRaceColumns()) {
-            RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
+        // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
+        // futures to finish:
+        Map<RaceColumn, FutureTask<Void>> competitorsFromBestToWorstTasks = new HashMap<>();
+        for (final RaceColumn raceColumn : this.getRaceColumns()) {
+            final RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 RaceDTO race = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 if (trackedRace != null) {
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
                     race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
                 }
-
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            result.setCompetitorsFromBestToWorst(raceColumnDTO,
-                    baseDomainFactory.getCompetitorDTOList(this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+            FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    result.setCompetitorsFromBestToWorst(raceColumnDTO,
+                            baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+                    return null;
+                }
+            });
+            executor.execute(task);
+            competitorsFromBestToWorstTasks.put(raceColumn, task);
+        }
+        // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
+        for (Map.Entry<RaceColumn, FutureTask<Void>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+            try {
+                raceColumnAndTaskToJoin.getValue().get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                // null values.
+                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                // this helps robustness from a user's perspective.
+                logger.log(
+                        Level.SEVERE,
+                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                + "): exception during computing competitor ordering for race column "+raceColumnAndTaskToJoin.getKey().getName(), e);
+            }
         }
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
         result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
@@ -1151,8 +1177,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.discardThresholds = null;
         }
         // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
-        // details
-        // are requested only once and pass them into getLeaderboardEntryDTO
+        // details are requested only once and pass them into getLeaderboardEntryDTO
         final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             // if details for the column are requested, cache the leg's ranks
@@ -1191,17 +1216,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                             @Override
                             public LeaderboardEntryDTO call() {
                                 try {
-                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn,
-                                            timePoint);
-                                    return getLeaderboardEntryDTO(
-                                            entry,
-                                            raceColumn,
-                                            competitor,
-                                            timePoint,
+                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint);
+                                    return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                             namesOfRaceColumnsForWhichToLoadLegDetails != null
                                                     && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn
-                                                            .getName()), waitForLatestAnalyses, legRanksCache,
-                                            baseDomainFactory);
+                                                            .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory);
                                 } catch (NoWindException e) {
                                     logger.info("Exception trying to compute leaderboard entry for competitor "
                                             + competitor.getName() + " in race column " + raceColumn.getName() + ": "
@@ -1226,12 +1245,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
                     // null values.
                     // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                    // this helps
-                    // robustness from a user's perspective.
+                    // this helps robustness from a user's perspective.
                     logger.log(
                             Level.SEVERE,
                             AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails
+                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
                                     + "): exception during computing leaderboard entry for competitor "
                                     + competitor.getName() + " in race column " + raceColumnNameAndFuture.getKey()
                                     + ". Leaving empty.", e);
