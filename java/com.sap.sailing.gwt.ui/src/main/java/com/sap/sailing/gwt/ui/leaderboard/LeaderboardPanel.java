@@ -1821,8 +1821,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private boolean shallAddOverallDetails() {
-        // TODO Auto-generated method stub
-        return true;
+        return !selectedOverallDetailColumns.isEmpty();
     }
 
     /**

@@ -624,9 +624,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = incrementalResult;
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
-                        + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
-                        + (System.currentTimeMillis() - startOfRequestHandling) + "ms; diff cache hits/misses "
-                        + leaderboardDifferenceCacheByIdPairHits+"/"+leaderboardDifferenceCacheByIdPairMisses);
+                        + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails
+                        + ") took " + (System.currentTimeMillis() - startOfRequestHandling)
+                        + "ms; diff cache hits/misses " + leaderboardDifferenceCacheByIdPairHits + "/"
+                        + leaderboardDifferenceCacheByIdPairMisses);
             }
             return result;
         } catch (NoWindException e) {

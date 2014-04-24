@@ -227,7 +227,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 timePointOfLastRequestForColumnDetails.put(nameOfRaceColumn, lastRequest);
             }
         }
-        if (addOverallDetails && timePointOfLastRequestForOverallDetails != null && lastRequest.after(timePointOfLastRequestForOverallDetails)) {
+        if (addOverallDetails && (timePointOfLastRequestForOverallDetails == null || lastRequest.after(timePointOfLastRequestForOverallDetails))) {
             timePointOfLastRequestForOverallDetails = lastRequest;
         }
     }
@@ -236,10 +236,11 @@ public class LiveLeaderboardUpdater implements Runnable {
      * Updates the cache contents and notifies all waiters on this object.
      */
     private synchronized void updateCacheContents(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            LeaderboardDTO result) {
+            boolean addOverallDetails, LeaderboardDTO result) {
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.clear();
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.addAll(namesOfRaceColumnsForWhichToLoadLegDetails);
         currentLiveLeaderboard = result;
+        currentLiveLeaderboardHasOverallDetails = addOverallDetails;
         notifyAll();
     }
 
@@ -275,7 +276,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                     LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
                             /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory);
-                    updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
+                    updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "
                             + e.getMessage());
