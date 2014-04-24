@@ -104,6 +104,15 @@ public class Timer {
     private long millisecondsClientIsBehindServer;
     
     private boolean clientServerOffsetHasAtLeastBeenSetOnce;
+
+    /**
+     * A timer may be in the <em>uninitialized</em> state that can be detected using {@link #isInitialized}. For reasons of
+     * backward compatibility, even an uninitialized timer will return a non-<code>null</code> time from {@link #getTime()}.
+     * However, clients are encouraged to use {@link #isInitialized} to check if the time returned by the timer is good
+     * to be used. A call to {@link #setTime(long)} will automatically put the timer into the <em>initialized</em> state from
+     * where it cannot get back into <em>uninitialized</em> state.
+     */
+    private boolean initialized;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -125,6 +134,12 @@ public class Timer {
         this(playMode, getDefaultPlayStateForPlayMode(playMode));
     }
     
+    /**
+     * The timer is created using the client's "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed
+     * factor} and 1 second (1000ms) as the {@link #refreshInterval delay between automatic updates} should the timer be
+     * {@link #resume() started}. The {@link #millisecondsClientIsBehindServer offset} to the server time is initially
+     * left at 0ms until updated by a call to {@link #adjustClientServerOffset(long, Date, long)}.
+     */
     public Timer(PlayModes playMode, PlayStates playState) {
         this(playMode, playState, 1000 /* refreshIntervalInMillis */);
     }
@@ -139,11 +154,16 @@ public class Timer {
         this(playMode, getDefaultPlayStateForPlayMode(playMode), refreshIntervalInMillis);
     }
     
+    /**
+     * The timer uses "now" as its current time and 1.0 as its {@link #playSpeedFactor acceleration factor}. The
+     * {@link #livePlayDelayInMillis} is set to zero seconds.
+     */
     public Timer(PlayModes playMode, PlayStates playState, long refreshIntervalInMillis) {
         this.refreshInterval = refreshIntervalInMillis;
         // Using the client's clock is only a default; the time offset between client and server is adjusted when
         // information about the server time is present; see adjustClientServerOffset(...)
         time = new Date();
+        initialized = playMode == PlayModes.Live;
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
         setPlaySpeedFactor(1.0);
@@ -152,6 +172,19 @@ public class Timer {
         setPlayState(playState, /* updatePlayMode */ false);
     }
     
+    /**
+     * A timer may be in the <em>uninitialized</em> state that can be detected using this method. For reasons of
+     * backward compatibility, even an uninitialized timer will return a non-<code>null</code> time from
+     * {@link #getTime()} which is usually the client's notion of "now." However, clients are encouraged to use
+     * {@link #isInitialized} to check if the time returned by the timer is good to be used. A call to
+     * {@link #setTime(long)} will automatically put the timer into the <em>initialized</em> state from where it cannot
+     * get back into <em>uninitialized</em> state. A timer in {@link PlayModes#Live live mode} is always considered
+     * initialized because it will be able to provide a live time point.
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     private static PlayStates getDefaultPlayStateForPlayMode(PlayModes playMode) {
         return playMode == PlayModes.Live ? PlayStates.Playing : PlayStates.Paused;
     }
@@ -203,6 +236,7 @@ public class Timer {
     }
     
     public void setTime(long timePointAsMillis) {
+        initialized = true;
         Date oldTime = time;
         time = new Date(timePointAsMillis);
         if ((oldTime == null) != (time == null) || (oldTime != null && !oldTime.equals(time))) {

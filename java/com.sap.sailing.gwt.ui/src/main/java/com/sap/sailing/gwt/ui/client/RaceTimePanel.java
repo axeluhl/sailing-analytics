@@ -193,7 +193,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * {@link RaceTimesInfoDTO#timePointOfNewestEvent timePointOfNewestEvent} received from the tracking infrastructure
      * so far and puts the timer into {@link PlayStates#Playing play mode}.
      */
-    private boolean initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
+    private void initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
         // initialize timer position
         switch (timer.getPlayMode()) {
         case Live:
@@ -209,7 +209,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             break;
         }
-        return timer.getTime() != null;
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {

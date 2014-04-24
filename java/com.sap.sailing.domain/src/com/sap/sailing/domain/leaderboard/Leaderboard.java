@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
@@ -386,7 +387,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single downwind leg at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard
      */
-    Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException;
+    Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException;
 
     /**
      * Starts counting when the gun goes off, not when the competitor passed the line.
