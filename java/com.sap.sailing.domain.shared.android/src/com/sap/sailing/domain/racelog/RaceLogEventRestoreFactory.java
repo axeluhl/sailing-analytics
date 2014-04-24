@@ -74,7 +74,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to);
 
     DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
-    		TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass);
+    		TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass, Serializable raceId);
 
     StartTrackingEvent createStartTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId);

@@ -1262,7 +1262,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
         BoatClass boatClass = baseDomainFactory.getOrCreateBoatClass((String) dbObject.get(FieldNames.BOAT_CLASS_NAME.name()));
-        return raceLogEventFactory.createDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, raceName, boatClass);
+        Serializable raceId = (Serializable) dbObject.get(FieldNames.RACE_ID.name());
+        return raceLogEventFactory.createDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, raceName, boatClass, raceId);
     }
 
     private RaceLogEvent loadRaceLogStartEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,

@@ -214,8 +214,10 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadDenoteForTrackingEvent() {
     	String raceName = "race";
     	BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
+    	UUID raceId = UUID.randomUUID();
         DenoteForTrackingEvent expectedEvent = eventFactory.createDenoteForTrackingEvent(
-        		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, raceName, boatClass);
+        		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId, raceName, boatClass,
+        		raceId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         DenoteForTrackingEvent actualEvent = loadEvent(dbObject);
@@ -223,6 +225,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(boatClass, actualEvent.getBoatClass());
         assertEquals(raceName, actualEvent.getRaceName());
+        assertEquals(raceId, actualEvent.getRaceId());
     }
 
     @Test

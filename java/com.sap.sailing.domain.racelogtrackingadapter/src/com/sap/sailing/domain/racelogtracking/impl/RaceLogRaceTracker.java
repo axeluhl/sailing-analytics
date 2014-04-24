@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
@@ -341,15 +343,16 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
 
-        Pair<String, BoatClass> raceInfo = new RaceInformationFinder(raceLog).analyze();
-        BoatClass boatClass = raceInfo.getB();
+        DenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
+        BoatClass boatClass = denoteEvent.getBoatClass();
+        String raceName = denoteEvent.getRaceName();
         CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (courseBase == null) {
-            courseBase = new CourseDataImpl("Default course for " + raceInfo.getA());
-            logger.log(Level.FINE, "Using empty course in creation of race " + raceInfo.getA());
+            courseBase = new CourseDataImpl("Default course for " + raceName);
+            logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
 
-        Course course = new CourseImpl(raceInfo.getA() + " course", courseBase.getWaypoints());
+        Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
 
         if (raceColumn.getTrackedRace(fleet) != null) {
             try {
@@ -359,7 +362,8 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         }
 
         Iterable<Competitor> competitors = new RegisteredCompetitorsAnalyzer(raceLog).analyze();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceInfo.getA(), course, boatClass, competitors);
+        Serializable raceId = denoteEvent.getRaceId();
+        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
 
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
 

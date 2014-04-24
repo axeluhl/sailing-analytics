@@ -17,14 +17,16 @@ DenoteForTrackingEvent {
 
     private final String raceName;
     private final BoatClass boatClass;
+    private final Serializable raceId;
 
     public DenoteForTrackingEventImpl(TimePoint createdAt,
             RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, int pPassId,
-            String raceName, BoatClass boatClass) {
+            String raceName, BoatClass boatClass, Serializable raceId) {
         super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
         this.raceName = raceName;
         this.boatClass = boatClass;
+        this.raceId = raceId;
     }
 
     @Override
@@ -41,5 +43,9 @@ DenoteForTrackingEvent {
     public BoatClass getBoatClass() {
         return boatClass;
     }
-
+    
+    @Override
+    public Serializable getRaceId() {
+        return raceId;
+    }
 }

@@ -205,7 +205,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testDenoteForTrackingSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createDenoteForTrackingEvent(null, author, 0, "", null);
+        RaceLogEvent event = factory.createDenoteForTrackingEvent(null, author, 0, "", null, null);
         serializer.serialize(event);
         verify(denoteForTrackingEventSerializer).serialize(event);
     }

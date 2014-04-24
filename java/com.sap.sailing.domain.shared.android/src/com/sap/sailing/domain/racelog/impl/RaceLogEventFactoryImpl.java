@@ -235,8 +235,9 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
-            String raceName, BoatClass boatClass) {
-        return new DenoteForTrackingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId, raceName, boatClass);
+            String raceName, BoatClass boatClass, Serializable raceId) {
+        return new DenoteForTrackingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId, raceName,
+                boatClass, raceId);
     }
 
     @Override

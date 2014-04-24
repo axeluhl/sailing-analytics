@@ -143,8 +143,8 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass) {
-        return new DenoteForTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId, raceName, boatClass);
+            TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass, Serializable raceId) {
+        return new DenoteForTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId, raceName, boatClass, raceId);
     }
 
     @Override

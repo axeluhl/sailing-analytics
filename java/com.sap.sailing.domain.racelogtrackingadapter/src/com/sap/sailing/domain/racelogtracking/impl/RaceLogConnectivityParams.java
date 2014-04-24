@@ -54,7 +54,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, GPSFixStore gpsFixStore) {
         if (regatta == null) {
-            BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getB();
+            BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta("RaceLog-tracking default Regatta", boatClass.getName(),
                     UUID.randomUUID());
         }

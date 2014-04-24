@@ -105,7 +105,7 @@ public interface RaceLogEventFactory {
             DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to);
 
     DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
-    		String raceName, BoatClass boatClass);
+    		String raceName, BoatClass boatClass, Serializable raceId);
 
     StartTrackingEvent createStartTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId);
     

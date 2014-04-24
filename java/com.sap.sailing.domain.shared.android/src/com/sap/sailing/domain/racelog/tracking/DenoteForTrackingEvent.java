@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -17,4 +19,5 @@ import com.sap.sailing.domain.racelog.Revokable;
 public interface DenoteForTrackingEvent extends RaceLogEvent, Revokable {
     String getRaceName();
     BoatClass getBoatClass();
+    Serializable getRaceId();
 }

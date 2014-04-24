@@ -11,6 +11,7 @@ public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSer
     public static final String VALUE_CLASS = DenoteForTrackingEvent.class.getSimpleName();
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_BOAT_CLASS = "boatClass";
+    public static final String FIELD_RACE_ID = "raceId";
 
     public RaceLogDenoteForTrackingEventSerializer(
             JsonSerializer<Competitor> competitorSerializer) {
@@ -29,6 +30,7 @@ public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSer
         JSONObject result = super.serialize(event);
         result.put(FIELD_RACE_NAME, event.getRaceName());
         result.put(FIELD_BOAT_CLASS, event.getBoatClass().getName());
+        result.put(FIELD_RACE_ID, event.getRaceId());
 
         return result;
     }
