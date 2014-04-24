@@ -74,7 +74,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (passedStartWaypoint != null && !passedStartWaypoint.getTimePoint().after(timePoint)) {
             MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                     getTrackedLeg().getLeg().getTo());
-            if (passedEndWaypoint != null) {
+            if (passedEndWaypoint != null && timePoint.after(passedEndWaypoint.getTimePoint())) {
+                // the query asks for a time point after the competitor has finished the leg; return the total leg time
                 result = passedStartWaypoint.getTimePoint().until(passedEndWaypoint.getTimePoint());
             } else {
                 if (getTrackedRace().getEndOfTracking() != null && timePoint.after(getTrackedRace().getEndOfTracking())) {
