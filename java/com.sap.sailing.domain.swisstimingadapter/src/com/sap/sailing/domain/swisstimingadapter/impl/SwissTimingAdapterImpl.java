@@ -23,7 +23,6 @@ import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.schema.Boat;
@@ -39,6 +38,8 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     private final SwissTimingFactory swissTimingFactory;
 
     private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
+
+    private final long DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS = 6000;
 
     public SwissTimingAdapterImpl(DomainFactory baseDomainFactory) {
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -69,7 +70,7 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
             throws Exception {
         return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, raceName, raceDescription, boatClass, startList, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
+                raceID, raceName, raceDescription, boatClass, startList, DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
                 swissTimingDomainFactory, logStore),
                 timeoutInMilliseconds);
     }
