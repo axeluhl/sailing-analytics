@@ -147,7 +147,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         insertWaypointAfter.setEnabled(false);
         waypointsBtnsPanel.add(insertWaypointAfter);
         
-        final Button addControlPoint = new Button(stringMessages.addGate());
+        final Button addControlPoint = new Button(stringMessages.add(stringMessages.twoMarkControlPoint()));
         addControlPoint.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
