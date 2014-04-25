@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -113,7 +114,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                         new RaceLogTrackingEventManagementRaceImagesBarCell(stringMessages));
         raceActionColumn.setFieldUpdater(new FieldUpdater<RaceColumnDTOAndFleetDTOWithNameBasedEquality, String>() {
             @Override
-            public void update(int index, RaceColumnDTOAndFleetDTOWithNameBasedEquality object, String value) {
+            public void update(int index, final RaceColumnDTOAndFleetDTOWithNameBasedEquality object, String value) {
                 final String leaderboardName = getSelectedLeaderboardName();
                 final String raceColumnName = object.getA().getName();
                 final String fleetName = object.getB().getName();
@@ -124,7 +125,16 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     removeDenotation(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                            getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
+                            getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable,
+                            new Callback<Boolean, Throwable>() {
+                                @Override
+                                public void onSuccess(Boolean result) {
+                                    object.getB().competitorRegistrationsExist = result;
+                                }
+                                
+                                @Override
+                                public void onFailure(Throwable reason) {}
+                            }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
@@ -223,6 +233,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         } else {
             trackedRacesListComposite.clearSelection();
         }
+        enableStartTrackingButtonIfAppropriateRacesSelected();
     }
     
     @Override
@@ -244,6 +255,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
         }
+        raceColumnTableSelectionModel.clear();
     }
 
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
@@ -355,5 +367,10 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             @Override
             public void cancel() { }
         }).show();
+    }
+    
+    @Override
+    public void loadAndRefreshLeaderboard(String leaderboardName, String nameOfRaceColumnToSelect) {
+        super.loadAndRefreshLeaderboard(leaderboardName, nameOfRaceColumnToSelect);
     }
 }

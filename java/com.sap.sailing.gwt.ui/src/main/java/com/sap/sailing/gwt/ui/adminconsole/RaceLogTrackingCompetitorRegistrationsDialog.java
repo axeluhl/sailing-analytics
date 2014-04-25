@@ -19,10 +19,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackingDialog {
     private CompetitorTableWrapper competitorTable;
     private final boolean filterByLeaderBoardInitially = false;
+    private final Callback<Boolean, Throwable> competitorsRegistered;
 
     public RaceLogTrackingCompetitorRegistrationsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName,
-            final String raceColumnName, final String fleetName, boolean editable) {
+            final String raceColumnName, final String fleetName, boolean editable,
+            Callback<Boolean, Throwable> competitorsRegistered) {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, editable);
 
         competitorTable.refreshCompetitorList(filterByLeaderBoardInitially ? leaderboardName : null,
@@ -54,6 +56,8 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
             @Override
             public void onFailure(Throwable reason) {}
         });
+        
+        this.competitorsRegistered = competitorsRegistered;
     }
 
     @Override
@@ -107,16 +111,19 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
 
     @Override
     protected void save() {
+        final Set<CompetitorDTO> selectedCompetitors = competitorTable.getSelectionModel().getSelectedSet();
         sailingService.setCompetitorRegistrations(leaderboardName, raceColumnName, fleetName,
-                competitorTable.getSelectionModel().getSelectedSet(), new AsyncCallback<Void>() {
+                selectedCompetitors, new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 hide();
+                competitorsRegistered.onSuccess(! selectedCompetitors.isEmpty());
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Could not save competitor registrations: " + caught.getMessage());
+                competitorsRegistered.onFailure(caught);
             }
         });
     }
