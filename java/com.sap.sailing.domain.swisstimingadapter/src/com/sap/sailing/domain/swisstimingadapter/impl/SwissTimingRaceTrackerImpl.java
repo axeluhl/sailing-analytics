@@ -325,22 +325,28 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                // update mark passing only if we have a start time; guessed start times don't make sense and
-                // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
-                // which then cannot be identified as "guessed" anymore...
-                if (trackedRace.getStartOfRace() != null) {
-                    final TimePoint startTime = trackedRace.getStartOfRace();
-                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
-                            startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-                    MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                            getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass));
-                    markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                // If the rank and time information is empty, we interpret this by clearing the mark rounding if any (see
+                // also bug 1911):
+                if (markIndexRankAndTimeSinceStartInMilliseconds.getC() == null) {
+                    markPassingsByMarkIndex.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
                 } else {
-                    // 
-                    logger.warning("Received mark passing with time relative to start of race "+trackedRace.getRace().getName()+
-                            " before having received a race start time."
-                            + " Queueing message for re-application when a start time has been received.");
-                    tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                    // update mark passing only if we have a start time; guessed start times don't make sense and
+                    // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
+                    // which then cannot be identified as "guessed" anymore...
+                    if (trackedRace.getStartOfRace() != null) {
+                        final TimePoint startTime = trackedRace.getStartOfRace();
+                        MillisecondsTimePoint timePoint = new MillisecondsTimePoint(startTime.asMillis()
+                                + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                        MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                                getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass));
+                        markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                    } else {
+                        //
+                        logger.warning("Received mark passing with time relative to start of race "
+                                + trackedRace.getRace().getName() + " before having received a race start time."
+                                + " Queueing message for re-application when a start time has been received.");
+                        tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                    }
                 }
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
