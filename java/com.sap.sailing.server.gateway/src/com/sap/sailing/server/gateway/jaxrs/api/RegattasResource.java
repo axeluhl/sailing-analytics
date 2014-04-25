@@ -491,8 +491,8 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/firstlegdirection")
-    public Response getFirstLegDirection(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+    @Path("{regattaname}/races/{racename}/firstlegbearing")
+    public Response getFirstLegBearing(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
