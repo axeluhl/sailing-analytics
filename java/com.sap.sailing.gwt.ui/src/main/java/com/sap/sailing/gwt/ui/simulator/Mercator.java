@@ -28,33 +28,38 @@ public class Mercator {
 
 	public void calibrate() {
 
-		Point pointSW;
-		Point pointNE;
+		Vector pointSW;
+		Vector pointNE;
 		
 		int canvasHeight = canvas.getCanvas().getOffsetHeight();
 
-		LatLng mapSW = this.map.getBounds().getSouthWest();
-		LatLng mapNE = this.map.getBounds().getNorthEast();
+		GeoPos mapSW = new GeoPos();
+		mapSW.lat = this.map.getBounds().getSouthWest().getLatitude();
+		mapSW.lng = this.map.getBounds().getSouthWest().getLongitude();
+		GeoPos mapNE = new GeoPos();
+		mapNE.lat = this.map.getBounds().getNorthEast().getLatitude();
+		mapNE.lng = this.map.getBounds().getNorthEast().getLongitude();
 			
 		pointSW = this.sphere2plane(mapSW);
 		pointNE = this.sphere2plane(mapNE);
 			
-		if (pointNE.getX() < pointSW.getX()) {
-			pointSW = Point.newInstance(pointSW.getX() - 2*Math.PI, pointSW.getY());
+		if (pointNE.x < pointSW.x) {
+			pointSW.x -= 2*Math.PI;
 		}
 		
-		this.alpha = canvasHeight / (pointNE.getY() - pointSW.getY());
-		this.beta = pointSW.getX();
+		this.alpha = canvasHeight / (pointNE.y - pointSW.y);
+		this.beta = pointSW.x;
 		
 		this.gamma = - this.alpha;
-		this.delta = pointNE.getY();	
+		this.delta = pointNE.y;	
 	}
 
-	public Point sphere2plane(LatLng p) {
-		double x = p.getLongitude()*Math.PI/180.0;
-		double latsin = Math.sin(p.getLatitude()*Math.PI/180.0);
-		double y = 0.5*Math.log((1.0+latsin)/(1.0-latsin));
-		return Point.newInstance(x, y);
+	public Vector sphere2plane(GeoPos p) {
+		Vector result = new Vector();
+		result.x = p.lng*Math.PI/180.0;
+		double latsin = Math.sin(p.lat*Math.PI/180.0);
+		result.y = 0.5*Math.log((1.0+latsin)/(1.0-latsin));
+		return result;
 	}
 
 	public LatLng plane2sphere(Point px) {
@@ -63,11 +68,11 @@ public class Mercator {
 		return LatLng.newInstance(lat, lng);
 	}
 
-	public Point latlng2pixel(LatLng p) {
-		Point proj = this.sphere2plane(p);
-		double x = this.alpha * (proj.getX() - this.beta);
-		double y = this.gamma * (proj.getY() - this.delta);
-		return Point.newInstance(x, y);
+	public Vector latlng2pixel(GeoPos p) {
+		Vector proj = this.sphere2plane(p);
+		proj.x = this.alpha * (proj.x - this.beta);
+		proj.y = this.gamma * (proj.y - this.delta);
+		return proj;
 	}
 
 	public LatLng pixel2latlng(Point px) {

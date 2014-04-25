@@ -1,14 +1,12 @@
 package com.sap.sailing.gwt.ui.simulator;
 
-import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.base.Point;
 
 public class Particle {
 
-	public LatLng pos;
-	public Point pxOld;
+	public GeoPos pos;
+	public Vector pxOld;
 	public int alpha;
 	public int age;
-	public Point v;
+	public Vector v;
 
 }
