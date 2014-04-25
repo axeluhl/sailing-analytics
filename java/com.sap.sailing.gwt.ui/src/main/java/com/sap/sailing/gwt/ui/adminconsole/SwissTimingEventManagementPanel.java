@@ -276,7 +276,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 strings.add(t.boatClass);
                 strings.add(t.gender);
                 if (t.raceStartTime != null) {
-                    strings.add(t.raceStartTime.toString());
+                    strings.add(dateFormatter.render(t.raceStartTime));
                 }
                 return strings;
             }
