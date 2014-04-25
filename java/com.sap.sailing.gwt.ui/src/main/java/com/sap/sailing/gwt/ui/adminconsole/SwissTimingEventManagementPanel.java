@@ -268,10 +268,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 availableSwissTimingRaces, raceTable, raceList) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.add(t.raceId);
+                List<String> strings = new ArrayList<>();
+                strings.add(t.regattaName);
+                strings.add(t.seriesName);
                 strings.add(t.raceName);
+                strings.add(t.raceStatus);
                 strings.add(t.boatClass);
+                strings.add(t.gender);
+                if (t.raceStartTime != null) {
+                    strings.add(t.raceStartTime.toString());
+                }
                 return strings;
             }
         };
