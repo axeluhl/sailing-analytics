@@ -135,7 +135,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     /**
      * The leaderboard name is used to
-     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], String, com.google.gwt.user.client.rpc.AsyncCallback)
+     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
@@ -791,7 +791,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 getSailingService().getLeaderboardByName(getLeaderboardName(),
                         timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                        shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
                                 new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                                     @Override
                                     public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
@@ -1767,7 +1767,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
+                    shallAddOverallDetails(), /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -1818,6 +1818,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         }
         return namesOfExpandedRaces;
+    }
+
+    private boolean shallAddOverallDetails() {
+        return !selectedOverallDetailColumns.isEmpty();
     }
 
     /**
@@ -2519,7 +2523,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public boolean hasBusyIndicator() {
         return true;
     }
-
+    
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
         ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
         for (LeaderboardRowDTO row : getData().getList()) {

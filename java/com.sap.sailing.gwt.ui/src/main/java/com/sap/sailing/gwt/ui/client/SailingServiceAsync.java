@@ -172,7 +172,7 @@ public interface SailingServiceAsync {
 
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
+            boolean addOverallDetails, String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 

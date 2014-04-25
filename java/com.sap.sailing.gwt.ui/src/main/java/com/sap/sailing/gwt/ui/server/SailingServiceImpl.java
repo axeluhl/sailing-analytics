@@ -557,7 +557,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * <p>
      * 
      * Otherwise, the leaderboard is computed synchronously on the fly.
-     * 
      * @param previousLeaderboardId
      *            if <code>null</code> or no leaderboard with that {@link LeaderboardDTO#getId() ID} is known, a
      *            {@link FullLeaderboardDTO} will be computed; otherwise, an {@link IncrementalLeaderboardDTO} will be
@@ -565,8 +564,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId)
-                    throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            String previousLeaderboardId) throws NoWindException, InterruptedException, ExecutionException,
+            IllegalArgumentException {
         try {
             long startOfRequestHandling = System.currentTimeMillis();
             IncrementalOrFullLeaderboardDTO result = null;
@@ -579,7 +579,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     timePoint = new MillisecondsTimePoint(date);
                 }
                 LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
+                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory);
                 LeaderboardDTO previousLeaderboardDTO = null;
                 synchronized (leaderboardByNameResultsCacheById) {
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
@@ -625,9 +625,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = incrementalResult;
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
-                        + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
-                        + (System.currentTimeMillis() - startOfRequestHandling) + "ms; diff cache hits/misses "
-                        + leaderboardDifferenceCacheByIdPairHits+"/"+leaderboardDifferenceCacheByIdPairMisses);
+                        + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails
+                        + ") took " + (System.currentTimeMillis() - startOfRequestHandling)
+                        + "ms; diff cache hits/misses " + leaderboardDifferenceCacheByIdPairHits + "/"
+                        + leaderboardDifferenceCacheByIdPairMisses);
             }
             return result;
         } catch (NoWindException e) {
@@ -2502,7 +2503,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 switch (detailType) {
                 case REGATTA_TOTAL_POINTS:
                     LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
-                            getService(), baseDomainFactory);
+                            /* addOverallDetails */ false, getService(), baseDomainFactory);
                     for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
                         result.add(getTotalPointsForRaceColumn(leaderboardDTO, raceColumnDTO));
                     }
