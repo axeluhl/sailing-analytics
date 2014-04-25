@@ -92,6 +92,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private boolean stopped;
     private boolean connected;
     private final String raceId;
+    private final String raceName;
     private final String raceDescription;
     private final BoatClass boatClass;
     
@@ -121,10 +122,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
+        this.raceName = raceName;
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -519,7 +521,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public Race getRace() {
-        return new RaceImpl(raceId, raceDescription, boatClass);
+        return new RaceImpl(raceId, raceName, raceDescription, boatClass);
     }
 
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
@@ -528,7 +530,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
             String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
-            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], boatClass));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], idAndDescription[1], boatClass));
         }
         return result;
     }

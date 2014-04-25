@@ -26,7 +26,7 @@ public interface SwissTimingAdapter {
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param raceDescription TODO
      */
-    RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceDescription,
+    RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 

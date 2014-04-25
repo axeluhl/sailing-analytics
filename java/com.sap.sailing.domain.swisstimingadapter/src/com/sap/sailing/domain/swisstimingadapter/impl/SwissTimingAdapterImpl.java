@@ -65,11 +65,11 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     }
 
     @Override
-    public RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceDescription,
+    public RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
             throws Exception {
         return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, raceDescription, boatClass, startList, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
+                raceID, raceName, raceDescription, boatClass, startList, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
                 swissTimingDomainFactory, logStore),
                 timeoutInMilliseconds);
     }

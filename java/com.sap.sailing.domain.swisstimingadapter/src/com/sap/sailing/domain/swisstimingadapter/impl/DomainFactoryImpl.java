@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,7 +99,8 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         if (result == null) {
             BoatClass regattaBoatClass = boatClass != null ? boatClass : getRaceTypeFromRaceID(raceID).getBoatClass();
-            result = new RegattaImpl(raceLogStore, raceID, regattaBoatClass, trackedRegattaRegistry,
+            Calendar calendar = Calendar.getInstance();
+            result = new RegattaImpl(raceLogStore, "ST Regatta " + calendar.get(Calendar.YEAR), regattaBoatClass, trackedRegattaRegistry,
                     getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
@@ -189,7 +191,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Competitor> competitors = createCompetitorList(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse, boatClass, competitors);
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors);
         regatta.addRace(result);
         return result;
     }
@@ -349,10 +351,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore) {
-        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceDescription, boatClass, startList, delayToLiveInMillis, 
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis, 
                 swissTimingFactory, domainFactory, raceLogStore);
     }
 

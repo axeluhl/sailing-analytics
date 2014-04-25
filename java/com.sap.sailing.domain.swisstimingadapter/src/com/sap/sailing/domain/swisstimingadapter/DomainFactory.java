@@ -58,7 +58,7 @@ public interface DomainFactory {
 
     RaceType getRaceTypeFromRaceID(String raceID);
 
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
 

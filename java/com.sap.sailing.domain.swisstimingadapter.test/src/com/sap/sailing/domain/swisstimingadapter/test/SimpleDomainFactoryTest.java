@@ -75,6 +75,11 @@ public class SimpleDomainFactoryTest {
                     public BoatClass getBoatClass() {
                         return null;
                     }
+
+					@Override
+					public String getRaceName() {
+						return null;
+					}
         }, new StartList() {
             @Override
             public String getRaceID() {
@@ -106,7 +111,7 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
-        Race race = new RaceImpl("1234", "Race 1234");
+        Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
         Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);
@@ -131,7 +136,7 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
-        Race race = new RaceImpl("1234", "Race 1234");
+        Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
         Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);

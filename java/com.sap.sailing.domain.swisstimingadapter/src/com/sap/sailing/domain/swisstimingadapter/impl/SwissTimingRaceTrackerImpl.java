@@ -64,12 +64,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     private final SailMasterConnector connector;
     private final String raceID;
+    private final String raceName;
     private final String raceDescription;
     private final BoatClass boatClass;
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
+    private final boolean startListFromManage2Sail;
 
     /**
      * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
@@ -93,43 +95,28 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      */
     private final TMDMessageQueue tmdMessageQueue;
 
-    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, RaceLogStore raceLogStore,
+    protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore raceLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID,
-                raceDescription, boatClass, hostname, port, null, windStore, domainFactory, factory, trackedRegattaRegistry,
-                delayToLiveInMillis);
-    }
-
-    protected SwissTimingRaceTrackerImpl(String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore raceLogStore,
-            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID,
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, boatClass, trackedRegattaRegistry), raceID, raceName,
                 raceDescription, boatClass, hostname, port, startList, windStore, domainFactory, factory, trackedRegattaRegistry,
                 delayToLiveInMillis);
     }
 
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port,
-            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
-        this(regatta, raceID, raceDescription, boatClass, hostname, port, null, windStore, domainFactory, factory, trackedRegattaRegistry,
-                delayToLiveInMillis);
-    }
-    
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList,
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port, StartList startList,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
         this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceDescription, boatClass);
+        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceName, raceDescription, boatClass);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
+        this.raceName = raceName;
         this.startList = startList;
+        this.startListFromManage2Sail = startList != null;
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         this.windStore = windStore;
@@ -393,7 +380,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedStartList(String raceID, StartList startList) {
-        if (this.raceID.equals(raceID)) {
+    	// ignore STL messages if the startlist has been already provided by Manage2Sail  
+    	if (!startListFromManage2Sail && this.raceID.equals(raceID)) {
             StartList oldStartList = this.startList;
             this.startList = startList;
             if (oldStartList == null && course != null) {
@@ -407,7 +395,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race swissTimingRace = new RaceImpl(raceID, raceDescription, boatClass);
+        Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
         // temp
         CompetitorStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();

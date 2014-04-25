@@ -111,7 +111,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
                     @Override
                     public RacesHandle addSwissTimingRace(TrackerManager trackerManager,
-                            RegattaIdentifier regattaToAddTo, String raceID, String raceDescription, BoatClass boatClass, String hostname,
+                            RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
                             int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
                             throws InterruptedException, UnknownHostException, IOException, ParseException,
                             Exception {

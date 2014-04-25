@@ -16,6 +16,7 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final String hostname;
     private final int port;
     private final String raceID;
+    private final String raceName;
     private final String raceDescription;
     private final BoatClass boatClass;
     private final SwissTimingFactory swissTimingFactory;
@@ -24,13 +25,14 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final long delayToLiveInMillis;
     private final StartList startList;
     
-    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceDescription, BoatClass boatClass,
+    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName, String raceDescription, BoatClass boatClass,
     		StartList startList, long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore) {
         super();
         this.hostname = hostname;
         this.port = port;
         this.raceID = raceID;
+        this.raceName = raceName;
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         this.startList = startList;
@@ -42,14 +44,14 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, domainFactory,
+        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, domainFactory,
                 trackedRegattaRegistry);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore)
             throws Exception {
-        return swissTimingFactory.createRaceTracker(regatta, raceID, raceDescription, boatClass, hostname, port, delayToLiveInMillis, windStore, domainFactory,
+        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, windStore, domainFactory,
                 trackedRegattaRegistry);
     }
 
