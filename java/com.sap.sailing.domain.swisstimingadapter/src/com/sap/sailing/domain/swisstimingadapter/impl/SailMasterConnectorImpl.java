@@ -510,12 +510,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     private void closeAndNullSocketAndWaitABit() throws InterruptedException {
-        try {
-            socket.close();
-        } catch (IOException e) {
-            logger.log(Level.INFO, "Exception trying to close socket. Maybe already closed. Continuing", e);
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                logger.log(Level.INFO, "Exception trying to close socket. Maybe already closed. Continuing", e);
+            }
+            socket = null;
         }
-        socket = null;
         Thread.sleep(1000);
     }
 
