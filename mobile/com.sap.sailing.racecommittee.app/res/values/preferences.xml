@@ -7,11 +7,11 @@
 
     <string name="preference_language_key">languagePref</string>
     <string name="preference_server_url_key">webserviceUrlPref</string>
-    <string name="preference_server_url_default">http://ess40-2014.sapsailing.com/</string>
+    <string name="preference_server_url_default">http://dev.sapsailing.com/</string>
     <string name="preference_course_areas_key">courseAreasPref</string>
     <string-array name="preference_course_areas_default">
         <item>Alpha</item>
-        <item>Stadium</item>
+        <item>Marina Bay</item>
     </string-array>
     <string-array name="preference_course_areas_example">
         <item>Alpha</item>
