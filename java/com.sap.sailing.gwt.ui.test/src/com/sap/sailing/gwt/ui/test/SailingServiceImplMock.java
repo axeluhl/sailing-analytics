@@ -130,20 +130,18 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                         return com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE;
                     }
 
-					@Override
-					public StartList readStartListForRace(String raceId,
-							RegattaResults regattaResults) {
-						// TODO Auto-generated method stub
-						return null;
-					}
+                    @Override
+                    public StartList readStartListForRace(String raceId, RegattaResults regattaResults) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
 
-					@Override
-					public RegattaResults readRegattaEntryListFromXrrUrl(
-							String xrrEntryListUrl) throws IOException,
-							JAXBException {
-						// TODO Auto-generated method stub
-						return null;
-					}
+                    @Override
+                    public RegattaResults readRegattaEntryListFromXrrUrl(String xrrEntryListUrl) throws IOException,
+                            JAXBException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
                 };
             }
         });
