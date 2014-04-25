@@ -239,6 +239,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         boatClassColumn.setSortable(true);
         raceIdColumn.setSortable(true);
         genderColumn.setSortable(true);
+        raceStatusColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
@@ -258,7 +259,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
-        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn);
+        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
         
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -293,7 +294,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     		Column<SwissTimingRaceRecordDTO, ?> regattaNameColumn, Column<SwissTimingRaceRecordDTO, ?> seriesNameColumn, 
     		Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn,
             Column<SwissTimingRaceRecordDTO, ?> raceIdColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn,
-            final Column<SwissTimingRaceRecordDTO, ?> genderColumn) {
+            Column<SwissTimingRaceRecordDTO, ?> genderColumn, Column<SwissTimingRaceRecordDTO, ?> statusColumn) {
            
         ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
         result.setComparator(regattaNameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
@@ -338,6 +339,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
                 return o1.gender == null ? -1 : o2.gender == null ? 1 : new NaturalComparator(false).compare(o1.gender, o2.gender);
+            }
+        });
+        result.setComparator(statusColumn, new Comparator<SwissTimingRaceRecordDTO>() {
+            @Override
+            public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
+                return new NaturalComparator().compare(o1.raceStatus,  o2.raceStatus);
             }
         });
         return result;
