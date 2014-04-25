@@ -13,6 +13,14 @@ import com.sap.sailing.gwt.ui.datamining.client.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 
+/**
+ * Expects the inner key in the group key to be the angle for the polar chart. (x-value) Maybe the angle should be
+ * transfered as part of the result value in the future. But in the backend the angle is treated as a key (for polar
+ * sheets) for grouping all polar fixes with the same rounded angle
+ * 
+ * @author Frederik Petersen D054528
+ * 
+ */
 public class PolarChart implements ResultsPresenter<Number> {
 
     private final Chart chart = createPolarChartWidget();
