@@ -18,7 +18,7 @@ public class DefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
     @Override
     protected Collection<Mark> performAnalysis() {
         List< Mark> result = new ArrayList<Mark>();
-        for (RaceLogEvent event : getAllEvents()) {
+        for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
             if (event instanceof DefineMarkEvent) {
                 DefineMarkEvent dME = (DefineMarkEvent) event;
                 result.add(dME.getMark());
