@@ -983,7 +983,7 @@ public interface StringMessages extends Messages {
     String pleaseEnterA(String what);
     String pingPosition(String whose);
     String pleaseEnterAValidValueFor(String what, String validTemplate);
-    String copyCourseToOther();
+    String copyCourseAndCompetitors();
     String nowSelectRaceColumnAndFleetToCopyTo();
     String selectRowInTableToCopyCourse();
     String deviceId();
@@ -1010,4 +1010,8 @@ public interface StringMessages extends Messages {
     String competitorRegistrationsMissingProceed(String namesOfRaces);
     String pleaseSelectAControlPoint();
     String twoMarkControlPoint();
+    String registeredCompetitors();
+    String competitorPool();
+    String selectAtLeastOne();
+    String selectRaces();
 }

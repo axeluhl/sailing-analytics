@@ -125,9 +125,9 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
             }
         });
         
-        sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<CompetitorDTO>>() {
+        sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
             @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
+            public void onSuccess(Collection<CompetitorDTO> result) {
                 competitorTable.refreshCompetitorList(result);
                 if (mapping != null && mapping.mappedTo instanceof CompetitorDTO) {
                     //got new DTOs with new object identities, so have to go through them one by one
@@ -202,7 +202,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         return panel;
     }
     
-    private static <T> void deselectAll(SelectionModel<T> selectionModel, List<T> list) {
+    private static <T> void deselectAll(SelectionModel<T> selectionModel, Collection<T> list) {
         for (T t : list) {
             selectionModel.setSelected(t, false);
         }

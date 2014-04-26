@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -56,6 +57,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
 TrackedRaceChangedListener {
+    private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+    
     private final boolean showRaceDetails;
 
     private Button leaderboardRemoveButton;
@@ -287,14 +290,6 @@ TrackedRaceChangedListener {
     
     @Override
     protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
-        Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceLinkColumn = getRaceLinkColumn();
-        
-        TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> fleetNameColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
-            @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
-                return object.getB().getName();
-            }
-        };
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> explicitFactorColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
@@ -355,12 +350,12 @@ TrackedRaceChangedListener {
             }
         });
         
-        racesTable.addColumn(raceLinkColumn, stringMessages.name());
-        racesTable.addColumn(fleetNameColumn, stringMessages.fleet());
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
+        
+        racesTable.ensureDebugId("RaceColumnTable");
     }
     
     @Override
@@ -589,7 +584,7 @@ TrackedRaceChangedListener {
         final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
         // use a set to avoid duplicates in the case of regatta leaderboards with multiple fleets per column
         Set<RaceColumnDTO> existingRacesWithoutThisRace = new HashSet<RaceColumnDTO>();
-        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnAndFleetList.getList()) {
+        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnTable.getDataProvider().getList()) {
             existingRacesWithoutThisRace.add(pair.getA());
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
@@ -665,7 +660,7 @@ TrackedRaceChangedListener {
     private void addRaceColumnsToLeaderboard() {
         final String leaderboardName = getSelectedLeaderboardName();
         final List<RaceColumnDTO> existingRaceColumns = new ArrayList<RaceColumnDTO>();
-        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnAndFleetList.getList()) {
+        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : raceColumnTable.getDataProvider().getList()) {
             existingRaceColumns.add(pair.getA());
         }
         final RaceColumnsInLeaderboardDialog raceDialog = new RaceColumnsInLeaderboardDialog(existingRaceColumns,
@@ -723,10 +718,10 @@ TrackedRaceChangedListener {
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
-            raceColumnAndFleetList.getList().clear();
+            raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnAndFleetList.getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet));
+                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);

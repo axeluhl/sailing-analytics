@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.racelogtracking;
 
+import java.util.Set;
+
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -74,10 +77,17 @@ public interface RaceLogTrackingAdapter {
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
     
     /**
-     * Duplicate the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
-     * {@code to} race log.
+     * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent}
+     * in {@code from} race log to the {@code to} race logs.
      * The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also inserts the necessary
-     * {@link DefineMarkEvent}s into the {@code to} race log.
+     * {@link DefineMarkEvent}s into the {@code to} race logs.
      */
-    void copyCourseToOtherRaceLog(RaceLog from, RaceLog to, SharedDomainFactory baseDomainFactory, RacingEventService service);
+    void copyCourseAndCompetitors(RaceLog from, Set<RaceLog> to, SharedDomainFactory baseDomainFactory,
+            RacingEventService service);
+    
+    /**
+     * If not yet registered, register the competitors in {@code competitors},
+     * and unregister all already registered competitors not in {@code competitors}.
+     */
+    void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors);
 }

@@ -539,7 +539,7 @@ public interface SailingServiceAsync {
             Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
 
     void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Iterable<CompetitorDTO>> callback);
+            AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
             AsyncCallback<Void> callback);
@@ -555,9 +555,6 @@ public interface SailingServiceAsync {
 
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
             PositionDTO position, AsyncCallback<Void> callback);
-
-    void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
-            String leaderboardTo, String raceColumnTo, String fleetTo, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
 
@@ -577,5 +574,8 @@ public interface SailingServiceAsync {
 
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
+
+    void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
+            Set<Triple<String, String, String>> raceLogsTo, AsyncCallback<Void> callback);
 }
 

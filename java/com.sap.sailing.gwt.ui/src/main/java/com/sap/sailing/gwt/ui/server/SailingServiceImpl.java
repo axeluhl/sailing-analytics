@@ -200,7 +200,6 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
-import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
@@ -2067,8 +2066,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
                 fleetDTO.raceLogTrackingState = raceLogTrackingState;
                 fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
-                fleetDTO.courseDefinitionInRaceLog = raceLogTrackingState.isForTracking() ?
-                        new LastPublishedCourseDesignFinder(raceLog).analyze() != null : false;
                 
                 fleetDTO.competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
                 
@@ -4062,6 +4059,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard);
     }
     
+    /**
+     * @param triple leaderboard and racecolumn and fleet names
+     * @return
+     */
+    private RaceLog getRaceLog(Triple<String, String, String> triple) {
+        return getRaceLog(triple.getA(), triple.getB(), triple.getC());
+    }
+    
     private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
@@ -4069,45 +4074,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Iterable<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
+    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer(
                         getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
     }
     
-    private void unregisterCompetitor(RaceLog raceLog, Competitor competitor) {
-        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent && ((RegisterCompetitorEvent) event).getCompetitor().equals(competitor)) {
-                try {
-                    raceLog.revokeEvent(getService().getServerAuthor(), (RegisterCompetitorEvent) event);
-                } catch (NotRevokableException e) {}
-            }
-        }
+    private Competitor getCompetitor(CompetitorDTO dto) {
+        return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
     
     @Override
     public void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
-            Set<CompetitorDTO> competitors) {
+            Set<CompetitorDTO> competitorDTOs) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Set<Competitor> alreadyRegistered = new HashSet<Competitor>(new RegisteredCompetitorsAnalyzer(raceLog).analyze());
-        Set<Competitor> toBeRegistered = new HashSet<Competitor>();
-        
-        for (CompetitorDTO dto : competitors) {
-            toBeRegistered.add(getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString()));
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        for (CompetitorDTO dto : competitorDTOs) {
+            competitors.add(getCompetitor(dto));
         }
         
-        Set<Competitor> toBeRemoved = new HashSet<Competitor>(alreadyRegistered);
-        toBeRemoved.removeAll(toBeRegistered);
-        toBeRegistered.removeAll(alreadyRegistered);
-        
-        for (Competitor c : toBeRegistered) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(),
-                    getService().getServerAuthor(), raceLog.getCurrentPassId(), c));
-        }
-        
-        for (Competitor c : toBeRemoved) {
-            unregisterCompetitor(raceLog, c);
-        }
+        getRaceLogTrackingAdapter().registerCompetitors(getService(), raceLog, competitors);
     }
     
     private Mark convertToMark(MarkDTO dto, boolean resolve) {
@@ -4232,15 +4218,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
-            String leaderboardTo, String raceColumnTo, String fleetTo) {
-        if (leaderboardFrom == leaderboardTo && raceColumnFrom == raceColumnTo && fleetFrom == fleetTo) {
-            return;
+    public void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples) {
+        RaceLog fromRaceLog = getRaceLog(fromTriple);
+        Set<RaceLog> toRaceLogs = new HashSet<>();
+        for (Triple<String, String, String> toTriple : toTriples) {
+            toRaceLogs.add(getRaceLog(toTriple));
         }
-        RaceLog fromRaceLog = getRaceLog(leaderboardFrom, raceColumnFrom, fleetFrom);
-        RaceLog toRaceLog = getRaceLog(leaderboardTo, raceColumnTo, fleetTo);
 
-        getRaceLogTrackingAdapter().copyCourseToOtherRaceLog(fromRaceLog, toRaceLog, baseDomainFactory, getService());
+        getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
     }
     
     private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(

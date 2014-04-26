@@ -44,6 +44,8 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         
         dataProvider.addDataDisplay(table);
         table.setSelectionModel(selectionModel);
+        
+        mainPanel.add(table);
     }
     
     public CellTable<T> getTable() {
