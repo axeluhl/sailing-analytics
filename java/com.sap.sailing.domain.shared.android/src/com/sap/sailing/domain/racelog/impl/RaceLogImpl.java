@@ -402,7 +402,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
     
     @Override
-    public void revokeEvent(RaceLogEventAuthor author, Revokable toRevoke) throws NotRevokableException {
+    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         if (toRevoke == null) {
             throw new NotRevokableException("Received null as event to revoke");
         }
