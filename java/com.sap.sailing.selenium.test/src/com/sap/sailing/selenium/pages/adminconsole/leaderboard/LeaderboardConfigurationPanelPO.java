@@ -9,18 +9,39 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 public class LeaderboardConfigurationPanelPO extends PageArea {
+    public static class LeaderboardEntryPO extends DataEntryPO {
+        public LeaderboardEntryPO(CellTablePO<?> table, WebElement element) {
+            super(table, element);
+        }
+        
+        protected LeaderboardEntryPO() {
+            super();
+        }
+        
+        @Override
+        public String getIdentifier() {
+            return getName();
+        }
+        
+        public String getName() {
+            return getColumnContent(0);
+        }
+        
+        public String getLeaderboardURL() {
+            WebElement link = this.context.findElement(By.xpath(".//td/div/a"));
+            
+            return link.getAttribute("href");
+        }
+    }
+    
     @FindBy(how = BySeleniumId.class, using = "CreateFlexibleLeaderboardButton")
     private WebElement createFlexibleLeaderboardButton;
     
@@ -75,7 +96,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     }
     
     public void deleteLeaderboard(String leaderboard) {
-        DataEntryPO entry = findLeaderboard(leaderboard);
+        LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         
         if(entry != null) {
             WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
@@ -88,12 +109,10 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     }
     
     public String getLeaderboardURL(String leaderboard) {
-        DataEntryPO entry = findLeaderboard(leaderboard);
+        LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         
         if(entry != null) {
-            WebElement link = entry.getWebElement().findElement(By.xpath(".//td/div/a"));
-            
-            return link.getAttribute("href");
+            return entry.getLeaderboardURL();
         }
         
         return null;
@@ -102,48 +121,35 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     public List<String> getAvailableLeaderboards() {
         List<String> leaderboards = new ArrayList<>();
         
-        CellTablePO<DataEntryPO> table = getLeaderboardTable();
-        List<DataEntryPO> entries = table.getEntries();
+        CellTablePO<LeaderboardEntryPO> table = getLeaderboardTable();
+        List<LeaderboardEntryPO> entries = table.getEntries();
         
-        for(DataEntryPO entry : entries) {
-            leaderboards.add(entry.getColumnContent(0));
+        for(LeaderboardEntryPO entry : entries) {
+            leaderboards.add(entry.getIdentifier());
         }
         
         return leaderboards;
     }
     
     public LeaderboardDetailsPanelPO getLeaderboardDetails(String leaderboard) {
-        CellTablePO<DataEntryPO> table = getLeaderboardTable();
-        List<DataEntryPO> entries = table.getEntries();
+        LeaderboardEntryPO entry = findLeaderboard(leaderboard);
         
-        for(DataEntryPO entry : entries) {
-            String name = entry.getColumnContent(0);
-            
-            if(leaderboard.equals(name)) {
-                entry.select();
-            
-                return new LeaderboardDetailsPanelPO(this.driver, this.leaderboardDetailsPanel);
-            }
+        if(entry == null) {
+            return null;
         }
         
-        return null;
+        entry.select();
+        
+        return new LeaderboardDetailsPanelPO(this.driver, this.leaderboardDetailsPanel);
     }
     
-    private CellTablePO<DataEntryPO> getLeaderboardTable() {
-        return new GenericCellTablePO<>(this.driver, this.leaderboardsCellTable, DataEntryPO.class);
+    private CellTablePO<LeaderboardEntryPO> getLeaderboardTable() {
+        return new GenericCellTablePO<>(this.driver, this.leaderboardsCellTable, LeaderboardEntryPO.class);
     }
     
-    private DataEntryPO findLeaderboard(String leaderboard) {
-        CellTablePO<DataEntryPO> table = getLeaderboardTable();
+    private LeaderboardEntryPO findLeaderboard(String name) {
+        CellTablePO<LeaderboardEntryPO> table = getLeaderboardTable();
         
-        for(DataEntryPO entry : table.getEntries()) {
-            String name = entry.getColumnContent(0);
-            
-            if(leaderboard.equals(name)) {
-                return entry;
-            }
-        }
-        
-        return null;
+        return table.getEntry(name);
     }
 }

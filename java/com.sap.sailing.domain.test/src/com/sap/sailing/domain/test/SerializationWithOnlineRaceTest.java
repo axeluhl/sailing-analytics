@@ -32,8 +32,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
-    public SerializationTestWithOnlineRace() throws MalformedURLException, URISyntaxException {
+public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
+    public SerializationWithOnlineRaceTest() throws MalformedURLException, URISyntaxException {
         super();
     }
 

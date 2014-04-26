@@ -83,7 +83,11 @@ public class WindowManager {
      * @return
      */
     public WebDriverWindow openNewWindow() {
-        return openNewWindow("");
+        return openNewWindow(false);
+    }
+    
+    public WebDriverWindow openNewWindow(boolean focus) {
+        return openNewWindow("", focus);
     }
     
     /**
@@ -93,7 +97,17 @@ public class WindowManager {
      * @return
      */
     public WebDriverWindow openNewWindow(String url) {
-        return new WebDriverWindow(this.driver, createWindow(url));
+        return openNewWindow(url, false);
+    }
+    
+    public WebDriverWindow openNewWindow(String url, boolean focus) {
+        WebDriverWindow window = new WebDriverWindow(this.driver, createWindow(url));
+        
+        if(focus) {
+            window.switchToWindow();
+        }
+        
+        return window;
     }
     
     private String createWindow(String url) {

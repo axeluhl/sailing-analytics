@@ -141,7 +141,7 @@ public class TrackedRacesListPO extends PageArea {
 //        return null;
 //    }
     
-    public Object getStatus(TrackedRaceDescriptor race) {
+    public Status getStatus(TrackedRaceDescriptor race) {
         List<Status> status = getStatus(Arrays.asList(race));
         
         return status.get(0);
@@ -169,15 +169,19 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public void stopTracking(TrackedRaceDescriptor race) {
-        stopTracking(Arrays.asList(race));
+        stopTracking(Arrays.asList(race), false);
+    }
+    
+    public void stopTrackingAndWaitForFinshed(TrackedRaceDescriptor race) {
+        stopTracking(Arrays.asList(race), true);
     }
     
     public void stopTracking(List<TrackedRaceDescriptor> races) {
-        selectRaces(races);
-        
-        this.stopTrackingButton.click();
-        
-        waitForAjaxRequests();
+        stopTracking(races, false);
+    }
+    
+    public void stopTrackingAndWaitForFinshed(List<TrackedRaceDescriptor> races) {
+        stopTracking(races, true);
     }
     
     public void remove(TrackedRaceDescriptor race) {
@@ -198,19 +202,20 @@ public class TrackedRacesListPO extends PageArea {
         waitForAjaxRequests();
     }
     
-    public void waitForTrackedRace(TrackedRaceDescriptor race) {
-        waitForTrackedRaces(Arrays.asList(race));
+    public void waitForTrackedRace(TrackedRaceDescriptor race, Status status) {
+        waitForTrackedRaces(Arrays.asList(race), status);
     }
     
-    public void waitForTrackedRace(TrackedRaceDescriptor race, int timeout) {
-        waitForTrackedRaces(Arrays.asList(race), timeout);
+    public void waitForTrackedRace(TrackedRaceDescriptor race, Status status, int timeout) {
+        waitForTrackedRaces(Arrays.asList(race), status, timeout);
     }
     
-    public void waitForTrackedRaces(List<TrackedRaceDescriptor> races) {
-        waitForTrackedRaces(races, DEFAULT_WAIT_TIMEOUT);
+    public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status) {
+        waitForTrackedRaces(races, status, DEFAULT_WAIT_TIMEOUT);
     }
     
-    public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, int timeout) {
+    public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status, int timeout) {
+        final Status statusToWaitFor = status;
         FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_POLLING_INTERVAL);
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
@@ -219,7 +224,7 @@ public class TrackedRacesListPO extends PageArea {
                     refresh();
                     
                     for(Status status : getStatus(races)) {
-                        if(status != Status.TRACKING)
+                        if(status != statusToWaitFor)
                             return Boolean.FALSE;
                     }
                 } catch(TimeoutException exception) {
@@ -243,6 +248,18 @@ public class TrackedRacesListPO extends PageArea {
 //            raceRow = trp.getTrackedRace(regattaName, raceName);
 //        }
 //    }
+    
+    public void stopTracking(List<TrackedRaceDescriptor> races, boolean waitForFinished) {
+        selectRaces(races);
+        
+        this.stopTrackingButton.click();
+        
+        waitForAjaxRequests();
+        
+        if(waitForFinished) {
+            waitForTrackedRaces(races, Status.FINISHED);
+        }
+    }
     
     private CellTablePO<DataEntryPO> getTrackedRacesTable() {
 //        if(!this.trackedRacesTable.isDisplayed()) {

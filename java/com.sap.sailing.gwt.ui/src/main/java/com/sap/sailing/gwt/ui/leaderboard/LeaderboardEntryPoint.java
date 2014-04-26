@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -95,23 +96,24 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
 
         if (leaderboardName != null) {
-            sailingService.checkLeaderboardName(leaderboardName, new AsyncCallback<Pair<String, LeaderboardType>>() {
-                @Override
-                public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
-                    if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                        Window.setTitle(leaderboardName);
-                        leaderboardType = leaderboardNameAndType.getB();
-                        createUI(showRaceDetails, embedded, hideToolbar);
-                    } else {
-                        RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
-                }
-            });
+            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<Pair<String, LeaderboardType>>(
+                    new AsyncCallback<Pair<String, LeaderboardType>>() {
+                        @Override
+                        public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
+                            if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                Window.setTitle(leaderboardName);
+                                leaderboardType = leaderboardNameAndType.getB();
+                                createUI(showRaceDetails, embedded, hideToolbar);
+                            } else {
+                                RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                            }
+                        }
+        
+                        @Override
+                        public void onFailure(Throwable t) {
+                            reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
+                        }
+                    }));
         } else {
             RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
         }

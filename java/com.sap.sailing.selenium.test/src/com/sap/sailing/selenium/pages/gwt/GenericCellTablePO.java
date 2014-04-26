@@ -65,19 +65,19 @@ public class GenericCellTablePO<T extends DataEntryPO> extends CellTablePO<T> {
          */
         @Override
         public <S extends CellTablePO<T>> T createEntry(S table, WebElement element) {
-        	Class<?> clazz = table.getClass();
-        	
-        	while(clazz != null) {
-        		try {
-        			Constructor<T> constructor = this.type.getConstructor(clazz, WebElement.class);
-        			
+            Class<?> clazz = table.getClass();
+            
+            while(clazz != null) {
+                try {
+                    Constructor<T> constructor = this.type.getConstructor(clazz, WebElement.class);
+                    
                     return constructor.newInstance(table, element);
-        		} catch (Exception exception) {
-        			clazz = clazz.getSuperclass();
-        		}
-        	}
-        	
-        	throw new RuntimeException("Can't create DataEntry of type " + this.type);
+                } catch (Exception exception) {
+                    clazz = clazz.getSuperclass();
+                }
+            }
+            
+            throw new RuntimeException("Can't create DataEntry of type " + this.type);
         }
     }
     

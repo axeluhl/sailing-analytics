@@ -37,6 +37,9 @@ http://germanmaster.traclive.dk/events/event_20120615_KielerWoch1/jsonservice.ph
 Extreme Sailing Series 2012:
 http://germanmaster.traclive.dk/events/event_20120101_ExtremeSai/jsonservice.php
 
+Extreme Sailing Series 2014:
+http://secondary.traclive.dk/events/event_20140218_ESSSingapo/jsonservice.php
+
 OBMR 2012:
 http://germanmaster.traclive.dk/events/event_20121031_OBMR/jsonservice.php
 

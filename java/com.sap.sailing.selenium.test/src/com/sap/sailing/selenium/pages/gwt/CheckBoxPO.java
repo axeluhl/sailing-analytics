@@ -10,12 +10,12 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.common.CSSHelper;
 
 public class CheckBoxPO extends PageArea {
-    protected static final String CHECKBOX_TAG_NAME = "span"; //$NON-NLS-1$
+    protected static final String TAG_NAME = "span"; //$NON-NLS-1$
     
     private static final String CHECKBOX_CSS_CLASS = "gwt-CheckBox";
     
     @FindBy(how = ByTagName.class, using = "input")
-    private WebElement checkbox;
+    private WebElement input;
 
     @FindBy(how = ByTagName.class, using = "label")
     private WebElement label;
@@ -29,12 +29,12 @@ public class CheckBoxPO extends PageArea {
         WebElement element = (WebElement) this.context;
         String tagName = element.getTagName();
         
-        if(!CHECKBOX_TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, CHECKBOX_CSS_CLASS))
+        if(!TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, getCssClassName()))
             throw new IllegalArgumentException("WebElement does not represent a CheckBox");
     }
     
     public boolean isEnabled() {
-        return this.checkbox.isEnabled();
+        return this.input.isEnabled();
     }
     
     public String getLabel() {
@@ -42,11 +42,15 @@ public class CheckBoxPO extends PageArea {
     }
     
     public boolean isSelected() {
-        return this.checkbox.isSelected();
+        return this.input.isSelected();
     }
     
     public void setSelected(boolean selected) {
         if(selected != isSelected())
-            this.checkbox.click();
+            this.input.click();
+    }
+    
+    protected String getCssClassName() {
+        return CHECKBOX_CSS_CLASS;
     }
 }

@@ -53,7 +53,7 @@ public class WindFieldGeneratorTest {
         WindFieldGeneratorImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
-        Position[][] positions = bd.extractGrid(hSteps, vSteps);
+        Position[][] positions = bd.extractGrid(hSteps, vSteps, 0, 0);
         assert (positions.length*positions[0].length == hSteps * vSteps);
         int index = 0;
         for (int i = 0; i < positions.length; ++i) {
@@ -61,7 +61,7 @@ public class WindFieldGeneratorTest {
                 logger.info("P" + ++index + ":" + positions[i][j]);
             }
         }
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         assertNotNull("Position Grid is not null", positionGrid);
         assertEquals("Position Grid Number of Rows", vSteps, positionGrid.length);
@@ -95,7 +95,7 @@ public class WindFieldGeneratorTest {
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
@@ -240,7 +240,7 @@ public class WindFieldGeneratorTest {
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);

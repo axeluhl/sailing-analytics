@@ -502,7 +502,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             for (MarkPassing markPassing : markPassings) {
                 // try to find corresponding old start mark passing
                 if (oldStartMarkPassing != null
-                        && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                        && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
                     if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
                             && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
                         requiresStartTimeUpdate = false;
@@ -533,7 +533,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
                 LockUtil.lockForWrite(markPassingsLock2);
                 try {
-                // TODO wouldn't we need to remove a previous mark passing of competitor for the same waypoint before re-adding it?
+                    // The mark passings of competitor have been removed by the call to clearMarkPassings(competitor) above
+                    // from both, the collection that holds the mark passings by waypoint and the one that holds the
+                    // mark passings per competitor; so we can simply add here:
                     markPassingsInOrderForWaypoint.add(markPassing);
                 } finally {
                     LockUtil.unlockAfterWrite(markPassingsLock2);
@@ -575,6 +577,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         getRace().getCourse().unlockAfterRead();
     }
 
+    /**
+     * Removes all mark passings of <code>competitor</code> from both, the {@link #markPassingsForCompetitor}
+     * and the {@link #markPassingsForWaypoint} collections.
+     */
     private void clearMarkPassings(Competitor competitor) {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassings);

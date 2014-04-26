@@ -371,3 +371,9 @@ img.openColumn {
   background: #f01010;
 }
 
+.busyIndicator-Simple {
+	margin-top: 7px;	
+}
+
+.busyIndicator-Circle {
+}

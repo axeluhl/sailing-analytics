@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.core;
 
-import java.net.URL;
+import java.io.File;
 
 import org.openqa.selenium.WebDriver;
 
@@ -45,5 +45,5 @@ public interface TestEnvironment {
      * @return
      *   The folder where screenshots should be stored.
      */
-    public URL getScreenshotFolder();
+    public File getScreenshotFolder();
 }

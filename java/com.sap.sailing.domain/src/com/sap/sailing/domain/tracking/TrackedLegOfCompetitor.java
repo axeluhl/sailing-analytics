@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
@@ -26,7 +27,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * competitor to complete the leg is returned. If the competitor didn't finish the leg before the end of tracking,
      * <code>null</code> is returned because this indicates that the tracker stopped sending valid data.
      */
-    Long getTimeInMilliSeconds(TimePoint timePoint);
+    Duration getTime(TimePoint timePoint);
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If

@@ -773,23 +773,35 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        if (markPassings.isEmpty()) {
-            return null;
-        } else {
-            TimePoint end = timePoint;
-            if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()
-                    && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
-                // competitor has finished race; use time point of crossing the finish line
-                end = markPassings.last().getTimePoint();
-            } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint() &&
-                    timePoint.after(markPassings.last().getTimePoint())) {
-                // if competitor has not finished the race (and the requested timepoint
-                // is after the last mark passing) then we can not tell anything about
-                // the distance traveled - this is in line with AbstractSimpleLeaderboardImpl#getTotalTimeSailedInMilliseconds
-                return null;
+        try {
+            lockForRead(markPassings);
+            if (markPassings.isEmpty()) {
+                result = null;
+            } else {
+                TimePoint end = timePoint;
+                if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()
+                        && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
+                    // competitor has finished race; use time point of crossing the finish line
+                    end = markPassings.last().getTimePoint();
+                } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint()
+                        && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
+                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED)) {
+                    // If the race is no longer tracking and hence no more data can be expected, and the competitor
+                    // hasn't finished the race, no valid distance traveled can be determined
+                    // for the competitor in this race.
+                    end = null;
+                }
+                if (end == null) {
+                    result = null;
+                } else {
+                    result = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+                }
             }
-            return getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+            return result;
+        } finally {
+            unlockAfterRead(markPassings);
         }
     }
 
