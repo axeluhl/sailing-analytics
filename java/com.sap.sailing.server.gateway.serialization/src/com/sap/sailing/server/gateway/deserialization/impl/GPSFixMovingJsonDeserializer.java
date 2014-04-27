@@ -22,21 +22,14 @@ public class GPSFixMovingJsonDeserializer extends TypeBasedJsonDeserializer<GPSF
     protected GPSFixMoving deserializeAfterCheckingType(JSONObject object) throws JsonDeserializationException {        
         double bearingDeg = (Double) object.get(FIELD_BEARING_DEG);
         double speedKnots = (Double) object.get(FIELD_SPEED_KNOTS);
-
         JSONObject clone = (JSONObject) object.clone();
         clone.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixJsonDeserializer.TYPE);
-        GPSFix baseFix = new GPSFixJsonDeserializer()
-        .deserialize(object);
-
-        // TODO do we have to use corrected course here? (corrected by magnetic
-        // variation)
+        GPSFix baseFix = new GPSFixJsonDeserializer().deserialize(object);
         Bearing bearing = new DegreeBearingImpl(bearingDeg);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(
                 speedKnots, bearing);
-
         GPSFixMoving fix = new GPSFixMovingImpl(baseFix.getPosition(),
                 baseFix.getTimePoint(), speed);
-
         return fix;
     }
 
