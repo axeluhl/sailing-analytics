@@ -16,7 +16,6 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.Revokable;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -235,7 +234,7 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void revokeEvent(RaceLogEventAuthor author, Revokable toRevoke) throws NotRevokableException {
+    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         innerRaceLog.revokeEvent(author, toRevoke);
     }
 }

@@ -22,7 +22,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -37,7 +36,6 @@ public class CompetitorPanel extends SimplePanel {
     private final ErrorReporter errorReporter;
     private final CompetitorTableWrapper competitorTable;
     private final MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
-    private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final String leaderboardName;
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
@@ -54,7 +52,6 @@ public class CompetitorPanel extends SimplePanel {
         this.leaderboardName = leaderboardName;
         this.competitorTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
         this.competitorSelectionModel = competitorTable.getSelectionModel();
-        this.filterField = competitorTable.getFilterField();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -150,19 +147,7 @@ public class CompetitorPanel extends SimplePanel {
 
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
-                        // replace updated competitor in competitor list
-                    	boolean found = false;
-                        for (int i=0; i<competitorTable.getAllCompetitors().size(); i++) {
-                            if (competitorTable.getAllCompetitors().get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
-                            	found = true;
-                            	competitorTable.getAllCompetitors().set(i, updatedCompetitor);
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            competitorTable.getAllCompetitors().add(updatedCompetitor);
-                        }
-                        filterField.updateAll(competitorTable.getAllCompetitors());
+                        refreshCompetitorList();
                     }
                 });
             }

@@ -1,17 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -32,9 +28,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
-import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -60,13 +53,12 @@ TrackedRaceChangedListener {
 
     protected final ListDataProvider<StrippedLeaderboardDTO> leaderboardList;
 
-    protected final ListDataProvider<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnAndFleetList;
-
     protected final ErrorReporter errorReporter;
 
     protected final CellTable<StrippedLeaderboardDTO> leaderboardTable;
 
-    protected final CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTable;
+    protected final RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
+    protected final SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard;
 
@@ -75,8 +67,6 @@ TrackedRaceChangedListener {
     protected final List<RegattaDTO> allRegattas;
 
     protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
-
-    protected final SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
     protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
@@ -130,7 +120,6 @@ TrackedRaceChangedListener {
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>();
-        raceColumnAndFleetList = new ListDataProvider<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
         mainPanel = new VerticalPanel();
@@ -176,6 +165,7 @@ TrackedRaceChangedListener {
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
+                raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
         leaderboardList.addDataDisplay(leaderboardTable);
@@ -237,15 +227,11 @@ TrackedRaceChangedListener {
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         
-        raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
-        raceColumnTable.ensureDebugId("RaceColumnTable");
-        raceColumnAndFleetList.addDataDisplay(raceColumnTable);
-        raceColumnTable.setWidth("500px");
-
-        addColumnsToRacesTable(raceColumnTable);
-        
+        raceColumnTable = new RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
+                sailingService, stringMessages, errorReporter, raceColumnTableSelectionModel);
+        raceColumnTable.getTable().setWidth("500px");
+        addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTableSelectionModel;
-        raceColumnTable.setSelectionModel(raceColumnTableSelectionModel);
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardRaceColumnSelectionChanged();
@@ -352,7 +338,7 @@ TrackedRaceChangedListener {
             public void onSuccess(Void arg0) {
                 trackedRacesListComposite.clearSelection();
                 getSelectedRaceColumnWithFleet().getA().setRaceIdentifier(fleet, null);
-                raceColumnAndFleetList.refresh();
+                raceColumnTable.getDataProvider().refresh();
             }
         });
     }
@@ -378,11 +364,11 @@ TrackedRaceChangedListener {
 
     protected abstract void leaderboardRaceColumnSelectionChanged();
     
-    protected void selectRaceColumn(String raceCoumnName) {
-        List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> list = raceColumnAndFleetList.getList();
+    protected void selectRaceColumn(String raceColumnName) {
+        List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> list = raceColumnTable.getDataProvider().getList();
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality pair : list) {
-            if (pair.getA().getName().equals(raceCoumnName)) {
-                raceColumnTableSelectionModel.setSelected(pair, true);
+            if (pair.getA().getName().equals(raceColumnName)) {
+                raceColumnTable.getSelectionModel().setSelected(pair, true);
                 break;
             }
         }
@@ -428,10 +414,10 @@ TrackedRaceChangedListener {
     }
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality getSelectedRaceColumnWithFleet() {
-        if (raceColumnTableSelectionModel.getSelectedSet().isEmpty()) {
+        if (raceColumnTable.getSelectionModel().getSelectedSet().isEmpty()) {
             return null;
         }
-        return raceColumnTableSelectionModel.getSelectedSet().iterator().next();
+        return raceColumnTable.getSelectionModel().getSelectedSet().iterator().next();
     }
 
     protected String getSelectedLeaderboardName() {
@@ -451,13 +437,13 @@ TrackedRaceChangedListener {
     @Override
     public void changeTrackingRace(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, boolean isTracked) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
-            for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName : raceColumnAndFleetList.getList()) {
+            for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName : raceColumnTable.getDataProvider().getList()) {
                 if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaAndRaceIdentifier.getRaceName())) {
                     raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(),
                             regattaAndRaceIdentifier);
                 }
             }
-            raceColumnAndFleetList.refresh();
+            raceColumnTable.getDataProvider().refresh();
         }
     }
 
@@ -496,7 +482,7 @@ TrackedRaceChangedListener {
                                 if (success) {
                                     // TODO consider enabling the Unlink button
                                     selectedRaceInLeaderboard.setRaceIdentifier(fleet, selectedRace);
-                                    raceColumnAndFleetList.refresh();
+                                    raceColumnTable.getDataProvider().refresh();
                                 }
                             }
                         }));
@@ -505,29 +491,5 @@ TrackedRaceChangedListener {
     @Override
     public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null : leaderboardSelectionModel.getSelectedSet().iterator().next();
-    }
-    
-    protected static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    
-    protected Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> getRaceLinkColumn() {
-        return new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
-            @Override
-            public SafeHtml getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceInLeaderboardDTOAndFleetName) {
-                if (raceInLeaderboardDTOAndFleetName.getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB()) != null) {
-                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
-                            .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
-                    
-                    Map<String, String> params = new HashMap<>();
-                    params.put("leaderboardName", getSelectedLeaderboard().name);
-                    params.put("regattaName", raceIdentifier.getRegattaName());
-                    params.put("raceName", raceIdentifier.getRaceName());
-                    params.put("canReplayDuringLiveRaces", "true");
-                    String link = EntryPointLinkFactory.createRaceBoardLink(params);
-                    return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
-                } else {
-                    return SafeHtmlUtils.fromString(raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
-                }
-            }
-        };
     }
 }

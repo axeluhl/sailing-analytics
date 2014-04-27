@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -27,10 +28,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 
 public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSelectionModel<CompetitorDTO>> {
-    private List<CompetitorDTO> allCompetitors;
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
 
-    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
+    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, new MultiSelectionModel<CompetitorDTO>());
         
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
@@ -116,7 +116,7 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         });
 
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
-                allCompetitors, table, dataProvider) {
+                new ArrayList<CompetitorDTO>(), table, dataProvider) {
 
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
@@ -138,8 +138,8 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         mainPanel.add(table);
     }
     
-    public List<CompetitorDTO> getAllCompetitors() {
-        return allCompetitors;
+    public Collection<CompetitorDTO> getAllCompetitors() {
+        return filterField.getAll();
     }
     
     public LabeledAbstractFilterablePanel<CompetitorDTO> getFilterField() {
@@ -196,10 +196,6 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
     }
 
     private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
-        allCompetitors = new ArrayList<CompetitorDTO>();
-        for (CompetitorDTO c : result) {
-            allCompetitors.add(c);
-        }
-        filterField.updateAll(allCompetitors);
+        filterField.updateAll(result);
     }
 }

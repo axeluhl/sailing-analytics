@@ -425,7 +425,7 @@ public interface SailingService extends RemoteService {
     
     void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
     
-    Iterable<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
+    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
     
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
@@ -444,8 +444,8 @@ public interface SailingService extends RemoteService {
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
     
-    void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
-            String leaderboardTo, String raceColumnTo, String fleetTo);
+    void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
+            Set<Triple<String, String, String>> raceLogsTo);
     
     void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
             throws TransformationException;

@@ -89,6 +89,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/copy_course.png")
     ImageResource copyCourse();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/copy.png")
+    ImageResource copy();
+
     @Source("com/sap/sailing/gwt/ui/client/images/close_time_range.png")
     ImageResource closeTimeRange();
 }

@@ -14,7 +14,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
     public final static String ACTION_DEFINE_COURSE = "ACTION_DEFINE_COURSE";
     public final static String ACTION_MAP_DEVICES = "ACTION_MAP_DEVICES";
-    public final static String ACTION_COPY_COURSE = "ACTION_COPY_COURSE";
+    public final static String ACTION_COPY = "ACTION_COPY";
     public final static String ACTION_SET_START_TIME = "ACTION_SET_START_TIME";
     
     private final StringMessages stringMessages;
@@ -37,10 +37,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             result.add(new ImageSpec(ACTION_DEFINE_COURSE, stringMessages.defineCourse(), makeImagePrototype(resources.defineCourse())));
             result.add(new ImageSpec(ACTION_MAP_DEVICES, stringMessages.mapDevices(), makeImagePrototype(resources.mapDevices())));
             result.add(new ImageSpec(ACTION_SET_START_TIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
-        }
-        
-        if (object.getB().courseDefinitionInRaceLog) {
-            result.add(new ImageSpec(ACTION_COPY_COURSE, stringMessages.copyCourseToOther(), makeImagePrototype(resources.copyCourse())));
+            result.add(new ImageSpec(ACTION_COPY, stringMessages.copyCourseAndCompetitors(), makeImagePrototype(resources.copy())));
         }
         
         return result;

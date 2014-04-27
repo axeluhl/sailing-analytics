@@ -121,12 +121,12 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     NavigableSet<RaceLogEvent> getUnrevokedEventsDescending();
     
     /**
-     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter exists in the racelog
+     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter is revokable, exists in the racelog
      * and has not yet been revoked.
      * 
      * @param author The author for the {@code RevokeEvent}.
      */
-    void revokeEvent(RaceLogEventAuthor author, Revokable toRevoke) throws NotRevokableException;
+    void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException;
 
     /**
      * Merges all events from the <code>other</code> race log into this.
