@@ -228,9 +228,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private long delayToLiveInMillis;
 
     private enum LoadingFromStoresState { NOT_STARTED, RUNNING, FINISHED };
+    
     /**
-     * The constructor loads wind fixes from the {@link #windStore} asynchronously. When completed, this flag is set to
-     * <code>true</code>, and all threads currently waiting on this object are notified.
+     * The constructor loads wind fixes from the {@link #windStore} and GPS fixes from the {@link #gpsFixStore}
+     * asynchronously. When completed, this flag is set to <code>true</code>, and all threads currently waiting on this
+     * object are notified.
      */
     private LoadingFromStoresState loadingFromStoresCompleted;
 
