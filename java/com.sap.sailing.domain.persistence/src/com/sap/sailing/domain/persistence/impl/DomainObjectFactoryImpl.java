@@ -1607,7 +1607,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return configuration;
     }
     
-    public static DeviceIdentifier loadDeviceId(
+    private DeviceIdentifier loadDeviceId(
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DBObject deviceId)
                     throws TransformationException, NoCorrespondingServiceRegisteredException {
         String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
