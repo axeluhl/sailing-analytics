@@ -12,7 +12,8 @@ public class RaceCourseDTO implements IsSerializable {
     public List<WaypointDTO> waypoints;
     public List<MarkDTO> marks;
 
-    RaceCourseDTO() {}
+    RaceCourseDTO() {
+    }
 
     public RaceCourseDTO(List<WaypointDTO> waypoints) {
         this(waypoints, null);
@@ -25,25 +26,27 @@ public class RaceCourseDTO implements IsSerializable {
 
     public List<ControlPointDTO> getControlPoints() {
         List<ControlPointDTO> controlPoints = new ArrayList<ControlPointDTO>();
-        for(WaypointDTO waypoint: waypoints) {
+        for (WaypointDTO waypoint : waypoints) {
             controlPoints.add(waypoint.controlPoint);
         }
         return controlPoints;
     }
 
     public Collection<MarkDTO> getMarks() {
+        final Collection<MarkDTO> result;
         if (marks != null) {
-            return marks;
-        }
-
-        Map<String, MarkDTO> marks = new HashMap<String, MarkDTO>();
-        for(WaypointDTO waypoint: waypoints) {
-            for(MarkDTO mark: waypoint.marks) {
-                if(!marks.containsKey(mark.getName())) {
-                    marks.put(mark.getName(), mark);
+            result = marks;
+        } else {
+            Map<String, MarkDTO> marks = new HashMap<String, MarkDTO>();
+            for (WaypointDTO waypoint : waypoints) {
+                for (MarkDTO mark : waypoint.marks) {
+                    if (!marks.containsKey(mark.getName())) {
+                        marks.put(mark.getName(), mark);
+                    }
                 }
             }
+            result = marks.values();
         }
-        return marks.values();
+        return result;
     }
 }
