@@ -239,9 +239,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final GPSFixStore gpsFixStore;
     
     /**
-     * Wind loading is started in a background thread during object construction. If a client needs to ensure that wind loading
-     * either has terminated or has not yet begun, it can obtain the read lock of this lock. The wind loading procedure will obtain
-     * the write lock before it starts loading wind fixes.
+     * Wind and GPS fix loading is started in a background thread during object construction. If a client needs to
+     * ensure that wind / GPS fix loading either has terminated or has not yet begun, it can obtain the read lock of
+     * this lock. The wind / GPS fix loading procedure will obtain the write lock before it starts loading wind fixes.
      */
     private final NamedReentrantReadWriteLock loadingFromStoresLock;
 
