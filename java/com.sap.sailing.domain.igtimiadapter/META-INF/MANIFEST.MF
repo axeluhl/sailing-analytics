@@ -32,5 +32,4 @@ Web-ContextPath: /igtimi
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.impl.Activator
 Export-Package: com.sap.sailing.domain.igtimiadapter,
  com.sap.sailing.domain.igtimiadapter.datatypes,
- com.sap.sailing.domain.igtimiadapter.impl;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.domain.igtimiadapter.shared
