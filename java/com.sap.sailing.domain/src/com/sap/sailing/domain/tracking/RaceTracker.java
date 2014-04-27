@@ -63,6 +63,7 @@ public interface RaceTracker {
     DynamicTrackedRegatta getTrackedRegatta();
     
     WindStore getWindStore();
+    
     GPSFixStore getGPSFixStore();
 
     /**
