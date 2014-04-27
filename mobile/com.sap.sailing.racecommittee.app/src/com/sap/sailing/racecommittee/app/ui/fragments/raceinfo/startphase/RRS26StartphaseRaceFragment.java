@@ -50,6 +50,17 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
                 getRaceState().forceNewStartTime(now, now.plus(4*60*1000));
             }
         });
+        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn2Minutes);
+        raceStartIn2Minutes.setVisibility(View.VISIBLE);
+        raceStartIn2Minutes.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final TimePoint now = MillisecondsTimePoint.now();
+                getRaceState().setAdvancePass(now);
+                getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
+                getRaceState().forceNewStartTime(now, now.plus(2*60*1000));
+            }
+        });
     }
     
     @Override

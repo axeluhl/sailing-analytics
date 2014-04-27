@@ -237,7 +237,8 @@
 	<string name="preference_there_are_no_regattas">Bisher keine Regatta geladen.</string>
 	<string name="configure_regatta">Konfiguriere Regatta %1$s</string>
 
-	<string name="race_start_in_4_minutes">Rennen startet in genau 4 Minuten</string>
+	<string name="race_start_in_4_minutes">4 Minuten</string>
+	<string name="race_start_in_2_minutes">2 Minuten</string>
 	<string name="race_reset_course">Kurs ändern</string>
 	<string name="no_course_active">Kein Kurs gesetzt</string>
 </resources>
