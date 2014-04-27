@@ -13,8 +13,8 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 
 public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
-    MongoObjectFactoryImpl mof;
-    DomainObjectFactoryImpl dof;
+    private final MongoObjectFactoryImpl mof;
+    private final DomainObjectFactoryImpl dof;
 
     public GPSFixMongoHandlerImpl(MongoObjectFactory mof, DomainObjectFactory dof) {
         this.mof = (MongoObjectFactoryImpl) mof;
