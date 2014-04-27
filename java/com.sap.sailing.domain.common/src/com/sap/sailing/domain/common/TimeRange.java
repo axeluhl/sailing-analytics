@@ -51,8 +51,6 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * Get time-difference between the timepoint and this timerange.
      * It will be 0 if the timepoint lies within the timerange, otherwise the time-difference
      * to either the start or end of the timerange, depending on which is closer
-     * @param timePoint
-     * @return
      */
     long timeDifference(TimePoint timePoint);
     

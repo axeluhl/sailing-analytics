@@ -66,6 +66,20 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
         if (timePoint.before(from())) return from().asMillis() - timePoint.asMillis();
         return to().asMillis() - timePoint.asMillis();
     }
+    
+//    @Override
+//    public Duration timeDifference(TimePoint timePoint) {
+//        final Duration result;
+//        if (includes(timePoint)) {
+//            result = Duration.NULL;
+//        } else if (timePoint.before(from())) {
+//            result = timePoint.until(from());
+//        } else {
+//            result = to().until(timePoint);
+//        }
+//        return result;
+//    }
+
 
     @Override
     public TimeRange union(TimeRange other) {

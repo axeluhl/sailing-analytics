@@ -121,4 +121,12 @@ public class TimeRangeTest {
     	assertEquals(0, intersection.from().asMillis());
     	assertEquals(10, intersection.to().asMillis());
     }
+    
+    @Test
+    public void timeDifferenceTest() {
+        TimeRange one = create(5, 10);
+        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(3)));
+        assertEquals(0, one.timeDifference(new MillisecondsTimePoint(7)));
+        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(12)));
+    }
 }

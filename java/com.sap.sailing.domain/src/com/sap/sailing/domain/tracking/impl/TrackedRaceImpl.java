@@ -2348,41 +2348,43 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public void attachRaceLog(final RaceLog raceLog) {
         if (raceLog != null) {
             this.attachedRaceLogs.put(raceLog.getId(), raceLog);
-            
-            //Use the new race log, that possibly contains device mappings, to load GPSFix tracks from the DB
+            // Use the new race log, that possibly contains device mappings, to load GPSFix tracks from the DB
             loadingFromStoresCompleted = LoadingFromStoresState.NOT_STARTED;
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
             new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName()) {
-            	@Override
-            	public void run() {
-            		LockUtil.lockForRead(getSerializationLock());
-            		LockUtil.lockForWrite(getLoadingFromStoresLock());
-            		synchronized (TrackedRaceImpl.this) {
-            			loadingFromStoresCompleted = LoadingFromStoresState.RUNNING; // indicates that the serialization lock is now safely held
-            			TrackedRaceImpl.this.notifyAll();
-            		}
-            		try {
-            			logger.info("Started loading competitor tracks for " + getRace().getName());
-            			for (Competitor competitor : race.getCompetitors()) {
-            				gpsFixStore.loadCompetitorTrack((DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog, competitor);
-            			}
-            			logger.info("Finished loading competitor tracks for " + getRace().getName());
+                @Override
+                public void run() {
+                    LockUtil.lockForRead(getSerializationLock());
+                    LockUtil.lockForWrite(getLoadingFromStoresLock());
+                    synchronized (TrackedRaceImpl.this) {
+                        loadingFromStoresCompleted = LoadingFromStoresState.RUNNING; // indicates that the serialization
+                                                                                     // lock is now safely held
+                        TrackedRaceImpl.this.notifyAll();
+                    }
+                    try {
+                        logger.info("Started loading competitor tracks for " + getRace().getName());
+                        for (Competitor competitor : race.getCompetitors()) {
+                            gpsFixStore.loadCompetitorTrack(
+                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
+                                    competitor);
+                        }
+                        logger.info("Finished loading competitor tracks for " + getRace().getName());
+                        logger.info("Started loading mark tracks for " + getRace().getName());
+                        for (Mark mark : getMarks()) {
+                            gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
+                                    mark);
+                        }
+                        logger.info("Finished loading mark tracks for " + getRace().getName());
 
-            			logger.info("Started loading mark tracks for " + getRace().getName());
-            			for (Mark mark : getMarks()) {
-            				gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog, mark);
-            			}
-            			logger.info("Finished loading mark tracks for " + getRace().getName());
-
-            		} finally {
-            			synchronized (TrackedRaceImpl.this) {
-            				loadingFromStoresCompleted = LoadingFromStoresState.FINISHED;
-            				TrackedRaceImpl.this.notifyAll();
-            			}
-            			LockUtil.unlockAfterWrite(getLoadingFromStoresLock());
-            			LockUtil.unlockAfterRead(getSerializationLock());
-            		}
-            	}
+                    } finally {
+                        synchronized (TrackedRaceImpl.this) {
+                            loadingFromStoresCompleted = LoadingFromStoresState.FINISHED;
+                            TrackedRaceImpl.this.notifyAll();
+                        }
+                        LockUtil.unlockAfterWrite(getLoadingFromStoresLock());
+                        LockUtil.unlockAfterRead(getSerializationLock());
+                    }
+                }
             }.start();
         } else {
             logger.severe("Got a request to attach race log for an empty race log!");
