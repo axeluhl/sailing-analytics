@@ -125,8 +125,8 @@ public class TimeRangeTest {
     @Test
     public void timeDifferenceTest() {
         TimeRange one = create(5, 10);
-        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(3)));
-        assertEquals(0, one.timeDifference(new MillisecondsTimePoint(7)));
-        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(12)));
+        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(3)).asMillis());
+        assertEquals(0, one.timeDifference(new MillisecondsTimePoint(7)).asMillis());
+        assertEquals(2, one.timeDifference(new MillisecondsTimePoint(12)).asMillis());
     }
 }

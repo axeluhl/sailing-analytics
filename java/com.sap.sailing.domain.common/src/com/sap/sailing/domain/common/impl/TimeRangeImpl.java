@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -61,25 +62,17 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
     }
 
     @Override
-    public long timeDifference(TimePoint timePoint) {
-        if (includes(timePoint)) return 0;
-        if (timePoint.before(from())) return from().asMillis() - timePoint.asMillis();
-        return to().asMillis() - timePoint.asMillis();
+    public Duration timeDifference(TimePoint timePoint) {
+        final Duration result;
+        if (includes(timePoint)) {
+            result = Duration.NULL;
+        } else if (timePoint.before(from())) {
+            result = timePoint.until(from());
+        } else {
+            result = to().until(timePoint);
+        }
+        return result;
     }
-    
-//    @Override
-//    public Duration timeDifference(TimePoint timePoint) {
-//        final Duration result;
-//        if (includes(timePoint)) {
-//            result = Duration.NULL;
-//        } else if (timePoint.before(from())) {
-//            result = timePoint.until(from());
-//        } else {
-//            result = to().until(timePoint);
-//        }
-//        return result;
-//    }
-
 
     @Override
     public TimeRange union(TimeRange other) {
