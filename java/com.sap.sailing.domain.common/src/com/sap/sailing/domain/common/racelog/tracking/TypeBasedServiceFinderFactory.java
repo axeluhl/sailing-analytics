@@ -7,7 +7,7 @@ package com.sap.sailing.domain.common.racelog.tracking;
  * {@link #createServiceFinder(Class)} method.
  * 
  * The created {@link TypeBasedServiceFinder} can then be used to find the desired
- * of service for a specific type. E.g. there may be a persistence service interface for
+ * service for a specific type. E.g., there may be a persistence service interface for
  * {@link GPSFix}es, and there are several different service registered, depending on the type
  * of {@link GPSFix}. The service finder then can find the appropriate service for each fix.
  * @author Fredrik Teschke
