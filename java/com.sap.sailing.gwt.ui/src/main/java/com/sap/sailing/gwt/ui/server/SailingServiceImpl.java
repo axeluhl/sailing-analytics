@@ -142,6 +142,7 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -2059,15 +2060,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
                 }    
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
-                leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(),
+                        raceColumn.getFactor(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-                fleetDTO.raceLogTrackingState = raceLogTrackingState;
-                fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
-                
-                fleetDTO.competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
+                boolean raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
+                boolean competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
+                RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
+                        competitorRegistrationsExist, raceLogTrackingState);
+                raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
             }
         }
         return leaderboardDTO;

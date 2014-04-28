@@ -82,12 +82,24 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
     }
     
+    private RaceLogTrackingState getTrackingState(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+        return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackingState;
+    }
+    
+    private boolean doesTrackerExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+        return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackerExists;
+    }
+    
+    private boolean doCompetitorResgistrationsExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+        return race.getA().getRaceLogTrackingInfo(race.getB()).competitorRegistrationsExists;
+    }
+    
     @Override
     protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogTrackingStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
-                RaceLogTrackingState state = raceColumnAndFleetName.getB().raceLogTrackingState;
+                RaceLogTrackingState state = getTrackingState(raceColumnAndFleetName);
                 return state.name();
             }
         };
@@ -95,7 +107,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> trackerStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
-                return raceColumnAndFleetName.getB().raceLogTrackerExists ? "Active" : "None";
+                return doesTrackerExist(raceColumnAndFleetName) ? "Active" : "None";
             }
         };
 
@@ -108,8 +120,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 final String leaderboardName = getSelectedLeaderboardName();
                 final String raceColumnName = object.getA().getName();
                 final String fleetName = object.getB().getName();
-                boolean editable = ! (object.getB().raceLogTrackerExists &&
-                        object.getB().raceLogTrackingState == RaceLogTrackingState.TRACKING);
+                boolean editable = ! (doesTrackerExist(object) &&
+                        getTrackingState(object) == RaceLogTrackingState.TRACKING);
                 if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_REMOVE_DENOTATION.equals(value)) {
@@ -120,7 +132,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             new Callback<Boolean, Throwable>() {
                                 @Override
                                 public void onSuccess(Boolean result) {
-                                    object.getB().competitorRegistrationsExist = result;
+                                    object.getA().getRaceLogTrackingInfo(object.getB()).competitorRegistrationsExists = result;
                                 }
                                 
                                 @Override
@@ -206,7 +218,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     private void enableStartTrackingButtonIfAppropriateRacesSelected() {
         boolean enable = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : raceColumnTableSelectionModel.getSelectedSet()) {
-            if (! race.getB().raceLogTrackingState.isForTracking() || race.getB().raceLogTrackerExists) {
+            if (! getTrackingState(race).isForTracking() || doesTrackerExist(race)) {
                 enable = false;
             }
         }
@@ -297,7 +309,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
-            if (! race.getB().competitorRegistrationsExist) {
+            if (! doCompetitorResgistrationsExist(race)) {
                 namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
             }
         }

@@ -29,7 +29,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     protected Iterable<ImageSpec> getImageSpecs() {
         List<ImageSpec> result = new ArrayList<ImageSpec>();
         RaceColumnDTOAndFleetDTOWithNameBasedEquality object = (RaceColumnDTOAndFleetDTOWithNameBasedEquality) getContext().getKey();
-        if (! object.getB().raceLogTrackingState.isForTracking()) {
+        if (! object.getA().getRaceLogTrackingInfo(object.getB()).raceLogTrackingState.isForTracking()) {
             result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(), makeImagePrototype(resources.denoteForRaceLogTracking())));
         } else {
             result.add(new ImageSpec(ACTION_REMOVE_DENOTATION, stringMessages.removeDenotation(), makeImagePrototype(resources.unDenoteForRaceLogTracking())));
