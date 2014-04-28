@@ -17,7 +17,7 @@ public enum PassingInstruction {
     Starboard(1),
     Gate(2),
     Line(2),
-    Offset(1),
+    Offset(2),
     FixedBearing(1);
 
     public static PassingInstruction[] relevantValues() {
