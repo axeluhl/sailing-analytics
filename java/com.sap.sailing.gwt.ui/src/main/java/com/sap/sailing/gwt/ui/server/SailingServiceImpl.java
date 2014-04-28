@@ -2046,7 +2046,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.discardThresholds = null;
         }
-        boolean oneRaceLogDenotableForTracking = false;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceDTO raceDTO = null;
@@ -2069,14 +2068,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
                 
                 fleetDTO.competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
-                
-                if (! raceLogTrackingState.isForTracking()) {
-                    oneRaceLogDenotableForTracking = true;
-                }
             }
-        }
-        if (oneRaceLogDenotableForTracking) {
-            leaderboardDTO.isDenotableForRaceLogTracking = leaderboard instanceof RegattaLeaderboard;
         }
         return leaderboardDTO;
     }

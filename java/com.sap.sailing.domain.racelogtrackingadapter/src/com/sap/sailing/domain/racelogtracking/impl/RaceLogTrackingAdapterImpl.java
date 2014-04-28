@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTracki
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -134,6 +135,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void denoteAllRacesForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
             throws NotDenotableForRaceLogTrackingException {
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            throw new NotDenotableForRaceLogTrackingException("Can only use regatta leaderboards for RaceLog-tracking");
+        }
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 try {
