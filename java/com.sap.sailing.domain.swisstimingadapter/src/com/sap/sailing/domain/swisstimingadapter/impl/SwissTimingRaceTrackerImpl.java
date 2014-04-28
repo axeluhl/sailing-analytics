@@ -420,8 +420,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 trackedRace.recordWind(wind, windSource);
             }
         }
-        // TODO Auto-generated method stub
-        
     }
 
     private void createRaceDefinition(Course course) {
