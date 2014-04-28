@@ -5,11 +5,14 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
+import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public interface SwissTimingAdapter {
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port) throws InterruptedException, UnknownHostException, IOException, ParseException;
@@ -23,10 +26,14 @@ public interface SwissTimingAdapter {
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param raceDescription TODO
      */
-    RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceDescription,
-            BoatClass boatClass, String hostname, int port, RaceLogStore logStore, long timeoutInMilliseconds)
+    RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
+            BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
+    StartList readStartListForRace(String raceId, RegattaResults regattaResults);
+    
+    RegattaResults readRegattaEntryListFromXrrUrl(String xrrEntryListUrl) throws IOException, JAXBException;
+    
     SwissTimingFactory getSwissTimingFactory();
 
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();

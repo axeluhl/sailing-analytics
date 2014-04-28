@@ -41,4 +41,8 @@ public abstract class SailMasterAdapter implements SailMasterListener {
     public void storedDataProgress(String raceID, double progress) {
     }
 
+    @Override
+    public void receivedWindData(String raceID, int markIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {
+    }
+
 }

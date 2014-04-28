@@ -8,7 +8,7 @@ public class TestManage2SailEventResultsParser {
     public static EventResultDescriptor getTestEventResult() throws IOException {
         Manage2SailEventResultsParser parser = new Manage2SailEventResultsParserImpl();
         
-        InputStream is = TestManage2SailEventResultsParser.class.getClassLoader().getResourceAsStream("yes2014_Races.json");
+        InputStream is = TestManage2SailEventResultsParser.class.getClassLoader().getResourceAsStream("worldcupMallorca2013_Races.json");
         return parser.getEventResult(is);
     }
 }
