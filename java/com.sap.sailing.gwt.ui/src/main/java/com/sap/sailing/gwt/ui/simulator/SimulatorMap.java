@@ -470,7 +470,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             			  // improve browser performance by deferred scheduling of redraws
             			  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             				  public void execute() {
-            					  windStreamletsCanvasOverlay.onBoundsChanged();
+            					  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged();
             				  }
             			  });
             		  }
