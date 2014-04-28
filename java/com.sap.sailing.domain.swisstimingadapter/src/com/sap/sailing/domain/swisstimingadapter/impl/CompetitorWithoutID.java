@@ -1,13 +1,16 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
-import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import java.util.List;
 
-public class CompetitorImpl implements Competitor {
+import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.swisstimingadapter.CrewMember;
+
+public class CompetitorWithoutID implements Competitor {
     private final String boatID;
     private final String threeLetterIOCCode;
     private final String name;
     
-    public CompetitorImpl(String boatID, String threeLetterIOCCode, String name) {
+    public CompetitorWithoutID(String boatID, String threeLetterIOCCode, String name) {
         super();
         this.boatID = boatID;
         this.threeLetterIOCCode = threeLetterIOCCode;
@@ -29,13 +32,19 @@ public class CompetitorImpl implements Competitor {
         return name;
     }
     
-    @Override
-    public String toString() {
-        return name+"/"+boatID;
-    }
-
     public String getID() {
         return null;
     }
+
+	@Override
+	public String toString() {
+		return "CompetitorWithoutID [boatID=" + boatID + ", threeLetterIOCCode="
+				+ threeLetterIOCCode + ", name=" + name + "]";
+	}
+
+	@Override
+	public List<CrewMember> getCrew() {
+		return null;
+	}
 
 }

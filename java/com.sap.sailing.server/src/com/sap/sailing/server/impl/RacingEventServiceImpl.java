@@ -971,7 +971,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                             regattasByName.remove(regattaName);
                             cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                         } else {
-                            throw new RuntimeException("Internal error. Two Event objects with equal name " + regattaName);
+                            throw new RuntimeException("Internal error. Two regatta objects with equal name " + regattaName);
                         }
                     }
                 } else {

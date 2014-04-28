@@ -31,8 +31,11 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
             result.setIsafId((String) jsonRoot.get("IsafId"));
             result.setName((String) jsonRoot.get("Name"));
             result.setXrrUrl(parseURL(jsonRoot, "XrrUrl"));
-            result.setTrackingDataHost((String) jsonRoot.get("TrackingDataHost"));
-            result.setTrackingDataPort(parseInteger(jsonRoot, "TrackingDataPort"));
+            JSONObject jsonTracking = (JSONObject) jsonRoot.get("Tracking");
+            if(jsonTracking != null) {
+                result.setTrackingDataHost((String) jsonTracking.get("Host"));
+                result.setTrackingDataPort(parseInteger(jsonTracking, "Port"));
+            }
             
             JSONArray jsonRegattas = (JSONArray) jsonRoot.get("Regattas");
             for (Object regattaObject: jsonRegattas) {
@@ -47,6 +50,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                 regattaResult.setPdfUrl(parseURL(jsonRegatta, "PdfUrl"));
                 regattaResult.setXrrPreliminaryUrl(parseURL(jsonRegatta, "XrrPreliminaryUrl"));
                 regattaResult.setXrrFinalUrl(parseURL(jsonRegatta, "XrrFinalUrl"));
+                regattaResult.setXrrEntriesUrl(parseURL(jsonRegatta, "XrrEntriesUrl"));
                 regattaResult.setHtmlUrl(parseURL(jsonRegatta, "HtmlUrl"));
                 regattaResult.setPublishedAt(parseDate(jsonRegatta, "Published"));
                 regattaResult.setIsFinal((Boolean) jsonRegatta.get("Final"));
@@ -58,10 +62,12 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                         JSONObject jsonRace = (JSONObject) raceObject;
                         raceResult.setId((String) jsonRace.get("Id"));
                         raceResult.setName((String) jsonRace.get("Name"));
-                        raceResult.setStartTimeUTC(parseDate(jsonRace, "StartTimeUTC"));
-                        raceResult.setEndTimeUTC(parseDate(jsonRace, "EndTimeUTC"));
-                        raceResult.setState((String) jsonRace.get("State"));
+                        raceResult.setRaceColumnNumber(parseInteger(jsonRace, "RaceIndex"));
+                        raceResult.setStatus((String) jsonRace.get("Status"));
+                        raceResult.setSeriesName((String) jsonRace.get("Series"));
+                        raceResult.setFleetName((String) jsonRace.get("Fleet"));
                         raceResult.setTracked((Boolean) jsonRace.get("IsTracked"));
+                        raceResult.setStartTime(parseDate(jsonRace, "StartTime"));
                         regattaResult.getRaceResults().add(raceResult);
                     }
                 }
@@ -92,9 +98,19 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
 
     private Integer parseInteger(JSONObject jsonNumber, String attributeName) {
         Integer result = null;
-        Number asNumber = (Number) jsonNumber.get(attributeName);
-        if(asNumber != null) {
-            result = asNumber.intValue();
+        Object object = jsonNumber.get(attributeName);
+        if(object != null) {
+        	if(object instanceof Number) {
+                result = ((Number) object).intValue();
+        	} else if (object instanceof String) {
+        		String numberAsString = (String) object;
+        		if(!numberAsString.isEmpty()) {
+            		try {
+            			result = Integer.parseInt(numberAsString);   
+            		} catch (NumberFormatException e) {
+            		}
+        		}
+        	}
         }
         return result;
     }

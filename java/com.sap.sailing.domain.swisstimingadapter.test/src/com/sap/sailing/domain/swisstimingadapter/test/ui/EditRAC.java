@@ -149,7 +149,7 @@ public class EditRAC extends javax.swing.JDialog {
 
     private void jAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddActionPerformed
         // TODO add your handling code here:
-        races.add(new DescriptionRace(jRaceID.getText(), jRaceDesc.getText()));
+        races.add(new DescriptionRace(jRaceID.getText(), jRaceID.getText(), jRaceDesc.getText()));
         jRaceList.setListData(races.toArray(new Race[0]));
     }//GEN-LAST:event_jAddActionPerformed
 
@@ -173,8 +173,8 @@ public class EditRAC extends javax.swing.JDialog {
     
     private class DescriptionRace extends RaceImpl {
         
-        public DescriptionRace(String raceId, String desc){
-            super(raceId, desc);
+        public DescriptionRace(String raceId, String raceName, String desc){
+            super(raceId, raceName, desc);
         }
         
         @Override
