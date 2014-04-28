@@ -1,8 +1,8 @@
 package com.sap.sailing.selenium.core;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
      */
     protected class SeleniumJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         private String root;
-        private URL screenshots;
+        private File screenshotsFolder;
         private DriverDefinition definition;
 
         private TestEnvironmentImpl environment;
@@ -57,19 +57,18 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
          *   The class containing the tests.
          * @param root
          *   The context root (base URL) against the tests should be executed.
-         * @param screenshots
+         * @param screenshotsFolder
          *   The folder where screenshots should be stored.
          * @param definition
          *   Definition of the web driver to use.
          * @throws InitializationError
          *   
          */
-        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, URL screenshots, DriverDefinition definition)
+        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, File screenshotsFolder, DriverDefinition definition)
                 throws InitializationError {
             super(klass);
-
             this.root = root;
-            this.screenshots = screenshots;
+            this.screenshotsFolder = screenshotsFolder;
             this.definition = definition;
         }
 
@@ -178,7 +177,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
                 WebDriver driver = constructor.newInstance(capabilities);
                 
-                URL screenshots = resolveScreenshotFolder();
+                File screenshots = resolveScreenshotFolder();
                 
                 return new TestEnvironmentImpl(driver, this.root, screenshots);
             } catch (Exception exception) {
@@ -187,8 +186,8 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
         }
 
         // TODO: Implement in a way that we construct a unique folder which is a subfolder of the defined one!
-        private URL resolveScreenshotFolder() {
-            return this.screenshots;
+        private File resolveScreenshotFolder() {
+            return this.screenshotsFolder;
         }
         
         private void setValueForField(Object instance, Field field, Object value) throws IllegalArgumentException,
@@ -254,11 +253,11 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
             }
 
             TestClass test = getTestClass();
-            URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(resolveScreenshotFolder(screenshotsFolder)) : null);
+            File screenshotsStorage = (configuration.screenshotsEnabled() ? new File(resolveScreenshotFolder(screenshotsFolder)) : null);
             
-            for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
+            for (DriverDefinition definition : configuration.getDriverDefinitions()) {
                 SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
-                        screenshotsStorage, defenition);
+                        screenshotsStorage, definition);
                 
                 this.children.add(child);
             }

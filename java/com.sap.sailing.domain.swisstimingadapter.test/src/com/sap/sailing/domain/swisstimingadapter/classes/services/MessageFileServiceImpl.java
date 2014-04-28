@@ -36,7 +36,7 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
-import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
@@ -218,7 +218,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         int count = Integer.valueOf(message.getSections()[2]);
         for (int i = 0; i < count; i++) {
             String[] competitorDetails = message.getSections()[3 + i].split(";");
-            competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
+            competitors.add(new CompetitorWithoutID(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new STLMessage(raceId, competitors);
     }

@@ -35,6 +35,25 @@
 				<h2 class="articleHeadline">Analyzing Races, Leaderboards</h2>
 
 				<div class="innerContent">
+					<h2 class="articleSubheadline">April 2014</h2>
+
+					<ul class="bulletList">
+						<li>China races, such as in Qingdao, may have the map background displayed at slightly wrong locations.
+						    This is due to an intentional random transformation that Google applies to GPS locations for
+						    China. You can circumvent this issue by switching to satellite view where the map background is displayed
+						    correctly. <img src="images/mapsatellite.png"/>
+						</li>
+						<li>Fixed a bug that in some cases has caused the wind chart, the advantage line, the wind indicator on the map
+						    and the leaderboard to use slightly different wind values. The problem was related to different averaging and
+						    damping methods used for these values which has now been aligned.
+						</li>
+						<li>Fixed a bug that caused the time spent in a leg, race or regatta to always show the time at the end of the leg
+						    if the leg has been started by the competitor at the time point queried, e.g., by the time slider. While this
+						    did not have any serious effects in live mode, for replay races this left the leg time and race time constant
+							at the total time spent so far up to the end of the last leg the competitor had started at that time.
+					    </li>
+					</ul>
+					
 					<h2 class="articleSubheadline">March 2014</h2>
 
 					<ul class="bulletList">

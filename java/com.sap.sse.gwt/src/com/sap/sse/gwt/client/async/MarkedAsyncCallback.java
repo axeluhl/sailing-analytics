@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * <p>Decorator for asynchronous remote procedure calls which should be marked as pending until they complete.
  *   Such calls will be marked using a counter, which is necessary in UI tests to be able able to tell exactly when an
  *   asynchronous request has finished. With this counter a test which triggers a request (which can cause additional
- *   request) can wait until the requests have finished. It's guaranteed that the counter is decremented no matter if
+ *   requests) can wait until the requests have finished. It's guaranteed that the counter is decremented no matter if
  *   the call was successful or not.</p>
  * 
  * <p>Note: Since the counter for pending Ajax requests is incremented as soon as an instance of this class is created

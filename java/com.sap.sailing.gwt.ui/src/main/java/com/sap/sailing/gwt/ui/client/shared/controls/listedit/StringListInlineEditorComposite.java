@@ -105,6 +105,7 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
         @Override
         protected Widget createValueWidget(final int rowIndex, String newValue) {
             final TextBox textBox = new TextBox();
+            textBox.ensureDebugId("ValueTextBox");
             textBox.setValue(newValue);
 
             textBox.addKeyUpHandler(new KeyUpHandler() {

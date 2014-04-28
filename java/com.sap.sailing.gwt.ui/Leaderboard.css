@@ -158,3 +158,10 @@ body, table td, select, button {
 .circleRed {
   background: #f01010;
 }
+
+.busyIndicator-Simple {
+	margin-top: 7px;	
+}
+
+.busyIndicator-Circle {
+}

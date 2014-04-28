@@ -68,7 +68,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace()!=null&&!race.getStartOfRace().minus(2000).equals(raceStartTime)) {
+        if (race.getStartOfRace() != null && (raceStartTime == null || !race.getStartOfRace().minus(2000).equals(raceStartTime))) {
             raceStartTime = race.getStartOfRace().minus(2000);
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);

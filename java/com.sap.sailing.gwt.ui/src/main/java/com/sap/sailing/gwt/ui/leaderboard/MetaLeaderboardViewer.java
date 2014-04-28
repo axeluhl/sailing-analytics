@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardCha
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -32,34 +33,28 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
             UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
             boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
-
+                // perform the first request as live request but don't auto-play
+                new Timer(PlayModes.Live, PlayStates.Paused, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
         FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
-        
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
         overallStandingsLabel.setStyleName("leaderboardHeading");
-
         metaLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
                 showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true);
-
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, metaLeaderboardName,
                 chartDetailType, competitorSelectionProvider, timer, stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        
         multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
         multiLeaderboardPanel.setVisible(showSeriesLeaderboards);
-        
         mainPanel.add(metaLeaderboardPanel);
         mainPanel.add(multiCompetitorChart);
         mainPanel.add(multiLeaderboardPanel);
-
         addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard(),  /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiLeaderboardPanel, true , stringMessages.regattaLeaderboards(),  /* hasSettingsWhenComponentIsInvisible*/ false);

@@ -47,6 +47,11 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         this(track, trackedRace, null, null, resolutionInMilliseconds);
     }
     
+    /**
+     * Compute the {@link Wind} fix for the specified position and time point to deliver in this virtual track.
+     */
+    abstract protected Wind getWind(Position p, TimePoint timePoint);
+
     public long getResolutionInMilliseconds() {
         return resolutionInMilliseconds;
     }
@@ -152,11 +157,6 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         TimePoint timePoint = lowerToResolution(w.getTimePoint());
         return timePoint.compareTo(getFrom()) < 0 ? null : getWind(w.getPosition(), timePoint);
     }
-
-    /**
-     * Compute the {@link Wind} fix for the specified position and time point to deliver in this virtual track.
-     */
-    abstract protected Wind getWind(Position p, TimePoint timePoint);
 
     @Override
     public Wind floor(Wind w) {

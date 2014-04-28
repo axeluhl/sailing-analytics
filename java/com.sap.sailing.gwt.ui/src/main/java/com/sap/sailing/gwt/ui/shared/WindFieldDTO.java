@@ -9,6 +9,8 @@ public class WindFieldDTO implements IsSerializable {
     public double curSpeed;
     public double curBearing;
     
+    public String windDataJSON;
+    
     private List<SimulatorWindDTO> matrix;
     
     private WindLinesDTO windLinesDTO;
