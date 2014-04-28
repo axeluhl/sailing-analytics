@@ -1159,7 +1159,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
-            trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */ true);
+            trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */ true, true);
         }
     }
 

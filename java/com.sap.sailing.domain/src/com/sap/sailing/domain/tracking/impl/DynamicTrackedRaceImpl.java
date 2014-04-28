@@ -44,6 +44,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -249,16 +250,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
-    /**
-     * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
-     * of the {@link #getLoadingFromStoresLock() wind loading lock}, locking against the wind loading thread which uses the
-     * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
-     * hasn't started yet.
-     */
     @Override
-    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded,
+            final boolean notifyAboutGPSFixesAlreadyLoaded) {
         if (notifyAboutWindFixesAlreadyLoaded) {
-            LockUtil.lockForRead(getLoadingFromStoresLock());
+            LockUtil.lockForRead(getLoadingFromWindStoreLock());
+        }
+        if (notifyAboutGPSFixesAlreadyLoaded) {
+            LockUtil.lockForRead(getLoadingFromGPSFixStoreLock());
         }
         try {
             addListener(listener);
@@ -282,9 +281,34 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     }
                 }
             }
+            if (notifyAboutGPSFixesAlreadyLoaded) {
+                for (Mark mark : getMarks()) {
+                    GPSFixTrack<Mark, GPSFix> markTrack = getOrCreateTrack(mark);
+                    markTrack.lockForRead();
+                    try {
+                        for (GPSFix fix : markTrack.getRawFixes()) {
+                            listener.markPositionChanged(fix, mark);
+                        }
+                    } finally {
+                        markTrack.unlockAfterRead();
+                    }
+                }
+                
+                for (Competitor competitor : getRace().getCompetitors()) {
+                    GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
+                    competitorTrack.lockForRead();
+                    try {
+                        for (GPSFixMoving fix : competitorTrack.getRawFixes()) {
+                            listener.competitorPositionChanged(fix, competitor);
+                        }
+                    } finally {
+                        competitorTrack.unlockAfterRead();
+                    }
+                }
+            }
         } finally {
             if (notifyAboutWindFixesAlreadyLoaded) {
-                LockUtil.unlockAfterRead(getLoadingFromStoresLock());
+                LockUtil.unlockAfterRead(getLoadingFromWindStoreLock());
             }
         }
     }

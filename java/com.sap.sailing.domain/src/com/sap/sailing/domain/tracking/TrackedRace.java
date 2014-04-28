@@ -443,9 +443,12 @@ public interface TrackedRace extends Serializable {
      * tracked race. This runs synchronized with the otherwise asynchronous loading of wind tracks, triggered by the
      * constructor of the {@link TrackedRace} implementation classes. This procedure guarantees that eventually the
      * listener will have received a notification for all wind fixes, regardless of whether they were already loaded at
-     * the time the listener is registered or they are loaded after the registration has completed.
+     * the time the listener is registered or they are loaded after the registration has completed.<p>
+     * 
+     * The same is true for the GPS fixes for marks and competitors.
      */
-    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded);
+    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
 

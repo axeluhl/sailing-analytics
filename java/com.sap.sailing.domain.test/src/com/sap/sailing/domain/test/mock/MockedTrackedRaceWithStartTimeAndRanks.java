@@ -353,7 +353,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded) {
         // TODO Auto-generated method stub
         
     }
