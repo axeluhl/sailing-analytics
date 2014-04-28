@@ -57,29 +57,26 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         final String raceID = "SAX920103";
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(
-                EmptyRaceLogStore.INSTANCE,
-                raceID, null /* boat class */,
-                new RacingEventServiceImpl()),
-                new Race() {
-                    @Override
-                    public String getDescription() {
-                        return null;
-                    }
+                EmptyRaceLogStore.INSTANCE, raceID, null /* boat class */, new RacingEventServiceImpl()), new Race() {
+            @Override
+            public String getDescription() {
+                return null;
+            }
 
-                    @Override
-                    public String getRaceID() {
-                        return raceID;
-                    }
+            @Override
+            public String getRaceID() {
+                return raceID;
+            }
 
-                    @Override
-                    public BoatClass getBoatClass() {
-                        return null;
-                    }
+            @Override
+            public BoatClass getBoatClass() {
+                return null;
+            }
 
-					@Override
-					public String getRaceName() {
-						return null;
-					}
+            @Override
+            public String getRaceName() {
+                return "The famous SAX920103 race";
+            }
         }, new StartList() {
             @Override
             public String getRaceID() {
