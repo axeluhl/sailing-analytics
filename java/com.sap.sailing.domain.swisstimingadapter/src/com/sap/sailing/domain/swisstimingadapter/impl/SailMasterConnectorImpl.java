@@ -109,6 +109,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      */
     private String lastTimeZoneSuffix;
     
+    /**
+     * Some messages in the SwissTiming SailMaster protocol lack proper time stamp information. It is therefore
+     * necessary to keep track of time stamps received from other messages and use them as an approximation for
+     * the time point of messages received without explicit time stamp.
+     */
+    private TimePoint lastRPDMessageTimePoint;
+    
     private TimePoint startTime;
     
     /**
@@ -234,6 +241,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             case TMD:
                 notifyListenersTMD(message);
                 break;
+            case WND:
+                notifyListenersWND(message);
+                break;
             default:
                 // ignore all other messages because there are no notification patterns for those
             }
@@ -250,6 +260,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             } catch (Exception e) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about progress "+progress);
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyStoredDataProgress", e);
+            }
+        }
+    }
+    
+    private void notifyListenersWND(SailMasterMessage message) {
+        // example message: WND|W4702|1|320|5.4
+        String raceID = message.getSections()[1];
+        int zeroBasedMarkIndex = Integer.valueOf(message.getSections()[2]);
+        double windDirectionTrueDegrees = Double.valueOf(message.getSections()[3]);
+        double windSpeedInKnots = Double.valueOf(message.getSections()[4]);
+        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+            try {
+                listener.receivedWindData(raceID, zeroBasedMarkIndex, windDirectionTrueDegrees, windSpeedInKnots);
+            } catch (Exception e) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+e.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersWND", e);
             }
         }
     }
@@ -333,6 +359,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
+        lastRPDMessageTimePoint = timePoint;
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
         String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffix;
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
@@ -568,6 +595,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     markType));
         }
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
+    }
+    
+    @Override
+    public TimePoint getLastRPDMessageTimePoint() {
+        return lastRPDMessageTimePoint;
     }
     
     private String getLastTimeZoneSuffix(String raceID) {

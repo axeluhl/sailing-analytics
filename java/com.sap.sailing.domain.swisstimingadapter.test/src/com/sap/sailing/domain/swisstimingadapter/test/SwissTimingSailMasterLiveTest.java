@@ -198,4 +198,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     @Override
     public void storedDataProgress(String raceID, double progress) {
     }
+
+    @Override
+    public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees,
+            double windSpeedInKnots) {
+    }
 }

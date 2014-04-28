@@ -24,11 +24,17 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -53,9 +59,11 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 import difflib.PatchFailedException;
 
@@ -396,6 +404,26 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         }
     }
 
+    @Override
+    public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {
+        if (this.raceID.equals(raceID)) {
+            DynamicTrackedRace trackedRace = getTrackedRace();
+            if (trackedRace == null) {
+                logger.warning("Received wind data at mark " + zeroBasedMarkIndex + ": " + windDirectionTrueDegrees + "deg at "
+                        + windSpeedInKnots + "kts but didn't find tracked race; ignoring");
+            } else {
+                Waypoint wp = Util.get(trackedRace.getRace().getCourse().getWaypoints(), zeroBasedMarkIndex);
+                final TimePoint timePoint = connector.getLastRPDMessageTimePoint();
+                Position waypointPosition = trackedRace.getApproximatePosition(wp, timePoint);
+                Wind wind = new WindImpl(waypointPosition, timePoint, new KnotSpeedWithBearingImpl(windSpeedInKnots, new DegreeBearingImpl(windDirectionTrueDegrees)));
+                WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.RACECOMMITTEE, "@"+zeroBasedMarkIndex);
+                trackedRace.recordWind(wind, windSource);
+            }
+        }
+        // TODO Auto-generated method stub
+        
+    }
+
     private void createRaceDefinition(Course course) {
         assert this.raceID.equals(raceID);
         assert startList != null;
@@ -405,13 +433,12 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
         // temp
         CompetitorStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();
-        for(com.sap.sailing.domain.swisstimingadapter.Competitor c: startList.getCompetitors()) {
-        	Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getID());
-        	if(existingCompetitor != null) {
-            	competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
-        	}
+        for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {
+            Competitor existingCompetitor = competitorStore.getExistingCompetitorByIdAsString(c.getID());
+            if (existingCompetitor != null) {
+                competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
+            }
         }
-        
         trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),

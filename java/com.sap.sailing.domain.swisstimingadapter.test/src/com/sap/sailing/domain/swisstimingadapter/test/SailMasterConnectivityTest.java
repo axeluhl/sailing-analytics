@@ -112,7 +112,8 @@ public class SailMasterConnectivityTest {
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override
             public void storedDataProgress(String raceID, double progress) {}
-            
+            @Override
+            public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {}
             @Override
             public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
                     Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeaderInMeters,
