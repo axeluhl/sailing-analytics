@@ -106,10 +106,6 @@ append_user_data_to_envsh ()
         echo $var >> $SERVER_HOME/env.sh
         echo "Activated: $var"
     done
-    if [[ $DEPLOY_TO == "" ]]; then
-	DEPLOY_TO=server
-	echo "DEPLOY_TO=server" >> $SERVER_HOME/env.sh
-    fi
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
@@ -131,10 +127,6 @@ install_environment ()
 
         # make sure to reload data
         source `pwd`/env.sh
-        if [[ $DEPLOY_TO == "" ]]; then
-            DEPLOY_TO=server
-            echo "DEPLOY_TO=server" >> $SERVER_HOME/env.sh
-        fi
 
         echo "Updated env.sh with data from environment file!"
     else
