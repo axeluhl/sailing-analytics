@@ -46,7 +46,13 @@ public class RaceHandleImpl implements RacesHandle {
 
     @Override
     public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-        Set<RaceDefinition> result = Collections.singleton(domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds));
+        final Set<RaceDefinition> result;
+        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds);
+        if (raceDefinition != null) { // may have time-outed
+            result = Collections.singleton(raceDefinition);
+        } else {
+            result = Collections.emptySet();
+        }
         return result;
     }
     

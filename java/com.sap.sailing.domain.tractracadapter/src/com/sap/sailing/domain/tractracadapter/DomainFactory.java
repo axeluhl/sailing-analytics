@@ -233,10 +233,10 @@ public interface DomainFactory {
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
-     * @param raceId TODO
+     * 
      * @param timeoutInMilliseconds
-     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if no
-     *            race definition is found for <code>race</code>.
+     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if
+     *            no race definition is found for <code>race</code>.
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 

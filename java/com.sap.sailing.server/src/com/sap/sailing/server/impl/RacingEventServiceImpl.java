@@ -1280,6 +1280,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         ScheduledFuture<?> task = getScheduler().schedule(new Runnable() {
             @Override
             public void run() {
+
                 if (tracker.getRaces() == null || tracker.getRaces().isEmpty()) {
                     try {
                         Regatta regatta = tracker.getRegatta();
