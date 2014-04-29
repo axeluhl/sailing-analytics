@@ -185,20 +185,26 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
                 long start = System.currentTimeMillis();
                 synchronized (this) {
-                    RaceDefinition result = race;
+                    RaceDefinition preResult = race;
                     boolean interrupted = false;
-                    while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+                    while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && preResult == null) {
                         try {
                             long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
                             if (timeToWait > 0) {
                                 this.wait(timeToWait);
                             }
-                            result = race;
+                            preResult = race;
                         } catch (InterruptedException e) {
                             interrupted = true;
                         }
                     }
-                    return result == null ? null : Collections.singleton(result);
+                    final Set<RaceDefinition> result;
+                    if (preResult == null) {
+                        result = Collections.emptySet();
+                    } else {
+                        result = Collections.singleton(preResult);
+                    }
+                    return result;
                 }
             }
 
