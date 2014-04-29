@@ -346,7 +346,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                     if (currentLeg != null && markPassingAtLegStart != null
                             && fix.getTimePoint().compareTo(markPassingAtLegStart.getTimePoint()) >= 0) {
                         TrackedLeg trackedLeg = owner.getTrackedLeg(currentLeg);
-                        Distance xte = owner.getTrackedLeg(trackedLeg.getLeg()).getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                        Distance xte = owner.getTrackedLeg(trackedLeg.getLeg()).getSignedCrossTrackError(fix.getPosition(), fix.getTimePoint());
                         if (xte != null) {
                             signedDistanceInMeters += xte.getMeters();
                             absoluteDistanceInMeters += Math.abs(xte.getMeters());

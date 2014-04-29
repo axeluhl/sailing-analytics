@@ -56,7 +56,7 @@ public interface TrackedLeg extends Serializable {
      * based on the position of the waypoints delimiting this leg at that time. Negative distances mean "left" of the
      * course middle line looking in the direction of the leg, positive distances mean "right."
      */
-    Distance getCrossTrackError(Position p, TimePoint timePoint);
+    Distance getSignedCrossTrackError(Position p, TimePoint timePoint);
 
     /**
      * Must be called when the start and finish waypoint of this leg may have changed.
