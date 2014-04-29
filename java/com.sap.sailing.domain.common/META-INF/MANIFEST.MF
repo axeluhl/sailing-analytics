@@ -16,3 +16,4 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.racelog,
  com.sap.sailing.domain.common.racelog.utils,
  com.sap.sailing.domain.common.trackfiles
+Require-Bundle: com.sap.sse.datamining.shared

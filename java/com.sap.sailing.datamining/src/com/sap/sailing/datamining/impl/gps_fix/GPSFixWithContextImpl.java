@@ -44,12 +44,12 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public String getRegattaName() {
-        return context.getTrackedRace().getTrackedRegatta().getRegatta().getName();
+        return context.getRegatta().getName();
     }
 
     @Override
     public String getRaceName() {
-        return context.getTrackedRace().getRace().getName();
+        return context.getRace().getName();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public String getBoatClassName() {
-        return context.getCompetitor().getBoat().getBoatClass().getName();
+        return context.getBoatClass().getName();
     }
 
     @Override

@@ -20,12 +20,12 @@ public class TrackedLegOfCompetitorWithContextImpl implements TrackedLegOfCompet
 
     @Override
     public String getRegattaName() {
-        return context.getTrackedRace().getTrackedRegatta().getRegatta().getName();
+        return context.getRegatta().getName();
     }
 
     @Override
     public String getRaceName() {
-        return context.getTrackedRace().getRace().getName();
+        return context.getRace().getName();
     }
 
     @Override

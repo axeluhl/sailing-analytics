@@ -4,12 +4,16 @@ import java.util.Calendar;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 public class HasTrackedRaceContextImpl extends HasLeaderboardContextImpl implements HasTrackedRaceContext {
 
@@ -31,6 +35,20 @@ public class HasTrackedRaceContextImpl extends HasLeaderboardContextImpl impleme
         this.fleet = fleet;
         this.trackedRace = trackedRace;
     }
+    
+    @Override
+    public TrackedRegatta getTrackedRegatta() {
+        return getTrackedRace().getTrackedRegatta();
+    }
+
+    public TrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+    
+    @Override
+    public Regatta getRegatta() {
+        return getTrackedRegatta().getRegatta();
+    }
 
     @Override
     public CourseArea getCourseArea() {
@@ -41,10 +59,15 @@ public class HasTrackedRaceContextImpl extends HasLeaderboardContextImpl impleme
     public Fleet getFleet() {
         return fleet;
     }
+    
+    @Override
+    public BoatClass getBoatClass() {
+        return getRegatta().getBoatClass();
+    }
 
     @Override
-    public TrackedRace getTrackedRace() {
-        return trackedRace;
+    public RaceDefinition getRace() {
+        return getTrackedRace().getRace();
     }
 
     @Override

@@ -68,7 +68,7 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
         for (Pair<TrackedLeg, HasTrackedLegContext> baseDataEntry : baseData) {
             TrackedLeg trackedLeg = baseDataEntry.getA();
             HasTrackedLegContext trackedLegContext = baseDataEntry.getB();
-            for (Competitor competitor : trackedLegContext.getTrackedRace().getRace().getCompetitors()) {
+            for (Competitor competitor : trackedLegContext.getRace().getCompetitors()) {
                 TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
                 HasTrackedLegOfCompetitorContext dataContext = new HasTrackedLegOfCompetitorContextImpl(trackedLegContext,
                         competitor);
