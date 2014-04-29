@@ -2,8 +2,8 @@ package com.sap.sailing.datamining.factories;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.impl.components.GroupDividingParallelDataRetriever;
-import com.sap.sailing.datamining.impl.workers.builders.DataRetrieverWorkerBuilder;
+import com.sap.sailing.datamining.impl.components.deprecated.GroupDividingParallelDataRetriever;
+import com.sap.sailing.datamining.impl.workers.builders.deprecated.DataRetrieverWorkerBuilder;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;

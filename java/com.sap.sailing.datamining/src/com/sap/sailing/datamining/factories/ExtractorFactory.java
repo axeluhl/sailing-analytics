@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.factories;
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.impl.workers.builders.ExtractionWorkerBuilder;
+import com.sap.sailing.datamining.impl.workers.builders.deprecated.ExtractionWorkerBuilder;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;

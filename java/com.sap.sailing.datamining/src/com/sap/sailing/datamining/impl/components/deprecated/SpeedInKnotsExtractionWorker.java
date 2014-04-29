@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.workers;
+package com.sap.sailing.datamining.impl.components.deprecated;
 
 import com.sap.sailing.domain.base.Moving;
 import com.sap.sse.datamining.impl.workers.extractors.AbstractExtractionWorker;

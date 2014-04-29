@@ -1,11 +1,11 @@
-package com.sap.sailing.datamining.impl.tracked_leg_of_competitor;
+package com.sap.sailing.datamining.impl.components.deprecated;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.impl.components.AbstractLeaderboardGroupDataRetrievalWorker;
+import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.TrackedLegOfCompetitorWithContextImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 

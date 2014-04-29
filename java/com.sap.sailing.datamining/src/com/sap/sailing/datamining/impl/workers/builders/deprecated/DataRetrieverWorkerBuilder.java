@@ -1,7 +1,7 @@
-package com.sap.sailing.datamining.impl.workers.builders;
+package com.sap.sailing.datamining.impl.workers.builders.deprecated;
 
-import com.sap.sailing.datamining.impl.gps_fix.GPSFixLeaderboardGroupDataRetrievalWorker;
-import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker;
+import com.sap.sailing.datamining.impl.components.deprecated.GPSFixLeaderboardGroupDataRetrievalWorker;
+import com.sap.sailing.datamining.impl.components.deprecated.TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;

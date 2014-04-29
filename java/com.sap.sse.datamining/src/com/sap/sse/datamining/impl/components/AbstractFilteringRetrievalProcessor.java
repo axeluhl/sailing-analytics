@@ -29,6 +29,7 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType,
         filteredDataAmountLock = new ReentrantLock();
     }
 
+    // Override, to provide a better method name to the sub classes
     @Override
     protected Iterable<ResultType> partitionElement(InputType element) {
         return retrieveData(element);

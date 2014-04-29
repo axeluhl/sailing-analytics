@@ -1,7 +1,7 @@
-package com.sap.sailing.datamining.impl.workers.builders;
+package com.sap.sailing.datamining.impl.workers.builders.deprecated;
 
+import com.sap.sailing.datamining.impl.components.deprecated.SpeedInKnotsExtractionWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.DistanceTraveledExtractionWorker;
-import com.sap.sailing.datamining.impl.workers.SpeedInKnotsExtractionWorker;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.workers.ExtractionWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;

@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.components;
+package com.sap.sailing.datamining.impl.components.deprecated;
 
 import java.util.ArrayList;
 import java.util.Collection;
