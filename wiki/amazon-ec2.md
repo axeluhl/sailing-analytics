@@ -17,10 +17,11 @@
 
 You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
 
-- Using a release, set the following in the instance's user data:
+- Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
+MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_NAME=MYSPECIFICEVENT
