@@ -5,7 +5,7 @@ DATE_OF_EXECUTION=`date`
 
 # The following temporary file may be used by this script to dump EC2-provided user data
 # variables to it; they can then be sourced from there and later appended to a new env.sh
-ec2EnvVars_tmpFile=`mktemp ec2EnvVars_XXX`
+ec2EnvVars_tmpFile=`mktemp /tmp/ec2EnvVars_XXX`
 
 find_project_home () 
 {
@@ -80,14 +80,16 @@ copy_user_data_to_tmp_file ()
     echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
 
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
-    echo "$VARS" >"$ec2EnvVars_tmpFile"
+    for var in $VARS; do
+      echo $var >>"$ec2EnvVars_tmpFile"
+    done
 }
 
 # loads the user data-provided variables by sourcing the script
 activate_user_data ()
 {
     # make sure to reload data
-    source "#ec2EnvVars_tmpFile"
+    source "$ec2EnvVars_tmpFile"
 }
 
 append_user_data_to_envsh ()
@@ -100,7 +102,6 @@ append_user_data_to_envsh ()
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
 
-    echo "$VARS" >"$ec2EnvVars_tmpFile"
     for var in `cat "$ec2EnvVars_tmpFile"`; do
         echo $var >> $SERVER_HOME/env.sh
         echo "Activated: $var"
@@ -237,7 +238,7 @@ if [[ $OPERATION == "auto-install" ]]; then
 	append_user_data_to_envsh
 
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
-            echo "It could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
+            echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
             exit 1
         fi
 
