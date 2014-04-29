@@ -32,8 +32,6 @@ public class GPSFixMovingNmeaDTOJsonDeserializer extends TypeBasedJsonDeserializ
         JSONObject clone = (JSONObject) object.clone();
         clone.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixNmeaDTOJsonDeserializer.TYPE);
         GPSFix baseFix = new GPSFixNmeaDTOJsonDeserializer().deserialize(clone);
-
-        //TODO do we have to use corrected course here? (corrected by magnetic variation)
         Bearing bearing = new DegreeBearingImpl(sentence.getCourse());
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(sentence.getSpeed(), bearing);
 
