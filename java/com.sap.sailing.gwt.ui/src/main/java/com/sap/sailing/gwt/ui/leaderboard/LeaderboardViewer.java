@@ -16,6 +16,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -35,7 +36,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
             boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
+                // perform the first request as live request but don't auto-play
+                new Timer(PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ 3000l), stringMessages, hideToolbar);
 
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
@@ -61,7 +63,6 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         if(showCharts) {
             multiCompetitorChart.timeChanged(timer.getTime(), null);
         }
-        
         overallLeaderboardPanel = null;
         if(showOverallLeaderboard) {
             sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(

@@ -135,7 +135,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     /**
      * The leaderboard name is used to
-     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], String, com.google.gwt.user.client.rpc.AsyncCallback)
+     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
@@ -791,7 +791,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 getSailingService().getLeaderboardByName(getLeaderboardName(),
                         timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                        shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
                                 new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                                     @Override
                                     public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
@@ -1367,7 +1367,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
-                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
+                // perform the first request as "live" but don't by default auto-play
+                PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
@@ -1460,7 +1461,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
         setShowAddedScores(settings.isShowAddedScores());
-        loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        }
 
         if (this.preSelectedRace == null) {
             isEmbedded = false;
@@ -1644,7 +1647,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
+        // If the timer is currently in a mode that causes null to be used as the leaderboard request time stamp,
+        // don't let a live play delay change cause another load request by unregistering this panel as timer
+        // listener before and re-registering it after adjusting the live play delay.
+        if (useNullAsTimePoint()) {
+            timer.removeTimeListener(this);
+        }
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
+        if (useNullAsTimePoint()) {
+            timer.addTimeListener(this);
+        }
     }
 
     private boolean isAutoExpandPreSelectedRace() {
@@ -1753,9 +1765,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
-                    getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
+                    getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
+                    shallAddOverallDetails(), /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -1777,6 +1789,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
+    /**
+     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(Date) loading the leaderboard contents}, <code>null</code>
+     * is used as time point. The condition for this is encapsulated in this method so others can find out. For example, when a time change
+     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(Date)} would be required
+     * as <code>null</code> will be passed in any case, not being affected by local time offsets.
+     */
+    private boolean useNullAsTimePoint() {
+        return timer.getPlayMode() == PlayModes.Live;
+    }
+
     private boolean needsDataLoading() {
         return isVisible();
     }
@@ -1796,6 +1818,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         }
         return namesOfExpandedRaces;
+    }
+
+    private boolean shallAddOverallDetails() {
+        return !selectedOverallDetailColumns.isEmpty();
     }
 
     /**
@@ -2497,7 +2523,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public boolean hasBusyIndicator() {
         return true;
     }
-
+    
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
         ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
         for (LeaderboardRowDTO row : getData().getList()) {
@@ -2510,7 +2536,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime(), null);
+        if (timer.isInitialized()) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     @Override
