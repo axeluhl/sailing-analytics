@@ -556,7 +556,7 @@ public class LeaderboardData extends ExportAction {
             Distance averageCrossTrackError = competitorLeg.getAverageAbsoluteCrossTrackError(legFinishTime, /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorLegDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1);
             Distance averageSignedCrossTrackError = competitorLeg.getAverageSignedCrossTrackError(legFinishTime, /*waitForLatestAnalysis*/ false);
-            addNamedElementWithValue(competitorLegDataElement, "average_cross_track_error_in_meters", averageSignedCrossTrackError != null ? averageSignedCrossTrackError.getMeters() : -1);
+            addNamedElementWithValue(competitorLegDataElement, "average_signed_cross_track_error_in_meters", averageSignedCrossTrackError != null ? averageSignedCrossTrackError.getMeters() : -1);
             
             competitorElement.addContent(competitorLegDataElement);
             legElement.addContent(competitorElement);
