@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class RaceTrackerMock implements RaceTracker{
@@ -61,7 +61,7 @@ public class RaceTrackerMock implements RaceTracker{
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
+    public RaceHandle getRacesHandle() {
         throw new RuntimeException("No race Handle in RaceTrackerMock");
     }
 

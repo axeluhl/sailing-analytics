@@ -11,7 +11,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
@@ -42,7 +42,7 @@ public class TracTracWriter {
 
         for (String paramURLStr : sources) {
             URL paramURL = new URL(paramURLStr);
-            RacesHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
+            RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
                     null, 60000);
             String regatta = raceHandle.getRegatta().getName();
             Set<RaceDefinition> races = raceHandle.getRaces();

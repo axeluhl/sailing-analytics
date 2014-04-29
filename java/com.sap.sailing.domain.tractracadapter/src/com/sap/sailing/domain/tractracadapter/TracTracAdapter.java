@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 
@@ -46,7 +46,7 @@ public interface TracTracAdapter {
      *            if the race definition is not received for the race within this time, the race tracker for that race
      *            is stopped; use -1 to wait forever
      */
-    RacesHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
+    RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds,
             String tracTracUsername, String tracTracPassword, String raceStatus) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
@@ -65,7 +65,7 @@ public interface TracTracAdapter {
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param raceStatus 
      */
-    RacesHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
+    RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword, String raceStatus)

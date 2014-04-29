@@ -6,11 +6,11 @@ import java.util.Set;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.event.IRace;
 
-public class RaceHandleImpl implements RacesHandle {
+public class RaceHandleImpl implements RaceHandle {
     private final IRace tractracRace;
     private final DomainFactory domainFactory;
     private final DynamicTrackedRegatta trackedRegatta;
@@ -47,7 +47,7 @@ public class RaceHandleImpl implements RacesHandle {
     @Override
     public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
         final Set<RaceDefinition> result;
-        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds);
+        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds);
         if (raceDefinition != null) { // may have time-outed
             result = Collections.singleton(raceDefinition);
         } else {

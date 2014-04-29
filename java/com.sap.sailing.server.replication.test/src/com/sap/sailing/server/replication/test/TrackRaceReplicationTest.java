@@ -32,7 +32,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -44,7 +44,7 @@ import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
-    private RacesHandle racesHandle;
+    private RaceHandle racesHandle;
     private final boolean[] notifier = new boolean[1];
     private RaceTrackingConnectivityParameters trackingParams;
 

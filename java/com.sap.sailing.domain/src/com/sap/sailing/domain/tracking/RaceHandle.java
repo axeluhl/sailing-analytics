@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacesHandle {
+public interface RaceHandle {
 
     Regatta getRegatta();
     

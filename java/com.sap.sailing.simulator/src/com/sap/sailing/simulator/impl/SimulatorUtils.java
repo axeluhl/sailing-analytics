@@ -24,7 +24,7 @@ import org.osgi.framework.FrameworkUtil;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -75,12 +75,12 @@ public class SimulatorUtils {
         return prependedBundlePath;
     }
 
-    public static RacesHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory, URL paramURL, URI liveURI,
+    public static RaceHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory, URL paramURL, URI liveURI,
             URI storedURI, RaceLogStore raceLogStore, long timeoutInMilliseconds) throws Exception {
         //TODO: TracTrac Username / Password
         String tractracUsername = "";
         String tractracPassword = "";
-        RacesHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
+        RaceHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore,
                         timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         return raceHandle;

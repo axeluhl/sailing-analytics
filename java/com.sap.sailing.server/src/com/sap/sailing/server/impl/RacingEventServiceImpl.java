@@ -112,7 +112,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -935,7 +935,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
+    public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             long timeoutInMilliseconds) throws Exception {
         final Object trackerID = params.getTrackerID();
         NamedReentrantReadWriteLock raceTrackersByIdLock = lockRaceTrackersById(trackerID);

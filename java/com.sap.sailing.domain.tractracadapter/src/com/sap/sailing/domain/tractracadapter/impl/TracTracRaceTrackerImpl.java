@@ -31,7 +31,7 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -405,7 +405,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
+    public RaceHandle getRacesHandle() {
         return new RaceHandleImpl(domainFactory, tractracRace, getTrackedRegatta(), this);
     }
     

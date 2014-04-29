@@ -193,7 +193,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -910,7 +910,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 effectiveStoredURI = storedURI;
             }
-            final RacesHandle raceHandle = getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
+            final RaceHandle raceHandle = getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
                     record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
                     new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
@@ -984,11 +984,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * @param timeoutInMilliseconds eventually passed to {@link RacesHandle#getRaces(long)}. If the race definition
+     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRaces(long)}. If the race definition
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
-    private void startTrackingWind(RacesHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
+    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
         Regatta regatta = raceHandle.getRegatta();
         if (regatta != null) {
             for (RaceDefinition race : raceHandle.getRaces(timeoutInMilliseconds)) {
@@ -2231,7 +2231,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             	startList = getSwissTimingAdapter().readStartListForRace(rr.raceId, regattaResults);
             }
             // now read the entry list for the race from the result
-            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, raceDescription, 
+            final RaceHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, raceDescription, 
                     boatClass, hostname, port, startList,
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {

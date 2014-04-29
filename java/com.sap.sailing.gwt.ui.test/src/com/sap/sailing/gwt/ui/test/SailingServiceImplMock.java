@@ -25,7 +25,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
@@ -110,7 +110,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                     }
 
                     @Override
-                    public RacesHandle addSwissTimingRace(TrackerManager trackerManager,
+                    public RaceHandle addSwissTimingRace(TrackerManager trackerManager,
                             RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
                             int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
                             throws InterruptedException, UnknownHostException, IOException, ParseException,
