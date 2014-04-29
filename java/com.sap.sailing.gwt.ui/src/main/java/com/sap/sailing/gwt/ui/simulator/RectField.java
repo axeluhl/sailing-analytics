@@ -72,9 +72,9 @@ public class RectField {
 					double uy = y / (h - 1);
 					double lat = data.get("y0").isNumber().doubleValue() * (1 - uy) + data.get("y1").isNumber().doubleValue() * uy;
 					double m = Math.PI * lat / 180;
-					//double length = length(v);
+					double length = v.length();
 					v.x = v.x / Math.cos(m);
-					//v.setLength(length);
+					v.setLength(length);
 				}
 				field[x][y] = v;
 			}
