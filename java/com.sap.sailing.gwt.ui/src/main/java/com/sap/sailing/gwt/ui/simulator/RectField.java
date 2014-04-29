@@ -22,7 +22,7 @@ public class RectField {
 	private int h;
 
 	private double maxLength;
-	public double numParticleFactor;
+	public double particleFactor;
 
 	public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
 		this.x0 = x0;
@@ -39,7 +39,7 @@ public class RectField {
 		this.w = field.length;
 		this.h = field[0].length;
 		this.maxLength = 0;
-		this.numParticleFactor = 4.5;
+		this.particleFactor = 4.5;
 
 		double mx = 0;
 		double my = 0;
@@ -55,10 +55,6 @@ public class RectField {
 		mx = (mx / this.w) * (x1 - x0) + x0;
 		my = (my / this.h) * (y1 - y0) + y0;
 	}
-
-	//public static double length(Vector p) {
-	//	return Math.sqrt(p.x*p.x + p.y*p.y);
-	//}
 
 	public static RectField read(String jsonData, boolean correctForSphere) {
 		JSONObject data = JSONParser.parseLenient(jsonData).isObject();

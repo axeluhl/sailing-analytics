@@ -636,7 +636,7 @@ Swarm.prototype.updateBounds = function() {
 	var boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
 	var boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
 
-	this.numParticles = Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.numParticleFactor;
+	this.numParticles = Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.numParticleFactor);
 	//this.numParticles = Math.sqrt(boundsWidthpx*boundsWidthpx + boundsHeightpx*boundsHeightpx) * this.field.numParticleFactor;
 	if (swarmDebug) {
 		console.log("numParticles: "+this.numParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");

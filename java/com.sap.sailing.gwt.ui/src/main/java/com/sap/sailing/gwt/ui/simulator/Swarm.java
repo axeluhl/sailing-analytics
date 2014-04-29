@@ -6,6 +6,7 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 public class Swarm {
@@ -14,16 +15,15 @@ public class Swarm {
 	protected Canvas canvas;
 	protected MapWidget map;
 	
-	com.google.gwt.user.client.Timer loopTimer;
+	private Timer loopTimer;
     private String[] color;
     private Mercator projection;
     private RectField field;
     private int nParticles;
     private Particle[] particles;
-    //private GeoPos pNE;
-    //private GeoPos pSW;
     private boolean swarmOffScreen = false;
     private int swarmPause = 0;
+    private boolean swarmContinue = true;
     private GeoPos boundsNE;
 	private GeoPos boundsSW;
 
@@ -33,7 +33,7 @@ public class Swarm {
 		this.map = map;
 	}
 	
-    public void start() {
+    public void start(int animationDuration) {
 
     	projection = new Mercator(fullcanvas, map);
 
@@ -55,31 +55,45 @@ public class Swarm {
     	Context2d ctxt = canvas.getContext2d();
     	ctxt.setFillStyle("white");
 
-    	particles = this.makeNewParticles();
+    	particles = this.createParticles();
 
-    	/*// Create animation-loop using scheduler for repeated method calls
-    	Scheduler scheduler = Scheduler.get();
-    	scheduler.scheduleFixedPeriod(this, 40);
-    	//scheduler.scheduleFixedDelay(this, 10);*/
-    	
-    	startLoop(40);
+    	this.swarmContinue = true;
+    	startLoop(animationDuration);
+    }
+    
+    public void stop() {
+    	this.swarmContinue = false;
     }
 
-    public Particle[] makeNewParticles() {
- 
-    	Particle[] newParticles = new Particle[nParticles];
-
-    	for(int idx=0; idx<newParticles.length; idx++) {
-    		GeoPos q = field.getRandomPosition();
-    		Particle particle = new Particle();
-    		particle.pos = q;
-    		particle.age = Math.max(2, (int)Math.round(Math.random()*40));
-    		particle.pxOld = projection.latlng2pixel(q);
-    		particle.alpha = 0;
-    		particle.v = field.getVector(q);
-    		newParticles[idx] = particle;
+    public Particle createParticle() {
+    	Particle particle = new Particle();
+    	boolean done = false;
+    	while (!done) {
+    		particle.pos = field.getRandomPosition();
+    		Vector v = field.getVector(particle.pos);
+    		double weight = field.particleWeight(particle.pos, v);
+    		if (weight >= Math.random()) {
+    			if (v.length() == 0) {
+    				particle.age = 0;    				
+    			} else {
+    				particle.age = 1 + (int)Math.round(Math.random()*40);
+    			}
+    			particle.pxOld = projection.latlng2pixel(particle.pos);
+    			particle.alpha = 0;
+    			particle.v = v;
+    			done = true;
+    		}
     	}
-    	
+    	return particle;
+    }
+
+    public Particle[] createParticles() {
+
+    	Particle[] newParticles = new Particle[nParticles];
+    	for(int idx=0; idx<newParticles.length; idx++) {
+    		newParticles[idx] = this.createParticle();
+    	}
+
     	return newParticles;
     }
 
@@ -92,6 +106,10 @@ public class Swarm {
     	
     }
     
+    public static native void console(String msg) /*-{
+		console.log(msg);
+	}-*/;
+
     public void updateBounds() {
 
     	GeoPos mapNE = new GeoPos(map.getBounds().getNorthEast());
@@ -150,9 +168,8 @@ public class Swarm {
     	double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
     	double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
 
-    	this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.numParticleFactor);
-    	//this.numParticles = Math.sqrt(boundsWidthpx*boundsWidthpx + boundsHeightpx*boundsHeightpx) * this.field.numParticleFactor;
-    	//console.log("numParticles: "+this.numParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
+    	this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.particleFactor);
+    	//console("#particles: "+this.nParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
     };
 
     public Vector isVisible(GeoPos pos) {
@@ -168,6 +185,7 @@ public class Swarm {
     }
     
     public void startLoop(final int millis) {
+    	
     	// Create animation-loop based on timer timeout
     	loopTimer = new com.google.gwt.user.client.Timer() {
     		public void run() {
@@ -178,7 +196,7 @@ public class Swarm {
     	        	fullcanvas.setCanvasSettings();
     	    		projection.calibrate();
     	    		updateBounds();
-    	    		particles = makeNewParticles();
+    	    		particles = createParticles();
     	    		swarmPause = 0;
     			}
     			//console("swarmOffScreen:"+swarmOffScreen);
@@ -187,7 +205,9 @@ public class Swarm {
     			}
     			Date time1 = new Date();
     			//console("delta:"+(time1.getTime()-time0.getTime())+"/"+millis);
-    			loopTimer.schedule((int)Math.max(10, millis - (time1.getTime()-time0.getTime())));
+    			if (swarmContinue) {
+    				loopTimer.schedule((int)Math.max(10, millis - (time1.getTime()-time0.getTime())));
+    			}
     		}
     	};
     	loopTimer.schedule(millis);
@@ -204,13 +224,11 @@ public class Swarm {
     	ctxt.setGlobalAlpha(1.0);
     	ctxt.setGlobalCompositeOperation("source-over");
     	ctxt.setFillStyle("white");
-    	//int nDrawn = 0;
     	for(int idx=0; idx<particles.length; idx++) {
     		Particle particle = particles[idx];
     		if (particle.age == 0) {
     			continue;
     		}
-    		//nDrawn++;
     		ctxt.setLineWidth(field.lineWidth(particle.alpha));
     		ctxt.setStrokeStyle(color[particle.alpha]);
     		ctxt.beginPath();
@@ -219,60 +237,26 @@ public class Swarm {
     		ctxt.lineTo(particle.pxOld.x, particle.pxOld.y);
     		ctxt.stroke();
     	}
-    	//console("drawn particles:"+nDrawn);
-    }
- 
-/*    public void swarmStart() {
-    	int millis = 40; //opt_millis; // || 20;
-    	//self = this;
-    	//function go() {
-    	Date start = new Date();
-    	if (!execute()) {
-    			return;
-    	}
-    	Date time = new Date();
-    	int passed = (int)(time.getTime() - start.getTime());
-    	setTimeout(swarmStart(), Math.max(10, passed));
-    	//}
-    	//go();
-    }*/
-    
+    } 
+
     public boolean execute() {
 
     	double speed = 0.01*field.motionScale(map.getZoom());
+    	
     	for(int idx=0; idx<particles.length; idx++) {
     		Particle particle = particles[idx];
-    		Vector v = null;
-    		if (particle.age <= 0) {
-    			boolean done = false;
-    			while (!done) {
-    				particle.pos = field.getRandomPosition();
-    				v = field.getVector(particle.pos);
-    				double weight = field.particleWeight(particle.pos, v);
-    				if ((weight >= Math.random())&&(v != null)) {
-    					particle.age = Math.max(2, (int)Math.round(Math.random()*40));
-    					particle.pxOld = projection.latlng2pixel(particle.pos);
-    					particle.alpha = 0;
-    					particle.v = v;
-    					done = true;
-    				}
+    		if ((particle.age > 0) && (this.field.inBounds(particle.pos.lng, particle.pos.lat))) {
+    			particle.pos.lat = particle.pos.lat + speed*particle.v.y;
+    			particle.pos.lng = particle.pos.lng + speed*particle.v.x;
+    			double s = particle.v.length() / field.getMaxLength();
+    			particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
+    			particle.age--;
+    			if (particle.age > 0) {
+    				particle.v = field.getVector(particle.pos);
     			}
+    		} else {
+    			particles[idx] = this.createParticle();
     		}
-    		if (particle.age > 0) {
-    			if (particle.v == null) {
-    				particle.age = 0;
-    			} else {
-    				particle.pos.lat = particle.pos.lat + speed*particle.v.y;
-    				particle.pos.lng = particle.pos.lng + speed*particle.v.x;
-    				double s = particle.v.length() / field.getMaxLength();
-    				particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
-    				particle.age--;
-    				if (particle.age > 0) {
-    					particle.v = field.getVector(particle.pos);
-    				}
-    			}
-    		}
-
     	}    	
 
     	drawSwarm();
