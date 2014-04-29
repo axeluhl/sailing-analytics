@@ -389,6 +389,8 @@ public class LeaderboardData extends ExportAction {
             }
             Distance averageCrossTrackError = race.getAverageAbsoluteCrossTrackError(competitor, race.getStartOfRace(), race.getEndOfRace(), /*upwindOnly*/ false, /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
+            Distance averageSignedCrossTrackError = race.getAverageSignedCrossTrackError(competitor, race.getStartOfRace(), race.getEndOfRace(), /*upwindOnly*/ false, /*waitForLatestAnalysis*/ false);
+            addNamedElementWithValue(competitorRaceDataElement, "average_signed_cross_track_error_in_meters", averageSignedCrossTrackError != null ? averageSignedCrossTrackError.getMeters() : -1.0);
             competitorElement.addContent(competitorRaceDataElement);
             raceElement.addContent(competitorElement);
         }
@@ -553,6 +555,8 @@ public class LeaderboardData extends ExportAction {
             
             Distance averageCrossTrackError = competitorLeg.getAverageAbsoluteCrossTrackError(legFinishTime, /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorLegDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1);
+            Distance averageSignedCrossTrackError = competitorLeg.getAverageSignedCrossTrackError(legFinishTime, /*waitForLatestAnalysis*/ false);
+            addNamedElementWithValue(competitorLegDataElement, "average_cross_track_error_in_meters", averageSignedCrossTrackError != null ? averageSignedCrossTrackError.getMeters() : -1);
             
             competitorElement.addContent(competitorLegDataElement);
             legElement.addContent(competitorElement);
@@ -605,6 +609,10 @@ public class LeaderboardData extends ExportAction {
             }
             if (competitorLeg.getAverageAbsoluteCrossTrackError(now, /*waitForLatestAnalysis*/ false) == null) {
                 messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has no average cross track error for this leg!");
+                simpleConfidence -= 0.02;
+            }
+            if (competitorLeg.getAverageSignedCrossTrackError(now, /*waitForLatestAnalysis*/ false) == null) {
+                messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has no average signed cross track error for this leg!");
                 simpleConfidence -= 0.02;
             }
             if (competitorLeg.getStartTime() != null && competitorLeg.getStartTime().before(leg.getTrackedRace().getStartOfRace())) {
