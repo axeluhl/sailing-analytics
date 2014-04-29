@@ -125,9 +125,6 @@ install_environment ()
         cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> $SERVER_HOME/env.sh
 
-        # make sure to reload data
-        source `pwd`/env.sh
-
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
@@ -229,6 +226,10 @@ if [[ $OPERATION == "auto-install" ]]; then
 	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
 	append_user_data_to_envsh
 
+        # make sure to reload data
+        source `pwd`/env.sh
+
+
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
             echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
             exit 1
@@ -279,6 +280,9 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         install_environment
+        # make sure to reload data
+        source `pwd`/env.sh
+
         echo "Configuration for this server is now:"
         echo ""
         echo "SERVER_NAME: $SERVER_NAME"
