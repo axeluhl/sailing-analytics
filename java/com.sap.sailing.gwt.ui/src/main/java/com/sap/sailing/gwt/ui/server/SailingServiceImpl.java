@@ -196,6 +196,7 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
@@ -308,7 +309,6 @@ import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
-import com.sap.sailing.manage2sail.TestManage2SailEventResultsParser;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -365,6 +365,7 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 /**
  * The server side implementation of the RPC service.
@@ -2264,24 +2265,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         // TODO: delete getSwissTimingAdapter().getSwissTimingRaceRecords() method
         // TODO: delete SwissTimingDomainFactory.getRaceTypeFromRaceID(String raceID)
-        EventResultDescriptor eventResult = null;
-        if("test".equalsIgnoreCase(eventJsonURL)) {
-            eventResult = TestManage2SailEventResultsParser.getTestEventResult();
-        } else {
-            URL url = new URL(eventJsonURL);
-            URLConnection eventResultConn = url.openConnection();
-            Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
-            eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
-        }
+        URL url = new URL(eventJsonURL);
+        URLConnection eventResultConn = url.openConnection();
+        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
+        EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
         if (eventResult != null) {
             for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
                 for(RaceResultDescriptor race: regattaResult.getRaceResults()) {
-                    SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), race.getStartTimeUTC());
-                    swissTimingRaceRecordDTO.boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getClassName();
-                    swissTimingRaceRecordDTO.gender = regattaResult.getCompetitorGenderType().name();
-                    swissTimingRaceRecordDTO.hasCourse = false;
-                    swissTimingRaceRecordDTO.hasStartlist = false;
-                    swissTimingRaces.add(swissTimingRaceRecordDTO);
+                	// add only the  tracked races
+                	if(race.isTracked() != null && race.isTracked() == true) {
+                        SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(race.getId(), race.getName(), 
+                        		regattaResult.getName(), race.getSeriesName(), race.getFleetName(), race.getStatus(), race.getStartTime(),
+                        		regattaResult.getXrrEntriesUrl() != null ? regattaResult.getXrrEntriesUrl().toExternalForm() : null);
+                        swissTimingRaceRecordDTO.boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getClassName();
+                        swissTimingRaceRecordDTO.gender = regattaResult.getCompetitorGenderType().name();
+                        swissTimingRaces.add(swissTimingRaceRecordDTO);
+                	}
                 }
             }
             result = new SwissTimingEventRecordDTO(eventResult.getId(), eventResult.getName(), eventResult.getTrackingDataHost(),
@@ -2302,10 +2301,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port);
+        Map<String, RegattaResults> cachedRegattaEntriesLists = new HashMap<String, RegattaResults>();
         for (SwissTimingRaceRecordDTO rr : rrs) {
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(rr.boatClass);
-            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, 
-                    boatClass, hostname, port,
+            String raceDescription = rr.regattaName != null ? rr.regattaName : ""; 
+            raceDescription += rr.seriesName != null ? "/" + rr.seriesName : "";
+            raceDescription += raceDescription.length() > 0 ?  "/" + rr.raceName : rr.raceName;
+            // try to find a cached entry list for the regatta
+            RegattaResults regattaResults = cachedRegattaEntriesLists.get(rr.xrrEntriesUrl);
+            if(regattaResults == null) {
+            	regattaResults = getSwissTimingAdapter().readRegattaEntryListFromXrrUrl(rr.xrrEntriesUrl);
+                if(regattaResults != null) {
+                	cachedRegattaEntriesLists.put(rr.xrrEntriesUrl, regattaResults);
+                }
+            }
+            StartList startList = null;
+            if(regattaResults != null) {
+            	startList = getSwissTimingAdapter().readStartListForRace(rr.raceId, regattaResults);
+            }
+            // now read the entry list for the race from the result
+            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.raceId, rr.raceName, raceDescription, 
+                    boatClass, hostname, port, startList,
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.raceId + "/" + rr.raceName) {
