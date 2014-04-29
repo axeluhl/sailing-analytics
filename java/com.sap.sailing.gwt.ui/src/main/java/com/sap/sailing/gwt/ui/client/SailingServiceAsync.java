@@ -578,4 +578,3 @@ public interface SailingServiceAsync {
     void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
             Set<Triple<String, String, String>> raceLogsTo, AsyncCallback<Void> callback);
 }
-

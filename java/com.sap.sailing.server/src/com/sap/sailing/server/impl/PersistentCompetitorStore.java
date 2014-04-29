@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -96,8 +95,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newSailId, Nationality newNationality, BoatClass newBoatClass) {
-        Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newSailId, newNationality, newBoatClass);
+    public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newSailId, Nationality newNationality) {
+        Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newSailId, newNationality);
         storeTo.storeCompetitor(result);
         return result;
     }
