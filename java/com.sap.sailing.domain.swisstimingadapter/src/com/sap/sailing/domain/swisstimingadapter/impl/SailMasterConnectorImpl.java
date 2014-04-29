@@ -189,9 +189,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run", e);
+            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run for "+this, e);
         }
-        logger.info("Stopping Sail Master connector thread");
+        logger.info("Stopping Sail Master connector thread for "+this);
         stopped = true;
     }
     
@@ -436,8 +436,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
+    public String toString() {
+        return "SailMasterConnector listening on port "+port+" with socket "+socket+" for race "+raceName+" with ID "+raceId+" ("+raceDescription+")";
+    }
+    
+    @Override
     public void stop() throws IOException {
-        logger.info("Stopping SailMasterConnector listening on port "+port+" with socket "+socket);
+        logger.info("Stopping "+this);
         stopped = true;
         if (socket != null) {
             socket.close();
