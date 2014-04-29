@@ -2,14 +2,13 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -22,14 +21,12 @@ public class HasTrackedLegContextImpl extends HasTrackedRaceContextImpl implemen
     private boolean legTypeHasBeenInitialized;
 
     public HasTrackedLegContextImpl(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
-        this(trackedRaceContext.getLeaderboardGroup(), trackedRaceContext.getLeaderboard(), trackedRaceContext
-                .getCourseArea(), trackedRaceContext.getFleet(), trackedRaceContext.getTrackedRace(), trackedLeg,
-                legNumber);
+        this(trackedRaceContext.getEvent(), trackedRaceContext.getRegatta(), trackedRaceContext.getFleet(),
+                trackedRaceContext.getTrackedRace(), trackedLeg, legNumber);
     }
     
-    public HasTrackedLegContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet,
-                                 TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
-        super(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace);
+    public HasTrackedLegContextImpl(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
+        super(event, regatta, fleet, trackedRace);
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;
     }

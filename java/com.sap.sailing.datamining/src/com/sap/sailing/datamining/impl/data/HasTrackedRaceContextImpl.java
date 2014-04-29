@@ -2,57 +2,35 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
 
-import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.datamining.data.HasTrackedRegattaContext;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 
-public class HasTrackedRaceContextImpl extends HasLeaderboardContextImpl implements HasTrackedRaceContext {
+public class HasTrackedRaceContextImpl extends HasTrackedRegattaContextImpl implements HasTrackedRaceContext {
 
-    private final CourseArea courseArea;
     private final Fleet fleet;
     private final TrackedRace trackedRace;
     private Integer year;
     private boolean yearHasBeenInitialized;
     
-    public HasTrackedRaceContextImpl(HasLeaderboardContext leaderboardContext, CourseArea courseArea, Fleet fleet,
-            TrackedRace trackedRace) {
-        this(leaderboardContext.getLeaderboardGroup(), leaderboardContext.getLeaderboard(), courseArea, fleet, trackedRace);
+    public HasTrackedRaceContextImpl(HasTrackedRegattaContext regattaContext, Fleet fleet, TrackedRace trackedRace) {
+        this(regattaContext.getEvent(), regattaContext.getRegatta(), fleet, trackedRace);
     }
 
-    public HasTrackedRaceContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea,
-            Fleet fleet, TrackedRace trackedRace) {
-        super(leaderboardGroup, leaderboard);
-        this.courseArea = courseArea;
+    public HasTrackedRaceContextImpl(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+        super(event, regatta);
         this.fleet = fleet;
         this.trackedRace = trackedRace;
     }
     
     @Override
-    public TrackedRegatta getTrackedRegatta() {
-        return getTrackedRace().getTrackedRegatta();
-    }
-
     public TrackedRace getTrackedRace() {
-        return trackedRace;
-    }
-    
-    @Override
-    public Regatta getRegatta() {
-        return getTrackedRegatta().getRegatta();
-    }
-
-    @Override
-    public CourseArea getCourseArea() {
-        return courseArea;
+        return getTrackedRace();
     }
 
     @Override
@@ -61,13 +39,8 @@ public class HasTrackedRaceContextImpl extends HasLeaderboardContextImpl impleme
     }
     
     @Override
-    public BoatClass getBoatClass() {
-        return getRegatta().getBoatClass();
-    }
-
-    @Override
     public RaceDefinition getRace() {
-        return getTrackedRace().getRace();
+        return trackedRace.getRace();
     }
 
     @Override
