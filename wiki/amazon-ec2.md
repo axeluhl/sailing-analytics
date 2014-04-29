@@ -15,6 +15,8 @@
   - Archive: m2.2xlarge
   - Live: c1.xlarge
 
+You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
+
 - Using a release, set the following in the instance's user data:
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
