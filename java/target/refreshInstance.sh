@@ -216,8 +216,8 @@ if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
         # then download and install environment
-        activate_user_data
         install_environment
+        activate_user_data
 
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
             echo "It could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
