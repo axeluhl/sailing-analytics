@@ -517,17 +517,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     sendMessage(opnRequest, os);
                     SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
                     if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
-                        logger.info("Recevied non-OK response " + opnResponse + " for our request " + opnRequest
+                        logger.info("Recevied non-OK response " + opnResponse + " in "+this+" for our request " + opnRequest
                                 + ". Closing socket and trying again in 1s...");
                         closeAndNullSocketAndWaitABit();
                     } else {
-                        logger.info("Received " + opnResponse + " which seems OK. Continuing with "
+                        logger.info("Received " + opnResponse + " in "+this+" which seems OK. Continuing with "
                                 + MessageType.LSN.name() + " request...");
                         numberOfStoredMessages = Long.valueOf(opnResponse.getSections()[2]);
                         List<String> lsnArgs = new ArrayList<>();
                         lsnArgs.add("ON"); // request live messages always; why not?
                         if (maxSequenceNumber != -1) {
-                            logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1));
+                            logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1)+" in "+this);
                             // already received a numbered message; ask only for newer messages with greater sequence number
                             lsnArgs.add(new Long(maxSequenceNumber + 1).toString());
                         }
@@ -537,16 +537,15 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         SailMasterMessageImpl lsnResponse = new SailMasterMessageImpl(receiveMessage(is));
                         if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
                             logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
-                                    + ". Closing socket and trying again in 1s...");
+                                    + " in "+this+". Closing socket and trying again in 1s...");
                             closeAndNullSocketAndWaitABit();
                         } else {
                             logger.info("Received " + lsnResponse
-                                    + " which seems to be OK. I think we're connected to " + host + ":" + port + "!");
+                                    + " which seems to be OK. I think we're connected in "+this+"!");
                         }
                     }
                 } catch (IOException e) {
-                    logger.log(Level.INFO, "Exception trying to establish SailMaster connection to " + host + ":"
-                            + port + ". Trying again in 1s.", e);
+                    logger.log(Level.INFO, "Exception trying to establish connection in "+this+". Trying again in 1s.", e);
                     closeAndNullSocketAndWaitABit();
                 }
             }
