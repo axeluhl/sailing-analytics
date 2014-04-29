@@ -1001,7 +1001,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
@@ -1015,7 +1015,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         Distance result;
         if (from != null) {
-            result = getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
+            result = getAverageAbsoluteCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
         } else {
             result = null;
         }
@@ -1023,11 +1023,42 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+            throws NoWindException {
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        TimePoint from = null;
+        lockForRead(markPassings);
+        try {
+            if (markPassings != null && !markPassings.isEmpty()) {
+                from = markPassings.iterator().next().getTimePoint();
+            }
+        } finally {
+            unlockAfterRead(markPassings);
+        }
+        Distance result;
+        if (from != null) {
+            result = getAverageSignedCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException {
         Distance result;
         result = crossTrackErrorCache
-                .getAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+                .getAverageAbsoluteCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+        return result;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalysis) throws NoWindException {
+        Distance result;
+        result = crossTrackErrorCache
+                .getAverageSignedCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
         return result;
     }
 

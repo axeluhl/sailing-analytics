@@ -44,7 +44,9 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double windwardDistanceToOverallLeaderInMeters;
     
-    public Double averageCrossTrackErrorInMeters;
+    public Double averageAbsoluteCrossTrackErrorInMeters;
+    
+    public Double averageSignedCrossTrackErrorInMeters;
     
     public Double distanceToStartLineFiveSecondsBeforeStartInMeters;
     
@@ -99,7 +101,9 @@ public class LeaderboardEntryDTO implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
+                + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0 : averageAbsoluteCrossTrackErrorInMeters.hashCode());
+        result = prime * result
+                + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime
                 * result
@@ -141,10 +145,15 @@ public class LeaderboardEntryDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardEntryDTO other = (LeaderboardEntryDTO) obj;
-        if (averageCrossTrackErrorInMeters == null) {
-            if (other.averageCrossTrackErrorInMeters != null)
+        if (averageAbsoluteCrossTrackErrorInMeters == null) {
+            if (other.averageAbsoluteCrossTrackErrorInMeters != null)
                 return false;
-        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
+        } else if (!averageAbsoluteCrossTrackErrorInMeters.equals(other.averageAbsoluteCrossTrackErrorInMeters))
+            return false;
+        if (averageSignedCrossTrackErrorInMeters == null) {
+            if (other.averageSignedCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageSignedCrossTrackErrorInMeters.equals(other.averageSignedCrossTrackErrorInMeters))
             return false;
         if (discarded != other.discarded)
             return false;
