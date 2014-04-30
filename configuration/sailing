@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# sailing	Starts sailing services
+#
+# chkconfig: 2345 95 10
+# description: Sailing contains all sailing services
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+
+JAVA_START_INSTANCES="server"
+GIT_REPOSITORY=/home/sailing/code
+
+start_tmux() {
+	su - sailing -c "/home/sailing/bin/tmuxConsole.sh unattended"
+	success
+}
+
+start_servers() {
+	for conf in $JAVA_START_INSTANCES; do
+		echo "Checking for amazon update..."
+		su - sailing -c "cd /home/sailing/servers/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>/var/log/sailing.err >/var/log/sailing.out
+		echo "Starting Java server $conf"
+		su - sailing -c "cd /home/sailing/servers/$conf && ./start" 2>/var/log/sailing.err >/var/log/sailing.out
+		RETVAL=$?
+		[ $RETVAL -eq 0 ] && success || failure
+	done
+}
+
+stop_servers() {
+	for conf in $JAVA_START_INSTANCES; do
+		echo "Stopping Java server $conf"
+		su - sailing -c "cd /home/sailing/servers/$conf && ./stop"
+		RETVAL=$?
+		[ $RETVAL -eq 0 ] && success || failure
+	done
+
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start_servers
+        ;;
+  stop)
+	stop_servers
+	;;
+  status)
+	status java
+	RETVAL=$?
+	;;
+  *)
+        echo $"Usage: $0 {start|status|stop}"
+        RETVAL=3
+esac
+
+exit $RETVAL
+
