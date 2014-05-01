@@ -13,9 +13,8 @@ Currently, RaceLog-tracking has not been merged into the master branch. Instead,
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
 # Architectural Overview
-The basic architecture of Racelog-tracking is presented in this diagram (download as [[PDF|wiki/racelog-tracking/architecture.pdf]]):
-[[wiki/racelog-tracking/architecture.svg]]
-(weirdly enough, the image only shows in preview mode, but the link should work)
+The basic architecture of Racelog-tracking is presented in this diagram (download as [[PDF|racelog-tracking/architecture.pdf]]):
+[[racelog-tracking/architecture.svg]]
 
 Not all identifiers represent actual class or bundle names. For a more technical documentation, refer to the JavaDoc in the various ``*.racelog.tracking`` packages and the ``com.sap.sailing.domain.racelogtrackingadapter`` bundle. The following interfaces and classes are good starting points:
 * DeviceIdentifier

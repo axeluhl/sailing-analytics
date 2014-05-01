@@ -177,11 +177,21 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
     /**
-     * Computes the average cross track error for this leg. If you provide this method with a {@link TimePoint} greater
-     * than the time the mark passing of the leg end mark has occurred then the time point of the mark passing 
-     * of the leg end mark will be taken into account.
+     * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a
+     * positive number, thereby ignoring whether the competitor was left or right of the course middle line. If you
+     * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
+     * occurred then the time point of the mark passing of the leg end mark will be taken into account.
      */
-    Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+
+    /**
+     * Computes the average signed cross track error for this leg. The cross track error for each fix is taken to be a
+     * positive number in case the competitor was on the right side of the course middle line (looking in the direction
+     * of this leg), and a negative number in case the competitor was on the left side of the course middle line. If you
+     * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
+     * occurred then the time point of the mark passing of the leg end mark will be taken into account.
+     */
+    Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     /**
      * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the

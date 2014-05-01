@@ -244,8 +244,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
-                WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage,
-                        relativeTo);
+                WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
                 return average;
             }
         } finally {

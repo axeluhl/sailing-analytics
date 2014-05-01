@@ -1,4 +1,5 @@
-package com.sap.sailing.domain.confidence;
+package com.sap.sailing.domain.common.scalablevalue;
+
 
 /**
  * A {@link ScalableValue} where the <code>ValueType</code> and the <code>AveragesTo</code> type are both the same because
