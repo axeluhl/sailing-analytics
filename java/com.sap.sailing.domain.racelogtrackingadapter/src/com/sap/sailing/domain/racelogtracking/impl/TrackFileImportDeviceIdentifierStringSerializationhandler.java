@@ -1,0 +1,31 @@
+package com.sap.sailing.domain.racelogtracking.impl;
+
+import java.util.UUID;
+
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
+import com.sap.sailing.domain.racelogtracking.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.TrackFileImportDeviceIdentifierImpl;
+
+public class TrackFileImportDeviceIdentifierStringSerializationhandler implements
+        DeviceIdentifierStringSerializationHandler {
+
+    @Override
+    public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+        TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
+        return new Pair<String, String>(id.getStringRepresentation(), TrackFileImportDeviceIdentifier.TYPE);
+    }
+
+    @Override
+    /**
+     * Only uses the first 36 characters in the string to construct the UUID, ignoring file, track and date info.
+     */
+    public DeviceIdentifier deserialize(String serialized, String type, String stringRepresentation)
+            throws TransformationException {
+        UUID uuid = UUID.fromString(serialized.substring(0, 36));
+        return new TrackFileImportDeviceIdentifierImpl(uuid, null, null, null);
+    }
+
+}
