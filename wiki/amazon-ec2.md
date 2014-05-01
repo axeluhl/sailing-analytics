@@ -15,13 +15,22 @@
   - Archive: m2.2xlarge
   - Live: c1.xlarge
 
-- Using a release, set the following in the instance's user data:
+You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
+
+- Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
+MONGODB_PORT=10202
+MONGODB_NAME=myspecificevent
+REPLICATION_CHANNEL=myspecificevent
+SERVER_NAME=MYSPECIFICEVENT
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 </pre>
+
+Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
+
 - To build from git, install and start, set the following in the instance's user data, adjusting the MONGODB_PORT and memory settings according to your needs:
 <pre>
 BUILD_BEFORE_START=True
@@ -30,14 +39,15 @@ RUN_TESTS=False
 COMPILE_GWT=True
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=
-SERVER_NAME=LIVE1
+SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
 REPLICATION_HOST=172.31.25.253
-REPLICATION_CHANNEL=sapsailinganalytics-live
+REPLICATION_CHANNEL=myspecificevent
 TELNET_PORT=14888
 SERVER_PORT=8888
 MONGODB_HOST=172.31.25.253
 MONGODB_PORT=10202
+MONGODB_NAME=myspecificevent
 EXPEDITION_PORT=2010
 REPLICATE_ON_START=False
 REPLICATE_MASTER_SERVLET_HOST=
@@ -266,6 +276,29 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 ### Access MongoDB database
 
 To launch a local MongoDB instance on the default port, enter a command such as `mkdir /home/sailing/mongodb; /opt/mongodb-linux-x86_64-1.8.1/bin/mongod --dbpath /home/sailing/mongodb`. To make sure the process survives log-off, you may want to launch it in a tmux session. See above for how to create a tmux session. In an existing tmux session, a new window can be created using `Ctrl-a c`.
+
+### Upgrade the Sailing Analytics App AMI image
+
+There are a number of use cases that suggest an upgrade of the AMI that we use to start new SAP Sailing Analytics instances. One can be that we want to add or modify the set of SSH keys authorized for access to the root and sailing accounts. Another can be that we would like to upgrade the git contents under `~sailing/code` for an update to the `/etc/init.d/sailing` or the `/home/sailing/code/java/target/refreshInstance.sh` script that is central to the automated launch process of a new instance. Another use case can be applying an upgrade to the underlying operating system (currently CentOS).
+
+Follow these steps to upgrade the AMI:
+
+* Launch a new instance based on the existing AMI
+* Log in as user `root`
+* Run `yum update` to update the operating system
+* Remove any obsolete logs from `/home/sailing/servers/server/logs`
+* Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing <pre>
+    su - sailing
+    cd code
+    mvn clean
+    git fetch
+    git merge origin/master</pre>
+* Then, still as user `sailing`, edit `~sailing/servers/server/env.sh` and remove everything after the line `# **** Overwritten environment variables ****` as this will then be the place where any downloaded environment and the EC2 user data variables will be appended later during automatic installation upon reboot.
+* Check the sizes of the mounted partitions by doing `df; swapon -s`. These will come in handy after creating the new AMI in order to tag the new volume snapshots accordingly
+* Update any keys in `/root/.ssh/authorized_keys` and `/home/sailing/.ssh/authorized_keys`
+* In the EC2 administration console go to the "Instances" tab, select your running instance and from the "Actions" drop-down select "Create Image". Give the image the name "SAP Sailing Analytics App x.y" where "x.y" is the updated version number of the image. Just make sure it's greater than the previous one. If you feel like it, you may provide a short description telling the most important features of the image.
+* Once the image creation has completed, go to the Snapshots list in the "Elastic Block Store" category and name the new snapshots appropriately. Now the information about the device sizes obtained earlier from the `df` and `swapon` commands will help you to identify which snapshot is which. Usually, the three snapshots would be something like AMI Analytics Home x.y, AMI Analytics System x.y and AMI Analytics Swap x.y with "x.y" being the version number matching that of your image.
+* Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.
 
 ## Migration Checklist
 

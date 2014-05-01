@@ -381,7 +381,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         Distance result = null;
         final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
         if (legStartMarkPassing != null) {
@@ -393,7 +393,25 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             } else {
                 to = legEndMarkPassing.getTimePoint();
             }
-            result = getTrackedRace().getAverageCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+            result = getTrackedRace().getAverageAbsoluteCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        Distance result = null;
+        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
+        if (legStartMarkPassing != null) {
+            TimePoint legStart = legStartMarkPassing.getTimePoint();
+            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
+            TimePoint to;
+            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(timePoint) > 0) {
+                to = timePoint;
+            } else {
+                to = legEndMarkPassing.getTimePoint();
+            }
+            result = getTrackedRace().getAverageSignedCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
         }
         return result;
     }

@@ -48,7 +48,7 @@ public interface SailMasterConnector {
      */
     void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
     
-    void removeSailMasterListener(SailMasterListener listener);
+    void removeSailMasterListener(SailMasterListener listener) throws IOException;
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
     
