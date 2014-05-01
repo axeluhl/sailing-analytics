@@ -69,7 +69,7 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
                 return name == "LG1" || name == "LG2" || name == "LG3";
             }
         };
-        retriever = new LeaderboardGroupFilteringRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(receiver), criteria);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(receiver), criteria);
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {

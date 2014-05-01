@@ -1,14 +1,30 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
 
-public interface HasTrackedRaceContext extends HasTrackedRegattaContext {
+public interface HasTrackedRaceContext {
     
     public TrackedRace getTrackedRace();
+    
+    @SideEffectFreeValue(messageKey="Event")
+    public Event getEvent();
+    
+    @SideEffectFreeValue(messageKey="Regatta")
+    public Regatta getRegatta();
+    
+    @SideEffectFreeValue(messageKey="CourseArea")
+    public CourseArea getCourseArea();
+    
+    @SideEffectFreeValue(messageKey="BoatClass")
+    public BoatClass getBoatClass();
     
     @SideEffectFreeValue(messageKey="Fleet")
     public Fleet getFleet();
