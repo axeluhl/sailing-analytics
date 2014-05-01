@@ -1482,8 +1482,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         closer = fixAfter;
                     }
                     // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
-                    double factorForBefore = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
-                    double factorForAfter = 1-factorForBefore;
+                    double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
+                    double factorForBefore = 1-factorForAfter;
                     PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
                             factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
                     double betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
