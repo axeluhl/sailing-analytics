@@ -1,9 +1,9 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.scalablevalue.impl;
 
-import com.sap.sailing.domain.base.BearingWithConfidence.DoublePair;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.confidence.ScalableValue;
+import com.sap.sailing.domain.scalablevalue.ScalableValue;
 
 public class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
     private final double sin;

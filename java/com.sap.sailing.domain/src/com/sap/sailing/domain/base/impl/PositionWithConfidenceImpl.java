@@ -2,7 +2,8 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.PositionWithConfidence;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.confidence.IsScalable;
+import com.sap.sailing.domain.scalablevalue.IsScalable;
+import com.sap.sailing.domain.scalablevalue.impl.ScalablePosition;
 
 public class PositionWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<ScalablePosition, Position, RelativeTo> implements
         PositionWithConfidence<RelativeTo>, IsScalable<ScalablePosition, Position> {

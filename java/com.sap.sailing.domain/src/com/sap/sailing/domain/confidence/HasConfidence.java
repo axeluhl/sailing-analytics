@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.scalablevalue.ScalableValue;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are
@@ -72,7 +72,7 @@ public interface HasConfidence<ValueType, BaseType, RelativeTo> extends Serializ
     
     /**
      * The confidence attached to a value is usually relative to some reference point, such as a time point or
-     * a position. For example, when a {@link GPSFixTrack} is asked to deliver an estimation for the tracked item's
+     * a position. For example, when a <code>GPSFixTrack</code> is asked to deliver an estimation for the tracked item's
      * {@link Position} at some given {@link TimePoint}, the track computes some average from a number of GPS fixes. The resulting
      * position has a certain confidence, depending on the time differences between the fixes and the time point for which
      * the position estimation was requested. The result therefore carries this reference time point for which the estimation

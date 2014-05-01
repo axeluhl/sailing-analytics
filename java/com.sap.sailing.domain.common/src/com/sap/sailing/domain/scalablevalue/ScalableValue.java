@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.confidence;
+package com.sap.sailing.domain.scalablevalue;
 
 public interface ScalableValue<ValueType, AveragesTo> {
     ScalableValue<ValueType, AveragesTo> multiply(double factor);

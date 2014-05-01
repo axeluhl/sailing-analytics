@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.confidence;
+package com.sap.sailing.domain.scalablevalue;
 
 import java.io.Serializable;
 
