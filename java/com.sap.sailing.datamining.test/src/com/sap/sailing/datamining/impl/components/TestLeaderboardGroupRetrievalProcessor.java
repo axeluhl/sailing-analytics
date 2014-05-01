@@ -16,25 +16,20 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
-import com.sap.sailing.datamining.data.LeaderboardGroupWithContext;
-import com.sap.sailing.datamining.impl.data.HasLeaderboardGroupContextImpl;
-import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContextImpl;
 import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
-import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 
-public class TestLeaderboardGroupFilteringRetrievalProcessor {
+public class TestLeaderboardGroupRetrievalProcessor {
     
     private RacingEventService service;
     private Processor<RacingEventService> retriever;
     
-    private Collection<LeaderboardGroupWithContext> retrievedGroups;
+    private Collection<LeaderboardGroup> retrievedGroups;
     
     @Before
     public void initializeComponents() {
@@ -42,9 +37,9 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
 
         retrievedGroups = new HashSet<>();
-        Processor<LeaderboardGroupWithContext> receiver = new Processor<LeaderboardGroupWithContext>() {
+        Processor<LeaderboardGroup> receiver = new Processor<LeaderboardGroup>() {
             @Override
-            public void onElement(LeaderboardGroupWithContext element) {
+            public void onElement(LeaderboardGroup element) {
                 retrievedGroups.add(element);
             }
             @Override
@@ -62,14 +57,7 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
             }
         };
         
-        FilterCriteria<LeaderboardGroupWithContext> criteria = new FilterCriteria<LeaderboardGroupWithContext>() {
-            @Override
-            public boolean matches(LeaderboardGroupWithContext element) {
-                String name = element.getLeaderboardGroupName();
-                return name == "LG1" || name == "LG2" || name == "LG3";
-            }
-        };
-        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(receiver), criteria);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(receiver));
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {
@@ -88,23 +76,18 @@ public class TestLeaderboardGroupFilteringRetrievalProcessor {
         retriever.onElement(service);
         retriever.finish();
         
-        Collection<LeaderboardGroupWithContext> expectedGroups = getExpectedRetrievedGroups();
+        Collection<LeaderboardGroup> expectedGroups = getExpectedRetrievedGroups();
         assertThat(retrievedGroups, is(expectedGroups));
     }
 
-    private Collection<LeaderboardGroupWithContext> getExpectedRetrievedGroups() {
-        Collection<LeaderboardGroupWithContext> groups = new HashSet<>();
-        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>())));
-        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>())));
-        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>())));
-        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>())));
-        groups.add(groupToGroupWithContext(new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>())));
+    private Collection<LeaderboardGroup> getExpectedRetrievedGroups() {
+        Collection<LeaderboardGroup> groups = new HashSet<>();
+        groups.add(new LeaderboardGroupImpl("LG1", "", false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG2", "", false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG3", "", false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG4", "", false, new ArrayList<Leaderboard>()));
+        groups.add(new LeaderboardGroupImpl("LG5", "", false, new ArrayList<Leaderboard>()));
         return groups;
-    }
-
-    private LeaderboardGroupWithContext groupToGroupWithContext(LeaderboardGroupImpl leaderboardGroup) {
-        HasLeaderboardGroupContext context = new HasLeaderboardGroupContextImpl(leaderboardGroup);
-        return new LeaderboardGroupWithContextImpl(context);
     }
 
 }
