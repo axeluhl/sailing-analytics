@@ -11,10 +11,10 @@ import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 
-public class RegattaLeaderboardRetrievalProcessor extends
+public class RegattaLeaderboardFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<LeaderboardGroup, RegattaLeaderboard> {
 
-    public RegattaLeaderboardRetrievalProcessor(ExecutorService executor,
+    public RegattaLeaderboardFilteringRetrievalProcessor(ExecutorService executor,
             Collection<Processor<RegattaLeaderboard>> resultReceivers, FilterCriteria<RegattaLeaderboard> criteria) {
         super(executor, resultReceivers, criteria);
     }

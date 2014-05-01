@@ -16,10 +16,10 @@ import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 
-public class TrackedRaceRetrievalProcessor extends
+public class TrackedRaceFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Leaderboard, HasTrackedRaceContext> {
 
-    public TrackedRaceRetrievalProcessor(ExecutorService executor,
+    public TrackedRaceFilteringRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasTrackedRaceContext>> resultReceivers, FilterCriteria<HasTrackedRaceContext> criteria) {
         super(executor, resultReceivers, criteria);
     }
