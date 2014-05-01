@@ -289,7 +289,8 @@ public interface StringMessages extends Messages {
     String leaderboardsInGroup();
     String replication();
     String errorFetchingReplicaData(String message);
-    String averageCrossTrackErrorInMeters();
+    String averageAbsoluteCrossTrackErrorInMeters();
+    String averageSignedCrossTrackErrorInMeters();
     String enterMaster();
     String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
@@ -485,8 +486,10 @@ public interface StringMessages extends Messages {
     String totalTimeSailedReachingInSecondsTooltip();
     String totalTimeSailedUpwindInSecondsTooltip();
     String windwardDistanceToGoInMetersTooltip();
-    String averageCrossTrackErrorInMetersTooltip();
-    String raceAverageCrossTrackErrorInMetersTooltip();
+    String averageAbsoluteCrossTrackErrorInMetersTooltip();
+    String averageSignedCrossTrackErrorInMetersTooltip();
+    String raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
+    String raceAverageSignedCrossTrackErrorInMetersTooltip();
     String gapChangeSinceLegStartInSecondsTooltip();
     String velocityMadeGoodInKnotsTooltip();
     String sideToWhichMarkAtLegStartWasRoundedTooltip();

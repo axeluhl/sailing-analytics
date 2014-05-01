@@ -3,6 +3,10 @@
 source `pwd`/env.sh
 DATE_OF_EXECUTION=`date`
 
+# The following temporary file may be used by this script to dump EC2-provided user data
+# variables to it; they can then be sourced from there and later appended to a new env.sh
+ec2EnvVars_tmpFile=`mktemp /tmp/ec2EnvVars_XXX`
+
 find_project_home () 
 {
     if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
@@ -71,10 +75,29 @@ checks ()
     fi
 }
 
+copy_user_data_to_tmp_file ()
+{
+    echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
+
+    VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
+    for var in $VARS; do
+      echo $var >>"$ec2EnvVars_tmpFile"
+    done
+}
+
+# loads the user data-provided variables by sourcing the script
 activate_user_data ()
 {
-    echo "Reading user-data provided by Amazon instance data to $SERVER_HOME/env.sh"
+    # make sure to reload data
+    source "$ec2EnvVars_tmpFile"
+    INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
+    INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+    INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
+    INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
+}
 
+append_user_data_to_envsh ()
+{
     # make backup of original file
     cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
@@ -83,18 +106,10 @@ activate_user_data ()
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
 
-    VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
-    for var in $VARS; do
+    for var in `cat "$ec2EnvVars_tmpFile"`; do
         echo $var >> $SERVER_HOME/env.sh
         echo "Activated: $var"
     done
-    
-    # make sure to reload data
-    source `pwd`/env.sh
-    if [[ $DEPLOY_TO == "" ]]; then
-        DEPLOY_TO=server
-        echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
-    fi
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
@@ -113,13 +128,6 @@ install_environment ()
         echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> $SERVER_HOME/env.sh
-
-        # make sure to reload data
-        source `pwd`/env.sh
-        if [[ $DEPLOY_TO == "" ]]; then
-            DEPLOY_TO=server
-            echo "DEPLOY_TO=server" >> $SERVER_HOME/env.sh
-        fi
 
         echo "Updated env.sh with data from environment file!"
     else
@@ -215,12 +223,19 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-        # then download and install environment
+	copy_user_data_to_tmp_file
         activate_user_data
+        # then download and install environment and append to env.sh
         install_environment
+	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	append_user_data_to_envsh
+
+        # make sure to reload data
+        source `pwd`/env.sh
+
 
         if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
-            echo "It could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
+            echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
             exit 1
         fi
 
@@ -269,6 +284,9 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         install_environment
+        # make sure to reload data
+        source `pwd`/env.sh
+
         echo "Configuration for this server is now:"
         echo ""
         echo "SERVER_NAME: $SERVER_NAME"

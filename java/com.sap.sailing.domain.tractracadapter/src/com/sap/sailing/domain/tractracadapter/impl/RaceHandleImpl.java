@@ -52,7 +52,10 @@ public class RaceHandleImpl implements RacesHandle {
     public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
         Set<RaceDefinition> result = new HashSet<RaceDefinition>();
         for (Race race : tractracEvent.getRaceList()) {
-            result.add(domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds));
+            final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds);
+            if (raceDefinition != null) { // may have time-outed
+                result.add(raceDefinition);
+            }
         }
         return result;
     }

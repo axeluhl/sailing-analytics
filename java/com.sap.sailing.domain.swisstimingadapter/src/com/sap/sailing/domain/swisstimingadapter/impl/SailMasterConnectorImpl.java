@@ -90,7 +90,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
     private boolean stopped;
-    private boolean connected;
     private final String raceId;
     private final String raceName;
     private final String raceDescription;
@@ -143,45 +142,43 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
-        synchronized (this) {
-            while (!connected) {
-                wait();
-            }
-        }
     }
     
     public void run() {
         try {
             while (!stopped) {
                 try {
-                    ensureSocketIsOpen();
-                    String receivedMessage = receiveMessage(socket.getInputStream());
-                    if (receivedMessage == null) {
-                        // reached EOF; this means the socket is or can be closed
-                        if (socket != null && !socket.isClosed()) {
-                            socket.close();
-                        }
-                        socket = null;
-                    } else {
-                        SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
-                        // drop race-specific messages for non-tracked races
-                        if (message.getSequenceNumber() != null) {
-                            maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
-                            if (maxSequenceNumber <= numberOfStoredMessages) {
-                                notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber / (double) numberOfStoredMessages);
+                    ensureSocketIsOpen(); // the result of this may be that the connector w\s stopped in between, so another check is required
+                    if (!stopped && socket != null) {
+                        String receivedMessage = receiveMessage(socket.getInputStream());
+                        if (receivedMessage == null) {
+                            // reached EOF; this means the socket is or can be closed
+                            if (socket != null && !socket.isClosed()) {
+                                socket.close();
                             }
-                        }
-                        if (message.isResponse()) {
-                            // this is a response for an explicit request
-                            rendevouz(message);
-                        } else if (message.isEvent()) {
-                            // a spontaneous event
-                            logger.fine("notifying message " + message);
-                            notifyListeners(message);
-                        }
-                        if (message.getType() == MessageType._STOPSERVER) {
-                            logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
-                            stop();
+                            socket = null;
+                        } else {
+                            SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
+                            // drop race-specific messages for non-tracked races
+                            if (message.getSequenceNumber() != null) {
+                                maxSequenceNumber = Math.max(maxSequenceNumber, message.getSequenceNumber());
+                                if (maxSequenceNumber <= numberOfStoredMessages) {
+                                    notifyListenersStoredDataProgress(raceId, (double) maxSequenceNumber
+                                            / (double) numberOfStoredMessages);
+                                }
+                            }
+                            if (message.isResponse()) {
+                                // this is a response for an explicit request
+                                rendevouz(message);
+                            } else if (message.isEvent()) {
+                                // a spontaneous event
+                                logger.fine("notifying message " + message);
+                                notifyListeners(message);
+                            }
+                            if (message.getType() == MessageType._STOPSERVER) {
+                                logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
+                                stop();
+                            }
                         }
                     }
                 } catch (SocketException se) {
@@ -192,9 +189,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run", e);
+            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run for "+this, e);
         }
-        logger.info("Stopping Sail Master connector thread");
+        logger.info("Stopping Sail Master connector thread for "+this);
         stopped = true;
     }
     
@@ -205,14 +202,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return result;
     }
 
-    private synchronized BlockingQueue<SailMasterMessage> getBlockingQueue(MessageType type) {
-        BlockingQueue<SailMasterMessage> blockingQueue;
-        blockingQueue = unprocessedMessagesByType.get(type);
-        if (blockingQueue == null) {
-            blockingQueue = new LinkedBlockingQueue<SailMasterMessage>();
-            unprocessedMessagesByType.put(type, blockingQueue);
+    private BlockingQueue<SailMasterMessage> getBlockingQueue(MessageType type) {
+        synchronized (unprocessedMessagesByType) {
+            BlockingQueue<SailMasterMessage> blockingQueue;
+            blockingQueue = unprocessedMessagesByType.get(type);
+            if (blockingQueue == null) {
+                blockingQueue = new LinkedBlockingQueue<SailMasterMessage>();
+                unprocessedMessagesByType.put(type, blockingQueue);
+            }
+            return blockingQueue;
         }
-        return blockingQueue;
     }
     
     private void rendevouz(SailMasterMessage message) {
@@ -254,7 +253,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private void notifyListenersStoredDataProgress(String raceID, double progress) {
-        for (SailMasterListener listener : getListeners(raceID)) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.storedDataProgress(raceID, progress);
             } catch (Exception e) {
@@ -270,7 +269,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         int zeroBasedMarkIndex = Integer.valueOf(message.getSections()[2]);
         double windDirectionTrueDegrees = Double.valueOf(message.getSections()[3]);
         double windSpeedInKnots = Double.valueOf(message.getSections()[4]);
-        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedWindData(raceID, zeroBasedMarkIndex, windDirectionTrueDegrees, windSpeedInKnots);
             } catch (Exception e) {
@@ -294,7 +293,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 parseHHMMSSToMilliseconds(details[2]);
             markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
-        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
             } catch (Exception e) {
@@ -306,7 +305,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
         List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
-        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
             } catch (Exception e) {
@@ -318,7 +317,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
-        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedStartList(message.getSections()[1], startListMessage);
             } catch (Exception e) {
@@ -330,7 +329,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersCCG(SailMasterMessage message) {
         Course course = parseCourseConfigurationMessage(message);
-        for (SailMasterListener listener : getListeners(message.getRaceID())) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedCourseConfiguration(message.getSections()[1], course);
             } catch (Exception e) {
@@ -342,7 +341,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private void notifyListenersRAC(SailMasterMessage message) {
         Iterable<Race> races = parseAvailableRacesMessage(message);
-        for (SailMasterListener listener : listeners) {
+        for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedAvailableRaces(races);
             } catch (Exception e) {
@@ -418,7 +417,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark, boatIRM));
             }
         }
-        Set<SailMasterListener> allListeners = getListeners(message.getRaceID());
+        Set<SailMasterListener> allListeners = getListeners();
         for (SailMasterListener listener : allListeners) {
             try {
                 listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
@@ -430,17 +429,28 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
     }
 
-    private Set<SailMasterListener> getListeners(String raceID) {
-        return Collections.unmodifiableSet(listeners);
+    private Set<SailMasterListener> getListeners() {
+        synchronized (listeners) {
+            return Collections.unmodifiableSet(listeners);
+        }
     }
 
     @Override
-    public synchronized void stop() throws IOException {
-        logger.info("Stopping SailMasterConnector listening on port "+port+" with socket "+socket);
+    public String toString() {
+        return "SailMasterConnector listening on port "+port+" with socket "+socket+" for race "+raceName+" with ID "+raceId+" ("+raceDescription+")";
+    }
+    
+    @Override
+    public void stop() throws IOException {
+        logger.info("Stopping "+this);
         stopped = true;
-        socket.close();
-        socket = null;
-        notifyAll();
+        if (socket != null) {
+            socket.close();
+            socket = null;
+        }
+        synchronized (this) {
+            notifyAll();
+        }
     }
     
     @Override
@@ -450,13 +460,19 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     @Override
     public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException {
-        ensureSocketIsOpen();
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
     
     @Override
-    public void removeSailMasterListener(SailMasterListener listener) {
-        listeners.remove(listener);
+    public void removeSailMasterListener(SailMasterListener listener) throws IOException {
+        synchronized (listeners) {
+            listeners.remove(listener);
+            if (listeners.isEmpty()) {
+                stop();
+            }
+        }
     }
 
     public SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException {
@@ -487,51 +503,51 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return sailMasterMessage;
     }
 
-    private synchronized void ensureSocketIsOpen() throws InterruptedException {
-        while (!stopped && socket == null) {
-            try {
-                logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name() + " message...");
-                socket = new Socket(host, port);
-                final OutputStream os = socket.getOutputStream();
-                final InputStream is = socket.getInputStream();
-                final SailMasterMessage opnRequest = createSailMasterMessage(MessageType.OPN, raceId);
-                sendMessage(opnRequest, os);
-                SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
-                if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
-                    logger.info("Recevied non-OK response " + opnResponse + " for our request "
-                            + opnRequest + ". Closing socket and trying again in 1s...");
-                    closeAndNullSocketAndWaitABit();
-                } else {
-                    logger.info("Received " + opnResponse + " which seems OK. Continuing with " + MessageType.LSN.name() + " request...");
-                    numberOfStoredMessages = Long.valueOf(opnResponse.getSections()[2]);
-                    List<String> lsnArgs = new ArrayList<>();
-                    lsnArgs.add("ON"); // request live messages always; why not?
-                    if (maxSequenceNumber != -1) {
-                        logger.info("Requesting messages starting from sequence number "+(maxSequenceNumber+1));
-                        // already received a numbered message; ask only for newer messages with greater sequence number
-                        lsnArgs.add(new Long(maxSequenceNumber+1).toString());
-                    }
-                    final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN, lsnArgs.toArray(new String[0]));
-                    sendMessage(lsnRequest, os);
-                    SailMasterMessageImpl lsnResponse = new SailMasterMessageImpl(receiveMessage(is));
-                    if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
-                        logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
+    private final Object ensureSocketIsOpenSemaphor = new Object();
+    private void ensureSocketIsOpen() throws InterruptedException {
+        synchronized (ensureSocketIsOpenSemaphor) {
+            while (!stopped && socket == null) {
+                try {
+                    logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name()
+                            + " message...");
+                    socket = new Socket(host, port);
+                    final OutputStream os = socket.getOutputStream();
+                    final InputStream is = socket.getInputStream();
+                    final SailMasterMessage opnRequest = createSailMasterMessage(MessageType.OPN, raceId);
+                    sendMessage(opnRequest, os);
+                    SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                    if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
+                        logger.info("Recevied non-OK response " + opnResponse + " in "+this+" for our request " + opnRequest
                                 + ". Closing socket and trying again in 1s...");
                         closeAndNullSocketAndWaitABit();
                     } else {
-                        logger.info("Received "+lsnResponse+" which seems to be OK. I think we're connected!");
-                        synchronized (this) {
-                            logger.info("...successfully opened socket to " + host + ":" + port);
-                            // TODO now request all messages starting after the last message received so far
-                            connected = true;
-                            notifyAll();
+                        logger.info("Received " + opnResponse + " in "+this+" which seems OK. Continuing with "
+                                + MessageType.LSN.name() + " request...");
+                        numberOfStoredMessages = Long.valueOf(opnResponse.getSections()[2]);
+                        List<String> lsnArgs = new ArrayList<>();
+                        lsnArgs.add("ON"); // request live messages always; why not?
+                        if (maxSequenceNumber != -1) {
+                            logger.info("Requesting messages starting from sequence number " + (maxSequenceNumber + 1)+" in "+this);
+                            // already received a numbered message; ask only for newer messages with greater sequence number
+                            lsnArgs.add(new Long(maxSequenceNumber + 1).toString());
+                        }
+                        final SailMasterMessage lsnRequest = createSailMasterMessage(MessageType.LSN,
+                                lsnArgs.toArray(new String[0]));
+                        sendMessage(lsnRequest, os);
+                        SailMasterMessageImpl lsnResponse = new SailMasterMessageImpl(receiveMessage(is));
+                        if (lsnResponse.getType() != MessageType.LSN || !"OK".equals(lsnResponse.getSections()[1])) {
+                            logger.info("Received non-OK response " + lsnResponse + " for our request " + lsnRequest
+                                    + " in "+this+". Closing socket and trying again in 1s...");
+                            closeAndNullSocketAndWaitABit();
+                        } else {
+                            logger.info("Received " + lsnResponse
+                                    + " which seems to be OK. I think we're connected in "+this+"!");
                         }
                     }
+                } catch (IOException e) {
+                    logger.log(Level.INFO, "Exception trying to establish connection in "+this+". Trying again in 1s.", e);
+                    closeAndNullSocketAndWaitABit();
                 }
-            } catch (IOException e) {
-                logger.log(Level.INFO, "Exception trying to establish SailMaster connection to " + host + ":" + port
-                        + ". Trying again in 1s.", e);
-                closeAndNullSocketAndWaitABit();
             }
         }
     }

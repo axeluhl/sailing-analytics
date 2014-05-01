@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
