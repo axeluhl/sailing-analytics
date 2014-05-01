@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.scalablevalue.AbstractScalarValue;
-import com.sap.sailing.domain.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.AbstractScalarValue;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 
 public class ScalableInteger implements AbstractScalarValue<Integer> {
     

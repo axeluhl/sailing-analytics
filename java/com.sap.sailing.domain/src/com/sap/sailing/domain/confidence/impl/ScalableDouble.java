@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.confidence.impl;
 
-import com.sap.sailing.domain.scalablevalue.AbstractScalarValue;
-import com.sap.sailing.domain.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.AbstractScalarValue;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 
 public class ScalableDouble implements AbstractScalarValue<Double> {
     private final double value;

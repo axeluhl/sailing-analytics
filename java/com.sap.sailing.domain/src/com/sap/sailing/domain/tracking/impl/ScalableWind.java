@@ -3,9 +3,9 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.AbstractPosition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.scalablevalue.ScalableValue;
-import com.sap.sailing.domain.scalablevalue.impl.ScalablePosition;
-import com.sap.sailing.domain.scalablevalue.impl.ScalableSpeedWithBearing;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeedWithBearing;
 import com.sap.sailing.domain.tracking.Wind;
 
 /**

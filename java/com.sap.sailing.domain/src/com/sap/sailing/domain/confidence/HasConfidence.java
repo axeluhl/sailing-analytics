@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are

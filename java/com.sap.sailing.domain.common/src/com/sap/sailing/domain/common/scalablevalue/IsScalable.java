@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.scalablevalue;
+package com.sap.sailing.domain.common.scalablevalue;
 
 import java.io.Serializable;
 
