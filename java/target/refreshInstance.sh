@@ -90,6 +90,10 @@ activate_user_data ()
 {
     # make sure to reload data
     source "$ec2EnvVars_tmpFile"
+    INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
+    INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+    INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
+    INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
 }
 
 append_user_data_to_envsh ()
