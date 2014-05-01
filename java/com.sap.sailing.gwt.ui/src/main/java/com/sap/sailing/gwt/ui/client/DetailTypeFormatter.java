@@ -53,8 +53,10 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSeconds();
         case RACE_DISTANCE_TO_LEADER_IN_METERS:
             return stringMessages.windwardDistanceToLeaderInMeters();
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMeters();
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMeters();
         case START_TACK:
             return stringMessages.startTack();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -79,8 +81,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentLeg();
         case TIME_TRAVELED:
             return stringMessages.time();
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMeters();
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMeters();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_DISTANCE_TRAVELED:
@@ -153,8 +157,10 @@ public class DetailTypeFormatter {
         case AVERAGE_TACK_LOSS_IN_METERS:
         case AVERAGE_JIBE_LOSS_IN_METERS:
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
         case DISTANCE_TO_START_AT_RACE_START:
         case TOTAL_DISTANCE_TRAVELED:
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
@@ -213,12 +219,16 @@ public class DetailTypeFormatter {
      */
     public static String getTooltip(DetailType detailType) {
         switch (detailType) {
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMetersTooltip();
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMetersTooltip();
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMetersTooltip();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSecondsTooltip();
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.raceAverageCrossTrackErrorInMetersTooltip();
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.raceAverageSignedCrossTrackErrorInMetersTooltip();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
             return stringMessages.sideToWhichMarkAtLegStartWasRoundedTooltip();
         case VELOCITY_MADE_GOOD_IN_KNOTS:

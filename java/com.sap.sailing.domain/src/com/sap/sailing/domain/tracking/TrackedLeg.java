@@ -45,7 +45,18 @@ public interface TrackedLeg extends Serializable {
 
     Bearing getLegBearing(TimePoint at);
 
-    Distance getCrossTrackError(Position p, TimePoint timePoint);
+    /**
+     * Returns the positive (absolute) distance of <code>p</code> to this leg's course middle line at <code>timePoint</code>,
+     * based on the position of the waypoints delimiting this leg at that time.
+     */
+    Distance getAbsoluteCrossTrackError(Position p, TimePoint timePoint);
+
+    /**
+     * Returns the (signed) distance of <code>p</code> to this leg's course middle line at <code>timePoint</code>,
+     * based on the position of the waypoints delimiting this leg at that time. Negative distances mean "left" of the
+     * course middle line looking in the direction of the leg, positive distances mean "right."
+     */
+    Distance getSignedCrossTrackError(Position p, TimePoint timePoint);
 
     /**
      * Must be called when the start and finish waypoint of this leg may have changed.

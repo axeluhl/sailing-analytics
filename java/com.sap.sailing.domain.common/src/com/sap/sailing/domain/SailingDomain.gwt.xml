@@ -6,4 +6,6 @@
   <source path='common/racelog'/>
   <source path='common/filter'/>
   <source path='common/media'/>
+  <source path='common/scalablevalue'/>
+  <source path='common/scalablevalue/impl'/>
 </module>

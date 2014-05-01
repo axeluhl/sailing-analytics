@@ -1117,7 +1117,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-            // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
             windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
             for (WindSource windSource : windSourcesToDeliver) {
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
@@ -1133,16 +1132,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Double maxWindConfidence = -1.0;
                     for (int i = 0; i < numberOfFixes; i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
-
                         if (averagedWindWithConfidence != null) {
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             double confidence = averagedWindWithConfidence.getConfidence();
                             windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
-                            if(confidence < minWindConfidence) {
+                            if (confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
-                            if(confidence > maxWindConfidence) {
+                            if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
                             }
                         }
@@ -1162,7 +1160,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     throws NoWindException {
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
                 windSourceTypeNames, trackedRace);
         return result;
@@ -1172,7 +1169,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Collection<String> windSourceTypeNames, TrackedRace trackedRace) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
@@ -1197,14 +1193,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     TimePoint timePoint = from;
                     Double minWindConfidence = 2.0;
                     Double maxWindConfidence = -1.0;
-                    for (int i = 0; i < numberOfFixes && newestEvent != null && timePoint.compareTo(newestEvent) < 0; i++) {
+                    for (int i = 0; i < numberOfFixes; i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
                             double confidence = averagedWindWithConfidence.getConfidence();
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
-                            if(confidence < minWindConfidence) {
+                            if (confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
                             if (confidence > maxWindConfidence) {
