@@ -1,14 +1,14 @@
 # RaceLog Tracking
-RaceLog-tracking allows fully self-sustained tracking with the Sailing Analytics, with no need for an additional tracking provider. Instead, any source of positional data (e.g. smartphones, providers such as Igtimi without race-management) can be integrated.
+RaceLog-tracking allows fully self-sustained tracking with the Sailing Analytics, with no need for an additional tracking provider. Instead, any source of positional data (e.g. smartphones, providers such as Igtimi without race management) can be integrated.
 
-The term itself should be revised at some point, and currently refers to the technical implementation on how master-data related to a race (e.g. competitor registrations, course layout) is recorded and persisted: namely in a RaceLog.
+The term itself should be revised at some point, and currently refers to the technical implementation on how master data related to a race (e.g. competitor registrations, course layout) is recorded and stored persistently: namely in a RaceLog.
 
 This is the second iteration of implementing this idea. For previous documentation, see [[smartphone tracking|wiki/smartphone-tracking]].
 
 [[_TOC_]]
 
 # Development Infos
-Currently, RaceLog-tracking has not been merged into the master branch. Instead, refer to the following branches:
+Currently, RaceLog tracking has not been merged into the master branch. Instead, refer to the following branches:
 * ``gpsfixstore-independent-of-race``: The main RaceLog-tracking development
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
@@ -26,14 +26,14 @@ Not all identifiers represent actual class or bundle names. For a more technical
 # AdminConsole Components
 Currently, RaceLogs can be filled with the race metadata via the _RaceLog Tracking_ panel in the AdminConsole. Here one can denote RaceColumn/Fleet combinations within RegattaLeaderboards for RaceLog-tracking, register competitors, define the course layout, add device mappings, and finally start tracking.
 
-When thinking about smartphone tracking, it would of course be a good idea to also integrate similar functionality into the tracking app. Some parts of the communication (registering competitors, defining the course, mapping decies) can be handled via the existing RaceLog communication mechanism. Other parts (creating the Leaderboard structure in the first place, adding the RaceLog tracker) have to be dealt with separately, e.g. via a REST API.
+When thinking about smartphone tracking, it would of course be a good idea to also integrate similar functionality into the tracking app. Some parts of the communication (registering competitors, defining the course, mapping devices) can be handled via the existing RaceLog communication mechanism. Other parts (creating the Leaderboard structure in the first place, adding the RaceLog tracker) have to be dealt with separately, e.g. via a REST API.
 
 # ToDos
 ## Archiving old Races
-Since RaceLog-tracking allows fully independent tracking, storing and reloading of races, it may be a good foundation for archiving old races. Currently, we rely on tracking providers to retain all data indefinitely, so that it can be reloaded e.g. after restarting the server. Also see [[bug 2|http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2]] for more details.
+Since RaceLog-tracking allows for fully independent tracking, storing and reloading of races, it may be a good foundation for archiving old races. Currently, we rely on tracking providers to retain all data indefinitely, so that it can be reloaded, e.g., after restarting the server. Also see [[bug 2|http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2]] for more details.
 
 ## Smartphone Tracking
-RaceLog-tracking provides the server-side abilities for independent tracking. Therefore, using smartphones for tracking is one possible application. So far, there is no implementation in terms of a smartphone app. The relation to the existing RaceCommittee app has be be considered, as both should share a common code base, and as there should be certain points of integration (e.g. first defining the race in the tracking app, then setting the start time in the RC-app, and finally tracking one boat with that smartphone - again with the tracking app).
+RaceLog-tracking provides the server-side abilities for independent tracking. Therefore, using smartphones for tracking is one possible application. So far, there is no implementation in terms of a smartphone app. The relation to the existing RaceCommittee app has be be considered, as both should share a common code base, and as there should be certain points of integration (e.g., first defining the race in the tracking app, then setting the start time in the RC-app, and finally tracking one boat with that smartphone - again with the tracking app).
 
 The first option is to simply share code through a Android library module, the second option is integrating everything into one app with two launchers (one for tracking, one for the RaceCommittee functionality).
 
