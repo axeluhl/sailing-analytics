@@ -7,6 +7,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -86,5 +87,12 @@ public class RaceTrackerMock implements RaceTracker{
         // TODO Auto-generated method stub
         return null;
     }
+
+
+
+	@Override
+	public GPSFixStore getGPSFixStore() {
+        throw new RuntimeException("No GPSFix store in racetracker mock");
+	}
 
 }

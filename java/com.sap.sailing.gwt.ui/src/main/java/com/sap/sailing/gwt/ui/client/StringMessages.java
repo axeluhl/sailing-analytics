@@ -365,11 +365,12 @@ public interface StringMessages extends Messages {
     String controlPoint();
     String errorUpdatingRaceCourse(String message);
     String successfullyUpdatedCourse();
-    String selectOneMarkOrTwoMarksForGate();
+    String selectTwoMarksForGate();
     String errorTryingToObtainTheMarksOfTheRace(String message);
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
+    String addGate();
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
@@ -964,6 +965,42 @@ public interface StringMessages extends Messages {
     String releaseNotes();
     String hasSplitFleetContiguousScoring();
     String eventOverview();
+    String addRaceLogTracker();
+    String addRaceLogTrackers();
+    String denoteForRaceLogTracking();
+    String raceLogTracking();
+    String startRaceLogTracking();
+    String filterByLeaderboard();
+    String removeLeaderboardFilter();
+    String competitorRegistrations();
+    String trackerStatus();
+    String canOnlyBeEditedBeforeStartingTracking();
+    String defineCourse();
+    String mapDevices();
+    @Key("edit_what")
+    String edit(String what);
+    @Key("add_what")
+    String add(String what);
+    @Key("remove_what")
+    String remove(String what);
+    String pleaseEnterA(String what);
+    String pingPosition(String whose);
+    String pleaseEnterAValidValueFor(String what, String validTemplate);
+    String copyCourseAndCompetitors();
+    String nowSelectRaceColumnAndFleetToCopyTo();
+    String selectRowInTableToCopyCourse();
+    String deviceId();
+    String deviceType();
+    String mappedToType();
+    String mappedTo();
+    String deviceMappings();
+    String atMostOneEndOfTheTimeRangeMayBeOpen();
+    String pleaseSelectAnItemToMapTo();
+    String device();
+    String timeRange();
+    String closeTimeRange();
+    String setClosingTimePoint();
+    String startOfTimeRangeMustLieBeforeEnd();
     String start();
     String overallProgress();
     String showAddedScores();
@@ -972,4 +1009,12 @@ public interface StringMessages extends Messages {
     String importWindTooltip();
     String authorName();
     String authorPriority();
+    String removeDenotation();
+    String competitorRegistrationsMissingProceed(String namesOfRaces);
+    String pleaseSelectAControlPoint();
+    String twoMarkControlPoint();
+    String registeredCompetitors();
+    String competitorPool();
+    String selectAtLeastOne();
+    String selectRaces();
 }

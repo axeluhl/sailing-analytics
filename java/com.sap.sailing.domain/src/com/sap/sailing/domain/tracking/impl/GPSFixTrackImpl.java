@@ -54,6 +54,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
+    
     private final GPSTrackListeners<ItemType, FixType> listeners;
     
 

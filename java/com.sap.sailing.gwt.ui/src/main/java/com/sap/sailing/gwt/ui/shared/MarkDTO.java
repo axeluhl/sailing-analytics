@@ -28,4 +28,18 @@ public class MarkDTO extends ControlPointDTO {
     public Iterable<MarkDTO> getMarks() {
         return Collections.singleton(this);
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MarkDTO) {
+            MarkDTO other = (MarkDTO) o;
+            return getIdAsString() != null && getIdAsString().equals(other.getIdAsString());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return getIdAsString().hashCode();
+    }
 }

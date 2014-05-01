@@ -4,14 +4,17 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 
 /**
@@ -195,10 +198,15 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
         return innerRaceLog.getEventsToDeliver(clientId);
     }
-    
+
     @Override
     public Iterable<RaceLogEvent> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
         return innerRaceLog.getFixes(from, fromInclusive, to, toInclusive);
+    }
+
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
+        return innerRaceLog.getUnrevokedEvents();
     }
 
     @Override
@@ -212,7 +220,21 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
+        return innerRaceLog.getUnrevokedEventsDescending();
+    }
+    
+    public RaceLogEvent getEventById(Serializable id) {
+        return innerRaceLog.getEventById(id);
+    }
+
+    @Override
     public void merge(RaceLog other) {
         innerRaceLog.merge(other);
+    }
+
+    @Override
+    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+        innerRaceLog.revokeEvent(author, toRevoke);
     }
 }

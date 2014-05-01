@@ -12,13 +12,13 @@ package com.sap.sailing.domain.common;
  */
 
 public enum PassingInstruction {
-    None, 
-    Port, 
-    Starboard,
-    Gate,
-    Line,
-    Offset,
-    FixedBearing;
+    None(1, 2),
+    Port(1),
+    Starboard(1),
+    Gate(2),
+    Line(2),
+    Offset(2),
+    FixedBearing(1);
 
     public static PassingInstruction[] relevantValues() {
         PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - 1];
@@ -40,4 +40,15 @@ public enum PassingInstruction {
         return null;
     }
     
+    /**
+     * Denotes for which types of {@code ControlPoints} (defined by the number of marks they are made up of)
+     * this passing instruction is applicable.<p>
+     * E.g. {@code [1,2]} denotes that the passing instruction is applicable for {@code ControlPoints} with either one
+     * or two marks.
+     */
+    public final int[] applicability;
+    
+    private PassingInstruction(int... applicability) {
+        this.applicability = applicability;
+    }
 }

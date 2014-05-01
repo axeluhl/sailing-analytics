@@ -17,5 +17,4 @@ public class DynamicTrackImpl<FixType extends Timed> extends TrackImpl<FixType> 
     public boolean add(FixType fix) {
         return super.add(fix);
     }
-
 }
