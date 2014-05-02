@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking;
+package com.sap.sailing.server.gateway.trackfiles;
 
 import java.util.UUID;
 

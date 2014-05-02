@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking;
+package com.sap.sailing.server.gateway.trackfiles;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -46,8 +46,8 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof PingDeviceIdentifier) {
-            return id.equals(((PingDeviceIdentifier) obj).getId());
+        if (obj instanceof TrackFileImportDeviceIdentifier) {
+            return id.equals(((TrackFileImportDeviceIdentifier) obj).getId());
         }
         return false;
     }
