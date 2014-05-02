@@ -27,9 +27,9 @@ public interface DeviceIdentifierSerializationHandler<T> {
      * serializer, that actually returns some generic serializiation (e.g. {@link PlaceHolderDeviceIdentifier}).
      * 
      * @param deviceIdentifier
-     * @return A pair consisting of the {@code serialized identifier} and the {@code device type}.
+     * @return A pair: <{@code device type}, {@code serialized identifier}>
      */
-    Pair<? extends T, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException;
+    Pair<String, ? extends T> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException;
     
     /**
      * Deserialize the identifier. In case this is a fallback deserializer (e.g. for {@link PlaceHolderDeviceIdentifier}),

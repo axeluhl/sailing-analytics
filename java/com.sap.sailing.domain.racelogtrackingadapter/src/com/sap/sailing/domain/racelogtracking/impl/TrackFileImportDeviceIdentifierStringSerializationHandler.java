@@ -15,7 +15,7 @@ public class TrackFileImportDeviceIdentifierStringSerializationHandler implement
     @Override
     public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
-        return new Pair<String, String>(id.toString(), TrackFileImportDeviceIdentifier.TYPE);
+        return new Pair<String, String>(TrackFileImportDeviceIdentifier.TYPE, id.getStringRepresentation());
     }
 
     @Override

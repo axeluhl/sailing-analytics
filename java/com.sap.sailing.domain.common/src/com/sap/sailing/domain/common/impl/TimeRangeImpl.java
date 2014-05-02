@@ -113,4 +113,9 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
         }
         return super.equals(obj);
     }
+    
+    @Override
+    public String toString() {
+        return from() + "-" + to();
+    }
 }

@@ -37,7 +37,7 @@ public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdenti
     }
 
     @Override
-    public Pair<DBObject, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+    public Pair<String ,DBObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
         DBObject result = new BasicDBObject();
         result.put(Fields.UUID.name(), id.getId().toString());
@@ -50,7 +50,7 @@ public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdenti
         result.put(Fields.TO_MILLIS.name(), TrackFileImportDeviceIdentifierJsonHandler.
                 storeTimePoint(id.getFixesTimeRange().to()));
         result.put(Fields.NUM_FIXES.name(), id.getNumberOfFixes());
-        return new Pair<DBObject, String>(result, TrackFileImportDeviceIdentifier.TYPE);
+        return new Pair<String ,DBObject>(TrackFileImportDeviceIdentifier.TYPE, result);
     }
 
 }

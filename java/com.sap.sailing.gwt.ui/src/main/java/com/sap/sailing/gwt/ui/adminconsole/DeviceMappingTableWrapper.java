@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -17,6 +18,9 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>());
+        
+        table.setWidth("1000px", true);
+        table.addStyleName("wrap-cols");
         
         ListHandler<DeviceMappingDTO> listHandler = new ListHandler<DeviceMappingDTO>(dataProvider.getList());
         
@@ -80,7 +84,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
             }
         });
         table.addColumn(deviceIdCol, stringMessages.deviceId());
-        table.setColumnWidth(deviceIdCol, "300px");
+        table.setColumnWidth(deviceIdCol, 400, Unit.PX);
         
         TextColumn<DeviceMappingDTO> fromCol = new TextColumn<DeviceMappingDTO>() {
             @Override

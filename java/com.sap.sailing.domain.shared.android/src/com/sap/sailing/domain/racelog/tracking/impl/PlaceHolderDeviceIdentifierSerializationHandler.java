@@ -25,7 +25,7 @@ public class PlaceHolderDeviceIdentifierSerializationHandler {
     }
 
     public Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
-        return new Pair<String, String>(object.getIdentifierType(), PlaceHolderDeviceIdentifier.TYPE);
+        return new Pair<String, String>(object.getIdentifierType(), object.getStringRepresentation());
     }
 
 }

@@ -12,7 +12,7 @@ public class SmartphoneImeiSerializationHandler {
     }
 
     public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Pair<String, String>(castIdentifier(deviceIdentifier).getImei(), SmartphoneImeiIdentifier.TYPE);
+        return new Pair<String, String>(SmartphoneImeiIdentifier.TYPE, castIdentifier(deviceIdentifier).getImei());
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) {

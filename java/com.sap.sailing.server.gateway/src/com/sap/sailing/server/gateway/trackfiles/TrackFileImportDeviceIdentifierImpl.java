@@ -1,7 +1,5 @@
 package com.sap.sailing.server.gateway.trackfiles;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +12,6 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDeviceIdentifier {    
     private static final long serialVersionUID = 552465264341485161L;
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private final UUID id;
     private final String fileName;
     private final String trackName;
@@ -57,16 +54,13 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     
     @Override
     public String toString() {
-        String from = dateFormat.format(timeRange.from().asDate());
-        String to = dateFormat.format(timeRange.to().asDate());
-        String uploaded = timePoint == null ? "" : dateFormat.format(timePoint.asDate());
-        return String.format("%s: %s(%s-%s, %s fixes) @%s(uploaded %s)",
-                id.toString(), trackName, from, to, numberOfFixes, fileName, uploaded);
+        return id.toString();
     }
 
     @Override
     public String getStringRepresentation() {
-        return toString();
+        return String.format("%s: %s(%s, %s fixes)\n  @%s(uploaded %s)",
+                id.toString(), trackName, timeRange, numberOfFixes, fileName, timePoint);
     }
     
     @Override

@@ -49,7 +49,7 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
     }
 
     @Override
-    public Pair<JSONObject, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+    public Pair<String, JSONObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
         JSONObject result = new JSONObject();
         result.put(Fields.UUID.name(), id.getId().toString());
@@ -59,7 +59,7 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
         result.put(Fields.FROM_MILLIS.name(), storeTimePoint(id.getFixesTimeRange().from()));
         result.put(Fields.TO_MILLIS.name(), storeTimePoint(id.getFixesTimeRange().to()));
         result.put(Fields.NUM_FIXES.name(), id.getNumberOfFixes());
-        return new Pair<JSONObject, String>(result, TrackFileImportDeviceIdentifier.TYPE);
+        return new Pair<String ,JSONObject>(TrackFileImportDeviceIdentifier.TYPE, result);
     }
 
 }

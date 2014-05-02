@@ -16,7 +16,7 @@ public class PingDeviceIdentifierSerializationHandler {
     }
 
     public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Pair<String, String>(castIdentifier(deviceIdentifier).getId().toString(), PingDeviceIdentifier.TYPE);
+        return new Pair<String, String>(PingDeviceIdentifier.TYPE, castIdentifier(deviceIdentifier).getId().toString());
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) {

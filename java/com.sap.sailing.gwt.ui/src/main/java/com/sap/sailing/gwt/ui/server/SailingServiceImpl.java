@@ -4254,7 +4254,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {
         return getDeviceIdentifierStringSerializerHandlerFinder(true).findService(
-                deviceId.getIdentifierType()).serialize(deviceId).getA();
+                deviceId.getIdentifierType()).serialize(deviceId).getB();
     }
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
