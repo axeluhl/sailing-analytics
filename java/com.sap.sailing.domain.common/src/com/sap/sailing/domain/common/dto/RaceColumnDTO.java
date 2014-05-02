@@ -23,7 +23,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private Double explicitFactor;
     private double effectiveFactor;
 
-    private final Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
+    private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
     
     RaceColumnDTO() {} // for GWT serialization
     
