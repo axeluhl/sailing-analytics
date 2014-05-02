@@ -463,14 +463,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               add(map, 0, 0);
               map.setSize("100%", "100%");
 
-              if (parent.particles > 0) {
+              if (windParams.isShowStreamlets2()) {
             	  map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
             		  @Override
             		  public void onEvent(BoundsChangeMapEvent event) {
             			  // improve browser performance by deferred scheduling of redraws
             			  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             				  public void execute() {
-            					  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged();
+            					  if (windStreamletsCanvasOverlay.getSwarm() != null) {
+            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged();
+            					  }
             				  }
             			  });
             		  }

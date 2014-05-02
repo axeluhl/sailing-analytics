@@ -7,6 +7,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
+import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 public class Swarm {
@@ -18,7 +19,7 @@ public class Swarm {
 	private Timer loopTimer;
     private String[] color;
     private Mercator projection;
-    private RectField field;
+    private VectorField field;
     private int nParticles;
     private Particle[] particles;
     private boolean swarmOffScreen = false;
@@ -33,19 +34,27 @@ public class Swarm {
 		this.map = map;
 	}
 	
-    public void start(int animationDuration) {
+    public void start(int animationDuration, WindFieldDTO windField) {
 
     	projection = new Mercator(fullcanvas, map);
 
-    	if (field == null) {
+    	if (windField == null) {
+
     		SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
     		String jsonStr = bundle.windStreamletsDataJS().getText();
     		field = RectField.read(jsonStr.substring(19, jsonStr.length()-1), false);
 
     		map.setZoom(5);
-    		map.panTo(field.getCenter());
+    		map.panTo(((RectField)field).getCenter());
 
     		projection.calibrate();
+
+    	} else {
+    		
+    		field = new SimulatorField(((WindStreamletsCanvasOverlay)fullcanvas).windFieldDTO, ((WindStreamletsCanvasOverlay)fullcanvas).windParams);
+        	fullcanvas.setCanvasSettings();
+    		projection.calibrate();
+    		
     	}
 
     	this.updateBounds();
@@ -53,7 +62,13 @@ public class Swarm {
     	color = field.getColors();
 
     	Context2d ctxt = canvas.getContext2d();
-    	ctxt.setFillStyle("white");
+    	ctxt.setFillStyle("red");
+    	
+    	/*Vector p = this.projection.latlng2pixel(this.field.getFieldNE());
+    	ctxt.fillRect(p.x,p.y,5.0,5.0);
+
+    	p = this.projection.latlng2pixel(this.field.getFieldSW());
+    	ctxt.fillRect(p.x,p.y,5.0,5.0);*/
 
     	particles = this.createParticles();
 
@@ -115,8 +130,8 @@ public class Swarm {
     	GeoPos mapNE = new GeoPos(map.getBounds().getNorthEast());
     	GeoPos mapSW = new GeoPos(map.getBounds().getSouthWest());
 
-    	GeoPos fieldNE = new GeoPos(Math.max(this.field.y0, this.field.y1), Math.max(this.field.x0, this.field.x1));
-    	GeoPos fieldSW = new GeoPos(Math.min(this.field.y0, this.field.y1), Math.min(this.field.x0, this.field.x1));
+    	GeoPos fieldNE = this.field.getFieldNE();
+    	GeoPos fieldSW = this.field.getFieldSW();
 
     	Vector visibleNE = this.isVisible(fieldNE);
     	Vector visibleSW = this.isVisible(fieldSW);
@@ -157,10 +172,8 @@ public class Swarm {
 
     	}
 
-    	this.field.visX0 = this.boundsSW.lng;
-    	this.field.visY0 = this.boundsSW.lat;
-    	this.field.visX1 = this.boundsNE.lng;
-    	this.field.visY1 = this.boundsNE.lat;
+    	this.field.setVisSW(this.boundsSW);
+    	this.field.setVisNE(this.boundsNE);
 
     	Vector boundsSWpx = this.projection.latlng2pixel(this.boundsSW);
     	Vector boundsNEpx = this.projection.latlng2pixel(this.boundsNE);
@@ -168,7 +181,7 @@ public class Swarm {
     	double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
     	double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
 
-    	this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.particleFactor);
+    	this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
     	//console("#particles: "+this.nParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
     };
 
@@ -245,14 +258,16 @@ public class Swarm {
     	
     	for(int idx=0; idx<particles.length; idx++) {
     		Particle particle = particles[idx];
-    		if ((particle.age > 0) && (this.field.inBounds(particle.pos.lng, particle.pos.lat))) {
+    		if ((particle.age > 0) && (particle.v != null)) {
     			particle.pos.lat = particle.pos.lat + speed*particle.v.y;
     			particle.pos.lng = particle.pos.lng + speed*particle.v.x;
     			double s = particle.v.length() / field.getMaxLength();
     			particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
     			particle.age--;
-    			if (particle.age > 0) {
+    			if ((particle.age > 0) && (this.field.inBounds(particle.pos))) {
     				particle.v = field.getVector(particle.pos);
+    			} else {
+    				particle.v = null;    				
     			}
     		} else {
     			particles[idx] = this.createParticle();
@@ -263,5 +278,9 @@ public class Swarm {
 
     	return true;
     }
-	
+
+    public VectorField getField() {
+    	return field;
+    }
+    
 }

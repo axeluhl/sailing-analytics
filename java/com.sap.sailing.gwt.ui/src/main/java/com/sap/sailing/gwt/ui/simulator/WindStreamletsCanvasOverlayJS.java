@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
+public class WindStreamletsCanvasOverlayJS extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
     /** The wind field that is to be displayed in the overlay */
     protected WindFieldDTO windFieldDTO;
@@ -36,9 +36,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private int nParticles;
     private Swarm swarm;
 
-    private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
+    private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlayJS.class.getName());
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
+    public WindStreamletsCanvasOverlayJS(SimulatorMap simulatorMap, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
         super(simulatorMap.getMap(), zIndex);
         
         this.simulatorMap = simulatorMap;
@@ -52,6 +52,11 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
         getCanvas().getElement().setId("swarm-display");
         
+        /*if (!this.isSwarmDataExt()) {
+        	// random test windfield
+        	JavaScriptObject swarmData = this.getJSONRandomWindData();
+        	this.setSwarmData(swarmData);
+        }*/
     }
 
     public JavaScriptObject getJSONRandomWindData() {
@@ -105,7 +110,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     	$wnd.swarmData = swarmData;
     }-*/;    
 
-    private native void getJSNIWind(WindStreamletsCanvasOverlay wsc) /*-{
+    private native void getJSNIWind(WindStreamletsCanvasOverlayJS wsc) /*-{
     	$wnd.getWindfromSimulator = function(idx) {
     		return wsc.@com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay::getWind(I)(idx);
     	};
@@ -126,7 +131,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 		eval(jsonField);
 	}-*/;    
     		
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
+    public WindStreamletsCanvasOverlayJS(SimulatorMap simulatorMap, int zIndex) {
         this(simulatorMap, zIndex, null, null);
     }
 
@@ -138,41 +143,24 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 		$wnd.swarmCanvasProjection = instance;
 	}-*/;
 
-//    public native void startStreamlets() /*-{
-//    	if ($wnd.swarmAnimator) {
-//    		$wnd.swarmUpdData = true;
-//    		$wnd.updateStreamlets($wnd.swarmUpdData);
-//    	} else {
-//			$wnd.initStreamlets($wnd.swarmMap);
-//    	}
-//	}-*/;
-
-    public void startStreamlets() {
-    	if (swarm == null) {
-    		this.swarm = new Swarm(this,map);
+    public native void startStreamlets() /*-{
+    	if ($wnd.swarmAnimator) {
+    		$wnd.swarmUpdData = true;
+    		$wnd.updateStreamlets($wnd.swarmUpdData);
+    	} else {
+			$wnd.initStreamlets($wnd.swarmMap);
     	}
-    	this.swarm.start(40, windFieldDTO);
-    }
-    
-//    public native void setStreamletsStep(int step) /*-{
-//		$wnd.swarmField.setStep(step);
-//	}-*/;
+	}-*/;
 
-    public void setStreamletsStep(int step) {
-		this.swarm.getField().setStep(step);
-	}
+    public native void setStreamletsStep(int step) /*-{
+		$wnd.swarmField.setStep(step);
+	}-*/;
 
-//    public native void stopStreamlets() /*-{
-//    	if ($wnd.stopStreamlets) {
-//			$wnd.stopStreamlets();
-//    	};
-//	}-*/;
-    
-    public void stopStreamlets() {
-    	if (swarm != null) {
-    		this.swarm.stop();
-    	}
-    }
+    public native void stopStreamlets() /*-{
+    	if ($wnd.stopStreamlets) {
+			$wnd.stopStreamlets();
+    	};
+	}-*/;
     
     public void extendWindDataJSON() {
     	
@@ -219,6 +207,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     
     public void setWindField(final WindFieldDTO windFieldDTO) {
         this.windFieldDTO = windFieldDTO;
+
+        this.extendWindDataJSON();
+        this.setWindDataJSON(this.windFieldDTO.windDataJSON);
+
+        //this.getJSNIWind(this);
+
+        this.setMapInstance(this.simulatorMap.getMap().getJso());
+		this.setCanvasProjectionInstance(this.simulatorMap.getRegattaAreaCanvasOverlay().getMapProjection());
     }
 
     @Override
@@ -280,7 +276,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
     
     private void clear() {
-        this.stopStreamlets();
+        this.stopStreamlets();        
     }
 
     @Override

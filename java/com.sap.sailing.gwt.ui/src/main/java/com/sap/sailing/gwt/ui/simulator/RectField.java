@@ -4,19 +4,22 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
 
-public class RectField {
+public class RectField implements VectorField {
 
-	Vector[][] field;
+	private Vector[][] field;
 
 	public double x0;
 	public double x1;
 	public double y0;
 	public double y1;
 
-	public double visX0;
+	//public double visX0;
 	public double visX1;
 	public double visY0;
 	public double visY1;
+	
+	public GeoPos visSW;
+	public GeoPos visNE;
 
 	private int w;
 	private int h;
@@ -30,11 +33,9 @@ public class RectField {
 		this.y0 = y0;
 		this.y1 = y1;
 
-		this.visX0 = 0;
-		this.visY0 = 0;
-		this.visX1 = 0;
-		this.visY1 = 0;
-
+		this.visSW = new GeoPos(0.0, 0.0);
+		this.visNE = new GeoPos(0.0, 0.0);
+		
 		this.field = field;
 		this.w = field.length;
 		this.h = field[0].length;
@@ -83,26 +84,35 @@ public class RectField {
 		return result;
 	}
 
+	public void setStep(int step) {
+	}
+
+	public void nextStep() {
+	}
+
+	public void prevStep() {
+	}
+
 	public GeoPos getRandomPosition() {
 		double rndY = Math.random();
 		double rndX = Math.random();
 		GeoPos result = new GeoPos();
-		result.lat = rndY * this.visY0 + (1 - rndY) * this.visY1;
-		result.lng = rndX * this.visX0 + (1 - rndX) * this.visX1;
+		result.lat = rndY * this.visSW.lat + (1 - rndY) * this.visNE.lat;
+		result.lng = rndX * this.visSW.lng + (1 - rndX) * this.visNE.lng;
 		return result;
 	}
 
-	public boolean inBounds(double x, double y) {
-		return x >= this.x0 && x < this.x1 && y >= this.y0 && y < this.y1;
+	public boolean inBounds(GeoPos p) {
+		return p.lng >= this.x0 && p.lng < this.x1 && p.lat >= this.y0 && p.lat < this.y1;
 	}
 
-	public Vector interpolate(double a, double b) {
-		int na = (int)Math.floor(a);
-		int nb = (int)Math.floor(b);
-		int ma = (int)Math.ceil(a);
-		int mb = (int)Math.ceil(b);
-		double fa = a - na;
-		double fb = b - nb;
+	public Vector interpolate(GeoPos p) {
+		int na = (int)Math.floor(p.lng);
+		int nb = (int)Math.floor(p.lat);
+		int ma = (int)Math.ceil(p.lng);
+		int mb = (int)Math.ceil(p.lat);
+		double fa = p.lng - na;
+		double fb = p.lat - nb;
 
 		Vector result = new Vector();
 		result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb) + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
@@ -113,12 +123,13 @@ public class RectField {
 
 
 	public Vector getVector(GeoPos p) {
-		double a = (this.w - 1 - 1e-6) * (p.lng - this.x0) / (this.x1 - this.x0);
-		double b = (this.h - 1 - 1e-6) * (p.lat - this.y0) / (this.y1 - this.y0);
-		if ((a < 0)||(a > (this.w-1))||(b < 0)||(b > (this.h-1))) {
+		GeoPos q = new GeoPos();
+		q.lng = (this.w - 1 - 1e-6) * (p.lng - this.x0) / (this.x1 - this.x0);
+		q.lat = (this.h - 1 - 1e-6) * (p.lat - this.y0) / (this.y1 - this.y0);
+		if ((q.lng < 0)||(q.lng > (this.w-1))||(q.lat < 0)||(q.lat > (this.h-1))) {
 			return null;
 		} else {
-			return this.interpolate(a, b);
+			return this.interpolate(q);
 		}
 	}
 
@@ -153,4 +164,23 @@ public class RectField {
 		return 1.0;
 	}
 
+	public GeoPos getFieldNE() {
+		return new GeoPos(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+	}
+	
+	public GeoPos getFieldSW() {
+		return new GeoPos(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+	}
+
+	public void setVisNE(GeoPos visNE) {
+		this.visNE = visNE;
+	}
+	
+	public void setVisSW(GeoPos visSW) {
+		this.visSW = visSW;
+	}
+
+	public double getParticleFactor() {
+		return this.particleFactor;
+	}
 }
