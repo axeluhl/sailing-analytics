@@ -3,6 +3,7 @@ package com.sap.sailing.server.trackfiles;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.impl.ImportImpl;
 
@@ -10,8 +11,7 @@ public interface Import {
     Import INSTANCE = new ImportImpl();
     
     interface FixCallback {
-        void addFix(GPSFix fix);
-        void addFix(GPSFix fix, String trackName);
+        void addFix(GPSFix fix, int numberOfFixesInTrack, TimeRange trackTimeRange, String trackName);
     }
     
     /**

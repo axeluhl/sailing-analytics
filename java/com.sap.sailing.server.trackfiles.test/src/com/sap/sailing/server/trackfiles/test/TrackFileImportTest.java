@@ -1,6 +1,6 @@
 package com.sap.sailing.server.trackfiles.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.trackfiles.Import;
@@ -26,15 +27,10 @@ public class TrackFileImportTest {
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         Import.INSTANCE.importFixes(in, new FixCallback() {
             @Override
-            public void addFix(GPSFix fix, String trackName) {
+            public void addFix(GPSFix fix, int numberOfFixes, TimeRange timeRange, String trackName) {
                 if (fix instanceof GPSFixMoving) {
                     callbackCalled = true;
                 }
-            }
-            
-            @Override
-            public void addFix(GPSFix fix) {
-                // expecting track names
             }
         }, false);
         assertTrue(callbackCalled);

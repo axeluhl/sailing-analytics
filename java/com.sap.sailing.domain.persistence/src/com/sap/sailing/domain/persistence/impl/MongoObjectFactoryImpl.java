@@ -139,10 +139,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    public void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
+    public static void storeTimePoint(TimePoint timePoint, DBObject result, String fieldName) {
         if (timePoint != null) {
-            result.put(field.name(), timePoint.asMillis());
+            result.put(fieldName, timePoint.asMillis());
         }
+    }
+    
+    public static void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
+        storeTimePoint(timePoint, result, field.name());
     }
 
     public void storeTimed(Timed timed, DBObject result) {

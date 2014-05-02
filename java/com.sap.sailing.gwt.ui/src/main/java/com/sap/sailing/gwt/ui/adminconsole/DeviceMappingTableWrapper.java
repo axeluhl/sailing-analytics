@@ -80,6 +80,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
             }
         });
         table.addColumn(deviceIdCol, stringMessages.deviceId());
+        table.setColumnWidth(deviceIdCol, "300px");
         
         TextColumn<DeviceMappingDTO> fromCol = new TextColumn<DeviceMappingDTO>() {
             @Override

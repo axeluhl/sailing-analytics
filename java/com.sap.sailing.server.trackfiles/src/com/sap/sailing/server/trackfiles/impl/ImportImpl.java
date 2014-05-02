@@ -18,10 +18,12 @@ import slash.navigation.gpx.Gpx11Format;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -58,8 +60,16 @@ public class ImportImpl implements Import {
         }
         
         for (BaseRoute route : routes) {
-            String routeName = route.getName();
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
+            String routeName = route.getName();
+            int numberOfFixes = route.getPositionCount();
+            route.ensureIncreasingTime();
+            TimeRange timeRange = null;
+            if (numberOfFixes > 0) {
+                long fromMillis = route.getPosition(0).getTime().getTimeInMillis();
+                long toMillis = route.getPosition(numberOfFixes-1).getTime().getTimeInMillis();
+                timeRange = TimeRangeImpl.create(fromMillis, toMillis);
+            }
             GPSFix previousFix = null;
             for (BaseNavigationPosition p : positions) {
                 try {
@@ -89,11 +99,7 @@ public class ImportImpl implements Import {
                         fix = new GPSFixImpl(pos, timePoint);
                     }
                     
-                    if (routeName != null) {
-                        callback.addFix(fix, routeName);
-                    } else {
-                        callback.addFix(fix);
-                    }
+                    callback.addFix(fix, numberOfFixes, timeRange, routeName);
                     previousFix = fix;
                 } catch (Exception e) {
                     e.printStackTrace();

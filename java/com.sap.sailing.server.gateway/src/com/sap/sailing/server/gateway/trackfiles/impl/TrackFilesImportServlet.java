@@ -19,6 +19,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONArray;
 
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -72,22 +73,11 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             
             Import.INSTANCE.importFixes(file.getInputStream(), new FixCallback() {
                 @Override
-                public void addFix(GPSFix fix, String trackName) {
+                public void addFix(GPSFix fix, int numberOfFixes, TimeRange trackTimeRange, String trackName) {
                     DeviceIdentifier deviceId = deviceIds.get(trackName);
                     if (deviceId == null) {
-                        deviceId = new TrackFileImportDeviceIdentifierImpl(fileName, trackName);
+                        deviceId = new TrackFileImportDeviceIdentifierImpl(fileName, trackName, trackTimeRange, numberOfFixes);
                         deviceIds.put(trackName, deviceId);
-                        deviceIdList.add(deviceId);
-                    }
-                    storeFix(fix, deviceId);
-                }
-                
-                @Override
-                public void addFix(GPSFix fix) {
-                    DeviceIdentifier deviceId = deviceIds.get(null);
-                    if (deviceId == null) {
-                        deviceId = new TrackFileImportDeviceIdentifierImpl(fileName, null);
-                        deviceIds.put(null, deviceId);
                         deviceIdList.add(deviceId);
                     }
                     storeFix(fix, deviceId);

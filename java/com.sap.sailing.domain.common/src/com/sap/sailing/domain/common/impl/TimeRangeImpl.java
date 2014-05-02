@@ -9,6 +9,10 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
     public static final TimePoint BeginningOfTime = new MillisecondsTimePoint(Long.MIN_VALUE);
     public static final TimePoint EndOfTime = new MillisecondsTimePoint(Long.MAX_VALUE);
     private static final long serialVersionUID = 8710198176227507300L;
+    
+    public static TimeRange create(long fromMillis, long toMillis) {
+        return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillis));
+    }
 
     public TimeRangeImpl(TimePoint from, TimePoint to) {
         super(from == null ? BeginningOfTime : from, to == null ? EndOfTime : to);

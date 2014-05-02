@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -18,6 +19,8 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     private final String fileName;
     private final String trackName;
     private final TimePoint timePoint;
+    private final TimeRange timeRange;
+    private final long numberOfFixes;
     
     private static final Map<UUID, TrackFileImportDeviceIdentifier> cache = new ConcurrentHashMap<>();
     
@@ -25,18 +28,20 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
         if (cache.containsKey(uuid)) {
             return cache.get(uuid);
         }
-        return new TrackFileImportDeviceIdentifierImpl(uuid, null, null, null);
+        return new TrackFileImportDeviceIdentifierImpl(uuid, null, null, null, null, -1);
     }
     
-    public TrackFileImportDeviceIdentifierImpl(String fileName, String trackName) {
-        this(UUID.randomUUID(), fileName, trackName, MillisecondsTimePoint.now());
+    public TrackFileImportDeviceIdentifierImpl(String fileName, String trackName, TimeRange timeRange, long numberOfFixes) {
+        this(UUID.randomUUID(), fileName, trackName, MillisecondsTimePoint.now(), timeRange, numberOfFixes);
     }
     
-    public TrackFileImportDeviceIdentifierImpl(UUID id, String fileName, String trackName, TimePoint timePoint) {
+    public TrackFileImportDeviceIdentifierImpl(UUID id, String fileName, String trackName, TimePoint timePoint, TimeRange timeRange, long numberOfFixes) {
         this.id = id;
         this.fileName = fileName;
         this.trackName = trackName;
         this.timePoint = timePoint;
+        this.timeRange = timeRange;
+        this.numberOfFixes = numberOfFixes;
         cache.put(id, this);
     }
 
@@ -52,13 +57,16 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     
     @Override
     public String toString() {
-        String dateString = timePoint == null ? "" : dateFormat.format(timePoint.asDate());
-        return fileName + " (" + dateString + ") - " + trackName;
+        String from = dateFormat.format(timeRange.from().asDate());
+        String to = dateFormat.format(timeRange.to().asDate());
+        String uploaded = timePoint == null ? "" : dateFormat.format(timePoint.asDate());
+        return String.format("%s: %s(%s-%s, %s fixes) @%s(uploaded %s)",
+                id.toString(), trackName, from, to, numberOfFixes, fileName, uploaded);
     }
 
     @Override
     public String getStringRepresentation() {
-        return id.toString() + " - " + toString();
+        return toString();
     }
     
     @Override
@@ -94,5 +102,15 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
             throw new TransformationException("Expected TrackFileImportDeviceIdentifier, but got " + deviceIdentifier.getClass());
         }
         return (TrackFileImportDeviceIdentifier) deviceIdentifier;
+    }
+
+    @Override
+    public TimeRange getFixesTimeRange() {
+        return timeRange;
+    }
+
+    @Override
+    public long getNumberOfFixes() {
+        return numberOfFixes;
     }
 }

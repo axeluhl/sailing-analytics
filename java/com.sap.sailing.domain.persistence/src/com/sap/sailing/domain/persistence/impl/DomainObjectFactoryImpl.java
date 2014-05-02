@@ -205,13 +205,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
     
-    private TimePoint loadTimePoint(DBObject object, FieldNames field) {
+    public static TimePoint loadTimePoint(DBObject object, String fieldName) {
         TimePoint result = null;
-        Number timePointAsNumber = (Number) object.get(field.name());
+        Number timePointAsNumber = (Number) object.get(fieldName);
         if (timePointAsNumber != null) {
             result = new MillisecondsTimePoint(timePointAsNumber.longValue());
         }
         return result;
+    }
+    
+    public static TimePoint loadTimePoint(DBObject object, FieldNames field) {
+        return loadTimePoint(object, field.name());
     }
 
     /**
