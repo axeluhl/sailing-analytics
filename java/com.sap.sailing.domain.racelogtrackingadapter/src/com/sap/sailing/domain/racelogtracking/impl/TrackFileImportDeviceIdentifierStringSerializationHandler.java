@@ -9,13 +9,13 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializati
 import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
-public class TrackFileImportDeviceIdentifierStringSerializationhandler implements
+public class TrackFileImportDeviceIdentifierStringSerializationHandler implements
         DeviceIdentifierStringSerializationHandler {
 
     @Override
     public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
-        return new Pair<String, String>(id.getStringRepresentation(), TrackFileImportDeviceIdentifier.TYPE);
+        return new Pair<String, String>(id.toString(), TrackFileImportDeviceIdentifier.TYPE);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class TrackFileImportDeviceIdentifierStringSerializationhandler implement
     public DeviceIdentifier deserialize(String serialized, String type, String stringRepresentation)
             throws TransformationException {
         UUID uuid = UUID.fromString(serialized.substring(0, 36));
-        return new TrackFileImportDeviceIdentifierImpl(uuid, null, null, null);
+        return TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
     }
 
 }

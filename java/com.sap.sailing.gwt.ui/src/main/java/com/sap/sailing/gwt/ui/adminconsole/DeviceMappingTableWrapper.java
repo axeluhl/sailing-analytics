@@ -54,14 +54,14 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         TextColumn<DeviceMappingDTO> deviceTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
-                return mapping.deviceType;
+                return mapping.deviceIdentifier.deviceType;
             }
         };
         deviceTypeCol.setSortable(true);
         listHandler.setComparator(deviceTypeCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
-                return o1.deviceType.compareTo(o2.deviceType);
+                return o1.deviceIdentifier.deviceType.compareTo(o2.deviceIdentifier.deviceType);
             }
         });
         table.addColumn(deviceTypeCol, stringMessages.deviceType());
@@ -69,14 +69,14 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         TextColumn<DeviceMappingDTO> deviceIdCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {
-                return mapping.deviceId;
+                return mapping.deviceIdentifier.deviceId;
             }
         };
         deviceIdCol.setSortable(true);
         listHandler.setComparator(deviceIdCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
-                return o1.deviceId.compareTo(o2.deviceId);
+                return o1.deviceIdentifier.deviceId.compareTo(o2.deviceIdentifier.deviceId);
             }
         });
         table.addColumn(deviceIdCol, stringMessages.deviceId());

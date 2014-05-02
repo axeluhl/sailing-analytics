@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
         
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new TrackFileImportDeviceIdentifierMongoHandler(), getDict(TrackFileImportDeviceIdentifier.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new TrackFileImportDeviceIdentifierJsonHandler(), getDict(TrackFileImportDeviceIdentifier.TYPE)));
-        registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new TrackFileImportDeviceIdentifierStringSerializationhandler(), getDict(TrackFileImportDeviceIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new TrackFileImportDeviceIdentifierStringSerializationHandler(), getDict(TrackFileImportDeviceIdentifier.TYPE)));
         
         registerGPSFixJsonService(context, new GPSFixJsonDeserializer(), new GPSFixJsonSerializer(), GPSFixJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixMovingJsonDeserializer(), new GPSFixMovingJsonSerializer(), GPSFixMovingJsonDeserializer.TYPE);

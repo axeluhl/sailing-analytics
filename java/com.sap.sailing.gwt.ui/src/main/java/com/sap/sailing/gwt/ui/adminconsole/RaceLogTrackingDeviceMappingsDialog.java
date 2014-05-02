@@ -156,7 +156,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
                 DeviceMappingDTO mapping = allMappings.get(index);
                 String itemType = mapping.mappedTo instanceof MarkDTO ? stringMessages.mark() : stringMessages.competitor();
                 
-                return "<b>" + stringMessages.device() + ":</b> " + mapping.deviceType + " - " + mapping.deviceId + "<br/>" +
+                return "<b>" + stringMessages.device() + ":</b> " + mapping.deviceIdentifier.deviceType + " - " + mapping.deviceIdentifier.deviceId + "<br/>" +
                     "<b>" + stringMessages.mappedTo() + ":</b> " + itemType + " - " + mapping.mappedTo + "<br/>" +
                     "<b>" + stringMessages.from() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.from) + "<br/>" +
                     "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);

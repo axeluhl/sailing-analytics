@@ -196,7 +196,6 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
-import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
@@ -212,6 +211,7 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetit
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -258,6 +258,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -4251,8 +4252,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return handler.deserialize(deviceId, type, null);
     }
     
+    private String serializeDeviceIdentifier(DeviceIdentifier deviceId) throws TransformationException {
+        return getDeviceIdentifierStringSerializerHandlerFinder(true).findService(
+                deviceId.getIdentifierType()).serialize(deviceId).getA();
+    }
+    
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        String deviceId = mapping.getDevice().getStringRepresentation();
+        String deviceId = serializeDeviceIdentifier(mapping.getDevice());
         Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().asMillis() == Long.MIN_VALUE ? 
                 null : mapping.getTimeRange().from().asDate();
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
@@ -4265,8 +4271,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
         }
-        return new DeviceMappingDTO(mapping.getDevice().getIdentifierType(),
-                deviceId, from, to, item, mapping.getOriginalRaceLogEventIds());
+        return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
+                deviceId), from, to, item, mapping.getOriginalRaceLogEventIds());
     }
     
     @Override
@@ -4332,7 +4338,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceType, dto.deviceId);
+        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceIdentifier.deviceType, dto.deviceIdentifier.deviceId);
         TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
         TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
         TimeRange timeRange = new TimeRangeImpl(from, to);

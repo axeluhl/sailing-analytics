@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -49,10 +50,12 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
             @Override
             public String getErrorMessage(DeviceMappingDTO valueToValidate) {
-                if (valueToValidate.deviceType == null || valueToValidate.deviceType.isEmpty()) {
+                String deviceType = valueToValidate.deviceIdentifier.deviceType;
+                String deviceId = valueToValidate.deviceIdentifier.deviceId;
+                if (deviceType == null || deviceType.isEmpty()) {
                     return stringMessages.pleaseEnterA(stringMessages.deviceType());
                 }
-                if (valueToValidate.deviceId == null || valueToValidate.deviceId.isEmpty()) {
+                if (deviceId == null || deviceId.isEmpty()) {
                     return stringMessages.pleaseEnterA(stringMessages.deviceId());
                 }
                 if ((valueToValidate.from == null || valueToValidate.from.compareTo(new Date(Long.MIN_VALUE)) == 0)
@@ -79,7 +82,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         sailingService.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> result) {
-                String typeToPreselect = mapping != null ? mapping.deviceType : null;
+                String typeToPreselect = mapping != null ? mapping.deviceIdentifier.deviceType : null;
                 int i = 0;
                 for (String type : result) {
                     deviceType.addItem(type);
@@ -168,7 +171,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         });
         
         if (mapping != null) {
-            deviceId.setValue(mapping.deviceId);
+            deviceId.setValue(mapping.deviceIdentifier.deviceId);
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
@@ -233,7 +236,8 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     @Override
     protected DeviceMappingDTO getResult() {
         String deviceTypeS = deviceType.getSelectedIndex() < 0 ? null : deviceType.getValue(deviceType.getSelectedIndex());
-        return new DeviceMappingDTO(deviceTypeS, deviceId.getValue(), from.getValue(), to.getValue(),
+        DeviceIdentifierDTO deviceIdentifier = new DeviceIdentifierDTO(deviceTypeS, deviceId.getValue());
+        return new DeviceMappingDTO(deviceIdentifier, from.getValue(), to.getValue(),
                 selectedItem, null);
     }
 

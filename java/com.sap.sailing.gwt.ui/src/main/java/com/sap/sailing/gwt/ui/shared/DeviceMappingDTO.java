@@ -6,8 +6,7 @@ import java.util.List;
 
 public class DeviceMappingDTO implements Serializable {
     private static final long serialVersionUID = -3272980620254526040L;
-    public String deviceType;
-    public String deviceId;
+    public DeviceIdentifierDTO deviceIdentifier;
     public Date from;
     public Date to;
     public Serializable mappedTo;
@@ -15,10 +14,9 @@ public class DeviceMappingDTO implements Serializable {
     
     protected DeviceMappingDTO() {}
     
-    public DeviceMappingDTO(String deviceType, String deviceId, Date from, Date to, Serializable mappedTo,
+    public DeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, Serializable mappedTo,
             List<Serializable> originalRaceLogEventIds) {
-        this.deviceType = deviceType;
-        this.deviceId = deviceId;
+        this.deviceIdentifier = deviceId;
         this.from = from;
         this.to = to;
         this.mappedTo = mappedTo;

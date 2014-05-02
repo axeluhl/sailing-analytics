@@ -1017,4 +1017,5 @@ public interface StringMessages extends Messages {
     String competitorPool();
     String selectAtLeastOne();
     String selectRaces();
+    String importFixes();
 }
