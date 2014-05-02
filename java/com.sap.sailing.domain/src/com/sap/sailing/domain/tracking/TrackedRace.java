@@ -529,7 +529,7 @@ public interface TrackedRace extends Serializable {
      * loading process to complete can do so by calling this method which will block until the wind loading has
      * completed.
      */
-    void waitUntilLoadingFromStoresComplete() throws InterruptedException;
+    void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 

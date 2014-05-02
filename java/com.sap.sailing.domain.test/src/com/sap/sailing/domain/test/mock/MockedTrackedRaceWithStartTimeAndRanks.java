@@ -440,7 +440,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void waitUntilLoadingFromStoresComplete() {
+    public void waitUntilLoadingFromWindStoreComplete() {
         // TODO Auto-generated method stub
 
     }

@@ -93,7 +93,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
-        trackedRace.waitUntilLoadingFromStoresComplete();
+        trackedRace.waitUntilLoadingFromWindStoreComplete();
     }
     
     @Test

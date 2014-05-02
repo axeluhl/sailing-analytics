@@ -233,12 +233,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The constructor loads wind fixes from the {@link #windStore} asynchronously.
      * When completed all threads currently waiting on this object are notified.
      */
-    private LoadingFromStoresState loadingFromWindStoreState;
+    private LoadingFromStoresState loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
     
     /**
      * @see #loadingFromWindStoreState but for GPSFixStore
      */
-    private LoadingFromStoresState loadingFromGPSFixStoreState;
+    private LoadingFromStoresState loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
@@ -348,6 +348,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     synchronized (TrackedRaceImpl.this) {
                         loadingFromWindStoreState = LoadingFromStoresState.FINISHED;
                         TrackedRaceImpl.this.notifyAll();
+                    }
+                    synchronized (loadingFromWindStoreState) {
                         loadingFromWindStoreState.notifyAll();
                     }
                     LockUtil.unlockAfterWrite(getLoadingFromWindStoreLock());
@@ -367,14 +369,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
-        synchronized (this) {
-            while (loadingFromWindStoreState != LoadingFromStoresState.FINISHED) {
-                try {
-                    this.wait();
-                } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "Waiting for wind loading to start was interrupted", e);
-                }
-            }
+        try {
+            waitUntilLoadingFromWindStoreComplete();
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
     }
 
@@ -429,9 +427,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public synchronized void waitUntilLoadingFromStoresComplete() throws InterruptedException {
-        while (loadingFromWindStoreState != LoadingFromStoresState.FINISHED ||
-                loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
+    public synchronized void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
+        while (loadingFromWindStoreState != LoadingFromStoresState.FINISHED) {
             wait();
         }
     }
@@ -2398,7 +2395,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 @Override
                 public void run() {
                     LockUtil.lockForRead(getSerializationLock());
-                    LockUtil.lockForWrite(getLoadingFromWindStoreLock());
+                    LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
                     synchronized (TrackedRaceImpl.this) {
                         loadingFromGPSFixStoreState = LoadingFromStoresState.RUNNING; // indicates that the serialization
                                                                                      // lock is now safely held
@@ -2423,9 +2420,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         synchronized (TrackedRaceImpl.this) {
                             loadingFromGPSFixStoreState = LoadingFromStoresState.FINISHED;
                             TrackedRaceImpl.this.notifyAll();
+                        }
+                        synchronized (loadingFromGPSFixStoreState) {
                             loadingFromGPSFixStoreState.notifyAll();
                         }
-                        LockUtil.unlockAfterWrite(getLoadingFromWindStoreLock());
+                        LockUtil.unlockAfterWrite(getLoadingFromGPSFixStoreLock());
                         LockUtil.unlockAfterRead(getSerializationLock());
                     }
                 }

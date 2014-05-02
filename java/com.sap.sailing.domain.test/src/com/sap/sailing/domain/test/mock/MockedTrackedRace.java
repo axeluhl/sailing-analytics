@@ -745,7 +745,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void waitUntilLoadingFromStoresComplete() throws InterruptedException {
+    public void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
         // TODO Auto-generated method stub
     }
 

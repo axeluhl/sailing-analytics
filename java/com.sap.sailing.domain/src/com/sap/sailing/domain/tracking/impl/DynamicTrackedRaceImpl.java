@@ -119,7 +119,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.<p>
      * 
      * Loading wind tracks from the <code>windStore</code> happens asynchronously which means that when the constructor returns,
-     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromStoresComplete()}
+     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromWindStoreComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
@@ -309,6 +309,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } finally {
             if (notifyAboutWindFixesAlreadyLoaded) {
                 LockUtil.unlockAfterRead(getLoadingFromWindStoreLock());
+            }
+            if (notifyAboutGPSFixesAlreadyLoaded) {
+                LockUtil.unlockAfterRead(getLoadingFromGPSFixStoreLock());
             }
         }
     }
