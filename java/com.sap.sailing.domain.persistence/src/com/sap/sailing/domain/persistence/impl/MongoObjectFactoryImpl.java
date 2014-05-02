@@ -1138,9 +1138,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     				throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = device.getIdentifierType();
         DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        Pair<? extends Object, String> pair = handler.serialize(device);
-        type = pair.getB();
-    	Object deviceTypeId = pair.getA();
+        Pair<String, ? extends Object> pair = handler.serialize(device);
+        type = pair.getA();
+    	Object deviceTypeId = pair.getB();
     	return new BasicDBObjectBuilder()
     			.add(FieldNames.DEVICE_TYPE.name(), type)
     			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId)

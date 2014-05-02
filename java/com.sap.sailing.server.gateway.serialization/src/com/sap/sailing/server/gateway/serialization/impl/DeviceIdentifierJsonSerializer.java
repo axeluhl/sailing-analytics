@@ -38,11 +38,11 @@ public class DeviceIdentifierJsonSerializer implements JsonSerializer<DeviceIden
     public JSONObject serialize(DeviceIdentifier object) {
         JSONObject result = new JSONObject();
         DeviceIdentifierJsonHandler handler = serviceFinder.findService(object.getIdentifierType());
-        Pair<? extends Object, String> pair;
+        Pair<String, ? extends Object> pair;
         try {
             pair = handler.serialize(object);
-            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_ID, pair.getA());
-            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_TYPE, pair.getB());
+            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_TYPE, pair.getA());
+            result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_ID, pair.getB());
             result.put(DeviceIdentifierJsonDeserializer.FIELD_STRING_REPRESENTATION, object.getStringRepresentation());
             return result;
         } catch (TransformationException e) {
