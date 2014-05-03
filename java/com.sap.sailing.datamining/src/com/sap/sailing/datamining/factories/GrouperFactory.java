@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sse.datamining.components.ParallelGrouper;
 import com.sap.sse.datamining.data.deprecated.Dimension;
 import com.sap.sse.datamining.impl.components.deprecated.PartitioningParallelGrouper;
@@ -21,12 +21,12 @@ public final class GrouperFactory {
     
     private GrouperFactory() { }
 
-    public static <DataType> ParallelGrouper<DataType> createGrouper(QueryDefinition queryDefinition, ThreadPoolExecutor executor) {
+    public static <DataType> ParallelGrouper<DataType> createGrouper(QueryDefinitionDeprecated queryDefinition, ThreadPoolExecutor executor) {
         WorkerBuilder<GroupingWorker<DataType>> workerBuilder = createGroupingWorkerBuilder(queryDefinition);
         return new PartitioningParallelGrouper<DataType>(workerBuilder, executor);
     }
 
-    private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinition queryDefinition) {
+    private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinitionDeprecated queryDefinition) {
         switch (queryDefinition.getGrouperType()) {
         case Dimensions:
             return createMultiDimensionalGroupingWorkerBuilder(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());

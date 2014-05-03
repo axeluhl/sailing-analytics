@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.datamining.impl.data.HasTrackedRaceContextImpl;
+import com.sap.sailing.datamining.impl.data.TrackedRaceWithContext;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -33,7 +33,7 @@ public class TrackedRaceFilteringRetrievalProcessor extends
                 if (trackedRace != null) {
                     Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                     Event event = regatta.getEvent();
-                    HasTrackedRaceContext trackedRaceWithContext = new HasTrackedRaceContextImpl(event, regatta, fleet, trackedRace);
+                    HasTrackedRaceContext trackedRaceWithContext = new TrackedRaceWithContext(event, regatta, fleet, trackedRace);
                     trackedRacesWithContext.add(trackedRaceWithContext);
                 }
             }

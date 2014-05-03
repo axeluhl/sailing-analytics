@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -108,7 +108,7 @@ public class ComplexStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
         applyStatistic(statisticsManager.getStatistic(queryDefinition.getDataType()));
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
         dataTypeListBox.setValue(queryDefinition.getDataType(), false);

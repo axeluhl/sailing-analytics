@@ -7,11 +7,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.datamining.client.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
@@ -70,9 +70,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private Class<?> getBaseClassFor(DataTypes dataType) {
         switch (dataType) {
         case GPSFix:
-            return GPSFixWithContext.class;
+            return HasGPSFixContext.class;
         case TrackedLegOfCompetitor:
-            return TrackedLegOfCompetitorWithContext.class;
+            return HasTrackedLegOfCompetitorContext.class;
         }
         throw new IllegalArgumentException("No base class for data type " + dataType);
     }
@@ -86,7 +86,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {
         Query<ResultType> query = DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
         return query.run();
     }

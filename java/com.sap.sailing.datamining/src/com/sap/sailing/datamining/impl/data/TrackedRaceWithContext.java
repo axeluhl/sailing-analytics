@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class HasTrackedRaceContextImpl implements HasTrackedRaceContext {
+public class TrackedRaceWithContext implements HasTrackedRaceContext {
 
     private final Event event;
     private final Regatta regatta;
@@ -21,7 +21,7 @@ public class HasTrackedRaceContextImpl implements HasTrackedRaceContext {
     private Integer year;
     private boolean yearHasBeenInitialized;
 
-    public HasTrackedRaceContextImpl(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
+    public TrackedRaceWithContext(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace) {
         this.event = event;
         this.regatta = regatta;
         this.fleet = fleet;

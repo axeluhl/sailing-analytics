@@ -7,7 +7,7 @@ import java.util.List;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.HasGPSFixContextImpl;
+import com.sap.sailing.datamining.impl.data.GPSFixWithContext;
 import com.sap.sailing.datamining.impl.gps_fix.GPSFixWithContextImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -22,7 +22,7 @@ public class GPSFixLeaderboardGroupDataRetrievalWorker extends AbstractLeaderboa
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         Collection<Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
         for (Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext> baseDataEntry : baseData) {
-            HasGPSFixContext context = new HasGPSFixContextImpl(baseDataEntry.getB());
+            HasGPSFixContext context = new GPSFixWithContext(baseDataEntry.getB());
             data.addAll(retrieveDataFor(context));
         }
         return data;

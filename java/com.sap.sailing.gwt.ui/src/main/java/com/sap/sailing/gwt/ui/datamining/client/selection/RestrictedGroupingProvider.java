@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.DimensionIdentifier.OrdinalComparator;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
@@ -105,7 +105,7 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     }
 
     @Override
-    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
         if (queryDefinition.getGrouperType() == GrouperType.Dimensions) {
             int index = 0;
             for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {

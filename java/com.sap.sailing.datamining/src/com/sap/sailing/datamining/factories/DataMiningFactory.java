@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.factories;
 
 import java.util.Locale;
 
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.ParallelAggregator;
@@ -23,7 +23,7 @@ public final class DataMiningFactory {
     }
 
     public static <DataType, AggregatedType extends Number> Query<AggregatedType> createQuery(
-            QueryDefinition queryDefinition, RacingEventService racingService) {
+            QueryDefinitionDeprecated queryDefinition, RacingEventService racingService) {
         Locale locale = DataMiningStringMessages.Util.getLocaleFrom(queryDefinition.getLocaleInfoName());
 
         ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(
@@ -44,7 +44,7 @@ public final class DataMiningFactory {
                 retriever, filter, grouper, extractor, aggregator);
     }
 
-    private static <DataType> ParallelFilter<DataType> createFilter(QueryDefinition queryDefinition) {
+    private static <DataType> ParallelFilter<DataType> createFilter(QueryDefinitionDeprecated queryDefinition) {
         if (queryDefinition.getSelection().isEmpty()) {
             return FilterFactory.createNonFilteringFilter();
         }

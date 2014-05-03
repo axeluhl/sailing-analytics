@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.datamining.impl.data.HasTrackedLegContextImpl;
+import com.sap.sailing.datamining.impl.data.TrackedLegWithContext;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
@@ -25,7 +25,7 @@ public class TrackedLegFilteringRetrievalProcessor extends
         Collection<HasTrackedLegContext> trackedLegsWithContext = new ArrayList<>();
         int legNumber = 1;
         for (TrackedLeg trackedLeg : element.getTrackedRace().getTrackedLegs()) {
-            HasTrackedLegContext trackedLegWithContext = new HasTrackedLegContextImpl(element, trackedLeg, legNumber);
+            HasTrackedLegContext trackedLegWithContext = new TrackedLegWithContext(element, trackedLeg, legNumber);
             trackedLegsWithContext.add(trackedLegWithContext);
             legNumber++;
         }

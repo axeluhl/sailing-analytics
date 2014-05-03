@@ -6,19 +6,14 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractSimpleRetrievalProcessor;
 
 public class LeaderboardGroupRetrievalProcessor extends
-        AbstractRetrievalProcessor<RacingEventService, LeaderboardGroup, LeaderboardGroup> {
+        AbstractSimpleRetrievalProcessor<RacingEventService, LeaderboardGroup> {
 
     public LeaderboardGroupRetrievalProcessor(ExecutorService executor,
             Collection<Processor<LeaderboardGroup>> resultReceivers) {
         super(executor, resultReceivers);
-    }
-
-    @Override
-    protected LeaderboardGroup convertWorkingToResultType(LeaderboardGroup partialElement) {
-        return partialElement;
     }
 
     @Override

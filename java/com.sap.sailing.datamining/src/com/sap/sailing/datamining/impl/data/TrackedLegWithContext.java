@@ -13,19 +13,19 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class HasTrackedLegContextImpl extends HasTrackedRaceContextImpl implements HasTrackedLegContext {
+public class TrackedLegWithContext extends TrackedRaceWithContext implements HasTrackedLegContext {
     
     private final TrackedLeg trackedLeg;
     private final int legNumber;
     private LegType legType;
     private boolean legTypeHasBeenInitialized;
 
-    public HasTrackedLegContextImpl(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
+    public TrackedLegWithContext(HasTrackedRaceContext trackedRaceContext, TrackedLeg trackedLeg, int legNumber) {
         this(trackedRaceContext.getEvent(), trackedRaceContext.getRegatta(), trackedRaceContext.getFleet(),
                 trackedRaceContext.getTrackedRace(), trackedLeg, legNumber);
     }
     
-    public HasTrackedLegContextImpl(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
+    public TrackedLegWithContext(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
         super(event, regatta, fleet, trackedRace);
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;

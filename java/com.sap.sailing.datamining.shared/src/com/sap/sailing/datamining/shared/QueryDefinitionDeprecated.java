@@ -7,7 +7,7 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
 
-public interface QueryDefinition extends Serializable {
+public interface QueryDefinitionDeprecated extends Serializable {
 
     public String getLocaleInfoName();
 

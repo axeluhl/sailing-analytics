@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.HasTrackedLegOfCompetitorContextImpl;
+import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
@@ -25,7 +25,7 @@ public class TrackedLegOfCompetitorFilteringRetrievalProcessor extends
     protected Iterable<HasTrackedLegOfCompetitorContext> retrieveData(HasTrackedLegContext element) {
         Collection<HasTrackedLegOfCompetitorContext> trackedLegOfCompetitorsWithContext = new ArrayList<>();
         for (Competitor competitor : element.getRace().getCompetitors()) {
-            HasTrackedLegOfCompetitorContext trackedLegOfCompetitorWithContext = new HasTrackedLegOfCompetitorContextImpl(element, element.getTrackedLeg().getTrackedLeg(competitor));
+            HasTrackedLegOfCompetitorContext trackedLegOfCompetitorWithContext = new TrackedLegOfCompetitorWithContext(element, element.getTrackedLeg().getTrackedLeg(competitor));
             trackedLegOfCompetitorsWithContext.add(trackedLegOfCompetitorWithContext);
         }
         return trackedLegOfCompetitorsWithContext;

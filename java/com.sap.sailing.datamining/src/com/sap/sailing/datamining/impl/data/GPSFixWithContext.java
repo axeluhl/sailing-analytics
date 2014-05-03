@@ -10,16 +10,16 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class HasGPSFixContextImpl extends HasTrackedLegOfCompetitorContextImpl implements HasGPSFixContext {
+public class GPSFixWithContext extends TrackedLegOfCompetitorWithContext implements HasGPSFixContext {
     
     private final GPSFixMoving gpsFix;
 
-    public HasGPSFixContextImpl(HasTrackedLegOfCompetitorContext legContext, GPSFixMoving gpsFix) {
+    public GPSFixWithContext(HasTrackedLegOfCompetitorContext legContext, GPSFixMoving gpsFix) {
         this(legContext.getEvent(), legContext.getRegatta(), legContext.getFleet(), legContext.getTrackedRace(),
                 legContext.getTrackedLeg(), legContext.getLegNumber(), legContext.getTrackedLegOfCompetitor(), gpsFix);
     }
 
-    public HasGPSFixContextImpl(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace,
+    public GPSFixWithContext(Event event, Regatta regatta, Fleet fleet, TrackedRace trackedRace,
             TrackedLeg trackedLeg, int legNumber, TrackedLegOfCompetitor trackedLegOfCompetitor, GPSFixMoving gpsFix) {
         super(event, regatta, fleet, trackedRace, trackedLeg, legNumber, trackedLegOfCompetitor);
         this.gpsFix = gpsFix;
