@@ -1190,6 +1190,10 @@ public class MasterDataImportTest {
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_REGATTA_NAME + " (" + TEST_BOAT_CLASS_NAME + ")");
         Assert.assertNotNull(regattaOnTarget);
 
+        RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboardOnTarget;
+        Regatta regattaInLeaderboard = regattaLeaderboard.getRegatta();
+        Assert.assertEquals(regattaOnTarget, regattaInLeaderboard);
+
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
 
         RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
