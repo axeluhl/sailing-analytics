@@ -13,7 +13,7 @@ import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
 
-public class SimpleQueryDefinition implements QueryDefinitionDeprecated {
+public class QueryDefinitionDeprecatedImpl implements QueryDefinitionDeprecated {
     private static final long serialVersionUID = 8408302866342877839L;
 
     private String localeInfoName;
@@ -30,9 +30,9 @@ public class SimpleQueryDefinition implements QueryDefinitionDeprecated {
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    SimpleQueryDefinition() { }
+    QueryDefinitionDeprecatedImpl() { }
 
-    public SimpleQueryDefinition(String localeInfoName, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+    public QueryDefinitionDeprecatedImpl(String localeInfoName, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
         this.localeInfoName = localeInfoName;
         this.grouperType = grouperType;
         this.statisticType = statisticType;

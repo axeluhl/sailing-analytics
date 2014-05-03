@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
-import com.sap.sailing.datamining.shared.impl.SimpleQueryDefinition;
+import com.sap.sailing.datamining.shared.impl.QueryDefinitionDeprecatedImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,7 +66,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     @Override
     public QueryDefinitionDeprecated getQueryDefinition() {
-        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
+        QueryDefinitionDeprecatedImpl queryDTO = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
                                                                    statisticProvider.getStatisticType(), statisticProvider.getAggregatorType(), 
                                                                    statisticProvider.getDataType());
         
