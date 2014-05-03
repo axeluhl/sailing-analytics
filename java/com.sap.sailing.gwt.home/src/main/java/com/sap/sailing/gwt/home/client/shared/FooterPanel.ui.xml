@@ -4,42 +4,40 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:style>
-.site-footer {
+.sitefooter {
   font-size: 16px;
   font-size: 1rem;
   background: #333;
+  border-top: 5px solid #fff;
   color: #fff;
-  height: 4.375em;
+  height: 4.6875em;
   line-height: 4.375em;
   width: 100%;
 }
-.site-footer_copyright {
-  float: left;
+.sitefooter_copyright {
   font-weight: 600;
 }
-.site-footer_links {
-  float: right;
-}
-.site-footer_links_link {
-  display: inline-block;
-  color: #fff;
+.sitefooter_links {
+  text-align: right;
+  font-size: 0.9375em;
   font-weight: 600;
   text-transform: uppercase;
+}
+.sitefooter_links_link {
+  display: inline-block;
+  color: #fff;
   text-decoration: none;
   margin-right: 3.75em;
 }
-.site-footer_links_link:last-child {
+.sitefooter_links_link:last-child {
   margin-right: 0;
 }
-    </ui:style>
+</ui:style>
         <g:HTML>
-<footer class="{style.site-footer}">
-  <div class="{res.mainCss.container}">
-    <div class="{style.site-footer_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
-    <div class="{style.site-footer_links}">
-        <a href="" class="{style.site-footer_links_link}">Legal Disclosure</a>
-        <a href="" class="{style.site-footer_links_link}">Privacy</a>
-    </div>
+<footer class="{style.sitefooter}">
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
+    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_links}"><a href="" class="{style.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{style.sitefooter_links_link}">Privacy</a></div>
   </div>
 </footer>
         </g:HTML>

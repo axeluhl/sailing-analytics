@@ -7,12 +7,22 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 
 public class StartPageView extends Composite implements StartPagePresenter.MyView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
+    
+    @UiField Label bannerSeriesName;
+    @UiField Label bannerName;
+    @UiField Label bannerLocation;
+    
+    @UiField Label upcomingMessage;
+    @UiField Label upcomingName;
+    @UiField Label upcomingAction;
+    
     @UiField(provided=true)
     Event event1;
 

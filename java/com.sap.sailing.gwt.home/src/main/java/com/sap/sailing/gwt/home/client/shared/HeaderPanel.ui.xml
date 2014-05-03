@@ -5,7 +5,7 @@
 	<ui:with field='i18n' type='com.sap.sailing.gwt.home.client.i18n.TextMessages'/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
 		<ui:style>
-.site-header {
+.siteheader {
   font-size: 16px;
   font-size: 1rem;
   background: #333;
@@ -18,49 +18,46 @@
   margin: 0.625em 0;
   float: left;
 }
-.navigation {
+.sitenavigation {
   float: right;
 }
-.navigation_link {
+.sitenavigation_link {
   display: inline-block;
   font-size: 0.875em;
+  font-weight: 600;
   color: #f6f9fc;
   text-transform: uppercase;
   padding: 0 2.1875em;
 }
-.navigation_link:hover {
+.sitenavigation_link:hover {
   background-color: rgba(246,249,252,0.1);
   text-decoration: none;
 }
-.navigation_link-search img {
+.sitenavigation_linksearch img {
   vertical-align: middle;
 }
-.navigation-home .navigation_link-home,
-.navigation-events .navigation_link-events,
-.navigation-boat-classes .navigation_link-boat-classes,
-.navigation-solutions .navigation_link-solutions,
-.navigation-sponsoring .navigation_link-sponsoring {
+.sitenavigationhome .sitenavigation_linkhome,
+.sitenavigationevents .sitenavigation_linkevents,
+.sitenavigationboatclasses .sitenavigation_linkboatclasses,
+.sitenavigationsolutions .sitenavigation_linksolutions,
+.sitenavigationsponsoring .sitenavigation_linksponsoring {
   background: #f0ab00;
 }
-.navigation-home .navigation_link-home:hover,
-.navigation-events .navigation_link-events:hover,
-.navigation-boat-classes .navigation_link-boat-classes:hover,
-.navigation-solutions .navigation_link-solutions:hover,
-.navigation-sponsoring .navigation_link-sponsoring:hover {
+.sitenavigationhome .sitenavigation_linkhome:hover,
+.sitenavigationevents .sitenavigation_linkevents:hover,
+.sitenavigationboatclasses .sitenavigation_linkboatclasses:hover,
+.sitenavigationsolutions .sitenavigation_linksolutions:hover,
+.sitenavigationsponsoring .sitenavigation_linksponsoring:hover {
   background-color: rgba(240,171,0,0.9);
 }
     </ui:style>
 	<g:HTML>
-<header class="{style.site-header}">
-  <div class="{res.mainCss.container} {style.site-header}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{style.logo}"/>
-	    <nav class="{style.navigation}">
-        <a href="/" class="{style.navigation_link} {style.navigation_link-home}">Home</a>
-        <a href="/event.html" class="{style.navigation_link} {style.navigation_link-events}">Events</a>
-        <a href="" class="{style.navigation_link} {style.navigation_link-boat-classes}">Boat Classes</a>
-        <a href="" class="{style.navigation_link} {style.navigation_link-solutions}">Solutions</a>
-        <a href="" class="{style.navigation_link} {style.navigation_link-sponsoring}">Sponsoring</a>
-        <a href="" class="{style.navigation_link} {style.navigation_link-search}"><img src="images/search-icon.png" alt="Search"/></a>
-        </nav>
+<header class="{style.siteheader}">
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{style.logo}"></img></div>
+    <div class="{res.mainCss.small8} {res.mainCss.columns}">
+      <nav class="{style.sitenavigation}"><a href="index.html" class="{style.sitenavigation_link} {style.sitenavigation_linkhome}">Home</a><a href="events.html" class="{style.sitenavigation_link} {style.sitenavigation_linkevents}">Events</a><a href="boat-classes.html" class="{style.sitenavigation_link} {style.sitenavigation_linkboatclasses}">Boat Classes</a><a href="solutions.html" class="{style.sitenavigation_link} {style.sitenavigation_linksolutions}">Solutions</a><a href="sponsoring.html" class="{style.sitenavigation_link} {style.sitenavigation_linksponsoring}">Sponsoring</a><a href="" class="{style.sitenavigation_link} {style.sitenavigation_linksearch}"><img src="images/search-icon.png" alt="Search"></img></a></nav>
+    </div>
   </div>
 </header>
 	</g:HTML>
