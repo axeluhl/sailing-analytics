@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -21,13 +21,13 @@ import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.test.function.test_classes.ContainerElement;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
-import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
-import com.sap.sse.datamining.test.function.test_classes.MarkedContainer;
-import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
+import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
+import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
+import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
+import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
+import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;

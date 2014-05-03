@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.functions;
+package com.sap.sse.datamining.impl.functions.criterias;
 
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.factories.FunctionDTOFactory;

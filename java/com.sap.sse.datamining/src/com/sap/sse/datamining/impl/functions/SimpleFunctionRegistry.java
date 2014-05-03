@@ -21,6 +21,8 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.FunctionRetrievalProcessor;
+import com.sap.sse.datamining.impl.functions.components.ExternalFunctionRetrievalProcessor;
+import com.sap.sse.datamining.impl.functions.components.InternalFunctionRetrievalProcessor;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
     

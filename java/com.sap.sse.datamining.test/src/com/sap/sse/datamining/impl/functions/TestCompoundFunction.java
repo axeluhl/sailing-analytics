@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -14,10 +14,10 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.CompoundFunction;
 import com.sap.sse.datamining.shared.Unit;
-import com.sap.sse.datamining.test.function.test_classes.ContainerElement;
-import com.sap.sse.datamining.test.function.test_classes.ContainerElementImpl;
-import com.sap.sse.datamining.test.function.test_classes.MarkedContainer;
-import com.sap.sse.datamining.test.function.test_classes.MarkedContainerImpl;
+import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
+import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;
+import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
+import com.sap.sse.datamining.test.functions.test_classes.MarkedContainerImpl;
 import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestCompoundFunction {

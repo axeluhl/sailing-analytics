@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.test.function.test_classes;
+package com.sap.sse.datamining.test.functions.test_classes;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!

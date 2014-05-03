@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.functions;
+package com.sap.sse.datamining.impl.functions.components;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectExternalFunctionFilterCriteria;
 
 public class ExternalFunctionRetrievalProcessor extends FilteringFunctionRetrievalProcessor {
 

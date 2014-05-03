@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -17,8 +17,8 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
-import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
-import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 

@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions.criterias;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -9,12 +9,12 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.IsDeclaringTypeFilterCriteria;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeInterface;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
-import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.impl.functions.criterias.IsDeclaringTypeFilterCriteria;
+import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
+import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
+import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
+import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
+import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestDeclaringTypeOrParameterTypeCriteria {

@@ -10,6 +10,7 @@ import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriteria;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class RegistryFunctionProvider implements FunctionProvider {

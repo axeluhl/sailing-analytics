@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.functions;
+package com.sap.sse.datamining.impl.functions.criterias;
 
 import java.util.Arrays;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions.criterias;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,9 +8,9 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.impl.functions.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.MethodIsCorrectExternalFunctionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.MethodIsCorrectSideEffectFreeValueFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectDimensionFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectExternalFunctionFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {
