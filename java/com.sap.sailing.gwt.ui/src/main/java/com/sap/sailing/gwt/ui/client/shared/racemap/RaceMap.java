@@ -69,6 +69,7 @@ import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
@@ -491,7 +492,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames);
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
+                            /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
                     asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -778,7 +780,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null
-                && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
+                && !lastCombinedWindTrackInfoDTO.windFixes.isEmpty()) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
@@ -1480,16 +1482,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     } else {
                         closer = fixAfter;
                     }
-                    Date betweenDate = new Date((fixBefore.timepoint.getTime() + fixAfter.timepoint.getTime()) / 2);
-                    PositionDTO betweenPosition = new PositionDTO((fixBefore.position.latDeg + fixAfter.position.latDeg)/2,
-                            (fixBefore.position.lngDeg + fixAfter.position.lngDeg)/2);
-                    double betweenBearing = new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees).middle(
-                            new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).getDegrees();
+                    // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
+                    double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
+                    double factorForBefore = 1-factorForAfter;
+                    PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
+                            factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
+                    double betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
+                            multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
+                            multiply(factorForAfter)).divide(1).getDegrees();
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
-                            (fixBefore.speedWithBearing.speedInKnots + fixAfter.speedWithBearing.speedInKnots)/2,
+                            factorForBefore*fixBefore.speedWithBearing.speedInKnots + factorForAfter*fixAfter.speedWithBearing.speedInKnots,
                             betweenBearing);
-                    // TODO move SpeedWithBearing and GPSFix with implementation classes to com.sap.sailing.domain.common and share in GWT bundle
-                    result = new GPSFixDTO(betweenDate, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
+                    result = new GPSFixDTO(date, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
                             closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
                 }
             } else {

@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.BearingWithConfidence.DoublePair;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;

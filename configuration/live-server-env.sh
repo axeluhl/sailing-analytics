@@ -1,0 +1,16 @@
+DEPLOY_TO=server
+SERVER_NAME=LIVE
+MEMORY=4096m
+REPLICATION_HOST=172.31.25.253
+REPLICATION_CHANNEL=sapsailinganalytics-live
+TELNET_PORT=14888
+SERVER_PORT=8888
+MONGODB_HOST=172.31.25.253
+MONGODB_PORT=10201
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
+ADDITIONAL_JAVA_ARGS="-Digtimi.enableWorkaroundForSingleDigitLatitudes=true -Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog"
