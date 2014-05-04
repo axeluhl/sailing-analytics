@@ -9,28 +9,28 @@ import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 
 public class Activator implements BundleActivator {
 
-	private static BundleContext context;
+    private static BundleContext context;
 
-	private ServiceRegistration<ClassesWithFunctionsService> classesWithFunctionsServiceReference;
+    private ServiceRegistration<ClassesWithFunctionsService> classesWithFunctionsServiceRegistration;
 
-	@Override
-	public void start(BundleContext context) throws Exception {
+    @Override
+    public void start(BundleContext context) throws Exception {
         Activator.context = context;
-		registerClassesWithFunctionsService();
-	}
+        registerClassesWithFunctionsService();
+    }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		unregisterClassesWithFunctionsService();
-	}
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        unregisterClassesWithFunctionsService();
+    }
 
     private void unregisterClassesWithFunctionsService() {
-		context.ungetService(classesWithFunctionsServiceReference.getReference());
-	}
+        context.ungetService(classesWithFunctionsServiceRegistration.getReference());
+    }
 
-	private void registerClassesWithFunctionsService() {
-        classesWithFunctionsServiceReference = context.registerService(ClassesWithFunctionsService.class,
-        															new DataMiningClassesWithFunctionsService(), null);
+    private void registerClassesWithFunctionsService() {
+        classesWithFunctionsServiceRegistration = context.registerService(ClassesWithFunctionsService.class,
+                new DataMiningClassesWithFunctionsService(), null);
     }
 
 }
