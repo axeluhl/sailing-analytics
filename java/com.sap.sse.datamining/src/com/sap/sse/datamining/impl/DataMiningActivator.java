@@ -45,37 +45,8 @@ public class DataMiningActivator implements BundleActivator {
 
         FunctionRegistry functionRegistry = createAndBuildFunctionRegistry();
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        
         dataMiningServer = new DataMiningServerImpl(functionRegistry, functionProvider);
         registerDataMiningServer();
-    }
-
-    private void registerDataMiningServer() {
-        context.registerService(DataMiningServer.class, dataMiningServer, null);
-    }
-
-    private FunctionRegistry createAndBuildFunctionRegistry() {
-        FunctionRegistry functionRegistry = new SimpleFunctionRegistry(getExecutor());
-
-        Set<Class<?>> internalClassesWithMarkedMethods = new HashSet<>();
-        Set<Class<?>> externalLibraryClasses = new HashSet<>();
-        for (ServiceReference<ClassesWithFunctionsService> serviceReference : serviceReferences) {
-            ClassesWithFunctionsService service = context.getService(serviceReference);
-            
-            Set<Class<?>> internalClassesWithMarkedMethodsToAdd = service.getInternalClassesWithMarkedMethods();
-            if (internalClassesWithMarkedMethodsToAdd != null) {
-                internalClassesWithMarkedMethods.addAll(internalClassesWithMarkedMethodsToAdd);
-            }
-            
-            Set<Class<?>> externalLibraryClassesToAdd = service.getExternalLibraryClasses();
-            if (externalLibraryClassesToAdd != null) {
-                externalLibraryClasses.addAll(externalLibraryClassesToAdd);
-            }
-        }
-        
-        functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesWithMarkedMethods);
-        functionRegistry.registerAllWithExternalFunctionPolicy(externalLibraryClasses);
-        return functionRegistry;
     }
 
     private Collection<ServiceReference<ClassesWithFunctionsService>> getAllClassesWithMarkedMethodsServices() {
@@ -105,6 +76,35 @@ public class DataMiningActivator implements BundleActivator {
             }
         }
         return specificServiceReferences;
+    }
+
+    private FunctionRegistry createAndBuildFunctionRegistry() {
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry(getExecutor());
+
+        Set<Class<?>> internalClassesWithMarkedMethods = new HashSet<>();
+        Set<Class<?>> externalLibraryClasses = new HashSet<>();
+        for (ServiceReference<ClassesWithFunctionsService> serviceReference : serviceReferences) {
+            internalClassesWithMarkedMethods.addAll(getInternalClassesWithMarkedMethodsFromService(serviceReference));
+            externalLibraryClasses.addAll(getExternalLibraryClassesFromService(serviceReference));
+        }
+        
+        functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesWithMarkedMethods);
+        functionRegistry.registerAllWithExternalFunctionPolicy(externalLibraryClasses);
+        return functionRegistry;
+    }
+    
+    private Collection<Class<?>> getInternalClassesWithMarkedMethodsFromService(ServiceReference<ClassesWithFunctionsService> serviceReference) {
+        Collection<Class<?>> internalClassesWithMarkedMethods = context.getService(serviceReference).getInternalClassesWithMarkedMethods();
+        return internalClassesWithMarkedMethods != null ? internalClassesWithMarkedMethods : new ArrayList<Class<?>>();
+    }
+    
+    private Collection<Class<?>> getExternalLibraryClassesFromService(ServiceReference<ClassesWithFunctionsService> serviceReference) {
+        Collection<Class<?>> externalLibraryClasses = context.getService(serviceReference).getExternalLibraryClasses();
+        return externalLibraryClasses != null ? externalLibraryClasses : new ArrayList<Class<?>>();
+    }
+
+    private void registerDataMiningServer() {
+        context.registerService(DataMiningServer.class, dataMiningServer, null);
     }
 
     @Override
