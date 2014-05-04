@@ -4,7 +4,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.datamining.impl.data.DataMiningClassesWithFunctionsService;
+import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunctionsService;
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 
 public class Activator implements BundleActivator {
@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
 
     private void registerClassesWithFunctionsService() {
         classesWithFunctionsServiceRegistration = context.registerService(ClassesWithFunctionsService.class,
-                new DataMiningClassesWithFunctionsService(), null);
+                new SailingDataMiningClassesWithFunctionsService(), null);
     }
 
 }

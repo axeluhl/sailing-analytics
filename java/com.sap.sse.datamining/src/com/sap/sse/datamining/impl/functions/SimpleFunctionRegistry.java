@@ -123,11 +123,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     private Collection<Function<?>> collectAllFunctionsIn(Map<Class<?>, Collection<Function<?>>> functionsMap) {
-        Set<Function<?>> registeredMethods = new HashSet<>();
+        Set<Function<?>> registeredFunctions = new HashSet<>();
         for (Collection<Function<?>> registeredMethodsOfClass : functionsMap.values()) {
-            registeredMethods.addAll(registeredMethodsOfClass);
+            registeredFunctions.addAll(registeredMethodsOfClass);
         }
-        return registeredMethods;
+        return registeredFunctions;
     }
     
     private class FunctionsReceiver implements Processor<Collection<Function<?>>> {

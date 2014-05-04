@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 
-public class DataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
+public class SailingDataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
 
     @Override
     public Set<Class<?>> getInternalClassesWithMarkedMethods() {
