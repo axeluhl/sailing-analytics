@@ -90,7 +90,7 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
         double x = first.getMetersPerSecond()*Math.cos(first.getBearing().getRadians()) + other.getMetersPerSecond()*Math.cos(other.getBearing().getRadians());
         double y = first.getMetersPerSecond()*Math.sin(first.getBearing().getRadians()) + other.getMetersPerSecond()*Math.sin(other.getBearing().getRadians());
         double metersPerSecond = Math.sqrt(x*x+y*y);
-        double directionRad = (360.+Math.atan2(y, x))%360.;
+        double directionRad = (2*Math.PI+Math.atan2(y, x))%(2*Math.PI);
         return new MeterPerSecondSpeedWithDegreeBearingImpl(metersPerSecond, new RadianBearingImpl(directionRad));
     }
 }

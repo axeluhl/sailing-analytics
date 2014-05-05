@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 
@@ -35,8 +34,15 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
     
     @Override
     public synchronized void sendMessage(SailMasterMessage message, OutputStream os) throws IOException {
-        os.write(("" + message.getSequenceNumber()).getBytes());
-        sendMessage(message.getMessage(), os);
+        if (message.getSequenceNumber() == null) {
+            sendMessage(message.getMessage(), os);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append(message.getSequenceNumber());
+            sb.append('|');
+            sb.append(message.getMessage());
+            sendMessage(sb.toString(), os);
+        }
         os.flush();
     }
 
@@ -45,23 +51,13 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
      * marker bytes are removed from the message. The message is decoded into a string using the cp1252 character
      * encoding.
      * 
-     * @return <code>null</code> if the end of the stream has been reached without finding a
-     *         message start byte; a pair containing the message and, optionally, an integer number
-     *         telling the message's sequence number which may be merged into the data stream by
-     *         a filter to identify the message up to which the content has already been transformed
-     *         into an internal domain model. The sequence number may be used to request messages
-     *         from the database starting with this number. If no sequence number was received
-     *         along with the message, the pair's second component is <code>null</code>.
+     * @return <code>null</code> if the end of the stream has been reached without finding a message start byte; the
+     *         message otherwise.
      */
-    public Pair<String, Long> receiveMessage(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream bufferForOptionalSequenceNumber = new ByteArrayOutputStream(8);
-        Long sequenceNumber = null;
+    public String receiveMessage(InputStream inputStream) throws IOException {
         // read until an STX byte comes along
-        int read = inputStream.read();
-        while (read != -1 && read != STX) {
-            bufferForOptionalSequenceNumber.write(read);
-            read = inputStream.read();
-        }
+        int read;
+        while ((read = inputStream.read()) != -1 && read != STX);
         // now either we've read an STX byte or reached EOF
         String message = null;
         if (read == STX) {
@@ -70,19 +66,7 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
             // EOF; indicate by returning null
             logger.info("Received EOF in SailMasterTransceiver. Returning null as message.");
         }
-        if (bufferForOptionalSequenceNumber.size() > 0) {
-            sequenceNumber = getSequenceNumber(bufferForOptionalSequenceNumber);
-        }
-        return message == null ? null : new Pair<String, Long>(message, sequenceNumber);
-    }
-
-    private Long getSequenceNumber(ByteArrayOutputStream bufferForOptionalSequenceNumber) {
-        String s = new String(bufferForOptionalSequenceNumber.toByteArray());
-        StringBuilder trailingDigits = new StringBuilder();
-        for (int i=s.length()-1; i>=0 && s.charAt(i) >= '0' && s.charAt(i) <= '9'; i--) {
-            trailingDigits.insert(0, s.charAt(i));
-        }
-        return trailingDigits.length() > 0 ? Long.valueOf(trailingDigits.toString()) : null;
+        return message;
     }
 
     /**

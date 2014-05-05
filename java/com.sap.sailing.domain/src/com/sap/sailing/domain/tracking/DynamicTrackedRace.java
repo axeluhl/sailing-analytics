@@ -12,7 +12,7 @@ public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Mark mark, GPSFix fix);
     
     /**
-     * @return True if the specified wind has been accepteed and added to this race's windtrack and database, else false.
+     * @return True if the specified wind has been accepted and added to this race's wind track and database, else false.
      */
     boolean recordWind(Wind wind, WindSource windSource);
 

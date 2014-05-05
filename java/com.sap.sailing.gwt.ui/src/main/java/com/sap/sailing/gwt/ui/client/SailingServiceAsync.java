@@ -8,9 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -34,6 +31,8 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -50,7 +49,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -60,6 +59,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -105,7 +105,7 @@ public interface SailingServiceAsync {
             boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
-            String hostname, int port, boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            String hostname, int port, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> asyncCallback);
 
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
@@ -130,11 +130,17 @@ public interface SailingServiceAsync {
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * @param from if <code>null</code>, the tracked race's start of tracking is used
-     * @param to if <code>null</code>, the tracked race's time point of newest event is used
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
      */
-    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
+    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to,
+            long resolutionInMilliseconds, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param windSourceTypeNames
@@ -146,20 +152,17 @@ public interface SailingServiceAsync {
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * Same as {@link #getWindInfo(RegattaAndRaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only
-     * that the wind is not requested for a specific position, but instead the wind sources associated with the tracked
-     * race identified by <code>raceIdentifier</code> are requested to deliver their original position. This will in
-     * particular preserve the positions of actual measurements and will deliver the averaged positions for averaged /
-     * combined wind read-outs.
-     * 
-     * @param from
-     *            must not be <code>null</code>
-     * @param numberOfFixes
-     *            no matter how great this value is chosen, never returns data beyond the newest event recorded in the
-     *            race
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
      */
-    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
+    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
@@ -173,7 +176,7 @@ public interface SailingServiceAsync {
 
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
+            boolean addOverallDetails, String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
@@ -250,12 +253,9 @@ public interface SailingServiceAsync {
 
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
 
-    void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
-            AsyncCallback<List<SwissTimingRaceRecordDTO>> asyncCallback);
+    void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
-
-    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port, AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
@@ -460,6 +460,10 @@ public interface SailingServiceAsync {
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
 
+    void getRaceStateEntriesForLeaderboard(String leaderboardName, boolean showOnlyCurrentlyRunningRaces,
+            boolean showOnlyRacesOfSameDay, List<String> visibleRegattas,
+            AsyncCallback<List<RegattaOverviewEntryDTO>> callback);
+    
     void stopAllReplicas(AsyncCallback<Void> asyncCallback);
 
     void stopSingleReplicaInstance(String identifier, AsyncCallback<Void> asyncCallback);
@@ -471,19 +475,12 @@ public interface SailingServiceAsync {
             AsyncCallback<RaceLogDTO> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress,
+ boolean exportWind,
             AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 
     void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
-
-    <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
-    
-    /**
-     * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />
-     * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
-     */
-    void pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<DataMiningSerializationDummy> asyncCallback);
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
@@ -503,16 +500,16 @@ public interface SailingServiceAsync {
 
     /**
      * Sets the a new start time.
-     * @param dto {@link RaceLogSetStartTimeDTO} identifying the race to set the start time on and the new start time.
+     * @param dto {@link RaceLogSetStartTimeAndProcedureDTO} identifying the race to set the start time on and the new start time.
      */
-    void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
+    void setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto, AsyncCallback<Boolean> callback);
 
     /**
-     * Gets the race's current start time and current pass identifier. If no start time is set, the pass identifier will
-     * still be returned, but the start time field will be <code>null</code>.
+     * Gets the race's current start time, current pass identifier and racing procedure. If no start time is set, the
+     * pass identifier will still be returned, but the start time field will be <code>null</code>.
      */
-    void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Pair<Date, Integer>> callback);
+    void getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Triple<Date, Integer, RacingProcedureType>> callback);
 
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
     

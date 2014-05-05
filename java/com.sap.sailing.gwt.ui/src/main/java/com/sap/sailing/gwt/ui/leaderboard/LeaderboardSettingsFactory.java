@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.

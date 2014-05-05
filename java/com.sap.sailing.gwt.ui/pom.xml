@@ -44,6 +44,12 @@
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.common</artifactId>
+    	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
+    </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
     	<artifactId>com.sap.sse.gwt</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
@@ -56,7 +62,7 @@
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
-    	<artifactId>de.csenk.gwt.ws</artifactId>
+    	<artifactId>com.sap.sse.datamining.shared</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
@@ -79,7 +85,9 @@
           <execution>
 	        <configuration>
 		  <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
+		  <!--
 		  <userAgents>chrome</userAgents>
+		  -->
 	          <modules>
 	            <module>com.sap.sailing.gwt.ui.EmulatedJRE</module>
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>

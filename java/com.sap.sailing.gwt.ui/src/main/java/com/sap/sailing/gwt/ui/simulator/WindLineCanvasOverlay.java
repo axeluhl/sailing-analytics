@@ -17,10 +17,10 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.LineSegment;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
@@ -229,7 +229,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         final double weight = 1.0;
 
         LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
-        Point canvasPositionInPx = mapProjection.fromLatLngToContainerPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         final double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();

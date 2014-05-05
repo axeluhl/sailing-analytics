@@ -25,13 +25,12 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-
     protected Iterable<T> all;
     protected final AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
+    
     private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
-
         @Override
         public Iterable<String> getStrings(T t) {
             return getSearchableStrings(t);

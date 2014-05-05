@@ -10,12 +10,14 @@
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
 	<!-- Other module inherits -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
     <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
-	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
+  	<inherits name="com.sap.sse.SSECommon" />
+    <inherits name="com.sap.sse.datamining.DataMiningDomain" />
+  	<inherits name="com.sap.sailing.domain.SailingDomain" />
+    <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 
-	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
+	<entry-point class="com.sap.sailing.gwt.ui.datamining.client.DataMiningEntryPoint" />
 	
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />

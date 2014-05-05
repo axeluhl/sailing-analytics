@@ -765,23 +765,35 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        if (markPassings.isEmpty()) {
-            return null;
-        } else {
-            TimePoint end = timePoint;
-            if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()
-                    && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
-                // competitor has finished race; use time point of crossing the finish line
-                end = markPassings.last().getTimePoint();
-            } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint() &&
-                    timePoint.after(markPassings.last().getTimePoint())) {
-                // if competitor has not finished the race (and the requested timepoint
-                // is after the last mark passing) then we can not tell anything about
-                // the distance traveled - this is in line with AbstractSimpleLeaderboardImpl#getTotalTimeSailedInMilliseconds
-                return null;
+        try {
+            lockForRead(markPassings);
+            if (markPassings.isEmpty()) {
+                result = null;
+            } else {
+                TimePoint end = timePoint;
+                if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()
+                        && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
+                    // competitor has finished race; use time point of crossing the finish line
+                    end = markPassings.last().getTimePoint();
+                } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint()
+                        && ((getEndOfTracking() != null && timePoint.after(getEndOfTracking()))
+                                || getStatus().getStatus() == TrackedRaceStatusEnum.FINISHED)) {
+                    // If the race is no longer tracking and hence no more data can be expected, and the competitor
+                    // hasn't finished the race, no valid distance traveled can be determined
+                    // for the competitor in this race.
+                    end = null;
+                }
+                if (end == null) {
+                    result = null;
+                } else {
+                    result = getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+                }
             }
-            return getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+            return result;
+        } finally {
+            unlockAfterRead(markPassings);
         }
     }
 
@@ -989,7 +1001,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
@@ -1003,7 +1015,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         Distance result;
         if (from != null) {
-            result = getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
+            result = getAverageAbsoluteCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
         } else {
             result = null;
         }
@@ -1011,11 +1023,42 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+            throws NoWindException {
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        TimePoint from = null;
+        lockForRead(markPassings);
+        try {
+            if (markPassings != null && !markPassings.isEmpty()) {
+                from = markPassings.iterator().next().getTimePoint();
+            }
+        } finally {
+            unlockAfterRead(markPassings);
+        }
+        Distance result;
+        if (from != null) {
+            result = getAverageSignedCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException {
         Distance result;
         result = crossTrackErrorCache
-                .getAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+                .getAverageAbsoluteCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+        return result;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalysis) throws NoWindException {
+        Distance result;
+        result = crossTrackErrorCache
+                .getAverageSignedCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
         return result;
     }
 
@@ -1216,8 +1259,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // TODO consider parallelizing and consider caching
             if (!Util.contains(windSourcesToExclude, windSource)) {
                 WindTrack track = getOrCreateWindTrack(windSource);
-                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(
-                        p, at);
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);
                     canUseSpeedOfAtLeastOneWindSource = canUseSpeedOfAtLeastOneWindSource
@@ -2099,43 +2141,47 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     sideToWhichWaypointWasPassed));
         }
         final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
-        final Bearing courseBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver).getBearing();
-        final Bearing courseAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver).getBearing();
-        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
-        boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
-        boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
-        if (tacked && jibed) {
-            maneuverType = ManeuverType.PENALTY_CIRCLE;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
+        final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
+        final SpeedWithBearing estimatedSpeedAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver);
+        if (wind != null && estimatedSpeedBeforeManeuver != null && estimatedSpeedAfterManeuver != null) {
+            BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+            final Bearing courseBeforeManeuver = estimatedSpeedBeforeManeuver.getBearing();
+            final Bearing courseAfterManeuver = estimatedSpeedAfterManeuver.getBearing();
+            boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getBearing());
+            boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
+                    courseAfterManeuver, wind.getFrom());
+            if (tacked && jibed) {
+                maneuverType = ManeuverType.PENALTY_CIRCLE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (tacked) {
+                maneuverType = ManeuverType.TACK;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else if (jibed) {
+                maneuverType = ManeuverType.JIBE;
+                if (legBeforeManeuver != null) {
+                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                            timePointAfterManeuver);
+                }
+            } else {
+                // heading up or bearing away
+                Bearing windBearing = wind.getBearing();
+                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
+                        : ManeuverType.BEAR_AWAY;
             }
-        } else if (tacked) {
-            maneuverType = ManeuverType.TACK;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
-            }
-        } else if (jibed) {
-            maneuverType = ManeuverType.JIBE;
-            if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                        timePointAfterManeuver);
-            }
-        } else {
-            // heading up or bearing away
-            Bearing windBearing = wind.getBearing();
-            Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning
-                    .getBearing());
-            Bearing toWindAfterManeuver = windBearing
-                    .getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
-            maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
-                    : ManeuverType.BEAR_AWAY;
+            final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+            result.add(maneuver);
         }
-        final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                maneuverTimePoint, speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees, maneuverLoss);
-        result.add(maneuver);
         return result;
     }
 

@@ -692,7 +692,7 @@ body ::-webkit-scrollbar-track {
 
 .minMaxBackgroundBar {
   left: 0px;
-  background-image: url(images/greyBar.png);
+  background-image: url(images/yellowBar.png);
   background-position: left;
   background-repeat: no-repeat;
 }

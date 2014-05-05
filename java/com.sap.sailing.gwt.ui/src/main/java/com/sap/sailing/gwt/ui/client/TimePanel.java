@@ -21,13 +21,19 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.SliderBar;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.player.PlayStateListener;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
@@ -152,14 +158,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             @Override
             public void onClick(ClickEvent event) {
                 switch(TimePanel.this.timer.getPlayState()) {
-                    case Stopped:
+                    case Paused:
                         TimePanel.this.timer.play();
                         break;
                     case Playing:
                         TimePanel.this.timer.pause();
-                        break;
-                    case Paused:
-                    TimePanel.this.timer.play();
                         break;
                 }
             }
@@ -307,7 +310,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
                         break;
                     case Replay:
-                        timer.stop();
+                        timer.pause();
                         break;
                     }
                 }
@@ -414,7 +417,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
             break;
         case Paused:
-        case Stopped:
             updatePlayPauseButtonsVisibility(playMode);
             playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);

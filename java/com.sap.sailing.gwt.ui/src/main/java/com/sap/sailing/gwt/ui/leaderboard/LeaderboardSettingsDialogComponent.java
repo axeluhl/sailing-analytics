@@ -22,13 +22,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
-import com.sap.sse.gwt.ui.IntegerBox;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;
@@ -90,19 +91,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialogPanel.add(createTimingDetailsPanel(dialog));
         return dialogPanel;
     }
-
+    
     private FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel meneuverPanel = new FlowPanel();
+        meneuverPanel.ensureDebugId("ManeuverSettingsPanel");
         meneuverPanel.add(dialog.createHeadline(stringMessages.maneuverTypes(), true));
         meneuverPanel.addStyleName("SettingsDialogComponent");
         FlowPanel meneuverContent = new FlowPanel();
         meneuverContent.addStyleName("dialogInnerContent");
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType));
-            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(detailType));
-            checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
-            maneuverDetailCheckboxes.put(detailType, checkbox);
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, detailType,
+                    currentMeneuverDetailSelection.contains(detailType), maneuverDetailCheckboxes);
+            
             meneuverContent.add(checkbox);
         }
         meneuverPanel.add(meneuverContent);
@@ -111,7 +112,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel timingPanel = new FlowPanel();
+        timingPanel.ensureDebugId("TimingSettingsPanel");
         refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
+        refreshIntervalInSecondsBox.ensureDebugId("RefreshIntervalLongBox");
         
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
@@ -132,6 +135,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel raceDetailDialog = new FlowPanel();
+        raceDetailDialog.ensureDebugId("RaceDetailsSettingsPanel");
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
         int detailCountInCurrentFlowPanel = 0;
@@ -143,10 +147,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
                 raceDetailDialog.add(raceDetailDialogContent);
             }
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
-            checkbox.setValue(currentRaceDetailSelection.contains(type));
-            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
-            raceDetailCheckboxes.put(type, checkbox);
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                    raceDetailCheckboxes);
             raceDetailDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
@@ -163,16 +165,15 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel overallDetailDialog = new FlowPanel();
+        overallDetailDialog.ensureDebugId("OverallDetailsSettingsPanel");
         overallDetailDialog.add(dialog.createHeadline(stringMessages.overallDetailsToShow(), true));
         overallDetailDialog.addStyleName("SettingsDialogComponent overallDetailSettings");
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
-            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
-            checkbox.setValue(currentOverallDetailSelection.contains(type));
-            overallDetailCheckboxes.put(type, checkbox);
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
+                    overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
         overallDetailDialog.add(overallDetailDialogContent);
@@ -181,6 +182,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel legDetailsToShow = new FlowPanel();
+        legDetailsToShow.ensureDebugId("LegDetailsSettingsPanel");
         legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
         legDetailsToShow.addStyleName("SettingsDialogComponent");
         FlowPanel legDetailsContent = null;
@@ -192,10 +194,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 legDetailsContent.addStyleName("dialogInnerContent");
                 legDetailsToShow.add(legDetailsContent);
             }
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
-            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
-            checkbox.setValue(currentLegDetailSelection.contains(type));
-            legDetailCheckboxes.put(type, checkbox);
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentLegDetailSelection.contains(type),
+                    legDetailCheckboxes);
             legDetailsContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
@@ -204,6 +204,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
+        selectedRacesPanel.ensureDebugId("RaceSelectionSettingsPanel");
         selectedRacesPanel.addStyleName("SettingsDialogComponent");
         selectedRacesPanel.add(dialog.createHeadline(stringMessages.selectedRaces(), true));
         // race selection strategy elements
@@ -218,12 +219,16 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         int racesCount = raceAllRaceColumns.size();
         if (racesCount > 0) {
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
+            explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");
             final FlowPanel lastNRacesSelectionContent = new FlowPanel();
+            lastNRacesSelectionContent.ensureDebugId("MostCurrentRacesSelectionPanel");
+            
             String radioButtonGroupName = "raceSelectionStrategyGroup";
             Label raceSelectionWayLabel = new Label(stringMessages.chooseTheWayYouSelectRaces() + ":");
             raceSelectionWayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
             racesSelectionStrategyPanel.add(raceSelectionWayLabel);
             explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
+            explicitRaceColumnSelectionRadioBtn.ensureDebugId("ExplicitRaceSelectionRadioButton");
             racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             explicitRaceColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
             explicitRaceColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
@@ -246,8 +251,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             Grid grid = new Grid(rowCount, maxRacesPerRow);
             for (RaceColumnDTO expandableSortableColumn : raceAllRaceColumns) {
-                CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
-                checkbox.setValue(Util.contains(raceColumnSelection, expandableSortableColumn));
+                CheckBox checkbox = createCheckbox(dialog, expandableSortableColumn.getRaceColumnName(),
+                        Util.contains(raceColumnSelection, expandableSortableColumn), null);
                 raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
                 grid.setWidget(rowIndex, columnIndex++, checkbox);
                 if(columnIndex == maxRacesPerRow) {
@@ -260,6 +265,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             selectedRacesContent.add(explicitRaceSelectionContent);
             
             lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectANumberOfRaces());
+            lastNRacesColumnSelectionRadioBtn.ensureDebugId("MostCurrentRacesSelectionRadioButton");
             lastNRacesColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
             lastNRacesColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -279,6 +285,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             numberOfLastRacesLabel.getElement().getStyle().setPaddingRight(10, Unit.PX);
             hPanel.add(numberOfLastRacesLabel);
             numberOfLastRacesToShowBox = dialog.createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
+            numberOfLastRacesToShowBox.ensureDebugId("NumberOfMostCurrentRacesIntegerBox");
             hPanel.add(numberOfLastRacesToShowBox);
             dialog.alignAllPanelWidgetsVertically(hPanel, HasVerticalAlignment.ALIGN_MIDDLE);
             lastNRacesSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
@@ -287,6 +294,28 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             selectedRacesContent.add(new Label(stringMessages.noRacesYet()));
         }
         return selectedRacesPanel;
+    }
+    
+    private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
+            Map<DetailType, CheckBox> registry) {
+        CheckBox checkbox = createCheckbox(dialog, detailType, selected);
+        registry.put(detailType, checkbox);
+        return checkbox;
+    }
+    
+    private CheckBox createCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
+        CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
+                DetailTypeFormatter.getTooltip(detailType));
+        checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + "CheckBox");
+        return checkbox;
+    }
+    
+    private CheckBox createCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip) {
+        CheckBox checkbox = dialog.createCheckbox(label);
+        checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + "CheckBox");
+        checkbox.setValue(selected);
+        dialog.addTooltip(checkbox, tooltip);
+        return checkbox;
     }
 
     @Override
@@ -341,16 +370,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return new Validator<LeaderboardSettings>() {
             @Override
             public String getErrorMessage(LeaderboardSettings valueToValidate) {
+                final String result;
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                    return stringMessages.selectAtLeastOneLegDetail();
+                    result = stringMessages.selectAtLeastOneLegDetail();
                 } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                    return stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
+                    result = stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
                 } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N
                         && (numberOfLastRacesToShowBox.getValue() == null || numberOfLastRacesToShowBox.getValue() < 0)) {
-                    return stringMessages.numberOfRacesMustBeNonNegativeNumber();
+                    result = stringMessages.numberOfRacesMustBeNonNegativeNumber();
                 } else {
-                    return null;
+                    result = null;
                 }
+                return result;
             }
         };
     }

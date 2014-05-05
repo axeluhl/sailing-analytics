@@ -53,7 +53,7 @@ public class CombinedWindPanel extends FlowPanel {
 
     protected void redraw() {
         if (windTrackInfoDTO != null) {
-            if (windTrackInfoDTO.windFixes.size() > 0) {
+            if (!windTrackInfoDTO.windFixes.isEmpty()) {
                 WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
                 double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
                 double windFromDeg = windDTO.dampenedTrueWindFromDeg;
@@ -73,10 +73,6 @@ public class CombinedWindPanel extends FlowPanel {
         }
     }
     
-    public WindTrackInfoDTO getWindTrackInfoDTO() {
-        return windTrackInfoDTO;
-    }
-
     public void setWindInfo(WindTrackInfoDTO windTrackInfoDTO, WindSource windSource) {
         this.windTrackInfoDTO = windTrackInfoDTO;
         this.windSource = windSource;

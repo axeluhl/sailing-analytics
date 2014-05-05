@@ -6,7 +6,9 @@
   <stylesheet src="../reset.css" />
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
-
+  
+  <inherits name='com.google.gwt.debug.Debug'/>
+  
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
@@ -22,8 +24,8 @@
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
   <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
-  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint'/>

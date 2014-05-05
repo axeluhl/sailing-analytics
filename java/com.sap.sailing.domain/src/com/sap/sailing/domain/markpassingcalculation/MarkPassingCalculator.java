@@ -48,11 +48,15 @@ public class MarkPassingCalculator {
     private CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
-    private boolean suspended = false;
     private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
     /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1));
+
+    private MarkPassingUpdateListener listener;
+    private AbstractCandidateFinder finder;
+    private AbstractCandidateChooser chooser;
+    private boolean suspended = false;
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
         if (listen) {

@@ -289,7 +289,8 @@ public interface StringMessages extends Messages {
     String leaderboardsInGroup();
     String replication();
     String errorFetchingReplicaData(String message);
-    String averageCrossTrackErrorInMeters();
+    String averageAbsoluteCrossTrackErrorInMeters();
+    String averageSignedCrossTrackErrorInMeters();
     String enterMaster();
     String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
@@ -485,8 +486,10 @@ public interface StringMessages extends Messages {
     String totalTimeSailedReachingInSecondsTooltip();
     String totalTimeSailedUpwindInSecondsTooltip();
     String windwardDistanceToGoInMetersTooltip();
-    String averageCrossTrackErrorInMetersTooltip();
-    String raceAverageCrossTrackErrorInMetersTooltip();
+    String averageAbsoluteCrossTrackErrorInMetersTooltip();
+    String averageSignedCrossTrackErrorInMetersTooltip();
+    String raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
+    String raceAverageSignedCrossTrackErrorInMetersTooltip();
     String gapChangeSinceLegStartInSecondsTooltip();
     String velocityMadeGoodInKnotsTooltip();
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
@@ -923,7 +926,6 @@ public interface StringMessages extends Messages {
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
-    String createSwissTimingRace();
     String igtimiAccounts();
     String errorFetchingIgtimiAccounts(String message);
     String addIgtimiAccount();
@@ -966,4 +968,8 @@ public interface StringMessages extends Messages {
     String overallProgress();
     String showAddedScores();
     String ratio();
+    String importWind();
+    String importWindTooltip();
+    String authorName();
+    String authorPriority();
 }

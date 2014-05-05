@@ -13,18 +13,17 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.TimeRangeChangeListener;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.TimeZoomChangeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public abstract class AbstractRaceChart extends SimplePanel implements RaceSelectionChangeListener,
     TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
@@ -137,7 +136,7 @@ public abstract class AbstractRaceChart extends SimplePanel implements RaceSelec
 
     protected void setSeriesPoints(Series series, Point[] points) {
         if (timeRangeWithZoomProvider.isZoomed()) {
-            Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
+            com.sap.sse.common.Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
             resetMinMaxAndExtremesInterval(/* redraw */ false);
             series.setPoints(points, false);
             changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);

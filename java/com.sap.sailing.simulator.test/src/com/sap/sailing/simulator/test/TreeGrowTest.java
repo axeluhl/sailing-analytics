@@ -43,7 +43,7 @@ public class TreeGrowTest {
         course.add(end);
         PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        Position[][] positions = bd.extractGrid(10, 10);
+        Position[][] positions = bd.extractGrid(10, 10, 0, 0);
         //RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
         //Speed knotSpeed = new KnotSpeedImpl(8);
         WindControlParameters windParameters = new WindControlParameters(12, start.getBearingGreatCircle(end).reverse().getDegrees());

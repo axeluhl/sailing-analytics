@@ -15,12 +15,12 @@ import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
-import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -42,22 +42,21 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
@@ -73,7 +72,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private final Map<WindSource, Series> windSourceSpeedSeries;
     private final Map<WindSource, Point[]> windSourceDirectionPoints;
     private final Map<WindSource, Point[]> windSourceSpeedPoints;
-    private Pair<Double, Double> overallDirectionMinMax;
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
@@ -96,7 +94,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
-        overallDirectionMinMax = new Pair<Double, Double>(null, null);
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
@@ -327,8 +324,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             if (windSource.getType().useSpeed()) {
                 speedSeries = getOrCreateSpeedSeries(windSource);
             }
-            Double directionMin = overallDirectionMinMax.getA();
-            Double directionMax = overallDirectionMinMax.getB();
+
+            Point previousDirectionPoint = null;
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
@@ -350,22 +347,17 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         newDirectionPoint.setName(name);
                     }
                     
-                    newDirectionPoint = WindChartPointRecalculator.recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
+                    if (previousDirectionPoint != null) {
+                        newDirectionPoint = ChartPointRecalculator.stayClosestToPreviousPoint(previousDirectionPoint,
+                                newDirectionPoint);
+                    }
                     directionPoints[currentPointIndex] = newDirectionPoint;
+                    previousDirectionPoint = newDirectionPoint;
 
-                    double direction = newDirectionPoint.getY().doubleValue();
-                    if (directionMax == null || direction > directionMax) {
-                        directionMax = direction;
-                    }
-                    if (directionMin == null || direction < directionMin) {
-                        directionMin = direction;
-                    }
-                    
                     Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
                 }
             }
-            overallDirectionMinMax = new Pair<Double, Double>(directionMin, directionMax);
             
             Point[] newDirectionPoints;
             Point[] newSpeedPoints = null;
@@ -430,7 +422,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private void clearCacheAndReload() {
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
-        overallDirectionMinMax = new Pair<Double, Double>(null, null);
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
         
@@ -451,7 +442,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
-                    from, to, settings.getResolutionInMilliseconds(), null);
+                    from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
+                    to overshoot the evidence so far */ true);
             asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
                     new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override

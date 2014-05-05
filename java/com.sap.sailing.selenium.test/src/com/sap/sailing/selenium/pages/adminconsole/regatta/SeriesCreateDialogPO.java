@@ -9,8 +9,8 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
 public class SeriesCreateDialogPO extends DataEntryDialogPO {
-    @FindBy(how = BySeleniumId.class, using = "NameTextField")
-    private WebElement seriesNameTextField;
+    @FindBy(how = BySeleniumId.class, using = "NameTextBox")
+    private WebElement nameTextBox;
     
 //    @FindBy(how = BySeleniumId.class, using = "MedalSeriesCheckbox")
 //    private WebElement medalSeriesCheckbox;
@@ -32,8 +32,8 @@ public class SeriesCreateDialogPO extends DataEntryDialogPO {
     }
     
     public void setSeriesName(String name) {
-        this.seriesNameTextField.clear();
-        this.seriesNameTextField.sendKeys(name);
+        this.nameTextBox.clear();
+        this.nameTextBox.sendKeys(name);
     }
     
     // TODO: Checkboxes and Fleets

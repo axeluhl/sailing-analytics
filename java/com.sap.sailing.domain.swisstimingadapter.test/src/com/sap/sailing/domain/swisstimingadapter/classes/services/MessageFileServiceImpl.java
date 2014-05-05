@@ -36,7 +36,7 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
-import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
@@ -183,7 +183,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         List<Race> result = new ArrayList<Race>();
         for (int i = 0; i < count; i++) {
             String[] idAndDescription = message.getSections()[2 + i].split(";");
-            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1], null /* boat class */));
         }
         return new RACMessage(result);
     }
@@ -218,7 +218,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         int count = Integer.valueOf(message.getSections()[2]);
         for (int i = 0; i < count; i++) {
             String[] competitorDetails = message.getSections()[3 + i].split(";");
-            competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
+            competitors.add(new CompetitorWithoutID(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new STLMessage(raceId, competitors);
     }
@@ -258,7 +258,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         // Add Strings of stringmessageList into a ArrayList of type SailMasterMessage
         List<SailMasterMessage> sailMasterMessageList = new ArrayList<SailMasterMessage>();
         for (String s : strList) {
-            sailMasterMessageList.add(new SailMasterMessageImpl(s, new Long(0)));
+            sailMasterMessageList.add(new SailMasterMessageImpl(s));
         }
         return sailMasterMessageList;
     }

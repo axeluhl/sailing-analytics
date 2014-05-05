@@ -7,11 +7,13 @@ import java.util.Map;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -191,7 +193,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * {@link RaceTimesInfoDTO#timePointOfNewestEvent timePointOfNewestEvent} received from the tracking infrastructure
      * so far and puts the timer into {@link PlayStates#Playing play mode}.
      */
-    private boolean initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
+    private void initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
         // initialize timer position
         switch (timer.getPlayMode()) {
         case Live:
@@ -207,7 +209,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             break;
         }
-        return timer.getTime() != null;
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {

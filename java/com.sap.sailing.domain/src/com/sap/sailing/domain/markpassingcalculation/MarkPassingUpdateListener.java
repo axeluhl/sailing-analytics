@@ -98,7 +98,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener implem
             }
         });
     }
-
     @Override
     public void waypointRemoved(final int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         queue.add(new StorePositionUpdateStrategy() {

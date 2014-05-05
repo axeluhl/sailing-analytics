@@ -7,15 +7,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A viewer for a single leaderboard and a leaderboard chart.
@@ -34,7 +36,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
             boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
+                // perform the first request as live request but don't auto-play
+                new Timer(PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ 3000l), stringMessages, hideToolbar);
 
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
@@ -60,29 +63,29 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         if(showCharts) {
             multiCompetitorChart.timeChanged(timer.getTime(), null);
         }
-        
         overallLeaderboardPanel = null;
         if(showOverallLeaderboard) {
-            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
-                @Override
-                public void onSuccess(List<String> result) {
-                    if(result.size() == 1) {
-                        String overallLeaderboardName = result.get(0);
-                        overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                                leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
-                                leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                                false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
-                        mainPanel.add(overallLeaderboardPanel);
-                        addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
-                                /* hasSettingsWhenComponentIsInvisible*/ true);
-                    }
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    // DO NOTHING
-                }
-            });
+            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(
+                    new AsyncCallback<List<String>>() {
+                        @Override
+                        public void onSuccess(List<String> result) {
+                            if(result.size() == 1) {
+                                String overallLeaderboardName = result.get(0);
+                                overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                                        leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
+                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                                        false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
+                                mainPanel.add(overallLeaderboardPanel);
+                                addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
+                                        /* hasSettingsWhenComponentIsInvisible*/ true);
+                            }
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // DO NOTHING
+                        }
+            }));
         }
     }
     

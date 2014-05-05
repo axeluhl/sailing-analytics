@@ -42,4 +42,13 @@ public class SpeedUnitTest {
         assertEquals(Math.sqrt(12*12+12*12), sum.getKnots(), 0.01);
         assertEquals(65., sum.getBearing().getDegrees(), 0.0000001);
     }
+    
+    @Test
+    public void testSpeedWithBearingAddExample() {
+        SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(10., new DegreeBearingImpl(225)); // SW
+        SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(10./Math.sqrt(2.0), new DegreeBearingImpl(0)); // back to original lat by traveling N
+        SpeedWithBearing sum = s1.add(s2);
+        assertEquals(10./Math.sqrt(2.0), sum.getKnots(), 0.01);
+        assertEquals(270., sum.getBearing().getDegrees(), 0.0000001);
+    }
 }

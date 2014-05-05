@@ -39,14 +39,14 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidget {
 
@@ -384,12 +384,11 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet) {
         List<RaceColumnDTO> racesColumnsOfFleet = new ArrayList<RaceColumnDTO>();
-        
         for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
             for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
-                if(fleet.equals(fleetOfRaceColumn)) {
-                    //We have to get the race column from the leaderboard, because the race column of the series
-                    //have no tracked race and would be displayed as inactive race.
+                if (fleet.equals(fleetOfRaceColumn)) {
+                    // We have to get the race column from the leaderboard, because the race column of the series
+                    // have no tracked race and would be displayed as inactive race.
                     racesColumnsOfFleet.add(leaderboard.getRaceColumnByName(raceColumn.getName()));
                 }
             }

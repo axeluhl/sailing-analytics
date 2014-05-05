@@ -14,7 +14,11 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.datamining</module>
+		<module>com.sap.sse.datamining.shared</module>
+		<module>com.sap.sse.datamining.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
@@ -65,6 +69,7 @@
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
+		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
@@ -92,12 +97,12 @@
 		<module>com.sap.sailing.velum.resultimport.test</module>
 		<module>com.sap.sailing.sailwave.resultimport</module>
 		<module>com.sap.sailing.sailwave.resultimport.test</module>
+		<module>com.sap.sailing.manage2sail</module>
 		<module>com.sap.sailing.manage2sail.resultimport</module>
 		<module>com.sap.sailing.manage2sail.resultimport.test</module>
 		<module>com.sap.sailing.nmeaconnector.test</module>
 		<module>com.sap.sailing.simulator.test</module>
 		<module>com.sap.sailing.server.trackfiles.test</module>
-		<module>de.csenk.gwt.ws</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>com.sap.sailing.feature.p2build</module>
 	</modules>

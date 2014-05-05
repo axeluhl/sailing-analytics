@@ -488,6 +488,62 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/firstlegbearing")
+    public Response getFirstLegBearing(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                final TimePoint timePoint;
+                try {
+                    timePoint = parseTimePoint(time, timeasmillis,
+                            trackedRace.getStartOfRace() == null ? new MillisecondsTimePoint(0) :
+                                trackedRace.getStartOfRace());
+                } catch (InvalidDateException e1) {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'from' time.").type(MediaType.TEXT_PLAIN).build();
+                }
+
+                BearingJsonSerializer serializer = new BearingJsonSerializer();
+                JSONObject jsonBearing = serializer.serialize(trackedRace.getDirectionFromStartToNextMark(timePoint).getFrom());
+                String json = jsonBearing.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
+ 
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/markpassings")
+    public Response getMarkPassings(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else {     
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                MarkPassingsJsonSerializer serializer = new MarkPassingsJsonSerializer();
+                JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
+                String json = jsonMarkPassings.toJSONString();
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
  
     @GET
     @Produces("application/json;charset=UTF-8")
