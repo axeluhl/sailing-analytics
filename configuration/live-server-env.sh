@@ -13,4 +13,4 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
-ADDITIONAL_JAVA_ARGS="-Digtimi.enableWorkaroundForSingleDigitLatitudes=true -Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog"
+ADDITIONAL_JAVA_ARGS="-XX:+UseMembar -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog"
