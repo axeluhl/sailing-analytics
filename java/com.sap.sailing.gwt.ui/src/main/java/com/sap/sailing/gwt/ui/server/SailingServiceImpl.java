@@ -2853,13 +2853,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventId, eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue.getName(), isPublic, regattaNames));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, regattaNames));
     }
 
     @Override
     public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue, isPublic, eventUuid));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
