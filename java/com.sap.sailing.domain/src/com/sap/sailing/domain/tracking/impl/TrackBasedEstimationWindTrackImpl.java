@@ -139,8 +139,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
     
     /**
-     * {@link #scheduleCacheRefresh(WindWithConfidence, TimePoint)} synchronizes on this object before changing it
-     * and when actually invalidating the cache.
+     * {@link #scheduleCacheRefresh(WindWithConfidence, TimePoint)} synchronizes on this object before changing it and
+     * when actually invalidating the cache. When a querying thread holds at least the read lock of {@link #cacheLock}
+     * and the refresh interval it {@link InvalidationInterval#isSet() is set}, an invalidation is currently running or
+     * has been scheduled.
      */
     private final InvalidationInterval scheduledRefreshInterval;
 
@@ -270,8 +272,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
                 startSchedulerForCacheRefresh();
             } else {
-                // this means that an invalidation is already scheduled; as long as we're synchronized on scheduledInvalidationInterval
-                // we can safely extend the interval; the invalidation won't start before we release the lock
+                // this means that an invalidation or incremental refresh is already scheduled; as long as we're
+                // synchronized on scheduledInvalidationInterval we can safely extend the interval; the invalidation
+                // won't start before we release the lock
                 scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
             }
         } finally {
