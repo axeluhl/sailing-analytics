@@ -150,7 +150,7 @@ public class WindEstimationLockingUnderLoadTest {
         };
         inserter.start();
         List<Thread> readers = new ArrayList<Thread>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 4; i++) {
             Thread reader = new Thread(readerRunnable, "Reader thread "+i+" in " + getClass().getName()
                     + ".testAddingManyWindFixesWhileReadingLikeCrazy");
             reader.start();
