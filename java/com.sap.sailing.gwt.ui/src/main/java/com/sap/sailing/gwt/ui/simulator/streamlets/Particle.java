@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.simulator;
+package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 
 public class Particle {

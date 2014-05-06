@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.simulator;
+package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;

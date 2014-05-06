@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.simulator;
+package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import java.util.Date;
 
@@ -8,6 +8,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.simulator.SimulatorField;
+import com.sap.sailing.gwt.ui.simulator.SimulatorJSBundle;
+import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 public class Swarm {
@@ -51,7 +54,7 @@ public class Swarm {
 
     	} else {
     		
-    		field = new SimulatorField(((WindStreamletsCanvasOverlay)fullcanvas).windFieldDTO, ((WindStreamletsCanvasOverlay)fullcanvas).windParams);
+    		field = new SimulatorField(((WindStreamletsCanvasOverlay)fullcanvas).getWindFieldDTO(), ((WindStreamletsCanvasOverlay)fullcanvas).getWindParams());
         	fullcanvas.setCanvasSettings();
     		projection.calibrate();
     		
@@ -220,6 +223,8 @@ public class Swarm {
     			//console("delta:"+(time1.getTime()-time0.getTime())+"/"+millis);
     			if (swarmContinue) {
     				loopTimer.schedule((int)Math.max(10, millis - (time1.getTime()-time0.getTime())));
+    			} else {
+    		    	projection.clearCanvas();
     			}
     		}
     	};

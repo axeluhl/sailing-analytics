@@ -7,6 +7,11 @@ import com.google.gwt.json.client.JSONParser;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.simulator.streamlets.GeoPos;
+import com.sap.sailing.gwt.ui.simulator.streamlets.Index;
+import com.sap.sailing.gwt.ui.simulator.streamlets.Neighbors;
+import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
+import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 
 public class SimulatorField implements VectorField {
 

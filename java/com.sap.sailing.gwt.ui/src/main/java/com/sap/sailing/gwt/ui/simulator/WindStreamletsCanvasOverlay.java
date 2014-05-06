@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
@@ -54,6 +55,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         
     }
 
+    public WindFieldDTO getWindFieldDTO() {
+    	return this.windFieldDTO;
+    }
+    
+    public WindFieldGenParamsDTO getWindParams() {
+    	return this.windParams;
+    }
+    
     public JavaScriptObject getJSONRandomWindData() {
     	
     	JSONObject jsonWindData = new JSONObject();
@@ -138,15 +147,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 		$wnd.swarmCanvasProjection = instance;
 	}-*/;
 
-//    public native void startStreamlets() /*-{
-//    	if ($wnd.swarmAnimator) {
-//    		$wnd.swarmUpdData = true;
-//    		$wnd.updateStreamlets($wnd.swarmUpdData);
-//    	} else {
-//			$wnd.initStreamlets($wnd.swarmMap);
-//    	}
-//	}-*/;
-
     public void startStreamlets() {
     	if (swarm == null) {
     		this.swarm = new Swarm(this,map);
@@ -154,20 +154,10 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     	this.swarm.start(40, windFieldDTO);
     }
     
-//    public native void setStreamletsStep(int step) /*-{
-//		$wnd.swarmField.setStep(step);
-//	}-*/;
-
     public void setStreamletsStep(int step) {
 		this.swarm.getField().setStep(step);
 	}
 
-//    public native void stopStreamlets() /*-{
-//    	if ($wnd.stopStreamlets) {
-//			$wnd.stopStreamlets();
-//    	};
-//	}-*/;
-    
     public void stopStreamlets() {
     	if (swarm != null) {
     		this.swarm.stop();
