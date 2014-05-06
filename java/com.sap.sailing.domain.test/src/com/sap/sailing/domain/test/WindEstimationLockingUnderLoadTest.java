@@ -17,6 +17,7 @@ import org.mockito.stubbing.Answer;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
@@ -77,6 +79,8 @@ public class WindEstimationLockingUnderLoadTest {
                  }
         });
         when(result.getOrCreateWindTrack(realWindSource)).thenReturn(measuredTrack);
+        when(result.getStatus()).thenReturn(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* loadingProgress */ 1.0));
+        when(result.getMillisecondsOverWhichToAverageWind()).thenReturn(30000l);
         return result;
     }
     
