@@ -5,6 +5,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -13,10 +17,13 @@ import org.mockito.stubbing.Answer;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -37,11 +44,15 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
  *
  */
 public class WindEstimationLockingUnderLoadTest {
+    private static final Logger logger = Logger.getLogger(WindEstimationLockingUnderLoadTest.class.getName());
+    
     private static final int MIN_WIND_SPEED_IN_KNOTS = 5;
 
     private static final int MAX_WIND_SPEED_IN_KNOTS = 20;
 
     private TrackedRace mockedTrackedRace;
+    
+    private WindSource realWindSource;
     
     private TrackBasedEstimationWindTrackImpl estimationTrack;
     
@@ -49,9 +60,10 @@ public class WindEstimationLockingUnderLoadTest {
     
     @Before
     public void setUp() {
+        realWindSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, "1");
+        measuredTrack = new WindTrackImpl(WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* useSpeed */ true, /* nameForReadWriteLock */ "Test wind track in "+getClass().getName());
         mockedTrackedRace = mockTrackedRace();
         estimationTrack = new TrackBasedEstimationWindTrackImpl(mockedTrackedRace, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 0.5);
-        measuredTrack = new WindTrackImpl(WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* useSpeed */ true, /* nameForReadWriteLock */ "Test wind track in "+getClass().getName());
     }
 
     private TrackedRace mockTrackedRace() {
@@ -59,14 +71,12 @@ public class WindEstimationLockingUnderLoadTest {
         RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
         when(result.getRace()).thenReturn(mockedRaceDefinition);
         when(mockedRaceDefinition.getName()).thenReturn("Test Race");
-        when(result.getEstimatedWindDirectionWithConfidence((Position) any(), (TimePoint) any())).thenAnswer(new Answer() {
-                 public Object answer(InvocationOnMock invocation) {
+        when(result.getEstimatedWindDirectionWithConfidence((Position) any(), (TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
+                 public WindWithConfidence<TimePoint> answer(InvocationOnMock invocation) {
                      return randomWindOrNull();
-//                         Object[] args = invocation.getArguments();
-//                         Object mock = invocation.getMock();
-//                         return "called with arguments: " + args;
-                     }
+                 }
         });
+        when(result.getOrCreateWindTrack(realWindSource)).thenReturn(measuredTrack);
         return result;
     }
     
@@ -98,5 +108,62 @@ public class WindEstimationLockingUnderLoadTest {
             }
         }
         assertTrue(notNullCount > 0);
+    }
+    
+    @Test
+    public void testSendingNewWindFixToEstimationTrack() {
+        final WindImpl wind = new WindImpl(new DegreePosition(49, 8), MillisecondsTimePoint.now(),
+                new KnotSpeedWithBearingImpl(/* speedInKnots */12., new DegreeBearingImpl(47)));
+        addMeasuredWindFix(wind);
+        // no verdict, really; just expecting that there is no exception raised
+    }
+    
+    @Test
+    public void testAddingManyWindFixesWhileReadingLikeCrazy() throws InterruptedException {
+        Thread inserter = new Thread("Inserter thread in "+getClass().getName()+".testAddingManyWindFixesWhileReadingLikeCrazy") {
+            @Override
+            public void run() {
+                TimePoint now = MillisecondsTimePoint.now();
+                for (int i = 0; i < 1000000; i++) {
+                    final WindImpl wind = new WindImpl(new DegreePosition(49, 8), now, new KnotSpeedWithBearingImpl(
+                            /* speedInKnots */12., new DegreeBearingImpl(47)));
+                    addMeasuredWindFix(wind);
+                    now = now.plus(10);
+                }
+                logger.info("Inserter thread done");
+            }
+        };
+        Runnable readerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                TimePoint now = MillisecondsTimePoint.now();
+                for (int i=0; i<1000000; i++) {
+                    estimationTrack.getAveragedWind(/* position */ null, now);
+                    now = now.plus(10);   // the cache quantizes to a full second; so not all time points will automatically fetch uncached values
+                }
+                logger.info(Thread.currentThread().getName()+" done");
+            }
+        };
+        inserter.start();
+        List<Thread> readers = new ArrayList<Thread>();
+        for (int i = 0; i < 10; i++) {
+            Thread reader = new Thread(readerRunnable, "Reader thread "+i+" in " + getClass().getName()
+                    + ".testAddingManyWindFixesWhileReadingLikeCrazy");
+            reader.start();
+            readers.add(reader);
+        }
+        inserter.join();
+        for (Thread reader : readers) {
+            reader.join();
+        }
+    }
+
+    /**
+     * Adds the wind fix to the {@link #measuredTrack} and explicitly notifies {@link #estimationTrack} which is
+     * not a listener on the mocked tracked race or the wind track and therefore otherwise wouldn't receive the fix
+     */
+    private void addMeasuredWindFix(final WindImpl wind) {
+        measuredTrack.add(wind);
+        estimationTrack.windDataReceived(wind, realWindSource);
     }
 }

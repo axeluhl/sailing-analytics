@@ -52,10 +52,6 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
      */
     abstract protected Wind getWind(Position p, TimePoint timePoint);
 
-    public long getResolutionInMilliseconds() {
-        return resolutionInMilliseconds;
-    }
-
     /**
      * @param from expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
      * @param to expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
@@ -71,6 +67,10 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         this.resolutionInMilliseconds = resolutionInMilliseconds;
     }
     
+    public long getResolutionInMilliseconds() {
+        return resolutionInMilliseconds;
+    }
+
     protected WindTrack getTrack() {
         return track;
     }
