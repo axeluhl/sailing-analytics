@@ -64,12 +64,15 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
-        URI storedUri = new URI("file:///" + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
-        super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
-        /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS,
-                ReceiverType.RAWPOSITIONS });
-        getTrackedRace().recordWind(new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
-                new WindSourceImpl(WindSourceType.WEB));
+        URI storedUri = new URI("file:///"
+                + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(
+                new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
+                /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS,
+                        ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RAWPOSITIONS });
+        getTrackedRace().recordWind(
+                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
 
         for (Waypoint w : getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
@@ -86,7 +89,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException,
+            ParseException {
         setUp(raceNumber);
         testWholeRace();
         testMiddleOfRace(0);
@@ -155,7 +159,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         System.out.println("Both null" + "\n");
                     }
                 } else {
-                    long timeDelta = givenPasses.get(c).get(w).getTimePoint().asMillis() - computedPasses.get(c).get(w).getTimePoint().asMillis();
+                    long timeDelta = givenPasses.get(c).get(w).getTimePoint().asMillis()
+                            - computedPasses.get(c).get(w).getTimePoint().asMillis();
                     if ((Math.abs(timeDelta) < tolerance)) {
                         correctPasses++;
                         if (printRight) {
@@ -182,7 +187,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
 
         double totalMarkPasses = numberOfCompetitors * waypoints.size();
-        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed + wronglyComputed, 0);
+        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed
+                + wronglyComputed, 0);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
         if (printResult) {
             System.out.println("Total theoretical Passes: " + totalMarkPasses);
@@ -200,62 +206,66 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         incorrect += incorrectPasses;
         skipped += wronglyNotComputed;
         extra += wronglyComputed;
-        assertTrue("Expected accuracy to be at least 0.8 but was "+accuracy, accuracy >= 0.8);
+        assertTrue("Expected accuracy to be at least 0.8 but was " + accuracy, accuracy >= 0.8);
     }
 
-    private void testMiddleOfRace(int waypoint) {
-        CandidateFinder finder = new CandidateFinder(getTrackedRace());
-        CandidateChooser chooser = new CandidateChooser(getTrackedRace());
+    private void testMiddleOfRace(int zeroBasedIndexOfLastWaypointToBePassed) {
+        CandidateFinder finder = new CandidateFinderImpl(getTrackedRace());
+        CandidateChooser chooser = new CandidateChooserImpl(getTrackedRace());
         int mistakes = 0;
-        Waypoint start = waypoints.get(waypoint);
-        Waypoint second = waypoints.get(waypoint + 1);
+        Waypoint lastWaypointToBePassed = waypoints.get(zeroBasedIndexOfLastWaypointToBePassed);
+        Waypoint wayPointAfterwards = waypoints.get(zeroBasedIndexOfLastWaypointToBePassed + 1);
         for (Competitor c : getRace().getCompetitors()) {
-            MarkPassing markPassing = givenPasses.get(c).get(wayPointAfterWards);
-             if (markPassing == null) {
-            if (givenPasses.get(c).get(start) != null && givenPasses.get(c).get(second) != null) {
-                startTime = givenPasses.get(c).get(start).getTimePoint();
-                secondPass = givenPasses.get(c).get(second).getTimePoint();
-                TimePoint delta = new MillisecondsTimePoint(startTime.plus(secondPass.asMillis()).asMillis() / 2);
-            TimePoint firstPassingOfNext = markPassing.getTimePoint().minus(20000);
-                List<GPSFix> fixes = new ArrayList<GPSFix>();
-                try {
-                    getTrackedRace().getTrack(c).lockForRead();
-                    for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                        if (fix.getTimePoint().before(delta)) {
-                    if (fix.getTimePoint().before(firstPassingOfNext)) {
-                            fixes.add(fix);
+            MarkPassing markPassing = givenPasses.get(c).get(wayPointAfterwards);
+            if (markPassing != null) {
+                if (givenPasses.get(c).get(lastWaypointToBePassed) != null
+                        && givenPasses.get(c).get(wayPointAfterwards) != null) {
+                    TimePoint startTime = givenPasses.get(c).get(lastWaypointToBePassed).getTimePoint();
+                    TimePoint secondPass = givenPasses.get(c).get(wayPointAfterwards).getTimePoint();
+                    TimePoint delta = new MillisecondsTimePoint(startTime.plus(secondPass.asMillis()).asMillis() / 2);
+                    TimePoint firstPassingOfNext = markPassing.getTimePoint().minus(20000);
+                    List<GPSFix> fixes = new ArrayList<GPSFix>();
+                    try {
+                        getTrackedRace().getTrack(c).lockForRead();
+                        for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
+                            if (fix.getTimePoint().before(delta)) {
+                                if (fix.getTimePoint().before(firstPassingOfNext)) {
+                                    fixes.add(fix);
+                                }
+
+                            }
+                        }
+                    } finally {
+                        getTrackedRace().getTrack(c).unlockAfterRead();
+                    }
+                    Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+                    chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
+                    boolean gotPassed = true;
+                    boolean gotOther = false;
+                    // System.out.println(c);
+                    for (Waypoint w : getRace().getCourse().getWaypoints()) {
+                        MarkPassing old = givenPasses.get(c).get(w);
+                        MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
+                        // System.out.println(newm);
+                        if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
+                            if ((old == null) != (newm == null)) {
+                                gotPassed = false;
+                            }
+                        } else {
+                            if (w != wayPointAfterwards && newm != null) {
+                                gotOther = true;
+                            }
                         }
                     }
-                } finally {
-                    getTrackedRace().getTrack(c).unlockAfterRead();
-                }
-                Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
-                chooser.calculateMarkPassDeltas(c, f);
-                boolean gotPassed = true;
-                boolean gotOther = false;
-            //System.out.println(c);
-                for (Waypoint w : getRace().getCourse().getWaypoints()) {
-                    MarkPassing old = givenPasses.get(c).get(w);
-                    MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
-                //System.out.println(newm);
-                if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
-                        if ((old == null) != (newm == null)) {
-                            gotPassed = false;
-                        }
-                    } else {
-                    if (w != wayPointAfterWards&&newm != null) {
-                            gotOther = true;
-                        }
+                    if (!gotPassed || gotOther) {
+                        mistakes++;
                     }
-                }
-                if (!gotPassed || gotOther) {
-                    mistakes++;
                 }
             }
+            Assert.assertTrue(mistakes == 0);
         }
-        Assert.assertTrue(mistakes == 0);
     }
-    
+
     @AfterClass
     public static void createXML() throws IOException {
         double accuracy = correct / totalPasses;
@@ -267,7 +277,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         System.out.println(different);
         System.out.println(allSkipped);
         System.out.println(allExtra);
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName, className);
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName,
+                className);
         MeasurementCase performanceReportCase = performanceReport.addCase(simpleName);
         performanceReportCase.addMeasurement(new Measurement("Accurate", accuracy));
         performanceReportCase.addMeasurement(new Measurement("Different", different));

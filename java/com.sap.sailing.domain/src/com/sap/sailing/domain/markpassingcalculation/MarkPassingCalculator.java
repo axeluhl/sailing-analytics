@@ -53,9 +53,6 @@ public class MarkPassingCalculator {
     /* keepAliveTime */60, TimeUnit.SECONDS,
     /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1));
 
-    private MarkPassingUpdateListener listener;
-    private AbstractCandidateFinder finder;
-    private AbstractCandidateChooser chooser;
     private boolean suspended = false;
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
@@ -128,8 +125,8 @@ public class MarkPassingCalculator {
             }
         }
 
-        private void updateWaypoints(Integer smallestInterger) {
-            Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addedCandidates = finder.invalidateAfterCourseChange(smallestInterger);
+        private void updateWaypoints(Integer zeroBasedIndexOfEarliestWaypointChanged) {
+            Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addedCandidates = finder.invalidateAfterCourseChange(zeroBasedIndexOfEarliestWaypointChanged);
             for (Entry<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> entry : addedCandidates.entrySet()) {
                 Pair<Iterable<Candidate>, Iterable<Candidate>> deltas = entry.getValue();
                 chooser.calculateMarkPassDeltas(entry.getKey(), deltas.getA(), deltas.getB());
