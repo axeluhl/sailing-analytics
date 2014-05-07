@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -122,6 +123,7 @@ public class WindEstimationLockingUnderLoadTest {
         // no verdict, really; just expecting that there is no exception raised
     }
     
+    @Ignore("This test doesn't really test anything with a verdict; it is helpful to check the locking behavior of the wind estimation")
     @Test
     public void testAddingManyWindFixesWhileReadingLikeCrazy() throws InterruptedException {
         Thread inserter = new Thread("Inserter thread in "+getClass().getName()+".testAddingManyWindFixesWhileReadingLikeCrazy") {
