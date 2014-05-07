@@ -167,6 +167,12 @@ public class LeaderboardCacheManager {
                 observedCompetitors.remove(competitorToStopObserving);
             }
         }
+
+        public synchronized void removeFromAllCompetitors() {
+            for (Competitor competitor : observedCompetitors) {
+                competitor.removeCompetitorChangeListener(this);
+            }
+        }
         
     }
     
@@ -236,9 +242,7 @@ public class LeaderboardCacheManager {
             LockUtil.unlockAfterWrite(scoreCorrectionAndCompetitorChangeListenersLock);
         }
         leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            competitor.removeCompetitorChangeListener(removedCompetitorChangeListener);
-        }
+        removedCompetitorChangeListener.removeFromAllCompetitors();
         // invalidate after the listeners have been removed; this is important because invalidation may trigger a
         // re-calculation which then in turn may call add(leaderboard) asynchronously again which may be executed
         // before the listener removal happens here. This could lead to a race condition where listeners are
@@ -283,9 +287,9 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                        competitorChangeListeners.get(leaderboard).updateCompetitorListeners();
                         removeFromCache(leaderboard);
                         registerListener(leaderboard, trackedRace);
-                        competitorChangeListeners.get(leaderboard).updateCompetitorListeners();
                     }
 
                     /**
