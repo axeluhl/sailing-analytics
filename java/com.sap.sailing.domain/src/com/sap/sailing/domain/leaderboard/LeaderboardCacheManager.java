@@ -241,8 +241,12 @@ public class LeaderboardCacheManager {
         } finally {
             LockUtil.unlockAfterWrite(scoreCorrectionAndCompetitorChangeListenersLock);
         }
-        leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
-        removedCompetitorChangeListener.removeFromAllCompetitors();
+        if (removedScoreCorrectionListener != null) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
+        }
+        if (removedCompetitorChangeListener != null) {
+            removedCompetitorChangeListener.removeFromAllCompetitors();
+        }
         // invalidate after the listeners have been removed; this is important because invalidation may trigger a
         // re-calculation which then in turn may call add(leaderboard) asynchronously again which may be executed
         // before the listener removal happens here. This could lead to a race condition where listeners are
@@ -287,7 +291,6 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        competitorChangeListeners.get(leaderboard).updateCompetitorListeners();
                         removeFromCache(leaderboard);
                         registerListener(leaderboard, trackedRace);
                     }
@@ -302,8 +305,8 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        removeFromCache(leaderboard);
                         competitorChangeListeners.get(leaderboard).updateCompetitorListeners();
+                        removeFromCache(leaderboard);
                         Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
                                 .get(leaderboard);
                         if (listenersMap != null) {
