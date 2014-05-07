@@ -1,5 +1,6 @@
 package com.sap.sailing.util.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -355,9 +356,9 @@ public class LockUtil {
     }
 
     
-    private static String getStackTrace(Thread thread) {
+    private static String getStackTrace(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
-        for (StackTraceElement sf : thread.getStackTrace()) {
+        for (StackTraceElement sf : stackTrace) {
             sb.append(sf.toString());
             sb.append('\n');
         }
@@ -365,7 +366,7 @@ public class LockUtil {
     }
 
     private static String getCurrentStackTrace() {
-        return getStackTrace(Thread.currentThread());
+        return getStackTrace(Thread.currentThread().getStackTrace());
     }
 
     /**
@@ -381,6 +382,13 @@ public class LockUtil {
         try {
             locked = lock.tryLock(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK, TimeUnit.SECONDS);
             if (!locked) {
+                Thread writer = lockParent.getWriter();
+                // capture the stack traces as quickly as possible to try to reflect the situation as it was when the lock couuldn't be obtained
+                StackTraceElement[] writerStackTrace = writer != null ? writer.getStackTrace() : null;
+                Map<Thread, StackTraceElement[]> readerStackTraces = new HashMap<Thread, StackTraceElement[]>();
+                for (Thread reader : lockParent.getReaders()) {
+                    readerStackTraces.put(reader, reader.getStackTrace());
+                }
                 StringBuilder message = new StringBuilder();
                 message.append("Couldn't acquire lock ");
                 message.append(lockDescriptionForTimeoutLogMessage);
@@ -388,14 +396,13 @@ public class LockUtil {
                 message.append(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK);
                 message.append("s in thread " + Thread.currentThread().getName() + " at ");
                 message.append(getCurrentStackTrace());
-                Thread writer = lockParent.getWriter();
                 if (writer != null) {
                     message.append("\nThe current writer is:\n");
-                    appendThreadData(message, writer);
+                    appendThreadData(message, writer, writerStackTrace);
                 }
                 message.append("\nThe current readers are:\n");
                 for (Thread reader : lockParent.getReaders()) {
-                    appendThreadData(message, reader);
+                    appendThreadData(message, reader, readerStackTraces.get(reader));
                 }
                 message.append("Trying again...");
                 logger.info(message.toString());
@@ -406,10 +413,10 @@ public class LockUtil {
         return locked;
     }
 
-    private static void appendThreadData(StringBuilder message, Thread writer) {
+    private static void appendThreadData(StringBuilder message, Thread writer, StackTraceElement[] stackTrace) {
         message.append(writer);
         message.append('\n');
-        message.append(getStackTrace(writer));
+        message.append(stackTrace);
         message.append('\n');
     }
     
