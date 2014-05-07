@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +15,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.WithNationality;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.RGBColor;
@@ -40,9 +43,11 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private Color oldColor;
     private Color newColor;
     private DynamicCompetitor competitor;
+    private DomainFactoryImpl baseDomainFactory;
     
     @Before
     public void setUp() {
+        baseDomainFactory = new DomainFactoryImpl();
         competitor = TrackBasedTest.createCompetitor("Hasso");
         nationalityChanged = false;
         whatChangedNationality = null;
@@ -140,5 +145,53 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertEquals(myOldNationality, oldNationality);
         assertEquals(myNewNationality, newNationality);
         assertSame(competitor.getTeam(), whatChangedNationality);
+    }
+    
+    @Test
+    public void testCompetitorSerializationLosesAllExternalListeners() throws ClassNotFoundException, IOException {
+        DomainFactory baseDomainFactory = new DomainFactoryImpl();
+        DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
+        clonedCompetitor.setName("Dr. Hasso Plattner");
+        clonedCompetitor.getBoat().setSailId("POR 40");
+        final RGBColor myNewColor = new RGBColor(123, 12, 234);
+        clonedCompetitor.setColor(myNewColor);
+        final Nationality myNewNationality = baseDomainFactory.getOrCreateNationality("POR");
+        clonedCompetitor.getTeam().setNationality(myNewNationality);
+        assertFalse(nameChanged);
+        assertFalse(sailIdChanged);
+        assertFalse(colorChanged);
+        assertFalse(nationalityChanged);
+    }
+
+    @Test
+    public void testCompetitorSerializationListenerPatternForNameOnSerializedCompetitor() throws ClassNotFoundException, IOException {
+        DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
+        competitor = clonedCompetitor;
+        competitor.addCompetitorChangeListener(listener);
+        testSimpleCompetitorListenerPatternForName();
+    }
+
+    @Test
+    public void testCompetitorSerializationListenerPatternForColorOnSerializedCompetitor() throws ClassNotFoundException, IOException {
+        DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
+        competitor = clonedCompetitor;
+        competitor.addCompetitorChangeListener(listener);
+        testSimpleCompetitorListenerPatternForColor();
+    }
+    
+    @Test
+    public void testCompetitorSerializationListenerPatternForSailIdOnSerializedCompetitor() throws ClassNotFoundException, IOException {
+        DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
+        competitor = clonedCompetitor;
+        competitor.addCompetitorChangeListener(listener);
+        testSimpleCompetitorListenerPatternForSailId();
+    }
+    
+    @Test
+    public void testCompetitorSerializationListenerPatternForNationalityOnSerializedCompetitor() throws ClassNotFoundException, IOException {
+        DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
+        competitor = clonedCompetitor;
+        competitor.addCompetitorChangeListener(listener);
+        testSimpleCompetitorListenerPatternForNationality();
     }
 }

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +27,11 @@ public class PersonImpl extends NamedImpl implements DynamicPerson {
         this.listeners = new HashSet<NationalityChangeListener>();
     }
 
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        listeners = new HashSet<NationalityChangeListener>();
+    }
+    
     @Override
     public InputStream getImage() {
         throw new UnsupportedOperationException("Image for person not yet implemented");
