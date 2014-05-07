@@ -356,7 +356,7 @@ public class LockUtil {
     }
 
     
-    private static String getStackTrace(StackTraceElement[] stackTrace) {
+    private static String formatStackTrace(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement sf : stackTrace) {
             sb.append(sf.toString());
@@ -366,7 +366,7 @@ public class LockUtil {
     }
 
     private static String getCurrentStackTrace() {
-        return getStackTrace(Thread.currentThread().getStackTrace());
+        return formatStackTrace(Thread.currentThread().getStackTrace());
     }
 
     /**
@@ -416,7 +416,7 @@ public class LockUtil {
     private static void appendThreadData(StringBuilder message, Thread writer, StackTraceElement[] stackTrace) {
         message.append(writer);
         message.append('\n');
-        message.append(stackTrace);
+        message.append(formatStackTrace(stackTrace));
         message.append('\n');
     }
     
