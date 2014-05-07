@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -68,6 +68,13 @@ public class WindEstimationLockingUnderLoadTest {
         mockedTrackedRace = mockTrackedRace();
         estimationTrack = new TrackBasedEstimationWindTrackImpl(mockedTrackedRace, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 0.5);
     }
+    
+    @After
+    public void tearDown() {
+        // clean up all Mockito stubbing leaks, particularly the InvocationImpl objects attached to any ThreadLocal;
+        // see also bug 1923, comment #9.
+        // TODO
+    }
 
     private TrackedRace mockTrackedRace() {
         TrackedRace result = mock(TrackedRace.class);
@@ -123,7 +130,6 @@ public class WindEstimationLockingUnderLoadTest {
         // no verdict, really; just expecting that there is no exception raised
     }
     
-    @Ignore("This test doesn't really test anything with a verdict; it is helpful to check the locking behavior of the wind estimation")
     @Test
     public void testAddingManyWindFixesWhileReadingLikeCrazy() throws InterruptedException {
         Thread inserter = new Thread("Inserter thread in "+getClass().getName()+".testAddingManyWindFixesWhileReadingLikeCrazy") {
