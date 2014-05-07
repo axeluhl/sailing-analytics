@@ -124,6 +124,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         if (track != null) {
+            if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                logger.finest(""+competitor.getName() + ": " + fix);
+            }
             track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         }
     }
