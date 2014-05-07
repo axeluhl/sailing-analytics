@@ -29,7 +29,9 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
 
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality);
+        Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
+                .updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality);
+        return result;
     }
 
     @Override
