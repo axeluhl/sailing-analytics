@@ -305,7 +305,6 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        competitorChangeListeners.get(leaderboard).updateCompetitorListeners();
                         removeFromCache(leaderboard);
                         Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
                                 .get(leaderboard);
