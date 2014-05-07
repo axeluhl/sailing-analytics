@@ -114,7 +114,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     private static class InvalidationInterval implements Serializable {
         private static final long serialVersionUID = -6406690520919193690L;
+        /**
+         * Either both {@link #start} and {@link #end} are <code>null</code>, or both are non-<code>null</code>
+         */
         private WindWithConfidence<TimePoint> start;
+        /**
+         * Either both {@link #start} and {@link #end} are <code>null</code>, or both are non-<code>null</code>
+         */
         private TimePoint end;
         public InvalidationInterval() {
             super();
@@ -132,11 +138,31 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         public boolean isSet() {
             return start != null && end != null;
         }
+        
+        /**
+         * Checks whether the interval starting at {@link #start} and ending at {@link #end} is fully contained in this
+         * interval. Neither of the two arguments is allowed to be <code>null</code>. The interval is contained in this
+         * interval if this interval {@link #isSet() is set} and this interval's {@link #getStart() start} is at or
+         * before <code>start</code> and this interval's {@link #getEnd() end} is at or after <code>end</code>.
+         */
+        public boolean contains(TimePoint start, TimePoint end) {
+            return isSet() && !getStart().getObject().getTimePoint().after(start) && !end.after(getEnd());
+        }
+        /**
+         * Neither of the two arguments is allowed to be <code>null</code>.
+         */
         public void set(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+            assert startOfInvalidation != null;
+            assert endOfInvalidation != null;
             this.start = startOfInvalidation;
             this.end = endOfInvalidation;
         }
+        /**
+         * Neither of the two arguments is allowed to be <code>null</code>.
+         */
         public void extend(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+            assert startOfInvalidation != null;
+            assert endOfInvalidation != null;
             if (startOfInvalidation.getObject().getTimePoint().compareTo(start.getObject().getTimePoint()) < 0) {
                 this.start = startOfInvalidation;
             }
@@ -268,20 +294,29 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * will not be massively delayed by having to re-calculate the estimation over and over again.
      */
     private void scheduleCacheRefresh(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
-        LockUtil.lockForWrite(scheduledRefreshIntervalLock);
+        final boolean alreadyContained;
+        LockUtil.lockForRead(scheduledRefreshIntervalLock);
         try {
-            if (!scheduledRefreshInterval.isSet()) {
-                // according to the invariant this implies [1]==null
-                scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
-                startSchedulerForCacheRefresh();
-            } else {
-                // this means that an invalidation or incremental refresh is already scheduled; as long as we're
-                // synchronized on scheduledInvalidationInterval we can safely extend the interval; the invalidation
-                // won't start before we release the lock
-                scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
-            }
+            alreadyContained = scheduledRefreshInterval.contains(startOfInvalidation.getObject().getTimePoint(), endOfInvalidation);
         } finally {
-            LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
+            LockUtil.unlockAfterRead(scheduledRefreshIntervalLock);
+        }
+        if (!alreadyContained) {
+            LockUtil.lockForWrite(scheduledRefreshIntervalLock);
+            try {
+                if (!scheduledRefreshInterval.isSet()) {
+                    // according to the invariant this implies [1]==null
+                    scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
+                    startSchedulerForCacheRefresh();
+                } else {
+                    // this means that an invalidation or incremental refresh is already scheduled; as long as we're
+                    // synchronized on scheduledInvalidationInterval we can safely extend the interval; the invalidation
+                    // won't start before we release the lock
+                    scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
+            }
         }
     }
     
