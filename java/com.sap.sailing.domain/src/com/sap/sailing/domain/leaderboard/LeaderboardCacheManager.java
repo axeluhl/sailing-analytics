@@ -123,9 +123,14 @@ public class LeaderboardCacheManager {
         private final Leaderboard leaderboard;
         private final Set<Competitor> observedCompetitors;
         
+        /**
+         * Registers this listener as listener for all of the <code>leaderboard</code>'s current
+         * {@link Leaderboard#getCompetitors() competitors}
+         */
         public CacheInvalidationUponCompetitorChangeListener(Leaderboard leaderboard) {
             this.leaderboard = leaderboard;
             observedCompetitors = new HashSet<>();
+            updateCompetitorListeners();
         }
 
         @Override
@@ -271,9 +276,6 @@ public class LeaderboardCacheManager {
                 final CacheInvalidationUponCompetitorChangeListener competitorChangeListener = new CacheInvalidationUponCompetitorChangeListener(
                         leaderboard);
                 leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
-                for (Competitor competitor : leaderboard.getCompetitors()) {
-                    competitor.addCompetitorChangeListener(competitorChangeListener);
-                }
                 scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
                 competitorChangeListeners.put(leaderboard, competitorChangeListener);
                 final RaceColumnListener raceColumnListener = new RaceColumnListener() {
