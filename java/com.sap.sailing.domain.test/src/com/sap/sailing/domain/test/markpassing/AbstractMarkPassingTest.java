@@ -123,7 +123,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         double incorrectPasses = 0;
         double incorrectStarts = 0;
 
-        boolean printRight = true;
+        boolean printRight = false;
         boolean printWrong = true;
         boolean printResult = true;
 

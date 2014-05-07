@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -54,26 +53,16 @@ public class CandidateFinderImpl implements CandidateFinder {
     private final int strictnessOfDistanceBasedProbability = 8;
     private final double penaltyForWrongSide = 0.7;
     private final double penaltyForWrongDirection = 0.7;
-    private final double penaltyForDistanceCandidates = 0.8;
+    private final double penaltyForDistanceCandidates = 1;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
-    private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, Double>>> distanceCache = new LinkedHashMap<>(); 
+    private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> distanceCache = new LinkedHashMap<>();
     private Map<Competitor, TreeMap<GPSFix, Map<Waypoint, List<Double>>>> crossTrackErrors = new HashMap<>();
-    private Map<Competitor, TreeMap<GPSFix, Map<Mark, Distance>>> distances = new HashMap<>();
-    // Distance are calculated to each mark. Since the distance to a line relies on both marks, these line marks are
-    // used to represent them.
-    private Map<Waypoint, Mark> lineMarks = new HashMap<>();
-    private Set<Mark> marks = new TreeSet<Mark>(new Comparator<Mark>() {
-        @Override
-        public int compare(Mark o1, Mark o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    });
     private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> xteCandidates = new HashMap<>();
     private Map<Competitor, Map<Waypoint, Map<GPSFix, Candidate>>> distanceCandidates = new HashMap<>();
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
-    private final Map<Waypoint, PassingInstruction> passingInstructions = new HashMap<>();
+    private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
     private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
         @Override
         public int compare(GPSFix arg0, GPSFix arg1) {
@@ -90,17 +79,33 @@ public class CandidateFinderImpl implements CandidateFinder {
         Waypoint lastWaypointOfRace = course.getLastWaypoint();
         for (Competitor c : raceDefinition.getCompetitors()) {
             crossTrackErrors.put(c, new TreeMap<GPSFix, Map<Waypoint, List<Double>>>(comp));
-            distances.put(c, new TreeMap<GPSFix, Map<Mark, Distance>>(comp));
+            distanceCache.put(c, new LimitedLinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>(10));
             xteCandidates.put(c, new HashMap<Waypoint, Map<List<GPSFix>, Candidate>>());
             distanceCandidates.put(c, new HashMap<Waypoint, Map<GPSFix, Candidate>>());
         }
         processNewWaypoint(waypoints, firstWaypointOfRace, lastWaypointOfRace);
     }
 
+    private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+
+        private static final long serialVersionUID = 1L;
+        private int limit;
+
+        public LimitedLinkedHashMap(int limit) {
+            super();
+            this.limit = limit;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return this.size() > limit;
+        }
+    }
+
     @Override
     public Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c) {
         Set<GPSFix> fixes = getAllFixes(c);
-        distances.get(c).clear();
+        distanceCache.get(c).clear();
         crossTrackErrors.get(c).clear();
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             xteCandidates.get(c).get(w).clear();
@@ -144,7 +149,6 @@ public class CandidateFinderImpl implements CandidateFinder {
     public Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes) {
         List<Candidate> newCans = new ArrayList<>();
         List<Candidate> wrongCans = new ArrayList<>();
-        calculatesDistances(c, fixes, marks);
         calculateCrossTrackErrors(c, fixes, race.getRace().getCourse().getWaypoints());
         Pair<List<Candidate>, List<Candidate>> distanceCandidates = checkForDistanceCandidateChanges(c, fixes, race
                 .getRace().getCourse().getWaypoints());
@@ -174,20 +178,16 @@ public class CandidateFinderImpl implements CandidateFinder {
         Map<Competitor, Iterable<Candidate>> addedCandidates = addWaypoints(changedWaypoints);
         Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result = null;
         return null;
-        
 
     }
 
-    protected Map<Competitor, Iterable<Candidate>> addWaypoints(
-            Collection<Waypoint> waypoints) {
+    protected Map<Competitor, Iterable<Candidate>> addWaypoints(Collection<Waypoint> waypoints) {
         Map<Competitor, Iterable<Candidate>> result = new HashMap<>();
         Course course = race.getRace().getCourse();
         processNewWaypoint(waypoints, course.getFirstWaypoint(), course.getLastWaypoint());
-        List<Mark> uniqueMarks = getUniqueMarksOfWaypoints(waypoints);
         for (Competitor c : race.getRace().getCompetitors()) {
             List<Candidate> cans = new ArrayList<>();
             Set<GPSFix> allFixes = getAllFixes(c);
-            calculatesDistances(c, allFixes, uniqueMarks);
             calculateCrossTrackErrors(c, allFixes, waypoints);
             cans.addAll(checkForDistanceCandidateChanges(c, allFixes, waypoints).getA());
             cans.addAll(checkForXTECandidatesChanges(c, allFixes, waypoints).getA());
@@ -197,17 +197,8 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     protected Map<Competitor, Iterable<Candidate>> removeWaypoints(Collection<Waypoint> waypoints) {
-        for (Mark m : getUniqueMarksOfWaypoints(waypoints)) {
-            marks.remove(m);
-            for (Map<GPSFix, Map<Mark, Distance>> map : distances.values()) {
-                for (Map<Mark, Distance> distance : map.values()) {
-                    distance.remove(m);
-                }
-            }
-        }
         for (Waypoint w : waypoints) {
             passingInstructions.remove(w);
-            lineMarks.remove(w);
         }
         Map<Competitor, Iterable<Candidate>> result = new HashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -228,38 +219,16 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
-    private List<Mark> getUniqueMarksOfWaypoints(Collection<Waypoint> waypoints) {
-        List<Mark> allMarks = new ArrayList<>();
-        List<Mark> uniqueMarks = new ArrayList<>();
-        for (Waypoint w : waypoints) {
-            if (passingInstructions.get(w) == PassingInstruction.Line) {
-                allMarks.add(lineMarks.get(w));
-            } else {
-                Util.addAll(w.getMarks(), allMarks);
-            }
-        }
-        List<Waypoint> otherWaypoints = new ArrayList<>();
-        for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-            if (!waypoints.contains(w)) {
-                otherWaypoints.add(w);
-            }
-        }
-        Iterator<Mark> it = allMarks.iterator();
-        while (it.hasNext()) {
-            Mark m = it.next();
-            boolean unique = true;
-            for (Waypoint way : otherWaypoints) {
-                if (Util.contains(way.getMarks(), m)) {
-                    unique = false;
-                    break;
-                }
-            }
-            if (unique) {
-                uniqueMarks.add(m);
-            }
-        }
-        return uniqueMarks;
-    }
+    /*
+     * private List<Mark> getUniqueMarksOfWaypoints(Collection<Waypoint> waypoints) { List<Mark> allMarks = new
+     * ArrayList<>(); List<Mark> uniqueMarks = new ArrayList<>(); for (Waypoint w : waypoints) { if
+     * (passingInstructions.get(w) == PassingInstruction.Line) { allMarks.add(lineMarks.get(w)); } else {
+     * Util.addAll(w.getMarks(), allMarks); } } List<Waypoint> otherWaypoints = new ArrayList<>(); for (Waypoint w :
+     * race.getRace().getCourse().getWaypoints()) { if (!waypoints.contains(w)) { otherWaypoints.add(w); } }
+     * Iterator<Mark> it = allMarks.iterator(); while (it.hasNext()) { Mark m = it.next(); boolean unique = true; for
+     * (Waypoint way : otherWaypoints) { if (Util.contains(way.getMarks(), m)) { unique = false; break; } } if (unique)
+     * { uniqueMarks.add(m); } } return uniqueMarks; }
+     */
 
     private void processNewWaypoint(Iterable<Waypoint> waypoints, Waypoint firstWaypoint, Waypoint lastWaypoint) {
         for (Waypoint w : waypoints) {
@@ -284,13 +253,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
             passingInstructions.put(w, instruction);
-            if (instruction == PassingInstruction.Line) {
-                Mark proxy = new MarkImpl(w.getName());
-                lineMarks.put(w, proxy);
-                marks.add(proxy);
-            } else {
-                Util.addAll(w.getMarks(), marks);
-            }
             for (Competitor c : race.getRace().getCompetitors()) {
                 xteCandidates.get(c).put(w, new HashMap<List<GPSFix>, Candidate>());
                 distanceCandidates.get(c).put(w, new HashMap<GPSFix, Candidate>());
@@ -319,9 +281,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
         Pair<List<Candidate>, List<Candidate>> result = new Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
-        Set<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
+        TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        TreeMap<GPSFix, Map<Mark, Distance>> competitorDistances = distances.get(c);
         for (GPSFix fix : fixes) {
             affectedFixes.add(fix);
             GPSFix fixBefore;
@@ -354,102 +315,106 @@ public class CandidateFinderImpl implements CandidateFinder {
             } finally {
                 track.unlockAfterRead();
             }
-            for (Waypoint w : waypoints) {
-                Boolean wasCan = false;
-                Boolean isCan = false;
-                Candidate oldCan = null;
-                Double cost = null;
-                boolean portMark = true;
-                for (Mark mark : w.getMarks()) {
-                    Mark m = null;
-                    if (passingInstructions.get(w) == PassingInstruction.Line) {
-                        m = lineMarks.get(w);
-                    } else {
-                        m = mark;
-                    }
-                    Map<Mark, Distance> fixDistances = competitorDistances.get(fix);
-                    Distance dis = fixDistances != null ? fixDistances.get(m) : null;
-                    Distance disBefore = fixBefore != null ? competitorDistances.get(fixBefore).get(m) : null;
-                    Distance disAfter = (fixAfter != null && competitorDistances.get(fixAfter) != null) ? competitorDistances
-                            .get(fixAfter).get(m) : null;
-                    if (dis == null || disBefore == null || disAfter == null) {
-                        continue;
-                    }
-                    if (disBefore != null && disAfter != null && dis.getMeters() < disBefore.getMeters()
-                            && dis.getMeters() < disAfter.getMeters()) {
-                        t = fix.getTimePoint();
-                        p = fix.getPosition();
-                        if (cost != null) { // Candidate for both marks of a gate, the more likely one is chosen
-                            Double newCost = getDistanceBasedProbability(w, t, dis);
-
-                            if (newCost == null || newCost * penaltyForDistanceCandidates < cost) {
-                                continue;
-                            }
-                        }
-                        cost = getDistanceBasedProbability(w, t, dis);
-                        if (cost == null) {
-                            continue;
-                        }
-                        cost *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? penaltyForDistanceCandidates
-                                : penaltyForDistanceCandidates * penaltyForWrongSide;
-                        if (cost > penaltyForSkipping) {
-                            isCan = true;
-                            if (passingInstructions.get(w) == PassingInstruction.Gate) {
-                                Pair<Mark, Mark> pair = getPortAndStarboardMarks(t, w);
-                                if (m == pair.getB()) {
-                                    portMark = false;
+            if (fixBefore != null && fixAfter != null) {
+                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix);
+                Map<Waypoint, List<Distance>> fixDistancesBefore = getDistances(c, fixBefore);
+                Map<Waypoint, List<Distance>> fixDistancesAfter = getDistances(c, fixAfter);
+                for (Waypoint w : waypoints) {
+                    Boolean wasCan = false;
+                    Boolean isCan = false;
+                    Candidate oldCan = null;
+                    Double probability = null;
+                    List<Distance> waypointDistances = fixDistances.get(w);
+                    List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
+                    List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
+                    Distance dis = waypointDistances.get(0);
+                    Distance disBefore = waypointDistancesBefore.get(0);
+                    Distance disAfter = waypointDistancesAfter.get(0);
+                    if (dis != null && disBefore != null && disAfter != null) {
+                        if (Math.abs(dis.getMeters()) < Math.abs(disBefore.getMeters())
+                                && Math.abs(dis.getMeters()) < Math.abs(disAfter.getMeters())) {
+                            t = fix.getTimePoint();
+                            p = fix.getPosition();
+                            probability = getDistanceBasedProbability(w, t, dis);
+                            if (probability != null) {
+                                probability *= isOnCorrectSideOfWaypoint(w, p, t, true) ? penaltyForDistanceCandidates
+                                        : penaltyForDistanceCandidates * penaltyForWrongSide;
+                                if (probability > penaltyForSkipping) {
+                                    isCan = true;
                                 }
                             }
                         }
                     }
-                    if (passingInstructions.get(w) == PassingInstruction.Line) {
-                        break;
+                    if (waypointDistances.size() != 1) {
+                        dis = waypointDistances.get(1);
+                        disBefore = waypointDistancesBefore.get(1);
+                        disAfter = waypointDistancesAfter.get(1);
+                        if (dis != null && disBefore != null && disAfter != null) {
+                            if (dis.getMeters() < disBefore.getMeters() && dis.getMeters() < disAfter.getMeters()) {
+                                t = fix.getTimePoint();
+                                p = fix.getPosition();
+                                Double newProbability = getDistanceBasedProbability(w, t, dis);
+                                if (newProbability != null) {
+                                    newProbability *= isOnCorrectSideOfWaypoint(w, p, t, false) ? penaltyForDistanceCandidates
+                                            : penaltyForDistanceCandidates * penaltyForWrongSide;
+                                    if (newProbability > penaltyForSkipping
+                                            && (probability == null || newProbability > probability)) {
+                                        isCan = true;
+                                        probability = newProbability;
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-                for (Entry<GPSFix, Candidate> possibleCan : distanceCandidates.get(c).get(w).entrySet()) {
-                    if (possibleCan.getKey().equals(fix)) {
+                    oldCan = distanceCandidates.get(c).get(w).get(fix);
+                    if (oldCan != null) {
                         wasCan = true;
-                        oldCan = possibleCan.getValue();
-                        break;
                     }
-                }
-                if (!wasCan && isCan) {
-                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost,
-                            w);
-                    distanceCandidates.get(c).get(w).put(fix, newCan);
-                    result.getA().add(newCan);
-                } else if (wasCan && !isCan) {
-                    distanceCandidates.get(c).get(w).remove(fix);
-                    result.getB().add(oldCan);
-                } else if (wasCan && isCan && oldCan.getProbability() != cost) {
-                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost,
-                            w);
-                    distanceCandidates.get(c).get(w).put(fix, newCan);
-                    result.getA().add(newCan);
-                    result.getB().add(oldCan);
+                    if (!wasCan && isCan) {
+                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                probability, w);
+                        distanceCandidates.get(c).get(w).put(fix, newCan);
+                        result.getA().add(newCan);
+                    } else if (wasCan && !isCan) {
+                        distanceCandidates.get(c).get(w).remove(fix);
+                        result.getB().add(oldCan);
+                    } else if (wasCan && isCan && oldCan.getProbability() != probability) {
+                        Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,
+                                probability, w);
+                        distanceCandidates.get(c).get(w).put(fix, newCan);
+                        result.getA().add(newCan);
+                        result.getB().add(oldCan);
+                    }
                 }
             }
         }
         return result;
     }
 
-    /**
-     * Calculates the distance from each fix to each mark or line.
-     */
-    private void calculatesDistances(Competitor c, Iterable<GPSFix> fixes, Iterable<Mark> marksToCalculateTo) {
-        TreeMap<GPSFix, Map<Mark, Distance>> comDistances = distances.get(c);
-        for (GPSFix fix : fixes) {
-            Map<Mark, Distance> fixDistances = comDistances.get(fix);
-            if (fixDistances == null) {
-                fixDistances = new HashMap<Mark, Distance>();
-                comDistances.put(fix, fixDistances);
+    Map<Waypoint, List<Distance>> getDistances(Competitor c, GPSFix fix) {
+        // Check if the fix is still cached
+        Map<Waypoint, List<Distance>> result = distanceCache.get(c).get(fix);
+        if (result == null) {
+            // Else calculate distances and put them into the cache
+            result = new LinkedHashMap<>();
+            for (Waypoint w : passingInstructions.keySet()) {
+                List<Distance> distances = calculateDistance(fix.getPosition(), w, fix.getTimePoint());
+                result.put(w, distances);
             }
-            for (Mark m : marksToCalculateTo) {
-                Distance distance = calculateDistance(fix.getPosition(), m, fix.getTimePoint());
-                fixDistances.put(m, distance);
-            }
+            distanceCache.get(c).put(fix, result);
         }
+        return result;
     }
+
+    /*
+     * Calculates the distance from each fix to each mark or line.
+     * 
+     * private void calculatesDistances(Competitor c, Iterable<GPSFix> fixes, Iterable<Waypoint> waypointsToCalculateTo)
+     * { TreeMap<GPSFix, Map<Mark, Distance>> comDistances = distances.get(c); for (GPSFix fix : fixes) { Map<Mark,
+     * Distance> fixDistances = comDistances.get(fix); if (fixDistances == null) { fixDistances = new HashMap<Mark,
+     * Distance>(); comDistances.put(fix, fixDistances); } for (Waypoint w : waypointsToCalculateTo) { Distance distance
+     * = calculateDistance(fix.getPosition(), w, fix.getTimePoint()); fixDistances.put(m, distance); } } }
+     */
 
     /**
      * For each fix the cross-track error(s) to each waypoint are calculated. Then all pairs of fixes are checked for
@@ -596,17 +561,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         double ratio = (Math.abs(xte1) / (Math.abs(xte1) + Math.abs(xte2)));
         TimePoint t = t1.plus((long) (differenceInMillis * ratio));
         Position p = race.getTrack(c).getEstimatedPosition(t, false);
-        Mark m = null;
-        PassingInstruction instruction = passingInstructions.get(w);
-        if (instruction == PassingInstruction.Gate) {
-            Pair<Mark, Mark> marks = getPortAndStarboardMarks(t, w);
-            m = portMark ? marks.getA() : marks.getB();
-        } else if (instruction == PassingInstruction.Line) {
-            m = lineMarks.get(w);
-        } else {
-            m = w.getMarks().iterator().next();
-        }
-        Distance d = calculateDistance(p, m, t);
+        List<Distance> distances = calculateDistance(p, w, t);
+        Distance d = portMark ? distances.get(0) : distances.get(1);
         double cost = getDistanceBasedProbability(w, t, d);
         cost = isOnCorrectSideOfWaypoint(w, p, t, portMark) ? cost : cost * penaltyForWrongSide;
         cost = passesInTheRightDirection(w, xte1, xte2, portMark) ? cost : cost * penaltyForWrongDirection;
@@ -711,26 +667,52 @@ public class CandidateFinderImpl implements CandidateFinder {
      * If <code>m</code> is contained in <code>lineMarks</code>, the distance to that line is calculated, else simply
      * the distance to the m.
      */
-    private Distance calculateDistance(Position p, Mark m, TimePoint t) {
-        Distance distance = null;
-        if (!lineMarks.containsValue(m)) {
-            Position markPosition = race.getOrCreateTrack(m).getEstimatedPosition(t, false);
-            distance = markPosition != null ? p.getDistance(markPosition) : null;
-        } else {
-            Waypoint w = null;
-            for (Entry<Waypoint, Mark> way : lineMarks.entrySet()) {
-                if (way.getValue() == m) {
-                    w = way.getKey();
-                    break;
-                }
-            }
-            Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
-            Position p1 = race.getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
-            Position p2 = race.getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
-            distance = (p1 != null && p2 != null) ? p.getDistanceToLine(p1, p2) : p1 != null ? p.getDistance(p1)
-                    : p2 != null ? p.getDistance(p1) : null;
+    private List<Distance> calculateDistance(Position p, Waypoint w, TimePoint t) {
+        List<Distance> distances = new ArrayList<>();
+        PassingInstruction instruction = passingInstructions.get(w);
+        boolean singleMark = false;
+        switch (instruction) {
+        case Port:
+            singleMark = true;
+            break;
+        case Starboard:
+            singleMark = true;
+            break;
+        case FixedBearing:
+            singleMark = true;
+            break;
+        case Gate:
+            Pair<Mark, Mark> posGate = getPortAndStarboardMarks(t, w);
+            Position portGatePosition = race.getOrCreateTrack(posGate.getA()).getEstimatedPosition(t, false);
+            Position starboardGatePosition = race.getOrCreateTrack(posGate.getB()).getEstimatedPosition(t, false);
+            distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
+            distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
+
+            break;
+        case Line:
+            Pair<Mark, Mark> posLine = getPortAndStarboardMarks(t, w);
+            Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
+            Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
+            distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
+                    portLinePosition, starboardLinePosition) : portLinePosition != null ? p
+                    .getDistance(portLinePosition) : starboardLinePosition != null ? p.getDistance(portLinePosition)
+                    : null);
+            break;
+        case Offset:
+            // TODO
+            break;
+        case None:
+            break;
+        default:
+            break;
+
         }
-        return distance;
+        if (singleMark) {
+            Position markPosition = race.getOrCreateTrack(w.getMarks().iterator().next())
+                    .getEstimatedPosition(t, false);
+            distances.add(markPosition != null ? p.getDistance(markPosition) : null);
+        }
+        return distances;
     }
 
     /**
