@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -73,7 +74,7 @@ public class WindEstimationLockingUnderLoadTest {
     public void tearDown() {
         // clean up all Mockito stubbing leaks, particularly the InvocationImpl objects attached to any ThreadLocal;
         // see also bug 1923, comment #9.
-        // TODO
+        Mockito.reset();
     }
 
     private TrackedRace mockTrackedRace() {

@@ -65,20 +65,20 @@ public class LockUtil {
      * The thread-specific value maps are used as monitor objects whenever decisions about thread-specific lock counts
      * need to be made.
      */
-    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentHashMap<Thread, Map<Lock,Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new WeakHashMap<Thread, Map<Lock,Integer>>();
     
     /**
      * Counts the "virtual" locks. A "virtual" lock is obtained if and only if at the time of calling
      * {@link #lockForRead(NamedReentrantReadWriteLock)} or {@link #lockForWrite(NamedReentrantReadWriteLock)} the
      * respective lock has a positive {@link #propagationCounts propagation count} for the current thread.
      */
-    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new WeakHashMap<Thread, Map<Lock, Integer>>();
     
     /**
      * Redundant but easily accessible hold count per thread and lock. These are the actual lock hold counts as they are
      * recorded in the actual {@link NamedReentrantReadWriteLock} locks.
      */
-    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new WeakHashMap<Thread, Map<Lock, Integer>>();
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.readLock(), ReadOrWrite.READ);
@@ -243,7 +243,10 @@ public class LockUtil {
 
     private static Set<Lock> getLocksHeldVirtuallyOrActuallyBy(Thread thread) {
         Set<Lock> locksToPropagate = new HashSet<Lock>();
-        Map<Lock, Integer> propagationMap = propagationCounts.get(thread);
+        final Map<Lock, Integer> propagationMap;
+        synchronized (propagationCounts) {
+            propagationMap = propagationCounts.get(thread);
+        }
         if (propagationMap != null) {
             // first synchronize fromMap, then toMap; this way, no deadlock can occur as long as propagation works in the same direction
             synchronized (propagationMap) {
@@ -252,7 +255,10 @@ public class LockUtil {
                 }
             }
         }
-        Map<Lock, Integer> lockMap = lockCounts.get(thread);
+        final Map<Lock, Integer> lockMap;
+        synchronized (lockCounts) {
+            lockMap = lockCounts.get(thread);
+        }
         if (lockMap != null) {
             for (Map.Entry<Lock, Integer> otherEntry : lockMap.entrySet()) {
                 locksToPropagate.add(otherEntry.getKey());
@@ -288,19 +294,17 @@ public class LockUtil {
     }
 
     private static Map<Lock, Integer> getOrCreateMapForThread(final Thread thread, Map<Thread, Map<Lock, Integer>> map) {
-        // don't synchronize all the frequent read accesses
-        Map<Lock, Integer> result = map.get(thread);
-        if (result == null) {
-            // but if we need to create a new entry, ensure that this doesn't happen concurrently
-            synchronized (map) {
+        synchronized (map) {
+            Map<Lock, Integer> result = map.get(thread);
+            if (result == null) {
                 result = map.get(thread);
                 if (result == null) {
                     result = new ConcurrentHashMap<Lock, Integer>();
                     map.put(thread, result);
                 }
             }
+            return result;
         }
-        return result;
     }
 
     private static Map<Lock, Integer> getLockCounts(final Thread thread) {
