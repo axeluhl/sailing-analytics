@@ -2,6 +2,7 @@ package com.sap.sailing.util.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -386,7 +387,8 @@ public class LockUtil {
                 // capture the stack traces as quickly as possible to try to reflect the situation as it was when the lock couuldn't be obtained
                 StackTraceElement[] writerStackTrace = writer != null ? writer.getStackTrace() : null;
                 Map<Thread, StackTraceElement[]> readerStackTraces = new HashMap<Thread, StackTraceElement[]>();
-                for (Thread reader : lockParent.getReaders()) {
+                final List<Thread> readers = lockParent.getReaders();
+                for (Thread reader : readers) {
                     readerStackTraces.put(reader, reader.getStackTrace());
                 }
                 StringBuilder message = new StringBuilder();
@@ -400,9 +402,11 @@ public class LockUtil {
                     message.append("\nThe current writer is:\n");
                     appendThreadData(message, writer, writerStackTrace);
                 }
-                message.append("\nThe current readers are:\n");
-                for (Thread reader : lockParent.getReaders()) {
-                    appendThreadData(message, reader, readerStackTraces.get(reader));
+                if (readers != null && !readers.isEmpty()) {
+                    message.append("\nThe current readers are:\n");
+                    for (Thread reader : readers) {
+                        appendThreadData(message, reader, readerStackTraces.get(reader));
+                    }
                 }
                 message.append("Trying again...");
                 logger.info(message.toString());
