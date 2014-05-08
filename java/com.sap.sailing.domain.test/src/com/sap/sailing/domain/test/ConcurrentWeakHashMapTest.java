@@ -1,7 +1,12 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -31,6 +36,68 @@ public class ConcurrentWeakHashMapTest {
     }
 
     @Test
+    public void testPutAndPutAgain() {
+        ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
+        Integer one1 = new Integer(1);
+        Integer one2 = new Integer(1);
+        assertNotSame(one1, one2);
+        m.put(one1, "a");
+        String replaced = m.put(one2, "b");
+        assertEquals("a", replaced);
+        assertEquals(1, m.size());
+        assertEquals(m.keySet().iterator().next(), one2);
+    }
+
+    @Test
+    public void testRemoveWithSame() {
+        ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
+        Integer one = new Integer(1);
+        m.put(one, "a");
+        m.remove(one);
+        assertTrue(m.isEmpty());
+    }
+
+    @Test
+    public void testRemoveImpactOnKeySetAndEntrySet() {
+        ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
+        Integer one = new Integer(1);
+        m.put(one, "a");
+        Set<Integer> keySet = m.keySet();
+        Set<Entry<Integer, String>> entrySet = m.entrySet();
+        assertEquals(1, keySet.size());
+        assertEquals(1, entrySet.size());
+        m.remove(one);
+        assertTrue(m.isEmpty());
+        assertTrue(keySet.isEmpty());
+        assertTrue(entrySet.isEmpty());
+    }
+
+    @Test
+    public void testRemoveWithEqual() {
+        ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
+        Integer one1 = new Integer(1);
+        Integer one2 = new Integer(1);
+        assertNotSame(one1, one2);
+        m.put(one1, "a");
+        m.remove(one2);
+        assertTrue(m.isEmpty());
+    }
+    
+    @Test
+    public void removeThrougKeySet() {
+        ConcurrentWeakHashMap<Integer, String> m = new ConcurrentWeakHashMap<>();
+        Integer one1 = new Integer(1);
+        m.put(one1, "a");
+        final Set<Integer> keySet = m.keySet();
+        Iterator<Integer> keySetIter = keySet.iterator();
+        keySetIter.next();
+        keySetIter.remove();
+        assertTrue(m.isEmpty());
+        assertTrue(keySet.isEmpty());
+        assertTrue(m.entrySet().isEmpty());
+    }
+
+    @Test
     public void testPutAndGetWithSubsequentGC() {
         Object key = createKeyObject();
         ConcurrentWeakHashMap<Object, String> m = new ConcurrentWeakHashMap<>();
@@ -40,7 +107,7 @@ public class ConcurrentWeakHashMapTest {
         forceEnqueuableWeakReferencesToBeEnqueued();
         assertTrue(m.isEmpty());
     }
-
+    
     private void forceEnqueuableWeakReferencesToBeEnqueued() {
         System.gc();
         try {

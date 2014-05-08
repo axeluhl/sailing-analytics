@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -53,7 +52,7 @@ public class LockUtil {
     
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
-    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
+    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
     
     /**
      * Tells how many other threads propagated which held lock to the key thread. During propagation, a lock is
@@ -65,20 +64,20 @@ public class LockUtil {
      * The thread-specific value maps are used as monitor objects whenever decisions about thread-specific lock counts
      * need to be made.
      */
-    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new WeakHashMap<Thread, Map<Lock,Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentWeakHashMap<Thread, Map<Lock,Integer>>();
     
     /**
      * Counts the "virtual" locks. A "virtual" lock is obtained if and only if at the time of calling
      * {@link #lockForRead(NamedReentrantReadWriteLock)} or {@link #lockForWrite(NamedReentrantReadWriteLock)} the
      * respective lock has a positive {@link #propagationCounts propagation count} for the current thread.
      */
-    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new WeakHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     /**
      * Redundant but easily accessible hold count per thread and lock. These are the actual lock hold counts as they are
      * recorded in the actual {@link NamedReentrantReadWriteLock} locks.
      */
-    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new WeakHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.readLock(), ReadOrWrite.READ);
@@ -86,9 +85,7 @@ public class LockUtil {
 
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.writeLock(), ReadOrWrite.WRITE);
-        synchronized (lastTimeWriteLockWasObtained) {
-            lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
-        }
+        lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
     }
     
     private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final ReadOrWrite readOrWrite) {
@@ -149,9 +146,7 @@ public class LockUtil {
             unlockVirtuallyOrActually(lock, lock.writeLock());
         }
         final TimePoint timePointWriteLockWasObtained;
-        synchronized (lastTimeWriteLockWasObtained) {
-            timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
-        }
+        timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
         if (timePointWriteLockWasObtained == null) {
             logger.info("Internal error: write lock " + lock.getName()
                     + " to be unlocked but no time recorded for when it was last obtained.\n"
@@ -243,10 +238,7 @@ public class LockUtil {
 
     private static Set<Lock> getLocksHeldVirtuallyOrActuallyBy(Thread thread) {
         Set<Lock> locksToPropagate = new HashSet<Lock>();
-        final Map<Lock, Integer> propagationMap;
-        synchronized (propagationCounts) {
-            propagationMap = propagationCounts.get(thread);
-        }
+        Map<Lock, Integer> propagationMap = propagationCounts.get(thread);
         if (propagationMap != null) {
             // first synchronize fromMap, then toMap; this way, no deadlock can occur as long as propagation works in the same direction
             synchronized (propagationMap) {
@@ -255,10 +247,7 @@ public class LockUtil {
                 }
             }
         }
-        final Map<Lock, Integer> lockMap;
-        synchronized (lockCounts) {
-            lockMap = lockCounts.get(thread);
-        }
+        Map<Lock, Integer> lockMap = lockCounts.get(thread);
         if (lockMap != null) {
             for (Map.Entry<Lock, Integer> otherEntry : lockMap.entrySet()) {
                 locksToPropagate.add(otherEntry.getKey());
@@ -294,17 +283,19 @@ public class LockUtil {
     }
 
     private static Map<Lock, Integer> getOrCreateMapForThread(final Thread thread, Map<Thread, Map<Lock, Integer>> map) {
-        synchronized (map) {
-            Map<Lock, Integer> result = map.get(thread);
-            if (result == null) {
+        // don't synchronize all the frequent read accesses
+        Map<Lock, Integer> result = map.get(thread);
+        if (result == null) {
+            // but if we need to create a new entry, ensure that this doesn't happen concurrently
+            synchronized (map) {
                 result = map.get(thread);
                 if (result == null) {
                     result = new ConcurrentHashMap<Lock, Integer>();
                     map.put(thread, result);
                 }
             }
-            return result;
         }
+        return result;
     }
 
     private static Map<Lock, Integer> getLockCounts(final Thread thread) {
