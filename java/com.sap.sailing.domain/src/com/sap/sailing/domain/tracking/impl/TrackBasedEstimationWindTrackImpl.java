@@ -170,6 +170,47 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 end = endOfInvalidation;
             }
         }
+        
+        /**
+         * Leaves this object unchanged. Returns a new {@link InvalidationInterval} object. If the interval defined by
+         * <code>start</code> and <code>end</code> does not exceed this interval, the resulting interval will have
+         * {@link #isSet()}<code>==false</code>. Otherwise, the resulting interval will contain all time ranges from
+         * <code>start</code> to <code>end</code> (inclusive) that are not in this interval. In particular, if
+         * <code>start</code>..<code>end</code> exceeds this interval on both ends, the resulting interval will start at
+         * <code>start</code> and end at <code>end</code>. If this interval has {@link #isSet()}<code>==false</code>,
+         * the resulting interval will range from <code>start</code> to <code>end</code>.
+         * 
+         * @param start must not be <code>null</code>
+         * @param end must not be <code>null</code>
+         */
+        public InvalidationInterval subtract(WindWithConfidence<TimePoint> start, TimePoint end) {
+            assert start != null;
+            assert end != null;
+            final InvalidationInterval result = new InvalidationInterval();
+            if (!isSet()) {
+                result.set(start, end);
+            } else {
+                final WindWithConfidence<TimePoint> newStart;
+                final TimePoint startTimePoint = getStart().getObject().getTimePoint();
+                if (start.getObject().getTimePoint().before(startTimePoint)) {
+                    newStart = start;
+                } else {
+                    // don't go beyond the end of time, avoiding overflow
+                    newStart = getDummyFixWithConfidence(getEnd().asMillis()==Long.MAX_VALUE?getEnd():getEnd().plus(1));
+                }
+                final TimePoint newEnd;
+                if (end.after(getEnd())) {
+                    newEnd = end;
+                } else {
+                    // avoid underflow
+                    newEnd = startTimePoint.asMillis()==0?startTimePoint:startTimePoint.minus(1);
+                }
+                if (!newStart.getObject().getTimePoint().after(newEnd)) {
+                    result.set(newStart, newEnd);
+                } // else, the resulting interval remains unset
+            }
+            return result;
+        }
     }
     
     /**
@@ -364,24 +405,28 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     private void refreshCacheIncrementally() {
         Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
         Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
+        final WindWithConfidence<TimePoint> refreshIntervalStart;
+        final TimePoint refreshIntervalEnd;
         LockUtil.lockForRead(scheduledRefreshIntervalLock);
         LockUtil.lockForRead(cacheLock);
         try {
-            Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
-                    : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
-            Iterator<TimePoint> nullIter = (scheduledRefreshInterval.getStart() == null ? timePointsWithCachedNullResult
-                    : timePointsWithCachedNullResult.tailSet(scheduledRefreshInterval.getStart().getObject().getTimePoint(), /* inclusive */
+            refreshIntervalStart = scheduledRefreshInterval.getStart();
+            Iterator<WindWithConfidence<TimePoint>> iter = (refreshIntervalStart == null ? getCachedFixes()
+                    : getCachedFixes().tailSet(refreshIntervalStart, /* inclusive */true)).iterator();
+            Iterator<TimePoint> nullIter = (refreshIntervalStart == null ? timePointsWithCachedNullResult
+                    : timePointsWithCachedNullResult.tailSet(refreshIntervalStart.getObject().getTimePoint(), /* inclusive */
                     true)).iterator();
             WindWithConfidence<TimePoint> nextFixToRecalculate = null;
+            refreshIntervalEnd = scheduledRefreshInterval.getEnd();
             while (iter.hasNext() &&
-                    ((nextFixToRecalculate = iter.next()).getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
-                    scheduledRefreshInterval.getEnd() == null) {
+                    ((nextFixToRecalculate = iter.next()).getObject().getTimePoint().compareTo(refreshIntervalEnd) < 0) ||
+                    refreshIntervalEnd == null) {
                 windFixesToRecalculate.add(nextFixToRecalculate);
             }
             TimePoint nextNullResultToRecalculate = null;
             while (nullIter.hasNext() &&
-                    ((nextNullResultToRecalculate = nullIter.next()).compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
-                    scheduledRefreshInterval.getEnd() == null) {
+                    ((nextNullResultToRecalculate = nullIter.next()).compareTo(refreshIntervalEnd) < 0) ||
+                    refreshIntervalEnd == null) {
                 cachedNullResultsToRecalculate.add(nextNullResultToRecalculate);
             }
         } finally {
@@ -431,7 +476,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
         LockUtil.lockForWrite(scheduledRefreshIntervalLock);
         try {
+            // now remove the interval for which the cache was refreshed; note that in between the interval may have been extended;
+            // for the extended part of the interval that hasn't been refreshed during this run, a new refresh needs to be
+            // requested
+            InvalidationInterval remainingRefreshInterval = scheduledRefreshInterval.subtract(refreshIntervalStart, refreshIntervalEnd);
             scheduledRefreshInterval.clear();
+            if (remainingRefreshInterval.isSet()) {
+                scheduleCacheRefresh(remainingRefreshInterval.getStart(), remainingRefreshInterval.getEnd());
+            }
         } finally {
             LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
         }
@@ -502,7 +554,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return result;
     }
 
-    private WindWithConfidence<TimePoint> getDummyFixWithConfidence(TimePoint timePoint) {
+    private static WindWithConfidence<TimePoint> getDummyFixWithConfidence(TimePoint timePoint) {
         return new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint, defaultSpeedWithBearing), 0,
                 timePoint, /* useSpeed */false);
     }
