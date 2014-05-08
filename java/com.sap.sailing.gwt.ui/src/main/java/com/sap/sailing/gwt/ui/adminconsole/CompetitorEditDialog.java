@@ -132,10 +132,14 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     @Override
     protected CompetitorDTO getResult() {
         Color color;
-        try {
-            color = new RGBColor(displayColorTextBox.getText());
-        } catch (IllegalArgumentException iae) {
-            color = new InvalidColor(iae);
+        if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
+            color = null;
+        } else {
+            try {
+                color = new RGBColor(displayColorTextBox.getText());
+            } catch (IllegalArgumentException iae) {
+                color = new InvalidColor(iae);
+            }
         }
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
                 /* twoLetterIsoCountryCode */ null,
