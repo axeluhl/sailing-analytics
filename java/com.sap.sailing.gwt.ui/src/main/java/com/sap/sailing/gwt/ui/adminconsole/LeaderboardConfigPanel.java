@@ -86,6 +86,8 @@ TrackedRaceChangedListener {
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails) {
         super(sailingService, adminConsole, errorReporter, theStringConstants, new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         this.showRaceDetails = showRaceDetails;
+        
+        leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }
     
     @Override
