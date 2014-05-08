@@ -48,6 +48,12 @@ When thinking about smartphone tracking, it would of course be a good idea to al
 7. Change the course layout, or add device mappings during tracking. Removing mappings will not have the effect of removing the fixes from the race, as this is not currently supported by the underlying GPSFixTrack.
 8. Stop tracking (stop the tracker).
 
+## Reloading a race that has already been tracked
+
+Technically, the entire race is loaded as soon as the RaceLogRaceTracker is attached to the RaceLog, as it will find the already existing StartTrackingEvent and load all fixes that correspond to the mappings.
+
+In the AdminConsole, triggering this step is no different from adding the tracker for the very first time, do so with the _start tracking_ button the the RaceLog Tracking Panel.
+
 # ToDos
 ## Archiving old Races
 Since RaceLog-tracking allows for fully independent tracking, storing and reloading of races, it may be a good foundation for archiving old races. Currently, we rely on tracking providers to retain all data indefinitely, so that it can be reloaded, e.g., after restarting the server. Also see [[bug 2|http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2]] for more details.
