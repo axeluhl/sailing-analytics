@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -36,6 +37,12 @@ public class TrackedLegOfCompetitorWithContext extends TrackedLegWithContext imp
     @Override
     public Competitor getCompetitor() {
         return competitor;
+    }
+    
+    @Override
+    public double getDistanceTraveled() {
+        TimePoint timePoint = getTrackedRace().getEndOfTracking();
+        return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint).getMeters();
     }
 
 }

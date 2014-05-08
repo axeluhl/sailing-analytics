@@ -1,6 +1,8 @@
 package com.sap.sailing.datamining.impl;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +12,10 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.domain.base.Moving;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
@@ -32,10 +37,12 @@ public class DeprecatedToFunctionConverter {
             FunctionDTO functionDTO = null;
             switch (statisticType) {
             case Distance:
-                functionDTO = new FunctionDTOImpl("Distance", HasGPSFixContext.class.getSimpleName(), "double", new ArrayList<String>(), "Distance", false);
+                functionDTO = new FunctionDTOImpl("Distance", HasGPSFixContext.class.getSimpleName(), "double",
+                        new ArrayList<String>(), "Distance", false);
                 break;
             case Speed:
-                functionDTO = new FunctionDTOImpl("Speed", HasTrackedLegOfCompetitorContext.class.getSimpleName(), "double", new ArrayList<String>(), "Speed", false);
+                functionDTO = new FunctionDTOImpl("Speed", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
+                        "double", new ArrayList<String>(), "Speed", false);
                 break;
             }
             statisticTypeToFunctionDTOMap.put(statisticType, functionDTO);
@@ -96,7 +103,65 @@ public class DeprecatedToFunctionConverter {
     }
 
     private static void initializeFunctionDTOToFunctionMap() {
+        for (StatisticType statisticType : StatisticType.values()) {
+            FunctionDTO functionDTO = getFunctionDTOFor(statisticType);
+            Method method = null;
+            Function<?> function = null;
+            switch (statisticType) {
+            case Distance:
+                method = getNullaryMethodFromClass(HasTrackedLegOfCompetitorContext.class, "getDistanceTraveled");
+                function = FunctionFactory.createMethodWrappingFunction(method);
+                break;
+            case Speed:
+                method = getNullaryMethodFromClass(HasGPSFixContext.class, "getGPSFix");
+                Function<?> getGPSFix = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Moving.class, "getSpeed");
+                Function<?> getSpeed = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Speed.class, "getKnots");
+                Function<?> getKnots = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Speed", Arrays.asList(getGPSFix, getSpeed, getKnots));
+                break;
+            }
+            functionDTOToFunctionMap.put(functionDTO, function);
+        }
         
+        for (DimensionIdentifier dimensionIdentifier : DimensionIdentifier.values()) {
+            switch (dimensionIdentifier) {
+            case BoatClassName:
+                break;
+            case CompetitorName:
+                break;
+            case CourseAreaName:
+                break;
+            case FleetName:
+                break;
+            case LegNumber:
+                break;
+            case LegType:
+                break;
+            case Nationality:
+                break;
+            case RaceName:
+                break;
+            case RegattaName:
+                break;
+            case SailID:
+                break;
+            case WindStrength:
+                break;
+            case Year:
+                break;
+            }
+        }
+    }
+
+    private static Method getNullaryMethodFromClass(Class<?> clazz, String methodName) {
+        try {
+            return clazz.getMethod(methodName, new Class<?>[0]);
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new IllegalArgumentException("The class " + clazz.getSimpleName() + " doesn't have"
+                    + " the nullary method " + methodName);
+        }
     }
 
     public static FunctionDTO getFunctionDTOFor(StatisticType statisticType) {
