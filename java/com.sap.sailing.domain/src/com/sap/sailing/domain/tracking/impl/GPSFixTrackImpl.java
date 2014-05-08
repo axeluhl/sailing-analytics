@@ -1009,7 +1009,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         final boolean result;
         lockForWrite();
         try {
-            result = super.add(fix);
+            result = addWithoutLocking(fix);
             invalidateValidityAndDistanceCaches(fix);
         } finally {
             unlockAfterWrite();
