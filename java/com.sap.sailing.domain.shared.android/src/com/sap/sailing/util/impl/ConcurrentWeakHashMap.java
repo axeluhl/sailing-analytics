@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.common.impl.Util;
+
 /**
  * A map that is concurrency-safe as provided by the {@link ConcurrentHashMap} implementation, and referencing
  * keys only weakly. Like {@link ConcurrentHashMap}, this map does not support <code>null</code> keys.
@@ -24,8 +26,8 @@ public class ConcurrentWeakHashMap<K, V> implements Map<K, V> {
     /**
      * A reference whose hash code is based on the hash code of the original referent, also after the
      * reference has been enqueued. Equality is defined such that this reference is equal to itself which is
-     * helpful to remove the entries from the {@link ConcurrentHashMap}, as well as equal to its referent as
-     * long as the reference hasn't been enqueued.
+     * helpful to remove the entries from the {@link ConcurrentHashMap}, as well as equal to any other reference
+     * of this type if their referents are equal.
      * 
      * @author Axel Uhl (D043530)
      *
@@ -53,12 +55,11 @@ public class ConcurrentWeakHashMap<K, V> implements Map<K, V> {
             if (other == this) {
                 result = true;
             } else {
+                @SuppressWarnings("unchecked") // don't care about the generics here; important is that we can get at the referent
+                WeakReferenceThatIsEqualToItselfAndItsReferent otherAsRef = (WeakReferenceThatIsEqualToItselfAndItsReferent) other;
                 K referent = get();
-                if (referent == null) {
-                    result = false; // we already asserted that other != this
-                } else {
-                    result = referent.equals(other);
-                }
+                K otherReferent = otherAsRef.get();
+                result = Util.equalsWithNull(referent, otherReferent);
             }
             return result;
         }
@@ -172,17 +173,21 @@ public class ConcurrentWeakHashMap<K, V> implements Map<K, V> {
 
     @Override
     public int size() {
+        purgeStaleEntries();
         return map.size();
     }
 
     @Override
     public boolean isEmpty() {
+        purgeStaleEntries();
         return map.isEmpty();
     }
 
+    @SuppressWarnings("unchecked") // if the cast doesn't work then neither will the equals call, so false will result which is ok
     @Override
     public boolean containsKey(Object key) {
-        return map.containsKey(key);
+        purgeStaleEntries();
+        return map.containsKey(new WeakReferenceThatIsEqualToItselfAndItsReferent((K) key, /* queue */ null));
     }
 
     @Override
@@ -190,9 +195,11 @@ public class ConcurrentWeakHashMap<K, V> implements Map<K, V> {
         return map.containsValue(value);
     }
 
+    @SuppressWarnings("unchecked") // if the cast doesn't work then neither will the equals call, so null will result which is ok
     @Override
     public V get(Object key) {
-        return map.get(key);
+        purgeStaleEntries();
+        return map.get(new WeakReferenceThatIsEqualToItselfAndItsReferent((K) key, /* queue */ null));
     }
 
     @Override
@@ -200,9 +207,10 @@ public class ConcurrentWeakHashMap<K, V> implements Map<K, V> {
         return map.put(new WeakReferenceThatIsEqualToItselfAndItsReferent(key, queue), value);
     }
 
+    @SuppressWarnings("unchecked") // if the cast doesn't work then neither will the equals call, so null will result which is ok
     @Override
     public V remove(Object key) {
-        return map.remove(key);
+        return map.remove(new WeakReferenceThatIsEqualToItselfAndItsReferent((K) key, /* queue */ null));
     }
 
     @Override
