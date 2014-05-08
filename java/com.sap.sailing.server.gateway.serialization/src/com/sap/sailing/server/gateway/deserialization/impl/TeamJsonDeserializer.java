@@ -6,7 +6,6 @@ import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -32,7 +31,7 @@ public class TeamJsonDeserializer implements JsonDeserializer<DynamicTeam> {
 	public DynamicTeam deserialize(JSONObject object)
 			throws JsonDeserializationException {
 		String name = (String) object.get(TeamJsonSerializer.FIELD_NAME);
-		Person coach = personDeserializer.deserialize((JSONObject) object
+		DynamicPerson coach = personDeserializer.deserialize((JSONObject) object
 				.get(TeamJsonSerializer.FIELD_COACH));
 		Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
 

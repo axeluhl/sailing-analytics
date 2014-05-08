@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Team;
@@ -62,6 +63,14 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public Color getColor() {
                 return null;
+            }
+
+            @Override
+            public void addCompetitorChangeListener(CompetitorChangeListener listener) {
+            }
+
+            @Override
+            public void removeCompetitorChangeListener(CompetitorChangeListener listener) {
             }
         };
     }
