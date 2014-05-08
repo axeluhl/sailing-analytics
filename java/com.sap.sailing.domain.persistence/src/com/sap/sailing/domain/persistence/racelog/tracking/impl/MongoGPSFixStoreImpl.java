@@ -57,7 +57,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 
     private GPSFix loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
-        Object fixObject = object.get(FieldNames.GPSFIX.name());
+        DBObject fixObject = (DBObject) object.get(FieldNames.GPSFIX.name());
         return fixServiceFinder.findService(type).transformBack(fixObject);
     }
 

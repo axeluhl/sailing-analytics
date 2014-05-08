@@ -22,7 +22,7 @@ public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
     }
 
     @Override
-    public Object transformForth(GPSFix fix) throws IllegalArgumentException {
+    public DBObject transformForth(GPSFix fix) throws IllegalArgumentException {
         DBObject result = new BasicDBObject();
         mof.storeTimed(fix, result);
         mof.storePositioned(fix, result);        
@@ -30,7 +30,7 @@ public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
     }
 
     @Override
-    public GPSFix transformBack(Object object) {
+    public GPSFix transformBack(DBObject object) {
         DBObject dbObject = (DBObject) object;
         TimePoint timePoint = dof.loadTimePoint(dbObject);
         Position position = dof.loadPosition(dbObject);

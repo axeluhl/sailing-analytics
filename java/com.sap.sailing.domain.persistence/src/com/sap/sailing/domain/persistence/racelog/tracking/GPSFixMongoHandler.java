@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.racelog.tracking;
 
+import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
 import com.sap.sailing.domain.tracking.GPSFix;
 
@@ -11,5 +12,5 @@ import com.sap.sailing.domain.tracking.GPSFix;
  * @author Fredrik Teschke
  *
  */
-public interface GPSFixMongoHandler extends TransformationHandler<GPSFix, Object> {
+public interface GPSFixMongoHandler extends TransformationHandler<GPSFix, DBObject> {
 }

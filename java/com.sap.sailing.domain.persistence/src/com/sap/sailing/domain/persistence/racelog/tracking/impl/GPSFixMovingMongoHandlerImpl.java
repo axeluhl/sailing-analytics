@@ -24,7 +24,7 @@ public class GPSFixMovingMongoHandlerImpl implements GPSFixMongoHandler {
     }
 
     @Override
-    public Object transformForth(GPSFix fix) throws IllegalArgumentException {
+    public DBObject transformForth(GPSFix fix) throws IllegalArgumentException {
         DBObject result = new BasicDBObject();
         mof.storeTimed(fix, result);
         mof.storePositioned(fix, result);    
@@ -33,8 +33,7 @@ public class GPSFixMovingMongoHandlerImpl implements GPSFixMongoHandler {
     }
 
     @Override
-    public GPSFix transformBack(Object object) {
-        DBObject dbObject = (DBObject) object;
+    public GPSFix transformBack(DBObject dbObject) {
         TimePoint timePoint = dof.loadTimePoint(dbObject);
         Position position = dof.loadPosition(dbObject);
         SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
