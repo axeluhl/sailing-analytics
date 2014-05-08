@@ -138,6 +138,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -1615,8 +1616,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DBObject deviceId)
                     throws TransformationException, NoCorrespondingServiceRegisteredException {
         String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
-        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
+        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
         String stringRepresentation = (String) deviceId.get(FieldNames.DEVICE_STRING_REPRESENTATION.name());
-        return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType, stringRepresentation);
+        
+        try {
+            return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType, stringRepresentation);
+        } catch (TransformationException e) {
+            return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(
+                    stringRepresentation, deviceType, stringRepresentation);
+        }
     }
 }

@@ -19,7 +19,11 @@ public class PingDeviceIdentifierSerializationHandler {
         return new Pair<String, String>(PingDeviceIdentifier.TYPE, castIdentifier(deviceIdentifier).getId().toString());
     }
 
-    public DeviceIdentifier deserialize(String input, String type, String stringRep) {
-        return new PingDeviceIdentifierImpl(UUID.fromString(input));
+    public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {
+        try {
+            return new PingDeviceIdentifierImpl(UUID.fromString(stringRep));
+        } catch (IllegalArgumentException e) {
+            throw new TransformationException(e);
+        }
     }
 }

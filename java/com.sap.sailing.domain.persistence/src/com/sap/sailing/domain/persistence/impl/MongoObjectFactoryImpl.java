@@ -1140,10 +1140,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
         Pair<String, ? extends Object> pair = handler.serialize(device);
         type = pair.getA();
-    	Object deviceTypeId = pair.getB();
+    	Object deviceTypeSpecificId = pair.getB();
     	return new BasicDBObjectBuilder()
     			.add(FieldNames.DEVICE_TYPE.name(), type)
-    			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId)
+    			.add(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), deviceTypeSpecificId)
     			.add(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation()).get();
     }
     

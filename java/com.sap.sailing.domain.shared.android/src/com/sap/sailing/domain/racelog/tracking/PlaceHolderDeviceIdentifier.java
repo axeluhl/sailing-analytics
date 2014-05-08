@@ -13,7 +13,6 @@ package com.sap.sailing.domain.racelog.tracking;
  */
 public class PlaceHolderDeviceIdentifier implements DeviceIdentifier {
     private static final long serialVersionUID = 8642469389180406246L;
-    public static final String TYPE = "PLACEHOLDER";
     
     private final String type;
     private final String stringRepresentation;

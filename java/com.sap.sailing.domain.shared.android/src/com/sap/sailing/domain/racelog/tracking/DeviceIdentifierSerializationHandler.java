@@ -33,7 +33,9 @@ public interface DeviceIdentifierSerializationHandler<T> {
     
     /**
      * Deserialize the identifier. In case this is a fallback deserializer (e.g. for {@link PlaceHolderDeviceIdentifier}),
-     * additional information such as {@code type} and {@code stringRepresentation} is passed in.
+     * additional information such as {@code type} and {@code stringRepresentation} is passed in.<p>
+     * The handler should check whether all necessary information is contained (specifically, if the {@code serialized}
+     * object is not {@code null}, and otherwise throw an {@link TransformationException}.
      */
     DeviceIdentifier deserialize(T serialized, String type, String stringRepresentation) throws TransformationException;
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
 public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     public StoreAndLoadDeviceIdentifierTest() throws UnknownHostException, MongoException {
@@ -121,15 +124,28 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     }
     
     @Test
-    public void testNoAppropriateSerializer() throws TransformationException, NoCorrespondingServiceRegisteredException {
+    public void testUseStringRepForDeserializing() throws TransformationException, NoCorrespondingServiceRegisteredException {
         TypeBasedServiceFinderFactory forLoading = new MockSmartphoneImeiServiceFinderFactory();
         TypeBasedServiceFinderFactory forStoring = new MockEmptyServiceFinderFactory();
 
         DeviceIdentifier smartphone = new SmartphoneImeiIdentifier("abc");
         DeviceIdentifier loaded = storeAndLoad(smartphone, forStoring, forLoading);
         
-        assertTrue(loaded instanceof PlaceHolderDeviceIdentifier);
+        //smartphone imei identifier can be restored from string rep
+        assertTrue(loaded instanceof SmartphoneImeiIdentifier);
         assertEquals(smartphone.getIdentifierType(), loaded.getIdentifierType());
         assertEquals(smartphone.getStringRepresentation(), loaded.getStringRepresentation());
+    }
+    
+    @Test
+    public void testNoAppropriateSerializer() throws TransformationException, NoCorrespondingServiceRegisteredException {
+        TypeBasedServiceFinderFactory forLoading = new MockSmartphoneImeiServiceFinderFactory();
+        TypeBasedServiceFinderFactory forStoring = new MockEmptyServiceFinderFactory();
+        
+        DeviceIdentifier trackFile = new TrackFileImportDeviceIdentifierImpl("FILE", "track", TimeRangeImpl.create(100, 200), 30);
+        DeviceIdentifier loaded = storeAndLoad(trackFile, forStoring, forLoading);
+        assertTrue(loaded instanceof PlaceHolderDeviceIdentifier);
+        assertEquals(trackFile.getIdentifierType(), loaded.getIdentifierType());
+        assertEquals(trackFile.getStringRepresentation(), loaded.getStringRepresentation());
     }
 }

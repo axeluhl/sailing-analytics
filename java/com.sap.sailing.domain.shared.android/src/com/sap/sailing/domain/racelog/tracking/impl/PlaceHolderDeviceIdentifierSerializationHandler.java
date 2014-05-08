@@ -18,14 +18,11 @@ import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 public class PlaceHolderDeviceIdentifierSerializationHandler {
 
     public DeviceIdentifier deserialize(String object, String type, String stringRepresentation) throws TransformationException {
-        if (type.equals(PlaceHolderDeviceIdentifier.TYPE)) {
-            type = (String) object;
-        }
         return new PlaceHolderDeviceIdentifier(type, stringRepresentation);
     }
 
     public Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
-        return new Pair<String, String>(object.getIdentifierType(), object.getStringRepresentation());
+        return new Pair<String, String>(object.getIdentifierType(), null);
     }
 
 }

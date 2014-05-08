@@ -35,6 +35,9 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
     @Override
     public DeviceIdentifier deserialize(Object serialized, String type, String stringRepresentation)
             throws TransformationException {
+        if (serialized == null) {
+            throw new TransformationException("Received nothing to deserialize");
+        }
         JSONObject json = (JSONObject) serialized;
         UUID uuid = UUID.fromString((String) json.get(Fields.UUID.name()));
         String fileName = (String) json.get(Fields.FILE_NAME.name());

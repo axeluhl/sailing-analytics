@@ -40,7 +40,11 @@ public class DeviceIdentifierJsonDeserializer implements JsonDeserializer<Device
         try {
             return deviceServiceFinder.findService(deviceType).deserialize(deviceIdObject, deviceType, deviceStringRep);
         } catch (TransformationException e) {
-            throw new JsonDeserializationException(e);
+            try {
+            return new PlaceHolderDeviceIdentifierJsonHandler().deserialize(deviceIdObject, deviceType, deviceStringRep);
+            } catch (TransformationException e2) {
+                throw new JsonDeserializationException(e2);
+            }
         }
     }
 

@@ -15,7 +15,7 @@ public class SmartphoneImeiSerializationHandler {
         return new Pair<String, String>(SmartphoneImeiIdentifier.TYPE, castIdentifier(deviceIdentifier).getImei());
     }
 
-    public DeviceIdentifier deserialize(String input, String type, String stringRep) {
-        return new SmartphoneImeiIdentifier(input);
+    public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {
+        return new SmartphoneImeiIdentifier(stringRep);
     }
 }
