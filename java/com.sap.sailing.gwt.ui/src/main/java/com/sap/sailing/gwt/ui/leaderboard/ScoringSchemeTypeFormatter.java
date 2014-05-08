@@ -20,8 +20,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTen();
         case LOW_POINT_WINNER_GETS_ZERO:
             return stringMessages.scoringSchemeLowPointWinnerGetsZero();
-        case HIGH_POINT_WINNER_GETS_SIX_LAST_GETS_ONE_OTHERS_ARE_INTERPOLATED:
-            return stringMessages.scoringSchemeWinnerGetsSixLastGetsOneOthersAreInterpolated();
+        case HIGH_POINT_WINNER_GETS_SIX:
+            return stringMessages.scoringSchemeWinnerGetsSix();
         }
         return null;
     }

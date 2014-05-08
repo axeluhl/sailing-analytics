@@ -24,11 +24,25 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
     public HighPointFirstGetsFixedScore(double scoreForRaceWinner) {
         this.scoreForRaceWinner = scoreForRaceWinner;
     }
+    
+    protected double getScoreForRaceWinner() {
+        return scoreForRaceWinner;
+    }
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        final int effectiveRank;
+        final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
         final Double result;
+        if (effectiveRank == 0) {
+            result = null;
+        } else {
+            result = Math.max(1.0, (double) (getScoreForRaceWinner() - effectiveRank + 1));
+        }
+        return result;
+    }
+
+    protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+        final int effectiveRank;
         int competitorFleetOrdering;
         if (rank == 0) {
             effectiveRank = 0;
@@ -41,11 +55,6 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
                 effectiveRank = rank;
             }
         }
-        if (effectiveRank == 0) {
-            result = null;
-        } else {
-            result = Math.max(1.0, (double) (scoreForRaceWinner - effectiveRank + 1));
-        }
-        return result;
+        return effectiveRank;
     }
 }
