@@ -965,4 +965,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

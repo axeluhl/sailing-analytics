@@ -617,4 +617,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 		return null;
 	}
 
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

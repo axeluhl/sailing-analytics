@@ -566,4 +566,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 		return null;
 	}
 
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

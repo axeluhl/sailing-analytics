@@ -523,13 +523,18 @@ public interface TrackedRace extends Serializable {
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
     /**
-     * When provided with a {@link WindStore} and/or {@link GPSFixStore} during construction, the tracked race will
-     * asynchronously load the wind and/or GPS data for this tracked race from the wind store and the GPS store in a
-     * background thread and update this tracked race with the results. Clients that want to wait for the wind / GPS fix
+     * When provided with a {@link WindStore} during construction, the tracked race will
+     * asynchronously load the wind data for this tracked race from the wind store and the GPS store in a
+     * background thread and update this tracked race with the results. Clients that want to wait for the wind
      * loading process to complete can do so by calling this method which will block until the wind loading has
      * completed.
      */
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
+
+    /**
+     * @see #waitUntilLoadingFromWindStoreComplete(), but for fixes from a {@link GPSFixStore}
+     */
+    void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 

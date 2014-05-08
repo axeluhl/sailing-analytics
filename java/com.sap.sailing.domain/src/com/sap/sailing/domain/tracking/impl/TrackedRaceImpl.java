@@ -433,6 +433,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
+    @Override
+    public synchronized void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
+            wait();
+        }
+    }
+
     private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {

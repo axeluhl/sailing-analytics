@@ -56,7 +56,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         trackedRace.attachRaceLog(raceLog);
-        trackedRace.waitUntilLoadingFromWindStoreComplete();
+        trackedRace.waitUntilNotLoading();
+        trackedRace.waitUntilLoadingFromGPSFixStoreComplete();
 
         testLength(trackedRace.getTrack(comp), 2);
         testLength(trackedRace.getTrack(comp2), 1);
