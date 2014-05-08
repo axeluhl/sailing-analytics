@@ -18,6 +18,7 @@ The basic architecture of Racelog-tracking is presented in this diagram (downloa
 [[racelog-tracking/architecture.svg]]
 
 Following the numbers in the diagram, this is a possible race log tracking scenario:
+
 1. The race is defined through events that are added to the RaceLog.
 2. The RaceTracker is created.
 3. As soon as the "StartTrackingEvent" is added to the RaceLog, the RaceTracker creates the TrackedRace.
@@ -37,6 +38,7 @@ Currently, RaceLogs can be filled with the race metadata via the _RaceLog Tracki
 When thinking about smartphone tracking, it would of course be a good idea to also integrate similar functionality into the tracking app. Some parts of the communication (registering competitors, defining the course, mapping devices) can be handled via the existing RaceLog communication mechanism. Other parts (creating the Leaderboard structure in the first place, adding the RaceLog tracker) have to be dealt with separately, e.g. via a REST API.
 
 ## Steps for setting up a racelog-tracked race in the AdminConsole
+
 1. Precondition: A RegattaLeaderboard with one race (and automatically RaceLog) has to exist.
 2. Denote the race for racelog-tracking and add a race tracker.
 3. Register competitors for the race (these need to exist in the CompetitorStore).
@@ -61,6 +63,7 @@ By using the OSGi service registry, adapters are completely decoupled from the S
 The first attempt so far (``ftes-rltracking-equestrian`` branch) is completely restricted to one bundle. However, this is a branch branched from ``master``, and the new bundle has been added to the existing launch configurations and build and deployment descriptors (``pom.xml``, ``feature.xml``, ``raceanalysis.product``). This makes developing and testing easy, but is not in line with the goal stated above.
 
 Steps for creating an adapter:
+
 1. Create a new project: ``com.sap.sailing.domain.<adaptername>``. Think about duplicating an existing project, such as ``com.sap.sailing.domain.racelogtrackingadapter``. In this case, don't forget to adapt the project's ``pom.xml``, ``META-INF/MANIFEST.MF`` and ``.project`` files.
 2. Add the new project to the maven build in ``java/pom.xml``.
 3. Add the project as an auto-start bundle to the eclipse launch configs. The bundle needs to be started before the central ``com.sap.sailing.server`` bundle, for which currently a startup-level of ``3`` is sufficient.
