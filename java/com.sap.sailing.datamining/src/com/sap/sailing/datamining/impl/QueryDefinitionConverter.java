@@ -1,7 +1,11 @@
-package com.sap.sailing.datamining.shared;
+package com.sap.sailing.datamining.impl;
 
 import java.util.Map.Entry;
 
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.datamining.shared.impl.QueryDefinitionImpl;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -26,15 +30,11 @@ public class QueryDefinitionConverter {
     }
 
     private static FunctionDTO convertToFunctionDTO(StatisticType statisticType) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Not yet implemented");
-//        return null;
+        return DeprecatedToFunctionConverter.getFunctionDTOFor(statisticType);
     }
 
     private static FunctionDTO convertToFunctionDTO(DimensionIdentifier dimensionIdentifier) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Not yet implemented");
-        // return null;
+         return DeprecatedToFunctionConverter.getFunctionDTOFor(dimensionIdentifier);
     }
 
     private QueryDefinitionConverter() {
