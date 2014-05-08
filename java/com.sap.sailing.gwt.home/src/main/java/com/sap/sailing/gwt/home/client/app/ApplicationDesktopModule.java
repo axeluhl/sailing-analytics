@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.app;
 import javax.inject.Singleton;
 
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.sap.sailing.gwt.home.client.app.aboutus.AboutUsPagePresenter;
 import com.sap.sailing.gwt.home.client.app.aboutus.AboutUsPageView;
 import com.sap.sailing.gwt.home.client.app.contact.ContactPagePresenter;
@@ -24,6 +25,8 @@ public class ApplicationDesktopModule extends AbstractPresenterModule {
         bind(AbstractRootPagePresenter.MyView.class).to(ApplicationDesktopView.class);
         bind(AbstractRootPagePresenter.class).to(ApplicationDesktopPresenter.class);
 
+        bind(PlaceManager.class).in(Singleton.class); 
+        
         // Presenters
         bindPresenter(StartPagePresenter.class, StartPagePresenter.MyView.class, StartPageView.class,
         		StartPagePresenter.MyProxy.class);

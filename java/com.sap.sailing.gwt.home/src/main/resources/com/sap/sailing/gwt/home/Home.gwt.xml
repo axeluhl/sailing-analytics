@@ -28,8 +28,8 @@
 
 	<!-- 
 	<inherits name="com.google.gwt.inject.Inject" />
+	-->
   	<inherits name="com.google.gwt.uibinder.GinUiBinder" /> 	
-	 -->	
   	
     <inherits name="com.gwtplatform.mvp.MvpWithFormFactor" />
     <inherits name='com.gwtplatform.dispatch.Dispatch' />
@@ -56,10 +56,9 @@
                                 value="com.gwtplatform.dispatch.client.gin.DispatchAsyncModule" />
     <extend-configuration-property name="gin.ginjector.modules"
                                    value="com.sap.sailing.gwt.home.client.gin.SharedModule" />
-<!-- 
+    
  	<set-configuration-property name="gin.ginjector.extensions"
                               value="com.sap.sailing.gwt.home.client.gin.GinjectorExtension"/>
- -->	
     		
 	<source path='client'/>
 	<source path='shared'/>

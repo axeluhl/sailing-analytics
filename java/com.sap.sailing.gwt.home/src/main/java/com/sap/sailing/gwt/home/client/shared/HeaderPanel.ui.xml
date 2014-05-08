@@ -21,45 +21,25 @@
 .sitenavigation {
   float: right;
 }
-.sitenavigation_link {
-  display: inline-block;
-  font-size: 0.875em;
-  font-weight: 600;
-  color: #f6f9fc;
-  text-transform: uppercase;
-  padding: 0 2.1875em;
-}
-.sitenavigation_link:hover {
-  background-color: rgba(246,249,252,0.1);
-  text-decoration: none;
-}
-.sitenavigation_linksearch img {
-  vertical-align: middle;
-}
-.sitenavigationhome .sitenavigation_linkhome,
-.sitenavigationevents .sitenavigation_linkevents,
-.sitenavigationboatclasses .sitenavigation_linkboatclasses,
-.sitenavigationsolutions .sitenavigation_linksolutions,
-.sitenavigationsponsoring .sitenavigation_linksponsoring {
-  background: #f0ab00;
-}
-.sitenavigationhome .sitenavigation_linkhome:hover,
-.sitenavigationevents .sitenavigation_linkevents:hover,
-.sitenavigationboatclasses .sitenavigation_linkboatclasses:hover,
-.sitenavigationsolutions .sitenavigation_linksolutions:hover,
-.sitenavigationsponsoring .sitenavigation_linksponsoring:hover {
-  background-color: rgba(240,171,0,0.9);
-}
+		.languageSelection {
+			float: right;	
+		}
     </ui:style>
-	<g:HTML>
+	<g:HTMLPanel>
 <header class="{style.siteheader}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{style.logo}"></img></div>
     <div class="{res.mainCss.small8} {res.mainCss.columns}">
-      <nav class="{style.sitenavigation}"><a href="index.html" class="{style.sitenavigation_link} {style.sitenavigation_linkhome}">Home</a><a href="events.html" class="{style.sitenavigation_link} {style.sitenavigation_linkevents}">Events</a><a href="boat-classes.html" class="{style.sitenavigation_link} {style.sitenavigation_linkboatclasses}">Boat Classes</a><a href="solutions.html" class="{style.sitenavigation_link} {style.sitenavigation_linksolutions}">Solutions</a><a href="sponsoring.html" class="{style.sitenavigation_link} {style.sitenavigation_linksponsoring}">Sponsoring</a><a href="" class="{style.sitenavigation_link} {style.sitenavigation_linksearch}"><img src="images/search-icon.png" alt="Search"></img></a></nav>
+        
+        <g:FlowPanel styleName="{style.sitenavigation}">
+			<s:MainMenu ui:field="mainMenu" />
+    	</g:FlowPanel>
+    	<g:FlowPanel styleName="{style.languageSelection}">
+    		<s:LocaleSelection ui:field="localeSelection" />
+    	</g:FlowPanel>
     </div>
   </div>
 </header>
-	</g:HTML>
+	</g:HTMLPanel>
 
 </ui:UiBinder>

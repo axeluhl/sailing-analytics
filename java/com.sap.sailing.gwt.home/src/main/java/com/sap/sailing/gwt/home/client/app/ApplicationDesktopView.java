@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 import com.sap.sailing.gwt.home.client.shared.FooterPanel;
 import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
@@ -27,7 +28,7 @@ public class ApplicationDesktopView extends ViewImpl implements AbstractRootPage
     @UiField(provided=true)
     HeaderPanel headerPanel;
 
-    @UiField(provided=true)
+    @UiField
     FooterPanel footerPanel;
 
     @UiField
@@ -36,9 +37,9 @@ public class ApplicationDesktopView extends ViewImpl implements AbstractRootPage
     @UiField
     Element loadingMessage;
 
-    public ApplicationDesktopView() {
-        headerPanel = new HeaderPanel();
-        footerPanel = new FooterPanel();
+    @Inject
+    public ApplicationDesktopView(HeaderPanel headerPanel) {
+        this.headerPanel = headerPanel;
         
         widget = uiBinder.createAndBindUi(this);
     }

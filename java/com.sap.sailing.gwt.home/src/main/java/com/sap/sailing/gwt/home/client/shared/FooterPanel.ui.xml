@@ -33,12 +33,12 @@
   margin-right: 0;
 }
 </ui:style>
-        <g:HTML>
+        <g:HTMLPanel>
 <footer class="{style.sitefooter}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
     <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_links}"><a href="" class="{style.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{style.sitefooter_links_link}">Privacy</a></div>
   </div>
 </footer>
-        </g:HTML>
+        </g:HTMLPanel>
 </ui:UiBinder>

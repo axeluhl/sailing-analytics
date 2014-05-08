@@ -16,6 +16,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
+import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 import com.sap.sailing.gwt.home.client.SailingEventsServiceAsync;
 import com.sap.sailing.gwt.home.client.app.AbstractRootPagePresenter;
 import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
