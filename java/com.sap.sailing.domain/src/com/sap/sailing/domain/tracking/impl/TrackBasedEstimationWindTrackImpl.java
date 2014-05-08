@@ -310,13 +310,17 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return cache;
     }
     
+    /**
+     * The caller must <em>not</em> hold the read lock of {@link #cacheLock} when calling this method (unless the caller
+     * also holds the corresponding write lock) because this method will acquire the corresponding write lock, and
+     * upgrading from a read lock to a write lock is not possible.
+     */
     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
         // can't use lockForWrite() here because caching can happen while holding the read lock, and the lock can't be
         // upgraded. But lockForRead() and synchronization will do the job because all invalidations lock the write lock,
         // and all contains() checks and get() calls use synchronization too.
         LockUtil.lockForWrite(cacheLock);
         try {
-            // synchronization necessary to protect writeObject from ConcurrentModificationException
             if (fix == null) {
                 timePointsWithCachedNullResult.add(timePoint);
                 timePointsWithCachedNullResultFastContains.add(timePoint);
