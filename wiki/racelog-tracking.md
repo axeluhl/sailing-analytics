@@ -9,7 +9,7 @@ This is the second iteration of implementing this idea. For previous documentati
 
 # Development Infos
 Currently, RaceLog tracking has not been merged into the master branch. Instead, refer to the following branches:
-* ``gpsfixstore-independent-of-race``: The main RaceLog-tracking development
+* ``ftes-rltracking``: The main RaceLog-tracking development
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
 # Architectural Overview
