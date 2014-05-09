@@ -23,12 +23,26 @@ public class TrackFileImportTest {
     }
     
     @Test
-    public void testImport() throws IOException {
+    public void testGpx() throws IOException {
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         Import.INSTANCE.importFixes(in, new FixCallback() {
             @Override
             public void addFix(GPSFix fix, int numberOfFixes, TimeRange timeRange, String trackName) {
                 if (fix instanceof GPSFixMoving) {
+                    callbackCalled = true;
+                }
+            }
+        }, false);
+        assertTrue(callbackCalled);
+    }
+    
+    @Test
+    public void testKmlOnlyLatLong() throws IOException {
+        InputStream in = getClass().getResourceAsStream("/sam002903 - COMPETITORS.kml");
+        Import.INSTANCE.importFixes(in, new FixCallback() {
+            @Override
+            public void addFix(GPSFix fix, int numberOfFixes, TimeRange timeRange, String trackName) {
+                if (fix instanceof GPSFix) {
                     callbackCalled = true;
                 }
             }
