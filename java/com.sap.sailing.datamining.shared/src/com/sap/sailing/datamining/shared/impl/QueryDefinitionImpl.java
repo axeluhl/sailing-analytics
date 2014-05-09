@@ -29,7 +29,7 @@ public class QueryDefinitionImpl implements QueryDefinition {
         filterSelection.put(dimension, selection);
     }
     
-    public void appenDimensionToGroupBy(FunctionDTO dimensionToGroupBy) {
+    public void appendDimensionToGroupBy(FunctionDTO dimensionToGroupBy) {
         dimensionsToGroupBy.add(dimensionToGroupBy);
     }
 

@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.factories;
 
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.impl.components.deprecated.GroupDividingParallelDataRetriever;
@@ -8,12 +9,19 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.ParallelDataRetriever;
+import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataRetrieverFactory {
 
     private DataRetrieverFactory() {
+    }
+    
+    public static <DataSourceType, ElementType> Processor<DataSourceType> createRetrievalProcessorChain(Processor<ElementType> groupingProcessor, Map<FunctionDTO, Iterable<?>> filterSelection) {
+        //TODO implement me
+        return null;
     }
 
     /**

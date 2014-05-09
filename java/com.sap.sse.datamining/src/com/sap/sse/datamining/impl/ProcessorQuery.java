@@ -140,7 +140,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         }
     }
 
-    Processor<Map<GroupKey, AggregatedType>> getResultReceiver() {
+    public Processor<Map<GroupKey, AggregatedType>> getResultReceiver() {
         return resultReceiver;
     }
     

@@ -13,6 +13,6 @@ public interface HasTrackedLegOfCompetitorContext extends HasTrackedLegContext {
     public Competitor getCompetitor();
     
     @SideEffectFreeValue(messageKey="DistanceTraveled", resultUnit=Unit.Meters, resultDecimals=0)
-    public double getDistanceTraveled();
+    public Double getDistanceTraveled();
 
 }

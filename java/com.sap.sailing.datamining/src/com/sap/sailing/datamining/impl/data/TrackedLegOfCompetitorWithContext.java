@@ -40,7 +40,7 @@ public class TrackedLegOfCompetitorWithContext extends TrackedLegWithContext imp
     }
     
     @Override
-    public double getDistanceTraveled() {
+    public Double getDistanceTraveled() {
         TimePoint timePoint = getTrackedRace().getEndOfTracking();
         return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint).getMeters();
     }
