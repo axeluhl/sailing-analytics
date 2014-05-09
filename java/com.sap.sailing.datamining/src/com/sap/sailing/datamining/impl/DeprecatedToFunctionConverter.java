@@ -12,8 +12,13 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Moving;
+import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -128,31 +133,84 @@ public class DeprecatedToFunctionConverter {
         }
         
         for (DimensionIdentifier dimensionIdentifier : DimensionIdentifier.values()) {
+            FunctionDTO functionDTO = getFunctionDTOFor(dimensionIdentifier);
+            Method method = null;
+            Function<?> function = null;
+
+            method = getNullaryMethodFromClass(Named.class, "getName");
+            Function<?> getName = FunctionFactory.createMethodWrappingFunction(method);
             switch (dimensionIdentifier) {
             case BoatClassName:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getBoatClass");
+                Function<?> getBoatClass = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Boat Class Name",
+                        Arrays.asList(getBoatClass, getName));
                 break;
             case CompetitorName:
+                method = getNullaryMethodFromClass(HasTrackedLegOfCompetitorContext.class, "getCompetitor");
+                Function<?> getCompetitor = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Competitor Name",
+                        Arrays.asList(getCompetitor, getName));
                 break;
             case CourseAreaName:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getCourseArea");
+                Function<?> getCourseArea = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Course Area Name",
+                        Arrays.asList(getCourseArea, getName));
                 break;
             case FleetName:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getFleet");
+                Function<?> getFleet = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Fleet Name", Arrays.asList(getFleet, getName));
                 break;
             case LegNumber:
+                method = getNullaryMethodFromClass(HasTrackedLegContext.class, "getLegNumber");
+                function = FunctionFactory.createMethodWrappingFunction(method);
                 break;
             case LegType:
+                method = getNullaryMethodFromClass(HasTrackedLegContext.class, "getLegType");
+                function = FunctionFactory.createMethodWrappingFunction(method);
                 break;
             case Nationality:
+                method = getNullaryMethodFromClass(HasTrackedLegOfCompetitorContext.class, "getCompetitor");
+                getCompetitor = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Competitor.class, "getTeam");
+                Function<?> getTeam = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(WithNationality.class, "getNationality");
+                Function<?> getNationality = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Nationality.class, "getThreeLetterIOCAcronym");
+                Function<?> getNationalityAcronym = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Nationality",
+                        Arrays.asList(getCompetitor, getTeam, getNationality, getNationalityAcronym));
                 break;
             case RaceName:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getRace");
+                Function<?> getRace = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Race Name", Arrays.asList(getRace, getName));
                 break;
             case RegattaName:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getRegatta");
+                Function<?> getRegatta = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Regatta Name", Arrays.asList(getRegatta, getName));
                 break;
             case SailID:
+                method = getNullaryMethodFromClass(HasTrackedLegOfCompetitorContext.class, "getCompetitor");
+                getCompetitor = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Competitor.class, "getBoat");
+                Function<?> getBoat = FunctionFactory.createMethodWrappingFunction(method);
+                method = getNullaryMethodFromClass(Boat.class, "getSailID");
+                Function<?> getSailID = FunctionFactory.createMethodWrappingFunction(method);
+                function = FunctionFactory.createCompoundFunction("Sail ID", Arrays.asList(getCompetitor, getBoat, getSailID));
                 break;
             case WindStrength:
                 break;
             case Year:
+                method = getNullaryMethodFromClass(HasTrackedRaceContext.class, "getYear");
+                function = FunctionFactory.createMethodWrappingFunction(method);
                 break;
+            }
+            if (function != null) {
+                functionDTOToFunctionMap.put(functionDTO, function);
             }
         }
     }
