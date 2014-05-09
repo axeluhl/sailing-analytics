@@ -181,6 +181,7 @@ TrackedRaceChangedListener {
 
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
+        splitPanel.ensureDebugId("LeaderboardDetailsPanel");
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
@@ -203,12 +204,13 @@ TrackedRaceChangedListener {
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
-        trackedRacesListComposite.ensureDebugId("TrackedRaces");
+        trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 
         Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
+        reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

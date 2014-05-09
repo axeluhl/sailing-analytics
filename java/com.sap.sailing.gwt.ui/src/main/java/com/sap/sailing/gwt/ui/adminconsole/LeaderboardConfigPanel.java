@@ -357,13 +357,13 @@ TrackedRaceChangedListener {
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
         
-        racesTable.ensureDebugId("RaceColumnTable");
+        racesTable.ensureDebugId("RacesCellTable");
     }
     
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
-        addRaceColumnsButton.ensureDebugId("AddRaceColumnsButton");
+        addRaceColumnsButton.ensureDebugId("AddRacesButton");
         racesPanel.add(addRaceColumnsButton);
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -379,6 +379,7 @@ TrackedRaceChangedListener {
 
         columnMoveUpButton = new Button(stringMessages.columnMoveUp());
         racesPanel.add(columnMoveUpButton);
+        columnMoveUpButton.ensureDebugId("MoveRaceUpButton");
         columnMoveUpButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -389,6 +390,7 @@ TrackedRaceChangedListener {
 
         columnMoveDownButton = new Button(stringMessages.columnMoveDown());
         racesPanel.add(columnMoveDownButton);
+        columnMoveDownButton.ensureDebugId("MoveRaceDownButton");
         columnMoveDownButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
