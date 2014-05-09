@@ -279,13 +279,19 @@ public interface SailingService extends RemoteService {
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
+    List<String> getSailingServerInstanceUrls();
+
+    void removeSailingServerInstanceURLs(Set<String> toRemove) throws Exception;
+
+    void addSailingServerInstanceUrl(String url) throws Exception;
+
     List<String> getResultImportUrls(String resultProviderName);
 
     void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception;
 
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
-    Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+    void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
     List<String> getUrlResultProviderNames();

@@ -390,6 +390,12 @@ public interface SailingServiceAsync {
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
+    void getSailingServerInstanceUrls(AsyncCallback<List<String>> callback);
+
+    void removeSailingServerInstanceURLs(Set<String> toRemove, AsyncCallback<Void> callback);
+
+    void addSailingServerInstanceUrl(String url, AsyncCallback<Void> callback);
+
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 
     void removeResultImportURLs(String resultProviderName, Set<String> toRemove, AsyncCallback<Void> callback);

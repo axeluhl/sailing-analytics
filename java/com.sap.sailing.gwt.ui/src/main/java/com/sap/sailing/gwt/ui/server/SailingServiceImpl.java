@@ -2142,8 +2142,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
-        return getService().apply(
+    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
+        getService().apply(
                 new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName,
                         timePointOfLastCorrectionValidity == null ? null : new MillisecondsTimePoint(timePointOfLastCorrectionValidity),
                                 comment));
@@ -3172,6 +3172,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    @Override
+    public List<String> getSailingServerInstanceUrls() {
+    	return null;
+    }
+
+    @Override
+    public void removeSailingServerInstanceURLs(Set<String> toRemove) throws Exception {
+    	
+    }
+
+    @Override
+    public void addSailingServerInstanceUrl(String url) throws Exception {
+    	
+    }
+    
     @Override
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();

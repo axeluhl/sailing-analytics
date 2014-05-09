@@ -358,6 +358,12 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
+    String sailingServerInstanceUrls();
+    String errorRefreshingSailingServerInstanceUrlList(String message);
+    String successfullyUpdatedSailingServerInstanceUrls();
+    String errorRemovingSailingServerInstanceUrls(String message);
+    String addSailingServerInstanceUrl();
+    String errorAddingSailingServerInstanceUrl(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
