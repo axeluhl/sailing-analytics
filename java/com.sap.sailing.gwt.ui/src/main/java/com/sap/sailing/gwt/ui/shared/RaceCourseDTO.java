@@ -10,7 +10,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RaceCourseDTO implements IsSerializable {
     public List<WaypointDTO> waypoints;
-    public List<MarkDTO> marks;
+    
+    /**
+     * List of all marks in race, that can include such that are not actually part of
+     * the race course definition.
+     */
+    private List<MarkDTO> allMarks;
 
     RaceCourseDTO() {
     }
@@ -19,9 +24,9 @@ public class RaceCourseDTO implements IsSerializable {
         this(waypoints, null);
     }
 
-    public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> marks) {
+    public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> allMarks) {
         this.waypoints = waypoints;
-        this.marks = marks;
+        this.allMarks = allMarks;
     }
 
     public List<ControlPointDTO> getControlPoints() {
@@ -33,13 +38,13 @@ public class RaceCourseDTO implements IsSerializable {
     }
 
     public Collection<MarkDTO> getMarks() {
-        final Collection<MarkDTO> result;
-        if (marks != null) {
-            result = marks;
+        Collection<MarkDTO> result;
+        if (allMarks != null) {
+            result = allMarks;
         } else {
             Map<String, MarkDTO> marks = new HashMap<String, MarkDTO>();
             for (WaypointDTO waypoint : waypoints) {
-                for (MarkDTO mark : waypoint.marks) {
+                for (MarkDTO mark : waypoint.controlPoint.getMarks()) {
                     if (!marks.containsKey(mark.getName())) {
                         marks.put(mark.getName(), mark);
                     }

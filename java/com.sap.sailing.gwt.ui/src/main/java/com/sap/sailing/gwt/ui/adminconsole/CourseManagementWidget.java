@@ -112,7 +112,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 WaypointDTO waypoint = waypoints.getSelectionModel().getSelectedObject();
                 if (waypoint != null) {
                     selectControlPoints(waypoint);
-                    selectMarks(waypoint.marks);
+                    selectMarks(waypoint.controlPoint.getMarks());
                 }
                 updateWaypointButtons();
             }

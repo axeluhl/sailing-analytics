@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
@@ -9,15 +8,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -83,13 +81,11 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
                 : PassingInstruction.None;
         
         ControlPointDTO controlPoint = controlPointsWrapper.getSelectionModel().getSelectedObject();
-        List<MarkDTO> marks = new ArrayList<MarkDTO>();
         String name = null;
         if (controlPoint != null) {
-            Util.addAll(controlPoint.getMarks(), marks);
             name = controlPoint.getName();
         }
-        return new WaypointDTO(name, controlPoint, marks, pi);
+        return new WaypointDTO(name, controlPoint, pi);
     }
 
     @Override

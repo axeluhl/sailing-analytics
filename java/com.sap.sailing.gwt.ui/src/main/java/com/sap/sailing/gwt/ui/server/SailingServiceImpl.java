@@ -882,11 +882,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
             for (Waypoint waypoint : lastCourseDesign.getWaypoints()) {
                 ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint());
-                List<MarkDTO> marks = new ArrayList<MarkDTO>();
-                for (MarkDTO markDTO : controlPointDTO.getMarks()) {
-                    marks.add(markDTO);
-                }
-                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingInstructions());
+                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, waypoint.getPassingInstructions());
                 waypointDTOs.add(waypointDTO);
             }
             result = new RaceCourseDTO(waypointDTOs);
@@ -1633,30 +1629,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
         Map<Serializable, ControlPointDTO> controlPointCache = new HashMap<>();
-        RaceCourseDTO result = new RaceCourseDTO(waypointDTOs);
-        if (date != null) {
-            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-            if (trackedRace != null) {
-                Course course = trackedRace.getRace().getCourse();
-                for (Waypoint waypoint : course.getWaypoints()) {
-                    List<MarkDTO> marks = new ArrayList<>();
-                    for (Mark mark : waypoint.getMarks()) {
-                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                        marks.add(convertToMarkDTO(mark, positionAtDate));
-                    }
-                    ControlPointDTO controlPointDTO = controlPointCache.get(waypoint.getControlPoint().getId());
-                    if (controlPointDTO == null) {
-                        controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint);
-                        controlPointCache.put(waypoint.getControlPoint().getId(), controlPointDTO);
-                    }
-                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingInstructions());
-                    waypointDTOs.add(waypointDTO);
+        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        List<MarkDTO> allMarks = new ArrayList<>();
+        if (trackedRace != null) {
+            for (Mark mark : trackedRace.getMarks()) {
+                Position pos = trackedRace.getOrCreateTrack(mark).getEstimatedPosition(dateAsTimePoint, false);
+                allMarks.add(convertToMarkDTO(mark, pos));
+            }
+            Course course = trackedRace.getRace().getCourse();
+            for (Waypoint waypoint : course.getWaypoints()) {
+                ControlPointDTO controlPointDTO = controlPointCache.get(waypoint.getControlPoint().getId());
+                if (controlPointDTO == null) {
+                    controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint);
+                    controlPointCache.put(waypoint.getControlPoint().getId(), controlPointDTO);
                 }
+                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO,
+                        waypoint.getPassingInstructions());
+                waypointDTOs.add(waypointDTO);
             }
         }
-        return result;
+        return new RaceCourseDTO(waypointDTOs, allMarks);
     }
     
     private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
@@ -4179,9 +4172,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             cp = convertToControlPointDTO(waypoint.getControlPoint());
             controlPointCache.put(waypoint.getControlPoint().getId(), cp);
         }
-        List<MarkDTO> marks = new ArrayList<MarkDTO>();
-        Util.addAll(cp.getMarks(), marks);
-        return new WaypointDTO(waypoint.getName(), cp, marks, waypoint.getPassingInstructions());
+        return new WaypointDTO(waypoint.getName(), cp, waypoint.getPassingInstructions());
     }
     
     private RaceCourseDTO convertToRaceCourseDTO(CourseBase course) {
