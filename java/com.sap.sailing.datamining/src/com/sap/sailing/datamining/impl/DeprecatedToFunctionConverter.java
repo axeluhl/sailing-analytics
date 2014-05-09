@@ -52,53 +52,55 @@ public class DeprecatedToFunctionConverter {
             FunctionDTO functionDTO = null;
             switch (dimensionIdentifier) {
             case BoatClassName:
-                new FunctionDTOImpl("BoatClassName", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("BoatClassName", HasTrackedRaceContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Boat Class Name", true);
                 break;
             case CompetitorName:
-                new FunctionDTOImpl("CompetitorName", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("CompetitorName", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Competitor Name", true);
                 break;
             case CourseAreaName:
-                new FunctionDTOImpl("CourseClassName", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("CourseClassName", HasTrackedRaceContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Course Area Name", true);
                 break;
             case FleetName:
-                new FunctionDTOImpl("FleetName", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("FleetName", HasTrackedRaceContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Fleet Name", true);
                 break;
             case LegNumber:
-                new FunctionDTOImpl("LegNumber", HasTrackedLegContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("LegNumber", HasTrackedLegContext.class.getSimpleName(),
                         "int", new ArrayList<String>(), "Leg Number", true);
                 break;
             case LegType:
-                new FunctionDTOImpl("LegType", HasTrackedLegContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("LegType", HasTrackedLegContext.class.getSimpleName(),
                         LegType.class.getSimpleName(), new ArrayList<String>(), "Leg Type", true);
                 break;
             case Nationality:
-                new FunctionDTOImpl("Nationality", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("Nationality", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Nationality", true);
                 break;
             case RaceName:
-                new FunctionDTOImpl("RaceName", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("RaceName", HasTrackedRaceContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Race Name", true);
                 break;
             case RegattaName:
-                new FunctionDTOImpl("RegattaName", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("RegattaName", HasTrackedRaceContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Regattay Name", true);
                 break;
             case SailID:
-                new FunctionDTOImpl("SailID", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("SailID", HasTrackedLegOfCompetitorContext.class.getSimpleName(),
                         String.class.getSimpleName(), new ArrayList<String>(), "Sail ID", true);
                 break;
             case WindStrength:
                 break;
             case Year:
-                new FunctionDTOImpl("Year", HasTrackedRaceContext.class.getSimpleName(),
+                functionDTO = new FunctionDTOImpl("Year", HasTrackedRaceContext.class.getSimpleName(),
                         "int", new ArrayList<String>(), "Year", true);
                 break;
             }
-            dimensionIdentifierToFunctionDTOMap.put(dimensionIdentifier, functionDTO);
+            if (functionDTO != null) {
+                dimensionIdentifierToFunctionDTOMap.put(dimensionIdentifier, functionDTO);
+            }
         }
     }
 
