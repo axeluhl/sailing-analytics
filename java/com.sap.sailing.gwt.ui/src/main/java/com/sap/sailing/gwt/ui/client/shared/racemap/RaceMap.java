@@ -492,7 +492,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames);
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
+                            /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
                     asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {

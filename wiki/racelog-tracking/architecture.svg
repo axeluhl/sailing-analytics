@@ -53,6 +53,11 @@
    <glyph unicode="D" horiz-adv-x="1231" d="M 1381,719 C 1381,602 1363,498 1328,409 1293,319 1244,244 1183,184 1122,123 1049,78 966,47 882,16 792,0 695,0 L 168,0 168,1409 634,1409 C 743,1409 843,1396 935,1369 1026,1342 1105,1300 1171,1244 1237,1187 1289,1116 1326,1029 1363,942 1381,839 1381,719 Z M 1189,719 C 1189,814 1175,896 1148,964 1121,1031 1082,1087 1033,1130 984,1173 925,1205 856,1226 787,1246 712,1256 630,1256 L 359,1256 359,153 673,153 C 747,153 816,165 879,189 942,213 996,249 1042,296 1088,343 1124,402 1150,473 1176,544 1189,626 1189,719 Z"/>
    <glyph unicode="C" horiz-adv-x="1338" d="M 792,1274 C 712,1274 641,1261 580,1234 518,1207 466,1169 425,1120 383,1071 351,1011 330,942 309,873 298,796 298,711 298,626 310,549 333,479 356,408 389,348 432,297 475,246 527,207 590,179 652,151 722,137 800,137 855,137 905,144 950,159 995,173 1035,193 1072,219 1108,245 1140,276 1169,312 1198,347 1223,387 1245,430 L 1401,352 C 1376,299 1344,250 1307,205 1270,160 1226,120 1176,87 1125,54 1068,28 1005,9 941,-10 870,-20 791,-20 677,-20 577,-2 492,35 406,71 334,122 277,187 219,252 176,329 147,418 118,507 104,605 104,711 104,821 119,920 150,1009 180,1098 224,1173 283,1236 341,1298 413,1346 498,1380 583,1413 681,1430 790,1430 940,1430 1065,1401 1166,1342 1267,1283 1341,1196 1388,1081 L 1207,1021 C 1194,1054 1176,1086 1153,1117 1130,1147 1102,1174 1068,1197 1034,1220 994,1239 949,1253 903,1267 851,1274 792,1274 Z"/>
    <glyph unicode="A" horiz-adv-x="1391" d="M 1167,0 L 1006,412 364,412 202,0 4,0 579,1409 796,1409 1362,0 1167,0 Z M 768,1026 C 757,1053 747,1080 738,1107 728,1134 719,1159 712,1182 705,1204 699,1223 694,1238 689,1253 686,1262 685,1265 684,1262 681,1252 676,1237 671,1222 665,1203 658,1180 650,1157 641,1132 632,1105 622,1078 612,1051 602,1024 L 422,561 949,561 768,1026 Z"/>
+   <glyph unicode="5" horiz-adv-x="990" d="M 1053,459 C 1053,388 1042,324 1021,265 1000,206 968,156 926,114 884,71 832,38 770,15 707,-8 635,-20 553,-20 479,-20 415,-11 360,6 305,23 258,47 220,78 182,108 152,143 130,184 107,225 91,268 82,315 L 264,336 C 271,309 282,284 295,259 308,234 327,211 350,192 373,172 401,156 435,145 468,133 509,127 557,127 604,127 646,134 684,149 722,163 755,184 782,212 809,240 829,274 844,315 859,356 866,402 866,455 866,498 859,538 845,575 831,611 811,642 785,669 759,695 727,715 690,730 652,745 609,752 561,752 531,752 503,749 478,744 453,739 429,731 408,722 386,713 366,702 349,690 331,677 314,664 299,651 L 123,651 170,1409 971,1409 971,1256 334,1256 307,809 C 339,834 379,855 427,873 475,890 532,899 598,899 668,899 731,888 787,867 843,846 891,816 930,777 969,738 1000,691 1021,637 1042,583 1053,524 1053,459 Z"/>
+   <glyph unicode="4" horiz-adv-x="1070" d="M 881,319 L 881,0 711,0 711,319 47,319 47,459 692,1409 881,1409 881,461 1079,461 1079,319 881,319 Z M 711,1206 C 710,1203 706,1196 701,1187 696,1177 690,1166 683,1154 676,1142 670,1130 663,1118 656,1105 649,1095 644,1087 L 283,555 C 280,550 275,543 269,534 262,525 256,517 249,508 242,499 236,490 229,481 222,472 217,466 213,461 L 711,461 711,1206 Z"/>
+   <glyph unicode="3" horiz-adv-x="1017" d="M 1049,389 C 1049,324 1039,267 1018,216 997,165 966,123 926,88 885,53 835,26 776,8 716,-11 648,-20 571,-20 484,-20 410,-9 351,13 291,34 242,63 203,99 164,134 135,175 116,221 97,266 84,313 78,362 L 264,379 C 269,342 279,308 294,277 308,246 327,220 352,198 377,176 407,159 443,147 479,135 522,129 571,129 662,129 733,151 785,196 836,241 862,307 862,395 862,447 851,489 828,521 805,552 776,577 742,595 707,612 670,624 630,630 589,636 552,639 518,639 L 416,639 416,795 514,795 C 548,795 583,799 620,806 657,813 690,825 721,844 751,862 776,887 796,918 815,949 825,989 825,1038 825,1113 803,1173 759,1217 714,1260 648,1282 561,1282 482,1282 418,1262 369,1221 320,1180 291,1123 283,1049 L 102,1063 C 109,1125 126,1179 153,1225 180,1271 214,1309 255,1340 296,1370 342,1393 395,1408 448,1423 504,1430 563,1430 642,1430 709,1420 766,1401 823,1381 869,1354 905,1321 941,1287 968,1247 985,1202 1002,1157 1010,1108 1010,1057 1010,1016 1004,977 993,941 982,905 964,873 940,844 916,815 886,791 849,770 812,749 767,734 715,723 L 715,719 C 772,713 821,700 863,681 905,661 940,636 967,607 994,578 1015,544 1029,507 1042,470 1049,430 1049,389 Z"/>
+   <glyph unicode="2" horiz-adv-x="964" d="M 103,0 L 103,127 C 137,205 179,274 228,334 277,393 328,447 382,496 436,544 490,589 543,630 596,671 643,713 686,754 729,795 763,839 790,884 816,929 829,981 829,1038 829,1078 823,1113 811,1144 799,1174 782,1199 759,1220 736,1241 709,1256 678,1267 646,1277 611,1282 572,1282 536,1282 502,1277 471,1267 439,1257 411,1242 386,1222 361,1202 341,1177 326,1148 310,1118 300,1083 295,1044 L 111,1061 C 117,1112 131,1159 153,1204 175,1249 205,1288 244,1322 283,1355 329,1382 384,1401 438,1420 501,1430 572,1430 642,1430 704,1422 759,1405 814,1388 860,1364 898,1331 935,1298 964,1258 984,1210 1004,1162 1014,1107 1014,1044 1014,997 1006,952 989,909 972,866 949,826 921,787 892,748 859,711 822,675 785,639 746,604 705,570 664,535 623,501 582,468 541,434 502,400 466,366 429,332 397,298 368,263 339,228 317,191 301,153 L 1036,153 1036,0 103,0 Z"/>
+   <glyph unicode="1" horiz-adv-x="936" d="M 156,0 L 156,153 515,153 515,1237 197,1010 197,1180 530,1409 696,1409 696,153 1039,153 1039,0 156,0 Z"/>
    <glyph unicode="/" horiz-adv-x="589" d="M 0,-20 L 411,1484 569,1484 162,-20 0,-20 Z"/>
    <glyph unicode="." horiz-adv-x="215" d="M 187,0 L 187,219 382,219 382,0 187,0 Z"/>
    <glyph unicode="-" horiz-adv-x="536" d="M 91,464 L 91,624 591,624 591,464 91,464 Z"/>
@@ -64,7 +69,7 @@
   </font>
  </defs>
  <defs class="TextShapeIndex">
-  <g ooo:slide="id1" ooo:id-list="id3 id4 id5 id6 id7 id8 id9 id10 id11 id12 id13 id14 id15 id16 id17 id18 id19 id20 id21 id22 id23 id24 id25 id26 id27 id28 id29 id30 id31 id32 id33 id34 id35 id36 id37 id38 id39 id40 id41 id42 id43 id44 id45 id46 id47 id48 id49 id50 id51 id52 id53 id54 id55 id56 id57 id58 id59 id60 id61 id62 id63 id64 id65 id66 id67 id68"/>
+  <g ooo:slide="id1" ooo:id-list="id3 id4 id5 id6 id7 id8 id9 id10 id11 id12 id13 id14 id15 id16 id17 id18 id19 id20 id21 id22 id23 id24 id25 id26 id27 id28 id29 id30 id31 id32 id33 id34 id35 id36 id37 id38 id39 id40 id41 id42 id43 id44 id45 id46 id47 id48 id49 id50 id51 id52 id53 id54 id55 id56 id57 id58 id59 id60 id61 id62 id63 id64 id65 id66 id67 id68 id69 id70 id71 id72 id73"/>
  </defs>
  <defs class="EmbeddedBulletChars">
   <g id="bullet-char-template(57356)" transform="scale(0.00048828125,-0.00048828125)">
@@ -132,77 +137,77 @@
        <g id="id6">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,16771 L 13954,16771 13954,16066 21828,16066 21828,16771 17891,16771 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,16771 L 13954,16771 13954,16066 21828,16066 21828,16771 17891,16771 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="16001" y="16640"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="15988" y="16640"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id7">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,14279 L 13954,14279 13954,13573 21828,13573 21828,14279 17891,14279 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,14279 L 13954,14279 13954,13573 21828,13573 21828,14279 17891,14279 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="14172" y="14147"><tspan fill="rgb(0,0,0)" stroke="none">DenoteForRaceLogTrackingEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14153" y="14147"><tspan fill="rgb(0,0,0)" stroke="none">DenoteForRaceLogTrackingEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id8">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,21759 L 13954,21759 13954,21054 21828,21054 21828,21759 17891,21759 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,21759 L 13954,21759 13954,21054 21828,21054 21828,21759 17891,21759 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="16001" y="21628"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="15988" y="21628"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id9">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,18434 L 13954,18434 13954,17729 21828,17729 21828,18434 17891,18434 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,18434 L 13954,18434 13954,17729 21828,17729 21828,18434 17891,18434 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="14354" y="18303"><tspan fill="rgb(0,0,0)" stroke="none">DeviceCompetitorMappingEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14335" y="18303"><tspan fill="rgb(0,0,0)" stroke="none">DeviceCompetitorMappingEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id10">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,19265 L 13954,19265 13954,18560 21828,18560 21828,19265 17891,19265 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,19265 L 13954,19265 13954,18560 21828,18560 21828,19265 17891,19265 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="15013" y="19134"><tspan fill="rgb(0,0,0)" stroke="none">DeviceMarkMappingEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14998" y="19134"><tspan fill="rgb(0,0,0)" stroke="none">DeviceMarkMappingEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id11">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,20096 L 13954,20096 13954,19391 21828,19391 21828,20096 17891,20096 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,20096 L 13954,20096 13954,19391 21828,19391 21828,20096 17891,20096 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="15808" y="19965"><tspan fill="rgb(0,0,0)" stroke="none">StartTrackingEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="15792" y="19965"><tspan fill="rgb(0,0,0)" stroke="none">StartTrackingEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id12">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,20927 L 13954,20927 13954,20222 21828,20222 21828,20927 17891,20927 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,20927 L 13954,20927 13954,20222 21828,20222 21828,20927 17891,20927 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="14354" y="20796"><tspan fill="rgb(0,0,0)" stroke="none">DeviceCompetitorMappingEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14335" y="20796"><tspan fill="rgb(0,0,0)" stroke="none">DeviceCompetitorMappingEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id13">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,17604 L 13954,17604 13954,16898 21828,16898 21828,17604 17891,17604 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,17604 L 13954,17604 13954,16898 21828,16898 21828,17604 17891,17604 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="14695" y="17472"><tspan fill="rgb(0,0,0)" stroke="none">CourseDesignChangedEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14678" y="17472"><tspan fill="rgb(0,0,0)" stroke="none">CourseDesignChangedEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id14">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,22590 L 13954,22590 13954,21884 21828,21884 21828,22590 17891,22590 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,22590 L 13954,22590 13954,21884 21828,21884 21828,22590 17891,22590 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="14695" y="22458"><tspan fill="rgb(0,0,0)" stroke="none">CourseDesignChangedEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="14678" y="22458"><tspan fill="rgb(0,0,0)" stroke="none">CourseDesignChangedEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id15">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,15942 L 13954,15942 13954,15236 21828,15236 21828,15942 17891,15942 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,15942 L 13954,15942 13954,15236 21828,15236 21828,15942 17891,15942 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="16001" y="15810"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="15988" y="15810"><tspan fill="rgb(0,0,0)" stroke="none">DefineMarkEvent</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id16">
         <path fill="rgb(255,255,255)" stroke="none" d="M 17891,15108 L 13954,15108 13954,14403 21828,14403 21828,15108 17891,15108 Z"/>
         <path fill="none" stroke="rgb(0,0,0)" d="M 17891,15108 L 13954,15108 13954,14403 21828,14403 21828,15108 17891,15108 Z"/>
-        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="493px" font-weight="400"><tspan class="TextPosition" x="15137" y="14977"><tspan fill="rgb(0,0,0)" stroke="none">RegisterCompetitorEvent</tspan></tspan></tspan></text>
+        <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="15118" y="14977"><tspan fill="rgb(0,0,0)" stroke="none">RegisterCompetitorEvent</tspan></tspan></tspan></text>
        </g>
       </g>
      </g>
@@ -483,7 +488,7 @@
      <g class="com.sun.star.drawing.CustomShape">
       <g id="id61">
        <path fill="rgb(255,255,102)" stroke="none" d="M 14716,4683 L 10652,4683 10652,2397 18780,2397 18780,4683 14716,4683 Z"/>
-       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="10902" y="2794"><tspan fill="rgb(0,0,0)" stroke="none">This does not necessarily have to be a </tspan></tspan><tspan class="TextPosition" x="10902" y="3235"><tspan fill="rgb(0,0,0)" stroke="none">servlet. A tracking adapter is free to </tspan></tspan><tspan class="TextPosition" x="10902" y="3676"><tspan fill="rgb(0,0,0)" stroke="none">generate fixes whatever way it wished, it </tspan></tspan><tspan class="TextPosition" x="10902" y="4117"><tspan fill="rgb(0,0,0)" stroke="none">merely has to add them to the GPSFixStore </tspan></tspan><tspan class="TextPosition" x="10902" y="4558"><tspan fill="rgb(0,0,0)" stroke="none">with the accompanying DeviceIdentifer.</tspan></tspan></tspan></text>
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="10902" y="2794"><tspan fill="rgb(0,0,0)" stroke="none">This does not necessarily have to be a </tspan></tspan><tspan class="TextPosition" x="10902" y="3235"><tspan fill="rgb(0,0,0)" stroke="none">servlet. A tracking adapter is free to </tspan></tspan><tspan class="TextPosition" x="10902" y="3676"><tspan fill="rgb(0,0,0)" stroke="none">generate fixes whatever way it wishes, it </tspan></tspan><tspan class="TextPosition" x="10902" y="4117"><tspan fill="rgb(0,0,0)" stroke="none">merely has to add them to the GPSFixStore </tspan></tspan><tspan class="TextPosition" x="10902" y="4558"><tspan fill="rgb(0,0,0)" stroke="none">with the accompanying DeviceIdentifer.</tspan></tspan></tspan></text>
       </g>
      </g>
      <g class="com.sun.star.drawing.LineShape">
@@ -506,8 +511,8 @@
      </g>
      <g class="com.sun.star.drawing.CustomShape">
       <g id="id65">
-       <path fill="rgb(255,255,102)" stroke="none" d="M 34528,25250 L 31226,25250 31226,22844 37830,22844 37830,25250 34528,25250 Z"/>
-       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="31476" y="23301"><tspan fill="rgb(0,0,0)" stroke="none">The RaceTracker listens to the </tspan></tspan><tspan class="TextPosition" x="31476" y="23742"><tspan fill="rgb(0,0,0)" stroke="none">RaceLog and changes the state of </tspan></tspan><tspan class="TextPosition" x="31476" y="24183"><tspan fill="rgb(0,0,0)" stroke="none">the TrackedRace accordingly (e.g. </tspan></tspan><tspan class="TextPosition" x="31476" y="24624"><tspan fill="rgb(0,0,0)" stroke="none">by creating it, changing its course </tspan></tspan><tspan class="TextPosition" x="31476" y="25065"><tspan fill="rgb(0,0,0)" stroke="none">definition, adding fixes etc.)</tspan></tspan></tspan></text>
+       <path fill="rgb(255,255,102)" stroke="none" d="M 34528,25764 L 31226,25764 31226,22843 37830,22843 37830,25764 34528,25764 Z"/>
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="31476" y="23337"><tspan fill="rgb(0,0,0)" stroke="none">The RaceTracker listens to the </tspan></tspan><tspan class="TextPosition" x="31476" y="23778"><tspan fill="rgb(0,0,0)" stroke="none">RaceLog and changes the state of </tspan></tspan><tspan class="TextPosition" x="31476" y="24219"><tspan fill="rgb(0,0,0)" stroke="none">the TrackedRace accordingly (e.g. </tspan></tspan><tspan class="TextPosition" x="31476" y="24660"><tspan fill="rgb(0,0,0)" stroke="none">by creating it, changing its course </tspan></tspan><tspan class="TextPosition" x="31476" y="25101"><tspan fill="rgb(0,0,0)" stroke="none">definition, creating marks, adding </tspan></tspan><tspan class="TextPosition" x="31476" y="25542"><tspan fill="rgb(0,0,0)" stroke="none">fixes etc.)</tspan></tspan></tspan></text>
       </g>
      </g>
      <g class="com.sun.star.drawing.LineShape">
@@ -519,13 +524,38 @@
      <g class="com.sun.star.drawing.CustomShape">
       <g id="id67">
        <path fill="rgb(255,255,102)" stroke="none" d="M 5699,14335 L 1000,14335 1000,9763 10398,9763 10398,14335 5699,14335 Z"/>
-       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="10200"><tspan fill="rgb(0,0,0)" stroke="none">The RaceLog serves as storage for all masterdata </tspan></tspan><tspan class="TextPosition" x="1250" y="10641"><tspan fill="rgb(0,0,0)" stroke="none">pertaining to the race. This includes the </tspan></tspan><tspan class="TextPosition" x="1250" y="11082"><tspan fill="rgb(0,0,0)" stroke="none">competitors and the course definition.</tspan></tspan></tspan><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="11523"><tspan fill="rgb(0,0,0)" stroke="none">In addition, meta-events are added for the purpose </tspan></tspan><tspan class="TextPosition" x="1250" y="11964"><tspan fill="rgb(0,0,0)" stroke="none">of defining the RaceLog&apos;s state in terms of racelog-</tspan></tspan><tspan class="TextPosition" x="1250" y="12405"><tspan fill="rgb(0,0,0)" stroke="none">tracking (DenotForRaceLogTrackingEvent and </tspan></tspan><tspan class="TextPosition" x="1250" y="12846"><tspan fill="rgb(0,0,0)" stroke="none">StartTrackingEvent).</tspan></tspan></tspan><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="13287"><tspan fill="rgb(0,0,0)" stroke="none">Also, mapping events define which fix (determined </tspan></tspan><tspan class="TextPosition" x="1250" y="13728"><tspan fill="rgb(0,0,0)" stroke="none">by producing device and timepoint) is added to the </tspan></tspan><tspan class="TextPosition" x="1250" y="14169"><tspan fill="rgb(0,0,0)" stroke="none">track of which competitor or mark.</tspan></tspan></tspan></text>
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="10200"><tspan fill="rgb(0,0,0)" stroke="none">The RaceLog serves as storage for all masterdata </tspan></tspan><tspan class="TextPosition" x="1250" y="10641"><tspan fill="rgb(0,0,0)" stroke="none">pertaining to the race. This includes the </tspan></tspan><tspan class="TextPosition" x="1250" y="11082"><tspan fill="rgb(0,0,0)" stroke="none">competitors and the course definition.</tspan></tspan></tspan><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="11523"><tspan fill="rgb(0,0,0)" stroke="none">In addition, meta-events are added for the purpose </tspan></tspan><tspan class="TextPosition" x="1250" y="11964"><tspan fill="rgb(0,0,0)" stroke="none">of defining the RaceLog&apos;s state in terms of racelog-</tspan></tspan><tspan class="TextPosition" x="1250" y="12405"><tspan fill="rgb(0,0,0)" stroke="none">tracking (DenotForRaceLogTrackingEvent and </tspan></tspan><tspan class="TextPosition" x="1250" y="12846"><tspan fill="rgb(0,0,0)" stroke="none">StartTrackingEvent).</tspan></tspan></tspan><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="388px" font-weight="400"><tspan class="TextPosition" x="1250" y="13287"><tspan fill="rgb(0,0,0)" stroke="none">Also, mapping events define which fix (determined </tspan></tspan><tspan class="TextPosition" x="1250" y="13728"><tspan fill="rgb(0,0,0)" stroke="none">by producing device and the timepoint of the fix) is </tspan></tspan><tspan class="TextPosition" x="1250" y="14169"><tspan fill="rgb(0,0,0)" stroke="none">added to the track of which competitor or mark.</tspan></tspan></tspan></text>
       </g>
      </g>
      <g class="com.sun.star.drawing.LineShape">
       <g id="id68">
        <path fill="none" stroke="rgb(128,128,128)" d="M 10525,11414 L 13184,12685"/>
        <path fill="rgb(128,128,128)" stroke="none" d="M 13446,12811 L 13215,12588 13128,12771 13446,12811 Z"/>
+      </g>
+     </g>
+     <g class="com.sun.star.drawing.TextShape">
+      <g id="id69">
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="12172" y="15036"><tspan fill="rgb(0,0,0)" stroke="none">1.</tspan></tspan></tspan></text>
+      </g>
+     </g>
+     <g class="com.sun.star.drawing.TextShape">
+      <g id="id70">
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="7727" y="23676"><tspan fill="rgb(0,0,0)" stroke="none">2.</tspan></tspan></tspan></text>
+      </g>
+     </g>
+     <g class="com.sun.star.drawing.TextShape">
+      <g id="id71">
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="12299" y="7289"><tspan fill="rgb(0,0,0)" stroke="none">4.</tspan></tspan></tspan></text>
+      </g>
+     </g>
+     <g class="com.sun.star.drawing.TextShape">
+      <g id="id72">
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="33127" y="17449"><tspan fill="rgb(0,0,0)" stroke="none">3.</tspan></tspan></tspan></text>
+      </g>
+     </g>
+     <g class="com.sun.star.drawing.TextShape">
+      <g id="id73">
+       <text class="TextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="29698" y="12246"><tspan fill="rgb(0,0,0)" stroke="none">5.</tspan></tspan></tspan></text>
       </g>
      </g>
     </g>

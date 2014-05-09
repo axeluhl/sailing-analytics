@@ -1208,21 +1208,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    /**
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
+     */
     @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames)
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent)
                     throws NoWindException {
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace);
+                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent */ true);
         return result;
     }
 
+    /**
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
+     */
     private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, TrackedRace trackedRace) {
+            Collection<String> windSourceTypeNames, TrackedRace trackedRace, boolean onlyUpToNewestEvent) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
@@ -1247,9 +1266,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     TimePoint timePoint = from;
                     Double minWindConfidence = 2.0;
                     Double maxWindConfidence = -1.0;
-                    for (int i = 0; i < numberOfFixes; i++) {
+                    for (int i = 0; i < numberOfFixes && (!onlyUpToNewestEvent ||
+                            (newestEvent != null && timePoint.before(newestEvent))); i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest("Found averaged wind: " + averagedWindWithConfidence);
+                            }
                             double confidence = averagedWindWithConfidence.getConfidence();
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             windDTO.confidence = confidence;
@@ -1259,6 +1282,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             }
                             if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
+                            }
+                        } else {
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest("Did NOT find any averaged wind for timepoint " + timePoint + " and tracked race " + trackedRace.getRaceIdentifier().getRaceName());
                             }
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
@@ -1271,9 +1298,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    /**
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
+     */
     @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to,
-            long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
+            long resolutionInMilliseconds, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
@@ -1281,7 +1317,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
             if (fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-                result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
+                result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes,
+                        windSourceTypeNames, trackedRace, onlyUpToNewestEvent);
             }
         }
         return result;
@@ -1377,6 +1414,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
                             if (fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                                if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                    logger.finest(""+competitor.getName()+": " + fix);
+                                }
                                 fixes.add(fix);
                             } else {
                                 break;
@@ -1391,7 +1431,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
                         if (estimatedPosition != null && estimatedSpeed != null) {
-                            fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
+                            GPSFixMoving estimatedFix = new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed);
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest(""+competitor.getName()+": " + estimatedFix+" (estimated)");
+                            }
+                            fixes.add(estimatedFix);
                         }
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
@@ -2906,13 +2950,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventId, eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue.getName(), isPublic, regattaNames));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, regattaNames));
     }
 
     @Override
     public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue, isPublic, eventUuid));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }

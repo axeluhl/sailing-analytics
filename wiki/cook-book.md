@@ -199,3 +199,25 @@ Assume that you want to know which threads exactly eat up all the CPU time. This
 <pre>
 /opt/jdk1.7.0_02/bin/jconsole -pluginpath topthreads-1.1.jar
 </pre>
+
+### Activate logging of GPS fixes
+
+It can happen that you want to log every GPS fix added to a track. If you want to see these then add the following to your logging.properties file. NEVER use it in production.
+
+<pre>
+com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl.level=FINEST
+</pre>
+
+If you want to log all GPS fixes sent to the client (RaceBoard) then activate the following:
+
+<pre>
+com.sap.sailing.gwt.ui.server.SailingServiceImpl.level=FINEST
+</pre>
+
+### Remove GWT SerializationException messages from log
+
+When installing a new version of server code that contains changes related to GWT it can happen that viewers that did not reload their view after the server restart will trigger a SerializationException because the information needed to serialize is no longer matching the one on the server. GWT will start throwing loads of SerializationException that are filling up your logs quite quick. As these messages can be considered blather it is good to disable them to be able to see really relevant messages. Disabling is not that easy as Jetty is using it's own logging system. But there is a trick. Just add the following to your VM argument list (ADDITIONAL_JAVA_ARGS) and you're good to enjoy a life without these messages.
+
+<pre>
+-Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog
+</pre>

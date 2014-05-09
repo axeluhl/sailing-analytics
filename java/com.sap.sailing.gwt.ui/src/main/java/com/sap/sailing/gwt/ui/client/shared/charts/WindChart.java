@@ -442,7 +442,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
-                    from, to, settings.getResolutionInMilliseconds(), null);
+                    from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
+                    to overshoot the evidence so far */ true);
             asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
                     new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override

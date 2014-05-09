@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -133,11 +134,17 @@ public interface SailingServiceAsync {
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * @param from if <code>null</code>, the tracked race's start of tracking is used
-     * @param to if <code>null</code>, the tracked race's time point of newest event is used
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
      */
-    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
+    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to,
+            long resolutionInMilliseconds, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param windSourceTypeNames
@@ -149,20 +156,17 @@ public interface SailingServiceAsync {
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * Same as {@link #getWindInfo(RegattaAndRaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only
-     * that the wind is not requested for a specific position, but instead the wind sources associated with the tracked
-     * race identified by <code>raceIdentifier</code> are requested to deliver their original position. This will in
-     * particular preserve the positions of actual measurements and will deliver the averaged positions for averaged /
-     * combined wind read-outs.
-     * 
-     * @param from
-     *            must not be <code>null</code>
-     * @param numberOfFixes
-     *            no matter how great this value is chosen, never returns data beyond the newest event recorded in the
-     *            race
+     * @param onlyUpToNewestEvent
+     *            if <code>true</code>, no wind data will be returned for time points later than
+     *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
+     *            helpful in case the client wants to populate a chart during live mode. If <code>false</code>, the
+     *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
+     *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
+     *            trackedRace.getTimePointOfNewestEvent()}.
      */
-    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
+    void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
