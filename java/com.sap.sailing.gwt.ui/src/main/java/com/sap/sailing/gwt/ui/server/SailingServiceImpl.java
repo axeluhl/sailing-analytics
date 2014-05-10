@@ -1216,6 +1216,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             (newestEvent != null && timePoint.before(newestEvent))); i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest("Found averaged wind: " + averagedWindWithConfidence);
+                            }
                             double confidence = averagedWindWithConfidence.getConfidence();
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             windDTO.confidence = confidence;
@@ -1225,6 +1228,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             }
                             if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
+                            }
+                        } else {
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest("Did NOT find any averaged wind for timepoint " + timePoint + " and tracked race " + trackedRace.getRaceIdentifier().getRaceName());
                             }
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
@@ -1353,6 +1360,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
                             if (fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                                if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                    logger.finest(""+competitor.getName()+": " + fix);
+                                }
                                 fixes.add(fix);
                             } else {
                                 break;
@@ -1367,7 +1377,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
                         if (estimatedPosition != null && estimatedSpeed != null) {
-                            fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
+                            GPSFixMoving estimatedFix = new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed);
+                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                                logger.finest(""+competitor.getName()+": " + estimatedFix+" (estimated)");
+                            }
+                            fixes.add(estimatedFix);
                         }
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
@@ -2853,13 +2867,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventId, eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue.getName(), isPublic, regattaNames));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, regattaNames));
     }
 
     @Override
     public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue, isPublic, eventUuid));
+        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }

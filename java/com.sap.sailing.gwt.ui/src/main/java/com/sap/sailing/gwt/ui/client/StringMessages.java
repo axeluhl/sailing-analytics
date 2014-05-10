@@ -373,6 +373,7 @@ public interface StringMessages extends Messages {
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
+    String scoringSchemeWinnerGetsSix();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
