@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+
+import com.sap.sailing.domain.deckmanadapter.LogFile;
 
 /**
  * A log file as produced by Deckman, in CSV format. The first line is expected to contain the column headers.
@@ -15,7 +16,7 @@ import java.util.Map;
  * @author Axel Uhl (D043530)
  *
  */
-public class LogFile implements Iterator<Record> {
+public class LogFileImpl implements LogFile {
     private final FieldType[] fieldTypes;
     private final BufferedReader bufferedReader;
     private String nextLine;
@@ -24,7 +25,7 @@ public class LogFile implements Iterator<Record> {
      * Reads the header from the reader to initialize {@link #fieldTypes}. Afterwards, using the {@link #iterator},
      * the records can be read one by one.
      */
-    public LogFile(Reader r) throws IOException {
+    public LogFileImpl(Reader r) throws IOException {
         bufferedReader = new BufferedReader(r);
         String header = bufferedReader.readLine();
         String[] fieldNames = header.split(",");

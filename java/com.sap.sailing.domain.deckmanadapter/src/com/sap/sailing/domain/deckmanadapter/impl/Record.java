@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -12,14 +14,19 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
-public class Record {
+public class Record implements Timed, Positioned {
+    private static final long serialVersionUID = -7939775022865795801L;
+
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
     
     private final TimePoint timePoint;
+    
+    private final Position position; 
     
     private final GPSFixMoving gpsFix;
     
@@ -30,7 +37,7 @@ public class Record {
     public Record(Map<FieldType, String> fieldsAsString) throws ParseException {
         this.fieldsAsString = fieldsAsString;
         timePoint = new MillisecondsTimePoint(dateFormat.parse(this.fieldsAsString.get(FieldType.date)));
-        final DegreePosition position = new DegreePosition(Double.valueOf(this.fieldsAsString.get(FieldType.latitude)),
+        position = new DegreePosition(Double.valueOf(this.fieldsAsString.get(FieldType.latitude)),
                 Double.valueOf(this.fieldsAsString.get(FieldType.longitude)));
         final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(Double.valueOf(this.fieldsAsString.get(FieldType.sog)),
                 new DegreeBearingImpl(Double.valueOf(this.fieldsAsString.get(FieldType.cog))));
@@ -61,5 +68,10 @@ public class Record {
 
     public Wind getWind() {
         return wind;
+    }
+
+    @Override
+    public Position getPosition() {
+        return position;
     }
 }

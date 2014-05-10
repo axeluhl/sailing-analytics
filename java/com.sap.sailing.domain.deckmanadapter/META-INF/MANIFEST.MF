@@ -6,4 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain,
- com.sap.sailing.domain.common
+ com.sap.sailing.domain.common,
+ com.sap.sailing.domain.shared.android
