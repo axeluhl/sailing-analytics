@@ -8,7 +8,7 @@ This is the second iteration of implementing this idea. For previous documentati
 [[_TOC_]]
 
 # Development Infos
-Currently, RaceLog tracking has not been merged into the master branch. Instead, refer to the following branches:
+RaceLog tracking has been merged into the master branch with commit 4b4b61b6c518139f4389aabd73c282621711855a. It was developed on the following branches:
 * ``ftes-rltracking``: The main RaceLog-tracking development
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
