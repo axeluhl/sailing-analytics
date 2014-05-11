@@ -76,5 +76,5 @@ Steps for creating an adapter:
 4. Add the bundle to the ``com.sap.sailing.feature/feature.xml``, and also to the ``com.sap.sailing.feature.p2build/raceanalysis.product`` with the same startup properties as before.
 5. Implement a ``DeviceIdentifier`` and the appropriate ``DeviceIdentifierSerializationHandler``s (refer to the JavaDoc of ``DeviceIdentifier``).
 6. Register your serialization handlers through the OSGi service registry (refer to the JavaDoc of ``DeviceIdentifierSerializationHandler`` for an example on how to do so).
-7. Add some kind of Servlet or similar that adds fixes to the GPSFixStore by calling ``storeFix(DeviceIdentifier device, GPSFix fix)``.
+7. Add some kind of Servlet or similar that adds fixes to the GPSFixStore by calling ``storeFix(DeviceIdentifier device, GPSFix fix)`` on the `GPSFixStore` which can be obtained from `RacingEventService.getGPSFixStore()`.
 8. Fire up the server, let OSGi work its magic, define the race metadata and start adding fixes.
