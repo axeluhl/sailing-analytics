@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SAP  Race Analysis" uid="raceanalysis.product.id" id="raceanalysis.product" application="raceanalysis.application" version="1.0.0" useFeatures="true" includeLaunchers="false">
+<product name="SAP  Race Analysis" uid="raceanalysis.product.id" id="raceanalysis.product" version="1.0.0" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>
@@ -33,6 +33,7 @@
    <configurations>
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="false" startLevel="4" />
       <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="false" startLevel="4" />
       <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />

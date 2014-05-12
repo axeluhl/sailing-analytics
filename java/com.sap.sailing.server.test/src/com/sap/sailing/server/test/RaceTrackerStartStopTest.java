@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -73,13 +74,13 @@ public class RaceTrackerStartStopTest {
         raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         regatta.addRace(raceDef1);
-        trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         regatta.addRace(raceDef2);
-        trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         regatta.addRace(raceDef3);
-        trackedRegatta1.createTrackedRace(raceDef3, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef3, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);

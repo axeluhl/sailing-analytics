@@ -22,6 +22,8 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private Boolean isValidInTotalScore;
     private Double explicitFactor;
     private double effectiveFactor;
+
+    private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
     
     RaceColumnDTO() {} // for GWT serialization
     
@@ -282,5 +284,13 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     public double getEffectiveFactor() {
         return effectiveFactor;
+    }
+    
+    public RaceLogTrackingInfoDTO getRaceLogTrackingInfo(FleetDTO fleet) {
+        return raceLogTrackingInfos.get(fleet);
+    }
+    
+    public void setRaceLogTrackingInfo(FleetDTO fleet, RaceLogTrackingInfoDTO info) {
+        raceLogTrackingInfos.put(fleet, info);
     }
 }
