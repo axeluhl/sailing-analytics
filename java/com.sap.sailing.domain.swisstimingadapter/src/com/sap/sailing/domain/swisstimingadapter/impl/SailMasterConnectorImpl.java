@@ -508,6 +508,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         synchronized (ensureSocketIsOpenSemaphor) {
             while (!stopped && socket == null) {
                 try {
+                    // TODO see bug 171, comment #2; randomized delay to make it unlikely that two requests collide at the M2S server
+                    Thread.sleep((long) (10000 /*ms*/ * Math.random())); // wait somewhere between 0s and 10s.
                     logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name()
                             + " message...");
                     socket = new Socket(host, port);
@@ -518,8 +520,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     SailMasterMessage opnResponse = new SailMasterMessageImpl(receiveMessage(is));
                     if (opnResponse.getType() != MessageType.OPN || !"OK".equals(opnResponse.getSections()[1])) {
                         logger.info("Recevied non-OK response " + opnResponse + " in "+this+" for our request " + opnRequest
-                                + ". Closing socket and trying again in 1s...");
-                        closeAndNullSocketAndWaitABit();
+                                + ". Closing socket and stopping because we have no hope for recovery");
+                        stopped = true;
+                        closeSocket();
                     } else {
                         logger.info("Received " + opnResponse + " in "+this+" which seems OK. Continuing with "
                                 + MessageType.LSN.name() + " request...");
@@ -553,6 +556,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     private void closeAndNullSocketAndWaitABit() throws InterruptedException {
+        closeSocket();
+        Thread.sleep(1000);
+    }
+
+    private void closeSocket() {
         if (socket != null) {
             try {
                 socket.close();
@@ -561,7 +569,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             }
             socket = null;
         }
-        Thread.sleep(1000);
     }
 
     @Override
