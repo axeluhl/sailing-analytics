@@ -2101,8 +2101,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-                boolean raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
-                boolean competitorRegistrationsExist = ! new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
+                boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
+                boolean competitorRegistrationsExist = raceLog == null ? false : !new RegisteredCompetitorsAnalyzer(raceLog).analyze().isEmpty();
                 RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, raceLogTrackingState);
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
