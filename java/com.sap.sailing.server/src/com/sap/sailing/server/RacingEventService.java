@@ -18,11 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.SailingServer;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -387,6 +389,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void removeEvent(UUID id);
 
+    
+    /**
+     * @return a thread-safe copy of the events of from all sailing server instances currently known by the service; it's safe for callers to iterate over
+     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<EventBase> getEventsFromAllSailingServers();
+
+    Iterable<SailingServer> getSailingServers();
+
+    void addSailingServer(String name, URL url);
+
+    void removeSailingServer(String name);
+
+    
     CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();

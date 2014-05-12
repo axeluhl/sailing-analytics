@@ -66,6 +66,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SailingServer;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -3176,17 +3177,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SailingServerDTO> getSailingServers() {
     	List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
+        for (SailingServer sailingServer: getService().getSailingServers()) {
+        	SailingServerDTO dto = new SailingServerDTO(sailingServer.getName(), sailingServer.getURL().toExternalForm());
+        	result.add(dto);
+        }
     	return result;
     }
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-    	
+    	for(String serverName: namesOfSailingServersToRemove) {
+        	getService().removeSailingServer(serverName);
+    	}
     }
 
     @Override
     public void addSailingServer(SailingServerDTO sailingServer) throws Exception {
-    	
+    	getService().addSailingServer(sailingServer.getName(), new URL(sailingServer.getUrl()));
     }
     
     @Override

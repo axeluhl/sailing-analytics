@@ -31,6 +31,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,6 +44,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -59,6 +64,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SailingServerImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -131,6 +137,9 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -189,7 +198,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * Holds the {@link Event} objects for the events of all registerd sailing server instances.
      */
-    protected final ConcurrentHashMap<Serializable, Event> cachedEventsOfAllSailingServerInstancesById;
+    protected final ConcurrentHashMap<Serializable, EventBase> cachedEventsOfAllSailingServerInstancesById;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -343,7 +352,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        cachedEventsOfAllSailingServerInstancesById = new ConcurrentHashMap<Serializable, Event>();
+        cachedEventsOfAllSailingServerInstancesById = new ConcurrentHashMap<Serializable, EventBase>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         raceTrackersByRegatta = new ConcurrentHashMap<>();
         raceTrackersByID = new ConcurrentHashMap<>();
@@ -368,7 +377,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
-        loadEventsForAllSailingServerInstances();
+        loadEventsFromAllSailingServerInstances();
     }
 
     @Override
@@ -449,24 +458,36 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
 
-    private void loadEventsForAllSailingServerInstances() {
-    	List<Event> allEvents = new ArrayList<Event>();
+    private void loadEventsFromAllSailingServerInstances() {
+    	List<EventBase> allEvents = new ArrayList<EventBase>();
         for (SailingServer server: domainObjectFactory.loadAllSailingServers()) {
-        	String getEventsUrl = server.getURL().toExternalForm() + "sailingserver/api/v1/events";
+        	String getEventsUrl = server.getURL().toExternalForm();
+        	if(!getEventsUrl.endsWith("/")) {
+        		getEventsUrl += "/";
+        	}
+        	getEventsUrl += "sailingserver/api/v1/events";
         	
         	try {
-        		StringBuilder content = new StringBuilder();
-
         	    URL url = new URL(getEventsUrl);
         	    URLConnection urlConnection = url.openConnection();
         	    urlConnection.connect();
         	    
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-				String line;
-				while ((line = bufferedReader.readLine()) != null) {
-					content.append(line + "\n");
+				JSONParser parser = new JSONParser();
+				try {
+					Object eventsAsObject = parser.parse(bufferedReader);
+					
+					EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+					JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
+					for(Object eventAsObject: eventsAsJsonArray) {
+						JSONObject eventAsJson = (JSONObject) eventAsObject;
+						EventBase event = deserializer.deserialize(eventAsJson);
+				    	allEvents.add(event);
+					}
+				} catch (ParseException e) {
+				} finally {
+					bufferedReader.close();
 				}
-				bufferedReader.close();
         	} 
         	catch (IOException e) { 
         	} 
@@ -475,7 +496,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         synchronized (cachedEventsOfAllSailingServerInstancesById) {
             cachedEventsOfAllSailingServerInstancesById.clear();
 
-            for (Event event : allEvents) {
+            for (EventBase event : allEvents) {
                 if (event.getId() != null)
                 	cachedEventsOfAllSailingServerInstancesById.put(event.getId(), event);
             }
@@ -825,6 +846,40 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
         }
     }
+
+    @Override
+    public Iterable<EventBase> getEventsFromAllSailingServers() {
+        return Collections.unmodifiableCollection(new ArrayList<EventBase>(cachedEventsOfAllSailingServerInstancesById.values()));
+    }
+
+    @Override
+    public Iterable<SailingServer> getSailingServers() {
+    	List<SailingServer> servers = new ArrayList<SailingServer>();
+    	Util.addAll(domainObjectFactory.loadAllSailingServers(), servers);
+    	return Collections.unmodifiableCollection(servers);
+    }
+
+    @Override
+    public void addSailingServer(String name, URL url) {
+    	createSailingServerWithoutReplication(name, url);
+    	updateCachedEventsOfSailingServers();
+    }
+
+    @Override
+    public void removeSailingServer(String name) {
+    	mongoObjectFactory.removeSailingServer(name);
+    	updateCachedEventsOfSailingServers();
+    }
+
+	private void updateCachedEventsOfSailingServers() {
+		loadEventsFromAllSailingServerInstances();
+	}
+
+	private SailingServer createSailingServerWithoutReplication(String name, URL url) {
+		SailingServer result = new SailingServerImpl(name, url);
+	    mongoObjectFactory.storeSailingServer(result);
+	    return result;
+	}
 
     @Override
     public Iterable<Event> getAllEvents() {

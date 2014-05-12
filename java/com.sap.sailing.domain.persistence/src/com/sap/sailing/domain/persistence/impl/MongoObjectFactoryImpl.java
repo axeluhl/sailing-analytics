@@ -419,13 +419,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeSailingServers(List<SailingServer> servers) {
-    	for(SailingServer server: servers) {
-    		storeSailingServer(server);
-    	}
-    }
-
-    private void storeSailingServer(SailingServer server) {
+    public void storeSailingServer(SailingServer server) {
         DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
         serverCollection.ensureIndex(FieldNames.SERVER_NAME.name());
         DBObject query = new BasicDBObject();
@@ -434,6 +428,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
         serverCollection.update(query, serverDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeSailingServer(String name) {
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.SERVER_NAME.name(), name);
+        serverCollection.remove(query);
     }
     
     @Override

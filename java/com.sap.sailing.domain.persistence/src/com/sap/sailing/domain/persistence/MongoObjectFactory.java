@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
@@ -82,11 +81,13 @@ public interface MongoObjectFactory {
     void removeEvent(Serializable id);
 
     /**
-     * Stores the registered sailing servers 
+     * Stores a registered sailing server 
      * @param serves the servers to store
      */
-    void storeSailingServers(List<SailingServer> serves);
-    
+    void storeSailingServer(SailingServer server);
+
+    void removeSailingServer(String name);
+
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
      * {@link Event} to which the regatta belongs.
