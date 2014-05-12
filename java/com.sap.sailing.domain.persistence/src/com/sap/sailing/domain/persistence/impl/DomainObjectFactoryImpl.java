@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.SailingServer;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
@@ -53,6 +56,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SailingServerImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -852,7 +856,41 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
-            logger.log(Level.SEVERE, "loadEvents", e);
+            logger.log(Level.SEVERE, "loadAllEvents", e);
+        }
+
+        return result;
+    }
+
+
+    private SailingServer loadSailingSever(DBObject serverDBObject) {
+    	SailingServer result = null;
+        String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
+        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+		try {
+			URL serverUrl = new URL(urlAsString);
+			result = new SailingServerImpl(name, serverUrl);
+		} catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, "Can't load the sailing server with URL " +urlAsString, e);
+		}
+        
+        return result;
+    }
+
+    @Override
+    public Iterable<SailingServer> loadAllSailingServers() {
+        ArrayList<SailingServer> result = new ArrayList<SailingServer>();
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+
+        try {
+            for (DBObject o : serverCollection.find()) {
+            	if(loadSailingSever(o) != null) {
+                    result.add(loadSailingSever(o));
+            	}
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load sailing server instances URLs.");
+            logger.log(Level.SEVERE, "loadAllSailingServers", e);
         }
 
         return result;

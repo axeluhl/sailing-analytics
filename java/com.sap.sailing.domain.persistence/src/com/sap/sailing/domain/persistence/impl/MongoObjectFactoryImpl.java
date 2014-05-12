@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SailingServer;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
@@ -417,6 +418,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         leaderboardGroupCollection.update(query, update, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
+    @Override
+    public void storeSailingServers(List<SailingServer> servers) {
+    	for(SailingServer server: servers) {
+    		storeSailingServer(server);
+    	}
+    }
+
+    private void storeSailingServer(SailingServer server) {
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        serverCollection.ensureIndex(FieldNames.SERVER_NAME.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.SERVER_NAME.name(), server.getName());
+        DBObject serverDBObject = new BasicDBObject();
+        serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
+        serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
+        serverCollection.update(query, serverDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+    }
+    
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());

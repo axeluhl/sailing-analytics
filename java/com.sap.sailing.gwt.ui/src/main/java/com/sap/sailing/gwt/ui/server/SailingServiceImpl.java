@@ -247,6 +247,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
@@ -3173,17 +3174,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<String> getSailingServerInstanceUrls() {
-    	return null;
+    public List<SailingServerDTO> getSailingServers() {
+    	List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
+    	return result;
     }
 
     @Override
-    public void removeSailingServerInstanceURLs(Set<String> toRemove) throws Exception {
+    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
     	
     }
 
     @Override
-    public void addSailingServerInstanceUrl(String url) throws Exception {
+    public void addSailingServer(SailingServerDTO sailingServer) throws Exception {
     	
     }
     

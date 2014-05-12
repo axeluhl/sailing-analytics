@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -390,11 +391,11 @@ public interface SailingServiceAsync {
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
-    void getSailingServerInstanceUrls(AsyncCallback<List<String>> callback);
+    void getSailingServers(AsyncCallback<List<SailingServerDTO>> callback);
 
-    void removeSailingServerInstanceURLs(Set<String> toRemove, AsyncCallback<Void> callback);
+    void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
 
-    void addSailingServerInstanceUrl(String url, AsyncCallback<Void> callback);
+    void addSailingServer(SailingServerDTO sailingServer, AsyncCallback<Void> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 

@@ -1,11 +1,15 @@
 package com.sap.sailing.server.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +47,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
+import com.sap.sailing.domain.base.SailingServer;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -180,6 +185,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * {@link Event} objects that exist outside this service for events not (yet) registered here.
      */
     protected final ConcurrentHashMap<Serializable, Event> eventsById;
+
+    /**
+     * Holds the {@link Event} objects for the events of all registerd sailing server instances.
+     */
+    protected final ConcurrentHashMap<Serializable, Event> cachedEventsOfAllSailingServerInstancesById;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -333,6 +343,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
+        cachedEventsOfAllSailingServerInstancesById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         raceTrackersByRegatta = new ConcurrentHashMap<>();
         raceTrackersByID = new ConcurrentHashMap<>();
@@ -357,6 +368,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
+        loadEventsForAllSailingServerInstances();
     }
 
     @Override
@@ -433,6 +445,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             synchronized (eventsById) {
                 if (event.getId() != null)
                     eventsById.put(event.getId(), event);
+            }
+        }
+    }
+
+    private void loadEventsForAllSailingServerInstances() {
+    	List<Event> allEvents = new ArrayList<Event>();
+        for (SailingServer server: domainObjectFactory.loadAllSailingServers()) {
+        	String getEventsUrl = server.getURL().toExternalForm() + "sailingserver/api/v1/events";
+        	
+        	try {
+        		StringBuilder content = new StringBuilder();
+
+        	    URL url = new URL(getEventsUrl);
+        	    URLConnection urlConnection = url.openConnection();
+        	    urlConnection.connect();
+        	    
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+				String line;
+				while ((line = bufferedReader.readLine()) != null) {
+					content.append(line + "\n");
+				}
+				bufferedReader.close();
+        	} 
+        	catch (IOException e) { 
+        	} 
+        }
+
+        synchronized (cachedEventsOfAllSailingServerInstancesById) {
+            cachedEventsOfAllSailingServerInstancesById.clear();
+
+            for (Event event : allEvents) {
+                if (event.getId() != null)
+                	cachedEventsOfAllSailingServerInstancesById.put(event.getId(), event);
             }
         }
     }

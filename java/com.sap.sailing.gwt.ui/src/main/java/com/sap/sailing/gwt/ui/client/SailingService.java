@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -279,11 +280,11 @@ public interface SailingService extends RemoteService {
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-    List<String> getSailingServerInstanceUrls();
+    List<SailingServerDTO> getSailingServers();
 
-    void removeSailingServerInstanceURLs(Set<String> toRemove) throws Exception;
+    void removeSailingServers(Set<String> toRemove) throws Exception;
 
-    void addSailingServerInstanceUrl(String url) throws Exception;
+    void addSailingServer(SailingServerDTO sailingServer) throws Exception;
 
     List<String> getResultImportUrls(String resultProviderName);
 

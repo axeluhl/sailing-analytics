@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -13,18 +17,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SailingServerInstancesManagementPanel extends FlowPanel {
-    private final ListBox urlListBox;
-    
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -33,12 +35,43 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
     private final Button removeButton;
     private final Button refreshButton;
 
+    private CellTable<SailingServerDTO> serverTable;
+    private MultiSelectionModel<SailingServerDTO> serverSelectionModel;
+    private ListDataProvider<SailingServerDTO> serverDataProvider;
+
+    private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+
     public SailingServerInstancesManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        urlListBox = new ListBox(/* multiple select */ true);
+        
+        TextColumn<SailingServerDTO> serverNameColumn = new TextColumn<SailingServerDTO>() {
+            @Override
+            public String getValue(SailingServerDTO server) {
+                return server.getName() != null ? server.getName() : "";
+            }
+        };
+
+        TextColumn<SailingServerDTO> serverUrlColumn = new TextColumn<SailingServerDTO>() {
+            @Override
+            public String getValue(SailingServerDTO server) {
+                return server.getUrl() != null ? server.getUrl() : "";
+            }
+        };
+
+        serverTable = new CellTable<SailingServerDTO>(10000, tableRes);
+        serverTable.addColumn(serverNameColumn, stringMessages.name());
+        serverTable.addColumn(serverUrlColumn, stringMessages.url());
+
+        serverTable.setEmptyTableWidget(new Label("No sailing server instances yet."));
+        
+        serverSelectionModel = new MultiSelectionModel<SailingServerDTO>();
+        serverTable.setSelectionModel(serverSelectionModel);
+
+        serverDataProvider = new ListDataProvider<SailingServerDTO>();
+        serverDataProvider.addDataDisplay(serverTable);
 
         addButton = new Button(stringMessages.add());
         removeButton = new Button(stringMessages.remove());
@@ -46,19 +79,19 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addUrl();
+                addSailingServer();
             }
         });
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                removeSelectedUrls();
+                removeSelectedSailingServers();
             }
         });
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refreshUrlList();
+                refreshSailingServerList();
             }
         });
         VerticalPanel vp = new VerticalPanel();
@@ -66,93 +99,78 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
         providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(providerSelectionPanel);
         
-        providerSelectionPanel.add(new Label("SailingServer Instance URL's"));
+        providerSelectionPanel.add(new Label("Registered SailingServer Instances"));
                 
-        vp.add(urlListBox);
         HorizontalPanel buttonPanel = new HorizontalPanel();
-        vp.add(buttonPanel);
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
         buttonPanel.add(refreshButton);
+
+        vp.add(serverTable);
+        vp.add(buttonPanel);
+
         add(vp);
-        refreshUrlList();
+        refreshSailingServerList();
     }
     
-    private void refreshUrlList() {
-        sailingService.getSailingServerInstanceUrls(new AsyncCallback<List<String>>() {
+    private void refreshSailingServerList() {
+        sailingService.getSailingServers(new AsyncCallback<List<SailingServerDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorRefreshingSailingServerInstanceUrlList(caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorRefreshingSailingServers(caught.getMessage()));
             }
 
             @Override
-            public void onSuccess(List<String> result) {
-                urlListBox.clear();
-                for (String s : result) {
-                    urlListBox.addItem(s);
-                }
+            public void onSuccess(List<SailingServerDTO> result) {
+            	serverDataProvider.getList().clear();
+            	serverDataProvider.getList().addAll(result);
             }
         });
     }
 
-    private void removeSelectedUrls() {
+    private void removeSelectedSailingServers() {
         Set<String> toRemove = new HashSet<String>();
-        for (int i=urlListBox.getItemCount()-1; i>=0; i--) {
-            if (urlListBox.isItemSelected(i)) {
-                toRemove.add(urlListBox.getItemText(i));
-                urlListBox.removeItem(i);
-            }
+        for (SailingServerDTO selectedServer: serverSelectionModel.getSelectedSet()) {
+        	toRemove.add(selectedServer.getName());
         }
         
-        sailingService.removeSailingServerInstanceURLs(toRemove, new AsyncCallback<Void>() {
+        sailingService.removeSailingServers(toRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorRemovingSailingServerInstanceUrls(caught.getMessage()));
-                refreshUrlList();
+                errorReporter.reportError(stringMessages.errorRemovingSailingServers(caught.getMessage()));
             }
 
             @Override
             public void onSuccess(Void result) {
-                Window.setStatus(stringMessages.successfullyUpdatedSailingServerInstanceUrls());
+                refreshSailingServerList();
+                Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
             }
         });
     }
 
-    private void addUrl() {
-        final TextfieldEntryDialog dialog = new TextfieldEntryDialog(stringMessages.addSailingServerInstanceUrl(),
-                stringMessages.addSailingServerInstanceUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
-                new DataEntryDialog.Validator<String>() {
-                    @Override
-                    public String getErrorMessage(String valueToValidate) {
-                        String result = null;
-                        if (valueToValidate == null || valueToValidate.length() == 0) {
-                            result = stringMessages.pleaseEnterNonEmptyUrl();
-                        }
-                        return result;
-                    }
-        }, new DialogCallback<String>() {
+    private void addSailingServer() {
+    	ArrayList<SailingServerDTO> existingServers = new ArrayList<SailingServerDTO>(serverDataProvider.getList());
+        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(existingServers, stringMessages, new DialogCallback<SailingServerDTO>() {
             @Override
             public void cancel() {
-                // user cancelled; just don't add
             }
 
             @Override
-            public void ok(final String url) {
-                sailingService.addSailingServerInstanceUrl(url, new AsyncCallback<Void>() {
+            public void ok(final SailingServerDTO server) {
+                sailingService.addSailingServer(server, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorAddingSailingServerInstanceUrl(caught.getMessage()));
+                        errorReporter.reportError(stringMessages.errorAddingSailingServer(caught.getMessage()));
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        urlListBox.addItem(url);
-                        Window.setStatus(stringMessages.successfullyUpdatedSailingServerInstanceUrls());
+                    	serverDataProvider.getList().add(server);
+                        Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
                     }
                 });
             }
         });
-        dialog.getEntryField().setVisibleLength(100);
-        dialog.show();
+        dialog.show();	
     }
 }

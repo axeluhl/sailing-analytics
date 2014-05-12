@@ -25,10 +25,15 @@ public enum CollectionNames {
     LEADERBOARD_GROUPS,
     
     /**
-     * Top-level event information about events such as Kiel Week 2011, or IDM Travemünde 2011, including name and
+     * Top-level event information about events such as Kiel Week 2011, or IDM Travemï¿½nde 2011, including name and
      * course areas.
      */
     EVENTS,
+    
+    /** 
+     * Stores the registered sailing servers.
+     */
+    SAILING_SERVERS,
     
     /**
      * Stores regatta definitions including their series layout and fleets and race columns. Regattas can reference
