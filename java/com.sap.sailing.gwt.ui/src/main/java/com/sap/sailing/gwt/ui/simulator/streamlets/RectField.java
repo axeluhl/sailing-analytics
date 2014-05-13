@@ -3,7 +3,8 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class RectField implements VectorField {
 
@@ -19,8 +20,8 @@ public class RectField implements VectorField {
 	public double visY0;
 	public double visY1;
 	
-	public PositionDTO visSW;
-	public PositionDTO visNE;
+	public Position visSW;
+	public Position visNE;
 
 	private int w;
 	private int h;
@@ -34,8 +35,8 @@ public class RectField implements VectorField {
 		this.y0 = y0;
 		this.y1 = y1;
 
-		this.visSW = new PositionDTO(0.0, 0.0);
-		this.visNE = new PositionDTO(0.0, 0.0);
+		this.visSW = new DegreePosition(0.0, 0.0);
+		this.visNE = new DegreePosition(0.0, 0.0);
 		
 		this.field = field;
 		this.w = field.length;
@@ -94,26 +95,25 @@ public class RectField implements VectorField {
 	public void prevStep() {
 	}
 
-	public PositionDTO getRandomPosition() {
+	public Position getRandomPosition() {
 		double rndY = Math.random();
 		double rndX = Math.random();
-		PositionDTO result = new PositionDTO();
-		result.latDeg = rndY * this.visSW.latDeg + (1 - rndY) * this.visNE.latDeg;
-		result.lngDeg = rndX * this.visSW.lngDeg + (1 - rndX) * this.visNE.lngDeg;
-		return result;
+		double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
+		double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
+		return new DegreePosition(latDeg, lngDeg);
 	}
 
-	public boolean inBounds(PositionDTO p) {
-		return p.lngDeg >= this.x0 && p.lngDeg < this.x1 && p.latDeg >= this.y0 && p.latDeg < this.y1;
+	public boolean inBounds(Position p) {
+		return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0 && p.getLatDeg() < this.y1;
 	}
 
-	public Vector interpolate(PositionDTO p) {
-		int na = (int)Math.floor(p.lngDeg);
-		int nb = (int)Math.floor(p.latDeg);
-		int ma = (int)Math.ceil(p.lngDeg);
-		int mb = (int)Math.ceil(p.latDeg);
-		double fa = p.lngDeg - na;
-		double fb = p.latDeg - nb;
+	public Vector interpolate(Position p) {
+		int na = (int)Math.floor(p.getLngDeg());
+		int nb = (int)Math.floor(p.getLatDeg());
+		int ma = (int)Math.ceil(p.getLngDeg());
+		int mb = (int)Math.ceil(p.getLatDeg());
+		double fa = p.getLngDeg() - na;
+		double fb = p.getLatDeg() - nb;
 
 		Vector result = new Vector();
 		result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb) + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
@@ -123,13 +123,13 @@ public class RectField implements VectorField {
 	}
 
 
-	public Vector getVector(PositionDTO p) {
-		PositionDTO q = new PositionDTO();
-		q.lngDeg = (this.w - 1 - 1e-6) * (p.lngDeg - this.x0) / (this.x1 - this.x0);
-		q.latDeg = (this.h - 1 - 1e-6) * (p.latDeg - this.y0) / (this.y1 - this.y0);
-		if ((q.lngDeg < 0)||(q.lngDeg > (this.w-1))||(q.latDeg < 0)||(q.latDeg > (this.h-1))) {
+	public Vector getVector(Position p) {
+		double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
+		double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
+		if ((lngDeg < 0)||(lngDeg > (this.w-1))||(latDeg < 0)||(latDeg > (this.h-1))) {
 			return null;
 		} else {
+			Position q = new DegreePosition(latDeg, lngDeg);
 			return this.interpolate(q);
 		}
 	}
@@ -146,7 +146,7 @@ public class RectField implements VectorField {
 		return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
 	}
 
-	public double particleWeight(PositionDTO p, Vector v) {
+	public double particleWeight(Position p, Vector v) {
 		return 1.0 - v.length() / this.maxLength;	
 	}
 
@@ -165,19 +165,19 @@ public class RectField implements VectorField {
 		return 1.0;
 	}
 
-	public PositionDTO getFieldNE() {
-		return new PositionDTO(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+	public Position getFieldNE() {
+		return new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
 	}
 	
-	public PositionDTO getFieldSW() {
-		return new PositionDTO(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+	public Position getFieldSW() {
+		return new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
 	}
 
-	public void setVisNE(PositionDTO visNE) {
+	public void setVisNE(Position visNE) {
 		this.visNE = visNE;
 	}
 	
-	public void setVisSW(PositionDTO visSW) {
+	public void setVisSW(Position visSW) {
 		this.visSW = visSW;
 	}
 

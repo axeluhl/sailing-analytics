@@ -1,35 +1,35 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 
 public interface VectorField {
 
-	public PositionDTO getRandomPosition();
+	public Position getRandomPosition();
 
-	public boolean inBounds(PositionDTO p);
+	public boolean inBounds(Position p);
 
-	public Vector interpolate(PositionDTO p);
+	public Vector interpolate(Position p);
 
-	public Vector getVector(PositionDTO p);
+	public Vector getVector(Position p);
 
 	public double getMaxLength();
 
 	public double motionScale(int zoomLevel);
 
-	public double particleWeight(PositionDTO p, Vector v);
+	public double particleWeight(Position p, Vector v);
 
 	public String[] getColors();
 
 	public double lineWidth(int alpha);
 	
-	public PositionDTO getFieldNE();
+	public Position getFieldNE();
 	
-	public PositionDTO getFieldSW();
+	public Position getFieldSW();
 
-	public void setVisNE(PositionDTO visNE);
+	public void setVisNE(Position visNE);
 	
-	public void setVisSW(PositionDTO visSW);
+	public void setVisSW(Position visSW);
 
 	public double getParticleFactor();
 	

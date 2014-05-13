@@ -4,7 +4,8 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 public class Mercator {
@@ -34,8 +35,8 @@ public class Mercator {
 		
 		int canvasHeight = canvas.getCanvas().getOffsetHeight();
 
-		PositionDTO mapSW = new PositionDTO(this.map.getBounds().getSouthWest().getLatitude(), this.map.getBounds().getSouthWest().getLongitude());
-		PositionDTO mapNE = new PositionDTO(this.map.getBounds().getNorthEast().getLatitude(), this.map.getBounds().getNorthEast().getLongitude());
+		Position mapSW = new DegreePosition(this.map.getBounds().getSouthWest().getLatitude(), this.map.getBounds().getSouthWest().getLongitude());
+		Position mapNE = new DegreePosition(this.map.getBounds().getNorthEast().getLatitude(), this.map.getBounds().getNorthEast().getLongitude());
 			
 		pointSW = this.sphere2plane(mapSW);
 		pointNE = this.sphere2plane(mapNE);
@@ -51,10 +52,10 @@ public class Mercator {
 		this.delta = pointNE.y;	
 	}
 
-	public Vector sphere2plane(PositionDTO p) {
+	public Vector sphere2plane(Position p) {
 		Vector result = new Vector();
-		result.x = p.lngDeg*Math.PI/180.0;
-		double latsin = Math.sin(p.latDeg*Math.PI/180.0);
+		result.x = p.getLngDeg()*Math.PI/180.0;
+		double latsin = Math.sin(p.getLatDeg()*Math.PI/180.0);
 		result.y = 0.5*Math.log((1.0+latsin)/(1.0-latsin));
 		return result;
 	}
@@ -65,7 +66,7 @@ public class Mercator {
 		return LatLng.newInstance(lat, lng);
 	}
 
-	public Vector latlng2pixel(PositionDTO p) {
+	public Vector latlng2pixel(Position p) {
 		Vector proj = this.sphere2plane(p);
 		proj.x = this.alpha * (proj.x - this.beta);
 		proj.y = this.gamma * (proj.y - this.delta);
