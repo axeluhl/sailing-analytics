@@ -4,6 +4,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -41,17 +42,17 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.domainFactory = domainFactory;
         this.raceLogStore = raceLogStore;
     }
-
+    
     @Override
-    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, domainFactory,
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, gpsFixStore, domainFactory,
                 trackedRegattaRegistry);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore)
+    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore)
             throws Exception {
-        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, windStore, domainFactory,
+        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, windStore, gpsFixStore, domainFactory,
                 trackedRegattaRegistry);
     }
 

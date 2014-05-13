@@ -67,5 +67,10 @@ public enum CollectionNames {
     /**
      * Stores configurations for mobile devices.
      */
-    CONFIGURATIONS;
+    CONFIGURATIONS,
+    
+    /**
+     * Stores {@link GPSFix}es
+     */
+    GPS_FIXES,
 }

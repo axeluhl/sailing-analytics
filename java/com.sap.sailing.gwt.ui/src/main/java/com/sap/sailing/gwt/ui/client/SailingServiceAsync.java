@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherTyp
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -42,10 +44,12 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -491,9 +495,10 @@ public interface SailingServiceAsync {
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+    void getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs,
+            AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
+    void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
@@ -532,6 +537,55 @@ public interface SailingServiceAsync {
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
-}
+    void denoteForRaceLogTracking(String leaderboardName,
+            String raceColumnName, String fleetName,
+            AsyncCallback<Void> callback);
 
+    void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
+
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Void> callback);
+
+    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+            Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
+
+    void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Collection<CompetitorDTO>> callback);
+
+    void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
+            AsyncCallback<Void> callback);
+
+    void getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Collection<MarkDTO>> callback);
+
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            List<Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
+
+    void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<RaceCourseDTO> callback);
+
+    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+            PositionDTO position, AsyncCallback<Void> callback);
+
+    void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
+
+    void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<DeviceMappingDTO>> callback);
+
+    void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO mapping, AsyncCallback<Void> callback);
+
+    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
+            DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
+
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds,
+            AsyncCallback<Void> callback);
+
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
+
+    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Void> callback);
+
+    void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
+            Set<Triple<String, String, String>> raceLogsTo, AsyncCallback<Void> callback);
+}

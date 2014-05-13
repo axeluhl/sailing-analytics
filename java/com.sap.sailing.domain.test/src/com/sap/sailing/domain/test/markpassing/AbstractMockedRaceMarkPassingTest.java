@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -66,7 +67,7 @@ public class AbstractMockedRaceMarkPassingTest {
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", Arrays.asList(w1, w2, w3));
         RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(bob));
-        trackedRace = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), race, new ArrayList<Sideline>(), new EmptyWindStore(), 0, 10000, 10000);
+        trackedRace = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), race, new ArrayList<Sideline>(), new EmptyWindStore(), EmptyGPSFixStore.INSTANCE, 0, 10000, 10000);
         trackedRace.setStartTimeReceived(new MillisecondsTimePoint(System.currentTimeMillis() - 120000));
         List<MillisecondsTimePoint> tps = Arrays.asList(new MillisecondsTimePoint(System.currentTimeMillis()), new MillisecondsTimePoint(System.currentTimeMillis() - 30000),
                 new MillisecondsTimePoint(System.currentTimeMillis() + 30000));

@@ -205,11 +205,19 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.TrackFilesExportPostServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesExportPostServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
-		<url-pattern>/trackfiles</url-pattern>
+		<url-pattern>/trackfiles/export</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>TrackFilesImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TrackFilesImportServlet</servlet-name>
+		<url-pattern>/trackfiles/import</url-pattern>
 	</servlet-mapping>
    
     <servlet>
@@ -249,3 +257,4 @@
     	<url-pattern>/spi/*</url-pattern>
   	</servlet-mapping>
  </web-app>
+ 

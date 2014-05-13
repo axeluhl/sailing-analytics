@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -155,7 +156,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
 
     private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
-                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                windStore, EmptyGPSFixStore.INSTANCE, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
         

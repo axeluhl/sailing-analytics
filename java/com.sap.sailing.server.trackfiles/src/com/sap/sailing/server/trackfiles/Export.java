@@ -16,9 +16,8 @@ import com.sap.sailing.server.trackfiles.impl.ExportImpl;
  * 
  */
 public interface Export {
-	Export INSTANCE = new ExportImpl();
+    Export INSTANCE = new ExportImpl();
 
-	void writeAllData(List<TrackFilesDataSource> data, TrackFilesFormat format,
-			List<TrackedRace> races, boolean dataBeforeAfter, boolean rawFixes,
-			ZipOutputStream out) throws IOException;
+    void writeAllData(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races,
+            boolean dataBeforeAfter, boolean rawFixes, ZipOutputStream out) throws IOException;
 }
