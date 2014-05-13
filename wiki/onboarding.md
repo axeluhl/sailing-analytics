@@ -107,16 +107,16 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 ####Stepps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
-   * *.gwt.xml , add "<inherits name="-modulename-.-gwt.xml file name-" />"
+   * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
    * In DebugConfigurations => Classpaths, Add Sourcefolder where classes are you want to user from the module
 2. For Maven Build
    * pom.xml , Add Dependency to used module ie.     
-<dependency>
+`<dependency>
 <groupId>com.sap.sailing</groupId>
 <artifactId>com.sap.sailing.domain.common</artifactId>
 <version>1.0.0-SNAPSHOT</version>
 <classifier>sources</classifier>
-</dependency>
+</dependency>`
 
 
 See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.
