@@ -323,6 +323,8 @@ public interface SailingServiceAsync {
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
+	void getPublicEventsOfAllSailingServers(AsyncCallback<List<SailingServerDTO>> callback);
+
     /**
      * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
      * name, the description and a list with {@link RegattaDTO RegattaDTOs} contained in the event.<br />

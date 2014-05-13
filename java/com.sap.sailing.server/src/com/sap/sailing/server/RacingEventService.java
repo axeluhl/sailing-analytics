@@ -397,7 +397,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a thread-safe copy of the events of from all sailing server instances currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
-    Iterable<Pair<SailingServer, EventBase>> getEventsFromAllSailingServers();
+    Map<SailingServer, List<EventBase>> getPublicEventsOfAllSailingServers();
 
     Iterable<SailingServer> getSailingServers();
 

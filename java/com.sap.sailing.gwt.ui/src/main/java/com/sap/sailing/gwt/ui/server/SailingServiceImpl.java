@@ -61,6 +61,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -2954,6 +2955,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public List<SailingServerDTO> getPublicEventsOfAllSailingServers() {
+    	List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
+    	for(Entry<SailingServer, List<EventBase>> serverAndEventsEntry: getService().getPublicEventsOfAllSailingServers().entrySet()) {
+    		SailingServer server = serverAndEventsEntry.getKey();
+            List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
+            for (EventBase event : serverAndEventsEntry.getValue()) {
+                EventDTO eventDTO = convertToEventDTO(event);
+                eventDTOs.add(eventDTO);
+            }
+    		SailingServerDTO sailingServerDTO = new SailingServerDTO(server.getName(), server.getURL().toExternalForm(), eventDTOs);
+    		result.add(sailingServerDTO);
+    	}
+    	return result;
+	}
+
+    @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -3017,6 +3034,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private EventDTO convertToEventDTO(EventBase event) {
+        EventDTO eventDTO = new EventDTO(event.getName());
+        eventDTO.venue = new VenueDTO();
+        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
+        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
+        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
+        eventDTO.isPublic = event.isPublic();
+        eventDTO.id = (UUID) event.getId();
+        return eventDTO;
+    }
+    
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
