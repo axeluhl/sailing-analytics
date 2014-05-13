@@ -58,8 +58,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -142,7 +142,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
+    public RaceHandle getRacesHandle() {
         return new RaceLogRacesHandle(this);
     }
 

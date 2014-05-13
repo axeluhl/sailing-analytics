@@ -6,10 +6,10 @@ import java.util.Set;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
 
-public class RaceLogRacesHandle implements RacesHandle {
+public class RaceLogRacesHandle implements RaceHandle {
     private final RaceLogRaceTracker tracker;
 
     public RaceLogRacesHandle(RaceLogRaceTracker tracker) {
