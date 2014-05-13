@@ -33,6 +33,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     private boolean visible = false;
     private Timer timer;
+    private Date endDate;
 
     private int nParticles;
     private Swarm swarm;
@@ -206,6 +207,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     	
     }
     
+    public void setEndDate(Date endDate) {
+    	this.endDate = endDate;
+    }
     
     public void setWindField(final WindFieldDTO windFieldDTO) {
         this.windFieldDTO = windFieldDTO;
@@ -281,7 +285,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     @Override
     public boolean shallStop() {
-    	if (timer.getTime().getTime() >= this.windParams.getEndTime().getTime()) {
+    	if (timer.getTime().getTime() >= this.endDate.getTime()) {
     		return true;
     	} else {
     		return false;

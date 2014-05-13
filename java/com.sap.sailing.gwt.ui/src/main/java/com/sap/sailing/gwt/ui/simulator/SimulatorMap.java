@@ -211,9 +211,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
 
             if (timePanel != null) {
-                timePanel.setMinMax(new Date(startTime), new Date(startTime + maxDurationTime), true);
+            	Date endDate = new Date(startTime + maxDurationTime);
+                timePanel.setMinMax(new Date(startTime), endDate, true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
+                if (windParams.isShowStreamlets2()) {
+                	windStreamletsCanvasOverlay.setEndDate(endDate);
+                }
             }
 
             /**

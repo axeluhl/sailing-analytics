@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 
 public class RectField implements VectorField {
 
@@ -18,8 +19,8 @@ public class RectField implements VectorField {
 	public double visY0;
 	public double visY1;
 	
-	public GeoPos visSW;
-	public GeoPos visNE;
+	public PositionDTO visSW;
+	public PositionDTO visNE;
 
 	private int w;
 	private int h;
@@ -33,8 +34,8 @@ public class RectField implements VectorField {
 		this.y0 = y0;
 		this.y1 = y1;
 
-		this.visSW = new GeoPos(0.0, 0.0);
-		this.visNE = new GeoPos(0.0, 0.0);
+		this.visSW = new PositionDTO(0.0, 0.0);
+		this.visNE = new PositionDTO(0.0, 0.0);
 		
 		this.field = field;
 		this.w = field.length;
@@ -93,26 +94,26 @@ public class RectField implements VectorField {
 	public void prevStep() {
 	}
 
-	public GeoPos getRandomPosition() {
+	public PositionDTO getRandomPosition() {
 		double rndY = Math.random();
 		double rndX = Math.random();
-		GeoPos result = new GeoPos();
-		result.lat = rndY * this.visSW.lat + (1 - rndY) * this.visNE.lat;
-		result.lng = rndX * this.visSW.lng + (1 - rndX) * this.visNE.lng;
+		PositionDTO result = new PositionDTO();
+		result.latDeg = rndY * this.visSW.latDeg + (1 - rndY) * this.visNE.latDeg;
+		result.lngDeg = rndX * this.visSW.lngDeg + (1 - rndX) * this.visNE.lngDeg;
 		return result;
 	}
 
-	public boolean inBounds(GeoPos p) {
-		return p.lng >= this.x0 && p.lng < this.x1 && p.lat >= this.y0 && p.lat < this.y1;
+	public boolean inBounds(PositionDTO p) {
+		return p.lngDeg >= this.x0 && p.lngDeg < this.x1 && p.latDeg >= this.y0 && p.latDeg < this.y1;
 	}
 
-	public Vector interpolate(GeoPos p) {
-		int na = (int)Math.floor(p.lng);
-		int nb = (int)Math.floor(p.lat);
-		int ma = (int)Math.ceil(p.lng);
-		int mb = (int)Math.ceil(p.lat);
-		double fa = p.lng - na;
-		double fb = p.lat - nb;
+	public Vector interpolate(PositionDTO p) {
+		int na = (int)Math.floor(p.lngDeg);
+		int nb = (int)Math.floor(p.latDeg);
+		int ma = (int)Math.ceil(p.lngDeg);
+		int mb = (int)Math.ceil(p.latDeg);
+		double fa = p.lngDeg - na;
+		double fb = p.latDeg - nb;
 
 		Vector result = new Vector();
 		result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb) + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
@@ -122,11 +123,11 @@ public class RectField implements VectorField {
 	}
 
 
-	public Vector getVector(GeoPos p) {
-		GeoPos q = new GeoPos();
-		q.lng = (this.w - 1 - 1e-6) * (p.lng - this.x0) / (this.x1 - this.x0);
-		q.lat = (this.h - 1 - 1e-6) * (p.lat - this.y0) / (this.y1 - this.y0);
-		if ((q.lng < 0)||(q.lng > (this.w-1))||(q.lat < 0)||(q.lat > (this.h-1))) {
+	public Vector getVector(PositionDTO p) {
+		PositionDTO q = new PositionDTO();
+		q.lngDeg = (this.w - 1 - 1e-6) * (p.lngDeg - this.x0) / (this.x1 - this.x0);
+		q.latDeg = (this.h - 1 - 1e-6) * (p.latDeg - this.y0) / (this.y1 - this.y0);
+		if ((q.lngDeg < 0)||(q.lngDeg > (this.w-1))||(q.latDeg < 0)||(q.latDeg > (this.h-1))) {
 			return null;
 		} else {
 			return this.interpolate(q);
@@ -145,7 +146,7 @@ public class RectField implements VectorField {
 		return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
 	}
 
-	public double particleWeight(GeoPos p, Vector v) {
+	public double particleWeight(PositionDTO p, Vector v) {
 		return 1.0 - v.length() / this.maxLength;	
 	}
 
@@ -164,19 +165,19 @@ public class RectField implements VectorField {
 		return 1.0;
 	}
 
-	public GeoPos getFieldNE() {
-		return new GeoPos(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+	public PositionDTO getFieldNE() {
+		return new PositionDTO(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
 	}
 	
-	public GeoPos getFieldSW() {
-		return new GeoPos(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+	public PositionDTO getFieldSW() {
+		return new PositionDTO(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
 	}
 
-	public void setVisNE(GeoPos visNE) {
+	public void setVisNE(PositionDTO visNE) {
 		this.visNE = visNE;
 	}
 	
-	public void setVisSW(GeoPos visSW) {
+	public void setVisSW(PositionDTO visSW) {
 		this.visSW = visSW;
 	}
 

@@ -7,9 +7,8 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.simulator.SimulatorField;
-import com.sap.sailing.gwt.ui.simulator.SimulatorJSBundle;
 import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
@@ -28,8 +27,8 @@ public class Swarm {
     private boolean swarmOffScreen = false;
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    private GeoPos boundsNE;
-	private GeoPos boundsSW;
+    private PositionDTO boundsNE;
+	private PositionDTO boundsSW;
 
 	public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
 		this.fullcanvas = fullcanvas;
@@ -68,7 +67,7 @@ public class Swarm {
     	ctxt.setFillStyle("red");
     	
     	/*Vector p = this.projection.latlng2pixel(this.field.getFieldNE());
-    	ctxt.fillRect(p.x,p.y,5.0,5.0);
+    	ctxt.fillRect(p.x,p.y,5.0,5.0); 
 
     	p = this.projection.latlng2pixel(this.field.getFieldSW());
     	ctxt.fillRect(p.x,p.y,5.0,5.0);*/
@@ -130,11 +129,11 @@ public class Swarm {
 
     public void updateBounds() {
 
-    	GeoPos mapNE = new GeoPos(map.getBounds().getNorthEast());
-    	GeoPos mapSW = new GeoPos(map.getBounds().getSouthWest());
+    	PositionDTO mapNE = new PositionDTO(map.getBounds().getNorthEast().getLatitude(), map.getBounds().getNorthEast().getLongitude());
+    	PositionDTO mapSW = new PositionDTO(map.getBounds().getSouthWest().getLatitude(), map.getBounds().getSouthWest().getLongitude());
 
-    	GeoPos fieldNE = this.field.getFieldNE();
-    	GeoPos fieldSW = this.field.getFieldSW();
+    	PositionDTO fieldNE = this.field.getFieldNE();
+    	PositionDTO fieldSW = this.field.getFieldSW();
 
     	Vector visibleNE = this.isVisible(fieldNE);
     	Vector visibleSW = this.isVisible(fieldSW);
@@ -156,9 +155,9 @@ public class Swarm {
     		if ((!useBoundsNorth)&&(!useBoundsEast)) {
     			this.boundsNE = mapNE;
     		} else if (!useBoundsNorth) {
-    			this.boundsNE = new GeoPos(mapNE.lat, fieldNE.lng);
+    			this.boundsNE = new PositionDTO(mapNE.latDeg, fieldNE.lngDeg);
     		} else if (!useBoundsEast) {
-    			this.boundsNE = new GeoPos(fieldNE.lat, mapNE.lng);		
+    			this.boundsNE = new PositionDTO(fieldNE.latDeg, mapNE.lngDeg);		
     		} else {
     			this.boundsNE = fieldNE;
     		}
@@ -166,9 +165,9 @@ public class Swarm {
     		if ((!useBoundsSouth)&&(!useBoundsWest)) {
     			this.boundsSW = mapSW;
     		} else if (!useBoundsSouth) {
-    			this.boundsSW = new GeoPos(mapSW.lat, fieldSW.lng);
+    			this.boundsSW = new PositionDTO(mapSW.latDeg, fieldSW.lngDeg);
     		} else if (!useBoundsWest) {
-    			this.boundsSW = new GeoPos(fieldSW.lat, mapSW.lng);		
+    			this.boundsSW = new PositionDTO(fieldSW.latDeg, mapSW.lngDeg);		
     		} else {
     			this.boundsSW = fieldSW;
     		}
@@ -188,7 +187,7 @@ public class Swarm {
     	//console("#particles: "+this.nParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
     };
 
-    public Vector isVisible(GeoPos pos) {
+    public Vector isVisible(PositionDTO pos) {
 
     	// test for visibility of swarm
     	Vector proj = this.projection.latlng2pixel(pos);
@@ -264,8 +263,8 @@ public class Swarm {
     	for(int idx=0; idx<particles.length; idx++) {
     		Particle particle = particles[idx];
     		if ((particle.age > 0) && (particle.v != null)) {
-    			particle.pos.lat = particle.pos.lat + speed*particle.v.y;
-    			particle.pos.lng = particle.pos.lng + speed*particle.v.x;
+    			particle.pos.latDeg = particle.pos.latDeg + speed*particle.v.y;
+    			particle.pos.lngDeg = particle.pos.lngDeg + speed*particle.v.x;
     			double s = particle.v.length() / field.getMaxLength();
     			particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
     			particle.age--;
