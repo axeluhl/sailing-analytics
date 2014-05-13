@@ -34,7 +34,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
-  * [[Smartphone Tracking|wiki/smartphone-tracking]]
+  * [[RaceLog tracking|wiki/racelog-tracking]]
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Theses (Bachelor, Master, ...)|wiki/theses]]

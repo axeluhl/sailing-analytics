@@ -6,7 +6,9 @@
   <stylesheet src="../reset.css" />
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
-
+  
+  <inherits name='com.google.gwt.debug.Debug'/>
+  
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
@@ -27,8 +29,11 @@
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint'/>
+
   <!-- Specify the paths for translatable code                    -->
-<extend-property name="locale" values="de"/>
+  <extend-property name="locale" values="de"/>
+  <extend-property name="locale" values="ru"/>
+  
   <source path='client'/>
   <source path='leaderboard'/>
   <source path='adminconsole'/>

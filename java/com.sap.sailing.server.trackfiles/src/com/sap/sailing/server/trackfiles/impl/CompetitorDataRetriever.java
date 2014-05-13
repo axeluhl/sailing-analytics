@@ -13,33 +13,25 @@ import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class CompetitorDataRetriever extends AbstractDataRetriever {
 
-	@Override
-	public Collection<GpxRoute> getRoutes(TrackFilesFormat format,
-			final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-			throws FormatNotSupportedException, IOException {
+    @Override
+    public Collection<GpxRoute> getRoutes(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter,
+            boolean rawFixes) throws FormatNotSupportedException, IOException {
 
-		TrackReaderRetriever<Competitor, GPSFixMoving> retriever = new TrackReaderRetriever<Competitor, GPSFixMoving>() {
-			@Override
-			public TrackReader<Competitor, GPSFixMoving> retrieveTrackReader(
-					Competitor e) {
-				return new TrackReaderImpl<Competitor, GPSFixMoving>(
-						race.getTrack(e));
-			}
-		};
+        TrackReaderRetriever<Competitor, GPSFixMoving> retriever = new TrackReaderRetriever<Competitor, GPSFixMoving>() {
+            @Override
+            public TrackReader<Competitor, GPSFixMoving> retrieveTrackReader(Competitor e) {
+                return new TrackReaderImpl<Competitor, GPSFixMoving>(race.getTrack(e));
+            }
+        };
 
-		return getRoutes(race, dataBeforeAfter, rawFixes,
-				GPSFixMovingToGpxPosition.INSTANCE, race.getRace()
-						.getCompetitors(), new NameReader<Competitor>() {
-					@Override
-					public String getName(Competitor c) {
-						return c.getName()
-								+ " - "
-								+ c.getBoat().getSailID()
-								+ " - "
-								+ c.getTeam().getNationality()
-										.getThreeLetterIOCAcronym();
-					}
-				}, retriever);
-	}
+        return getRoutes(race, dataBeforeAfter, rawFixes, GPSFixMovingToGpxPosition.INSTANCE, race.getRace()
+                .getCompetitors(), new NameReader<Competitor>() {
+            @Override
+            public String getName(Competitor c) {
+                return c.getName() + " - " + c.getBoat().getSailID() + " - "
+                        + c.getTeam().getNationality().getThreeLetterIOCAcronym();
+            }
+        }, retriever);
+    }
 
 }

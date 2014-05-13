@@ -25,7 +25,7 @@ public enum CollectionNames {
     LEADERBOARD_GROUPS,
     
     /**
-     * Top-level event information about events such as Kiel Week 2011, or IDM Travemünde 2011, including name and
+     * Top-level event information about events such as Kiel Week 2011, or IDM Travemï¿½nde 2011, including name and
      * course areas.
      */
     EVENTS,
@@ -62,5 +62,10 @@ public enum CollectionNames {
     /**
      * Stores configurations for mobile devices.
      */
-    CONFIGURATIONS;
+    CONFIGURATIONS,
+    
+    /**
+     * Stores {@link GPSFix}es
+     */
+    GPS_FIXES,
 }

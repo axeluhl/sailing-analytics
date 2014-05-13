@@ -1,0 +1,43 @@
+package com.sap.sailing.domain.persistence.racelog.tracking.impl;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+
+public class GPSFixMovingMongoHandlerImpl implements GPSFixMongoHandler {
+    private final MongoObjectFactoryImpl mof;
+    private final DomainObjectFactoryImpl dof;
+
+    public GPSFixMovingMongoHandlerImpl(MongoObjectFactory mof, DomainObjectFactory dof) {
+        this.mof = (MongoObjectFactoryImpl) mof;
+        this.dof = (DomainObjectFactoryImpl) dof;
+    }
+
+    @Override
+    public DBObject transformForth(GPSFix fix) throws IllegalArgumentException {
+        DBObject result = new BasicDBObject();
+        mof.storeTimed(fix, result);
+        mof.storePositioned(fix, result);    
+        mof.storeSpeedWithBearing(((GPSFixMoving) fix).getSpeed(), result);  
+        return result;
+    }
+
+    @Override
+    public GPSFix transformBack(DBObject dbObject) {
+        TimePoint timePoint = dof.loadTimePoint(dbObject);
+        Position position = dof.loadPosition(dbObject);
+        SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
+        return new GPSFixMovingImpl(position, timePoint, speed);
+    }
+
+}

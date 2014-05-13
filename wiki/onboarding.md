@@ -6,9 +6,9 @@ This document describes the onboarding process for a new team member (developer)
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Classic 4.2.1 (Juno)), http://www.eclipse.org
+1. Eclipse (e.g. Eclipse Classic 4.3.x (Kepler)), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.5 (https://developers.google.com/eclipse/docs/download)
+  * Install Eclipse GWT should be version 2.6 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
@@ -31,7 +31,7 @@ This document describes the onboarding process for a new team member (developer)
   * Ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
-  * Bugzilla url: http://sapsailing.com/bugzilla/
+  * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/
 3. Race Analysis user
   * Add yourself as an user to the Race Analysis suite by adding a Jetty user in the file java\target\configuration\jetty\etc\realm.properties
 4. Wiki
@@ -103,5 +103,20 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 2. Start a run configuration of the project
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
+
+####Stepps to consider for using other modules
+1. For Eclipse Build
+   * MANIFEST.MF , add module names unter dependencies
+   * *.gwt.xml , add `<inherits name="-modulename-.-gwt.xml file name-" />`
+   * In DebugConfigurations => Classpaths, Add Sourcefolder where classes are you want to user from the module
+2. For Maven Build
+   * pom.xml , Add Dependency to used module ie.     
+`<dependency>
+<groupId>com.sap.sailing</groupId>
+<artifactId>com.sap.sailing.domain.common</artifactId>
+<version>1.0.0-SNAPSHOT</version>
+<classifier>sources</classifier>
+</dependency>`
+
 
 See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.

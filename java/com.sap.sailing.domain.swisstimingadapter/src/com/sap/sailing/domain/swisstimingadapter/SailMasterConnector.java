@@ -48,7 +48,7 @@ public interface SailMasterConnector {
      */
     void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
     
-    void removeSailMasterListener(SailMasterListener listener);
+    void removeSailMasterListener(SailMasterListener listener) throws IOException;
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
     
@@ -78,4 +78,11 @@ public interface SailMasterConnector {
     void stop() throws IOException;
 
     boolean isStopped();
+
+    /**
+     * Some messages in the SwissTiming SailMaster protocol lack proper time stamp information. It is therefore
+     * necessary to keep track of time stamps received from other messages and use them as an approximation for
+     * the time point of messages received without explicit time stamp.
+     */
+    TimePoint getLastRPDMessageTimePoint();
 }

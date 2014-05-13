@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -220,7 +221,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded) {
         // TODO Auto-generated method stub
         
     }
@@ -518,7 +520,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
                 return null;
@@ -672,7 +674,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -737,14 +739,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses)
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses)
             throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void waitUntilWindLoadingComplete() throws InterruptedException {
+    public void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
         // TODO Auto-generated method stub
     }
 
@@ -932,6 +934,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public GPSFixStore getGPSFixStore() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
         // TODO Auto-generated method stub
         return null;
@@ -941,6 +949,26 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
+            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }
