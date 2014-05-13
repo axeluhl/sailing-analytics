@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -198,6 +199,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
+    private final GPSFixStore gpsFixStore;
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
@@ -249,18 +251,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, 
                 tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
@@ -272,10 +274,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, 
                 tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
@@ -293,7 +295,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
@@ -301,6 +303,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
+        this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
         this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
         final Simulator simulator;
@@ -850,5 +853,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         races.add(race);
         updateStatusOfTrackedRace(trackedRace);
     }
+
+	@Override
+	public GPSFixStore getGPSFixStore() {
+		return gpsFixStore;
+	}
 
 }

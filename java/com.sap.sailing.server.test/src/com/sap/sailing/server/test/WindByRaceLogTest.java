@@ -43,6 +43,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -96,7 +97,7 @@ public class WindByRaceLogTest {
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         service.apply(new TrackRegatta(raceIdentifier));
-        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 5000,
+        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
     }

@@ -54,6 +54,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
+    
     private final GPSTrackListeners<ItemType, FixType> listeners;
     
 
@@ -1009,7 +1010,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         final boolean result;
         lockForWrite();
         try {
-            result = super.add(fix);
+            result = addWithoutLocking(fix);
             invalidateValidityAndDistanceCaches(fix);
         } finally {
             unlockAfterWrite();

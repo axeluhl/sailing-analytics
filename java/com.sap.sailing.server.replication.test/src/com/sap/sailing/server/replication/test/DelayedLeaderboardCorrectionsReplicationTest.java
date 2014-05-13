@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -160,7 +161,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace,
             DomainFactory domainFactory) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, domainFactory), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE) {
+                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;

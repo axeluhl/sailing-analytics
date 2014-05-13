@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -23,16 +25,30 @@ import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
 
     private final static Logger logger = Logger.getLogger(AddEntryToRaceLogJsonPostServlet.class.getName());
+    
+    private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder;
+    
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+    	super.init(config);
+    	deviceJsonServiceFinder = getServiceFinderFactory()
+    			.createServiceFinder(DeviceIdentifierJsonHandler.class);
+    	deviceJsonServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierJsonHandler());
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
@@ -108,7 +124,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
         } else {
             try {
                 logger.fine("Client wants to add a race log event");
-                JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(getService().getBaseDomainFactory());
+                JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(
+                		getService().getBaseDomainFactory(), new DeviceIdentifierJsonDeserializer(deviceJsonServiceFinder));
                 Object requestObject = JSONValue.parseWithException(requestBody.toString());
                 JSONObject requestJsonObject = Helpers.toJSONObjectSafe(requestObject);
                 logger.fine("JSON requestObject is: " + requestObject.toString());
@@ -126,7 +143,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
     protected void sendResponse(HttpServletResponse response, final UUID clientUuid, RaceLog raceLog, 
             Iterable<RaceLogEvent> eventsToSendBackToClient) throws IOException {
-        JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
+        JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer(),
+                new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
         ServletOutputStream outputStream = response.getOutputStream();
         boolean first = true;
         outputStream.write('[');

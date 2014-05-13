@@ -299,10 +299,17 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     protected boolean add(FixType fix) {
         lockForWrite();
         try {
-            return getInternalRawFixes().add(fix);
+            return addWithoutLocking(fix);
         } finally {
             unlockAfterWrite();
         }
+    }
+
+    /**
+     * The caller must ensure to hold the write lock for this track when calling this methos
+     */
+    protected boolean addWithoutLocking(FixType fix) {
+        return getInternalRawFixes().add(fix);
     }
 
     @Override

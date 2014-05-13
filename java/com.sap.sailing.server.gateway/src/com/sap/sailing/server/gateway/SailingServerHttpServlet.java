@@ -12,9 +12,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -36,6 +38,8 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     private BundleContext context;
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    
+    private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     private ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tracTracAdapterFactoryTracker;
     
@@ -50,6 +54,7 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
        racingEventServiceTracker.open();
        tracTracAdapterFactoryTracker = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(context, TracTracAdapterFactory.class.getName(), null);
        tracTracAdapterFactoryTracker.open();
+       serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
    }
     
     protected BundleContext getContext() {
@@ -131,4 +136,7 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         return trackedRace;
     }
 
+    protected TypeBasedServiceFinderFactory getServiceFinderFactory() {
+    	return serviceFinderFactory;
+    }
 }
