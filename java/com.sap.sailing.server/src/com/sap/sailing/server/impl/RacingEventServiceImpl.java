@@ -1,15 +1,12 @@
 package com.sap.sailing.server.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,18 +20,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -144,9 +141,6 @@ import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -205,7 +199,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * Holds the {@link Event} objects for the events of all registerd sailing server instances.
      */
-    protected final ConcurrentHashMap<Serializable, EventBase> cachedEventsOfAllSailingServerInstancesById;
+    protected final ConcurrentHashMap<Serializable, Pair<SailingServer, EventBase>> cachedEventsOfAllSailingServerInstancesById;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -379,7 +373,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        cachedEventsOfAllSailingServerInstancesById = new ConcurrentHashMap<Serializable, EventBase>();
+        cachedEventsOfAllSailingServerInstancesById = new ConcurrentHashMap<Serializable, Pair<SailingServer, EventBase>>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         raceTrackersByRegatta = new ConcurrentHashMap<>();
         raceTrackersByID = new ConcurrentHashMap<>();
@@ -487,46 +481,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private void loadEventsFromAllSailingServerInstances() {
-    	List<EventBase> allEvents = new ArrayList<EventBase>();
+    	List<Pair<SailingServer, EventBase>> allEvents = new ArrayList<Pair<SailingServer, EventBase>>();
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<Callable<List<Pair<SailingServer, EventBase>>>> todo = new ArrayList<Callable<List<Pair<SailingServer, EventBase>>>>();
+
         for (SailingServer server: domainObjectFactory.loadAllSailingServers()) {
-        	String getEventsUrl = server.getURL().toExternalForm();
-        	if(!getEventsUrl.endsWith("/")) {
-        		getEventsUrl += "/";
-        	}
-        	getEventsUrl += "sailingserver/api/v1/events";
-        	
-        	try {
-        	    URL url = new URL(getEventsUrl);
-        	    URLConnection urlConnection = url.openConnection();
-        	    urlConnection.connect();
-        	    
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-				JSONParser parser = new JSONParser();
-				try {
-					Object eventsAsObject = parser.parse(bufferedReader);
-					
-					EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
-					JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
-					for(Object eventAsObject: eventsAsJsonArray) {
-						JSONObject eventAsJson = (JSONObject) eventAsObject;
-						EventBase event = deserializer.deserialize(eventAsJson);
-				    	allEvents.add(event);
-					}
-				} catch (ParseException e) {
-				} finally {
-					bufferedReader.close();
-				}
-        	} 
-        	catch (IOException e) { 
-        	} 
+            Callable<List<Pair<SailingServer, EventBase>>> callable = new ReadEventsFromSailingServerCallable(server);
+            todo.add(callable);
         }
+
+        List<Future<List<Pair<SailingServer, EventBase>>>> results;
+		try {
+			results = executor.invokeAll(todo);
+	        for(Future<List<Pair<SailingServer, EventBase>>> future: results) {
+	        	if(future.isDone()) {
+	            	List<Pair<SailingServer, EventBase>> result;
+					try {
+						result = future.get();
+	            		allEvents.addAll(result);
+					} catch (InterruptedException e) {
+					} catch (ExecutionException e) {
+					}
+	        	}
+	        }
+		} catch (InterruptedException e1) {
+		}
 
         synchronized (cachedEventsOfAllSailingServerInstancesById) {
             cachedEventsOfAllSailingServerInstancesById.clear();
 
-            for (EventBase event : allEvents) {
-                if (event.getId() != null)
-                	cachedEventsOfAllSailingServerInstancesById.put(event.getId(), event);
+            for (Pair<SailingServer, EventBase> serverAndEventPair : allEvents) {
+                if (serverAndEventPair.getB().getId() != null)
+                	cachedEventsOfAllSailingServerInstancesById.put(serverAndEventPair.getB().getId(), serverAndEventPair);
             }
         }
     }
@@ -876,8 +863,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Iterable<EventBase> getEventsFromAllSailingServers() {
-        return Collections.unmodifiableCollection(new ArrayList<EventBase>(cachedEventsOfAllSailingServerInstancesById.values()));
+    public Iterable<Pair<SailingServer, EventBase>> getEventsFromAllSailingServers() {
+        return Collections.unmodifiableCollection(new ArrayList<Pair<SailingServer, EventBase>>(cachedEventsOfAllSailingServerInstancesById.values()));
     }
 
     @Override
