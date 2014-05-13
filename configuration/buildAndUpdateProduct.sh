@@ -241,6 +241,15 @@ if [[ "$@" == "release" ]]; then
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
+
+    echo "
+    MONGODB_NAME=myspecificevent
+    REPLICATION_CHANNEL=myspecificevent
+    SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+    SERVER_NAME=LIVE
+    USE_ENVIRONMENT=live-server
+    INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
+    " >> $ACDIR/amazon-launch-config.txt
      
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
