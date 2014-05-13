@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -63,7 +64,7 @@ public class AbstractMockedRaceMarkPassingTest {
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", waypoints);
         RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(ron, tom, ben));
-        race = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), 0, 10000, 10000);
+        race = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), EmptyGPSFixStore.INSTANCE, 0, 10000, 10000);
         race.setStartTimeReceived(new MillisecondsTimePoint(10000));
         TimePoint t = new MillisecondsTimePoint(30000);
         List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)),

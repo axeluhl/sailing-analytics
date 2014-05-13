@@ -937,8 +937,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-
-    @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalysis) throws NoWindException {
         // TODO Auto-generated method stub
