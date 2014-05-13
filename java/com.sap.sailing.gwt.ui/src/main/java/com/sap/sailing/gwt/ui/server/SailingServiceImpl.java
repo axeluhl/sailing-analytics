@@ -320,6 +320,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddSailingServer;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -339,6 +340,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveSailingServer;
 import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
@@ -3271,13 +3273,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
     	for(String serverName: namesOfSailingServersToRemove) {
-        	getService().removeSailingServer(serverName);
+    		getService().apply(new RemoveSailingServer(serverName));
     	}
     }
 
     @Override
     public void addSailingServer(SailingServerDTO sailingServer) throws Exception {
-    	getService().addSailingServer(sailingServer.getName(), new URL(sailingServer.getUrl()));
+		URL serverURL = new URL(sailingServer.getUrl());
+    	getService().apply(new AddSailingServer(sailingServer.getName(), serverURL));
     }
     
     @Override

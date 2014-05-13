@@ -401,7 +401,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Iterable<SailingServer> getSailingServers();
 
-    void addSailingServer(String name, URL url);
+    SailingServer addSailingServer(String name, URL url);
 
     void removeSailingServer(String name);
 

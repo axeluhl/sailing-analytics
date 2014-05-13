@@ -1,0 +1,42 @@
+package com.sap.sailing.server.operationaltransformation;
+
+import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
+
+/**
+ * Removes a {@link SailingServer} instance.
+ * 
+ * @author Frank Mittag (c5163874)
+ *
+ */
+public class RemoveSailingServer extends AbstractRacingEventServiceOperation<Void> {
+	private static final long serialVersionUID = -1283971355735610505L;
+	private final String serverName; 
+	
+    public RemoveSailingServer(String serverName) {
+        super();
+        this.serverName = serverName;
+    }
+
+    @Override
+    public Void internalApplyTo(RacingEventService toState) throws Exception {
+        toState.removeSailingServer(serverName);
+        return null;
+    }
+
+    @Override
+    public RacingEventServiceOperation<?> transformClientOp(
+            RacingEventServiceOperation<?> serverOp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RacingEventServiceOperation<?> transformServerOp(
+            RacingEventServiceOperation<?> clientOp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+}

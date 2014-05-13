@@ -875,9 +875,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void addSailingServer(String name, URL url) {
-    	createSailingServerWithoutReplication(name, url);
+    public SailingServer addSailingServer(String name, URL url) {
+    	SailingServer result = new SailingServerImpl(name, url);
+	    mongoObjectFactory.storeSailingServer(result);
     	updateCachedEventsOfSailingServers();
+    	return result;
     }
 
     @Override
@@ -888,12 +890,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
 	private void updateCachedEventsOfSailingServers() {
 		loadEventsFromAllSailingServerInstances();
-	}
-
-	private SailingServer createSailingServerWithoutReplication(String name, URL url) {
-		SailingServer result = new SailingServerImpl(name, url);
-	    mongoObjectFactory.storeSailingServer(result);
-	    return result;
 	}
 
     @Override
