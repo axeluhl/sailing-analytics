@@ -508,8 +508,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         synchronized (ensureSocketIsOpenSemaphor) {
             while (!stopped && socket == null) {
                 try {
-                    // TODO see bug 171, comment #2; randomized delay to make it unlikely that two requests collide at the M2S server
-                    Thread.sleep((long) (10000 /*ms*/ * Math.random())); // wait somewhere between 0s and 10s.
                     logger.info("Opening socket to " + host + ":" + port + " and sending " + MessageType.OPN.name()
                             + " message...");
                     socket = new Socket(host, port);
