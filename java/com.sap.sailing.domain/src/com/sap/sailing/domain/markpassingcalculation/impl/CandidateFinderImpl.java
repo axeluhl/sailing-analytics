@@ -2,7 +2,6 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,7 +84,9 @@ public class CandidateFinderImpl implements CandidateFinder {
             xteCandidates.put(c, new HashMap<Waypoint, Map<List<GPSFix>, Candidate>>());
             distanceCandidates.put(c, new HashMap<Waypoint, Map<GPSFix, Candidate>>());
         }
-        processNewWaypoint(waypoints, firstWaypointOfRace, lastWaypointOfRace);
+        for (Waypoint w : waypoints) {
+            processNewWaypoint(w, firstWaypointOfRace, lastWaypointOfRace);
+        }
     }
 
     private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
@@ -168,55 +169,73 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
-    @Override
-    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> invalidateAfterCourseChange(int indexOfChange) {
-        // TODO Doesnt remove actually removed waypoint, tries to remove added
+    private Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> invalidateAfterCourseChange(
+            int indexOfChange) {
+        Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result = new HashMap<>();
         Course course = race.getRace().getCourse();
+        for(Competitor c : race.getRace().getCompetitors()){
+            distanceCache.get(c).clear();
+            xteCache.get(c).clear();
+        }
         List<Waypoint> changedWaypoints = new ArrayList<>();
         for (Waypoint w : course.getWaypoints()) {
             if (course.getIndexOfWaypoint(w) > indexOfChange - 2) {
                 changedWaypoints.add(w);
             }
         }
-        Map<Competitor, Iterable<Candidate>> removedCandidates = removeWaypoints(changedWaypoints);
-        Map<Competitor, Iterable<Candidate>> addedCandidates = addWaypoints(changedWaypoints);
-        Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result = null;
-        return null;
-
-    }
-
-    protected Map<Competitor, Iterable<Candidate>> addWaypoints(Collection<Waypoint> waypoints) {
-        Map<Competitor, Iterable<Candidate>> result = new HashMap<>();
-        Course course = race.getRace().getCourse();
-        processNewWaypoint(waypoints, course.getFirstWaypoint(), course.getLastWaypoint());
         for (Competitor c : race.getRace().getCompetitors()) {
-            List<Candidate> cans = new ArrayList<>();
+            List<Candidate> badCans = new ArrayList<>();
+            List<Candidate> newCans = new ArrayList<>();
+            for (Waypoint w : changedWaypoints) {
+                Map<List<GPSFix>, Candidate> xteCans = xteCandidates.get(c).get(w);
+                badCans.addAll(xteCans.values());
+                xteCans.clear();;
+                Map<GPSFix, Candidate> distanceCans = distanceCandidates.get(c).get(w);
+                badCans.addAll(distanceCans.values());
+                distanceCans.clear();
+            }
             Set<GPSFix> allFixes = getAllFixes(c);
-            cans.addAll(checkForDistanceCandidateChanges(c, allFixes, waypoints).getA());
-            cans.addAll(checkForXTECandidatesChanges(c, allFixes, waypoints).getA());
-            result.put(c, cans);
+            newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+            newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+            result.put(c, new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, badCans));
         }
         return result;
     }
 
-    protected Map<Competitor, Iterable<Candidate>> removeWaypoints(Collection<Waypoint> waypoints) {
+    @Override
+    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addWaypoint(Waypoint w, int index) {
+        Course course = race.getRace().getCourse();
+        processNewWaypoint(w, course.getFirstWaypoint(), course.getLastWaypoint());
+        return invalidateAfterCourseChange(index);
+    }
+
+    @Override
+    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> removeWaypoint(Waypoint w, int index) {
         // TODO Clear caches?
-        for (Waypoint w : waypoints) {
-            passingInstructions.remove(w);
-        }
-        Map<Competitor, Iterable<Candidate>> result = new HashMap<>();
-        for (Competitor c : race.getRace().getCompetitors()) {
+        passingInstructions.remove(w);
+        Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result = new HashMap<>();
+        Map<Competitor, List<Candidate>> candidatesOfRemovedWaypoint = new HashMap<>();
+        Iterable<Competitor> competitors = race.getRace().getCompetitors();
+        for (Competitor c : competitors) {
             List<Candidate> badCans = new ArrayList<>();
-            for (Waypoint w : waypoints) {
-                Map<Waypoint, Map<List<GPSFix>, Candidate>> xteCans = xteCandidates.get(c);
-                badCans.addAll(xteCans.get(w).values());
-                xteCans.remove(w);
-                Map<Waypoint, Map<GPSFix, Candidate>> distanceCans = distanceCandidates.get(c);
-                badCans.addAll(distanceCans.get(w).values());
-                distanceCans.remove(w);
-            }
-            result.put(c, badCans);
+            Map<Waypoint, Map<List<GPSFix>, Candidate>> xteCans = xteCandidates.get(c);
+            badCans.addAll(xteCans.get(w).values());
+            xteCans.remove(w);
+            Map<Waypoint, Map<GPSFix, Candidate>> distanceCans = distanceCandidates.get(c);
+            badCans.addAll(distanceCans.get(w).values());
+            distanceCans.remove(w);
+            candidatesOfRemovedWaypoint.put(c, badCans);
         }
+        Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> changes = invalidateAfterCourseChange(index);
+        
+        for (Competitor c : competitors) {
+            Iterable<Candidate> added = changes.get(c).getA();
+            List<Candidate> removed = new ArrayList<>();
+            Util.addAll(changes.get(c).getB(), removed);
+            removed.addAll(candidatesOfRemovedWaypoint.get(c));
+            result.put(c, new Pair<Iterable<Candidate>, Iterable<Candidate>>(added, removed));
+        }
+
         return result;
     }
 
@@ -231,33 +250,31 @@ public class CandidateFinderImpl implements CandidateFinder {
      * { uniqueMarks.add(m); } } return uniqueMarks; }
      */
 
-    private void processNewWaypoint(Iterable<Waypoint> waypoints, Waypoint firstWaypoint, Waypoint lastWaypoint) {
-        for (Waypoint w : waypoints) {
-            PassingInstruction instruction = w.getPassingInstructions();
-            if (instruction == PassingInstruction.None || instruction == null) {
-                if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
-                    instruction = PassingInstruction.Line;
+    private void processNewWaypoint(Waypoint w, Waypoint firstWaypoint, Waypoint lastWaypoint) {
+        PassingInstruction instruction = w.getPassingInstructions();
+        if (instruction == PassingInstruction.None || instruction == null) {
+            if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
+                instruction = PassingInstruction.Line;
+            } else {
+                int numberofMarks = 0;
+                Iterator<Mark> it = w.getMarks().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    numberofMarks++;
+                }
+                if (numberofMarks == 2) {
+                    instruction = PassingInstruction.Gate;
+                } else if (numberofMarks == 1) {
+                    instruction = PassingInstruction.Port;
                 } else {
-                    int numberofMarks = 0;
-                    Iterator<Mark> it = w.getMarks().iterator();
-                    while (it.hasNext()) {
-                        it.next();
-                        numberofMarks++;
-                    }
-                    if (numberofMarks == 2) {
-                        instruction = PassingInstruction.Gate;
-                    } else if (numberofMarks == 1) {
-                        instruction = PassingInstruction.Port;
-                    } else {
-                        instruction = PassingInstruction.None;
-                    }
+                    instruction = PassingInstruction.None;
                 }
             }
-            passingInstructions.put(w, instruction);
-            for (Competitor c : race.getRace().getCompetitors()) {
-                xteCandidates.get(c).put(w, new HashMap<List<GPSFix>, Candidate>());
-                distanceCandidates.get(c).put(w, new HashMap<GPSFix, Candidate>());
-            }
+        }
+        passingInstructions.put(w, instruction);
+        for (Competitor c : race.getRace().getCompetitors()) {
+            xteCandidates.get(c).put(w, new HashMap<List<GPSFix>, Candidate>());
+            distanceCandidates.get(c).put(w, new HashMap<GPSFix, Candidate>());
         }
     }
 

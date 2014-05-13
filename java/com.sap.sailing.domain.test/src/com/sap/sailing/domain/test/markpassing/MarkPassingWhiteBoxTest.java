@@ -40,14 +40,14 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     @Test
     public void testNormalPassing() {
         // Normal Passing of Single mark
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                330)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                270)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(47000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                225)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                190)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(
+                40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(
+                44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(270)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(
+                47000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(225)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(
+                50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(190)));
         race.recordFix(ron, fix1);
         race.recordFix(ron, fix2);
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
@@ -73,12 +73,12 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     @Test
     public void testDistance() {
         // 3 fixes all on one side of crossing Bearing, therefore no XTE-Candidate
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000155, 0.000103), new MillisecondsTimePoint(60000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                330)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000038, 0.000021), new MillisecondsTimePoint(65000), new KnotSpeedWithBearingImpl(4, new DegreeBearingImpl(
-                280)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(-0.000268, 0.000135), new MillisecondsTimePoint(80000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                170)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000155, 0.000103), new MillisecondsTimePoint(
+                60000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000038, 0.000021), new MillisecondsTimePoint(
+                65000), new KnotSpeedWithBearingImpl(4, new DegreeBearingImpl(280)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(-0.000268, 0.000135), new MillisecondsTimePoint(
+                80000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(170)));
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix3));
@@ -98,14 +98,14 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     @Test
     public void testPastGate() {
         // Competitor sails closely past one mark of gate and rounds the other mark further away
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000967, -0.000124), new MillisecondsTimePoint(100000), new KnotSpeedWithBearingImpl(5,
-                new DegreeBearingImpl(100)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000989, -0.000001), new MillisecondsTimePoint(110000), new KnotSpeedWithBearingImpl(5,
-                new DegreeBearingImpl(160)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(-0.001079, 0.000045), new MillisecondsTimePoint(115000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                90)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000982, 0.000143), new MillisecondsTimePoint(125000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                45)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000967, -0.000124), new MillisecondsTimePoint(
+                100000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(100)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000989, -0.000001), new MillisecondsTimePoint(
+                110000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(160)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(-0.001079, 0.000045), new MillisecondsTimePoint(
+                115000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(90)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000982, 0.000143), new MillisecondsTimePoint(
+                125000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45)));
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix2);
@@ -140,10 +140,10 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     @Test
     public void testGateAfterLine() {
         // The problem of passing a gate right after the start line is crossed, solved by the distance estimation
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001051, -0.000008), new MillisecondsTimePoint(10000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                5)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000942, 0.000022), new MillisecondsTimePoint(14000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                15)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001051, -0.000008), new MillisecondsTimePoint(
+                10000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(5)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000942, 0.000022), new MillisecondsTimePoint(
+                14000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(15)));
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix2);
         Candidate c1 = new CandidateImpl(1, new MillisecondsTimePoint(11000), 0.99, waypoints.get(0));
@@ -164,16 +164,16 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     @Test
     public void testSailingInFrontAndAroundMark() {
         CandidateFinder finder = new CandidateFinderImpl(race);
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000037, -0.000126), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                80)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000022, 0.000001), new MillisecondsTimePoint(43000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                45)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000018, 0.000038), new MillisecondsTimePoint(46000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                330)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0.000084, -0.000004), new MillisecondsTimePoint(49000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                260)));
-        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(0.000054, -0.000153), new MillisecondsTimePoint(52000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                200)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000037, -0.000126), new MillisecondsTimePoint(
+                40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(80)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000022, 0.000001), new MillisecondsTimePoint(
+                43000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000018, 0.000038), new MillisecondsTimePoint(
+                46000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0.000084, -0.000004), new MillisecondsTimePoint(
+                49000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(260)));
+        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(0.000054, -0.000153), new MillisecondsTimePoint(
+                52000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(200)));
         race.recordFix(ben, fix1);
         race.recordFix(ben, fix2);
         race.recordFix(ben, fix3);
@@ -190,19 +190,18 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         assertTrue(behind.getProbability() > inFront.getProbability());
     }
 
-    
     public void fixAndUnfixMarkPassing() {
-        //TODO this is before the latest method of updating waypoints therefore probably wrong
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(11000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                340)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000396, -0.000602), new MillisecondsTimePoint(35000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                315)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000164, -0.000012), new MillisecondsTimePoint(60000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                90)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000402, 0.00043), new MillisecondsTimePoint(85000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                135)));
-        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(115000), new KnotSpeedWithBearingImpl(5,
-                new DegreeBearingImpl(90)));
+        // TODO this is before the latest method of updating waypoints therefore probably wrong
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(
+                11000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(340)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000396, -0.000602), new MillisecondsTimePoint(
+                35000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(315)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000164, -0.000012), new MillisecondsTimePoint(
+                60000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(90)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000402, 0.00043), new MillisecondsTimePoint(
+                85000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(135)));
+        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(
+                115000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(90)));
 
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix2);
@@ -242,52 +241,42 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         assertTrue(markPassingAfterRemoving.getTimePoint().asMillis() == 60000);
     }
 
-    @SuppressWarnings({ "unused", "null" })
     @Test
     public void testAddingAndRemovingWaypointToFinder() {
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                330)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                270)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(47000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                225)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
-                190)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.00045, -0.00052), new MillisecondsTimePoint(
+                40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(200)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.0006, -0.00052),
+                new MillisecondsTimePoint(44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(160)));
 
         race.recordFix(ron, fix1);
         race.recordFix(ron, fix2);
-        race.recordFix(ron, fix3);
-        race.recordFix(ron, fix4);
+
         CandidateFinder finder = new CandidateFinderImpl(race);
-        Waypoint newWaypoint = new WaypointImpl(m, PassingInstruction.Port);
+        Waypoint newWaypoint = new WaypointImpl(reaching, PassingInstruction.Port);
         Course course = race.getRace().getCourse();
 
         // Before adding
         Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesBefore = finder.getAllCandidates(ron);
         assertEquals(Util.size(allCandidatesBefore.getB()), 0);
-        for (Candidate can : allCandidatesBefore.getA()) {
-            assertTrue(can.getWaypoint() != newWaypoint);
-        }
-        assertEquals(Util.size(allCandidatesBefore.getA()), 4);
+        assertEquals(Util.size(allCandidatesBefore.getA()), 0);
 
         // The process of adding
         course.addWaypoint(4, newWaypoint);
-        List<Waypoint> wayAsList = Arrays.asList(newWaypoint);
-        Pair<Iterable<Candidate>,Iterable<Candidate>> addedCans = null;//finder.addWaypoints(wayAsList).get(ron);
-        assertEquals(Util.size(addedCans.getA()), 2);
+        Pair<Iterable<Candidate>, Iterable<Candidate>> addedCans = finder.addWaypoint(newWaypoint, 4).get(ron);
+        assertEquals(Util.size(addedCans.getA()), 1);
         for (Candidate c : addedCans.getA()) {
             assertEquals(c.getWaypoint(), newWaypoint);
         }
 
         // Before removing
         Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesInBetween = finder.getAllCandidates(ron);
-        assertEquals(Util.size(allCandidatesInBetween.getA()), 6);
+        assertEquals(Util.size(allCandidatesInBetween.getA()), 1);
         assertEquals(Util.size(allCandidatesInBetween.getB()), 0);
 
         // The Process of removing
         course.removeWaypoint(4);
-        Pair<Iterable<Candidate>,Iterable<Candidate>> removedCans = null;// finder.removeWaypoints(wayAsList).get(ron);
-        assertEquals(Util.size(removedCans.getB()), 2);
+        Pair<Iterable<Candidate>, Iterable<Candidate>> removedCans = finder.removeWaypoint(newWaypoint, 4).get(ron);
+        assertEquals(Util.size(removedCans.getB()), 1);
         for (Candidate c : removedCans.getB()) {
             assertEquals(c.getWaypoint(), newWaypoint);
         }
@@ -295,9 +284,6 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         // After removing
         Pair<Iterable<Candidate>, Iterable<Candidate>> allCansAfterRemoving = finder.getAllCandidates(ron);
         assertEquals(Util.size(allCansAfterRemoving.getB()), 0);
-        for (Candidate can : allCansAfterRemoving.getA()) {
-            assertTrue(can.getWaypoint() != newWaypoint);
-        }
-        assertEquals(Util.size(allCansAfterRemoving.getA()), 4);
+        assertEquals(Util.size(allCansAfterRemoving.getA()), 0);
     }
 }

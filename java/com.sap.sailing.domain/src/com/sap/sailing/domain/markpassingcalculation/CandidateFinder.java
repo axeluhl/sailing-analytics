@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 
@@ -34,6 +35,8 @@ public interface CandidateFinder {
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
 
-    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> invalidateAfterCourseChange(int indexOfChange);
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addWaypoint(Waypoint w, int index);
+
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> removeWaypoint(Waypoint w, int index);
 
 }
