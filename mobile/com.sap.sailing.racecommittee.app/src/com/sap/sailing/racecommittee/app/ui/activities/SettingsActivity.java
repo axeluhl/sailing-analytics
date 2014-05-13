@@ -73,10 +73,12 @@ public class SettingsActivity extends PreferenceActivity {
         this.isRedirectedToTemp = arguments != null && arguments.containsKey(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
         if (isRedirectedToTemp) {
             Bundle info = arguments.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+            if (info != null) {
             sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
             String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
             String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
             showBreadCrumbs(title, title);
+            }
         }
     }
    

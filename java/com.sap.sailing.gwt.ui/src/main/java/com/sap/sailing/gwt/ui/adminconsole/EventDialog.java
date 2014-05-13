@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,22 +15,22 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class EventDialog extends DataEntryDialog<EventDTO> {
+public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     protected StringMessages stringConstants;
     protected TextBox nameEntryField;
     protected TextBox venueEntryField;
-    protected TextBox publicationUrlEntryField;
+    protected DateBox startDateBox;
+    protected DateBox endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected List<TextBox> courseAreaNameEntryFields;
-
-    private EventDTO event;
 
     private Grid courseAreasGrid;
 
@@ -66,7 +67,21 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
                 }
             }
 
-            if (!nameNotEmpty) {
+            Date startDate = eventToValidate.startDate;
+            Date endDate = eventToValidate.endDate;
+            String datesErrorMessage = null;
+            // remark: startDate == null and endDate == null is valid
+            if(startDate != null && endDate != null) {
+                if(startDate.after(endDate)) {
+                    datesErrorMessage = stringConstants.pleaseEnterStartAndEndDate(); 
+                }
+            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+                datesErrorMessage = stringConstants.pleaseEnterStartAndEndDate();
+            }
+            
+            if(datesErrorMessage != null) {
+                errorMessage = datesErrorMessage;
+            } else if (!nameNotEmpty) {
                 errorMessage = stringConstants.pleaseEnterAName();
             } else if (!venueNotEmpty) {
                 errorMessage = stringConstants.pleaseEnterNonEmptyVenue();
@@ -85,7 +100,6 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             DialogCallback<EventDTO> callback) {
         super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
                 callback);
-        this.event = new EventDTO();
         this.stringConstants = stringConstants;
         courseAreaNameEntryFields = new ArrayList<TextBox>();
         courseAreasGrid = new Grid(0, 0);
@@ -106,10 +120,13 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
 
     @Override
     protected EventDTO getResult() {
-        this.event.setName(nameEntryField.getText());
-        this.event.publicationUrl = publicationUrlEntryField.getText();
-        this.event.isPublic = isPublicCheckBox.getValue();
-        this.event.id = id;
+        EventDTO result = new EventDTO();
+        
+        result.setName(nameEntryField.getText());
+        result.startDate = startDateBox.getValue();
+        result.endDate = endDateBox.getValue();
+        result.isPublic = isPublicCheckBox.getValue();
+        result.id = id;
 
         List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
         int count = courseAreaNameEntryFields.size();
@@ -119,9 +136,8 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             courseAreas.add(courseAreaDTO);
         }
 
-        this.event.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
-
-        return this.event;
+        result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+        return result;
     }
 
     @Override
@@ -132,17 +148,19 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(5, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.venue() + ":"));
         formGrid.setWidget(1, 1, venueEntryField);
-        formGrid.setWidget(2, 0, new Label(stringConstants.publicationUrl() + ":"));
-        formGrid.setWidget(2, 1, publicationUrlEntryField);
-        formGrid.setWidget(3, 0, new Label(stringConstants.isPublic() + ":"));
-        formGrid.setWidget(3, 1, isPublicCheckBox);
+        formGrid.setWidget(2, 0, new Label(stringConstants.startDate() + ":"));
+        formGrid.setWidget(2, 1, startDateBox);
+        formGrid.setWidget(3, 0, new Label(stringConstants.endDate() + ":"));
+        formGrid.setWidget(3, 1, endDateBox);
+        formGrid.setWidget(4, 0, new Label(stringConstants.isPublic() + ":"));
+        formGrid.setWidget(4, 1, isPublicCheckBox);
 
         panel.add(createHeadlineLabel(stringConstants.courseAreas()));
         panel.add(courseAreasGrid);

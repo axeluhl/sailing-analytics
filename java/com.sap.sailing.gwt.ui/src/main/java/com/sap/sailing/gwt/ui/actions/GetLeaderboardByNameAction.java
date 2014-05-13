@@ -9,14 +9,15 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sse.gwt.client.async.AsyncAction;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * Performs a result adaptation from {@link IncrementalOrFullLeaderboardDTO} and {@link LeaderboardDTO}, encapsulating
  * the logic how differential, incremental leaderboard fetching and transmission works. This helps guarantee the
  * requirement of {@link IncrementalOrFullLeaderboardDTO#getLeaderboardDTO(LeaderboardDTO)} (only pass <code>null</code>
  * as the previous leaderboard if <code>null</code> was passed as identifier of the previous leaderboard to
- * {@link SailingServiceAsync#getLeaderboardByName(String, Date, Collection, String, AsyncCallback)} too.
+ * {@link SailingServiceAsync#getLeaderboardByName(String, Date, Collection, boolean, String, AsyncCallback)} too.
  * <p>
  * 
  * When a valid {@link IncrementalOrFullLeaderboardDTO} object is received, the
@@ -26,41 +27,39 @@ import com.sap.sailing.gwt.ui.client.Timer;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO> {
+public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     private final SailingServiceAsync sailingService;
     private final String leaderboardName;
     private final Date date;
     private final Collection<String> namesOfRacesForWhichToLoadLegDetails;
+    private final boolean addOverallDetails;
     private final LeaderboardDTO previousLeaderboard;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timerToAdjustOffetIn;
     
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails, LeaderboardDTO previousLeaderboard,
-            Timer timerToAdjustOffsetIn, ErrorReporter errorReporter, StringMessages stringMessages, AsyncCallback<LeaderboardDTO> callback) {
-        super(callback);
+            final Collection<String> namesOfRacesForWhichToLoadLegDetails, boolean addOverallDetails,
+            LeaderboardDTO previousLeaderboard, Timer timerToAdjustOffsetIn, ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.date = date;
         this.namesOfRacesForWhichToLoadLegDetails = namesOfRacesForWhichToLoadLegDetails;
+        this.addOverallDetails = addOverallDetails;
         this.previousLeaderboard = previousLeaderboard;
         this.timerToAdjustOffetIn = timerToAdjustOffsetIn;
     }
     
     @Override
-    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        final AsyncCallback<LeaderboardDTO> wrapperCallback = getWrapperCallback(asyncActionsExecutor);
+    public void execute(final AsyncCallback<LeaderboardDTO> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService
-                .getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails,
-                        previousLeaderboard==null?null:previousLeaderboard.getId(),
-                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, addOverallDetails,
+                        previousLeaderboard==null?null:previousLeaderboard.getId(), new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                wrapperCallback.onFailure(caught);
+                                callback.onFailure(caught);
                             }
 
                             @Override
@@ -74,7 +73,7 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
                                                 result.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
                                     }
                                     LeaderboardDTO leaderboardDTOResult = result.getLeaderboardDTO(previousLeaderboard);
-                                    wrapperCallback.onSuccess(leaderboardDTOResult);
+                                    callback.onSuccess(leaderboardDTOResult);
                                 }
                             }
                 });

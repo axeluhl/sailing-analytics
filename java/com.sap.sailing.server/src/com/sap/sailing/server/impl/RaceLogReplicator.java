@@ -16,6 +16,16 @@ import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnRegatta;
 
+/**
+ * Being a {@link RaceColumnListener}, this replicator must be added to all {@link RaceColumn}s managing a
+ * {@link RaceLog} so as to be notified about changes to the race log. This largely happens by callbacks to the
+ * {@link #raceLogEventAdded(RaceColumn, RaceLogIdentifier, RaceLogEvent)} method. This object will then use the
+ * {@link Replicator} passed to this object's constructor and send a {@link RecordRaceLogEventOnLeaderboard} or a
+ * {@link RecordRaceLogEventOnRegatta} operation to all replicas.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
 public class RaceLogReplicator implements RaceColumnListener {
     private static final long serialVersionUID = 7190510926643574068L;
     
@@ -28,7 +38,6 @@ public class RaceLogReplicator implements RaceColumnListener {
     @Override
     public void raceLogEventAdded(final RaceColumn raceColumn, final RaceLogIdentifier identifier, final RaceLogEvent event) {
         identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
-            
             @Override
             public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnRegatta(
@@ -74,6 +83,10 @@ public class RaceLogReplicator implements RaceColumnListener {
 
     @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
     }
 
     @Override

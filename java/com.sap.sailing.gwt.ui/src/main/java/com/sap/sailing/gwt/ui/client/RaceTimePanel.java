@@ -4,15 +4,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -37,13 +38,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
         if (selectedRaceTimes.startOfRace != null) {
-            if(time.before(selectedRaceTimes.startOfRace)) {
-                String timeToStartInSeconds = NumberFormat.getFormat("0.0").format(((double) selectedRaceTimes.startOfRace.getTime()-time.getTime()) / 1000.) + "s";
-                result = stringMessages.timeToStart(timeToStartInSeconds);
-            } else if(time.after(selectedRaceTimes.startOfRace)) {
+            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+                long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
+                result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
+            } else {
                 long timeSinceStartInMs = time.getTime() - selectedRaceTimes.startOfRace.getTime();
                 result = stringMessages.timeSinceStart(DateAndTimeFormatterUtil.formatElapsedTime(timeSinceStartInMs));
-            }
+            } 
         }
         return result;
     }
@@ -192,7 +193,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * {@link RaceTimesInfoDTO#timePointOfNewestEvent timePointOfNewestEvent} received from the tracking infrastructure
      * so far and puts the timer into {@link PlayStates#Playing play mode}.
      */
-    private boolean initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
+    private void initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
         // initialize timer position
         switch (timer.getPlayMode()) {
         case Live:
@@ -208,7 +209,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             break;
         }
-        return timer.getTime() != null;
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {

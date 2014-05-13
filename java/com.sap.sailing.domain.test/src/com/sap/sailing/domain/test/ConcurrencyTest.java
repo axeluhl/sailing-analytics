@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
         super.setUp();
         // load Race8 of RC44 Cup in Sweden
         super.setUp("event_20110815_RCSwedenCu",

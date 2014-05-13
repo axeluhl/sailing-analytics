@@ -50,7 +50,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -65,7 +64,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Displays a table of currently tracked races. The user can configure whether a race
@@ -571,7 +571,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private void showWindFixesList(RegattaAndRaceIdentifier selectedRace, RaceDTO raceDTO) {
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
+        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames,
+                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {

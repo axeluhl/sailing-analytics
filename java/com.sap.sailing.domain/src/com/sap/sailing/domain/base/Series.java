@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
@@ -40,6 +41,14 @@ public interface Series extends SeriesBase {
 
     Fleet getFleetByName(String fleetName);
 
+    /**
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
+     */
     RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
     
     void moveRaceColumnUp(String raceColumnName);
@@ -93,4 +102,14 @@ public interface Series extends SeriesBase {
     boolean isFirstColumnIsNonDiscardableCarryForward();
 
     void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward);
+
+    /**
+     * When a series has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
+     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
+     * in the column as many times as there are fleets in the column. For the former case, this method returns <code>true</code>.
+     */
+    boolean hasSplitFleetContiguousScoring();
+
+    void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
 }

@@ -13,12 +13,12 @@ import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
-import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -42,7 +42,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -51,12 +50,13 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
@@ -72,8 +72,9 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
  */
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
+    public static final String LODA_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    
     private static final int LINE_WIDTH = 1;
-    private static final int MAX_SERIES_POINTS = 10000;
     
     private final Label noCompetitorsSelectedLabel;
     private final Label noDataFoundLabel;
@@ -219,7 +220,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
-                leaderboardGroupName, leaderboardName, new AsyncCallback<CompetitorsRaceDataDTO>() {
+                leaderboardGroupName, leaderboardName);
+        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LODA_COMPETITOR_CHART_DATA_CATEGORY,
+                new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
@@ -235,7 +238,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                             }
                         }
                     }
-
+        
                     @Override
                     public void onFailure(Throwable caught) {
                         hideLoading();
@@ -243,7 +246,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                                 timer.getPlayMode() == PlayModes.Live);
                     }
                 });
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
     }
     
@@ -489,7 +491,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
                 chart = createChart();
                 if (isZoomed) {
-                    Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                	com.sap.sse.common.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
                     onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
@@ -548,7 +550,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         clearChart();
         if (selectedRaceIdentifier != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 
@@ -593,21 +595,21 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if (!isVisible()) {
             return;
         }
 
         if (allowTimeAdjust) {
-            updateTimePlotLine(date);
+            updateTimePlotLine(newTime);
         }
         
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
-            if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
-            } else if (date.getTime() > timeOfLatestRequestInMillis) {
+            if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+            } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                 updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
@@ -619,9 +621,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
             } else {
                 // replay mode during live play
-                if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                    updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
-                } else if (date.getTime() > timeOfLatestRequestInMillis) {
+                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                     updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
             }
@@ -647,11 +649,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
     
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 }

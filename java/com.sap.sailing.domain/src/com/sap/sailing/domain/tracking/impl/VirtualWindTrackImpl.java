@@ -42,10 +42,7 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     }
 
     /**
-     * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
-     * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
-     * calling the base class's implementation. If either race start or time of newest event are not known, the known
-     * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
+     * Delegates to {@link #getAveragedWindUnsynchronized(Position, TimePoint)}
      */
     @Override
     public Wind getAveragedWind(Position p, TimePoint at) {
@@ -53,6 +50,12 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
         return windWithConfidence == null ? null : windWithConfidence.getObject();
     }
     
+    /**
+     * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
+     * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
+     * calling the base class's implementation. If either race start or time of newest event are not known, the known
+     * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
+     */
     @Override
     public WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         WindWithConfidence<Pair<Position, TimePoint>> result = null;

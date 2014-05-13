@@ -12,7 +12,9 @@ public interface SelectionProvider<T> {
 
     void removeSelectionChangeListener(SelectionChangeListener<T> listener);
     
-    void setSelection(List<T> newSelection, SelectionChangeListener<T>... listenersNotToNotify);
+    void setSelection(List<T> newSelection);
+
+    void setSelection(List<T> newSelection, SelectionChangeListener<T>[] listenerNotToNotify);
 
     boolean hasMultiSelection();
 
@@ -21,5 +23,5 @@ public interface SelectionProvider<T> {
      */
     List<T> getAllItems();
     
-    void setAllItems(List<T> newAllItems, SelectionChangeListener<T>... listenersNotToNotify);
+    void setAllItems(List<T> newAllItems);
 }

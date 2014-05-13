@@ -7,11 +7,15 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.WithNationality;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -39,7 +43,8 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  */
 public class LeaderboardCacheManager {
     private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
-    private final NamedReentrantReadWriteLock scoreCorrectionListenersLock;
+    private final NamedReentrantReadWriteLock scoreCorrectionAndCompetitorChangeListenersLock;
+    private final WeakHashMap<Leaderboard, CacheInvalidationUponCompetitorChangeListener> competitorChangeListeners;
     private final WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
@@ -113,6 +118,64 @@ public class LeaderboardCacheManager {
         }
     }
     
+    private class CacheInvalidationUponCompetitorChangeListener implements CompetitorChangeListener {
+        private static final long serialVersionUID = 8308312509904366143L;
+        private final Leaderboard leaderboard;
+        private final Set<Competitor> observedCompetitors;
+        
+        /**
+         * Registers this listener as listener for all of the <code>leaderboard</code>'s current
+         * {@link Leaderboard#getCompetitors() competitors}
+         */
+        public CacheInvalidationUponCompetitorChangeListener(Leaderboard leaderboard) {
+            this.leaderboard = leaderboard;
+            observedCompetitors = new HashSet<>();
+            updateCompetitorListeners();
+        }
+
+        @Override
+        public void sailIdChanged(String oldSailId, String newSailId) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void nationalityChanged(WithNationality what, Nationality oldNationality, Nationality newNationality) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void colorChanged(Color oldColor, Color newColor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void nameChanged(String oldName, String newName) {
+            removeFromCache(leaderboard);
+        }
+
+        public synchronized void updateCompetitorListeners() {
+            Set<Competitor> competitorsToStopObserving = new HashSet<>(observedCompetitors);
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                if (!observedCompetitors.contains(competitor)) {
+                    competitor.addCompetitorChangeListener(this); // start observing competitor
+                } else {
+                    competitorsToStopObserving.remove(competitor); // keep observing competitor
+                }
+            }
+            for (Competitor competitorToStopObserving : competitorsToStopObserving) {
+                competitorToStopObserving.removeCompetitorChangeListener(this);
+                observedCompetitors.remove(competitorToStopObserving);
+            }
+        }
+
+        public synchronized void removeFromAllCompetitors() {
+            for (Competitor competitor : observedCompetitors) {
+                competitor.removeCompetitorChangeListener(this);
+            }
+        }
+        
+    }
+    
     private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
         private final Leaderboard leaderboard;
         
@@ -146,14 +209,15 @@ public class LeaderboardCacheManager {
     
     public LeaderboardCacheManager(LeaderboardCache leaderboardCache) {
         this.leaderboardCache = leaderboardCache;
-        this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
+        this.invalidationListenersPerLeaderboard = new WeakHashMap<>();
         this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
-        this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();
-        this.scoreCorrectionListenersLock = new NamedReentrantReadWriteLock("Score correction listeners", /* fair */ false);
+        this.scoreCorrectionListeners = new WeakHashMap<>();
+        this.scoreCorrectionAndCompetitorChangeListenersLock = new NamedReentrantReadWriteLock(
+                "Score correction and competitor change listeners", /* fair */false);
+        this.competitorChangeListeners = new WeakHashMap<>();
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
-        leaderboardCache.invalidate(leaderboard);
         synchronized (invalidationListenersPerLeaderboard) {
             Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
                     .remove(leaderboard);
@@ -168,14 +232,26 @@ public class LeaderboardCacheManager {
         synchronized (raceColumnListeners) {
             leaderboard.removeRaceColumnListener(raceColumnListeners.remove(leaderboard));
         }
-        LockUtil.lockForWrite(scoreCorrectionListenersLock);
+        LockUtil.lockForWrite(scoreCorrectionAndCompetitorChangeListenersLock);
         final CacheInvalidationUponScoreCorrectionListener removedScoreCorrectionListener;
+        final CacheInvalidationUponCompetitorChangeListener removedCompetitorChangeListener;
         try {
             removedScoreCorrectionListener = scoreCorrectionListeners.remove(leaderboard);
+            removedCompetitorChangeListener = competitorChangeListeners.remove(leaderboard);
         } finally {
-            LockUtil.unlockAfterWrite(scoreCorrectionListenersLock);
+            LockUtil.unlockAfterWrite(scoreCorrectionAndCompetitorChangeListenersLock);
         }
-        leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
+        if (removedScoreCorrectionListener != null) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
+        }
+        if (removedCompetitorChangeListener != null) {
+            removedCompetitorChangeListener.removeFromAllCompetitors();
+        }
+        // invalidate after the listeners have been removed; this is important because invalidation may trigger a
+        // re-calculation which then in turn may call add(leaderboard) asynchronously again which may be executed
+        // before the listener removal happens here. This could lead to a race condition where listeners are
+        // removed again after the invalidation has just added them again. See also bug 1807.
+        leaderboardCache.invalidate(leaderboard);
     }
     
     public void add(Leaderboard leaderboard) {
@@ -186,27 +262,30 @@ public class LeaderboardCacheManager {
     /**
      * Listens at the leaderboard for {@link TrackedRace}s being connected to / disconnected from race columns. Whenever this
      * happens, the listener structure that uses {@link CacheInvalidationListener}s to observe the individual tracked races
-     * is updated accordingly.
+     * is updated accordingly. Calling this method for a <code>leaderboard</code> that is already observed has no effect.
      */
     private void registerAsListener(final Leaderboard leaderboard) {
         // only add as listener again if not yet added
         final boolean containsKey;
-        LockUtil.lockForRead(scoreCorrectionListenersLock);
+        LockUtil.lockForRead(scoreCorrectionAndCompetitorChangeListenersLock);
         try {
             containsKey = scoreCorrectionListeners.containsKey(leaderboard);
         } finally {
-            LockUtil.unlockAfterRead(scoreCorrectionListenersLock);
+            LockUtil.unlockAfterRead(scoreCorrectionAndCompetitorChangeListenersLock);
         }
         if (!containsKey) {
-            LockUtil.lockForWrite(scoreCorrectionListenersLock);
+            LockUtil.lockForWrite(scoreCorrectionAndCompetitorChangeListenersLock);
             try {
                 for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
                     registerListener(leaderboard, trackedRace);
                 }
                 final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(
                         leaderboard);
+                final CacheInvalidationUponCompetitorChangeListener competitorChangeListener = new CacheInvalidationUponCompetitorChangeListener(
+                        leaderboard);
                 leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
                 scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
+                competitorChangeListeners.put(leaderboard, competitorChangeListener);
                 final RaceColumnListener raceColumnListener = new RaceColumnListener() {
                     private static final long serialVersionUID = 8165124797028386317L;
 
@@ -246,6 +325,11 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+                        removeFromCache(leaderboard);
+                    }
+
+                    @Override
+                    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
                         removeFromCache(leaderboard);
                     }
 
@@ -303,7 +387,7 @@ public class LeaderboardCacheManager {
                     raceColumnListeners.put(leaderboard, raceColumnListener);
                 }
             } finally {
-                LockUtil.unlockAfterWrite(scoreCorrectionListenersLock);
+                LockUtil.unlockAfterWrite(scoreCorrectionAndCompetitorChangeListenersLock);
             }
         }
     }

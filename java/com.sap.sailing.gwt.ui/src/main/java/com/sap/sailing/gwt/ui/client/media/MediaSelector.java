@@ -30,13 +30,8 @@ import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.media.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
@@ -45,7 +40,12 @@ import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.player.PlayStateListener;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class MediaSelector implements PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
@@ -215,8 +215,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
                 startPlaying();
                 break;
             case Paused:
-                // fall through to Stopped
-            case Stopped:
                 pausePlaying();
             default:
                 break;
@@ -261,8 +259,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     @Override
-    public void timeChanged(Date raceTime) {
-        this.currentRaceTime = raceTime;
+    public void timeChanged(Date newRaceTime, Date oldRaceTime) {
+        this.currentRaceTime = newRaceTime;
         if (activeAudioPlayer != null) {
             activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);
@@ -463,8 +461,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
             break;
         case Paused:
-            // fall through to Stopped
-        case Stopped:
             if (!mediaPlayer.isMediaPaused()) {
                 mediaPlayer.pauseMedia();
             }

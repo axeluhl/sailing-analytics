@@ -9,12 +9,12 @@ import slash.navigation.gpx.GpxRoute;
 
 @SuppressWarnings("rawtypes")
 abstract class RouteConverter {
-	abstract BaseRoute convert(GpxRoute route);
+    abstract BaseRoute convert(GpxRoute route);
 
-	List<BaseRoute> convert(Collection<GpxRoute> routes) {
-		List<BaseRoute> result = new ArrayList<BaseRoute>(routes.size());
-		for (GpxRoute route : routes)
-			result.add(convert(route));
-		return result;
-	}
+    List<BaseRoute> convert(Collection<GpxRoute> routes) {
+        List<BaseRoute> result = new ArrayList<BaseRoute>(routes.size());
+        for (GpxRoute route : routes)
+            result.add(convert(route));
+        return result;
+    }
 }

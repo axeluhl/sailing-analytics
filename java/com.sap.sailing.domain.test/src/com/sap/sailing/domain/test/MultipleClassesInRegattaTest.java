@@ -15,8 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -55,25 +55,25 @@ public class MultipleClassesInRegattaTest {
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
                         /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false,
-                        EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword, new DummyTrackedRegattaRegistry());
+                        EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, new DummyTrackedRegattaRegistry());
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword, new DummyTrackedRegattaRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, new DummyTrackedRegattaRegistry());
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword, new DummyTrackedRegattaRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, new DummyTrackedRegattaRegistry());
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword, new DummyTrackedRegattaRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, new DummyTrackedRegattaRegistry());
         
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
         assertEquals("505", kiwotest2.getRegatta().getBoatClass().getName());

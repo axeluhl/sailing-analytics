@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.MarkType;
 
 /**
  * A class for course mark graphics based on SVG graphics drawn to a HTML5 canvas
+ * The SVG files for the drawing can be found in the package com.sap.sailing.gwt.ui.svg.buys
+ * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/boatgraphicssvg 
  * @author Frank
  *
  */
@@ -55,9 +57,9 @@ public class MarkVectorGraphics {
         switch(type) {
             case BUOY:
                 if(shape != null) {
-                    if("Cylinder".equalsIgnoreCase(shape) && pattern != null && "Checkered".equalsIgnoreCase(pattern)) {
+                    if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
                         drawBuoyWithFinishFlag(ctx, isSelected, color);
-                    } else if ("Conical".equalsIgnoreCase(shape)) {
+                    } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
                         drawConicalBuoy(ctx, isSelected, color);
                     } else {
                         drawSimpleBuoy(ctx, isSelected, color);

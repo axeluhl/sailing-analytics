@@ -53,8 +53,10 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSeconds();
         case RACE_DISTANCE_TO_LEADER_IN_METERS:
             return stringMessages.windwardDistanceToLeaderInMeters();
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMeters();
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMeters();
         case START_TACK:
             return stringMessages.startTack();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -79,8 +81,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentLeg();
         case TIME_TRAVELED:
             return stringMessages.time();
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMeters();
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMeters();
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMeters();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_DISTANCE_TRAVELED:
@@ -101,10 +105,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageTackLossInMeters();
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMeters();
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
-            return stringMessages.timeSinceLastPositionFix();
-        case RACE_TRACKING_QUALITY:
-            return "TQ";
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval();
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStart();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
@@ -155,8 +157,10 @@ public class DetailTypeFormatter {
         case AVERAGE_TACK_LOSS_IN_METERS:
         case AVERAGE_JIBE_LOSS_IN_METERS:
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
         case DISTANCE_TO_START_AT_RACE_START:
         case TOTAL_DISTANCE_TRAVELED:
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
@@ -168,7 +172,6 @@ public class DetailTypeFormatter {
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
         case RACE_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
@@ -176,6 +179,9 @@ public class DetailTypeFormatter {
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.secondsUnit();
 
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratio();
+            
         case TOTAL_TIME_SAILED_IN_SECONDS:
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -197,7 +203,6 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
-        case RACE_TRACKING_QUALITY:
         case BEAT_ANGLE:
             return "";
         }
@@ -214,12 +219,16 @@ public class DetailTypeFormatter {
      */
     public static String getTooltip(DetailType detailType) {
         switch (detailType) {
-        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.averageCrossTrackErrorInMetersTooltip();
+        case AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageAbsoluteCrossTrackErrorInMetersTooltip();
+        case AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageSignedCrossTrackErrorInMetersTooltip();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
             return stringMessages.gapChangeSinceLegStartInSecondsTooltip();
-        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            return stringMessages.raceAverageCrossTrackErrorInMetersTooltip();
+        case RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.raceAverageAbsoluteCrossTrackErrorInMetersTooltip();
+        case RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.raceAverageSignedCrossTrackErrorInMetersTooltip();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
             return stringMessages.sideToWhichMarkAtLegStartWasRoundedTooltip();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -304,10 +313,8 @@ public class DetailTypeFormatter {
             return stringMessages.totalAverageSpeedOverGroundTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
-        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
-            return stringMessages.timeSinceLastPositionFixTooltip();
-        case RACE_TRACKING_QUALITY:
-            return stringMessages.trackingQuality();
+        case RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL:
+            return stringMessages.ratioBetweenTimeSinceLastPositionFixAndAverageSamplingIntervalTooltip();
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStartTooltip();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:

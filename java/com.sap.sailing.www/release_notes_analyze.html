@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="fontface.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
+  <link href="main.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
+	<link href="release_notes.css" rel="stylesheet" type="text/css" />
+  <link rel="shortcut icon" type="image/x-icon" href="/sap.ico" />
+  <title>SAP Sailing Analytics - Release Notes</title>
+</head>
+<body>
+	<div id="yield_content">
+		<!-- start logo and title panel _header -->
+		<div id="logoAndTitlePanel">
+			<a class="sapLogo" href="http://www.sap.com/">
+				<img alt="SAP Website" src="images/sap-logo.png" />
+			</a>
+			<ul class="headNavigation">
+				<li><a href="http://www.sapsailing.com/">sapsailing.com</a></li>
+			</ul>
+		</div>
+		<div id="contentWrapper">
+			<div id="keyVisual">
+				<img alt="Sailer" src="images/key-visual.jpg" />
+			</div>
+			<div id="mainContent">
+				<h1 class="releaseHeadline">Release Notes</h1>
+				<ul class="releaseNavigation">
+					<li>Analyzing Races, Leaderboards<span> | </span></li>
+					<li>
+						<a href="release_notes_RCApp.html">Race Committee App</a>
+						<span> | </span>
+					</li>
+					<li><a href="release_notes_admin.html">Administration</a></li>
+				</ul>
+				<h2 class="articleHeadline">Analyzing Races, Leaderboards</h2>
+
+				<div class="innerContent">
+					<h2 class="articleSubheadline">May 2014</h2>
+
+					<ul class="bulletList">
+						<li>A hint regarding the "distance to start line" metrics: please keep in mind that currently this
+						    measurement is calculated as the distance of the GPS tracker from the line. Unless the tracker
+						    is mounted near the bow (or at the bow sprit, if any), the distance calculated this way will
+						    be greater than what counts for crossing the line. Ordering, comparing and aggregating over this
+						    figure still makes sense as long as you remember this detail.
+						</li>
+						<li>Introduced a new leaderboard entry "XTE +/-" featuring a signed cross-track error which shows
+						    for a leg and also aggregated for an entire race on which side of the leg a competitor stayed on
+						    average. Currently, the "side" is defined as viewing in the leg's direction, so "left" for a downwind
+						    leg is the same side as "right" for the corresponding upwind leg.
+						</li>
+					</ul>
+					
+					<h2 class="articleSubheadline">April 2014</h2>
+
+					<ul class="bulletList">
+						<li>China races, such as in Qingdao, may have the map background displayed at slightly wrong locations.
+						    This is due to an intentional random transformation that Google applies to GPS locations for
+						    China. You can circumvent this issue by switching to satellite view where the map background is displayed
+						    correctly. <img src="images/mapsatellite.png"/>
+						</li>
+						<li>Fixed a bug that in some cases has caused the wind chart, the advantage line, the wind indicator on the map
+						    and the leaderboard to use slightly different wind values. The problem was related to different averaging and
+						    damping methods used for these values which has now been aligned.
+						</li>
+						<li>Fixed a bug that caused the time spent in a leg, race or regatta to always show the time at the end of the leg
+						    if the leg has been started by the competitor at the time point queried, e.g., by the time slider. While this
+						    did not have any serious effects in live mode, for replay races this left the leg time and race time constant
+							at the total time spent so far up to the end of the last leg the competitor had started at that time.
+					    </li>
+					</ul>
+					
+					<h2 class="articleSubheadline">March 2014</h2>
+
+					<ul class="bulletList">
+						<li>Added a new setting for a leaderboard called "Show added scores". Using this feature one
+						can display added scores for each leaderboard entry. An added score is the sum over all scores
+						from the first column to the current column. One can describe it as an intermediate overall score.
+						This feature can be used to know the score until a specific race while another race is live and
+						constantly changes the overall score.</li>
+						
+						<li>Added tooltips for leaderboard settings.</li>
+						
+						<li>Fixed HighPointOverall scheme to also break a tie by looking at the ranks of the last regatta.</li>
+
+						<li>Progress indicator when expanding a race in the RaceBoard view</li>
+
+						<li>Leaderboard column "GPS Lag" shows how far a competitor's GPS signal lags behind the average
+						    tracking quality. A background color bar classifies into good/ok/bad (green/yellow/red).</li>
+					</ul>
+					
+					<h2 class="articleSubheadline">February 2014</h2>
+
+					<ul class="bulletList">
+						<li>Fixed an issue with boat rotation on Safari browsers</li>
+
+						<li>Maneuver analysis now counts tacks and jibes based on wind
+						    at boat position and not based on leg type; subsequently,
+						    penalty circle analysis is now based on a tack and a jibe
+						    in close succession instead of a full circle.</li>
+
+						<li>Regatta rank and overall rank in competitor chart of leaderboard panel
+						    has been fixed; it did erroneously display the rank of the particular
+						    race, not the regatta/overall rank after that race.</li>
+
+						<li>Regatta overview now also displays all regatta leaderboards</li>
+
+						<li>Boat colors match tail colors</li>
+						
+						<li>When selecting boats in leaderboard, de-selected boats' tails turn grey</li>
+
+					</ul>
+
+
+					<h2 class="articleSubheadline">January 2014</h2>
+
+					<ul class="bulletList">
+						<li>Boat movement animated smoothly</li>
+
+						<li>Start and Finish line show line parameters (length, angle to wind,
+					advantage) when mouse hovers over them</li>
+
+						<li>Start line has a count-down indicator displayed next to it
+					before the start. The count-down is also displayed underneath the time
+					slider</li>
+
+						<li>Competitor and Wind charts show pre-start data where possible</li>
+
+						<li>Competitors can be assigned a fixed color which they will keep
+					for all races in a regatta</li>
+
+						<li>By default, videos are now shown in a moveable, resizable box embedded in
+					the web page. For a two screen setup, the embedded box can be popped out to a
+					dedicated browser window.</li>
+
+						<li>Official score corrections for historic races are only applied after
+					the respective competitor finished the race. Therefore, in-between race
+					scores now correspond with tracking, regardless of final corrected score.</li>
+					
+					    <li>By using negative playback speed (e.g., -1), replays can be run backwards.</li>
+
+					</ul>
+				</div>
+			</div>
+	  </div>
+		<div id="spaceBar"></div>
+	</div>
+	    <div id="footer">
+      <ul class="regularNav">
+        <li> 
+					<a href="http://www12.sap.com/corporate-en/legal/impressum.epx" target="_blank">
+            Legal Disclosure
+          </a>
+					<span>
+            |
+          </span>
+        </li>
+        <li> 
+					<a href="http://www12.sap.com/corporate-en/our-company/legal/privacy.epx" target="_blank">
+            Privacy
+          </a>
+        </li>
+      </ul>
+    </div>
+</body>
+
+</html>

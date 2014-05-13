@@ -46,13 +46,16 @@ public class LegEntryDTO implements Serializable {
     public boolean finished;
     public Map<ManeuverType, Integer> numberOfManeuvers;
     public Map<ManeuverType, Double> averageManeuverLossInMeters;
-    public Double averageCrossTrackErrorInMeters;
+    public Double averageAbsoluteCrossTrackErrorInMeters;
+    public Double averageSignedCrossTrackErrorInMeters;
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
+                + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0 : averageAbsoluteCrossTrackErrorInMeters.hashCode());
+        result = prime * result
+                + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((averageManeuverLossInMeters == null) ? 0 : averageManeuverLossInMeters.hashCode());
         result = prime * result
                 + ((averageSpeedOverGroundInKnots == null) ? 0 : averageSpeedOverGroundInKnots.hashCode());
@@ -87,10 +90,15 @@ public class LegEntryDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LegEntryDTO other = (LegEntryDTO) obj;
-        if (averageCrossTrackErrorInMeters == null) {
-            if (other.averageCrossTrackErrorInMeters != null)
+        if (averageAbsoluteCrossTrackErrorInMeters == null) {
+            if (other.averageAbsoluteCrossTrackErrorInMeters != null)
                 return false;
-        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
+        } else if (!averageAbsoluteCrossTrackErrorInMeters.equals(other.averageAbsoluteCrossTrackErrorInMeters))
+            return false;
+        if (averageSignedCrossTrackErrorInMeters == null) {
+            if (other.averageSignedCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageSignedCrossTrackErrorInMeters.equals(other.averageSignedCrossTrackErrorInMeters))
             return false;
         if (averageManeuverLossInMeters == null) {
             if (other.averageManeuverLossInMeters != null)

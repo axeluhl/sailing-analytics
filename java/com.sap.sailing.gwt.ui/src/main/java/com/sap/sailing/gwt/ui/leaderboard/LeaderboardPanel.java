@@ -68,32 +68,33 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
-import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
-import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
-import com.sap.sailing.gwt.ui.client.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.player.PlayStateListener;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -103,6 +104,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
  */
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
+    public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -133,7 +135,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     /**
      * The leaderboard name is used to
-     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], String, com.google.gwt.user.client.rpc.AsyncCallback)
+     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
@@ -202,6 +204,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean autoExpandPreSelectedRace;
     
     private boolean autoExpandLastRaceColumn;
+    
+    /**
+     * When <code>true</code>, the race columns don't display the competitors' scores in the race represented by the column
+     * but the cumulative score up to that race.
+     */
+    private boolean showAddedScores;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
@@ -322,11 +330,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
+    
+    protected ImageResource getSettingsIcon() {
+        return resources.settingsIcon();
+    }
 
     public void updateSettings(LeaderboardSettings newSettings) {
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
+        setShowAddedScores(newSettings.isShowAddedScores());
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -610,10 +623,27 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         public boolean isLive(FleetDTO fleetDTO) {
             return race.isLive(fleetDTO, timer.getLiveTimePointInMillis());
         }
-
+        
         @Override
         public String getColumnStyle() {
             return columnStyle;
+        }
+        
+        /**
+         * Computes added scores for this RaceColumn
+         */
+        private double computeAddedScores(LeaderboardRowDTO object) {
+            double addedScores = 0;
+            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+                LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
+                if (entryBefore.totalPoints != null) {
+                    addedScores += entryBefore.totalPoints;
+                }
+                if (raceColumn.getName().equals(getRaceColumnName())) {
+                    break; // we've reached the current column - stop here
+                }
+            }
+            return addedScores;
         }
 
         /**
@@ -636,28 +666,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             	boolean isLive = isLive(entry.fleet);
             	
                 String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
-                String totalPointsAsText = entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
-                String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
-
+                String totalOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
+                        : entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
+                String netOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
+                        : entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
+                
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
-                	html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
+                    html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
                 } else {
-                	html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
+                    html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
                 }
-
+                
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(totalPointsAsText);
+                        html.appendHtmlConstant(totalOrAddedPointsAsText);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(netPointsAsText);
+                        html.appendHtmlConstant(netOrAddedPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\"" + netPointsAsText + "/" + totalPointsAsText
+                    html.appendHtmlConstant(" <span title=\"" + netOrAddedPointsAsText + "/" + totalOrAddedPointsAsText
                             + "\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
@@ -677,12 +709,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
-                            race);
-                    int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
-                    int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
-                    return o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
-                            : 1 : o1Rank - o2Rank;
+                    if (isShowAddedScores()) {
+                        double o1AddedScore = computeAddedScores(o1);
+                        double o2AddedScore = computeAddedScores(o2);
+                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? -1. : 1. : o1AddedScore - o2AddedScore;
+                        return result > 0 ? 1 : result < 0 ? -1 : 0;
+                    } else {
+                        List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
+                                race);
+                        int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
+                        int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
+                        return o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
+                                : 1 : o1Rank - o2Rank;
+                    }
                 }
             };
         }
@@ -707,14 +746,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
-                DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START, DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
                 DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                 DetailType.START_TACK,
-                DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS,
-                DetailType.RACE_TRACKING_QUALITY };
+                DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -753,20 +792,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 getSailingService().getLeaderboardByName(getLeaderboardName(),
                         timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        previousLeaderboard.getId(), new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                            @Override
-                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
-                                callWhenExpansionDataIsLoaded.run();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError(
-                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                        true /* silentMode */);
-                            }
-                        });
+                        shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                                new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                                    @Override
+                                    public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                        updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
+                                        callWhenExpansionDataIsLoaded.run();
+                                    }
+        
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError(
+                                                stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                                true /* silentMode */);
+                                    }
+                                }));
             }
         }
 
@@ -775,11 +815,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            result.put(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS, 
-                            new RaceTimeSinceLastPositionFixInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.RACE_TRACKING_QUALITY, new TrackingQualityColumn(stringMessages.trackingQuality(), new RaceTrackingQuality(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            
+            result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
+                    new TimeSinceLastGpsFixColumn(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, 
+                            new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
@@ -795,8 +833,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS, new RaceDistanceToLeaderInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageCrossTrackErrorInMeters(),
+            result.put(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageAbsoluteCrossTrackErrorInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageSignedCrossTrackErrorInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START, new DistanceToStartFiveSecondsBeforeStartInMeters(),
@@ -880,25 +921,22 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return result;
         }
 
-        private class RaceTrackingQuality implements LegDetailField<Double> {
+        /**
+         * Reports the ratio of the time that passed since the last position fix and the average sampling interval of the
+         * competitor's track. On a perfect track, this value will never exceed 1.0. Immediately when a fix is received, this
+         * value goes to 0.0. For a competitor whose tracker is lagging, this value can grow considerably greater than 1.
+         * The value goes to <code>null</code> if there are no fixes in the track.
+         * 
+         * @author Axel Uhl (D043530)
+         *
+         */
+        private class RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null) {
-                    result = fieldsForRace.timeSinceLastPositionFixInSeconds;
-                }
-                return result;
-            }
-        }
-
-        private class RaceTimeSinceLastPositionFixInSeconds implements LegDetailField<Double> {
-            @Override
-            public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null) {
-                    result = fieldsForRace.timeSinceLastPositionFixInSeconds;
+                if (fieldsForRace != null && fieldsForRace.timeSinceLastPositionFixInSeconds != null && fieldsForRace.averageSamplingInterval != null) {
+                    result = fieldsForRace.timeSinceLastPositionFixInSeconds / fieldsForRace.averageSamplingInterval.asSeconds();
                 }
                 return result;
             }
@@ -938,17 +976,34 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
 
         /**
-         * Fetches the average cross-track error for the race
+         * Fetches the average absolute (distance always counted as positive, no matter whether left or right) cross-track error for the race
          * 
          * @author Axel Uhl (D043530)
          */
-        private class RaceAverageCrossTrackErrorInMeters implements LegDetailField<Double> {
+        private class RaceAverageAbsoluteCrossTrackErrorInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
-                    result = fieldsForRace.averageCrossTrackErrorInMeters;
+                    result = fieldsForRace.averageAbsoluteCrossTrackErrorInMeters;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average signed (right course side is positive, left course side is negative) cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceAverageSignedCrossTrackErrorInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.averageSignedCrossTrackErrorInMeters;
                 }
                 return result;
             }
@@ -1333,7 +1388,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
-                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
+                // perform the first request as "live" but don't by default auto-play
+                PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
@@ -1403,7 +1459,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
-        leaderboardTable.ensureDebugId("LeaderboardTable");
+        leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -1425,7 +1481,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
-        loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        setShowAddedScores(settings.isShowAddedScores());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        }
 
         if (this.preSelectedRace == null) {
             isEmbedded = false;
@@ -1437,7 +1496,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         // the information panel
         informationPanel = new FlowPanel();
-		informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
+        informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
         informationPanel.add(scoreCorrectionCommentLabel);
@@ -1452,8 +1511,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         // the toolbar panel
         DockPanel toolbarPanel = new DockPanel();
-		toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
+        toolbarPanel.ensureDebugId("ToolbarPanel");
+        toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+        busyIndicator.ensureDebugId("BusyIndicator");
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
@@ -1474,12 +1535,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         pauseIcon = resources.autoRefreshEnabledIcon();
         playIcon = resources.autoRefreshDisabledIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
+        refreshAndSettingsPanel.ensureDebugId("RefreshAndSettingsPanel");
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         FlowPanel refreshPanel = new FlowPanel();
         refreshPanel.addStyleName("refreshPanel");
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
+        playPause.ensureDebugId("PlayAndPauseAnchor");
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
@@ -1505,7 +1568,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public Double get(LeaderboardRowDTO row) {
             final Double result;
-            if (row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
+            if (row.totalDistanceTraveledInMeters != null && row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
                 result = row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
             } else {
                 result = null;
@@ -1605,7 +1668,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
+        // If the timer is currently in a mode that causes null to be used as the leaderboard request time stamp,
+        // don't let a live play delay change cause another load request by unregistering this panel as timer
+        // listener before and re-registering it after adjusting the live play delay.
+        if (useNullAsTimePoint()) {
+            timer.removeTimeListener(this);
+        }
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
+        if (useNullAsTimePoint()) {
+            timer.addTimeListener(this);
+        }
     }
 
     private boolean isAutoExpandPreSelectedRace() {
@@ -1623,9 +1695,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
     
+    private boolean isShowAddedScores() {
+        return showAddedScores;
+    }
+    
+    private void setShowAddedScores(boolean showAddedScores) {
+        this.showAddedScores = showAddedScores;
+    }
+    
     /**
      * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
-     * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to
+     * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantized to
      * the closest full second to increase the likelihood of cache hits in the back end.
      */
     protected Date getLeaderboardDisplayDate() {
@@ -1706,15 +1786,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
-                    getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
+                    getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages, new AsyncCallback<LeaderboardDTO>() {
+                    shallAddOverallDetails(), /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
+            this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
+                    new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
                             getBusyIndicator().setBusy(false);
                         }
-
+        
                         @Override
                         public void onFailure(Throwable caught) {
                             getBusyIndicator().setBusy(false);
@@ -1723,10 +1805,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                                             true /* silentMode */);
                         }
                     });
-            asyncActionsExecutor.execute(getLeaderboardByNameAction);
         } else {
             getBusyIndicator().setBusy(false);
         }
+    }
+
+    /**
+     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(Date) loading the leaderboard contents}, <code>null</code>
+     * is used as time point. The condition for this is encapsulated in this method so others can find out. For example, when a time change
+     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(Date)} would be required
+     * as <code>null</code> will be passed in any case, not being affected by local time offsets.
+     */
+    private boolean useNullAsTimePoint() {
+        return timer.getPlayMode() == PlayModes.Live;
     }
 
     private boolean needsDataLoading() {
@@ -1748,6 +1839,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         }
         return namesOfExpandedRaces;
+    }
+
+    private boolean shallAddOverallDetails() {
+        return !selectedOverallDetailColumns.isEmpty();
     }
 
     /**
@@ -2344,12 +2439,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     /**
-     * @param date
+     * @param newTime
      *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
      *            {@link #getLeaderboardDisplayDate()}.
      */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
     }
 
@@ -2407,7 +2502,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                timer.getRefreshInterval(), stringMessages);
+                isShowAddedScores(), timer.getRefreshInterval(), stringMessages);
     }
 
     @Override
@@ -2449,7 +2544,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public boolean hasBusyIndicator() {
         return true;
     }
-
+    
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
         ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
         for (LeaderboardRowDTO row : getData().getList()) {
@@ -2462,7 +2557,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        if (timer.isInitialized()) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.impl.tracked_leg_of_competitor;
 
 import com.sap.sailing.datamining.WindStrengthCluster;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -11,9 +11,9 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class TrackedLegOfCompetitorWithContextImpl implements TrackedLegOfCompetitorWithContext {
 
     private TrackedLegOfCompetitor trackedLegOfCompetitor;
-    private TrackedLegOfCompetitorContext context;
+    private HasTrackedLegOfCompetitorContext context;
 
-    public TrackedLegOfCompetitorWithContextImpl(TrackedLegOfCompetitor trackedLegOfCompetitor, TrackedLegOfCompetitorContext context) {
+    public TrackedLegOfCompetitorWithContextImpl(TrackedLegOfCompetitor trackedLegOfCompetitor, HasTrackedLegOfCompetitorContext context) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.context = context;
     }

@@ -41,7 +41,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         if (positions == null || positions.length < 1) {
             return;
         }
-        int vPoints = positions.length;
+        int vPoints = this.boundary.getResY();
         Distance vStep = boundary.getHeight().scale(1.0/(vPoints-1));
         if (windParameters.baseWindSpeed > 0) {
             timeScale = vStep.getNauticalMiles()/windParameters.baseWindSpeed;
@@ -56,7 +56,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             return;
         }
        
-        int ncol = positions[0].length;
+        int ncol = boundary.getResX();
    
         speed = new Speed[ncol];
         double leftSpeed = windParameters.baseWindSpeed*windParameters.leftWindSpeed/100.0;
@@ -85,6 +85,12 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         Pair<Integer,Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
             int colIndex = positionIndex.getB();
+            if (colIndex < 0) {
+            	colIndex = 0;
+            }
+            if (colIndex >= this.boundary.getResX()) {
+            	colIndex = this.boundary.getResX()-1;
+            }
             return speed[colIndex];
         } else {
             logger.severe("Error finding position " + p);

@@ -42,7 +42,7 @@ public class SimulatorTest {
         PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
         
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        Position[][] positions = bd.extractGrid(10, 10);
+        Position[][] positions = bd.extractGrid(10, 10, 0, 0);
         Bearing windBear = end.getBearingGreatCircle(start);
         WindControlParameters windParameters = new WindControlParameters(12.0, windBear.getDegrees());
         WindFieldGenerator wf = new WindFieldGeneratorBlastImpl(bd, windParameters);

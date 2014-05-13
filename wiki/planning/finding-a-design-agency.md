@@ -1,4 +1,80 @@
-# Finding a design agency
+# Finding a Design Agency
+
+[[_TOC_]]
+
+# Meeting preparations
+
+## Questions
+
+1. Wie sieht der Gesamtprozess vom "Verstehen der Anforderungen" bis zur 
+"Implementierung" aus? 
+2. Wie läuft das Projektmanagement? 
+3. Wie werden Designentscheidungen dokumentiert? 
+4. Wie werden alternative Entwürfe behandelt? 
+5. Wie wird die Usability getestet? (gibt es Usertests? wie oft?) 
+6. Wie wird die Kompatibilität der Lösung für den Device-Zoo sichergestellt? 
+Euch fallen sicher auch ein paar gute Fragen ein. Dazu kommen Axel's 
+Fragen, die eher allgemeine Rahmenbedingungen betreffen: 
+7. Frühester Starttermin 
+8. Anzahl verfügbarer Leute 
+9. Technlogie-Kompetenzen 
+10. Anzahl möglicher paralleler Projekte
+
+## Possible Process per Project
+
+1. We define the basic page flow and describe a minimal feature set in a document.
+2. A ramp-up workshop with the analytics team and the agency makes sure that everyone at the agency is on the same level
+3. Agency creates a design that shows all relevant pages (mockup). This step is delivered by using images.
+4. The agency creates a clickable prototype based on the mockups. This prototype must work on all target devices and be implemented in HTML or native UI.
+5. Sailing team starts integration with the server.
+6. Agency provides long-term support for changes. Lifecycle is communicated with agency.
+
+
+# Meeting Notes (20.01.2014)
+
+Participants: Axel, Frank, Simon
+
+- We have four projects that we would like to work on with an external agency
+
+1. Race Committee App
+2. Analytics Homepage
+3. Race Board
+4. TV Overlays
+
+- Important to make a decision about what we really want first before going into the process of deciding which agencies to go for. Agreed on the following workflow for each project:
+
+1. We define the basic page flow and describe a minimal feature set in a document.
+2. A ramp-up workshop with the analytics team and the agency makes sure that everyone at the agency is on the same level
+3. Agency creates a design that shows all relevant pages (mockup). This design is delivered by using images.
+4. The agency creates a clickable prototype based on the mockups. This prototype must work on all target devices.
+5. Sailing team starts integration with the server.
+6. Agency provides long-term support for changes. Lifecycle is communicated with agency.
+
+- The following criteria (order=priority) has been defined and guide the process on deciding for an agency:
+
+1. Design skills show professional work and a deep understanding of mobile devices and user interaction
+2. References show that the agency tries hard to understand the domain the project is built for
+3. Android skills at least for views
+4. Based in proximity of WDF or at least in Germany
+
+- Applying these criteria to the list of agencies, we agreed on the following three agencies:
+
+1. Ubilabs
+2. Creative Workline
+3. Sysvision
+
+- RaceBoard is a very complex topic. We agreed that we can't decide on the concrete design or the feature set now. But we have a basic understanding how we want to improve it and what we expect from a redesign. We can't decide now if it will be native or HTML5. We include into the projects we need help from the agency but we don't expect a solution right now. Agreed that we will try to get feedback from the agency and then define the project. We tell an agency that they should leave placeholders in the Analytics Homepage project for analytics that we might define later (start analysis, data mining).
+
+- In order to speed up the time to market we discussed the possibility of continuing the work on the Analytics Homepage with App House and later order Pier2Port to implement the prototype in HTML5. We agreed that this could be a way to go as we can't actually give any estimation for the time and effort an agency needs to implement this project. Stefan needs to agree as this would mean to put some more money aside.
+
+- Agreed on the following action items:
+
+1. Creating an email describing who we are and what we want (Simon)
+2. Sending out that email and calling each agency in order to schedule a meeting (Simon)
+3. Create a document that describes the features for the Analytics Homepage (Frank)
+4. Check with Stefan that parallel work is ok (internal=external budget) (Axel)
+
+# Agencies
 
 <table>
   <tr>
@@ -91,75 +167,207 @@ Telefon: 040 / 22 81 72 62 0
   </tr>
 </table>
 
-Priority list
+# Final Decision
+
+## Decision Matrix
 
 <table>
- <tr>
-  <td>Simon</td>
-  <td>Axel</td>
-  <td>Frank</td>
-  <td>Jens</td>
- </tr>
- <tr>
-  <td>Ubilabs</td>
+<tr>
+  <td>Objective</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Ubilabs (Hamburg)</td>
+  <td>Digital Sunray (Wien)</td>
+  <td>Creative Workline (Berlin)</td>
+  <td>GMR (London)</td>
+  <td>Pier2Port (Hamburg)</td>
+</tr>
+<tr>
+  <td>Office Location</td>
+  <td>++</td>
+  <td>+ (STG)</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Mobile HTML Knowledge, References and Developers?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
   <td>?</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Android Knowledge, References and Developers?</td>
+  <td>+ (more iOS)</td>
+  <td>+</td>
+  <td>++</td>
+  <td>++</td>
+  <td>? (no news)</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>iOS skills, References and Developers?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>+</td>
   <td>?</td>
-  <td>?</td>
- </tr>
- <tr>
-  <td>Creative Workline</td>
-  <td>?</td>
-  <td>?</td>
-  <td>?</td>
- </tr>
- <tr>
-  <td>Sysvision</td>
-  <td>?</td>
-  <td>?</td>
-  <td>?</td>
- </tr>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Professional Meeting at the office in terms of preparation and participants?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>GWT Knowledge?</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Technical Knowledge (GIT, Web-Technologies, Programming Languages)?</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Knowledge of Sailing Domain?</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Transformation of domain knowledge to design ideas (general)*</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>+</td>
+  <td>0</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Team size of developers and designers (10+)?</td>
+  <td>++ (30)</td>
+  <td>+ (20)</td>
+  <td>0 (10)</td>
+  <td>0 (10)</td>
+  <td>++ (30)</td>
+  <td>0 (10)</td>
+</tr>
+<tr>
+  <td>SAP Preferred Supplier?</td>
+  <td>+</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Cost per day (developer)</td>
+  <td>- (~1000)</td>
+  <td>0 (~800)</td>
+  <td>0 (~800)</td>
+  <td>+ (~700)</td>
+  <td>- (~900)</td>
+  <td>- (~900)</td>
+</tr>
+<tr>
+  <td>Task (Redesign of Homepage)</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Argumentation of task solution*</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Transformation of domain knowledge to design ideas (Homepage task)*</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Sympathy factor (gut feeling)</td>
+  <td>0</td>
+  <td>++</td>
+  <td>0</td>
+  <td>+</td>
+  <td>0</td>
+  <td>++</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td><b>15</b></td>
+  <td><b>20</b></td>
+  <td>5</td>
+  <td>9</td>
+  <td>3</td>
+  <td>5</td>
+</tr>
 </table>
 
-## Meeting Notes (20.01.2014)
+Items marked with * have a heigher weight in theory. This weight is not reflected in the bare numbers.
 
-Participants: Axel, Frank, Simon
+## Pros/Cons
 
-- We have four projects that we would like to work on with an external agency
+<table>
+<tr>
+  <td>Objective</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Ubilabs (Hamburg)</td>
+</tr>
+<tr>
+  <td>Pros</td>
+  <td><ul><li>Project is supported by Claus Heinrich (CEO)</li><li>Professional processes and environment</li><li> Near to SAP headquarters</li><li>Big, scalable team</li></ul></td>
+  <td><ul><li>Excellect design and user interaction understanding -> best prototype</li><li>CEO's are coming from the 'visual communication' world</li><li>Experience with map based solutions -> Google-Maps partner</li><li>Project references fit better to our project.</ul></td>
+</tr>
+<tr>
+  <td>Cons</td>
+  <td><ul><li>Expensive</li><li>We did not meet the people who made the prototype</li><li>People from the enterprise world -> not clear how flexible in dynamic event situations</li><li>We did not get a handout of the prototype</li></ul></td>
+  <td><ul><li>Small team, probably not scalable</li><li>Hamburg based -> communication overhead</li></ul></td>
+</tr>
+</table>
 
-1. Race Committee App
-2. Analytics Homepage
-3. Race Board
-4. TV Overlays
+## Resumee
 
-- Important to make a decision about what we really want first before going into the process of deciding which agencies to go for. Agreed on the following workflow for each project:
+The two only serious contenders in the process eventually turned out to be Sovanta and Ubilabs. After both agencies had presented themselves professionally and well-prepared at their respective offices, had listened carefully and created serious enthusiasm around the project, we tasked them with a tiny test project to better allow us to differentiate their skills and processes. In short, we asked them to spend a day or two into the re-design of our landing page sapsailing.com.
 
-1. We define the basic page flow and describe a minimal feature set in a document.
-2. A ramp-up workshop with the analytics team and the agency makes sure that everyone at the agency is on the same level
-3. Agency creates a design that shows all relevant pages (mockup). This design is delivered by using images.
-4. The agency creates a clickable prototype based on the mockups. This prototype must work on all target devices.
-5. Sailing team starts integration with the server.
-6. Agency provides long-term support for changes. Lifecycle is communicated with agency.
+Both completed the task in time, and we had both present their results and findings to our team. The Sovanta presentation demonstrated that they spent serious effort in understanding the domain. The scribbles they showed were OK but not overwhelming. The explanations of how they got there and why things were proposed the way they were was not entirely satisfactory to us. There was a very strong focus on a live video feed which is not always present. Some ideas such as the world map of events were nice and showed that Sovanta worked their way into the domain.
 
-- The following criteria (order=priority) has been defined and guide the process on deciding for an agency:
+Ubilabs presented a flawless and incredibly great design. With a lot less effort they had reached a clearer structure and were able to explain exactly why they did what and how. They conveyed the "Apple" feeling we had so long been looking for. Simple but not simplistic; beautiful, yet functional, combined with a solid understanding of the domain, given the comparably little effort they were able to put in. Their greatest skills are undoubtedly in the areas that we require the most.
 
-1. Design skills show professional work and a deep understanding of mobile devices and user interaction
-2. References show that the agency tries hard to understand the domain the project is built for
-3. Android skills at least for views
-4. Based in proximity of WDF or at least in Germany
+The working relation and the communication style worked better for all of our team in the Ubilabs case. We consider this an important aspect when it comes to a long-term working relation, and we are convinced that it outweighs the additional cost and effort incurred by the remoteness of their office location. Their significantly lower price, though certainly not the main criteria, helps in making their offer even more attractive. Ubilabs has a strong focus on anything geo-spatial as shown in theire rerefences and is Google Maps Premier Partner, adding lots of specific know-how to the project when it comes to the visualization of spatial data as we have it for the SAP Sailing Analytics.
 
-- Applying these criteria to the list of agencies, we agreed on the following three agencies:
+Last but not least, we felt that for Ubilabs, being a small, excellent and very ambitious company, the project will mean more to them than it would mean to Sovanta, giving the project more priority and the best of skills the company has to offer.
 
-1. Ubilabs
-2. Creative Workline
-3. Sysvision
-
-- RaceBoard is a very complex topic. We agreed that we can't decide on the concrete design or the feature set now. But we have a basic understanding how we want to improve it and what we expect from a redesign. We can't decide now if it will be native or HTML5. We include into the projects we need help from the agency but we don't expect a solution right now. Agreed that we will try to get feedback from the agency and then define the project. We tell an agency that they should leave placeholders in the Analytics Homepage project for analytics that we might define later (start analysis, data mining).
-
-- In order to speed up the time to market we discussed the possibility of continuing the work on the Analytics Homepage with App House and later order Pier2Port to implement the prototype in HTML5. We agreed that this could be a way to go as we can't actually give any estimation for the time and effort an agency needs to implement this project. Stefan needs to agree as this would mean to put some more money aside.
-
-- Agreed on the following action items:
-
-1. Creating an email describing who we are and what we want (Simon)
-2. Sending out that email and calling each agency in order to schedule a meeting (Simon)
-3. Create a document that describes the features for the Analytics Homepage (Frank)
-4. Check with Stefan that parallel work is ok (internal=external budget) (Axel)
+All things considered, we think that partnering with Ubilabs will lead to better results at lower cost which is what we want. Although it was a close call, our thoughts are backed by the evaluation matrix above, which gives Ubilabs a five-point edge over Sovanta.

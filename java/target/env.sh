@@ -20,6 +20,7 @@ TELNET_PORT=14888
 SERVER_PORT=8888
 MONGODB_HOST=localhost
 MONGODB_PORT=27017
+MONGODB_NAME=winddb
 EXPEDITION_PORT=2010
 
 # Start replication upon startup?
@@ -39,7 +40,7 @@ REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 
 # Automatic build and test configuration
-DEPLOY_TO=
+DEPLOY_TO=server
 BUILD_BEFORE_START=False
 BUILD_FROM=master
 COMPILE_GWT=True
@@ -64,7 +65,7 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar"
+ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 
 JAVA_HOME=$HOME/jdk1.7.0_02
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then

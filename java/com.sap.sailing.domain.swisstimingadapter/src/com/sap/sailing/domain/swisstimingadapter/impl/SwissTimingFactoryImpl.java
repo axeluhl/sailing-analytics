@@ -5,17 +5,19 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -26,10 +28,12 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
-    private final Map<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector> connectors;
+    private static final Logger logger = Logger.getLogger(SwissTimingFactoryImpl.class.getName());
+    
+    private final Map<Triple<String, Integer, String>, SailMasterConnector> connectors;
 
     public SwissTimingFactoryImpl() {
-        connectors = new HashMap<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector>();
+        connectors = new HashMap<>();
     }
 
     @Override
@@ -38,62 +42,66 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader, 
-            boolean canSendRequests) throws InterruptedException {
+    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, String raceId, String raceName,
+            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
-            return getOrCreateSailMasterLiveSimulatorConnector(host, port, messageLoader, canSendRequests);
+            return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass);
         } else {
-            Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(
-                    host, port, messageLoader);
+            Triple<String, Integer, String> key = new Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
-            if (result == null) {
-                result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+            if (result == null || result.isStopped()) {
+                if (result == null) {
+                    logger.info("Creating a new connector for "+key+" because none found");
+                } else {
+                    logger.info("Creating a new connector for "+key+" because the old one was stopped");
+                }
+                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
                 connectors.put(key, result);
                 // TODO how do connectors get stopped, terminated and removed from the connectors map again?
-            } else if (result.isStopped()) {
-                result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
-                connectors.put(key, result);
+            } else {
+                logger.info("Re-using connector for "+key+" because it wasn't stopped");
             }
             return result;
         }
     }
 
     @Override
-    public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
-        Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(host, port, messageLoader);
+    public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
+            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+        Triple<String, Integer, String> key = new Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
             connectors.put(key, result);
         }
         return result;
     }
 
     @Override
-    public SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests) {
-        return new SwissTimingConfigurationImpl(name, hostname, port, canSendRequests);
+    public SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, int port) {
+        return new SwissTimingConfigurationImpl(name, jsonURL, hostname, port);
     }
 
     @Override
-    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
-            RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException,
-            ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, raceLogStore, windStore, domainFactory, this, messageLoader,
-                trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+    public SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
+            StartList startList, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        return new SwissTimingRaceTrackerImpl(raceID, raceName, raceDescription, boatClass, hostname, port, startList, raceLogStore, windStore, gpsFixStore, domainFactory, this,
+                trackedRegattaRegistry, delayToLiveInMillis);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, String raceID, String hostname, int port,
-            boolean canSendRequests, long delayToLiveInMillis, WindStore windStore, RaceSpecificMessageLoader messageLoader,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
+    public RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname,
+            int port, StartList startList, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
             InterruptedException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(regatta, raceID, hostname, port, windStore, domainFactory, this,
-                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+        return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore, gpsFixStore, domainFactory,
+                this, trackedRegattaRegistry, delayToLiveInMillis);
     }
 
     @Override
@@ -102,13 +110,13 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterMessage createMessage(String message, Long sequenceNumber) {
-        return new SailMasterMessageImpl(message, sequenceNumber);
+    public SailMasterMessage createMessage(String message) {
+        return new SailMasterMessageImpl(message);
     }
 
     @Override
-    public Race createRace(String raceId, String description, TimePoint startTime) {
-        return new RaceImpl(raceId, description, startTime);
+    public Race createRace(String raceId, String raceName, String description, BoatClass boatClass) {
+        return new RaceImpl(raceId, raceName, description, boatClass);
     }
 
     @Override

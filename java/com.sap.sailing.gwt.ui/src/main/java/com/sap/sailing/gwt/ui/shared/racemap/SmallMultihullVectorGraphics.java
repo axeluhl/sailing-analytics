@@ -6,7 +6,7 @@ import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     
     public SmallMultihullVectorGraphics(String... compatibleBoatClassNames) {
-        super("Multihull", 7.1, 2.6, 2.62, compatibleBoatClassNames);
+        super("Multihull", 710, 260, 525, compatibleBoatClassNames);
     }
 
     @Override

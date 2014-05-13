@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * A text entry dialog with ok/cancel button and configurable validation rule. Subclasses may provide a redefinition for

@@ -73,4 +73,9 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
                 + ", id: " + getId() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId() +
                 ", author: "+ getAuthor();
     }
+    
+    @Override
+    public String getShortInfo() {
+        return "";
+    }
 }

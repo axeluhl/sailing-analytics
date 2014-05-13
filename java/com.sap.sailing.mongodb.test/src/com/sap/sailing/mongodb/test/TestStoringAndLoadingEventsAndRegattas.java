@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +51,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -65,6 +67,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -87,15 +90,21 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleEvent() {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
-        final String publicationUrl = "http://myevent.sapsailing.com";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final Venue venue = new VenueImpl(venueName);
+        
+        Calendar cal = Calendar.getInstance();
+        cal.set(2012, 12, 1);
+        final TimePoint startDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2012, 12, 5);
+        final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+        
         for (String courseAreaName : courseAreaNames) {
             CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true, UUID.randomUUID());
+        Event event = new EventImpl(eventName, startDate, endDate, venue, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -116,14 +125,19 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleEventAndRegattaWithCourseArea() {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
-        final String publicationUrl = "http://myevent.sapsailing.com";
         final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
         CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
         venue.addCourseArea(courseArea);
 
+        Calendar cal = Calendar.getInstance();
+        cal.set(2012, 12, 1);
+        final TimePoint startDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2012, 12, 5);
+        final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true, UUID.randomUUID());
+        Event event = new EventImpl(eventName, startDate, endDate, venue, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
         
         final String regattaBaseName = "Kieler Woche";
@@ -164,7 +178,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     @Test
     public void testLoadStoreSimpleRegattaLeaderboard() {
         RacingEventService res = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE);
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
@@ -278,7 +292,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE) {
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
@@ -500,7 +514,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         regatta.addRace(racedef);
         
         RacingEventServiceImpl evs = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE);
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         assertNull(evs.getRememberedRegattaForRace(racedef.getId()));
         evs.raceAdded(regatta, racedef);
         assertNotNull(evs.getRememberedRegattaForRace(racedef.getId()));

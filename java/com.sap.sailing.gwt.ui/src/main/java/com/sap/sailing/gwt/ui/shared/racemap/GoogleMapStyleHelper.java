@@ -34,6 +34,18 @@ public class GoogleMapStyleHelper {
 
         return result;
     }
+
+    public static MapTypeStyle createElementStyleOnlyLightness(MapTypeStyleFeatureType featureType, MapTypeStyleElementType elementType, int ligthness) {
+        MapTypeStyle result = MapTypeStyle.newInstance();
+        result.setFeatureType(featureType);
+        result.setElementType(elementType);
+        
+        MapTypeStyler[] typeStylers = new MapTypeStyler[1];
+        typeStylers[0] = MapTypeStyler.newLightnessStyler(ligthness);
+        result.setStylers(typeStylers);
+
+        return result;
+    }
     
     public static MapTypeStyle createElementStyleWithVisibility(MapTypeStyleFeatureType featureType, MapTypeStyleElementType elementType, String visibility) {
         MapTypeStyle result = MapTypeStyle.newInstance();

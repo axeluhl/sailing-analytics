@@ -13,13 +13,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * The competitors produced by this dialog will have a <code>null</code>
@@ -33,6 +34,7 @@ import com.sap.sse.gwt.ui.DataEntryDialog;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
+    private final ListBox boatClassName;
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
@@ -54,17 +56,43 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                             if (displayColor instanceof InvalidColor) {
                                 result = displayColor.getAsHtml();
                             }
+                        } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
+                            result = stringMessages.pleaseEnterABoatClass();
                         }
                         return result;
                     }
                 }, /* animationEnabled */true, callback);
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
+        
+        this.boatClassName = createListBox(/* isMultipleSelect */ false);
+        int i=0;
+        List<String> boatClassNamesList = new ArrayList<String>();
+        for (BoatTypes t : BoatTypes.values()) {
+            boatClassNamesList.add(t.getName());
+        }
+        String competitorsBoatClassName = competitorToEdit.getBoatClass() != null ? competitorToEdit.getBoatClass().getName() : null;
+        Collections.sort(boatClassNamesList);
+        for (String name : boatClassNamesList) {
+            boatClassName.addItem(name);
+            if (name.equals(competitorsBoatClassName)) {
+                boatClassName.setSelectedIndex(i);
+            }
+            i++;
+        }
+        if (boatClassName.getSelectedIndex() == -1 && competitorsBoatClassName != null) {
+            boatClassName.addItem(competitorsBoatClassName);
+            boatClassName.setSelectedIndex(i);
+        }
+        if (competitorToEdit.getBoatClass() != null) {
+            boatClassName.setEnabled(false);
+        }
+        
         this.name = createTextBox(competitorToEdit.getName());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
-        int i=0;
+        i=0;
         List<CountryCode> ccs = new ArrayList<CountryCode>();
         Util.addAll(ccf.getAll(), ccs);
         ccs.add(null); // representing no nationality (NONE / white flag)
@@ -132,22 +160,27 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     @Override
     protected CompetitorDTO getResult() {
         Color color;
-        try {
-            color = new RGBColor(displayColorTextBox.getText());
-        } catch (IllegalArgumentException iae) {
-            color = new InvalidColor(iae);
+        if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
+            color = null;
+        } else {
+            try {
+                color = new RGBColor(displayColorTextBox.getText());
+            } catch (IllegalArgumentException iae) {
+                color = new InvalidColor(iae);
+            }
         }
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(boatClassName.getSelectedIndex()), 0);
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                competitorToEdit.getBoatClass());
+                boatClass);
         return result;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(4, 2);
+        Grid result = new Grid(5, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
@@ -156,6 +189,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         result.setWidget(2, 1, threeLetterIocCountryCode);
         result.setWidget(3, 0, new Label(stringMessages.color()));
         result.setWidget(3, 1, displayColorTextBox);
+        result.setWidget(4, 0, new Label(stringMessages.boatClass()));
+        result.setWidget(4, 1, boatClassName);
         return result;
     }
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.dimensions;
 
-import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 
 public interface DimensionManager<DataType> {
 

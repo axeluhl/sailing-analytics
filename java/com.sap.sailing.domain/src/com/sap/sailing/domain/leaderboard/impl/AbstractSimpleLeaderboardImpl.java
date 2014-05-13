@@ -39,6 +39,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -56,7 +57,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -488,10 +488,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return isDiscarded(competitor, raceColumn, getRaceColumns(), timePoint);
     }
     
-    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
-                        raceColumn);
+    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return !raceColumn.isMedalRace()
+                && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
+                && getResultDiscardingRule()
+                        .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
+                                raceColumn);
     }
 
     @Override
@@ -560,20 +563,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 if (o1 == o2) {
                     comparisonResult = 0;
                 } else {
-                    final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
-                    final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
-                    if (o1Fleet == null) {
-                        if (o2Fleet == null) {
-                            comparisonResult = 0;
+                    if (raceColumn.hasSplitFleets() && !raceColumn.hasSplitFleetContiguousScoring()) {
+                        // only check fleets if there are more than one and the column is not to be contiguously scored even in case
+                        // of split fleets
+                        final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
+                        final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
+                        if (o1Fleet == null) {
+                            if (o2Fleet == null) {
+                                comparisonResult = 0;
+                            } else {
+                                comparisonResult = 1; // o1 ranks "worse" because it doesn't have a fleet set while o2
+                                                      // has
+                            }
                         } else {
-                            comparisonResult = 1; // o1 ranks "worse" because it doesn't have a fleet set while o2 has
+                            if (o2Fleet == null) {
+                                comparisonResult = -1; // o1 ranks "better" because it has a fleet set while o2 hasn't
+                            } else {
+                                comparisonResult = o1Fleet.compareTo(o2Fleet);
+                            }
                         }
                     } else {
-                        if (o2Fleet == null) {
-                            comparisonResult = -1; // o1 ranks "better" because it has a fleet set while o2 hasn't
-                        } else {
-                            comparisonResult = o1Fleet.compareTo(o2Fleet);
-                        }
+                        // either there are no split fleets or the split isn't relevant for scoring as for ordered fleets
+                        // the scoring runs contiguously from top to bottom
+                        comparisonResult = 0;
                     }
                     if (comparisonResult == 0) {
                         comparisonResult = getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
@@ -670,7 +682,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException {
-        Map<RaceColumn, List<Competitor>> result = new HashMap<>();
+        Map<RaceColumn, List<Competitor>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
@@ -749,6 +761,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
     }
 
     @Override
@@ -894,8 +911,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     @Override
-    public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
-        Long result = null;
+    public Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
+        return getTotalTimeSailedInLegType(competitor, legType, timePoint, new HashMap<TrackedLeg, LegType>());
+    }
+    
+    private Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint, Map<TrackedLeg, LegType> legTypeCache) throws NoWindException {
+        Duration result = null;
         // TODO should we ensure that competitor participated in all race columns?
         outerLoop:
         for (TrackedRace trackedRace : getTrackedRaces()) {
@@ -903,26 +924,33 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 trackedRace.getRace().getCourse().lockForRead();
                 try {
                     for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
-                        if (trackedLeg.hasStartedLeg(timePoint)) {
+                        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, leg);
+                        if (trackedLegOfCompetitor.hasStartedLeg(timePoint)) {
                             // find out leg type at the time the competitor started the leg
                             try {
-                                LegType trackedLegType = trackedRace.getTrackedLeg(leg).getLegType(
-                                        trackedLeg.getStartTime());
+                                final TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
+                                LegType trackedLegType = legTypeCache.get(trackedLeg);
+                                if (trackedLegType == null) {
+                                    final TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                                    TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                                    if (finishTime == null) {
+                                        finishTime = timePoint;
+                                    }
+                                    trackedLegType = trackedLeg.getLegType(startTime.plus(startTime.until(finishTime).divide(2))); // middle of the leg
+                                    legTypeCache.put(trackedLeg, trackedLegType);
+                                }
                                 if (legType == trackedLegType) {
-                                    Long millisecondsSpendOnDownwind = trackedLeg.getTimeInMilliSeconds(timePoint);
-                                    if (millisecondsSpendOnDownwind != null) {
+                                    Duration timeSpentOnDownwind = trackedLegOfCompetitor.getTime(timePoint);
+                                    if (timeSpentOnDownwind != null) {
                                         if (result == null) {
-                                            result = millisecondsSpendOnDownwind;
+                                            result = timeSpentOnDownwind;
                                         } else {
-                                            result += millisecondsSpendOnDownwind;
+                                            result = result.plus(timeSpentOnDownwind);
                                         }
                                     } else {
                                         // Although the competitor has started the leg, no value was produced. This
-                                        // means that
-                                        // the competitor didn't finish the leg before tracking ended. No useful value
-                                        // can
-                                        // be obtained for this competitor anymore.
+                                        // means that the competitor didn't finish the leg before tracking ended. No useful value
+                                        // can be obtained for this competitor anymore.
                                         result = null;
                                         break outerLoop;
                                     }
@@ -943,8 +971,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint) {
-        Long result = null;
+    public Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint) {
+        Duration result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
@@ -967,11 +995,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 to = timePoint;
                             }
                         }
-                        long timeSpent = to.asMillis() - from.asMillis();
+                        Duration timeSpent = from.until(to);
                         if (result == null) {
                             result = timeSpent;
                         } else {
-                            result += timeSpent;
+                            result=result.plus(timeSpent);
                         }
                     }
                 }
@@ -1074,12 +1102,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses,
-            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
-        LeaderboardDTO result = null;
-        result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+        final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator());
@@ -1089,40 +1116,65 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
             result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
         }
-        for (RaceColumn raceColumn : this.getRaceColumns()) {
-            RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
+        // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
+        // futures to finish:
+        Map<RaceColumn, FutureTask<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        for (final RaceColumn raceColumn : this.getRaceColumns()) {
+            result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 RaceDTO race = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 if (trackedRace != null) {
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
                     race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
                 }
-
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            result.setCompetitorsFromBestToWorst(raceColumnDTO,
-                    baseDomainFactory.getCompetitorDTOList(this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(new Callable<List<CompetitorDTO>>() {
+                @Override
+                public List<CompetitorDTO> call() throws Exception {
+                    return baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint));
+                }
+            });
+            executor.execute(task);
+            competitorsFromBestToWorstTasks.put(raceColumn, task);
+        }
+        // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
+        for (Map.Entry<RaceColumn, FutureTask<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+            try {
+                result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                // null values.
+                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                // this helps robustness from a user's perspective.
+                logger.log(
+                        Level.SEVERE,
+                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                + "): exception during computing competitor ordering for race column "+raceColumnAndTaskToJoin.getKey().getName(), e);
+            }
         }
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
         result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
-            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
-                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
-            } else {
-                result.discardThresholds = null;
-            }
+        if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+            result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
+                    .getDiscardIndexResultsStartingWithHowManyRaces();
+        } else {
+            result.discardThresholds = null;
+        }
         // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
-        // details
-        // are requested only once and pass them into getLeaderboardEntryDTO
+        // details are requested only once and pass them into getLeaderboardEntryDTO
         final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             // if details for the column are requested, cache the leg's ranks
@@ -1150,7 +1202,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
             row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
             row.totalPoints = this.getTotalPoints(competitor, timePoint);
-            addOverallDetailsToRow(timePoint, competitor, row);
+            if (addOverallDetails) {
+                addOverallDetailsToRow(timePoint, competitor, row);
+            }
             result.competitors.add(competitorDTO);
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
@@ -1159,17 +1213,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                             @Override
                             public LeaderboardEntryDTO call() {
                                 try {
-                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn,
-                                            timePoint);
-                                    return getLeaderboardEntryDTO(
-                                            entry,
-                                            raceColumn,
-                                            competitor,
-                                            timePoint,
+                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint);
+                                    return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                             namesOfRaceColumnsForWhichToLoadLegDetails != null
                                                     && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn
-                                                            .getName()), waitForLatestAnalyses, legRanksCache,
-                                            baseDomainFactory);
+                                                            .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory);
                                 } catch (NoWindException e) {
                                     logger.info("Exception trying to compute leaderboard entry for competitor "
                                             + competitor.getName() + " in race column " + raceColumn.getName() + ": "
@@ -1194,12 +1242,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
                     // null values.
                     // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                    // this helps
-                    // robustness from a user's perspective.
+                    // this helps robustness from a user's perspective.
                     logger.log(
                             Level.SEVERE,
                             AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails
+                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
                                     + "): exception during computing leaderboard entry for competitor "
                                     + competitor.getName() + " in race column " + raceColumnNameAndFuture.getKey()
                                     + ". Leaving empty.", e);
@@ -1211,8 +1258,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 result.competitorDisplayNames.put(competitorDTO, displayName);
             }
         }
-        logger.info("computeLeaderboardByName("+this.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
-                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
+        logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
+                + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
+                + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         return result;
     }
 
@@ -1223,14 +1271,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             row.maximumSpeedOverGroundInKnots = maximumSpeedOverGround.getB().getKnots();
             row.whenMaximumSpeedOverGroundWasAchieved = maximumSpeedOverGround.getA().getTimePoint().asDate();
         }
-        final Long totalTimeSailedDownwindInMilliseconds = this.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.DOWNWIND, timePoint);
-        row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwindInMilliseconds==null?null:1./1000.*totalTimeSailedDownwindInMilliseconds;
-        final Long totalTimeSailedUpwindInMilliseconds = this.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.UPWIND, timePoint);
-        row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwindInMilliseconds==null?null:1./1000.*totalTimeSailedUpwindInMilliseconds;
-        final Long totalTimeSailedReachingInMilliseconds = this.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.REACHING, timePoint);
-        row.totalTimeSailedReachingInSeconds = totalTimeSailedReachingInMilliseconds==null?null:1./1000.*totalTimeSailedReachingInMilliseconds;
-        final Long totalTimeSailedInMilliseconds = this.getTotalTimeSailedInMilliseconds(competitor, timePoint);
-        row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
+        Map<TrackedLeg, LegType> legTypeCache = new HashMap<>();
+        final Duration totalTimeSailedDownwind = this.getTotalTimeSailedInLegType(competitor, LegType.DOWNWIND, timePoint, legTypeCache);
+        row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwind==null?null:totalTimeSailedDownwind.asSeconds();
+        final Duration totalTimeSailedUpwind = this.getTotalTimeSailedInLegType(competitor, LegType.UPWIND, timePoint, legTypeCache);
+        row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwind==null?null:totalTimeSailedUpwind.asSeconds();
+        final Duration totalTimeSailedReaching = this.getTotalTimeSailedInLegType(competitor, LegType.REACHING, timePoint, legTypeCache);
+        row.totalTimeSailedReachingInSeconds = totalTimeSailedReaching==null?null:totalTimeSailedReaching.asSeconds();
+        final Duration totalTimeSailed = this.getTotalTimeSailed(competitor, timePoint);
+        row.totalTimeSailedInSeconds = totalTimeSailed==null?null:totalTimeSailed.asSeconds();
         final Distance totalDistanceTraveledInMeters = this.getTotalDistanceTraveled(competitor, timePoint);
         row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
     }
@@ -1254,9 +1303,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (trackedRace != null) {
-            entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
-            if(entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
-                long timeDifferenceInMs = timePoint.asMillis() - entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
+            Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
+            entryDTO.averageSamplingInterval = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
+            if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
+                long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
                 entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
@@ -1268,8 +1318,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 entryDTO.legDetails = raceDetails.getLegDetails();
                 entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
-                entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError() == null ? null
-                        : raceDetails.getAverageCrossTrackError().getMeters();
+                entryDTO.averageAbsoluteCrossTrackErrorInMeters = raceDetails.getAverageAbsoluteCrossTrackError() == null ? null
+                        : raceDetails.getAverageAbsoluteCrossTrackError().getMeters();
+                entryDTO.averageSignedCrossTrackErrorInMeters = raceDetails.getAverageSignedCrossTrackError() == null ? null
+                        : raceDetails.getAverageSignedCrossTrackError().getMeters();
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
                     Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
@@ -1346,13 +1398,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private static class RaceDetails {
         private final List<LegEntryDTO> legDetails;
         private final Distance windwardDistanceToOverallLeader;
-        private final Distance averageCrossTrackError;
+        private final Distance averageAbsoluteCrossTrackError;
+        private final Distance averageSignedCrossTrackError;
         public RaceDetails(List<LegEntryDTO> legDetails, Distance windwardDistanceToOverallLeader,
-                Distance averageCrossTrackError) {
+                Distance averageAbsoluteCrossTrackError, Distance averageSignedCrossTrackError) {
             super();
             this.legDetails = legDetails;
             this.windwardDistanceToOverallLeader = windwardDistanceToOverallLeader;
-            this.averageCrossTrackError = averageCrossTrackError;
+            this.averageAbsoluteCrossTrackError = averageAbsoluteCrossTrackError;
+            this.averageSignedCrossTrackError = averageSignedCrossTrackError;
         }
         public List<LegEntryDTO> getLegDetails() {
             return legDetails;
@@ -1360,8 +1414,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         public Distance getWindwardDistanceToOverallLeader() {
             return windwardDistanceToOverallLeader;
         }
-        public Distance getAverageCrossTrackError() {
-            return averageCrossTrackError;
+        public Distance getAverageAbsoluteCrossTrackError() {
+            return averageAbsoluteCrossTrackError;
+        }
+        public Distance getAverageSignedCrossTrackError() {
+            return averageSignedCrossTrackError;
         }
     }
 
@@ -1441,9 +1498,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
                     .getWindwardDistanceToOverallLeader(competitor, timePoint);
-            final Distance averageCrossTrackError = trackedRace == null ? null : trackedRace.getAverageCrossTrackError(
+            final Distance averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
                     competitor, timePoint, waitForLatestAnalyses);
-            return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageCrossTrackError);
+            final Distance averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
+                    competitor, timePoint, waitForLatestAnalyses);
+            return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError);
         } finally {
             course.unlockAfterRead();
         }
@@ -1459,8 +1518,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.legType = trackedLeg.getTrackedLeg().getLegType(timePoint);
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-            final Distance averageCrossTrackError = trackedLeg.getAverageCrossTrackError(timePoint, waitForLatestAnalyses);
-            result.averageCrossTrackErrorInMeters = averageCrossTrackError == null ? null : averageCrossTrackError.getMeters();
+            final Distance averageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+            result.averageAbsoluteCrossTrackErrorInMeters = averageAbsoluteCrossTrackError == null ? null : averageAbsoluteCrossTrackError.getMeters();
+            final Distance averageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+            result.averageSignedCrossTrackErrorInMeters = averageSignedCrossTrackError == null ? null : averageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
@@ -1472,7 +1533,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint);
-            result.timeInMilliseconds = trackedLeg.getTimeInMilliSeconds(timePoint);
+            result.timeInMilliseconds = trackedLeg.getTime(timePoint).asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
                     legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey());
@@ -1605,10 +1666,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
         LiveLeaderboardUpdater liveLeaderboardUpdater = getLiveLeaderboardUpdater(trackedRegattaRegistry,
                 baseDomainFactory);
-        return liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
+        return liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
     }
 
     private LiveLeaderboardUpdater getLiveLeaderboardUpdater(TrackedRegattaRegistry trackedRegattaRegistry,
@@ -1645,8 +1706,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     @Override
-    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException, InterruptedException, ExecutionException {
+    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            InterruptedException, ExecutionException {
         LeaderboardDTO result = null;
         if (timePoint == null) {
             // date==null means live mode; however, if we're after the end of all races and after all score
@@ -1662,7 +1725,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
                 timePoint = null;
-                result = this.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, trackedRegattaRegistry, baseDomainFactory);
+                result = this.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, trackedRegattaRegistry, baseDomainFactory);
             }
         }
         if (timePoint != null) {
@@ -1670,7 +1733,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             // which is OK because the cache is invalidated whenever any of the tracked races attached to the
             // leaderboard changes.
             result = getLeaderboardDTOCache().getLeaderboardByName(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
-                    baseDomainFactory, trackedRegattaRegistry);
+                    addOverallDetails, baseDomainFactory, trackedRegattaRegistry);
         }
         return result;
     }
@@ -1679,4 +1742,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getName() + " " + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " " + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 
+    @Override
+    public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
+        return new NumberOfCompetitorsFetcherImpl();
+    }
 }

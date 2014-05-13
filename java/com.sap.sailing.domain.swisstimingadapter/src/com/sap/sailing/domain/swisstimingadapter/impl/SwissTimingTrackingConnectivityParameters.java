@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
-import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -15,39 +17,43 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final String hostname;
     private final int port;
     private final String raceID;
-    private final boolean canSendRequests;
+    private final String raceName;
+    private final String raceDescription;
+    private final BoatClass boatClass;
     private final SwissTimingFactory swissTimingFactory;
     private final DomainFactory domainFactory;
     private final RaceLogStore raceLogStore;
-    private final RaceSpecificMessageLoader messageLoader; 
     private final long delayToLiveInMillis;
+    private final StartList startList;
     
-    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RaceSpecificMessageLoader messageLoader) {
+    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName, String raceDescription, BoatClass boatClass,
+    		StartList startList, long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
+            RaceLogStore raceLogStore) {
         super();
         this.hostname = hostname;
         this.port = port;
         this.raceID = raceID;
-        this.canSendRequests = canSendRequests;
+        this.raceName = raceName;
+        this.raceDescription = raceDescription;
+        this.boatClass = boatClass;
+        this.startList = startList;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.swissTimingFactory = swissTimingFactory;
         this.domainFactory = domainFactory;
         this.raceLogStore = raceLogStore;
-        this.messageLoader = messageLoader;
+    }
+    
+    @Override
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, raceLogStore, windStore, gpsFixStore, domainFactory,
+                trackedRegattaRegistry);
     }
 
     @Override
-    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, delayToLiveInMillis, raceLogStore, windStore, messageLoader,
-                domainFactory, trackedRegattaRegistry);
-    }
-
-    @Override
-    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore)
+    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore)
             throws Exception {
-        return swissTimingFactory.createRaceTracker(regatta, raceID, hostname, port, canSendRequests, delayToLiveInMillis, windStore, messageLoader,
-                domainFactory, trackedRegattaRegistry);
+        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname, port, startList, delayToLiveInMillis, windStore, gpsFixStore, domainFactory,
+                trackedRegattaRegistry);
     }
 
     @Override

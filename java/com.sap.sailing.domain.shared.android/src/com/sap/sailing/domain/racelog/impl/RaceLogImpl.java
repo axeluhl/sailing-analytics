@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -14,9 +15,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
@@ -40,11 +47,14 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+    private final Set<Serializable> revokedEventIds = new HashSet<Serializable>();
 
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
      */
     private transient Map<UUID, Set<RaceLogEvent>> eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
+    
+    private Map<Serializable, RaceLogEvent> eventsById = new HashMap<Serializable, RaceLogEvent>();
 
     private final Serializable id;
     private transient Set<RaceLogEventVisitor> listeners;
@@ -108,6 +118,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
+            eventsById.put(event.getId(), event);
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
@@ -127,11 +139,50 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         if (isAdded) {
             logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
+            eventsById.put(event.getId(), event);
         } else {
             logger.warning(String
                     .format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
         }
         return isAdded;
+    }
+    
+    private void revokeIfNecessary(RaceLogEvent newEvent) {
+        if (newEvent instanceof RevokeEvent) {
+            RevokeEvent revokeEvent = (RevokeEvent) newEvent;
+            try {
+                checkIfSuccessfullyRevokes(revokeEvent);
+
+                lockForWrite();
+                revokedEventIds.add(revokeEvent.getRevokedEventId());
+                unlockAfterWrite();
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            }
+        }
+    }
+    
+    private void checkIfSuccessfullyRevokes(RevokeEvent revokeEvent) throws NotRevokableException {
+        lockForRead();
+        RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+        unlockAfterRead();
+
+        if (revokedEvent == null) {
+            throw new NotRevokableException("RevokeEvent added, that refers to non-existent event to be revoked");
+        }
+
+        if (revokedEventIds.contains(revokedEvent.getId())) {
+            throw new NotRevokableException("Event has already been revoked");
+        }
+
+        if (! (revokedEvent instanceof Revokable)) {
+            throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
+        }
+
+        if (getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) <= 0) {
+            throw new NotRevokableException("RevokeEvent does not have sufficient priority");
+        }
     }
 
     @Override
@@ -148,6 +199,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
@@ -277,5 +329,86 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         edtc.addAll(result);
         return result;
+    }
+
+    @Override
+    public RaceLogEvent getEventById(Serializable id) {
+        assertReadLock();
+        return eventsById.get(id);
+    }
+    
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
+        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes()) {
+            @Override
+            protected boolean isValid(RaceLogEvent e) {
+            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
+            }
+        };
+    }
+    
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
+        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes().descendingSet()) {
+            @Override
+            protected boolean isValid(RaceLogEvent e) {
+            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
+            }
+        };
+    }
+
+    @Override
+    public void merge(RaceLog other) {
+        lockForWrite();
+        other.lockForRead();
+        try {
+            RaceLogEventComparator comparator = RaceLogEventComparator.INSTANCE;
+            Iterator<RaceLogEvent> thisIter = getRawFixes().iterator();
+            Iterator<RaceLogEvent> otherIter = other.getRawFixes().iterator();
+            RaceLogEvent thisEvent = null;
+            RaceLogEvent otherEvent = null;
+            while (otherIter.hasNext() || otherEvent != null) {
+                if (thisEvent == null && thisIter.hasNext()) {
+                    thisEvent = thisIter.next();
+                }
+                if (otherEvent == null) {
+                    otherEvent = otherIter.next();
+                }
+                if (thisEvent == null) {
+                    // All events of this race log have been consumed; simply keep adding the events
+                    // from the other race log to this race log.
+                    // otherEvent has to be non-null because if thisIter didn't have a next, otherIter must have had a next
+                    add(otherEvent);
+                    otherEvent = null; // "consumed" otherEvent; try to grab next if a next element exists in otherIter
+                } else {
+                    final int comparison = comparator.compare(thisEvent, otherEvent);
+                    if (comparison < 0) {
+                        thisEvent = null; // skip the "lesser" race log event on this race log
+                    } else if (comparison == 0) {
+                        // the race log event from the other log is already contained in this log; skip both
+                        thisEvent = null;
+                        otherEvent = null;
+                    } else {
+                        // comparison > 0; we skipped on this race log until we found a "greater" event on this race log; insert otherEvent
+                        add(otherEvent);
+                        otherEvent = null; // "consumed"
+                    }
+                }
+            }
+        } finally {
+            other.unlockAfterRead();
+            unlockAfterWrite();
+        }
+    }
+    
+    @Override
+    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+        if (toRevoke == null) {
+            throw new NotRevokableException("Received null as event to revoke");
+        }
+        RevokeEvent revokeEvent = RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), author,
+                getCurrentPassId(), toRevoke.getId());
+        checkIfSuccessfullyRevokes(revokeEvent);
+        add(revokeEvent);
     }
 }

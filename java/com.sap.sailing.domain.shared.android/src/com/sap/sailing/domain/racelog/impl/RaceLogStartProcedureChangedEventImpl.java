@@ -34,4 +34,8 @@ public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl impl
         visitor.visit(this);
     }
 
+    @Override
+    public String getShortInfo() {
+        return "startProcedureType=" + startProcedureType;
+    }
 }

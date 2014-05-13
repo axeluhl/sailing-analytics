@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
@@ -70,8 +71,9 @@ public interface Leaderboard extends Named {
     }
     
     LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory)
-            throws NoWindException;
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
+            DomainFactory baseDomainFactory) throws NoWindException;
 
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
@@ -125,6 +127,9 @@ public interface Leaderboard extends Named {
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
     
@@ -383,7 +388,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single downwind leg at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard
      */
-    Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException;
+    Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException;
 
     /**
      * Starts counting when the gun goes off, not when the competitor passed the line.
@@ -392,7 +397,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard
      */
-    Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
+    Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint);
     
     /**
      * Computes the distance the <code>competitor</code> has sailed in the tracked races in this leaderboard, starting
@@ -448,6 +453,7 @@ public interface Leaderboard extends Named {
      *            point at which to evaluate the leaderboard status
      * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            the names of the race columns of which to expand the details in the result
+     * @param addOverallDetails TODO
      * @param trackedRegattaRegistry
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
@@ -455,6 +461,8 @@ public interface Leaderboard extends Named {
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
             InterruptedException, ExecutionException;
+
+    NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 }

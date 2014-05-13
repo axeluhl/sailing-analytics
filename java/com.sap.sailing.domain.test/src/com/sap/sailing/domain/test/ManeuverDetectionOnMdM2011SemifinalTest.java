@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
         super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });

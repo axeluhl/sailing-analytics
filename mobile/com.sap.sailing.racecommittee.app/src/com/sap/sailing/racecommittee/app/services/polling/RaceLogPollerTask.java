@@ -38,12 +38,10 @@ public class RaceLogPollerTask extends AsyncTask<Pair<Serializable, URL>, Pollin
                 publishProgress(new PollingResult(true, 
                         new Pair<Serializable, InputStream>(query.getA(), responseStream)));
             } catch (IOException e) {
-                if (responseStream != null) {
-                    try {
-                        responseStream.close();
-                    } catch (IOException ie) {
-                    }
-                }
+                // don't need to close responseStream as it still must
+                // be null because the only call that may throw an
+                // IOException is the execute() call that would have
+                // initialized responseStream
                 publishProgress(new PollingResult(false, null));
             }
         }

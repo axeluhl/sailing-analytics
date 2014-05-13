@@ -24,8 +24,8 @@
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
   <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.SSECommon" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
-  	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.regattaoverview.RegattaOverviewEntryPoint'/>
@@ -45,6 +45,7 @@
   <source path='client'/>
   <source path='controls'/>
   <source path='components'/>
+  <source path='leaderboard'/>
   <source path='regattaoverview'/>
   <source path='shared'/>
   <source path='test'/>

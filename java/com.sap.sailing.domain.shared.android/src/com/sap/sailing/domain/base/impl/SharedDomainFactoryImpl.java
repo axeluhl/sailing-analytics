@@ -182,7 +182,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint, passingInstruction);
+            Waypoint result = passingInstruction==null?new WaypointImpl(controlPoint):new WaypointImpl(controlPoint, passingInstruction);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
@@ -311,6 +311,16 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             throw new IllegalArgumentException("Unknown matcher type: " + type);
         }
         return matcher;
+    }
+    
+    @Override
+    public Mark getExistingMarkById(Serializable id) {
+        return markCache.get(id);
+    }
+    
+    @Override
+    public Mark getExistingMarkByIdAsString(String toStringRepresentationOfID) {
+        return markCache.get(markIdCache.get(toStringRepresentationOfID));
     }
 
 }

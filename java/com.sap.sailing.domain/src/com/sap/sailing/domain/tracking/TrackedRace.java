@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -442,9 +443,12 @@ public interface TrackedRace extends Serializable {
      * tracked race. This runs synchronized with the otherwise asynchronous loading of wind tracks, triggered by the
      * constructor of the {@link TrackedRace} implementation classes. This procedure guarantees that eventually the
      * listener will have received a notification for all wind fixes, regardless of whether they were already loaded at
-     * the time the listener is registered or they are loaded after the registration has completed.
+     * the time the listener is registered or they are loaded after the registration has completed.<p>
+     * 
+     * The same is true for the GPS fixes for marks and competitors.
      */
-    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded);
+    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
 
@@ -496,8 +500,17 @@ public interface TrackedRace extends Serializable {
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
+
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalyses) throws NoWindException;
+
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+            throws NoWindException;
+
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalysis) throws NoWindException;
 
     WindStore getWindStore();
 
@@ -509,16 +522,19 @@ public interface TrackedRace extends Serializable {
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalyses) throws NoWindException;
+    /**
+     * When provided with a {@link WindStore} during construction, the tracked race will
+     * asynchronously load the wind data for this tracked race from the wind store and the GPS store in a
+     * background thread and update this tracked race with the results. Clients that want to wait for the wind
+     * loading process to complete can do so by calling this method which will block until the wind loading has
+     * completed.
+     */
+    void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
-     * data for this tracked race from the wind store in a background thread and update this tracked race with the
-     * results. Clients that want to wait for the wind loading process to complete can do so by calling this method
-     * which will block until the wind loading has completed.
+     * @see #waitUntilLoadingFromWindStoreComplete(), but for fixes from a {@link GPSFixStore}
      */
-    void waitUntilWindLoadingComplete() throws InterruptedException;
+    void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -564,8 +580,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -581,8 +596,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -621,9 +635,17 @@ public interface TrackedRace extends Serializable {
      */
     TimePoint getStartTimeReceived();
     
-    LineLengthAndAdvantage getStartLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the start waypoint does not have two marks or the course
+     * is empty or the start waypoint is the only waypoint
+     */
+    LineDetails getStartLine(TimePoint at);
     
-    LineLengthAndAdvantage getFinishLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course
+     * is empty or the finish waypoint is the only waypoint
+     */
+    LineDetails getFinishLine(TimePoint at);
     
     /**
      * Length of course if there are mark passings for competitors.
@@ -635,5 +657,6 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
-
+    
+    GPSFixStore getGPSFixStore();
 }

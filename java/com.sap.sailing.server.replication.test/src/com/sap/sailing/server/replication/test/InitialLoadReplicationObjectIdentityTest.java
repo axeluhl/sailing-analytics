@@ -27,12 +27,15 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -54,9 +57,9 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().dropDatabase();
         this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
     }
     
     public void performReplicationSetup() throws Exception {
@@ -77,7 +80,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         List<String> courseAreaNames = new ArrayList<String>();
         courseAreaNames.add("Default");
         final UUID eventId = UUID.randomUUID();
-        master.addEvent(eventName, venue, "", false, eventId);
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+
+        master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
         assertNotNull(master.getEvent(eventId));
         assertNull(replica.getEvent(eventId));
         

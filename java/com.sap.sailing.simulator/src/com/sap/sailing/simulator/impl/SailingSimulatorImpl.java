@@ -103,7 +103,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             }
 
             wf.setBoundary(bd);
-            Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1]);
+            Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1], gridRes[2], gridRes[3]);
             wf.setPositionGrid(positionGrid);
             wf.generate(wf.getStartTime(), wf.getEndTime(), wf.getTimeStep());
         }

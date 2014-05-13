@@ -9,8 +9,9 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
+import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<CompetitorsRaceDataDTO> {
+public class GetCompetitorsRaceDataAction implements AsyncAction<CompetitorsRaceDataDTO> {
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final List<CompetitorDTO> competitors;
@@ -23,8 +24,7 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<Competitors
     
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
             List<CompetitorDTO> competitors, Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType,
-            String leaderboardGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback) {
-        super(callback);
+            String leaderboardGroupName, String leaderboardName) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.competitors = competitors;
@@ -37,8 +37,8 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<Competitors
     }
 
     @Override
-    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType, leaderboarGroupName, leaderboardName,
-                    (AsyncCallback<CompetitorsRaceDataDTO>) getWrapperCallback(asyncActionsExecutor));
+    public void execute(AsyncCallback<CompetitorsRaceDataDTO> callback) {
+        sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType,
+                leaderboarGroupName, leaderboardName, callback);
     }
 }

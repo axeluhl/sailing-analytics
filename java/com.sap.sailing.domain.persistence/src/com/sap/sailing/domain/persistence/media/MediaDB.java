@@ -12,7 +12,18 @@ import java.util.List;
  */
 public interface MediaDB {
 
+    /**
+     * Stores a new track to the database, returning the db-generated id.
+     */
     String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType);
+
+    /**
+     * Stores a new track to the database, using the db id of the specified trackToImport.
+     * @return true if a new track has been added to db, e.g. the specified dbId didn't exist.
+     * @throws NullpointerException When trackToImport.dbId is null.
+     * @throws IllegalArgumentException When track with specified dbId already exists.
+     */
+    void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType);
 
     List<DBMediaTrack> loadAllMediaTracks();
 
@@ -33,6 +44,9 @@ public interface MediaDB {
             return "0";
         }
 
+        @Override
+        public void insertMediaTrackWithId(String dbId, String videoTitle, String url, Date startTime, int durationInMillis, String mimeType) {};
+        
         @Override
         public List<DBMediaTrack> loadAllMediaTracks() {
             return Collections.emptyList(); 
@@ -55,5 +69,4 @@ public interface MediaDB {
         
     };
 
-    
 }

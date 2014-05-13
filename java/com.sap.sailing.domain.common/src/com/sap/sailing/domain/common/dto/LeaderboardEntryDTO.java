@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -44,7 +44,9 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double windwardDistanceToOverallLeaderInMeters;
     
-    public Double averageCrossTrackErrorInMeters;
+    public Double averageAbsoluteCrossTrackErrorInMeters;
+    
+    public Double averageSignedCrossTrackErrorInMeters;
     
     public Double distanceToStartLineFiveSecondsBeforeStartInMeters;
     
@@ -61,13 +63,18 @@ public class LeaderboardEntryDTO implements Serializable {
     public Tack startTack;
     
     /**
-     * If we have GPS data for the competitor for whom this is a leaderboard entry, tells the time point of the last
+     * If we have GPS data for the competitor for whom this is a leaderboard entry, tells the time since the last
      * non-extrapolated GPS fix that was really received from the tracking device at or before the time point for which
      * the leaderboard was queried. The user interface may---particularly in live mode---choose to visualize the time
      * that passed between the last fix and the query time point for which this entry was created.
      */
-    public Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint;
     public Double timeSinceLastPositionFixInSeconds;
+    
+    /**
+     * For the competitor's track in the race represented by this object, if a track is present and the track has more
+     * than one fix, this field tells the average duration between two fixes on the competitor's track.
+     */
+    public Duration averageSamplingInterval;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -94,7 +101,9 @@ public class LeaderboardEntryDTO implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
+                + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0 : averageAbsoluteCrossTrackErrorInMeters.hashCode());
+        result = prime * result
+                + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime
                 * result
@@ -117,7 +126,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
-        result = prime * result + ((timePointOfLastPositionFixAtOrBeforeQueryTimePoint == null) ? 0 : timePointOfLastPositionFixAtOrBeforeQueryTimePoint.hashCode());
+        result = prime * result + ((averageSamplingInterval == null) ? 0 : averageSamplingInterval.hashCode());
         result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
@@ -136,10 +145,15 @@ public class LeaderboardEntryDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardEntryDTO other = (LeaderboardEntryDTO) obj;
-        if (averageCrossTrackErrorInMeters == null) {
-            if (other.averageCrossTrackErrorInMeters != null)
+        if (averageAbsoluteCrossTrackErrorInMeters == null) {
+            if (other.averageAbsoluteCrossTrackErrorInMeters != null)
                 return false;
-        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
+        } else if (!averageAbsoluteCrossTrackErrorInMeters.equals(other.averageAbsoluteCrossTrackErrorInMeters))
+            return false;
+        if (averageSignedCrossTrackErrorInMeters == null) {
+            if (other.averageSignedCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageSignedCrossTrackErrorInMeters.equals(other.averageSignedCrossTrackErrorInMeters))
             return false;
         if (discarded != other.discarded)
             return false;
@@ -190,10 +204,10 @@ public class LeaderboardEntryDTO implements Serializable {
             return false;
         if (startTack != other.startTack)
             return false;
-        if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint == null) {
-            if (other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null)
+        if (averageSamplingInterval == null) {
+            if (other.averageSamplingInterval != null)
                 return false;
-        } else if (!timePointOfLastPositionFixAtOrBeforeQueryTimePoint.equals(other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint))
+        } else if (!averageSamplingInterval.equals(other.averageSamplingInterval))
             return false;
         if (timeSinceLastPositionFixInSeconds == null) {
             if (other.timeSinceLastPositionFixInSeconds != null)

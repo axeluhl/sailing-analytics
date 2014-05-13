@@ -365,7 +365,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                                         public Integer call() {
                                             return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                                         }
-                            });
+                            }, numberOfCompetitorsInLeaderboardFetcher);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -437,7 +437,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             public Integer call() {
                                 return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                             }
-                        });
+                        }, numberOfCompetitorsInLeaderboardFetcher);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

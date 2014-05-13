@@ -22,10 +22,10 @@
   	
 	<!-- Other module inherits                                      -->
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-        <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
+    <inherits name="com.sap.sse.gwt.SSESharedGWT" />	
+    <inherits name="com.sap.sse.SSECommon" />
+    <inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sailing.simulator.Simulator" />
-  	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 	
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint'/>
@@ -35,6 +35,8 @@
 	<source path='client'/>
 	<source path='actions'/>
 	<source path='simulator'/>
+	
+	<script src="../js/wind-streamlets.js" /> 
 	
 	<inherits name='com.google.gwt.logging.Logging'/>
   	<set-property name="gwt.logging.enabled" value="FALSE"/>

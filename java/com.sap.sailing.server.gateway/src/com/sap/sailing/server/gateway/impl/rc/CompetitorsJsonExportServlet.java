@@ -16,6 +16,8 @@ import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -74,7 +76,7 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
         
         if (trackedRace != null) {
             CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-            		new PersonJsonSerializer(new NationalityJsonSerializer())), null);
+            		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
 
             for (Competitor competitor : raceColumn.getRaceDefinition(fleet).getCompetitors()) {
                 result.add(serializer.serialize(competitor));

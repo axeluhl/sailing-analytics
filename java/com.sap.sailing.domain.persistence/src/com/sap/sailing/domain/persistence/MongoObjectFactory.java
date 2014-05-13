@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -81,6 +82,7 @@ public interface MongoObjectFactory {
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
      * {@link Event} to which the regatta belongs.
+     * @param oldSeriesNameNewName 
      */
     void storeRegatta(Regatta regatta);
 
@@ -107,5 +109,6 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+    void removeRaceLog(RaceLogIdentifier identifier);
 
 }

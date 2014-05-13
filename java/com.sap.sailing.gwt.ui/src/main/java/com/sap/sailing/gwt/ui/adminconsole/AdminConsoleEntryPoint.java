@@ -8,44 +8,68 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.MediaService;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.UserManagementService;
+import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+    private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        
+        registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+
         BetterDateTimeBox.initialize();
         
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
         rootPanel.add(dockPanel);
 
-        HorizontalPanel topInformationPanel = new HorizontalPanel();
+        DockPanel topInformationPanel = new DockPanel();
         topInformationPanel.setSize("100%", "95%");
         UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
         userStatusPanel.ensureDebugId("UserStatus");
-        topInformationPanel.add(userStatusPanel);
-        topInformationPanel.add(persistentAlertLabel);
+        topInformationPanel.add(userStatusPanel, DockPanel.WEST);
+        topInformationPanel.add(persistentAlertLabel, DockPanel.CENTER);
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
+        topInformationPanel.add(releaseNotesLink, DockPanel.EAST);
+        topInformationPanel.setCellHorizontalAlignment(releaseNotesLink, HasHorizontalAlignment.ALIGN_RIGHT);
 
         dockPanel.addNorth(topInformationPanel, 2.5);
 
@@ -60,7 +84,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(
                 sailingService, this, stringMessages, this);
-        // eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
+        eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
         eventStructureManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);
@@ -85,11 +109,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addScrollableTab(tabPanel, swisstimingEventManagementPanel, stringMessages.swissTimingEvents());
         regattaDisplayers.add(swisstimingEventManagementPanel);
 
-        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService, this,
-                stringMessages);
-        // createSwissTimingRacePanel.ensureDebugId("CreateSwissTimingRace");
-        createSwissTimingRacePanel.setSize("90%", "90%");
-        addScrollableTab(tabPanel, createSwissTimingRacePanel, stringMessages.createSwissTimingRace());
+        final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
+                sailingService, this, this, this, stringMessages);
+        raceLogTrackingEventManagementPanel.setSize("90%", "90%");
+        addScrollableTab(tabPanel, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking());
+        regattaDisplayers.add(raceLogTrackingEventManagementPanel);
 
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
@@ -98,7 +122,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, stringMessages);
-        // trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, trackedRacesManagementPanel, stringMessages.trackedRaces());
         regattaDisplayers.add(trackedRacesManagementPanel);
@@ -125,7 +149,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService,
                 this, this, stringMessages);
-        // leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
+        leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration());
         regattaDisplayers.add(leaderboardGroupConfigPanel);
@@ -172,6 +196,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 if (competitorPanel.isVisible()) {
                     competitorPanel.refreshCompetitorList();
                 }
+                if (raceLogTrackingEventManagementPanel.isVisible()) {
+                    raceLogTrackingEventManagementPanel.loadLeaderboards();
+                }
             }
         });
         fillRegattas();
@@ -190,18 +217,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     @Override
     public void fillRegattas() {
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onSuccess(List<RegattaDTO> result) {
-                for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
-                    regattaDisplayer.fillRegattas(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                reportError("Remote Procedure Call getRegattas() - Failure");
-            }
-        });
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+                new AsyncCallback<List<RegattaDTO>>() {
+                    @Override
+                    public void onSuccess(List<RegattaDTO> result) {
+                        for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
+                            regattaDisplayer.fillRegattas(result);
+                        }
+                    }
+        
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        reportError("Remote Procedure Call getRegattas() - Failure");
+                    }
+                }));
     }
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface SailMasterTransceiver {
     /**
@@ -28,6 +27,6 @@ public interface SailMasterTransceiver {
      * @return the message read, or <code>null</code> if the end of the stream has been reached without finding a
      *         message start byte.
      */
-    Pair<String, Long> receiveMessage(InputStream inputStream) throws IOException;
+    String receiveMessage(InputStream inputStream) throws IOException;
 
 }

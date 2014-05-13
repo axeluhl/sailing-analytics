@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.filter.Filter;
 
 /**
  * A specialized filter which can create a UI factory for making a filter editable  

@@ -5,28 +5,40 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SwissTimingRaceRecordDTO implements IsSerializable {
-    public String ID;
-    public String description;
+    public String raceId;
+    public String raceName;
     public Date raceStartTime;
+    public String regattaName;
+    public String seriesName;
+    public String fleetName;
+    public String raceStatus;
+    public String xrrEntriesUrl;
     
-    /** boatClass and discipline (men, woman, all) are derived data from the object ID */
     public String boatClass;
-    public String discipline;
-
-    public boolean hasCourse;
-    public boolean hasStartlist;
+    public String gender;
     
     public SwissTimingRaceRecordDTO() {}
     
-    public SwissTimingRaceRecordDTO(String id, String description, Date raceStartTime) {
+    public SwissTimingRaceRecordDTO(String raceId, String raceName, String regattaName, String seriesName, String fleetName,
+    		String raceStatus, Date raceStartTime, String xrrEntriesUrl) {
         super();
-        ID = id;
-        this.description = description;
+        this.raceId = raceId;
+        this.raceName = raceName;
+        this.regattaName = regattaName;
+        this.seriesName = seriesName;
+        this.fleetName = fleetName;
+        this.raceStatus = raceStatus;
         this.raceStartTime = raceStartTime;
+        this.xrrEntriesUrl = xrrEntriesUrl;
     }
-    
-    @Override
-    public String toString() {
-        return "Race "+ID+" ("+raceStartTime+")";
-    }
+
+	@Override
+	public String toString() {
+		return "SwissTimingRaceRecordDTO [raceId=" + raceId + ", raceName="
+				+ raceName + ", raceStartTime=" + raceStartTime
+				+ ", regattaName=" + regattaName + ", seriesName=" + seriesName
+				+ ", fleetName=" + fleetName + ", raceStatus=" + raceStatus
+				+ ", boatClass=" + boatClass + ", gender=" + gender
+				+ "]";
+	}
 }

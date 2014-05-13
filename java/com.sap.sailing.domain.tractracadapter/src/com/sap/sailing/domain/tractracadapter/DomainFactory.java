@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -132,16 +133,17 @@ public interface DomainFactory {
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
+     * @param raceStatus 
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
@@ -240,10 +242,10 @@ public interface DomainFactory {
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
-     * @param raceId TODO
+     * 
      * @param timeoutInMilliseconds
-     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if no
-     *            race definition is found for <code>race</code>.
+     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if
+     *            no race definition is found for <code>race</code>.
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
@@ -251,7 +253,7 @@ public interface DomainFactory {
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
-            String tracTracUsername, String tracTracPassword);
+            String tracTracUsername, String tracTracPassword, String raceStatus);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

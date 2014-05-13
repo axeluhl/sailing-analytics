@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,13 +9,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -28,12 +26,24 @@ import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherTyp
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -43,13 +53,16 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -59,6 +72,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -71,7 +85,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
  * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
-@RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
@@ -85,7 +98,7 @@ public interface SailingService extends RemoteService {
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword) throws Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+            boolean trackWind, boolean correctWindByDeclination) throws Exception;
     
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
@@ -103,10 +116,10 @@ public interface SailingService extends RemoteService {
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind);
 
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent) throws NoWindException;
 
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
-            Collection<String> windSourceTypeNames);
+            Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent);
 
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
@@ -127,11 +140,14 @@ public interface SailingService extends RemoteService {
     public List<String> getLeaderboardNames();
     
     IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId) throws Exception;
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            String previousLeaderboardId) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta);
+    
+    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
@@ -161,14 +177,17 @@ public interface SailingService extends RemoteService {
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName);
+
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstRaceIsNonDiscardableCarryForward);
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -205,11 +224,9 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
 
-    List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
+    SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws Exception;
 
-    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
-
-    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, int port);
 
     String[] getCountryCodes();
     
@@ -219,7 +236,7 @@ public interface SailingService extends RemoteService {
     Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 
-    List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier);
     
     List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData);
     
@@ -251,10 +268,10 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic,
+    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
             List<String> regattaNames);
 
-    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreaNames);
+    EventDTO createEvent(String eventName, Date startDate, Date endDate, String venueName, boolean isPublic, List<String> courseAreaNames);
 
     void removeEvent(UUID eventId);
 
@@ -323,8 +340,13 @@ public interface SailingService extends RemoteService {
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
     
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
-            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
+            throws Exception;
     
+    List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
+            boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, List<String> visibleRegattas)
+            throws Exception;
+
     String getBuildVersion();
 
     void stopReplicatingFromMaster();
@@ -333,19 +355,28 @@ public interface SailingService extends RemoteService {
 
     void stopSingleReplicaInstance(String identifier);
 
-    void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+    void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
-    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+
+    List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
+
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
     
-    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
+    DataImportProgress getImportOperationProgress(UUID id);
 
     Iterable<CompetitorDTO> getCompetitors();
-
-    DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
     
-    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
+    /**
+     * 
+     * @param leaderboardName
+     * @param lookInRaceLogs If set to {@code true}, the {@link RaceLog}s are checked for the competitor registrations.
+     * If set to {@code false}, the {@link RaceDefinition}s are checked instead.
+     * @return
+     */
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
 
-    CompetitorDTO updateCompetitor(CompetitorDTO competitor);
+    CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     
@@ -357,9 +388,9 @@ public interface SailingService extends RemoteService {
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
 
-    boolean setStartTime(RaceLogSetStartTimeDTO dto);
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
-    Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
@@ -370,4 +401,67 @@ public interface SailingService extends RemoteService {
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
+    
+    void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+    
+    /**
+     * Revoke the {@link DenoteForTrackingEvent}. This does not affect an existing {@code RaceLogRaceTracker}
+     * or {@link TrackedRace} for this {@code RaceLog}.
+     * 
+     * @see RaceLogTrackingAdapter#removeDenotationForRaceLogTracking
+     */
+    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName);
+
+    void denoteForRaceLogTracking(String leaderboardName) throws Exception;
+    
+    /**
+     * Performs all the necessary steps to start tracking the race.
+     * The {@code RaceLog} needs to be denoted for racelog-tracking beforehand.
+     * 
+     * @see RaceLogTrackingAdapter#startTracking
+     */
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+            throws NotDenotedForRaceLogTrackingException, Exception;
+    
+    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
+    
+    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
+    
+    void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
+    
+    Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    
+    /**
+     * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
+     * from the previous course definition in the racelog.
+     */
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Pair<ControlPointDTO, PassingInstruction>> course);
+    
+    RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    
+    /**
+     * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
+     */
+    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
+    
+    void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
+            Set<Triple<String, String, String>> raceLogsTo);
+    
+    void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
+            throws TransformationException;
+    
+    List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName)
+            throws TransformationException;
+    
+    List<String> getDeserializableDeviceIdentifierTypes();
+    
+    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping,
+            Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException;
+    
+    /**
+     * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
+     * This only affects such events that implement {@link Revokable}.
+     */
+    void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
+            throws NotRevokableException;
 }

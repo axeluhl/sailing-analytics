@@ -71,11 +71,13 @@ public class LiveLeaderboardUpdater implements Runnable {
      */
     private final Set<String> columnNamesForWhichCurrentLiveLeaderboardHasTheDetails;
     
+    private boolean currentLiveLeaderboardHasOverallDetails;
+    
     private boolean running;
     
     /**
      * For each String from <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> passed to
-     * {@link #getLiveLeaderboard(Collection)}, records the validity time point of the last request here when the
+     * {@link #getLiveLeaderboard(Collection, boolean)}, records the validity time point of the last request here when the
      * {@link #currentLiveLeaderboard} has been updated with results containing this column details. This updater will
      * stop computing the details for that column if the validity time for the update calculation is more than
      * {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds after the time point recorded here.
@@ -84,7 +86,12 @@ public class LiveLeaderboardUpdater implements Runnable {
     private final Map<String, TimePoint> timePointOfLastRequestForColumnDetails;
     
     /**
-     * As soon as the first {@link #getLiveLeaderboard(Collection)} request has been received, this field tells the
+     * Tells when {@link #updateRequestTimes(Collection, boolean)} was last called with the request for overall details
+     */
+    private TimePoint timePointOfLastRequestForOverallDetails;
+    
+    /**
+     * As soon as the first {@link #getLiveLeaderboard(Collection, boolean)} request has been received, this field tells the
      * "validity time point" (as opposed to the request time point; so not when the request was received but for which
      * time point the request was asking the data) for which the last general request asked the leaderboard contents,
      * regardless the combination of column details requested. This is used to decide when to stop a thread running this
@@ -117,14 +124,15 @@ public class LiveLeaderboardUpdater implements Runnable {
         return leaderboard;
     }
     
-    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
+    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails) throws NoWindException {
         LeaderboardDTO result = null;
-        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails);
+        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
         ensureRunning();
         synchronized (this) {
             if (running
                     && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails
-                            .containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                            .containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)
+                            && (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
                 result = currentLiveLeaderboard;
                 if (result != null) {
                     cacheHitCount++;
@@ -140,12 +148,13 @@ public class LiveLeaderboardUpdater implements Runnable {
             cacheMissCount++;
             synchronized (this) {
                 while (result == null) {
-                    if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                    if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails) &&
+                            (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
                         result = currentLiveLeaderboard;
                     }
                     if (result == null) {
                         if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                         }
                         ensureRunning();
                         try {
@@ -153,26 +162,27 @@ public class LiveLeaderboardUpdater implements Runnable {
                         } catch (InterruptedException e) {
                             logger.log(Level.INFO, "interrupted while waiting for LiveLeaderboardCache update", e);
                         }
-                        if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                        if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails) &&
+                                (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
                             result = currentLiveLeaderboard;
                             if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                             }
                         } else {
                             if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" unsuccessful. Need to try again...");
+                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" unsuccessful. Need to try again...");
                             }
                         }
                     } else {
                         if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" was provided in the meantime");
+                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" was provided in the meantime");
                         }
                     }
                     // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
                     // or the thread still runs but the result may have expired and therefore be null (renew the request)
                     if (result == null) {
                         // need to renew the request
-                        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails);
+                        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
                         ensureRunning();
                     }
                 }
@@ -205,8 +215,11 @@ public class LiveLeaderboardUpdater implements Runnable {
      * 
      * This method assumes that <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> tells the column names for which
      * <code>result</code> has the details.
+     * 
+     * @param addOverallDetails tells whether overall details are requested for the resulting leaderboard; see also
+     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory)}.
      */
-    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) {
+    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails) {
         lastRequest = getLeaderboard().getNowMinusDelay();
         for (String nameOfRaceColumn : namesOfRaceColumnsForWhichToLoadLegDetails) {
             if (!timePointOfLastRequestForColumnDetails.containsKey(nameOfRaceColumn) ||
@@ -214,22 +227,28 @@ public class LiveLeaderboardUpdater implements Runnable {
                 timePointOfLastRequestForColumnDetails.put(nameOfRaceColumn, lastRequest);
             }
         }
+        if (addOverallDetails && (timePointOfLastRequestForOverallDetails == null || lastRequest.after(timePointOfLastRequestForOverallDetails))) {
+            timePointOfLastRequestForOverallDetails = lastRequest;
+        }
     }
 
     /**
      * Updates the cache contents and notifies all waiters on this object.
      */
     private synchronized void updateCacheContents(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            LeaderboardDTO result) {
+            boolean addOverallDetails, LeaderboardDTO result) {
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.clear();
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.addAll(namesOfRaceColumnsForWhichToLoadLegDetails);
         currentLiveLeaderboard = result;
+        currentLiveLeaderboardHasOverallDetails = addOverallDetails;
         notifyAll();
     }
 
     /**
-     * Keeps computing the leaderboard for the column names that appear as key in {@link #timePointOfLastRequestForColumnDetails}
-     * until no request has happened 
+     * Keeps computing the leaderboard for the column names that appear as key in
+     * {@link #timePointOfLastRequestForColumnDetails} and for the overall details as noted in
+     * {@link #timePointOfLastRequestForOverallDetails} until no request has happened during the
+     * {@link #UPDATE_TIMEOUT_IN_MILLIS timeout period}.
      */
     @Override
     public void run() {
@@ -253,10 +272,11 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
+                    final boolean addOverallDetails = getOverallDetails(timePoint);
                     LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
-                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false,
-                            trackedRegattaRegistry, baseDomainFactory);
-                    updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
+                            namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory);
+                    updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "
                             + e.getMessage());
@@ -290,6 +310,17 @@ public class LiveLeaderboardUpdater implements Runnable {
         }
     }
 
+    /**
+     * Determines based on {@link #timePointOfLastRequestForOverallDetails} and the <code>timePoint</code> parameter
+     * if the duration between then is less than {@link #UPDATE_TIMEOUT_IN_MILLIS} in which case overall details are to
+     * be loaded. If {@link #timePointOfLastRequestForOverallDetails} is <code>null</code>, meaning that overall details
+     * have never been requested for the leaderboard before, <code>false</code> is returned immediately.
+     */
+    private boolean getOverallDetails(TimePoint timePoint) {
+        return timePointOfLastRequestForOverallDetails != null &&
+                !timePoint.after(timePointOfLastRequestForOverallDetails.plus(UPDATE_TIMEOUT_IN_MILLIS));
+    }
+    
     /**
      * Determines those column names from {@link #timePointOfLastRequestForColumnDetails}'s keys for which the last
      * request is less then {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds before <code>timePoint</code>

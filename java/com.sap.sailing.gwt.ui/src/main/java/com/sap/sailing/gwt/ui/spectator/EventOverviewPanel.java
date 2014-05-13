@@ -46,11 +46,11 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * An overview panel for sailing events
@@ -215,16 +215,9 @@ public class EventOverviewPanel extends FormPanel {
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(eventNameAnchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
-                    String link = URLEncoder.encode(event.publicationUrl
-                            + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
-                    return ANCHORTEMPLATE.anchor(link, event.getName());
-                } else {
-                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    builder.appendHtmlConstant(event.getName());
-                    return builder.toSafeHtml();
-                }
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendHtmlConstant(event.getName());
+                return builder.toSafeHtml();
             }
         };
         eventNameColumn.setSortable(true);

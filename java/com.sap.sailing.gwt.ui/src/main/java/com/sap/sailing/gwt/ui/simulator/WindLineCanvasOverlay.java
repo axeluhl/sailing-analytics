@@ -17,10 +17,10 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.sap.sailing.domain.common.dto.PositionDTO;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.LineSegment;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
@@ -45,7 +45,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
         final Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap = windLinesDTO.getWindLinesMap();
 
         if (windLinesMap == null) {
@@ -61,13 +61,13 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         for (final Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
             List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
 
-            final SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(date.getTime() + 1));
+            final SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(newTime.getTime() + 1));
 
             if (!headMap.isEmpty()) {
                 positionDTOToDraw = headMap.get(headMap.lastKey());
             }
             logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionDTOToDraw.size() + " points"
-                    + " @ " + date);
+                    + " @ " + newTime);
 
             drawWindLine(positionDTOToDraw, ++index);
         }
@@ -140,7 +140,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     protected void drawWindLine() {
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 
@@ -229,7 +229,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         final double weight = 1.0;
 
         LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
-        Point canvasPositionInPx = mapProjection.fromLatLngToContainerPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         final double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();

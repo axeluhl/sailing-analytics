@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
@@ -30,14 +30,14 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     }
      */
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
 
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
 
         windDTOToDraw = new ArrayList<SimulatorWindDTO>();
         for (final SimulatorWindDTO windDTO : windFieldDTO.getMatrix()) {
-            if (windDTO.timepoint <= date.getTime()) {
+            if (windDTO.timepoint <= newTime.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }

@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 		implements SettingsDialogComponent<T> {

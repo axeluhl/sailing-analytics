@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint.LeaderboardUrlSettings;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
 
@@ -108,7 +108,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
-                /* autoExpandPreSelectedRace */ false,
+                /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
         }
 

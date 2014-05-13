@@ -5,11 +5,14 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.JavaScriptInjector;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -18,9 +21,10 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
     private final String titleName = "Strategy Simulator";
 
-    private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
+    private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
     private int yRes = 20;
+    private int border = 0;
     private boolean autoUpdate = false;
     private char mode = SailingSimulatorConstants.ModeEvent;  // default mode: 'e'vent
     private char event = SailingSimulatorConstants.EventKielerWoche; // default event: 'k'ieler woche
@@ -30,13 +34,25 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
     private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
     private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
-   
+    private boolean showStreamlets2 = false; // show animated wind streamlets in the wind display and replay modes.
+    private boolean injectWindDataJS = false;
+    
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
     protected void doOnModuleLoad() {
-        super.doOnModuleLoad();
-        checkUrlParameters();
+        
+    	super.doOnModuleLoad();
+        
+        registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        
+    	checkUrlParameters();
+
+    	if (this.injectWindDataJS) {
+    		SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
+    		JavaScriptInjector.inject(bundle.windStreamletsDataJS().getText());
+    	}
+    	
         createSimulatorPanel();
     }
 
@@ -52,6 +68,12 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             logger.config("Using default horizontal resolution " + yRes);
         } else {
             yRes = Integer.parseInt(verticalRes);
+        }
+        String border = Window.Location.getParameter("border");
+        if (border == null || border.isEmpty()) {
+           logger.config("Using default border " + this.border);
+        } else {
+            this.border = Integer.parseInt(border);
         }
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
@@ -101,6 +123,18 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             } else {
                 showStreamlets = false;
             }
+            if (windDisplayStr.contains("z")) {
+                showStreamlets2 = true;
+            } else {
+                showStreamlets2 = false;
+            }
+            if (windDisplayStr.contains("y")) {
+                showStreamlets2 = true;
+                injectWindDataJS = true;
+            }
+            if ((showStreamlets2)&&(this.border==0)) {
+            	this.border = 10;
+            }
             if (windDisplayStr.contains("b")) {
                 seedLines = 'b';
             }
@@ -129,8 +163,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border,
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets, showStreamlets2, injectWindDataJS);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);

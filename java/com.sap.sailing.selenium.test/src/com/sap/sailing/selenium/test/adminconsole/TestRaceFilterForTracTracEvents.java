@@ -3,12 +3,11 @@ package com.sap.sailing.selenium.test.adminconsole;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.*;
-
 import static org.junit.Assert.*;
 
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
-import com.sap.sailing.selenium.test.adminconsole.pages.AdminConsolePage;
-import com.sap.sailing.selenium.test.adminconsole.pages.TracTracEventManagementPanel;
 
 /**
  * <p>Tests for filtering of trackable TracTrac races.</p>
@@ -28,8 +27,8 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testNoFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(12));
         
@@ -43,8 +42,8 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 1"); //$NON-NLS-1$
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(5));
@@ -58,8 +57,8 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testExactFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 12"); //$NON-NLS-1$
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(1));
@@ -68,17 +67,15 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     /**
      * <p>Test with filter which does not match anything.</p>
      */
-    // TODO: This test fails at the moment, because of an incorrect result returned by the page object! If the table is
-    //       empty GWT uses a table body with one row as spacer, which is not filtered out correctly by the page object.
-//    @Test
-//    @SuppressWarnings("boxing")
-//    public void testNoneExisingFilter() {
-//        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-//        
-//        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-//        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
-//        tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
-//        
-//        assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
-//    }
+    @Test
+    @SuppressWarnings("boxing")
+    public void testNoneMatchingFilter() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
+        
+        assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
+    }
 }

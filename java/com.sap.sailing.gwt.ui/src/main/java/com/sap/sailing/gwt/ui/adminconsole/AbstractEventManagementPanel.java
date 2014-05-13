@@ -8,8 +8,8 @@ import java.util.List;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -23,12 +23,14 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
             ErrorReporter errorReporter, RaceSelectionProvider raceSelectionProvider, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
+        
         this.availableRegattasListBox = new ListBox();
-        this.availableRegattasListBox.ensureDebugId("AvailableRegattas");
+        this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
+        
         // TrackedEventsComposite should exist in every *ManagementPanel. 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, /* multiselection */ true);
-        trackedRacesListComposite.ensureDebugId("TrackedRaces");
+        trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
     
     @Override

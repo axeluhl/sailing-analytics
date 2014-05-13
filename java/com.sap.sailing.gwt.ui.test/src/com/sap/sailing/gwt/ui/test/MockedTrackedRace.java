@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -39,7 +42,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -218,7 +221,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded) {
         // TODO Auto-generated method stub
         
     }
@@ -439,6 +443,24 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public void addSeries(Series series) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public Event getEvent() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void removeSeries(Series series) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
@@ -498,7 +520,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
                 return null;
@@ -652,7 +674,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -717,14 +739,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses)
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses)
             throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void waitUntilWindLoadingComplete() throws InterruptedException {
+    public void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
         // TODO Auto-generated method stub
     }
 
@@ -876,13 +898,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+    public LineDetails getStartLine(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+    public LineDetails getFinishLine(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -909,6 +931,44 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
+            boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

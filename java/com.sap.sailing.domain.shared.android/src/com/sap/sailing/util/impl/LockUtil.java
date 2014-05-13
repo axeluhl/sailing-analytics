@@ -1,14 +1,16 @@
 package com.sap.sailing.util.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -50,7 +52,7 @@ public class LockUtil {
     
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
-    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
+    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
     
     /**
      * Tells how many other threads propagated which held lock to the key thread. During propagation, a lock is
@@ -62,20 +64,20 @@ public class LockUtil {
      * The thread-specific value maps are used as monitor objects whenever decisions about thread-specific lock counts
      * need to be made.
      */
-    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentHashMap<Thread, Map<Lock,Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentWeakHashMap<Thread, Map<Lock,Integer>>();
     
     /**
      * Counts the "virtual" locks. A "virtual" lock is obtained if and only if at the time of calling
      * {@link #lockForRead(NamedReentrantReadWriteLock)} or {@link #lockForWrite(NamedReentrantReadWriteLock)} the
      * respective lock has a positive {@link #propagationCounts propagation count} for the current thread.
      */
-    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     /**
      * Redundant but easily accessible hold count per thread and lock. These are the actual lock hold counts as they are
      * recorded in the actual {@link NamedReentrantReadWriteLock} locks.
      */
-    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.readLock(), ReadOrWrite.READ);
@@ -83,9 +85,7 @@ public class LockUtil {
 
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.writeLock(), ReadOrWrite.WRITE);
-        synchronized (lastTimeWriteLockWasObtained) {
-            lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
-        }
+        lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
     }
     
     private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final ReadOrWrite readOrWrite) {
@@ -146,9 +146,7 @@ public class LockUtil {
             unlockVirtuallyOrActually(lock, lock.writeLock());
         }
         final TimePoint timePointWriteLockWasObtained;
-        synchronized (lastTimeWriteLockWasObtained) {
-            timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
-        }
+        timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
         if (timePointWriteLockWasObtained == null) {
             logger.info("Internal error: write lock " + lock.getName()
                     + " to be unlocked but no time recorded for when it was last obtained.\n"
@@ -354,9 +352,9 @@ public class LockUtil {
     }
 
     
-    private static String getStackTrace(Thread thread) {
+    private static String formatStackTrace(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
-        for (StackTraceElement sf : thread.getStackTrace()) {
+        for (StackTraceElement sf : stackTrace) {
             sb.append(sf.toString());
             sb.append('\n');
         }
@@ -364,7 +362,7 @@ public class LockUtil {
     }
 
     private static String getCurrentStackTrace() {
-        return getStackTrace(Thread.currentThread());
+        return formatStackTrace(Thread.currentThread().getStackTrace());
     }
 
     /**
@@ -380,6 +378,14 @@ public class LockUtil {
         try {
             locked = lock.tryLock(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK, TimeUnit.SECONDS);
             if (!locked) {
+                Thread writer = lockParent.getWriter();
+                // capture the stack traces as quickly as possible to try to reflect the situation as it was when the lock couuldn't be obtained
+                StackTraceElement[] writerStackTrace = writer != null ? writer.getStackTrace() : null;
+                Map<Thread, StackTraceElement[]> readerStackTraces = new HashMap<Thread, StackTraceElement[]>();
+                final List<Thread> readers = lockParent.getReaders();
+                for (Thread reader : readers) {
+                    readerStackTraces.put(reader, reader.getStackTrace());
+                }
                 StringBuilder message = new StringBuilder();
                 message.append("Couldn't acquire lock ");
                 message.append(lockDescriptionForTimeoutLogMessage);
@@ -387,30 +393,29 @@ public class LockUtil {
                 message.append(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK);
                 message.append("s in thread " + Thread.currentThread().getName() + " at ");
                 message.append(getCurrentStackTrace());
-                Thread writer = lockParent.getWriter();
                 if (writer != null) {
                     message.append("\nThe current writer is:\n");
-                    appendThreadData(message, writer);
+                    appendThreadData(message, writer, writerStackTrace);
                 }
-                message.append("\nThe current readers are:\n");
-                for (Thread reader : lockParent.getReaders()) {
-                    appendThreadData(message, reader);
+                if (readers != null && !readers.isEmpty()) {
+                    message.append("\nThe current readers are:\n");
+                    for (Thread reader : readers) {
+                        appendThreadData(message, reader, readerStackTraces.get(reader));
+                    }
                 }
                 message.append("Trying again...");
                 logger.info(message.toString());
             }
         } catch (InterruptedException ex) {
-            // re-assert interrupt state that occurred while we
-            // were acquiring the lock
-            Thread.currentThread().interrupt();
+            logger.log(Level.WARNING, "Interrupted while waiting for lock "+lockDescriptionForTimeoutLogMessage, ex);
         }
         return locked;
     }
 
-    private static void appendThreadData(StringBuilder message, Thread writer) {
+    private static void appendThreadData(StringBuilder message, Thread writer, StackTraceElement[] stackTrace) {
         message.append(writer);
         message.append('\n');
-        message.append(getStackTrace(writer));
+        message.append(formatStackTrace(stackTrace));
         message.append('\n');
     }
     

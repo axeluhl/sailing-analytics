@@ -6,7 +6,7 @@ import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 public class _49erVectorGraphics extends BoatClassVectorGraphics {
     
     public _49erVectorGraphics(String... compatibleBoatClassNames) {
-        super("49ER", 4.99, 2.90, 2.50, compatibleBoatClassNames);
+        super("49ER", 499, 290, 499, compatibleBoatClassNames);
     }
 
     @Override

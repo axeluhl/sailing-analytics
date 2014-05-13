@@ -1,11 +1,13 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
@@ -32,16 +34,27 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
      * {@link EmptyWindStore}.
      */
     private transient final WindStore windStore;
+    
+    /**
+     * If a {@link GPSFixStore} is provided to this command, it will be used for the construction of the tracked race.
+     * However, after de-serialization, the store will always be <code>null</code>, causing the use of an
+     * {@link EmptyGPSFixStore}.
+     */
+    private transient final GPSFixStore gpsFixStore;
 
     /**
      * @param windStore
      *            if <code>null</code>, an {@link EmptyWindStore} will be used. Note that the {@link #windStore} field
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
+     * @param gpsFixStore
+     *            if <code>null</code>, an {@link EmptyGPSFixStore} will be used. Note that the {@link #gpsFixStore} field
+     *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
-    public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
         this.windStore = windStore;
+        this.gpsFixStore = gpsFixStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
@@ -61,7 +74,8 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
 
     @Override
     public TrackedRace internalApplyTo(RacingEventService toState) {
-        return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
+        return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore, 
+        		gpsFixStore == null ? EmptyGPSFixStore.INSTANCE : gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
     }
 

@@ -47,6 +47,13 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
+    /**
+     * Counts the messages received. Every {@link #LOG_EVERY_SO_MANY_MESSAGES} an {@link Level#INFO} message is logged.
+     */
+    private int messageCount;
+    
+    private static final int LOG_EVERY_SO_MANY_MESSAGES = 100;
+    
     public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
@@ -109,6 +116,10 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
             logger.fine("Received server heartbeat for "+this);
             receivedServerHeartbeatInInterval = true;
         } else if (message.startsWith("[")) {
+            messageCount++;
+            if (messageCount % LOG_EVERY_SO_MANY_MESSAGES == 0) {
+                logger.info("Received another "+LOG_EVERY_SO_MANY_MESSAGES+" Igtimi messages. Last message was: "+message);
+            }
             List<Fix> fixes = new ArrayList<>();
             try {
                 JSONArray jsonArray = (JSONArray) new JSONParser().parse(message);
@@ -219,7 +230,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                     break; // successfully connected
                 }
             } catch (IOException e) {
-                logger.log(Level.INFO, "Couldn't connect to "+uri+" for "+this, e);
+                logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
                 lastException = e;
             }
         }
