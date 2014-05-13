@@ -100,7 +100,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace22() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("22");
     }
-
+    
     @Test
     public void testRace24() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("24");

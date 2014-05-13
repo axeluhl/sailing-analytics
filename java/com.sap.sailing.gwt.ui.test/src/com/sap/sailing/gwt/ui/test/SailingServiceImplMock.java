@@ -19,7 +19,10 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -42,7 +45,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
     
     public SailingServiceImplMock() {
         super();
-        service = new RacingEventServiceImpl();
+        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
     }
 
     @Override
@@ -164,6 +167,16 @@ public class SailingServiceImplMock extends SailingServiceImpl {
         when(result.getService()).thenReturn(swissTimingReplayService);
         return result;
     }
+    
+    @Override
+    protected ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> createAndOpenRaceLogTrackingAdapterTracker(
+            BundleContext context) {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result = mock(ServiceTracker.class);
+        RaceLogTrackingAdapterFactory factory = RaceLogTrackingAdapterFactoryImpl.INSTANCE;
+        when(result.getService()).thenReturn(factory);
+        return result;
+    }
 
     @Override
     protected RacingEventService getService() {
@@ -171,5 +184,9 @@ public class SailingServiceImplMock extends SailingServiceImpl {
             service = new RacingEventServiceImpl();
         }
         return service;
+    }
+    
+    public RacingEventService getRacingEventService() {
+        return getService();
     }
 }

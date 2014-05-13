@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
  */
 public interface Duration extends Serializable, Comparable<Duration> {
     
+    static final Duration NULL = new MillisecondsDurationImpl(0);
     static final Duration ONE_SECOND = new MillisecondsDurationImpl(1000);
     static final Duration ONE_MINUTE = ONE_SECOND.times(60);
     static final Duration ONE_HOUR = ONE_MINUTE.times(60);

@@ -95,4 +95,8 @@ public interface SharedDomainFactory extends CompetitorFactory {
      * Hm.
      */
     DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers);
+    
+    Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
+    
+    Mark getExistingMarkById(Serializable id);
 }

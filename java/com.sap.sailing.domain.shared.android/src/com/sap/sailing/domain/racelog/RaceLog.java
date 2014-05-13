@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.racelog;
 
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.tracking.Track;
 
@@ -98,6 +101,32 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      *         in this race log yet
      */
     boolean load(RaceLogEvent event);
+    
+    /**
+     * Search for the event by its {@link RaceLogEvent#getId() id}.
+     * Caller needs to hold the read lock.
+     */
+    RaceLogEvent getEventById(Serializable id);
+    
+    /**
+     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}.
+     * @return
+     */
+    NavigableSet<RaceLogEvent> getUnrevokedEvents();
+    
+    /**
+     * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}.
+     * @return
+     */
+    NavigableSet<RaceLogEvent> getUnrevokedEventsDescending();
+    
+    /**
+     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter is revokable, exists in the racelog
+     * and has not yet been revoked.
+     * 
+     * @param author The author for the {@code RevokeEvent}.
+     */
+    void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException;
 
     /**
      * Merges all events from the <code>other</code> race log into this.
