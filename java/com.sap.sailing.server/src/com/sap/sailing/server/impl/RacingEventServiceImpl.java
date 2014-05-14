@@ -838,13 +838,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public boolean isRaceBeingTracked(RaceDefinition r) {
+    public boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r) {
         synchronized (raceTrackersByRegatta) {
-            for (Set<RaceTracker> trackers : raceTrackersByRegatta.values()) {
-                for (RaceTracker tracker : trackers) {
-                    if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
-                        return true;
-                    }
+            Set<RaceTracker> trackers = raceTrackersByRegatta.get(regattaContext);
+            for (RaceTracker tracker : trackers) {
+                if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
+                    return true;
                 }
             }
             return false;

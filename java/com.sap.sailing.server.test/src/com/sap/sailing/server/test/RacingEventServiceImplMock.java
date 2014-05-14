@@ -26,7 +26,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         return regattasByName;
     }
 
-    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByEventMap() {
+    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByRegattaMap() {
         return raceTrackersByRegatta;
     }
 
