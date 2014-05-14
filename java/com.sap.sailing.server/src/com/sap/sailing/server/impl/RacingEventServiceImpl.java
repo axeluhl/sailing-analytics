@@ -212,9 +212,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * not ideal due to its coarse-grained locking style which allows for little concurrency. Instead, this map is used
      * to keep locks for any ID that any invocation of the
      * {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} method is currently working on.
-     * Fetching or creating and putting a lock to this map happens in a synchronized method ({@link #getOrCreateRaceTrackersByIdLock}).
-     * When done, the {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} method cleans up by
-     * removing the lock again from this map, again using a synchronized method ({@link #removeRaceTrackersByIdLock}).
+     * Fetching or creating and putting a lock to this map happens in ({@link #getOrCreateRaceTrackersByIdLock}) which
+     * takes care of managing concurrent access to this concurrent map. When done, the
+     * {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long)} method cleans up by removing the
+     * lock again from this map, again using a synchronized method (
+     * {@link #unlockRaceTrackersById(Object, NamedReentrantReadWriteLock)}).
      */
     private final ConcurrentHashMap<Object, NamedReentrantReadWriteLock> raceTrackersByIDLocks;
 
@@ -1281,7 +1283,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                         }
                     }
                     raceTracker.stop();
-                    raceTrackersByID.remove(raceTracker.getID());
+                    final Object trackerId = raceTracker.getID();
+                    final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                    try {
+                        raceTrackersByID.remove(trackerId);
+                    } finally {
+                        unlockRaceTrackersById(trackerId, lock);
+                    }
+                    raceTrackersByID.remove(trackerId);
                 }
                 raceTrackersByRegatta.remove(regatta);
             }
@@ -1323,7 +1332,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         ScheduledFuture<?> task = getScheduler().schedule(new Runnable() {
             @Override
             public void run() {
-
                 if (tracker.getRaces() == null || tracker.getRaces().isEmpty()) {
                     try {
                         Regatta regatta = tracker.getRegatta();
@@ -1337,7 +1345,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                                 trackersForRegatta.remove(tracker);
                             }
                             tracker.stop();
-                            raceTrackersByID.remove(tracker.getID());
+                            final Object trackerId = tracker.getID();
+                            final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                            try {
+                                raceTrackersByID.remove(trackerId);
+                            } finally {
+                                unlockRaceTrackersById(trackerId, lock);
+                            }
                         }
                         if (trackersForRegatta == null || trackersForRegatta.isEmpty()) {
                             stopTracking(regatta);
@@ -1366,7 +1380,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                         logger.info("Found tracker to stop for races " + raceTracker.getRaces());
                         raceTracker.stop();
                         trackerIter.remove();
-                        raceTrackersByID.remove(raceTracker.getID());
+                        final Object trackerId = raceTracker.getID();
+                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                        try {
+                            raceTrackersByID.remove(trackerId);
+                        } finally {
+                            unlockRaceTrackersById(trackerId, lock);
+                        }
                     }
                 }
             } else {
@@ -1515,7 +1535,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                             raceTracker.stop();
                             // remove it from the raceTrackers by Regatta
                             trackerIter.remove();
-                            raceTrackersByID.remove(raceTracker.getID());
+                            final Object trackerId = raceTracker.getID();
+                            final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                            try {
+                                raceTrackersByID.remove(trackerId);
+                            } finally {
+                                unlockRaceTrackersById(trackerId, lock);
+                            }
                             // if the last tracked race was removed, remove the entire regatta
                             if (raceTrackersByRegatta.get(regatta).isEmpty()) {
                                 stopTracking(regatta);
