@@ -4,6 +4,16 @@ Our default Hudson runs on http://hudson.sapsailing.com. If you need access, ple
 
 It is good practice to set up a new Hudson job for major branches that require solid testing before being merged into the master branch. The entry page at http://hudson.sapsailing.com explains how to do this. It basically comes down to copying a template job and adjusting the branch name. As easy as that :-)
 
+## Collecting measurements using Hudson/Jenkins
+
+If you have a test case that measures something, such as performance or level of fulfillment or any other numeric measure, you can have Hudson/Jenkins plot it. In your test case, use the class `com.sap.sailing.domain.test.measurements.MeasurementXMLFile` and add performance cases to which you add measurements, e.g., as follows:
+<pre>
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile(getClass());
+        MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+        performanceReportCase.addMeasurement(new Measurement("My Measurement", theNumberIMeasured));
+        performanceReport.write();
+</pre>
+
 ## In case you'd like to set up your own Hudson/Jenkins
 
 Initially we had trouble with Jenkins and the GIT plug-in. However, https://issues.jenkins-ci.org/browse/JENKINS-13381?focusedCommentId=196689&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-196689 explains that installing the Credentials plugin into Jenkins may help. Basically, what is needed over and above a plain Jenkins installation are the following plug-ins:
