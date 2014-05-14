@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -242,7 +243,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     private final CompetitorStore competitorStore;
 
-    private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
+    private ConcurrentSkipListSet<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new ConcurrentSkipListSet<DynamicTrackedRegatta>();
 
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -1110,20 +1111,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 /* raceDefinitionSetToUpdate */null);
     }
 
-    private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
-            DynamicTrackedRegatta trackedRegatta) {
-        synchronized (regattasObservedForDefaultLeaderboard) {
-            if (!regattasObservedForDefaultLeaderboard.contains(trackedRegatta)) {
-                trackedRegatta.addRaceListener(new RaceAdditionListener());
-                regattasObservedForDefaultLeaderboard.add(trackedRegatta);
-            }
+    private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
+        if (regattasObservedForDefaultLeaderboard.add(trackedRegatta)) {
+            trackedRegatta.addRaceListener(new RaceAdditionListener());
         }
     }
 
     private void stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
-        synchronized (regattasObservedForDefaultLeaderboard) {
-            regattasObservedForDefaultLeaderboard.remove(trackedRegatta);
-        }
+        regattasObservedForDefaultLeaderboard.remove(trackedRegatta);
     }
 
     /**
