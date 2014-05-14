@@ -263,7 +263,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
     
     @Override
-    protected void setCanvasSettings() {
+    public void setCanvasSettings() {
         if (corners != null && corners.length == 4) {
             final Point corner0 = getPointInDivPixel(corners[0]);
             final Point corner1 = getPointInDivPixel(corners[1]);
