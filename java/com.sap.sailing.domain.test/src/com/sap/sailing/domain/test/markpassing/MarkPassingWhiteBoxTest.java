@@ -80,13 +80,18 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(-0.000268, 0.000135), new MillisecondsTimePoint(
                 80000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(170)));
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
+
+        race.recordFix(tom, fix1);
+        race.recordFix(tom, fix3);
         List<GPSFix> fixes = new ArrayList<>();
-        fixes.addAll(Arrays.asList(fix1, fix3));
+        fixes.add(fix1);
+        fixes.add(fix3);
         Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getA()), 0);
         assertEquals(Util.size(cans.getB()), 0);
 
         fixes.clear();
+        race.recordFix(tom, fix2);
         fixes.add(fix2);
         cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getA()), 2); // 2 Distance candidates (mark is rounded twice in course)
@@ -121,7 +126,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         fixes.clear();
         fixes.add(fix3);
         cans = finder.getCandidateDeltas(tom, fixes);
-        assertEquals(3, Util.size(cans.getA()));
+        assertEquals(5, Util.size(cans.getA()));
         assertEquals(Util.size(cans.getB()), 0);
 
         race.recordFix(tom, fix4);

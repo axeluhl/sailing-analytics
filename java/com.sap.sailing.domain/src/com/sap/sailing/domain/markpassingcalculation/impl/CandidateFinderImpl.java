@@ -51,7 +51,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private final int strictnessOfDistanceBasedProbability = 8;
     private final double penaltyForWrongSide = 0.7;
     private final double penaltyForWrongDirection = 0.7;
-    private final double penaltyForDistanceCandidates = 1;
+    private final double penaltyForDistanceCandidates = 0.7;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
     private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> distanceCache = new LinkedHashMap<>();
