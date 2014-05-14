@@ -222,8 +222,21 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * Leaderboards managed by this racing event service
     */
     private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
+    
+    /**
+     * {@link #leaderboardsByName} is already a concurrent hash map; however, when renaming a leaderboard, this shall
+     * happen as an atomic transaction, not interruptible by other write accesses on the same map because otherwise
+     * assumptions made during the rename process wouldn't hold. See, in particular,
+     * {@link #renameLeaderboard(String, String)}.
+     */
+    private final NamedReentrantReadWriteLock leaderboardsByNameLock;
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    /**
+     * See {@link #leaderboardsByNameLock}
+     */
+    private final NamedReentrantReadWriteLock leaderboardGroupsByNameLock;
     
     private final CompetitorStore competitorStore;
 
@@ -365,7 +378,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
+        leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for "+this, /* fair */ false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
+        leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for "+this, /* fair */ false);
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
@@ -398,29 +413,23 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void clearState() throws Exception {
-        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
+        for (String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
             removeLeaderboardGroup(leaderboardGroupName);
         }
-        
-        for(String leaderboardName : this.leaderboardsByName.keySet()) {
+        for (String leaderboardName : this.leaderboardsByName.keySet()) {
             removeLeaderboard(leaderboardName);
         }
-        
         for(Regatta regatta : this.regattasByName.values()) {
             stopTracking(regatta);
             removeRegatta(regatta);
         }
-        
         for(Event event : this.eventsById.values()) {
             removeEvent(event.getId());
         }
-        
         for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
-        
         this.competitorStore.clear();
-        
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
@@ -458,10 +467,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private void loadStoredEvents() {
         for (Event event : domainObjectFactory.loadAllEvents()) {
-            synchronized (eventsById) {
-                if (event.getId() != null)
-                    eventsById.put(event.getId(), event);
-            }
+            if (event.getId() != null)
+                eventsById.put(event.getId(), event);
         }
     }
 
@@ -485,21 +492,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     private void loadStoredDeviceConfigurations() {
         for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : domainObjectFactory.loadAllDeviceConfigurations()) {
-            synchronized (configurationMap) {
-                configurationMap.put(entry.getKey(), entry.getValue());
-            }
+            configurationMap.put(entry.getKey(), entry.getValue());
         }
     }
 
     @Override
     public void addLeaderboard(Leaderboard leaderboard) {
-        synchronized (leaderboardsByName) {
+        LockUtil.lockForWrite(leaderboardsByNameLock);
+        try {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
-            // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
-            if (leaderboard instanceof FlexibleLeaderboard) {
-                leaderboard.addRaceColumnListener(raceLogReplicator);
-                leaderboard.addRaceColumnListener(raceLogScoringReplicator);
-            }
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
+        }
+        // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            leaderboard.addRaceColumnListener(raceLogReplicator);
+            leaderboard.addRaceColumnListener(raceLogScoringReplicator);
         }
     }
 
@@ -508,7 +516,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         // Loading all leaderboard groups and the contained leaderboards
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this, this)) {
             logger.info("loaded leaderboard group " + leaderboardGroup.getName() + " into " + this);
-            leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+            LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+            try {
+                leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+            } finally {
+                LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+            }
         }
         // Loading the remaining leaderboards
         domainObjectFactory.getLeaderboardsNotInGroup(this, this);
@@ -526,12 +539,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds), scoringScheme,
                 courseArea);
         result.setDisplayName(leaderboardDisplayName);
-        synchronized (leaderboardsByName) {
-            if (getLeaderboardByName(leaderboardName) != null) {
-                throw new IllegalArgumentException("Leaderboard with name " + leaderboardName + " already exists");
-            }
-            addLeaderboard(result);
+        if (getLeaderboardByName(leaderboardName) != null) {
+            throw new IllegalArgumentException("Leaderboard with name " + leaderboardName + " already exists");
         }
+        addLeaderboard(result);
         mongoObjectFactory.storeLeaderboard(result);
         return result;
     }
@@ -558,13 +569,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
             result.setDisplayName(leaderboardDisplayName);
-            synchronized (leaderboardsByName) {
-                if (getLeaderboardByName(result.getName()) != null) {
-                    throw new IllegalArgumentException("Leaderboard with name " + result.getName()
-                            + " already exists in " + this);
-                }
-                addLeaderboard(result);
+            if (getLeaderboardByName(result.getName()) != null) {
+                throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "
+                        + this);
             }
+            addLeaderboard(result);
             mongoObjectFactory.storeLeaderboard(result);
         } else {
             logger.warning("Cannot find regatta " + regattaIdentifier
@@ -688,24 +697,30 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void renameLeaderboard(String oldName, String newName) {
-        synchronized (leaderboardsByName) {
-            if (!leaderboardsByName.containsKey(oldName)) {
+        final Leaderboard toRename = leaderboardsByName.get(oldName);
+        LockUtil.lockForWrite(leaderboardsByNameLock);
+        try {
+            if (toRename == null) {
                 throw new IllegalArgumentException("No leaderboard with name " + oldName + " found");
             }
             if (leaderboardsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard with name " + newName + " already exists");
             }
-            Leaderboard toRename = leaderboardsByName.get(oldName);
             if (toRename instanceof Renamable) {
                 ((Renamable) toRename).setName(newName);
                 leaderboardsByName.remove(oldName);
                 leaderboardsByName.put(newName, toRename);
-                mongoObjectFactory.renameLeaderboard(oldName, newName);
-                syncGroupsAfterLeaderboardChange(toRename, true);
             } else {
                 throw new IllegalArgumentException("Leaderboard with name " + newName + " is of type "
                         + toRename.getClass().getSimpleName() + " and therefore cannot be renamed");
             }
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
+        }
+        // don't need the lock anymore to update DB
+        if (toRename instanceof Renamable) {
+            mongoObjectFactory.renameLeaderboard(oldName, newName);
+            syncGroupsAfterLeaderboardChange(toRename, true);
         }
     }
 
@@ -729,24 +744,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private void syncGroupsAfterLeaderboardChange(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        synchronized (leaderboardGroupsByName) {
-            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if (leaderboard == updatedLeaderboard) {
-                        int index = leaderboardGroup.getIndexOf(leaderboard);
-                        leaderboardGroup.removeLeaderboard(leaderboard);
-                        leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);
-                        groupNeedsUpdate = true;
-                        // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                        break;
-                    }
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard == updatedLeaderboard) {
+                    int index = leaderboardGroup.getIndexOf(leaderboard);
+                    leaderboardGroup.removeLeaderboard(leaderboard);
+                    leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);
+                    groupNeedsUpdate = true;
+                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
+                    break;
                 }
-
-                if (doDatabaseUpdate && groupNeedsUpdate) {
-                    mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-                }
-                groupNeedsUpdate = false;
             }
+
+            if (doDatabaseUpdate && groupNeedsUpdate) {
+                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+            }
+            groupNeedsUpdate = false;
         }
     }
 
@@ -763,8 +776,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
-        synchronized (leaderboardsByName) {
+        LockUtil.lockForWrite(leaderboardsByNameLock);
+        try {
             return leaderboardsByName.remove(leaderboardName);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardsByNameLock);
         }
     }
 
@@ -776,37 +792,31 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
-        synchronized (leaderboardGroupsByName) {
-            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if (leaderboard.getName().equals(removedLeaderboardName)) {
-                        leaderboardGroup.removeLeaderboard(leaderboard);
-                        groupNeedsUpdate = true;
-                        // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                        break;
-                    }
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard.getName().equals(removedLeaderboardName)) {
+                    leaderboardGroup.removeLeaderboard(leaderboard);
+                    groupNeedsUpdate = true;
+                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
+                    break;
                 }
-
-                if (doDatabaseUpdate && groupNeedsUpdate) {
-                    mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-                }
-                groupNeedsUpdate = false;
             }
+
+            if (doDatabaseUpdate && groupNeedsUpdate) {
+                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+            }
+            groupNeedsUpdate = false;
         }
     }
 
     @Override
     public Leaderboard getLeaderboardByName(String name) {
-        synchronized (leaderboardsByName) {
-            return leaderboardsByName.get(name);
-        }
+        return leaderboardsByName.get(name);
     }
 
     @Override
     public Map<String, Leaderboard> getLeaderboards() {
-        synchronized (leaderboardsByName) {
-            return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
-        }
+        return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
     }
 
     @Override
@@ -955,7 +965,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      *            need to pass the lock obtained from {@link #lockRaceTrackersById(Object)} because a competing thread
      *            may already have removed the lock from the {@link #raceTrackersByIDLocks} map
      */
-    private synchronized void unlockRaceTrackersById(Object trackerId, NamedReentrantReadWriteLock lock) {
+    private void unlockRaceTrackersById(Object trackerId, NamedReentrantReadWriteLock lock) {
         LockUtil.unlockAfterWrite(lock);
         synchronized (raceTrackersByIDLocks) {
             raceTrackersByIDLocks.remove(trackerId);
@@ -1641,16 +1651,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Map<String, LeaderboardGroup> getLeaderboardGroups() {
-        synchronized (leaderboardGroupsByName) {
-            return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
-        }
+        return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
     }
 
     @Override
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
-        synchronized (leaderboardGroupsByName) {
-            return leaderboardGroupsByName.get(groupName);
-        }
+        return leaderboardGroupsByName.get(groupName);
     }
 
     @Override
@@ -1658,14 +1664,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
-        synchronized (leaderboardsByName) {
-            for (String leaderboardName : leaderboardNames) {
-                Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
-                if (leaderboard == null) {
-                    throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
-                } else {
-                    leaderboards.add(leaderboard);
-                }
+        for (String leaderboardName : leaderboardNames) {
+            Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
+            if (leaderboard == null) {
+                throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
+            } else {
+                leaderboards.add(leaderboard);
             }
         }
         LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, displayGroupsInReverseOrder,
@@ -1676,11 +1680,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     getBaseDomainFactory().createScoringScheme(overallLeaderboardScoringSchemeType),
                     overallLeaderboardDiscardThresholds);
         }
-        synchronized (leaderboardGroupsByName) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
             if (leaderboardGroupsByName.containsKey(groupName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
             leaderboardGroupsByName.put(groupName, result);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
         mongoObjectFactory.storeLeaderboardGroup(result);
         return result;
@@ -1689,8 +1696,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void removeLeaderboardGroup(String groupName) {
         final LeaderboardGroup leaderboardGroup;
-        synchronized (leaderboardGroupsByName) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
         mongoObjectFactory.removeLeaderboardGroup(groupName);
         if (leaderboardGroup != null && leaderboardGroup.getOverallLeaderboard() != null) {
@@ -1700,18 +1710,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void renameLeaderboardGroup(String oldName, String newName) {
-        synchronized (leaderboardGroupsByName) {
-            if (!leaderboardGroupsByName.containsKey(oldName)) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
+            final LeaderboardGroup toRename = leaderboardGroupsByName.get(oldName);
+            if (toRename == null) {
                 throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
             }
             if (leaderboardGroupsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
             }
-            LeaderboardGroup toRename = leaderboardGroupsByName.remove(oldName);
+            leaderboardGroupsByName.remove(oldName);
             toRename.setName(newName);
             leaderboardGroupsByName.put(newName, toRename);
-            mongoObjectFactory.renameLeaderboardGroup(oldName, newName);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
+        mongoObjectFactory.renameLeaderboardGroup(oldName, newName);
     }
 
     @Override
@@ -1892,7 +1906,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             logger.info("Clearing all data structures...");
             regattaTrackingCache.clear();
             leaderboardGroupsByName.clear();
-            leaderboardsByName.clear();
+            LockUtil.lockForWrite(leaderboardsByNameLock);
+            try {
+                leaderboardsByName.clear();
+            } finally {
+                LockUtil.unlockAfterWrite(leaderboardsByNameLock);
+            }
             eventsById.clear();
             mediaLibrary.clear();
             competitorStore.clear();
@@ -1977,23 +1996,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        synchronized (eventsById) {
-            Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
-            replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
-            return result;
-        }
+        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
+        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
+        return result;
     }
 
     @Override
     public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
-        synchronized (eventsById) {
-            if (eventsById.containsKey(result.getId())) {
-                throw new IllegalArgumentException("Event with ID " + result.getId()
-                        + " already exists which is pretty surprising...");
-            }
-            eventsById.put(result.getId(), result);
+        if (eventsById.containsKey(result.getId())) {
+            throw new IllegalArgumentException("Event with ID " + result.getId()
+                    + " already exists which is pretty surprising...");
         }
+        eventsById.put(result.getId(), result);
         mongoObjectFactory.storeEvent(result);
         return result;
     }
@@ -2001,36 +2016,29 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
             boolean isPublic, List<String> regattaNames) {
-        synchronized (eventsById) {
-            if (!eventsById.containsKey(id)) {
-                throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
-            }
-            Event event = eventsById.get(id);
-            event.setName(eventName);
-            event.setStartDate(startDate);
-            event.setEndDate(endDate);
-            event.setPublic(isPublic);
-            event.getVenue().setName(venueName);
-
-            // TODO need to update regattas if they are once linked to event objects
-            mongoObjectFactory.storeEvent(event);
-
-            replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
+        final Event event = eventsById.get(id);
+        if (event == null) {
+            throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
         }
+        event.setName(eventName);
+        event.setStartDate(startDate);
+        event.setEndDate(endDate);
+        event.setPublic(isPublic);
+        event.getVenue().setName(venueName);
+        // TODO need to update regattas if they are once linked to event objects
+        mongoObjectFactory.storeEvent(event);
+        replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
     }
 
     @Override
     public void renameEvent(UUID id, String newName) {
-        synchronized (eventsById) {
-            if (!eventsById.containsKey(id)) {
-                throw new IllegalArgumentException("No sailing event with ID " + id + " found.");
-            }
-            Event toRename = eventsById.get(id);
-            toRename.setName(newName);
-            mongoObjectFactory.renameEvent(id, newName);
-
-            replicate(new RenameEvent(id, newName));
+        final Event toRename = eventsById.get(id);
+        if (toRename == null) {
+            throw new IllegalArgumentException("No sailing event with ID " + id + " found.");
         }
+        toRename.setName(newName);
+        mongoObjectFactory.renameEvent(id, newName);
+        replicate(new RenameEvent(id, newName));
     }
 
     @Override
@@ -2041,9 +2049,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     protected void removeEventFromEventsById(Serializable id) {
-        synchronized (eventsById) {
-            eventsById.remove(id);
-        }
+        eventsById.remove(id);
     }
 
     @Override
@@ -2070,25 +2076,21 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
-        synchronized (eventsById) {
-            addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
-            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-        }
+        addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
+        replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
         return courseArea;
     }
 
     @Override
     public CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName) {
         final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
-        synchronized (eventsById) {
-            if (!eventsById.containsKey(eventId)) {
-                throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
-            }
-            Event event = eventsById.get(eventId);
-            event.getVenue().addCourseArea(courseArea);
-            mongoObjectFactory.storeEvent(event);
-            return courseArea;
+        final Event event = eventsById.get(eventId);
+        if (event == null) {
+            throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
         }
+        event.getVenue().addCourseArea(courseArea);
+        mongoObjectFactory.storeEvent(event);
+        return courseArea;
     }
 
     @Override
@@ -2230,18 +2232,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
-        synchronized (configurationMap) {
-            configurationMap.put(matcher, configuration);
-        }
+        configurationMap.put(matcher, configuration);
         mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
         replicate(new CreateOrUpdateDeviceConfiguration(matcher, configuration));
     }
 
     @Override
     public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
-        synchronized (configurationMap) {
-            configurationMap.remove(matcher);
-        }
+        configurationMap.remove(matcher);
         mongoObjectFactory.removeDeviceConfiguration(matcher);
         replicate(new RemoveDeviceConfiguration(matcher));
     }
