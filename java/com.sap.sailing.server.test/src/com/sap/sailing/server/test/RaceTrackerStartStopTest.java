@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class RaceTrackerStartStopTest {
     private RacingEventServiceImplMock racingEventService;
     private Regatta regatta;
     private BoatClass boatClass;
-    private Set<RaceTracker> raceTrackerSet = new HashSet<RaceTracker>();
+    private ConcurrentSkipListSet<RaceTracker> raceTrackerSet = new ConcurrentSkipListSet<RaceTracker>();
 
     private RaceDefinition raceDef1;
     private RaceDefinition raceDef2;
@@ -66,10 +67,10 @@ public class RaceTrackerStartStopTest {
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EVENTNAME, boatClass, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
-        racingEventService.getEventsByName().put(EVENTNAME, regatta);
+        racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
-        racingEventService.getEventsByNameMap().put(EVENTNAME, regatta);
-        raceTrackerSet = new HashSet<RaceTracker>();
+        racingEventService.getRegattasByName().put(EVENTNAME, regatta);
+        raceTrackerSet = new ConcurrentSkipListSet<RaceTracker>();
         raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
