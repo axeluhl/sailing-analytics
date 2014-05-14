@@ -56,6 +56,28 @@ public class LockTraceTest {
         assertFalse(lock.getReaders().contains(Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
     }
+    
+    @Test
+    public void testReentrantWriteLockingWithInBetweenReadLocking() {
+        NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantWriteLockingWithInBetweenReadLocking-Lock", /* fair */ false);
+        LockUtil.lockForWrite(lock);
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        LockUtil.lockForRead(lock); // reentrant read while holding write
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.lockForWrite(lock); // reentrant write
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.unlockAfterRead(lock);
+        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(0, lock.getReadHoldCount());
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(0, lock.getReadHoldCount());
+        LockUtil.unlockAfterWrite(lock);
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        LockUtil.unlockAfterWrite(lock);
+        assertFalse(lock.getWriter() == Thread.currentThread());
+    }
 
     @Test
     public void testLockingPerformance() throws IOException {
