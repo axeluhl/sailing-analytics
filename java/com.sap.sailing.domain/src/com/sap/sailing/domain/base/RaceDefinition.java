@@ -21,5 +21,4 @@ public interface RaceDefinition extends Named, WithID {
     Course getCourse();
 
     Iterable<Competitor> getCompetitors();
-
 }

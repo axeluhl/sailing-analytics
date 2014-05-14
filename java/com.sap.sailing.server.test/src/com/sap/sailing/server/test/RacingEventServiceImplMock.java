@@ -1,7 +1,7 @@
 package com.sap.sailing.server.test;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
@@ -22,11 +22,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         lock.addProgress(dataImportProgressImpl.getOperationId(), dataImportProgressImpl);
     }
 
-    public Map<String, Regatta> getEventsByNameMap() {
-        return regattasByName;
-    }
-
-    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByEventMap() {
+    public Map<Regatta, ConcurrentSkipListSet<RaceTracker>> getRaceTrackersByRegattaMap() {
         return raceTrackersByRegatta;
     }
 
@@ -34,7 +30,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         return raceTrackersByID;
     }
 
-    public Map<String, Regatta> getEventsByName() {
+    public Map<String, Regatta> getRegattasByName() {
         return regattasByName;
     }
 

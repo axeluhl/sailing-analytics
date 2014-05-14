@@ -27,16 +27,14 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
     private static LinkedHashMap<String, Long> result = new LinkedHashMap<>();
-    private static String className;
 
     public MarkPassingCalculatorPerformanceTest() {
         super();
-        className = getClass().getName();
     }
 
     @AfterClass
     public static void createXMLFile() throws IOException {
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest", className);
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile(MarkPassingCalculatorPerformanceTest.class);
         for (String key : result.keySet()) {
             MeasurementCase performanceReportCase = performanceReport.addCase(key);
             performanceReportCase.addMeasurement(new Measurement(key, result.get(key)));
