@@ -140,7 +140,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 return null;
             }
             @Override
-            public boolean isRaceBeingTracked(RaceDefinition r) {
+            public boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r) {
                 return true;
             }
             @Override
