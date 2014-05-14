@@ -140,7 +140,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     }
 
     @Override
-    protected void setCanvasSettings() {
+    public void setCanvasSettings() {
     	super.setCanvasSettings();	
         canvas.getElement().getStyle().setZIndex(100000); // make legend float on-top of all overlays
     }
