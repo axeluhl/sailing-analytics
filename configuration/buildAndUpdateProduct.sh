@@ -244,12 +244,12 @@ if [[ "$@" == "release" ]]; then
 
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     echo "
-    MONGODB_NAME=myspecificevent
-    REPLICATION_CHANNEL=myspecificevent
-    SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-    SERVER_NAME=LIVE
-    USE_ENVIRONMENT=live-server
-    INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
+MONGODB_NAME=myspecificevent
+REPLICATION_CHANNEL=myspecificevent
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_NAME=MYSPECIFICEVENT
+USE_ENVIRONMENT=live-server
+INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config.txt
      
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
