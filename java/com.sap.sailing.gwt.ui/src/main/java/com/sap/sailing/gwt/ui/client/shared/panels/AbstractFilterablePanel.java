@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.panels;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -25,7 +28,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-    protected Iterable<T> all;
+    protected Collection<T> all;
     protected final AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
@@ -36,14 +39,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
             return getSearchableStrings(t);
         }
     };
-
+    
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         setSpacing(5);
         this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
-        this.all = all;
+        setAll(all);
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -51,6 +54,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
                 filter();
             }
         });
+    }
+    
+    private void setAll(Iterable<T> all) {
+        if (all instanceof Collection) {
+            this.all = (Collection<T>) all;
+        } else {
+            this.all = new ArrayList<T>();
+            if (all != null) {
+                for (T t : all) {
+                    this.all.add(t);
+                }
+            }
+        }
     }
 
     /**
@@ -69,7 +85,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     
     public void updateAll(Iterable<T> all){
-        this.all = all;
+        setAll(all);
+        filter();
+    }
+    
+    /**
+     * Adds an object and applies the search filter.
+     */
+    public void add(T object){
+        all.add(object);
         filter();
     }
     
@@ -85,5 +109,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public TextBox getTextBox() {
         return textBox;
+    }
+    
+    public Collection<T> getAll() {
+        return all;
     }
 }

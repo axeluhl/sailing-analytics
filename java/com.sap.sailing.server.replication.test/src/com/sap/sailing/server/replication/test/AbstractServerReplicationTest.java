@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
@@ -106,7 +107,7 @@ public abstract class AbstractServerReplicationTest {
         } else {
             this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -127,7 +128,7 @@ public abstract class AbstractServerReplicationTest {
             final MongoObjectFactory mongoObjectFactory) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                 DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
-                EmptyWindStore.INSTANCE);
+                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
     }
 
     @After
