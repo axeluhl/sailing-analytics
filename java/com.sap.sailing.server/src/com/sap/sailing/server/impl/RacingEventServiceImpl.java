@@ -256,6 +256,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private final DomainObjectFactory domainObjectFactory;
 
     private final ConcurrentHashMap<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
+    
+    /**
+     * Protects write access transactions that do a previous read to {@link #regattaTrackingCache}; read-only
+     * access is already synchronized by using a concurrent hash map for {@link #regattaTrackingCache}.
+     */
+    private final NamedReentrantReadWriteLock regattaTrackingCacheLock;
 
     private final ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener> operationExecutionListeners;
 
@@ -383,6 +389,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<>();
+        regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
         raceTrackersByRegattaLock = new NamedReentrantReadWriteLock("raceTrackersByRegatta for "+this, /* fair */ false);
         raceTrackersByID = new ConcurrentHashMap<>();
@@ -1313,7 +1320,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             if (regatta.getName() != null) {
                 logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from " + this);
                 regattasByName.remove(regatta.getName());
-                regattaTrackingCache.remove(regatta);
+                LockUtil.lockForWrite(regattaTrackingCacheLock);
+                try {
+                    regattaTrackingCache.remove(regatta);
+                } finally {
+                    LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
+                }
                 regatta.removeRegattaListener(this);
                 regatta.removeRaceColumnListener(raceLogReplicator);
                 regatta.removeRaceColumnListener(raceLogScoringReplicator);
@@ -1604,7 +1616,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public DynamicTrackedRegatta getOrCreateTrackedRegatta(Regatta regatta) {
         cacheAndReplicateDefaultRegatta(regatta);
-        synchronized (regattaTrackingCache) {
+        LockUtil.lockForWrite(regattaTrackingCacheLock);
+        try {
             DynamicTrackedRegatta result = regattaTrackingCache.get(regatta);
             if (result == null) {
                 logger.info("Creating DynamicTrackedRegattaImpl for regatta " + regatta.getName() + " with hashCode "
@@ -1615,6 +1628,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
             }
             return result;
+        } finally {
+            LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
         }
     }
 
@@ -1626,7 +1641,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void removeTrackedRegatta(Regatta regatta) {
         logger.info("Removing regatta " + regatta.getName() + " from regattaTrackingCache");
-        DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.remove(regatta);
+        final DynamicTrackedRegatta trackedRegatta;
+        LockUtil.lockForWrite(regattaTrackingCacheLock);
+        try {
+            trackedRegatta = regattaTrackingCache.remove(regatta);
+        } finally {
+            LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
+        }
         stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
     }
 
@@ -1932,7 +1953,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
 
             logger.info("Clearing all data structures...");
-            regattaTrackingCache.clear();
+            LockUtil.lockForWrite(regattaTrackingCacheLock);
+            try {
+                regattaTrackingCache.clear();
+            } finally {
+                LockUtil.unlockAfterRead(regattaTrackingCacheLock);
+            }
             LockUtil.lockForWrite(raceTrackersByRegattaLock);
             try {
                 raceTrackersByRegatta.clear();
