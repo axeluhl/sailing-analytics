@@ -194,6 +194,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * {@link Regatta} objects that exist outside this service for regattas not (yet) registered here.
      */
     protected final ConcurrentHashMap<String, Regatta> regattasByName;
+    
+    private final NamedReentrantReadWriteLock regattasByNameLock;
 
     private final ConcurrentHashMap<RaceDefinition, CourseChangeReplicator> courseListeners;
 
@@ -387,6 +389,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.dataImportLock = new DataImportLockWithProgress();
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
+        regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
@@ -430,20 +433,20 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void clearState() throws Exception {
-        for (String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
+        for (String leaderboardGroupName : new ArrayList<>(this.leaderboardGroupsByName.keySet())) {
             removeLeaderboardGroup(leaderboardGroupName);
         }
-        for (String leaderboardName : this.leaderboardsByName.keySet()) {
+        for (String leaderboardName : new ArrayList<>(this.leaderboardsByName.keySet())) {
             removeLeaderboard(leaderboardName);
         }
-        for(Regatta regatta : this.regattasByName.values()) {
+        for (Regatta regatta : new ArrayList<>(this.regattasByName.values())) {
             stopTracking(regatta);
             removeRegatta(regatta);
         }
-        for(Event event : this.eventsById.values()) {
+        for (Event event : new ArrayList<>(this.eventsById.values())) {
             removeEvent(event.getId());
         }
-        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
+        for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
         this.competitorStore.clear();
@@ -473,12 +476,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private void loadStoredRegattas() {
-        for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
-            regattasByName.put(regatta.getName(), regatta);
-            regatta.addRegattaListener(this);
-            regatta.addRaceColumnListener(raceLogReplicator);
-            regatta.addRaceColumnListener(raceLogScoringReplicator);
+        LockUtil.lockForWrite(regattasByNameLock);
+        try {
+            for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
+                logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+                regattasByName.put(regatta.getName(), regatta);
+                regatta.addRegattaListener(this);
+                regatta.addRaceColumnListener(raceLogReplicator);
+                regatta.addRaceColumnListener(raceLogScoringReplicator);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(regattasByNameLock);
         }
     }
 
@@ -913,14 +921,23 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), series, persistent, scoringScheme, id, courseArea);
         boolean wasCreated = false;
+        // try a quick read protected by the concurrent hash map implementation
         if (!regattasByName.containsKey(regatta.getName())) {
-            wasCreated = true;
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode()
-                    + ") into regattasByName of " + this);
-            regattasByName.put(regatta.getName(), regatta);
-            regatta.addRegattaListener(this);
-            regatta.addRaceColumnListener(raceLogReplicator);
-            regatta.addRaceColumnListener(raceLogScoringReplicator);
+            LockUtil.lockForWrite(regattasByNameLock);
+            try {
+                // check again, now that we hold the exclusive write lock
+                if (!regattasByName.containsKey(regatta.getName())) {
+                    wasCreated = true;
+                    logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode()
+                            + ") into regattasByName of " + this);
+                    regattasByName.put(regatta.getName(), regatta);
+                    regatta.addRegattaListener(this);
+                    regatta.addRaceColumnListener(raceLogReplicator);
+                    regatta.addRaceColumnListener(raceLogScoringReplicator);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(regattasByNameLock);
+            }
         }
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         if (persistent) {
@@ -1026,8 +1043,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     if (regattaWithName != tracker.getRegatta()) {
                         if (Util.isEmpty(regattaWithName.getAllRaces())) {
                             // probably, tracker removed the last races from the old regatta and created a new one
-                            regattasByName.remove(regattaName);
-                            cacheAndReplicateDefaultRegatta(tracker.getRegatta());
+                            LockUtil.lockForWrite(regattasByNameLock);
+                            try {
+                                regattasByName.remove(regattaName);
+                                cacheAndReplicateDefaultRegatta(tracker.getRegatta());
+                            } finally {
+                                LockUtil.unlockAfterWrite(regattasByNameLock);
+                            }
                         } else {
                             throw new RuntimeException("Internal error. Two regatta objects with equal name " + regattaName);
                         }
@@ -1101,19 +1123,29 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * contained {@link Regatta#getAllRaces() races} are replicated to all replica.
      */
     private void cacheAndReplicateDefaultRegatta(Regatta regatta) {
+        // try a quick read first, protected by regattasByName being a concurrent hash set
         if (!regattasByName.containsKey(regatta.getName())) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode()
-                    + ") into regattasByName of " + this);
-            regattasByName.put(regatta.getName(), regatta);
-            regatta.addRegattaListener(this);
-            regatta.addRaceColumnListener(raceLogReplicator);
-            regatta.addRaceColumnListener(raceLogScoringReplicator);
+            // now we need to obtain exclusive write access; in between, some other thread may have added a regatta by that
+            // name, so we need to check again:
+            LockUtil.lockForWrite(regattasByNameLock);
+            try {
+                if (!regattasByName.containsKey(regatta.getName())) {
+                    logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode()
+                            + ") into regattasByName of " + this);
+                    regattasByName.put(regatta.getName(), regatta);
+                    regatta.addRegattaListener(this);
+                    regatta.addRaceColumnListener(raceLogReplicator);
+                    regatta.addRaceColumnListener(raceLogScoringReplicator);
 
-            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
-                    .getBoatClass().getName(), regatta.getId()));
-            RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                replicate(new AddRaceDefinition(regattaIdentifier, race));
+                    replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null
+                            : regatta.getBoatClass().getName(), regatta.getId()));
+                    RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
+                    for (RaceDefinition race : regatta.getAllRaces()) {
+                        replicate(new AddRaceDefinition(regattaIdentifier, race));
+                    }
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(regattasByNameLock);
             }
         }
     }
@@ -1319,7 +1351,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regatta != null) {
             if (regatta.getName() != null) {
                 logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from " + this);
-                regattasByName.remove(regatta.getName());
+                LockUtil.lockForWrite(regattasByNameLock);
+                try {
+                    regattasByName.remove(regatta.getName());
+                } finally {
+                    LockUtil.unlockAfterWrite(regattasByNameLock);
+                }
                 LockUtil.lockForWrite(regattaTrackingCacheLock);
                 try {
                     regattaTrackingCache.remove(regatta);
@@ -1438,7 +1475,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regatta.isPersistent()) {
             mongoObjectFactory.removeRegatta(regatta);
         }
-        regattasByName.remove(regatta.getName());
+        LockUtil.lockForWrite(regattasByNameLock);
+        try {
+            regattasByName.remove(regatta.getName());
+        } finally {
+            LockUtil.unlockAfterWrite(regattasByNameLock);
+        }
         regatta.removeRegattaListener(this);
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
@@ -1517,11 +1559,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        // remove the race from the regatta if the regatta is not persistently stored
+        // remove the race from the (default) regatta if the regatta is not persistently stored
         regatta.removeRace(race);
         if (!regatta.isPersistent() && Util.isEmpty(regatta.getAllRaces())) {
             logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from service " + this);
-            regattasByName.remove(regatta.getName());
+            LockUtil.lockForWrite(regattasByNameLock);
+            try {
+                regattasByName.remove(regatta.getName());
+            } finally {
+                LockUtil.unlockAfterWrite(regattasByNameLock);
+            }
             regatta.removeRegattaListener(this);
             regatta.removeRaceColumnListener(raceLogReplicator);
             regatta.removeRaceColumnListener(raceLogScoringReplicator);
@@ -1941,7 +1988,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             // de-serialization; this will cause all classes to be visible that this bundle
             // (com.sap.sailing.server) can see
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            regattasByName.clear();
+            LockUtil.lockForWrite(regattasByNameLock);
+            try {
+                regattasByName.clear();
+            } finally {
+                LockUtil.unlockAfterWrite(regattasByNameLock);
+            }
             regattasObservedForDefaultLeaderboard.clear();
 
             if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
