@@ -27,6 +27,10 @@ public class MeasurementXMLFile {
     private final Set<MeasurementCase> cases;
     private final String testClassName;
     
+    public MeasurementXMLFile(Class<?> testClass) {
+        this("TEST-"+testClass.getSimpleName()+".xml", testClass.getSimpleName(), testClass.getName());
+    }
+    
     public MeasurementXMLFile(String reportFileName, String testSuiteName, String testClassName) {
         this.reportFileName = reportFileName;
         this.testSuiteName = testSuiteName;
