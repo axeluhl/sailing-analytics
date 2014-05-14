@@ -238,7 +238,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory,
                 paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername,
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, tracTracUsername,
                 tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     

@@ -52,7 +52,7 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetit
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
@@ -92,7 +92,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
      * Otherwise, the {@code RaceLogRaceTracker} waits until a {@code StartTrackingEvent} is added to perform these actions.
      * The race first has to be denoted for racelog tracking.
      */
-    private RacesHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
+    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds) throws RaceLogRaceTrackerExistsException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert ! isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
