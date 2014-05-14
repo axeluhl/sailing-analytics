@@ -1,7 +1,7 @@
 package com.sap.sailing.server.test;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
@@ -26,7 +26,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         return regattasByName;
     }
 
-    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByRegattaMap() {
+    public Map<Regatta, ConcurrentSkipListSet<RaceTracker>> getRaceTrackersByRegattaMap() {
         return raceTrackersByRegatta;
     }
 

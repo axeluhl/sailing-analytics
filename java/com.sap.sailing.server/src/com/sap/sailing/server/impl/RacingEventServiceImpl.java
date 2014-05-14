@@ -197,7 +197,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private final ConcurrentHashMap<RaceDefinition, CourseChangeReplicator> courseListeners;
 
-    protected final ConcurrentHashMap<Regatta, Set<RaceTracker>> raceTrackersByRegatta;
+    protected final ConcurrentHashMap<Regatta, ConcurrentSkipListSet<RaceTracker>> raceTrackersByRegatta;
+    
+    /**
+     * Although {@link #raceTrackersByRegatta} is a concurrent hash map, entering sets as values needs to be
+     * synchronized using this lock's write lock to avoid two value sets overwriting each other.
+     */
+    private final NamedReentrantReadWriteLock raceTrackersByRegattaLock;
 
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
@@ -378,6 +384,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         raceTrackersByRegatta = new ConcurrentHashMap<>();
+        raceTrackersByRegattaLock = new NamedReentrantReadWriteLock("raceTrackersByRegatta for "+this, /* fair */ false);
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
@@ -839,15 +846,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r) {
-        synchronized (raceTrackersByRegatta) {
-            Set<RaceTracker> trackers = raceTrackersByRegatta.get(regattaContext);
+        Set<RaceTracker> trackers = raceTrackersByRegatta.get(regattaContext);
+        if (trackers != null) {
             for (RaceTracker tracker : trackers) {
-                if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
+                final Set<RaceDefinition> races = tracker.getRaces();
+                if (races != null && races.contains(r)) {
                     return true;
                 }
             }
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -991,14 +999,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore);
                     assert tracker.getRegatta() == regatta;
                 }
-                synchronized (raceTrackersByRegatta) {
+                LockUtil.lockForWrite(raceTrackersByRegattaLock);
+                try {
                     raceTrackersByID.put(trackerID, tracker);
-                    Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
+                    ConcurrentSkipListSet<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                     if (trackers == null) {
-                        trackers = new HashSet<RaceTracker>();
+                        trackers = new ConcurrentSkipListSet<RaceTracker>();
                         raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
                     }
                     trackers.add(tracker);
+                } finally {
+                    LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
                 }
                 // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 String regattaName = tracker.getRegatta().getName();
@@ -1267,26 +1278,30 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        synchronized (raceTrackersByRegatta) {
-            if (raceTrackersByRegatta.containsKey(regatta)) {
-                for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                    final Set<RaceDefinition> races = raceTracker.getRaces();
-                    if (races != null) {
-                        for (RaceDefinition race : races) {
-                            stopTrackingWind(regatta, race);
-                        }
+        final ConcurrentSkipListSet<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
+        if (trackersForRegatta != null) {
+            for (RaceTracker raceTracker : trackersForRegatta) {
+                final Set<RaceDefinition> races = raceTracker.getRaces();
+                if (races != null) {
+                    for (RaceDefinition race : races) {
+                        stopTrackingWind(regatta, race);
                     }
-                    raceTracker.stop();
-                    final Object trackerId = raceTracker.getID();
-                    final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                    try {
-                        raceTrackersByID.remove(trackerId);
-                    } finally {
-                        unlockRaceTrackersById(trackerId, lock);
-                    }
-                    raceTrackersByID.remove(trackerId);
                 }
+                raceTracker.stop();
+                final Object trackerId = raceTracker.getID();
+                final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                try {
+                    raceTrackersByID.remove(trackerId);
+                } finally {
+                    unlockRaceTrackersById(trackerId, lock);
+                }
+                raceTrackersByID.remove(trackerId);
+            }
+            LockUtil.lockForWrite(raceTrackersByRegattaLock);
+            try {
                 raceTrackersByRegatta.remove(regatta);
+            } finally {
+                LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
             }
         }
     }
@@ -1332,20 +1347,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                         logger.log(Level.SEVERE, "RaceDefinition for a race in regatta " + regatta.getName()
                                 + " not obtained within " + timeoutInMilliseconds
                                 + "ms. Aborting tracker for this race.");
-                        Set<RaceTracker> trackersForRegatta;
-                        synchronized (raceTrackersByRegatta) {
-                            trackersForRegatta = raceTrackersByRegatta.get(regatta);
-                            if (trackersForRegatta != null) {
-                                trackersForRegatta.remove(tracker);
-                            }
-                            tracker.stop();
-                            final Object trackerId = tracker.getID();
-                            final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                            try {
-                                raceTrackersByID.remove(trackerId);
-                            } finally {
-                                unlockRaceTrackersById(trackerId, lock);
-                            }
+                        Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
+                        if (trackersForRegatta != null) {
+                            trackersForRegatta.remove(tracker);
+                        }
+                        tracker.stop();
+                        final Object trackerId = tracker.getID();
+                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                        try {
+                            raceTrackersByID.remove(trackerId);
+                        } finally {
+                            unlockRaceTrackersById(trackerId, lock);
                         }
                         if (trackersForRegatta == null || trackersForRegatta.isEmpty()) {
                             stopTracking(regatta);
@@ -1364,33 +1376,31 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
-        synchronized (raceTrackersByRegatta) {
-            final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
-            if (raceTrackersByRegatta.containsKey(regatta)) {
-                Iterator<RaceTracker> trackerIter = trackerSet.iterator();
-                while (trackerIter.hasNext()) {
-                    RaceTracker raceTracker = trackerIter.next();
-                    if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                        logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                        raceTracker.stop();
-                        trackerIter.remove();
-                        final Object trackerId = raceTracker.getID();
-                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                        try {
-                            raceTrackersByID.remove(trackerId);
-                        } finally {
-                            unlockRaceTrackersById(trackerId, lock);
-                        }
+        final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
+        if (trackerSet != null) {
+            Iterator<RaceTracker> trackerIter = trackerSet.iterator();
+            while (trackerIter.hasNext()) {
+                RaceTracker raceTracker = trackerIter.next();
+                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
+                    logger.info("Found tracker to stop for races " + raceTracker.getRaces());
+                    raceTracker.stop();
+                    trackerIter.remove();
+                    final Object trackerId = raceTracker.getID();
+                    final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                    try {
+                        raceTrackersByID.remove(trackerId);
+                    } finally {
+                        unlockRaceTrackersById(trackerId, lock);
                     }
                 }
-            } else {
-                logger.warning("Didn't find any trackers for regatta " + regatta);
             }
-            stopTrackingWind(regatta, race);
-            // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
-            if (trackerSet == null || trackerSet.isEmpty()) {
-                stopTracking(regatta);
-            }
+        } else {
+            logger.warning("Didn't find any trackers for regatta " + regatta);
+        }
+        stopTrackingWind(regatta, race);
+        // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
+        if (trackerSet == null || trackerSet.isEmpty()) {
+            stopTracking(regatta);
         }
     }
 
@@ -1511,35 +1521,33 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private void stopAllTrackersForWhichRaceIsLastReachable(Regatta regatta, RaceDefinition race)
             throws MalformedURLException, IOException, InterruptedException {
-        synchronized (raceTrackersByRegatta) {
-            if (raceTrackersByRegatta.containsKey(regatta)) {
-                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
-                while (trackerIter.hasNext()) {
-                    RaceTracker raceTracker = trackerIter.next();
-                    if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                        boolean foundReachableRace = false;
-                        for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
-                            if (raceTrackedByTracker != race && isReachable(regatta, raceTrackedByTracker)) {
-                                foundReachableRace = true;
-                                break;
-                            }
+        if (raceTrackersByRegatta.containsKey(regatta)) {
+            Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+            while (trackerIter.hasNext()) {
+                RaceTracker raceTracker = trackerIter.next();
+                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
+                    boolean foundReachableRace = false;
+                    for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
+                        if (raceTrackedByTracker != race && isReachable(regatta, raceTrackedByTracker)) {
+                            foundReachableRace = true;
+                            break;
                         }
-                        if (!foundReachableRace) {
-                            // firstly stop the tracker
-                            raceTracker.stop();
-                            // remove it from the raceTrackers by Regatta
-                            trackerIter.remove();
-                            final Object trackerId = raceTracker.getID();
-                            final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                            try {
-                                raceTrackersByID.remove(trackerId);
-                            } finally {
-                                unlockRaceTrackersById(trackerId, lock);
-                            }
-                            // if the last tracked race was removed, remove the entire regatta
-                            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
-                                stopTracking(regatta);
-                            }
+                    }
+                    if (!foundReachableRace) {
+                        // firstly stop the tracker
+                        raceTracker.stop();
+                        // remove it from the raceTrackers by Regatta
+                        trackerIter.remove();
+                        final Object trackerId = raceTracker.getID();
+                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                        try {
+                            raceTrackersByID.remove(trackerId);
+                        } finally {
+                            unlockRaceTrackersById(trackerId, lock);
+                        }
+                        // if the last tracked race was removed, remove the entire regatta
+                        if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+                            stopTracking(regatta);
                         }
                     }
                 }
@@ -1925,7 +1933,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
             logger.info("Clearing all data structures...");
             regattaTrackingCache.clear();
-            leaderboardGroupsByName.clear();
+            LockUtil.lockForWrite(raceTrackersByRegattaLock);
+            try {
+                raceTrackersByRegatta.clear();
+            } finally {
+                LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
+            }
+            LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+            try {
+                leaderboardGroupsByName.clear();
+            } finally {
+                LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+            }
             LockUtil.lockForWrite(leaderboardsByNameLock);
             try {
                 leaderboardsByName.clear();
