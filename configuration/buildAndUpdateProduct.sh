@@ -242,6 +242,7 @@ if [[ "$@" == "release" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
 
+    mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     echo "
     MONGODB_NAME=myspecificevent
     REPLICATION_CHANNEL=myspecificevent
@@ -249,9 +250,8 @@ if [[ "$@" == "release" ]]; then
     SERVER_NAME=LIVE
     USE_ENVIRONMENT=live-server
     INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
-    " >> $ACDIR/amazon-launch-config.txt
+    " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config.txt
      
-    mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO

@@ -202,7 +202,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private CheckBox addLeaderboardEnablerButton() {
-        final CheckBox checkBox = new CheckBox("Leaderboard");
+        final CheckBox checkBox = new CheckBox(stringMessages.leaderboard());
         
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         
