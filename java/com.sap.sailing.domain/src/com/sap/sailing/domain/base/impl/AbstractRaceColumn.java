@@ -39,7 +39,6 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         this.trackedRaces = new TrackedRaces();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
         this.raceLogs = new HashMap<Fleet, RaceLog>();
-
     }
 
     @Override
