@@ -8,7 +8,7 @@ This is the second iteration of implementing this idea. For previous documentati
 [[_TOC_]]
 
 # Development Infos
-Currently, RaceLog tracking has not been merged into the master branch. Instead, refer to the following branches:
+RaceLog tracking has been merged into the master branch with commit 4b4b61b6c518139f4389aabd73c282621711855a. It was developed on the following branches:
 * ``ftes-rltracking``: The main RaceLog-tracking development
 * ``ftes-rltracking-equestrian``: Serves as a reference implementation of a tracking adapter built for RaceLog-tracking.
 
@@ -22,8 +22,8 @@ Following the numbers in the diagram, this is a possible race log tracking scena
 1. The race is defined through events that are added to the RaceLog.
 2. The RaceTracker is created.
 3. As soon as the "StartTrackingEvent" is added to the RaceLog, the RaceTracker creates the TrackedRace.
-4. Tracking devices submit GPS fixes to the tracking adapter.
-5. If these fixes match the mappings defined for this race in the RaceLog, they are added to the TrackedRace. 
+4. Tracking devices submit GPS fixes to the tracking adapter. This adds these fixes to the global GPSFixStore.
+5. The GPSFixStore notifies its listeners - among them the RaceTrackers - of new fixes. Each RaceTracker checks whether a new fix matches the mappings defined in its RaceLog, and if so adds it to the TrackedRace. 
 
 Not all identifiers represent actual class or bundle names. For a more technical documentation, refer to the JavaDoc in the various ``*.racelog.tracking`` packages and the ``com.sap.sailing.domain.racelogtrackingadapter`` bundle. The following interfaces and classes are good starting points:
 * DeviceIdentifier
@@ -76,5 +76,5 @@ Steps for creating an adapter:
 4. Add the bundle to the ``com.sap.sailing.feature/feature.xml``, and also to the ``com.sap.sailing.feature.p2build/raceanalysis.product`` with the same startup properties as before.
 5. Implement a ``DeviceIdentifier`` and the appropriate ``DeviceIdentifierSerializationHandler``s (refer to the JavaDoc of ``DeviceIdentifier``).
 6. Register your serialization handlers through the OSGi service registry (refer to the JavaDoc of ``DeviceIdentifierSerializationHandler`` for an example on how to do so).
-7. Add some kind of Servlet or similar that adds fixes to the GPSFixStore by calling ``storeFix(DeviceIdentifier device, GPSFix fix)``.
+7. Add some kind of Servlet or similar that adds fixes to the GPSFixStore by calling ``storeFix(DeviceIdentifier device, GPSFix fix)`` on the `GPSFixStore` which can be obtained from `RacingEventService.getGPSFixStore()`.
 8. Fire up the server, let OSGi work its magic, define the race metadata and start adding fixes.

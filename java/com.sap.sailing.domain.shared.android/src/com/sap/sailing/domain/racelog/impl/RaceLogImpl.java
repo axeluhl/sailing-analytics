@@ -122,7 +122,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             eventsById.put(event.getId(), event);
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
+            logger.fine(String.format("%s (%s) was not added to race log %s because it already existed there.", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }
@@ -142,8 +142,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             revokeIfNecessary(event);
             eventsById.put(event.getId(), event);
         } else {
-            logger.warning(String
-                    .format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
+            logger.fine(String
+                    .format("%s (%s) was not loaded into log because it already existed there.", event, event.getClass().getName()));
         }
         return isAdded;
     }
@@ -202,7 +202,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             revokeIfNecessary(event);
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            logger.fine(String.format("%s (%s) was not added to log because it already eists there.", event, event.getClass().getName()));
         }
         return getEventsToDeliver(clientId, event);
     }

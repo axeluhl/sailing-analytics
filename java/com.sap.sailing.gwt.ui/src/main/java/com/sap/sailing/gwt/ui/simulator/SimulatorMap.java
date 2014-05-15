@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.maps.client.LoadApi;
@@ -19,6 +20,8 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.idle.IdleMapEvent;
@@ -208,9 +211,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
 
             if (timePanel != null) {
-                timePanel.setMinMax(new Date(startTime), new Date(startTime + maxDurationTime), true);
+            	Date endDate = new Date(startTime + maxDurationTime);
+                timePanel.setMinMax(new Date(startTime), endDate, true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
+                if (windParams.isShowStreamlets2()) {
+                	windStreamletsCanvasOverlay.setEndDate(endDate);
+                }
             }
 
             /**
@@ -369,7 +376,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               
               if (windParams.isShowStreamlets2()) {
               
-            	  mapTypeStyles = new MapTypeStyle[7];
+            	  mapTypeStyles = new MapTypeStyle[11];
 
             	  // hide all transit lines including ferry lines
             	  mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
@@ -379,18 +386,45 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             	  mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
             	  // set water color
             	  mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), -50, -50);
-            	  mapTypeStyles[4] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.LANDSCAPE, new RGBColor(255, 255, 255), 0, -70);
-            	  mapTypeStyles[5] = GoogleMapStyleHelper.createElementStyleOnlyLightness(MapTypeStyleFeatureType.ROAD, MapTypeStyleElementType.ALL, -40);
+            	  mapTypeStyles[4] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.LANDSCAPE, new RGBColor(255, 255, 255), -100, -70);
+            	  mapTypeStyles[5] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.POI, new RGBColor(255, 255, 255), -100, -70);
+            	  mapTypeStyles[6] = GoogleMapStyleHelper.createElementStyleOnlyLightness(MapTypeStyleFeatureType.ROAD, MapTypeStyleElementType.ALL, -40);
 
             	  MapTypeStyle mapStyle = MapTypeStyle.newInstance();
             	  mapStyle.setFeatureType(MapTypeStyleFeatureType.ADMINISTRATIVE);
-            	  mapStyle.setElementType(MapTypeStyleElementType.LABELS);
+            	  mapStyle.setElementType(MapTypeStyleElementType.LABELS__TEXT__FILL);
             	  MapTypeStyler[] typeStylers = new MapTypeStyler[1];
             	  typeStylers[0] = MapTypeStyler.newInvertLightnessStyler(true);
             	  mapStyle.setStylers(typeStylers);
-            	  mapTypeStyles[6] = mapStyle;
+            	  mapTypeStyles[7] = mapStyle;
+
+            	  mapStyle = MapTypeStyle.newInstance();
+            	  mapStyle.setFeatureType(MapTypeStyleFeatureType.ADMINISTRATIVE);
+            	  mapStyle.setElementType(MapTypeStyleElementType.LABELS__TEXT__STROKE);
+            	  typeStylers = new MapTypeStyler[1];
+            	  typeStylers[0] = MapTypeStyler.newInvertLightnessStyler(true);
+            	  mapStyle.setStylers(typeStylers);
+            	  mapTypeStyles[8] = mapStyle;
+
+            	  mapStyle = MapTypeStyle.newInstance();
+            	  mapStyle.setFeatureType(MapTypeStyleFeatureType.ADMINISTRATIVE);
+            	  mapStyle.setElementType(MapTypeStyleElementType.GEOMETRY__FILL);
+            	  typeStylers = new MapTypeStyler[3];
+              	  typeStylers[0] = MapTypeStyler.newHueStyler("#ffffff");
+              	  typeStylers[1] = MapTypeStyler.newLightnessStyler(-70);
+              	  typeStylers[2] = MapTypeStyler.newSaturationStyler(-100);              	  
+            	  mapStyle.setStylers(typeStylers);
+            	  mapTypeStyles[9] = mapStyle;
               
-              } else {
+            	  mapStyle = MapTypeStyle.newInstance();
+            	  mapStyle.setFeatureType(MapTypeStyleFeatureType.ADMINISTRATIVE);
+            	  mapStyle.setElementType(MapTypeStyleElementType.GEOMETRY__STROKE);
+            	  typeStylers = new MapTypeStyler[1];
+              	  typeStylers[0] = MapTypeStyler.newLightnessStyler(-70);
+            	  mapStyle.setStylers(typeStylers);
+            	  mapTypeStyles[10] = mapStyle;
+
+    		} else {
             	  
             	  mapTypeStyles = new MapTypeStyle[4];
 
@@ -432,6 +466,22 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
               add(map, 0, 0);
               map.setSize("100%", "100%");
+
+              if (windParams.isShowStreamlets2()) {
+            	  map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+            		  @Override
+            		  public void onEvent(BoundsChangeMapEvent event) {
+            			  // improve browser performance by deferred scheduling of redraws
+            			  Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            				  public void execute() {
+            					  if (windStreamletsCanvasOverlay.getSwarm() != null) {
+            						  windStreamletsCanvasOverlay.getSwarm().onBoundsChanged();
+            					  }
+            				  }
+            			  });
+            		  }
+            	  });
+              }
 
               /*map.addZoomChangeHandler(new ZoomChangeMapHandler() {
 

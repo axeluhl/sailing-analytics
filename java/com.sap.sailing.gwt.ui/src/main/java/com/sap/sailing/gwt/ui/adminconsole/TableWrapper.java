@@ -39,12 +39,9 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         this.selectionModel = selectionModel;
         this.dataProvider = new ListDataProvider<T>();
         mainPanel = new VerticalPanel();
-        
         table = new CellTable<T>(10000, tableRes);
-        
         dataProvider.addDataDisplay(table);
         table.setSelectionModel(selectionModel);
-        
         mainPanel.add(table);
     }
     
