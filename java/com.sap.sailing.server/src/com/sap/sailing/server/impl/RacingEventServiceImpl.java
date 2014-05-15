@@ -2011,7 +2011,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             try {
                 regattaTrackingCache.clear();
             } finally {
-                LockUtil.unlockAfterRead(regattaTrackingCacheLock);
+                LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
             }
             LockUtil.lockForWrite(raceTrackersByRegattaLock);
             try {
