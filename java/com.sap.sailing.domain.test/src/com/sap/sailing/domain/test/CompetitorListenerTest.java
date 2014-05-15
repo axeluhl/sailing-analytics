@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -95,6 +96,18 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
             }
         };
         competitor.addCompetitorChangeListener(listener);
+    }
+    
+    @Test
+    public void testNullNationality() {
+        competitor.getTeam().setNationality(null);
+        assertNull(competitor.getTeam().getNationality());
+        competitor.getTeam().setNationality(null);
+        assertNull(competitor.getTeam().getNationality());
+        competitor.getTeam().setNationality(baseDomainFactory.getOrCreateNationality("GER"));
+        assertEquals(baseDomainFactory.getOrCreateNationality("GER"), competitor.getTeam().getNationality());
+        competitor.getTeam().setNationality(null);
+        assertNull(competitor.getTeam().getNationality());
     }
     
     @Test

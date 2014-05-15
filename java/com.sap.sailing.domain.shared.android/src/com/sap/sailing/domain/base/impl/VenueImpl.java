@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,12 +21,23 @@ public class VenueImpl implements Venue {
      */
     private final List<CourseArea> courseAreas;
     
-    private final NamedReentrantReadWriteLock courseAreasLock;
+    private NamedReentrantReadWriteLock courseAreasLock;
 
     public VenueImpl(String name) {
         this.name = name;
         courseAreas = new ArrayList<CourseArea>();
-        courseAreasLock = new NamedReentrantReadWriteLock("Course Areas for venue "+name, /* fair */ false);
+        courseAreasLock = createCourseAreasLock(name);
+    }
+
+    private NamedReentrantReadWriteLock createCourseAreasLock(String name) {
+        return new NamedReentrantReadWriteLock("Course Areas for venue "+name, /* fair */ false);
+    }
+    
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        if (courseAreasLock == null) {
+            courseAreasLock = createCourseAreasLock(getName());
+        }
     }
 
     @Override
