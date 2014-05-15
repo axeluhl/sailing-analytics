@@ -47,7 +47,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         map(mark2, device3, 0, 600);
 
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
-        store.storeFix(device, createFix(101, 10, 20, 30, 40));
+        store.storeFix(device, createFix(200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20, 30, 40));
@@ -56,7 +56,6 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         trackedRace.attachRaceLog(raceLog);
-        trackedRace.waitUntilNotLoading();
         trackedRace.waitUntilLoadingFromGPSFixStoreComplete();
 
         testLength(trackedRace.getTrack(comp), 2);
