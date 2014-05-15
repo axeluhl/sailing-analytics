@@ -59,7 +59,7 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
      * a penalty although between the jibe and the tack there is a mark passing
      */
     @Test
-    public void testManeuversForFindelCriticalDetection() throws ParseException, NoWindException {
+    public void testManeuversForAlinghiCriticalDetection() throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName("Alinghi");
         assertNotNull(competitor);
         Date fromDate = dateFormat.parse("05/01/2014-09:07:00");
