@@ -111,6 +111,9 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
             for (Person sailor : getSailors()) {
                 ((DynamicPerson) sailor).setNationality(newNationality);
             }
+            if (getCoach() != null) {
+                getCoach().setNationality(newNationality);
+            }
             for (NationalityChangeListener listener : getNationalityChangeListeners()) {
                 listener.nationalityChanged(this, oldNationality, newNationality);
             }
