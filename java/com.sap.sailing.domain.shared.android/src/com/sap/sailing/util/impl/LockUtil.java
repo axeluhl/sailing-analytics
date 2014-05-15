@@ -52,7 +52,7 @@ public class LockUtil {
     
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
-    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentHashMap/*TODO ConcurrentWeakHashMap*/<NamedReentrantReadWriteLock, TimePoint>();
+    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
     
     /**
      * Tells how many other threads propagated which held lock to the key thread. During propagation, a lock is
@@ -64,7 +64,7 @@ public class LockUtil {
      * The thread-specific value maps are used as monitor objects whenever decisions about thread-specific lock counts
      * need to be made.
      */
-    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentHashMap/*TODO ConcurrentWeakHashMap*/<Thread, Map<Lock,Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> propagationCounts = new ConcurrentWeakHashMap<Thread, Map<Lock,Integer>>();
     
     /**
      * Counts the "virtual" locks. A "virtual" lock is obtained if and only if at the time of calling
@@ -73,13 +73,13 @@ public class LockUtil {
      * always have a positive integer value. {@link #decrement(Lock, Map)} removes entries whose integer count would
      * go to 0.
      */
-    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentHashMap/*TODO ConcurrentWeakHashMap*/<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     /**
      * Redundant but easily accessible hold count per thread and lock. These are the actual lock hold counts as they are
      * recorded in the actual {@link NamedReentrantReadWriteLock} locks.
      */
-    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap/*TODO ConcurrentWeakHashMap*/<Thread, Map<Lock, Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.readLock(), ReadOrWrite.READ);
