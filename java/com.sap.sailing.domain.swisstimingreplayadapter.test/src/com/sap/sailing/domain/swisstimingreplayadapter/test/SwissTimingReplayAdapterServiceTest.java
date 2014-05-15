@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingreplayadapter.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -195,6 +196,7 @@ public class SwissTimingReplayAdapterServiceTest {
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitor.getBoat().getBoatClass());
             Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
             assertTrue(distanceToLineAtStart.getMeters() > 0);
             assertTrue(distanceToLineAtStart.getMeters() < 8.5);
