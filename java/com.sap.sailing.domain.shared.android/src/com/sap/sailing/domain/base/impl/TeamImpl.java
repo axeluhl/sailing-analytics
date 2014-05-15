@@ -89,7 +89,7 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
 
     @Override
     public Nationality getNationality() {
-        return getNationalityDonor().getNationality();
+        return getNationalityDonor() == null ? null : getNationalityDonor().getNationality();
     }
     
     private WithNationality getNationalityDonor() {
@@ -110,6 +110,9 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
         if (!Util.equalsWithNull(oldNationality, newNationality)) {
             for (Person sailor : getSailors()) {
                 ((DynamicPerson) sailor).setNationality(newNationality);
+            }
+            if (getCoach() != null) {
+                getCoach().setNationality(newNationality);
             }
             for (NationalityChangeListener listener : getNationalityChangeListeners()) {
                 listener.nationalityChanged(this, oldNationality, newNationality);
