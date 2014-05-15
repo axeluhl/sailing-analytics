@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -199,7 +198,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private final ConcurrentHashMap<RaceDefinition, CourseChangeReplicator> courseListeners;
 
-    protected final ConcurrentHashMap<Regatta, ConcurrentSkipListSet<RaceTracker>> raceTrackersByRegatta;
+    protected final ConcurrentHashMap<Regatta, Set<RaceTracker>> raceTrackersByRegatta;
     
     /**
      * Although {@link #raceTrackersByRegatta} is a concurrent hash map, entering sets as values needs to be
@@ -251,7 +250,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     private final CompetitorStore competitorStore;
 
-    private ConcurrentSkipListSet<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new ConcurrentSkipListSet<DynamicTrackedRegatta>();
+    /**
+     * A set based on a concurrent hash map, therefore being thread safe
+     */
+    private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = Collections.newSetFromMap(new ConcurrentHashMap<DynamicTrackedRegatta, Boolean>());
 
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -1026,9 +1028,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
                 try {
                     raceTrackersByID.put(trackerID, tracker);
-                    ConcurrentSkipListSet<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
+                    Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                     if (trackers == null) {
-                        trackers = new ConcurrentSkipListSet<RaceTracker>();
+                        trackers = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
                         raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
                     }
                     trackers.add(tracker);
@@ -1317,7 +1319,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        final ConcurrentSkipListSet<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
+        final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
         if (trackersForRegatta != null) {
             for (RaceTracker raceTracker : trackersForRegatta) {
                 final Set<RaceDefinition> races = raceTracker.getRaces();
