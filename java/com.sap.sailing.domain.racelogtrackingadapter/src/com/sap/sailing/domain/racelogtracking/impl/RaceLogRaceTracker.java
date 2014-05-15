@@ -339,7 +339,6 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
         } catch (PatchFailedException e) {
             logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
-            e.printStackTrace();
         }
     }
 
