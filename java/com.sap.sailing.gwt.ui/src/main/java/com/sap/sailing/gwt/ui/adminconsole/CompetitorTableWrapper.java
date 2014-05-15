@@ -58,9 +58,10 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         };
         boatClassColumn.setSortable(true);
         competitorColumnListHandler.setComparator(boatClassColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return new NaturalComparator(false).compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
+                return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
         
@@ -86,9 +87,10 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         };
         sailIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return new NaturalComparator(false).compare(o1.getSailID(), o2.getSailID());
+                return comparator.compare(o1.getSailID(), o2.getSailID());
             }
         });
 
