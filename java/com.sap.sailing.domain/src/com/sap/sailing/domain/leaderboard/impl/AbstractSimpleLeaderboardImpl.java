@@ -1302,9 +1302,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         if (trackedRace != null) {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
-            entryDTO.averageSamplingInterval = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
+            if (track != null) {
+                entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenFixes();
+            }
             if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
                 long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
                 entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
@@ -1341,12 +1344,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                         competitor, startOfRace);
                                 entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
                                         : distanceToStartLineAtStartOfRace.getMeters();
-                                Speed speedAtStartTime = trackedRace.getTrack(competitor)
-                                        .getEstimatedSpeed(startOfRace);
+                                Speed speedAtStartTime = track == null ? null : track.getEstimatedSpeed(startOfRace);
                                 entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null
                                         : speedAtStartTime.getKnots();
                                 TimePoint competitorStartTime = firstMarkPassing.getTimePoint();
-                                Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor)
+                                Speed competitorSpeedWhenPassingStart = track == null ? null : track
                                         .getEstimatedSpeed(competitorStartTime);
                                 entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
                                         : competitorSpeedWhenPassingStart.getKnots();
