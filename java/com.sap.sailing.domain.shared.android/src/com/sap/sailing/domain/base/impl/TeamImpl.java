@@ -89,7 +89,7 @@ public class TeamImpl extends NamedImpl implements DynamicTeam {
 
     @Override
     public Nationality getNationality() {
-        return getNationalityDonor().getNationality();
+        return getNationalityDonor() == null ? null : getNationalityDonor().getNationality();
     }
     
     private WithNationality getNationalityDonor() {
