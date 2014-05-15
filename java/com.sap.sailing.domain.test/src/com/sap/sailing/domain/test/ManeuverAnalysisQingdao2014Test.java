@@ -50,7 +50,7 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
                         ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:02:00")),
-                        new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(89))),
+                        new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(269))),
                 new WindSourceImpl(WindSourceType.WEB));
     }
     
@@ -70,6 +70,8 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
 
+        assertManeuver(maneuvers, ManeuverType.JIBE, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:15")), 5000);
+        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:51")), 5000);
         for (Maneuver maneuver : maneuvers) {
             // make sure there is no penalty detected in the time frame considered
             assertNotSame("Found an unexpected penalty "+maneuver, ManeuverType.PENALTY_CIRCLE, maneuver.getType());
