@@ -433,8 +433,8 @@ public class CandidateFinder implements AbstractCandidateFinder {
 
         if (instruction == PassingInstruction.Line) {
             Pair<Mark, Mark> pos = race.getPortAndStarboardMarks(t, w);
-            p1 = race.getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
-            p2 = race.getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
+            p1 = pos.getA() == null ? null : race.getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
+            p2 = pos.getB() == null ? null : race.getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
         } else {
             int i = 1;
             for (Mark m : w.getMarks()) {
