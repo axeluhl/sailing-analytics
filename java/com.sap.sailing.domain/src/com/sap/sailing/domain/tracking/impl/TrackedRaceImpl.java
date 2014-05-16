@@ -2206,9 +2206,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             waypointPassed = legAfterManeuver.getLeg().getFrom();
             MarkPassing markPassing = getMarkPassing(competitor, waypointPassed);
             markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverTimePoint;
+            Position markPassingPosition = markPassing != null ? competitorTrack.getEstimatedPosition(markPassingTimePoint, /* extrapolate */false) : maneuverPosition;
             sideToWhichWaypointWasPassed = courseChangedTo;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
-            result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, maneuverPosition,
+            result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
                     markPassingTimePoint, speedWithBearingOnApproximationAtBeginning,
                     speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
                     sideToWhichWaypointWasPassed));
