@@ -75,14 +75,14 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         assert raceLogTrackingState.isForTracking() : new NotDenotedForRaceLogTrackingException();
         RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
 
-        if (! isRaceLogRaceTrackerAttached(service, raceLog)) {
-            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
-        }
-
         if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
                     service.getServerAuthor(), raceLog.getCurrentPassId());
             raceLog.add(event);
+        }
+
+        if (! isRaceLogRaceTrackerAttached(service, raceLog)) {
+            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
         }
     }  
 
