@@ -167,6 +167,17 @@ Assume you want to forward UDP packets from machine A (port 2014) to machine B (
 
 Now also UDP packets get transmitted through.
 
+### Set limits for a Linux server
+
+Especially our EC2 CentOS Linux installations use `/etc/security/limits.conf` and `/etc/security/limits.d/*` to specify upper bounds for the number of processes / threads and file handles that a user may use. On EC2, in particular the `/etc/security/limits.d/90-nproc.conf` file set a small limit for the soft limit for the number of processes:
+<pre>
+    *          soft    nproc     1024
+</pre>
+Changing this to a greater value, such as 65536, helps, e.g., to avoid the following message:
+<pre>
+    su: cannot set user id: Resource temporarily unavailable
+</pre>
+
 ### Set limits (ulimit) for a running process
 
 <pre>
