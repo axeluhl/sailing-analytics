@@ -24,8 +24,16 @@ public class NaturalComparatorTest {
     }
     
     @Test 
-    public void testCaseInsesitive(){
+    public void testCaseInsensitive(){
         assertEquals(0, caseInsensitive.compare("E", "e"));
+    }
+
+    @Test 
+    public void testCaseInsensitiveIsDifferent(){
+        assertEquals(-1, caseInsensitive.compare("E", "F"));
+        assertEquals(-1, caseInsensitive.compare("E", "f"));
+        assertEquals(1, caseInsensitive.compare("F", "E"));
+        assertEquals(1, caseInsensitive.compare("f", "E"));
     }
 
     @Test
