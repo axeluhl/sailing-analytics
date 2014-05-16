@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.DeprecatedToFunctionConverter;
 import com.sap.sailing.datamining.impl.QueryDefinitionConverter;
 import com.sap.sailing.datamining.shared.QueryDefinition;
@@ -29,7 +31,7 @@ import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataMiningFactory {
-
+    
     private DataMiningFactory() {
     }
     
@@ -49,7 +51,8 @@ public final class DataMiningFactory {
         List<Function<?>> dimensionsToGroupBy = getDimensionsToGroupBy(queryDefinition);
         Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor(extractionProcessor, dimensionsToGroupBy);
         
-        Processor<DataSourceType> firstRetrievalProcessor = DataRetrieverFactory.createRetrievalProcessorChain(groupingProcessor, queryDefinition.getFilterSelection());
+        SailingDataRetrievalLevels dataRetrievalLevel = calculateDataRetrievalLevel(extractionFunction);
+        Processor<DataSourceType> firstRetrievalProcessor = DataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection());
         
         query.setFirstProcessor(firstRetrievalProcessor);
         return query;
@@ -68,6 +71,17 @@ public final class DataMiningFactory {
             dimensionsToGroupBy.add(DeprecatedToFunctionConverter.getFunctionFor(functionDTO));
         }
         return dimensionsToGroupBy;
+    }
+    
+    //TODO Generalize the way to calculate the base data type from the extraction function
+    private static SailingDataRetrievalLevels calculateDataRetrievalLevel(Function<Double> extractionFunction) {
+        if (extractionFunction.getDeclaringType().equals(HasGPSFixContext.class)) {
+            return SailingDataRetrievalLevels.GPSFix;
+        }
+        if (extractionFunction.getDeclaringType().equals(HasTrackedLegOfCompetitorContext.class)) {
+            return SailingDataRetrievalLevels.TrackedLegOfCompetitor;
+        }
+        return SailingDataRetrievalLevels.GPSFix;
     }
 
     @Deprecated
