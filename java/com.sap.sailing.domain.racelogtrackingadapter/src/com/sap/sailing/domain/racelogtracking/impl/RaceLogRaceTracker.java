@@ -49,6 +49,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -273,8 +274,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     @Override
     public void visit(DeviceMarkMappingEvent event) {
-        if (trackedRace != null)
+        if (trackedRace != null) {
             updateMarkMappings(true);
+            gpsFixStore.addListener(this, event.getDevice());
+        }
     }
 
     private void updateCompetitorMappings(boolean loadIfNotCovered) {
@@ -309,8 +312,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     @Override
     public void visit(DeviceCompetitorMappingEvent event) {
-        if (trackedRace != null)
+        if (trackedRace != null) {
             updateCompetitorMappings(true);
+            gpsFixStore.addListener(this, event.getDevice());
+        }
     }
 
     @Override
@@ -334,7 +339,6 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
         } catch (PatchFailedException e) {
             logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
-            e.printStackTrace();
         }
     }
 
@@ -376,13 +380,17 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null);
 
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
+        
+        //add listeners for devices in mappings
+        for (List<DeviceMapping<WithID>> mappings : new DeviceMappingFinder<WithID>(params.getRaceLog()).analyze().values()) {
+            for (DeviceMapping<WithID> mapping : mappings) {
+                gpsFixStore.addListener(this, mapping.getDevice());
+            }
+        }
 
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         updateCompetitorMappings(false);
         updateMarkMappings(false);
-
-        // add a listener, so new fixes will also be forwarded to the race
-        gpsFixStore.addListener(this);
         
         // add mark passing detection
         new MarkPassingCalculator(trackedRace, true);

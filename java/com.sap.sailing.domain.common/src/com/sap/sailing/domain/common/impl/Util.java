@@ -3,8 +3,11 @@ package com.sap.sailing.domain.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Util {
     /**
@@ -271,4 +274,20 @@ public class Util {
         return result;
     }
     
+    /**
+     * Return the default value instead of null, if the map does not contain the key.
+     */
+    public static <K, V> V get(Map<K, V> map, K key, V defaultVal) {
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        return defaultVal;
+    }
+    
+    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        if (! map.containsKey(key)) {
+            map.put(key, new HashSet<V>());
+        }
+        map.get(key).add(value);
+    }
 }
