@@ -3,10 +3,10 @@ package com.sap.sailing.domain.leaderboard.impl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public class HighPointWinnerGetsFive extends HighPointFirstGetsFixedScore {
-	private static final long serialVersionUID = 1367473387431601943L;
+    private static final long serialVersionUID = 1367473387431601943L;
 
-	public HighPointWinnerGetsFive() {
-        super(/* scoreForRaceWinner */ 5);
+    public HighPointWinnerGetsFive() {
+        super(/* scoreForRaceWinner */ 5, /* minimumScoreFromRank */ 0.0);
     }
 
     @Override

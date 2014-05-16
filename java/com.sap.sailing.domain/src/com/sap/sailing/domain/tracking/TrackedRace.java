@@ -398,7 +398,8 @@ public interface TrackedRace extends Serializable {
     /**
      * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
      * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>.
+     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
+     * the competitor's {@link GPSFixTrack track}.
      */
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
