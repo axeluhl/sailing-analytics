@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	
+	
+	<!-- Apache Shiro -->
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener
+		</listener-class>
+	</listener>
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+	</filter>
+	<!-- Make sure any request you want accessible to Shiro is filtered. /* 
+		catches all -->
+	<!-- requests. Usually this filter mapping is defined first (before all 
+		others) to -->
+	<!-- ensure that Shiro works in subsequent filters in the filter chain: -->
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+	
+	
+	<servlet>
+		<display-name>User Management Service</display-name>
+	    <servlet-name>UserManagementService</servlet-name>
+    	<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UserManagementService</servlet-name>
+		<url-pattern>/service/usermanagement</url-pattern>
+	</servlet-mapping>
+</web-app>

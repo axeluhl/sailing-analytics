@@ -4,7 +4,10 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+
+import com.sap.sse.security.userstore.shared.UserStore;
 
 public class Activator implements BundleActivator {
 
@@ -25,7 +28,7 @@ public class Activator implements BundleActivator {
         
         registration = context.registerService(SecurityService.class.getName(),
                 new SecurityServiceImpl(), null);
-        Logger.getLogger(Activator.class.getName()).info("Security Service registered.");;
+        Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 
     /*
