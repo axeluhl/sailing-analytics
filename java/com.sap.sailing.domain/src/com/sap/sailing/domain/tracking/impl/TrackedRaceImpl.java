@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -1927,11 +1928,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (extendedTo != null) {
                 try {
-                    List<Maneuver> extendedResultForCache = detectManeuvers(
-                            competitor,
-                            approximate(competitor,
-                                    getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), extendedFrom,
-                                    extendedTo));
+                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */ false);
                     result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
                             extendedResultForCache);
                 } catch (NoWindException ex) {
@@ -1951,11 +1948,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
+    
+    /**
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @return a valid but possibly empty list
+     * @see #detectManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
+     */
+    private List<Maneuver> detectManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean ignoreMarkPassings) throws NoWindException {
+        return detectManeuvers(
+                competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
+                from, to), ignoreMarkPassings, from, to);
+    }
 
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.<p>
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * <p>
      * 
      * The time period assumed for a maneuver duration is taken from the
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
@@ -1966,10 +1980,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
      * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
      * 
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @param earliestManeuverStart
+     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
+     *            after this time point, no matter how close it is, its start regarding speed and course into the
+     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
+     *            maneuver duration before the maneuver time point were before this time point.
+     * @param latestManeuverEnd
+     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
+     *            before this time point, no matter how close it is, its end regarding speed and course out of the
+     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
+     *            maneuver duration after the maneuver time point were after this time point.
+     * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze)
+    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze,
+            boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
             throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (approximatingFixesToAnalyze.size() > 2) {
@@ -1998,7 +2030,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // start new list
                     List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
                             speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                            courseChangeSequenceInSameDirection);
+                            courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
                     speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
@@ -2011,7 +2043,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
                 result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor,
                         speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                        courseChangeSequenceInSameDirection));
+                        courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd));
             }
         }
         return result;
@@ -2062,18 +2094,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
      * the average time point of the course changes that went into the maneuver construction is used.
      * <p>
-     * 
      * @param speedWithBearingOnApproximationAtBeginning
      *            the speed/bearing before the first approximating fix passed in
      *            <code>courseChangeSequenceInSameDirection</code>
      * @param courseChangeSequenceInSameDirection
      *            all expected to have equal {@link CourseChange#to()} values
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @param earliestManeuverStart
+     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
+     *            after this time point, no matter how close it is, its start regarding speed and course into the
+     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
+     *            maneuver duration before the maneuver time point were before this time point.
+     * @param latestManeuverEnd
+     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
+     *            before this time point, no matter how close it is, its end regarding speed and course out of the
+     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
+     *            maneuver duration after the maneuver time point were after this time point.
      * 
      * @return a non-<code>null</code> list
      */
     private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
             SpeedWithBearing speedWithBearingOnApproximationAtBeginning,
-            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection) throws NoWindException {
+            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection, boolean ignoreMarkPassings,
+            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
@@ -2104,7 +2152,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // if next is more then approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
                     Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
-                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
+                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds, earliestManeuverStart, latestManeuverEnd), result);
                     group.clear();
                     totalCourseChangeInDegrees = 0.0;
                     totalMilliseconds = 0l;
@@ -2120,7 +2168,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } while (iter.hasNext());
             if (!group.isEmpty()) {
                 Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation, group,
-                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
+                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds, earliestManeuverStart, latestManeuverEnd), result);
             }
         }
         return result;
@@ -2129,19 +2177,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private Iterable<Maneuver> createManeuverFromGroupOfCourseChanges(Competitor competitor,
             SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<Pair<GPSFixMoving, CourseChange>> group,
             SpeedWithBearing speedWithBearingOnApproximationAtEnd, double totalCourseChangeInDegrees,
-            long totalMilliseconds) throws NoWindException {
+            long totalMilliseconds, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<>();
-        MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
-                .asMillis()
-                - getApproximateManeuverDurationInMilliseconds() / 2);
-        MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
-                .getTimePoint().asMillis()
-                + getApproximateManeuverDurationInMilliseconds() / 2);
-        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver,
-                timePointAfterManeuver);
+        TimePoint timePointBeforeManeuver = Collections.max(Arrays.asList(new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
+                .asMillis() - getApproximateManeuverDurationInMilliseconds() / 2), earliestManeuverStart));
+        TimePoint timePointAfterManeuver = Collections.min(Arrays.asList(new MillisecondsTimePoint(group.get(group.size() - 1).getA()
+                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds() / 2), latestManeuverEnd));
+        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, timePointAfterManeuver);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
-        Position maneuverPosition = competitorTrack
-                .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
+        Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
                 speedWithBearingOnApproximationAtEnd.getBearing());
         ManeuverType maneuverType;
@@ -2154,18 +2198,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final NauticalSide courseChangedTo = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
         // detected as a penalty circle
+        final TimePoint markPassingTimePoint;
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
-            maneuverType = ManeuverType.MARK_PASSING;
             waypointPassed = legAfterManeuver.getLeg().getFrom();
+            MarkPassing markPassing = getMarkPassing(competitor, waypointPassed);
+            markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverTimePoint;
+            Position markPassingPosition = markPassing != null ? competitorTrack.getEstimatedPosition(markPassingTimePoint, /* extrapolate */false) : maneuverPosition;
             sideToWhichWaypointWasPassed = courseChangedTo;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
-            result.add(new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+            result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
+                    markPassingTimePoint, speedWithBearingOnApproximationAtBeginning,
                     speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
                     sideToWhichWaypointWasPassed));
+        } else {
+            markPassingTimePoint = null;
         }
         final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
         final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
@@ -2178,36 +2227,51 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     courseAfterManeuver, wind.getBearing());
             boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
                     courseAfterManeuver, wind.getFrom());
-            if (tacked && jibed) {
-                maneuverType = ManeuverType.PENALTY_CIRCLE;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
-            } else if (tacked) {
-                maneuverType = ManeuverType.TACK;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
-            } else if (jibed) {
-                maneuverType = ManeuverType.JIBE;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
+            if (markPassingTimePoint != null && (tacked || jibed)) {
+                // In case of a mark passing we need to split the maneuver analysis into the phase before and after
+                // the mark passing. First of all, this is important to identify the correct maneuver time point for
+                // each tack and jibe, second it is essential to call a penalty which is only the case if the tack and
+                // the jibe are on the same side of the mark passing; otherwise this may have been a jibe set or a
+                // kiwi drop.
+                // Therefore, we recursively detect the maneuvers for the segment before and the segment after the
+                // mark passing and add the results to our result.
+                result.addAll(detectManeuvers(competitor, timePointBeforeManeuver, markPassingTimePoint.minus(1), /* ignoreMarkPassings */ true));
+                result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
-                // heading up or bearing away
-                Bearing windBearing = wind.getBearing();
-                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
-                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
-                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
-                        : ManeuverType.BEAR_AWAY;
+                // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe
+                if (tacked && jibed && markPassingTimePoint == null) {
+                    maneuverType = ManeuverType.PENALTY_CIRCLE;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else if (tacked) {
+                    maneuverType = ManeuverType.TACK;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else if (jibed) {
+                    maneuverType = ManeuverType.JIBE;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else {
+                    // heading up or bearing away
+                    Bearing windBearing = wind.getBearing();
+                    Bearing toWindBeforeManeuver = windBearing
+                            .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                    Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd
+                            .getBearing());
+                    maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
+                            .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                }
+                final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                        maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                        speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+                result.add(maneuver);
             }
-            final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
-                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
-            result.add(maneuver);
         }
         return result;
     }
@@ -2216,8 +2280,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's
      * track has greatest change in course.
      */
-    private TimePoint computeManeuverTimepoint(Competitor competitor, MillisecondsTimePoint timePointBeforeManeuver,
-            MillisecondsTimePoint timePointAfterManeuver) {
+    private TimePoint computeManeuverTimepoint(Competitor competitor, TimePoint timePointBeforeManeuver,
+            TimePoint timePointAfterManeuver) {
         TimePoint result = timePointBeforeManeuver;
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         GPSFixMoving lastFix = null;
