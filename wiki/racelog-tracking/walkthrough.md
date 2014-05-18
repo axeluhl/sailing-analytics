@@ -1,6 +1,6 @@
 # Tracking a Race using the RaceLog
 
-[[racelog-tracking/walkthrough/01_regatta.png]]
+[[/racelog-tracking/walkthrough/01_regatta.png]]
 
 [[racelog-tracking/walkthrough/02_leaderboard.png]]
 
