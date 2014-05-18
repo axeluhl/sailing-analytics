@@ -72,7 +72,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-        assert raceLogTrackingState.isForTracking() : new NotDenotedForRaceLogTrackingException();
+        if (! raceLogTrackingState.isForTracking()) {
+            throw new NotDenotedForRaceLogTrackingException();
+        }
         RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
 
         if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
