@@ -401,8 +401,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
 
-    Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getRemoteSailingServersAndTheirCachedEvents();
-
     RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
 
     void removeRemoteSailingServerReference(String name);

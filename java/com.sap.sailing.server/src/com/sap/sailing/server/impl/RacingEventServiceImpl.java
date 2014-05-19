@@ -1,15 +1,12 @@
 package com.sap.sailing.server.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,10 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -144,9 +137,6 @@ import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -202,12 +192,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      */
     private final ConcurrentHashMap<Serializable, Event> eventsById;
 
-    /**
-     * Holds the {@link Event} objects for the events of all registered sailing server instances.
-     */
-    private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
-    
-    private final ConcurrentHashMap<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
+    private final RemoteSailingServerSet remoteSailingServerSet;
     
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -411,11 +396,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.windStore = windStore;
         this.dataImportLock = new DataImportLockWithProgress();
         
+        remoteSailingServerSet = new RemoteSailingServerSet(scheduler);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        remoteSailingServers = new ConcurrentHashMap<>();
-        cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -525,70 +509,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
         for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
-            remoteSailingServers.put(sailingServer.getName(), sailingServer);
+            remoteSailingServerSet.add(sailingServer);
         }
-        scheduler.scheduleAtFixedRate(new Runnable() { @Override public void run() { updateRemoteSailingServerReferenceEventCaches(); } },
-                /* initialDelay */ 0, /* period */ 60, TimeUnit.SECONDS);
     }
     
-    private void updateRemoteSailingServerReferenceEventCaches() {
-        for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
-            triggerAsynchronousEventCacheUpdate(ref);
-        }
-    }
-
-    private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread("Event Cache Updater for remote server "+ref) {
-            @Override public void run() { updateRemoteServerEventCacheSynchronously(ref); }
-        }.start();
-    }
-
-    @Override
-    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
-        BufferedReader bufferedReader = null;
-        Pair<Iterable<EventBase>, Exception> result;
-        try {
-            try {
-                final URL eventsURL = getEventsURL(ref.getURL());
-                logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
-                URLConnection urlConnection = eventsURL.openConnection();
-                urlConnection.connect();
-                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                JSONParser parser = new JSONParser();
-                Object eventsAsObject = parser.parse(bufferedReader);
-                EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
-                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
-                JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
-                final Set<EventBase> events = new HashSet<>();
-                for (Object eventAsObject : eventsAsJsonArray) {
-                    JSONObject eventAsJson = (JSONObject) eventAsObject;
-                    EventBase event = deserializer.deserialize(eventAsJson);
-                    events.add(event);
-                }
-                result = new Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
-            } finally {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            }
-        } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch events from remote server "+ref+": "+e.getMessage(), e);
-            result = new Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
-        }
-        cachedEventsForRemoteSailingServers.put(ref, result);
-        return result;
-    }
-    
-    
-    public URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
-        String getEventsUrl = remoteServerBaseURL.toExternalForm();
-        if (!getEventsUrl.endsWith("/")) {
-            getEventsUrl += "/";
-        }
-        getEventsUrl += "sailingserver/api/v1/events";
-        return new URL(getEventsUrl);
-    }
-
     /**
      * Collects media track references from the configured sources (mongo DB by default, ftp folder yet to be
      * implemented). The method is expected to be called initially blocking the API until finished.
@@ -938,27 +862,25 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
-    }
-
-    @Override
-    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getRemoteSailingServersAndTheirCachedEvents() {
-        return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
     }
 
     @Override
     public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
     	RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url);
-    	remoteSailingServers.put(name, result);
+    	remoteSailingServerSet.add(result);
     	mongoObjectFactory.storeSailingServer(result);
-    	triggerAsynchronousEventCacheUpdate(result);
     	return result;
     }
 
     @Override
+    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+        return remoteSailingServerSet.getCachedEventsOrException(ref);
+    }
+
+    @Override
     public void removeRemoteSailingServerReference(String name) {
-        RemoteSailingServerReference ref = remoteSailingServers.remove(name);
-        cachedEventsForRemoteSailingServers.remove(ref);
+        remoteSailingServerSet.remove(name);
     	mongoObjectFactory.removeSailingServer(name);
     }
 
@@ -2150,6 +2072,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             eventsById.clear();
             mediaLibrary.clear();
             competitorStore.clear();
+            remoteSailingServerSet.clear();
 
             StringBuffer logoutput = new StringBuffer();
 
@@ -2207,7 +2130,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
             
-
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
             logger.info("Reading competitors...");
@@ -2223,6 +2145,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
                 logoutput.append(String.format("%3s\n", matcher.toString()));
             }
+            
+            logger.info("Reading remote sailing server references...");
+            for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois.readObject()) {
+                remoteSailingServerSet.add(remoteSailingServerReference);
+                logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
+            }
+            
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);

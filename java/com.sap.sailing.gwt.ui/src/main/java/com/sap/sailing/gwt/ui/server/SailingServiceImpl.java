@@ -3318,7 +3318,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
         List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
         for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
-                    getService().getRemoteSailingServersAndTheirCachedEvents().entrySet()) {
+                    getService().getPublicEventsOfAllSailingServers().entrySet()) {
             RemoteSailingServerReferenceDTO dto = createRemoteSailingServerReferenceDTO(
                     remoteSailingServerRefAndItsCachedEvent.getKey(),
                     remoteSailingServerRefAndItsCachedEvent.getValue());
