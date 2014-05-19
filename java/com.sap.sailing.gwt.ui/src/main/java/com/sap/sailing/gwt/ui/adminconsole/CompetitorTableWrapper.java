@@ -16,7 +16,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
@@ -27,11 +27,12 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 
-public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSelectionModel<CompetitorDTO>> {
+public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
 
-    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new MultiSelectionModel<CompetitorDTO>());
+    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
+            S selectionModel) {
+        super(sailingService, stringMessages, errorReporter, selectionModel);
         
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
         
@@ -58,9 +59,10 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         };
         boatClassColumn.setSortable(true);
         competitorColumnListHandler.setComparator(boatClassColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* caseSensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return new NaturalComparator(false).compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
+                return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
         
@@ -86,9 +88,10 @@ public class CompetitorTableWrapper extends TableWrapper<CompetitorDTO, MultiSel
         };
         sailIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return new NaturalComparator(false).compare(o1.getSailID(), o2.getSailID());
+                return comparator.compare(o1.getSailID(), o2.getSailID());
             }
         });
 

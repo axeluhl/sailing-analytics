@@ -37,7 +37,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
     private final BetterDateTimeBox to;
     private final ListBox deviceType;
     private final TextBox deviceId;
-    private final CompetitorTableWrapper competitorTable;
+    private final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
     private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
@@ -102,7 +102,8 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         deviceId = createTextBox("");
         
         final SingleSelectionModel<MarkDTO> markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        competitorTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                new SingleSelectionModel<CompetitorDTO>());
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
                 markSelectionModel, sailingService, stringMessages, errorReporter);
         

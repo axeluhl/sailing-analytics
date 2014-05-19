@@ -3,6 +3,10 @@ package com.sap.sailing.domain.common.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,8 +24,16 @@ public class NaturalComparatorTest {
     }
     
     @Test 
-    public void testCaseInsesitive(){
+    public void testCaseInsensitive(){
         assertEquals(0, caseInsensitive.compare("E", "e"));
+    }
+
+    @Test 
+    public void testCaseInsensitiveIsDifferent(){
+        assertEquals(-1, caseInsensitive.compare("E", "F"));
+        assertEquals(-1, caseInsensitive.compare("E", "f"));
+        assertEquals(1, caseInsensitive.compare("F", "E"));
+        assertEquals(1, caseInsensitive.compare("f", "E"));
     }
 
     @Test
@@ -102,6 +114,13 @@ public class NaturalComparatorTest {
         assertTrue(comparator.compare("0.1", "0.2") < 0);
         assertTrue(comparator.compare("0.01", "0.2") < 0);
         assertTrue(comparator.compare("0.1.5b", "0.2a") < 0);
+    }
+    
+    @Test
+    public void testSortSailIDs() {
+        List<String> list = Arrays.asList("Groupama", "GER8829", "A", "FRA 56893", "Cam", "GAC Pindar", "Grün", "a/m", "d/n");
+        Collections.sort(list, new NaturalComparator(/* case sensitive */ false));
+        assertTrue(list.indexOf("A") < list.indexOf("Cam"));
     }
 
 }

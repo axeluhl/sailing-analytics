@@ -71,7 +71,9 @@ public class SimulatorMainPanel extends SimplePanel {
             simulatorMap.getMap().triggerResize();
         }
     }
-	    
+	
+    public int particles;
+    
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
     private ResizableFlowPanel rightPanel;
@@ -225,10 +227,12 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, boolean autoUpdate,
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, int particles, boolean autoUpdate,
             char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS) {
         super();
 
+        this.particles = particles;
+        
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;

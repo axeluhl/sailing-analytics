@@ -33,10 +33,13 @@ public interface GPSFixStore {
     void storeFix(DeviceIdentifier device, GPSFix fix);
 
     /**
-     * Listeners are notified, whenever a {@link GPSFix} is stored through the {@link #storeFix(DeviceIdentifier, GPSFix)}
-     * method.
+     * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}
+     * is stored through the {@link #storeFix(DeviceIdentifier, GPSFix)} method.
      */
-    void addListener(GPSFixReceivedListener listener);
+    void addListener(GPSFixReceivedListener listener, DeviceIdentifier device);
 
+    /**
+     * Remove the registrations of the listener for all devices.
+     */
     void removeListener(GPSFixReceivedListener listener);
 }

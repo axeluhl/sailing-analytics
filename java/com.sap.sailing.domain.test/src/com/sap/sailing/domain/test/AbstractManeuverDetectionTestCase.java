@@ -38,20 +38,20 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      *            The type of maneuver that should have happened to the given time point.
      * @param maneuverTimePoint
      *            The time point the maneuver type should have happened.
-     * @param tolerance
+     * @param toleranceInMillis
      *            The tolerance of time, the maneuver should have happened in milliseconds.
      */
     protected void assertManeuver(List<Maneuver> maneuverList, ManeuverType maneuverType,
-            TimePoint maneuverTimePoint, int tolerance) {
+            TimePoint maneuverTimePoint, int toleranceInMillis) {
         for (Maneuver maneuver : maneuverList) {
             assertNotNull(maneuver.getTimePoint());
             if (maneuver.getType() == maneuverType
-                    && Math.abs(maneuver.getTimePoint().asMillis() - maneuverTimePoint.asMillis()) <= tolerance) {
+                    && Math.abs(maneuver.getTimePoint().asMillis() - maneuverTimePoint.asMillis()) <= toleranceInMillis) {
                 maneuversInvalid.remove(maneuver);
                 return;
             }
         }
-        fail("Didn't find maneuver type " + maneuverType + " in " + tolerance + "ms around " + maneuverTimePoint);
+        fail("Didn't find maneuver type " + maneuverType + " in " + toleranceInMillis + "ms around " + maneuverTimePoint);
     }
 
     /**

@@ -233,7 +233,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceID, null /* boat class */);
+                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();
@@ -306,7 +306,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE,
-                currentRaceID, null /* boat class */, trackedRegattaRegistry);
+                currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass(), trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);

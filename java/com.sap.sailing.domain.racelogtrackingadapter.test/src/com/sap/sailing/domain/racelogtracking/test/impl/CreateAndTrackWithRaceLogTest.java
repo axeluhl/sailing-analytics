@@ -18,23 +18,19 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
-import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -95,7 +91,7 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);		
-        exception.expect(RaceNotCreatedException.class);
+        exception.expect(NotDenotedForRaceLogTrackingException.class);
         adapter.startTracking(service, leaderboard, column, fleet);
     }
 
@@ -123,9 +119,6 @@ public class CreateAndTrackWithRaceLogTest {
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(5), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
         gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(15), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
 
-        CourseBase course = new CourseDataImpl("test");
-        course.addWaypoint(0, new WaypointImpl(new MarkImpl("mark")));
-        raceLog.add(factory.createCourseDesignChangedEvent(t(), author, 0, course));
         raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
 
         //start tracking

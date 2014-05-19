@@ -905,7 +905,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
             }
             RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()),
-                    trackedRaceDTO, getService().isRaceBeingTracked(r));
+                    trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
             if (trackedRace != null) {
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
             }
