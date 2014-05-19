@@ -2957,7 +2957,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SailingServerDTO> getPublicEventsOfAllSailingServers() {
         List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
-        for (Entry<SailingServer, List<EventBase>> serverAndEventsEntry : getService().getPublicEventsOfAllSailingServers().entrySet()) {
+        for (Entry<SailingServer, Iterable<EventBase>> serverAndEventsEntry : getService().getPublicEventsOfAllSailingServers().entrySet()) {
             SailingServer server = serverAndEventsEntry.getKey();
             List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
             for (EventBase event : serverAndEventsEntry.getValue()) {
