@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -18,13 +15,12 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServ
     private TextBox urlTextBox;
     
     private static class SailingServerValidator implements Validator<SailingServerDTO> {
-
         private StringMessages stringConstants;
-        private ArrayList<SailingServerDTO> existingSailingServers;
+        private Iterable<SailingServerDTO> existingSailingServers;
 
-        public SailingServerValidator(StringMessages stringConstants, Collection<SailingServerDTO> existingSailingServers) {
+        public SailingServerValidator(StringMessages stringConstants, Iterable<SailingServerDTO> existingSailingServers) {
             this.stringConstants = stringConstants;
-            this.existingSailingServers = new ArrayList<SailingServerDTO>(existingSailingServers);
+            this.existingSailingServers = existingSailingServers;
         }
 
         @Override
@@ -32,7 +28,6 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServ
             String errorMessage = null;
             boolean nameNotEmpty = serverToValidate.getName() != null && serverToValidate.getName().length() > 0;
             boolean urlNotEmpty = serverToValidate.getUrl() != null && serverToValidate.getUrl().length() > 0;
-
             boolean unique = true;
             for (SailingServerDTO event : existingSailingServers) {
                 if (event.getName().equals(serverToValidate.getName())) {
@@ -40,30 +35,28 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServ
                     break;
                 }
             }
-
-        if (!nameNotEmpty) {
-            errorMessage = stringConstants.pleaseEnterAName();
-        } else if (!urlNotEmpty) {
-            errorMessage = stringConstants.pleaseEnterNonEmptyUrl();
-        } else if (!unique) {
-            errorMessage = stringConstants.eventWithThisNameAlreadyExists();
-        }
-
+            if (!nameNotEmpty) {
+                errorMessage = stringConstants.pleaseEnterAName();
+            } else if (!urlNotEmpty) {
+                errorMessage = stringConstants.pleaseEnterNonEmptyUrl();
+            } else if (!unique) {
+                errorMessage = stringConstants.eventWithThisNameAlreadyExists();
+            }
             return errorMessage;
         }
     }
 
-    public SailingServerCreateOrEditDialog(ArrayList<SailingServerDTO> existingSailingServers, StringMessages stringConstants,
-            DialogCallback<SailingServerDTO> callback) {
-    	this(existingSailingServers, null, false, stringConstants, callback);
+    public SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers,
+            StringMessages stringConstants, DialogCallback<SailingServerDTO> callback) {
+        this(existingSailingServers, null, false, stringConstants, callback);
     }
 
-    public SailingServerCreateOrEditDialog(ArrayList<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, StringMessages stringConstants,
+    public SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, StringMessages stringConstants,
             DialogCallback<SailingServerDTO> callback) {
     	this(existingSailingServers, serverToEdit, true, stringConstants, callback);
     }
 
-    private SailingServerCreateOrEditDialog(ArrayList<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, boolean isEditMode, StringMessages stringConstants,
+    private SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, boolean isEditMode, StringMessages stringConstants,
             DialogCallback<SailingServerDTO> callback) {
         super("Sailing Server", null, stringConstants.ok(), stringConstants.cancel(),
         		new SailingServerValidator(stringConstants, existingSailingServers), callback);

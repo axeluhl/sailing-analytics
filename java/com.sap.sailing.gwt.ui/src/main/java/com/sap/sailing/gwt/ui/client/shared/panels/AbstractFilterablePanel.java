@@ -11,6 +11,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
 
 /**
@@ -92,13 +93,18 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     /**
      * Adds an object and applies the search filter.
      */
-    public void add(T object){
+    public void add(T object) {
         all.add(object);
         filter();
     }
     
-    public void filter(){
-        filtered.getList().clear(); 
+    public void addAll(Iterable<T> objects) {
+        Util.addAll(objects, all);
+        filter();
+    }
+    
+    public void filter() {
+        filtered.getList().clear();
         filtered.getList().addAll(filterer.applyFilter(getTextBox().getText(), all));
         sort();
     }

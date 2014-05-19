@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -15,13 +16,12 @@ public class SailingServerDTO extends NamedDTO implements IsSerializable {
     }
 
     public SailingServerDTO(String name, String url) {
-        super(name);
-        this.url = url;
-        this.events = null;
+        this(name, url, Collections. <EventDTO> emptyList());
     }
-
+    
     public SailingServerDTO(String name, String url, List<EventDTO> events) {
         super(name);
+        assert events != null;
         this.url = url;
         this.events = events;
     }

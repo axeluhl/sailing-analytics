@@ -515,30 +515,33 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private void loadEventsFromAllSailingServerInstances() {
         final Iterable<SailingServer> allSailingServers = domainObjectFactory.loadAllSailingServers();
-        ExecutorService executor = Executors.newFixedThreadPool(Util.size(allSailingServers));
-        List<ReadEventsFromSailingServerCallable> todo = new ArrayList<ReadEventsFromSailingServerCallable>();
-        for (SailingServer server : allSailingServers) {
-            ReadEventsFromSailingServerCallable callable = new ReadEventsFromSailingServerCallable(server);
-            todo.add(callable);
-        }
-        Map<SailingServer, Iterable<EventBase>> newMap = new HashMap<>();
-        try {
-            List<Future<Map<SailingServer, Iterable<EventBase>>>> results = executor.invokeAll(todo);
-            for (Future<Map<SailingServer, Iterable<EventBase>>> future : results) {
-                try {
-                    newMap.putAll(future.get());
-                } catch (InterruptedException e) {
-                } catch (ExecutionException e) {
-                    logger.log(Level.SEVERE, "Exception trying to obtain events from remote server: "+e.getMessage(), e);
-                }
+        if (!Util.isEmpty(allSailingServers)) {
+            ExecutorService executor = Executors.newFixedThreadPool(Util.size(allSailingServers));
+            List<ReadEventsFromSailingServerCallable> todo = new ArrayList<ReadEventsFromSailingServerCallable>();
+            for (SailingServer server : allSailingServers) {
+                ReadEventsFromSailingServerCallable callable = new ReadEventsFromSailingServerCallable(server);
+                todo.add(callable);
             }
-        } catch (InterruptedException e1) {
+            Map<SailingServer, Iterable<EventBase>> newMap = new HashMap<>();
+            try {
+                List<Future<Map<SailingServer, Iterable<EventBase>>>> results = executor.invokeAll(todo);
+                for (Future<Map<SailingServer, Iterable<EventBase>>> future : results) {
+                    try {
+                        newMap.putAll(future.get());
+                    } catch (InterruptedException e) {
+                    } catch (ExecutionException e) {
+                        logger.log(Level.SEVERE,
+                                "Exception trying to obtain events from remote server: " + e.getMessage(), e);
+                    }
+                }
+            } catch (InterruptedException e1) {
+            }
+            synchronized (cachedPublicEventsOfAllSailingServerInstances) {
+                cachedPublicEventsOfAllSailingServerInstances.clear();
+                cachedPublicEventsOfAllSailingServerInstances.putAll(newMap);
+            }
+            // executor.shutdown() will happen automatically during thread pool's finalizer
         }
-        synchronized (cachedPublicEventsOfAllSailingServerInstances) {
-            cachedPublicEventsOfAllSailingServerInstances.clear();
-            cachedPublicEventsOfAllSailingServerInstances.putAll(newMap);
-        }
-        executor.shutdown();
     }
 
     /**

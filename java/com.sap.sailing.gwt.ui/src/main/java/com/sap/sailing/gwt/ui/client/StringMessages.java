@@ -1026,4 +1026,6 @@ public interface StringMessages extends Messages {
     String selectAtLeastOne();
     String selectRaces();
     String importFixes();
+    String noSailingServerInstancesYet();
+    String registeredSailingServerInstances();
 }

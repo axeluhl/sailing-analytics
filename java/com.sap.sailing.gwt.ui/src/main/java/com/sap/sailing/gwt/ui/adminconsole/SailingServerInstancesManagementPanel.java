@@ -23,6 +23,8 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -31,21 +33,21 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
-    private final Button addButton;
-    private final Button removeButton;
-    private final Button refreshButton;
-
-    private CellTable<SailingServerDTO> serverTable;
-    private MultiSelectionModel<SailingServerDTO> serverSelectionModel;
-    private ListDataProvider<SailingServerDTO> serverDataProvider;
+    /**
+     * The set of all known servers, a subset of which may be displayed in the filtered table
+     */
+    private final List<SailingServerDTO> allServers;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final MultiSelectionModel<SailingServerDTO> serverSelectionModel;
+    private LabeledAbstractFilterablePanel<SailingServerDTO> filteredServerTable;
 
     public SailingServerInstancesManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.allServers = new ArrayList<>();
         
         TextColumn<SailingServerDTO> serverNameColumn = new TextColumn<SailingServerDTO>() {
             @Override
@@ -61,21 +63,21 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
             }
         };
 
-        serverTable = new CellTable<SailingServerDTO>(10000, tableRes);
+        CellTable<SailingServerDTO> serverTable = new CellTable<SailingServerDTO>(10000, tableRes);
         serverTable.addColumn(serverNameColumn, stringMessages.name());
         serverTable.addColumn(serverUrlColumn, stringMessages.url());
 
-        serverTable.setEmptyTableWidget(new Label("No sailing server instances yet."));
+        serverTable.setEmptyTableWidget(new Label(stringMessages.noSailingServerInstancesYet()));
         
         serverSelectionModel = new MultiSelectionModel<SailingServerDTO>();
         serverTable.setSelectionModel(serverSelectionModel);
 
-        serverDataProvider = new ListDataProvider<SailingServerDTO>();
+        ListDataProvider<SailingServerDTO> serverDataProvider = new ListDataProvider<SailingServerDTO>();
         serverDataProvider.addDataDisplay(serverTable);
 
-        addButton = new Button(stringMessages.add());
-        removeButton = new Button(stringMessages.remove());
-        refreshButton = new Button(stringMessages.refresh());
+        Button addButton = new Button(stringMessages.add());
+        Button removeButton = new Button(stringMessages.remove());
+        Button refreshButton = new Button(stringMessages.refresh());
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -99,14 +101,24 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
         providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(providerSelectionPanel);
         
-        providerSelectionPanel.add(new Label("Registered SailingServer Instances"));
-                
+        filteredServerTable = new LabeledAbstractFilterablePanel<SailingServerDTO>(
+                new Label(stringMessages.registeredSailingServerInstances()), allServers, serverTable, serverDataProvider) {
+            @Override
+            public List<String> getSearchableStrings(SailingServerDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.getUrl());
+                for (EventDTO e : t.getEvents()) {
+                    strings.add(e.getName());
+                }
+                return strings;
+            }
+        };
+        providerSelectionPanel.add(filteredServerTable);
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
         buttonPanel.add(refreshButton);
-
-        vp.add(serverTable);
         vp.add(buttonPanel);
 
         add(vp);
@@ -122,8 +134,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(List<SailingServerDTO> result) {
-            	serverDataProvider.getList().clear();
-            	serverDataProvider.getList().addAll(result);
+                filteredServerTable.updateAll(result);
             }
         });
     }
@@ -149,8 +160,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
     }
 
     private void addSailingServer() {
-    	ArrayList<SailingServerDTO> existingServers = new ArrayList<SailingServerDTO>(serverDataProvider.getList());
-        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(existingServers, stringMessages, new DialogCallback<SailingServerDTO>() {
+        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(allServers, stringMessages, new DialogCallback<SailingServerDTO>() {
             @Override
             public void cancel() {
             }
@@ -165,7 +175,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                    	serverDataProvider.getList().add(server);
+                    	filteredServerTable.add(server);
                         Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
                     }
                 });
