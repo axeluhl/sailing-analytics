@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,11 +34,6 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
-    /**
-     * The set of all known servers, a subset of which may be displayed in the filtered table
-     */
-    private final List<SailingServerDTO> allServers;
-
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final MultiSelectionModel<SailingServerDTO> serverSelectionModel;
     private LabeledAbstractFilterablePanel<SailingServerDTO> filteredServerTable;
@@ -47,7 +43,6 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.allServers = new ArrayList<>();
         
         TextColumn<SailingServerDTO> serverNameColumn = new TextColumn<SailingServerDTO>() {
             @Override
@@ -102,7 +97,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
         vp.add(providerSelectionPanel);
         
         filteredServerTable = new LabeledAbstractFilterablePanel<SailingServerDTO>(
-                new Label(stringMessages.registeredSailingServerInstances()), allServers, serverTable, serverDataProvider) {
+                new Label(stringMessages.registeredSailingServerInstances()), Collections.<SailingServerDTO>emptyList(), serverTable, serverDataProvider) {
             @Override
             public List<String> getSearchableStrings(SailingServerDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -115,6 +110,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
             }
         };
         providerSelectionPanel.add(filteredServerTable);
+        vp.add(serverTable);
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
@@ -160,7 +156,7 @@ public class SailingServerInstancesManagementPanel extends FlowPanel {
     }
 
     private void addSailingServer() {
-        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(allServers, stringMessages, new DialogCallback<SailingServerDTO>() {
+        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(filteredServerTable.getAll(), stringMessages, new DialogCallback<SailingServerDTO>() {
             @Override
             public void cancel() {
             }

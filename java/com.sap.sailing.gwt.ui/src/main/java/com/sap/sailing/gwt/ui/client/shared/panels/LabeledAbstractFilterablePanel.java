@@ -13,7 +13,11 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
  * known to an instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be
  * defined, which gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or
  * boatClass. The cell table can be sorted independently from the text box (e.g. after adding new objects) by calling
- * the method {@link #updateAll(Iterable)} which then runs the filter over the new selection.
+ * the method {@link #updateAll(Iterable)} which then runs the filter over the new selection.</p>
+ * 
+ * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free
+ * to position the table wherever they want, not necessarily related to the text box provided by this panel in any
+ * specific way.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl

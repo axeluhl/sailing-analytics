@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -141,7 +140,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         mainPanel.add(table);
     }
     
-    public Collection<CompetitorDTO> getAllCompetitors() {
+    public Iterable<CompetitorDTO> getAllCompetitors() {
         return filterField.getAll();
     }
     

@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -57,10 +58,12 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
         if (toMove.isEmpty()) {
             return;
         }
-        List<CompetitorDTO> newFromList = new ArrayList<>(from.getFilterField().getAll());
+        List<CompetitorDTO> newFromList = new ArrayList<>();
+        Util.addAll(from.getFilterField().getAll(), newFromList);
         newFromList.removeAll(toMove);
         from.getFilterField().updateAll(newFromList);
-        List<CompetitorDTO> newToList = new ArrayList<>(to.getFilterField().getAll());
+        List<CompetitorDTO> newToList = new ArrayList<>();
+        Util.addAll(to.getFilterField().getAll(), newToList);
         newToList.addAll(toMove);
         to.getFilterField().updateAll(newToList);
     }
@@ -111,8 +114,8 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
 
     @Override
     protected void save() {
-        final Set<CompetitorDTO> registeredCompetitors = new HashSet<>(
-                registeredCompetitorsTable.getAllCompetitors());
+        final Set<CompetitorDTO> registeredCompetitors = new HashSet<>();
+        Util.addAll(registeredCompetitorsTable.getAllCompetitors(), registeredCompetitors);
         sailingService.setCompetitorRegistrations(leaderboardName, raceColumnName, fleetName,
                 registeredCompetitors, new AsyncCallback<Void>() {
             @Override
