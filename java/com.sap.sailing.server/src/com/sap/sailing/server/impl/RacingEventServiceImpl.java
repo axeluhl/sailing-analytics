@@ -538,7 +538,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread() { @Override public void run() { updateRemoteServerEventCacheSynchronously(ref); } }.start();
+        new Thread("Event Cache Updater for remote server "+ref) {
+            @Override public void run() { updateRemoteServerEventCacheSynchronously(ref); }
+        }.start();
     }
 
     @Override
