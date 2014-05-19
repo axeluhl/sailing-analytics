@@ -3291,27 +3291,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<SailingServerDTO> getSailingServers() {
-    	List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
-        for (SailingServer sailingServer: getService().getSailingServers()) {
-        	SailingServerDTO dto = new SailingServerDTO(sailingServer.getName(), sailingServer.getURL().toExternalForm());
-        	result.add(dto);
+        List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
+        for (SailingServer sailingServer : getService().getSailingServers()) {
+            SailingServerDTO dto = new SailingServerDTO(sailingServer.getName(), sailingServer.getURL()
+                    .toExternalForm());
+            result.add(dto);
         }
-    	return result;
+        return result;
     }
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
-    	for(String serverName: namesOfSailingServersToRemove) {
-    		getService().apply(new RemoveSailingServer(serverName));
-    	}
+        for (String serverName : namesOfSailingServersToRemove) {
+            getService().apply(new RemoveSailingServer(serverName));
+        }
     }
 
     @Override
     public void addSailingServer(SailingServerDTO sailingServer) throws Exception {
-		URL serverURL = new URL(sailingServer.getUrl());
-    	getService().apply(new AddSailingServer(sailingServer.getName(), serverURL));
+        URL serverURL = new URL(sailingServer.getUrl());
+        getService().apply(new AddSailingServer(sailingServer.getName(), serverURL));
     }
-    
+
     @Override
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
