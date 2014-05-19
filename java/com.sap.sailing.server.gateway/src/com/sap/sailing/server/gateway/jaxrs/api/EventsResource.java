@@ -34,7 +34,9 @@ public class EventsResource extends AbstractSailingServerResource {
         JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
-            result.add(eventSerializer.serialize(event));
+            if (event.isPublic()) {
+                result.add(eventSerializer.serialize(event));
+            }
         }
         String json = result.toJSONString();
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
