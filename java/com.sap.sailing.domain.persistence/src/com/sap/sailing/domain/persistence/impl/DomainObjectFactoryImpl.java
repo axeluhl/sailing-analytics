@@ -901,16 +901,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
 
     private SailingServer loadSailingSever(DBObject serverDBObject) {
-    	SailingServer result = null;
+        SailingServer result = null;
         String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
         String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
-		try {
-			URL serverUrl = new URL(urlAsString);
-			result = new SailingServerImpl(name, serverUrl);
-		} catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, "Can't load the sailing server with URL " +urlAsString, e);
-		}
-        
+        try {
+            URL serverUrl = new URL(urlAsString);
+            result = new SailingServerImpl(name, serverUrl);
+        } catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
+        }
         return result;
     }
 
@@ -918,18 +917,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Iterable<SailingServer> loadAllSailingServers() {
         ArrayList<SailingServer> result = new ArrayList<SailingServer>();
         DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
-
         try {
             for (DBObject o : serverCollection.find()) {
-            	if(loadSailingSever(o) != null) {
+                if (loadSailingSever(o) != null) {
                     result.add(loadSailingSever(o));
-            	}
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load sailing server instances URLs.");
             logger.log(Level.SEVERE, "loadAllSailingServers", e);
         }
-
         return result;
     }
 

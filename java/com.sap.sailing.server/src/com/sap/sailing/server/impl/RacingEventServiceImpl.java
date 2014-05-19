@@ -199,7 +199,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * Holds the {@link Event} objects for the events of all registerd sailing server instances.
      */
-    protected final ConcurrentHashMap<SailingServer, List<EventBase>> cachedEventsOfAllSailingServerInstances;
+    protected final ConcurrentHashMap<SailingServer, List<EventBase>> cachedPublicEventsOfAllSailingServerInstances;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -406,7 +406,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        cachedEventsOfAllSailingServerInstances = new ConcurrentHashMap<SailingServer, List<EventBase>>();
+        cachedPublicEventsOfAllSailingServerInstances = new ConcurrentHashMap<SailingServer, List<EventBase>>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -515,45 +515,44 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private void loadEventsFromAllSailingServerInstances() {
-    	List<Pair<SailingServer, EventBase>> allEvents = new ArrayList<Pair<SailingServer, EventBase>>();
-
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<Pair<SailingServer, EventBase>> allEvents = new ArrayList<Pair<SailingServer, EventBase>>();
+        final Iterable<SailingServer> allSailingServers = domainObjectFactory.loadAllSailingServers();
+        ExecutorService executor = Executors.newFixedThreadPool(Util.size(allSailingServers));
         List<Callable<List<Pair<SailingServer, EventBase>>>> todo = new ArrayList<Callable<List<Pair<SailingServer, EventBase>>>>();
-
-        for (SailingServer server: domainObjectFactory.loadAllSailingServers()) {
+        for (SailingServer server : allSailingServers) {
             Callable<List<Pair<SailingServer, EventBase>>> callable = new ReadEventsFromSailingServerCallable(server);
             todo.add(callable);
         }
 
         List<Future<List<Pair<SailingServer, EventBase>>>> results;
-		try {
-			results = executor.invokeAll(todo);
-	        for(Future<List<Pair<SailingServer, EventBase>>> future: results) {
-	        	if(future.isDone()) {
-	            	List<Pair<SailingServer, EventBase>> result;
-					try {
-						result = future.get();
-	            		allEvents.addAll(result);
-					} catch (InterruptedException e) {
-					} catch (ExecutionException e) {
-					}
-	        	}
-	        }
-		} catch (InterruptedException e1) {
-		}
+        try {
+            results = executor.invokeAll(todo);
+            for (Future<List<Pair<SailingServer, EventBase>>> future : results) {
+                List<Pair<SailingServer, EventBase>> result;
+                try {
+                    result = future.get();
+                    allEvents.addAll(result);
+                } catch (InterruptedException e) {
+                } catch (ExecutionException e) {
+                    logger.log(Level.SEVERE, "Exception trying to obtain events from remote server: "+e.getMessage(), e);
+                }
+            }
+        } catch (InterruptedException e1) {
+        }
 
-        synchronized (cachedEventsOfAllSailingServerInstances) {
-            cachedEventsOfAllSailingServerInstances.clear();
+        synchronized (cachedPublicEventsOfAllSailingServerInstances) {
+            cachedPublicEventsOfAllSailingServerInstances.clear();
 
             for (Pair<SailingServer, EventBase> serverAndEventPair : allEvents) {
-            	List<EventBase> events = cachedEventsOfAllSailingServerInstances.get(serverAndEventPair.getA());
-            	if(events == null) {
-            		events = new ArrayList<EventBase>();
-            		cachedEventsOfAllSailingServerInstances.put(serverAndEventPair.getA(), events);
-            	}
-            	events.add(serverAndEventPair.getB());
+                List<EventBase> events = cachedPublicEventsOfAllSailingServerInstances.get(serverAndEventPair.getA());
+                if (events == null) {
+                    events = new ArrayList<EventBase>();
+                    cachedPublicEventsOfAllSailingServerInstances.put(serverAndEventPair.getA(), events);
+                }
+                events.add(serverAndEventPair.getB());
             }
         }
+        executor.shutdown();
     }
 
     /**
@@ -905,7 +904,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Map<SailingServer, List<EventBase>> getPublicEventsOfAllSailingServers() {
-        return Collections.unmodifiableMap(new HashMap<SailingServer, List<EventBase>>(cachedEventsOfAllSailingServerInstances));
+        return Collections.unmodifiableMap(new HashMap<SailingServer, List<EventBase>>(cachedPublicEventsOfAllSailingServerInstances));
     }
 
     @Override
@@ -918,7 +917,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public SailingServer addSailingServer(String name, URL url) {
     	SailingServer result = new SailingServerImpl(name, url);
-	    mongoObjectFactory.storeSailingServer(result);
+    	mongoObjectFactory.storeSailingServer(result);
     	updateCachedEventsOfSailingServers();
     	return result;
     }
@@ -929,9 +928,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     	updateCachedEventsOfSailingServers();
     }
 
-	private void updateCachedEventsOfSailingServers() {
-		loadEventsFromAllSailingServerInstances();
-	}
+    private void updateCachedEventsOfSailingServers() {
+        loadEventsFromAllSailingServerInstances();
+    }
 
     @Override
     public Iterable<Event> getAllEvents() {

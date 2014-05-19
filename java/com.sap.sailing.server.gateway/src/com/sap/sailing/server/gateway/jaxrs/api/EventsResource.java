@@ -47,16 +47,16 @@ public class EventsResource extends AbstractSailingServerResource {
         Response response;
         UUID eventUuid;
         try {
-			eventUuid = UUID.fromString(eventId);
-		} catch (IllegalArgumentException e) {
-			return getBadEventErrorResponse(eventId);
-		}
-        
+            eventUuid = UUID.fromString(eventId);
+        } catch (IllegalArgumentException e) {
+            return getBadEventErrorResponse(eventId);
+        }
         Event event = getService().getEvent(eventUuid);
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
+            JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(
+                    new CourseAreaJsonSerializer()));
             JSONObject eventJson = eventSerializer.serialize(event);
 
             String json = eventJson.toJSONString();
@@ -64,7 +64,7 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{eventId}/racestates")
