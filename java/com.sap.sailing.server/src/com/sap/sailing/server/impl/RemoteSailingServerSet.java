@@ -136,7 +136,15 @@ public class RemoteSailingServerSet {
         return ref;
     }
 
-    public Pair<Iterable<EventBase>, Exception> getCachedEventsOrException(RemoteSailingServerReference ref) {
-        return cachedEventsForRemoteSailingServers.get(ref);
+    /**
+     * Synchronously fetches the latest events list for the remote server reference specified. The
+     * result is cached. If <code>ref</code> was not yet part of this remote sailing server reference set,
+     * it is automatically added.
+     */
+    public Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
+        if (!remoteSailingServers.containsKey(ref.getName())) {
+            remoteSailingServers.put(ref.getName(), ref);
+        }
+        return updateRemoteServerEventCacheSynchronously(ref);
     }
 }

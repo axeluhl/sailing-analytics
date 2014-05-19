@@ -875,7 +875,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
-        return remoteSailingServerSet.getCachedEventsOrException(ref);
+        return remoteSailingServerSet.getEventsOrException(ref);
     }
 
     @Override
@@ -2005,7 +2005,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorStore);
         logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
-        logger.info(logoutput.toString());
         
         logger.info("Serializing configuration map...");
         oos.writeObject(configurationMap);
@@ -2014,7 +2013,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             logoutput.append(String.format("%3s\n", matcher.toString()));
         }
         
-        logger.info(logoutput.toString());    }
+        logger.info("Serializing remote sailing server references...");
+        final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet.getCachedEventsForRemoteSailingServers().keySet());
+        oos.writeObject(remoteServerReferences);
+        logoutput.append("Serialized "+remoteServerReferences.size()+" remote sailing server references\n");
+        
+        logger.info(logoutput.toString());
+    }
 
     @SuppressWarnings("unchecked")
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
