@@ -213,6 +213,9 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
             DeviceMapping<ItemT> newMapping, List<DeviceMapping<ItemT>> oldMappings) {
+        if (oldMappings == null) {
+            return false;
+        }
         for (DeviceMapping<ItemT> oldMapping : oldMappings) {
             if (newMapping.getDevice() == oldMapping.getDevice()
                     && newMapping.getTimeRange().liesWithin(oldMapping.getTimeRange())) {

@@ -30,7 +30,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -91,7 +91,7 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);		
-        exception.expect(RaceNotCreatedException.class);
+        exception.expect(NotDenotedForRaceLogTrackingException.class);
         adapter.startTracking(service, leaderboard, column, fleet);
     }
 

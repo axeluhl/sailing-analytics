@@ -39,14 +39,7 @@ When thinking about smartphone tracking, it would of course be a good idea to al
 
 ## Steps for setting up a racelog-tracked race in the AdminConsole
 
-1. Precondition: A RegattaLeaderboard with one race (and automatically RaceLog) has to exist.
-2. Denote the race for racelog-tracking and add a race tracker.
-3. Register competitors for the race (these need to exist in the CompetitorStore).
-4. Define the course layout, including the definition of marks. Optionally, the course layout and competitor registrations can be copied from a different race in the same leaderboard.
-5. Create the mappings from tracking devices to competitors and/or marks.
-6. Start tracking the race.
-7. Change the course layout, or add device mappings during tracking. Removing mappings will not have the effect of removing the fixes from the race, as this is not currently supported by the underlying GPSFixTrack.
-8. Stop tracking (stop the tracker).
+[[Walkthrough with screenshots|wiki/racelog-tracking/walkthrough]]
 
 ## Reloading a race that has already been tracked
 

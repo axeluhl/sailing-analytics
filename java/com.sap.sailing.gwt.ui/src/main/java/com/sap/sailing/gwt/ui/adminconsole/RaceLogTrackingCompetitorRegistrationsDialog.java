@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -24,8 +25,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackingDialog {
-    private CompetitorTableWrapper allCompetitorsTable;
-    private CompetitorTableWrapper registeredCompetitorsTable;
+    private CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
+    private CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     private final boolean filterByLeaderBoardInitially = false;
     private final Callback<Boolean, Throwable> competitorsRegistered;
 
@@ -52,7 +53,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
         super.addButtons(buttonPanel);
     }
     
-    private void move(CompetitorTableWrapper from, CompetitorTableWrapper to, Collection<CompetitorDTO> toMove) {
+    private void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
         if (toMove.isEmpty()) {
             return;
         }
@@ -64,7 +65,8 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
         to.getFilterField().updateAll(newToList);
     }
     
-    private void moveSelected(CompetitorTableWrapper from, CompetitorTableWrapper to) {
+    private void moveSelected(CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> from,
+            CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
     }
 
@@ -76,8 +78,10 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
         mainPanel.add(panel);
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
-        registeredCompetitorsTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                new MultiSelectionModel<CompetitorDTO>());
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                new MultiSelectionModel<CompetitorDTO>());
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
