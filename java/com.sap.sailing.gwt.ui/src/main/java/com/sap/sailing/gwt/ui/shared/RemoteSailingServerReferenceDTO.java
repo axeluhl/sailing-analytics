@@ -31,7 +31,6 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO implements IsSeria
     
     public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventDTO> events, String lastErrorMessage) {
         super(name);
-        assert events != null;
         this.url = url;
         this.events = events;
         this.lastErrorMessage = lastErrorMessage;

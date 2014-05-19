@@ -572,6 +572,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         } catch (IOException | ParseException e) {
+            logger.log(Level.INFO, "Exception trying to fetch events from remote server "+ref+": "+e.getMessage(), e);
             result = new Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
         cachedEventsForRemoteSailingServers.put(ref, result);

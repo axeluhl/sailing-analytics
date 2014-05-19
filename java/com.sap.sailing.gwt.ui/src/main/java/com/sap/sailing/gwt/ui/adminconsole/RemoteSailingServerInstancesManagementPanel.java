@@ -124,8 +124,10 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.getUrl());
-                for (EventDTO e : t.getEvents()) {
-                    strings.add(e.getName());
+                if (t.getEvents() != null) {
+                    for (EventDTO e : t.getEvents()) {
+                        strings.add(e.getName());
+                    }
                 }
                 return strings;
             }

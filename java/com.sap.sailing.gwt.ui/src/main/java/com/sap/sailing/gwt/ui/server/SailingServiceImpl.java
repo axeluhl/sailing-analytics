@@ -341,7 +341,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
-import com.sap.sailing.server.operationaltransformation.RemoveSailingServer;
+import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
@@ -3330,13 +3330,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
         for (String serverName : namesOfSailingServersToRemove) {
-            getService().apply(new RemoveSailingServer(serverName));
+            getService().apply(new RemoveRemoteSailingServerReference(serverName));
         }
     }
 
     @Override
     public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
-        URL serverURL = new URL(sailingServer.getUrl());
+        final String expandedURL;
+        if (sailingServer.getUrl().contains("//")) {
+            expandedURL = sailingServer.getUrl();
+        } else {
+            expandedURL = "http://" + sailingServer.getUrl();
+        }
+        URL serverURL = new URL(expandedURL);
         RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
         Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
