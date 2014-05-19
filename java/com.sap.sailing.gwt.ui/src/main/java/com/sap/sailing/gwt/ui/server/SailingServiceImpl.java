@@ -2956,19 +2956,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<SailingServerDTO> getPublicEventsOfAllSailingServers() {
-    	List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
-    	for(Entry<SailingServer, List<EventBase>> serverAndEventsEntry: getService().getPublicEventsOfAllSailingServers().entrySet()) {
-    		SailingServer server = serverAndEventsEntry.getKey();
+        List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
+        for (Entry<SailingServer, List<EventBase>> serverAndEventsEntry : getService()
+                .getPublicEventsOfAllSailingServers().entrySet()) {
+            SailingServer server = serverAndEventsEntry.getKey();
             List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
             for (EventBase event : serverAndEventsEntry.getValue()) {
                 EventDTO eventDTO = convertToEventDTO(event);
                 eventDTOs.add(eventDTO);
             }
-    		SailingServerDTO sailingServerDTO = new SailingServerDTO(server.getName(), server.getURL().toExternalForm(), eventDTOs);
-    		result.add(sailingServerDTO);
-    	}
-    	return result;
-	}
+            SailingServerDTO sailingServerDTO = new SailingServerDTO(server.getName(),
+                    server.getURL().toExternalForm(), eventDTOs);
+            result.add(sailingServerDTO);
+        }
+        return result;
+    }
 
     @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
