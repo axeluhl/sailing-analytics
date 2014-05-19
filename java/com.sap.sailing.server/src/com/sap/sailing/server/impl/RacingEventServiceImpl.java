@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -199,7 +198,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     /**
      * Holds the {@link Event} objects for the events of all registerd sailing server instances.
      */
-    protected final ConcurrentHashMap<SailingServer, List<EventBase>> cachedPublicEventsOfAllSailingServerInstances;
+    protected final ConcurrentHashMap<SailingServer, Iterable<EventBase>> cachedPublicEventsOfAllSailingServerInstances;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -406,7 +405,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        cachedPublicEventsOfAllSailingServerInstances = new ConcurrentHashMap<SailingServer, List<EventBase>>();
+        cachedPublicEventsOfAllSailingServerInstances = new ConcurrentHashMap<SailingServer, Iterable<EventBase>>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -515,23 +514,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     private void loadEventsFromAllSailingServerInstances() {
-        List<Pair<SailingServer, EventBase>> allEvents = new ArrayList<Pair<SailingServer, EventBase>>();
         final Iterable<SailingServer> allSailingServers = domainObjectFactory.loadAllSailingServers();
         ExecutorService executor = Executors.newFixedThreadPool(Util.size(allSailingServers));
-        List<Callable<List<Pair<SailingServer, EventBase>>>> todo = new ArrayList<Callable<List<Pair<SailingServer, EventBase>>>>();
+        List<ReadEventsFromSailingServerCallable> todo = new ArrayList<ReadEventsFromSailingServerCallable>();
         for (SailingServer server : allSailingServers) {
-            Callable<List<Pair<SailingServer, EventBase>>> callable = new ReadEventsFromSailingServerCallable(server);
+            ReadEventsFromSailingServerCallable callable = new ReadEventsFromSailingServerCallable(server);
             todo.add(callable);
         }
-
-        List<Future<List<Pair<SailingServer, EventBase>>>> results;
+        Map<SailingServer, Iterable<EventBase>> newMap = new HashMap<>();
         try {
-            results = executor.invokeAll(todo);
-            for (Future<List<Pair<SailingServer, EventBase>>> future : results) {
-                List<Pair<SailingServer, EventBase>> result;
+            List<Future<Map<SailingServer, Iterable<EventBase>>>> results = executor.invokeAll(todo);
+            for (Future<Map<SailingServer, Iterable<EventBase>>> future : results) {
                 try {
-                    result = future.get();
-                    allEvents.addAll(result);
+                    newMap.putAll(future.get());
                 } catch (InterruptedException e) {
                 } catch (ExecutionException e) {
                     logger.log(Level.SEVERE, "Exception trying to obtain events from remote server: "+e.getMessage(), e);
@@ -539,18 +534,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         } catch (InterruptedException e1) {
         }
-
         synchronized (cachedPublicEventsOfAllSailingServerInstances) {
             cachedPublicEventsOfAllSailingServerInstances.clear();
-
-            for (Pair<SailingServer, EventBase> serverAndEventPair : allEvents) {
-                List<EventBase> events = cachedPublicEventsOfAllSailingServerInstances.get(serverAndEventPair.getA());
-                if (events == null) {
-                    events = new ArrayList<EventBase>();
-                    cachedPublicEventsOfAllSailingServerInstances.put(serverAndEventPair.getA(), events);
-                }
-                events.add(serverAndEventPair.getB());
-            }
+            cachedPublicEventsOfAllSailingServerInstances.putAll(newMap);
         }
         executor.shutdown();
     }
@@ -903,8 +889,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Map<SailingServer, List<EventBase>> getPublicEventsOfAllSailingServers() {
-        return Collections.unmodifiableMap(new HashMap<SailingServer, List<EventBase>>(cachedPublicEventsOfAllSailingServerInstances));
+    public Map<SailingServer, Iterable<EventBase>> getPublicEventsOfAllSailingServers() {
+        return Collections.unmodifiableMap(new HashMap<SailingServer, Iterable<EventBase>>(cachedPublicEventsOfAllSailingServerInstances));
     }
 
     @Override

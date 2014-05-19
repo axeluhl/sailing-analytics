@@ -6,12 +6,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 
 public class SailingServerDTO extends NamedDTO implements IsSerializable {
-	private static final long serialVersionUID = -4209262742778693873L;
-	private String url;
-	private List<EventDTO> events;
-	
+    private static final long serialVersionUID = -4209262742778693873L;
+    private String url;
+    private List<EventDTO> events;
+
     // for GWT
-    SailingServerDTO() {}
+    SailingServerDTO() {
+    }
 
     public SailingServerDTO(String name, String url) {
         super(name);
@@ -25,12 +26,12 @@ public class SailingServerDTO extends NamedDTO implements IsSerializable {
         this.events = events;
     }
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public List<EventDTO> getEvents() {
-		return events;
-	}
+    public List<EventDTO> getEvents() {
+        return events;
+    }
 
 }
