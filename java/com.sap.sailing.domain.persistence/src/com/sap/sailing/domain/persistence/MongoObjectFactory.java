@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -84,7 +84,7 @@ public interface MongoObjectFactory {
      * Stores a registered sailing server 
      * @param serves the servers to store
      */
-    void storeSailingServer(SailingServer server);
+    void storeSailingServer(RemoteSailingServerReference server);
 
     void removeSailingServer(String name);
 

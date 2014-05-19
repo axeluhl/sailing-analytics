@@ -69,7 +69,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -288,10 +288,10 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
-import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
@@ -321,7 +321,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
-import com.sap.sailing.server.operationaltransformation.AddSailingServer;
+import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -2955,18 +2955,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<SailingServerDTO> getPublicEventsOfAllSailingServers() {
-        List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
-        for (Entry<SailingServer, Iterable<EventBase>> serverAndEventsEntry : getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            SailingServer server = serverAndEventsEntry.getKey();
-            List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
-            for (EventBase event : serverAndEventsEntry.getValue()) {
-                EventDTO eventDTO = convertToEventDTO(event);
-                eventDTOs.add(eventDTO);
-            }
-            SailingServerDTO sailingServerDTO = new SailingServerDTO(server.getName(),
-                    server.getURL().toExternalForm(), eventDTOs);
+    public List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers() {
+        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
+            final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
+            final RemoteSailingServerReferenceDTO sailingServerDTO = createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
             result.add(sailingServerDTO);
+        }
+        return result;
+    }
+
+    private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
+            final RemoteSailingServerReference serverRef,
+            final Pair<Iterable<EventBase>, Exception> eventsOrException) {
+        final Iterable<EventBase> events = eventsOrException.getA();
+        final Iterable<EventDTO> eventDTOs;
+        final RemoteSailingServerReferenceDTO sailingServerDTO;
+        if (events == null) {
+            eventDTOs = null;
+            final Exception exception = eventsOrException.getB();
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
+                    serverRef.getURL().toExternalForm(), exception==null?null:exception.getMessage());
+        } else {
+            eventDTOs = convertToEventDTOs(events);
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(
+                    serverRef.getName(), serverRef
+                            .getURL().toExternalForm(), eventDTOs);
+        }
+        return sailingServerDTO;
+    }
+    
+    private Iterable<EventDTO> convertToEventDTOs(Iterable<EventBase> events) {
+        List<EventDTO> result = new ArrayList<>();
+        for (EventBase event : events) {
+            EventDTO eventDTO = convertToEventDTO(event);
+            result.add(eventDTO);
         }
         return result;
     }
@@ -3290,11 +3315,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<SailingServerDTO> getSailingServers() {
-        List<SailingServerDTO> result = new ArrayList<SailingServerDTO>();
-        for (SailingServer sailingServer : getService().getSailingServers()) {
-            SailingServerDTO dto = new SailingServerDTO(sailingServer.getName(), sailingServer.getURL()
-                    .toExternalForm());
+    public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
+        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
+                    getService().getRemoteSailingServersAndTheirCachedEvents().entrySet()) {
+            RemoteSailingServerReferenceDTO dto = createRemoteSailingServerReferenceDTO(
+                    remoteSailingServerRefAndItsCachedEvent.getKey(),
+                    remoteSailingServerRefAndItsCachedEvent.getValue());
             result.add(dto);
         }
         return result;
@@ -3308,9 +3335,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void addSailingServer(SailingServerDTO sailingServer) throws Exception {
+    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
         URL serverURL = new URL(sailingServer.getUrl());
-        getService().apply(new AddSailingServer(sailingServer.getName(), serverURL));
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
+        Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+        
     }
 
     @Override

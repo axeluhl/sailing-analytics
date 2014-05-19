@@ -1,12 +1,15 @@
 package com.sap.sailing.server.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,16 +24,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -48,7 +52,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -60,7 +64,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.base.impl.SailingServerImpl;
+import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -140,6 +144,9 @@ import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -193,13 +200,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
      * {@link Event} objects that exist outside this service for events not (yet) registered here.
      */
-    protected final ConcurrentHashMap<Serializable, Event> eventsById;
+    private final ConcurrentHashMap<Serializable, Event> eventsById;
 
     /**
-     * Holds the {@link Event} objects for the events of all registerd sailing server instances.
+     * Holds the {@link Event} objects for the events of all registered sailing server instances.
      */
-    protected final ConcurrentHashMap<SailingServer, Iterable<EventBase>> cachedPublicEventsOfAllSailingServerInstances;
-
+    private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
+    
+    private final ConcurrentHashMap<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
+    
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
      * {@link Regatta} objects that exist outside this service for regattas not (yet) registered here.
@@ -405,7 +414,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        cachedPublicEventsOfAllSailingServerInstances = new ConcurrentHashMap<SailingServer, Iterable<EventBase>>();
+        remoteSailingServers = new ConcurrentHashMap<>();
+        cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for "+this, /* fair */ false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -444,7 +454,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
-        loadEventsFromAllSailingServerInstances();
+        loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
     }
 
     @Override
@@ -512,36 +522,68 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 eventsById.put(event.getId(), event);
         }
     }
-
-    private void loadEventsFromAllSailingServerInstances() {
-        final Iterable<SailingServer> allSailingServers = domainObjectFactory.loadAllSailingServers();
-        if (!Util.isEmpty(allSailingServers)) {
-            ExecutorService executor = Executors.newFixedThreadPool(Util.size(allSailingServers));
-            List<ReadEventsFromSailingServerCallable> todo = new ArrayList<ReadEventsFromSailingServerCallable>();
-            for (SailingServer server : allSailingServers) {
-                ReadEventsFromSailingServerCallable callable = new ReadEventsFromSailingServerCallable(server);
-                todo.add(callable);
-            }
-            Map<SailingServer, Iterable<EventBase>> newMap = new HashMap<>();
-            try {
-                List<Future<Map<SailingServer, Iterable<EventBase>>>> results = executor.invokeAll(todo);
-                for (Future<Map<SailingServer, Iterable<EventBase>>> future : results) {
-                    try {
-                        newMap.putAll(future.get());
-                    } catch (InterruptedException e) {
-                    } catch (ExecutionException e) {
-                        logger.log(Level.SEVERE,
-                                "Exception trying to obtain events from remote server: " + e.getMessage(), e);
-                    }
-                }
-            } catch (InterruptedException e1) {
-            }
-            synchronized (cachedPublicEventsOfAllSailingServerInstances) {
-                cachedPublicEventsOfAllSailingServerInstances.clear();
-                cachedPublicEventsOfAllSailingServerInstances.putAll(newMap);
-            }
-            // executor.shutdown() will happen automatically during thread pool's finalizer
+    
+    private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
+        for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
+            remoteSailingServers.put(sailingServer.getName(), sailingServer);
         }
+        scheduler.scheduleAtFixedRate(new Runnable() { @Override public void run() { updateRemoteSailingServerReferenceEventCaches(); } },
+                /* initialDelay */ 0, /* period */ 60, TimeUnit.SECONDS);
+    }
+    
+    private void updateRemoteSailingServerReferenceEventCaches() {
+        for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
+            triggerAsynchronousEventCacheUpdate(ref);
+        }
+    }
+
+    private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
+        new Thread() { @Override public void run() { updateRemoteServerEventCacheSynchronously(ref); } }.start();
+    }
+
+    @Override
+    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+        BufferedReader bufferedReader = null;
+        Pair<Iterable<EventBase>, Exception> result;
+        try {
+            try {
+                final URL eventsURL = getEventsURL(ref.getURL());
+                logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
+                URLConnection urlConnection = eventsURL.openConnection();
+                urlConnection.connect();
+                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                JSONParser parser = new JSONParser();
+                Object eventsAsObject = parser.parse(bufferedReader);
+                EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
+                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+                JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
+                final Set<EventBase> events = new HashSet<>();
+                for (Object eventAsObject : eventsAsJsonArray) {
+                    JSONObject eventAsJson = (JSONObject) eventAsObject;
+                    EventBase event = deserializer.deserialize(eventAsJson);
+                    events.add(event);
+                }
+                result = new Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+            } finally {
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                }
+            }
+        } catch (IOException | ParseException e) {
+            result = new Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
+        }
+        cachedEventsForRemoteSailingServers.put(ref, result);
+        return result;
+    }
+    
+    
+    public URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
+        String getEventsUrl = remoteServerBaseURL.toExternalForm();
+        if (!getEventsUrl.endsWith("/")) {
+            getEventsUrl += "/";
+        }
+        getEventsUrl += "sailingserver/api/v1/events";
+        return new URL(getEventsUrl);
     }
 
     /**
@@ -892,33 +934,29 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Map<SailingServer, Iterable<EventBase>> getPublicEventsOfAllSailingServers() {
-        return Collections.unmodifiableMap(new HashMap<SailingServer, Iterable<EventBase>>(cachedPublicEventsOfAllSailingServerInstances));
+    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
+        return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
     }
 
     @Override
-    public Iterable<SailingServer> getSailingServers() {
-    	List<SailingServer> servers = new ArrayList<SailingServer>();
-    	Util.addAll(domainObjectFactory.loadAllSailingServers(), servers);
-    	return Collections.unmodifiableCollection(servers);
+    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getRemoteSailingServersAndTheirCachedEvents() {
+        return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
     }
 
     @Override
-    public SailingServer addSailingServer(String name, URL url) {
-    	SailingServer result = new SailingServerImpl(name, url);
+    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
+    	RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url);
+    	remoteSailingServers.put(name, result);
     	mongoObjectFactory.storeSailingServer(result);
-    	updateCachedEventsOfSailingServers();
+    	triggerAsynchronousEventCacheUpdate(result);
     	return result;
     }
 
     @Override
-    public void removeSailingServer(String name) {
+    public void removeRemoteSailingServerReference(String name) {
+        RemoteSailingServerReference ref = remoteSailingServers.remove(name);
+        cachedEventsForRemoteSailingServers.remove(ref);
     	mongoObjectFactory.removeSailingServer(name);
-    	updateCachedEventsOfSailingServers();
-    }
-
-    private void updateCachedEventsOfSailingServers() {
-        loadEventsFromAllSailingServerInstances();
     }
 
     @Override

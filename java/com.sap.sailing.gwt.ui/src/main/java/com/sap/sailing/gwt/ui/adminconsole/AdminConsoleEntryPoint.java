@@ -165,7 +165,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
         addScrollableTab(tabPanel, resultImportUrlsManagementPanel, stringMessages.resultImportUrls());
 
-        SailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new SailingServerInstancesManagementPanel(sailingService, this, stringMessages);
+        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
         addScrollableTab(tabPanel, sailingServerInstancesManagementPanel, stringMessages.sailingServers());
 
         ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);

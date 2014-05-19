@@ -28,7 +28,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
@@ -465,7 +465,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeSailingServer(SailingServer server) {
+    public void storeSailingServer(RemoteSailingServerReference server) {
         DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
         serverCollection.ensureIndex(FieldNames.SERVER_NAME.name());
         DBObject query = new BasicDBObject();

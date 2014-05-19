@@ -1,11 +1,11 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 /**
- * Removes a {@link SailingServer} instance.
+ * Removes a {@link RemoteSailingServerReference} instance.
  * 
  * @author Frank Mittag (c5163874)
  *
@@ -21,7 +21,7 @@ public class RemoveSailingServer extends AbstractRacingEventServiceOperation<Voi
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.removeSailingServer(serverName);
+        toState.removeRemoteSailingServerReference(serverName);
         return null;
     }
 

@@ -6,30 +6,30 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServerDTO> {
+public class SailingServerCreateOrEditDialog extends DataEntryDialog<RemoteSailingServerReferenceDTO> {
     private StringMessages stringConstants;
     private TextBox nameTextBox;
     private TextBox urlTextBox;
     
-    private static class SailingServerValidator implements Validator<SailingServerDTO> {
+    private static class SailingServerValidator implements Validator<RemoteSailingServerReferenceDTO> {
         private StringMessages stringConstants;
-        private Iterable<SailingServerDTO> existingSailingServers;
+        private Iterable<RemoteSailingServerReferenceDTO> existingSailingServers;
 
-        public SailingServerValidator(StringMessages stringConstants, Iterable<SailingServerDTO> existingSailingServers) {
+        public SailingServerValidator(StringMessages stringConstants, Iterable<RemoteSailingServerReferenceDTO> existingSailingServers) {
             this.stringConstants = stringConstants;
             this.existingSailingServers = existingSailingServers;
         }
 
         @Override
-        public String getErrorMessage(SailingServerDTO serverToValidate) {
+        public String getErrorMessage(RemoteSailingServerReferenceDTO serverToValidate) {
             String errorMessage = null;
             boolean nameNotEmpty = serverToValidate.getName() != null && serverToValidate.getName().length() > 0;
             boolean urlNotEmpty = serverToValidate.getUrl() != null && serverToValidate.getUrl().length() > 0;
             boolean unique = true;
-            for (SailingServerDTO event : existingSailingServers) {
+            for (RemoteSailingServerReferenceDTO event : existingSailingServers) {
                 if (event.getName().equals(serverToValidate.getName())) {
                     unique = false;
                     break;
@@ -46,18 +46,18 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServ
         }
     }
 
-    public SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers,
-            StringMessages stringConstants, DialogCallback<SailingServerDTO> callback) {
+    public SailingServerCreateOrEditDialog(Iterable<RemoteSailingServerReferenceDTO> existingSailingServers,
+            StringMessages stringConstants, DialogCallback<RemoteSailingServerReferenceDTO> callback) {
         this(existingSailingServers, null, false, stringConstants, callback);
     }
 
-    public SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, StringMessages stringConstants,
-            DialogCallback<SailingServerDTO> callback) {
+    public SailingServerCreateOrEditDialog(Iterable<RemoteSailingServerReferenceDTO> existingSailingServers, RemoteSailingServerReferenceDTO serverToEdit, StringMessages stringConstants,
+            DialogCallback<RemoteSailingServerReferenceDTO> callback) {
     	this(existingSailingServers, serverToEdit, true, stringConstants, callback);
     }
 
-    private SailingServerCreateOrEditDialog(Iterable<SailingServerDTO> existingSailingServers, SailingServerDTO serverToEdit, boolean isEditMode, StringMessages stringConstants,
-            DialogCallback<SailingServerDTO> callback) {
+    private SailingServerCreateOrEditDialog(Iterable<RemoteSailingServerReferenceDTO> existingSailingServers, RemoteSailingServerReferenceDTO serverToEdit, boolean isEditMode, StringMessages stringConstants,
+            DialogCallback<RemoteSailingServerReferenceDTO> callback) {
         super("Sailing Server", null, stringConstants.ok(), stringConstants.cancel(),
         		new SailingServerValidator(stringConstants, existingSailingServers), callback);
         this.stringConstants = stringConstants;
@@ -70,8 +70,8 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<SailingServ
     }
 
     @Override
-    protected SailingServerDTO getResult() {
-    	return new SailingServerDTO(nameTextBox.getText(), urlTextBox.getText());
+    protected RemoteSailingServerReferenceDTO getResult() {
+    	return new RemoteSailingServerReferenceDTO(nameTextBox.getText(), urlTextBox.getText());
     }
 
     @Override

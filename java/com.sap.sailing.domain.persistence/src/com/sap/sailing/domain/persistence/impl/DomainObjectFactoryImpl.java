@@ -43,7 +43,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
@@ -56,7 +56,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.base.impl.SailingServerImpl;
+import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -900,13 +900,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
 
-    private SailingServer loadSailingSever(DBObject serverDBObject) {
-        SailingServer result = null;
+    private RemoteSailingServerReference loadSailingSever(DBObject serverDBObject) {
+        RemoteSailingServerReference result = null;
         String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
         String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
         try {
             URL serverUrl = new URL(urlAsString);
-            result = new SailingServerImpl(name, serverUrl);
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl);
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
         }
@@ -914,8 +914,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<SailingServer> loadAllSailingServers() {
-        ArrayList<SailingServer> result = new ArrayList<SailingServer>();
+    public Iterable<RemoteSailingServerReference> loadAllRemoteSailingServerReferences() {
+        ArrayList<RemoteSailingServerReference> result = new ArrayList<RemoteSailingServerReference>();
         DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
         try {
             for (DBObject o : serverCollection.find()) {

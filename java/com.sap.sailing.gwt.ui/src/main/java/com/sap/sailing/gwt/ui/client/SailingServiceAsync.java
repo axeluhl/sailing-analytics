@@ -59,7 +59,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
-import com.sap.sailing.gwt.ui.shared.SailingServerDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -323,7 +323,7 @@ public interface SailingServiceAsync {
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
-	void getPublicEventsOfAllSailingServers(AsyncCallback<List<SailingServerDTO>> callback);
+	void getPublicEventsOfAllSailingServers(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
     /**
      * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
@@ -397,11 +397,11 @@ public interface SailingServiceAsync {
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
-    void getSailingServers(AsyncCallback<List<SailingServerDTO>> callback);
+    void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
     void removeSailingServers(Set<String> toRemove, AsyncCallback<Void> callback);
 
-    void addSailingServer(SailingServerDTO sailingServer, AsyncCallback<Void> callback);
+    void addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer, AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 

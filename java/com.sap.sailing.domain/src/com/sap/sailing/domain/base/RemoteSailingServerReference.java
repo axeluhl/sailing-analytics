@@ -5,11 +5,11 @@ import java.net.URL;
 import com.sap.sailing.domain.common.Named;
 
 /**
- * A SailingServer represents a runtime instance of our server.
+ * Represents a {@link URL}-based reference to a remote server.
  * 
  * @author Frank
  * 
  */
-public interface SailingServer extends Named {
+public interface RemoteSailingServerReference extends Named {
     URL getURL();
 }

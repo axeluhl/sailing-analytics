@@ -2,30 +2,31 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.net.URL;
 
-import com.sap.sailing.domain.base.SailingServer;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 /**
- * Adds a {@link SailingServer} instance.
+ * Adds a {@link RemoteSailingServerReference} instance.
  * 
  * @author Frank Mittag (c5163874)
  *
  */
-public class AddSailingServer extends AbstractRacingEventServiceOperation<SailingServer> {
+public class AddRemoteSailingServerReference extends AbstractRacingEventServiceOperation<RemoteSailingServerReference> {
 	private static final long serialVersionUID = -226327171479379243L;
 	private final String serverName; 
 	private final URL serverUrl;
 	
-    public AddSailingServer(String serverName, URL serverUrl) {
+    public AddRemoteSailingServerReference(String serverName, URL serverUrl) {
         super();
         this.serverName = serverName;
         this.serverUrl = serverUrl;
     }
 
     @Override
-    public SailingServer internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.addSailingServer(serverName, serverUrl);
+    public RemoteSailingServerReference internalApplyTo(RacingEventService toState) throws Exception {
+        RemoteSailingServerReference result = toState.addRemoteSailingServerReference(serverName, serverUrl);
+        return result;
     }
 
     @Override
