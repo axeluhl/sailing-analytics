@@ -171,8 +171,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         return new Long(value < 0 ? value + 360 : value).toString();
                     }
                 }));
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
-            .setStartOnTick(false).setGridLineWidth(0).setMinorGridLineWidth(0);
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)
+            .setMaxPadding(0.05).setStartOnTick(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
