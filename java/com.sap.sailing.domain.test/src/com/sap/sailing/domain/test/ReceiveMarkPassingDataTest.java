@@ -23,7 +23,6 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 import com.tractrac.model.lib.api.data.IControlPassing;
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.event.IRace;
@@ -94,7 +93,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(
                         EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */null)),
-                        SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
+                        getTracTracEvent().getRaces().iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* simulator */null,
                 new DynamicRaceDefinitionSet() {
                     @Override

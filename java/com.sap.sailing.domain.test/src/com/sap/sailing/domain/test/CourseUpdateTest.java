@@ -47,7 +47,6 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
-import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
@@ -78,7 +77,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
-        IRace tractracRace = SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next();
+        IRace tractracRace = getTracTracEvent().getRaces().iterator().next();
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(), tractracRace,
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {

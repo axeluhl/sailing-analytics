@@ -43,7 +43,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.domain.tractracadapter.impl.SynchronizationUtil;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
@@ -78,7 +77,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, Util.get(SynchronizationUtil.getRaces(getTracTracEvent()), 0),
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, Util.get(getTracTracEvent().getRaces(), 0),
                 EmptyWindStore.INSTANCE,
                 0l, /* simulator */ null, /* delayToLiveInMillis */
                 new DynamicRaceDefinitionSet() {
@@ -87,7 +86,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     }
                 }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
-        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(SynchronizationUtil.getRaces(getTracTracEvent()).iterator().next().getId());
+        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaces().iterator().next().getId());
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override
