@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.BaseChart;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -97,7 +98,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
-                .setZoomType(Chart.ZoomType.X)
+                .setZoomType(BaseChart.ZoomType.X)
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setWidth100()
