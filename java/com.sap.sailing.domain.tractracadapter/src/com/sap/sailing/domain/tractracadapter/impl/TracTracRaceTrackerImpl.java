@@ -562,9 +562,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // we have seen many more fixes been transmitted after having received stopped()
     }
 
-	@Override
-	public GPSFixStore getGPSFixStore() {
-		return gpsFixStore;
-	}
-
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        return gpsFixStore;
+    }
 }
