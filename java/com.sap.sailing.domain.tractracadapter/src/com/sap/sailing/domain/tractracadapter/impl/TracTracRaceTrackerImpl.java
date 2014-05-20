@@ -556,7 +556,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     public void stopped(IEvent event) {
         assert event == tractracEvent;
         logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
         // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
         // we have seen many more fixes been transmitted after having received stopped()
