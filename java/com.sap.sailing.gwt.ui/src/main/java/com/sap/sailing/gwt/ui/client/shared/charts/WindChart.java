@@ -338,7 +338,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     newMaxTimepoint = wind.requestTimepoint;
                 }
      
-                if((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                if ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
