@@ -206,7 +206,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         return panel;
     }
     
-    private static <T> void deselectAll(SelectionModel<T> selectionModel, Collection<T> list) {
+    private static <T> void deselectAll(SelectionModel<T> selectionModel, Iterable<T> list) {
         for (T t : list) {
             selectionModel.setSelected(t, false);
         }
