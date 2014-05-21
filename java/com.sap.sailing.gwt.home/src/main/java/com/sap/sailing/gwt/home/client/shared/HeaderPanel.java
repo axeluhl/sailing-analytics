@@ -22,7 +22,7 @@ public class HeaderPanel extends Composite {
 
     @Inject
     HeaderPanel(HeaderPanelUiBinder uiBinder, MainMenu mainMenu) {
-        HeaderPanelCss.INSTANCE.s().ensureInjected();
+        HeaderPanelResources.INSTANCE.s().ensureInjected();
         this.mainMenu = mainMenu;
 
         initWidget(uiBinder.createAndBindUi(this));
