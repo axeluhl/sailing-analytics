@@ -4,37 +4,16 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field='i18n' type='com.sap.sailing.gwt.home.client.i18n.TextMessages'/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-		<ui:style>
-.siteheader {
-  font-size: 16px;
-  font-size: 1rem;
-  background: #333;
-  border-bottom: 5px solid #f0ab00;
-  height: 4.0625em;
-  line-height: 3.75em;
-  width: 100%;
-}
-.logo {
-  margin: 0.625em 0;
-  float: left;
-}
-.sitenavigation {
-  float: right;
-}
-		.languageSelection {
-			float: right;	
-		}
-    </ui:style>
+	<ui:with field="cs" type="com.sap.sailing.gwt.home.client.shared.HeaderPanelCss" />
 	<g:HTMLPanel>
-<header class="{style.siteheader}">
+<header class="{cs.s.siteheader}">
   <div class="{res.mainCss.grid}">
-    <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{style.logo}"></img></div>
+    <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{cs.s.logo}"></img></div>
     <div class="{res.mainCss.small8} {res.mainCss.columns}">
-        
-        <g:FlowPanel styleName="{style.sitenavigation}">
+        <g:FlowPanel styleName="{cs.s.sitenavigation}">
 			<s:MainMenu ui:field="mainMenu" />
     	</g:FlowPanel>
-    	<g:FlowPanel styleName="{style.languageSelection}">
+    	<g:FlowPanel styleName="{cs.s.languageSelection}">
     		<s:LocaleSelection ui:field="localeSelection" />
     	</g:FlowPanel>
     </div>

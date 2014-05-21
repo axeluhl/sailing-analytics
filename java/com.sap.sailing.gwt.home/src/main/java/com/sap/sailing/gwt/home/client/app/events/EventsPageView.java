@@ -42,11 +42,8 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     @Inject
     public EventsPageView(PlaceManager placeManager) {
         super();
-
         this.placeManager = placeManager;
-
         eventsTable = new EventsTable();
-
         initWidget(uiBinder.createAndBindUi(this));
         queryInput.getElement().setId("queryInput");
     }
