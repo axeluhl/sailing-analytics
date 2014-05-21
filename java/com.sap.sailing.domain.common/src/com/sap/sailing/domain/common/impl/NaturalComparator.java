@@ -13,7 +13,7 @@ import java.util.Comparator;
 public class NaturalComparator implements Comparator<String> {
     boolean caseSensitive;
     
-    public NaturalComparator(boolean caseSensitive){
+    public NaturalComparator(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
     }
     
@@ -26,9 +26,9 @@ public class NaturalComparator implements Comparator<String> {
      */
     @Override
     public int compare(String a, String b) {
-        if(!caseSensitive){
+        if (!caseSensitive){
             a = a.toLowerCase();
-            b = a.toLowerCase();
+            b = b.toLowerCase();
         }
         int result = 0;
         int aIndex = 0;

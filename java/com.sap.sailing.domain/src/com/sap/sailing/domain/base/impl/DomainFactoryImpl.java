@@ -112,7 +112,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
         TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
-        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(trackedRace.getRace()));
+        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(
+                trackedRace.getTrackedRegatta().getRegatta(), trackedRace.getRace()));
         raceDTO.places = racePlaces;
         updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
         return raceDTO;
