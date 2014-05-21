@@ -53,7 +53,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     @Override
     protected Builder createDialog(Builder builder) {
         return builder
-                .setTitle(getString(R.string.login_onto_course_area))
+                .setTitle(getString(R.string.login))
                 .setIcon(R.drawable.ic_menu_login)
                 .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
