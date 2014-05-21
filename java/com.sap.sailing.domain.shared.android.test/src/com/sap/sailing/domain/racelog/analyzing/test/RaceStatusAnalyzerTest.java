@@ -22,6 +22,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
@@ -56,7 +57,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         raceLog.add(event1);
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, analyzer.analyze());
     }
-    
+
     @Test
     public void testMostRecent() {
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
@@ -117,6 +118,29 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         raceLog.add(event);
         
         assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze());
+    }
+
+    @Test
+    @Override
+    public void testPassAwareHidingMinorAuthor() {
+        // makes no sense here as the status events are not of the same type - redirect to testStartSetByStartVesselAndFinishSetByShoreControl()
+        testStartSetByStartVesselAndFinishSetByShoreControl();
+    }
+
+    public void testStartSetByStartVesselAndFinishSetByShoreControl() {
+        RaceLogEventAuthor authorStartVessel = new RaceLogEventAuthorImpl("Race Officer on Finish Vessel", 1);
+        RaceLogEventAuthor authorShoreControl = new RaceLogEventAuthorImpl("Shore Control", 2);
+        
+        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1, 1 /** passId*/, authorStartVessel);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.SCHEDULED);
+        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 2, 1 /** passId*/, authorShoreControl);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        doAnswer(new StatusVisitorAnswer()).when(event2).accept(any(RaceLogEventVisitor.class));
+        
+        raceLog.add(event1);
+        raceLog.add(event2);
+
+        assertEquals(event2.getNextStatus(), analyzer.analyze());
     }
 
     private static RaceLogStartTimeEvent createStartTimeEvent(long startTimeAsMillis, boolean isGreater) {
