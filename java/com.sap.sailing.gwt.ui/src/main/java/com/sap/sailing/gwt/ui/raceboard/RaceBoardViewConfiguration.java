@@ -13,7 +13,7 @@ public class RaceBoardViewConfiguration {
     private boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
     
-	public static final String PARAM_VIEW_MODE = "viewMode";
+    public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
