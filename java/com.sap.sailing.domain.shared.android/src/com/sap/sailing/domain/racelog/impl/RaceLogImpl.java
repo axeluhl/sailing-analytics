@@ -47,7 +47,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
-    private final Set<Serializable> revokedEventIds = new HashSet<Serializable>();
+    private Set<Serializable> revokedEventIds = new HashSet<Serializable>();
 
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
@@ -103,7 +103,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             this.currentPassId = newPassId;
         }
     }
-
+    
     @Override
     public boolean add(RaceLogEvent event) {
         boolean isAdded = false;
@@ -279,12 +279,39 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
 
     /**
-     * When deserializing, needs to initialize empty set of listeners.
+     * When deserializing, needs to initialize empty set of listeners. Furthermore, as a migration effort, when the
+     * {@link #eventsById} field was introduced, old clients get <code>null</code> as its value when deserializing which
+     * leads to NPEs later on. However, since the map is redundant to the contents of the <code>fixes</code> collection,
+     * it can be reconstructed here.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
         eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
+        if (eventsById == null) {
+            eventsById = new HashMap<Serializable, RaceLogEvent>();
+            lockForRead();
+            try {
+                for (RaceLogEvent event : getRawFixes()) {
+                    eventsById.put(event.getId(), event);
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
+        if (revokedEventIds == null) {
+            revokedEventIds = new HashSet<Serializable>();
+            lockForRead();
+            try {
+                for (RaceLogEvent event : getRawFixes()) {
+                    if (event instanceof RevokeEvent) {
+                        revokedEventIds.add(event.getId());
+                    }
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
     }
 
     @Override
