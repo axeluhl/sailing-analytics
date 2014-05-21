@@ -32,7 +32,7 @@ For the various areas of the site we don't always want to have to load a new pag
 
 ## About GWTP and the Gin Framework and how We Use Them
 
-GWPT (https://github.com/ArcBees/GWTP) is a model-view-presenter framework that uses Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) as an underlying framework for GWT-based dependency injection.
+GWPT (https://github.com/ArcBees/GWTP and https://github.com/arcbees/gwtp/wiki) is a model-view-presenter framework that uses Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) as an underlying framework for GWT-based dependency injection.
 
 ### Our Bundle and Package Structure
 
