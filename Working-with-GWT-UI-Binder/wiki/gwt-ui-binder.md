@@ -1,5 +1,7 @@
 # Working with GWT UI Binder
 
+[[_TOC_]]
+
 ## Introduction
 
 The GWT UI Binder technology uses HTML-like documents to describe the structure and static content of the UI. See the tutorial here: http://www.gwtproject.org/doc/latest/DevGuideUiBinder.html. With UI Binder, widgets are developed by declaring the widget's static HTML content in a `.ui.xml` file that more or less looks like HTML. By naming convention, a corresponding class related to the `.ui.xml` file. The class can bind its fields to elements in the `.ui.xml` file using Java annotations such as `@UiField`, matching with `ui:field` attributes in the `.ui.xml` file.
@@ -16,13 +18,52 @@ Ubilabs will deliver two versions of the site: one for use on desktops and table
 
 ## Internationalization (i18n)
 
-We're not yet decided on how to implement i18n. GWT offers two mechanisms that seem viable, see http://www.gwtproject.org/doc/latest/DevGuideUiBinderI18n.html. We could use  ...
+We're not yet decided on how to implement i18n. GWT offers two mechanisms that seem viable, see http://www.gwtproject.org/doc/latest/DevGuideUiBinderI18n.html. We could use GWT's feature that generates the property files. The upside would be that in case of many static texts we would get a quick start. The generation of UUIDs from the original static texts additionally ensures that changes cause compile errors and hence notify us that re-translation is required, which is good.
+
+The downside is that redundancies across different entry points are not handled well and that the property files may not fit in well with programmatic use of those message strings.
+
+Alternatively, it is possible to declare the string messages class and the method name that shall be used for the string message property. This way, we could consolidate all texts into a single message properties file which may help avoid redundancies.
+
+We'll probably try out both approaches in a small scale and then decide.
 
 ## GWT Code Splitting
 
-For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low.
+For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low. We use the Gin framework to support us in this.
 
-We use the Gin framework (see https://code.google.com/p/google-gin/) to support us in this.
+## About the Gin Framework and how We Use It
 
-## About the Gin Framework
+Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) is a framework for dependency injection with GWT.
 
+
+## Our Bundle and Package Structure
+
+The key bundle to the GWT UI Binder-based site is `com.sap.sailing.gwt.home`. The key module is described in `src/main/resources` under `com/sap/sailing/gwt/home/Home.gwt.xml`. It contains configuration entries of the form
+
+<pre>
+    &lt;set-configuration-property name="gin.ginjector.module.desktop"
+                                value="com.sap.sailing.gwt.home.client.gin.DesktopModule" /&gt;
+    &lt;set-configuration-property name="gin.ginjector.module.mobile"
+                                value="com.sap.sailing.gwt.home.client.gin.MobileModule" /&gt;
+    &lt;set-configuration-property name="gin.ginjector.module.tablet"
+                                value="com.sap.sailing.gwt.home.client.gin.TabletModule" /&gt;
+</pre>
+
+which instructs Gin to activate the modules mentioned for the respective type of user agent (desktop, mobile, tablet). Each such module implementation is trivial, as seen in the desktop module:
+
+<pre>
+public class DesktopModule extends AbstractPresenterModule {
+    @Override
+    protected void configure() {
+        install(new ApplicationDesktopModule());
+    }
+}
+</pre>
+
+As the example shows, the presenter module redirects by installing another module, showing that modules can be nested. A nested module, such as `ApplicationDesktopModule` then binds views to presenters, as in
+
+<pre>
+        bindPresenter(StartPagePresenter.class, StartPagePresenter.MyView.class, StartPageView.class,
+                StartPagePresenter.MyProxy.class);
+</pre>
+
+Note the use of `MyProxy`. This is where GWT's code splitting capability comes into play. 
