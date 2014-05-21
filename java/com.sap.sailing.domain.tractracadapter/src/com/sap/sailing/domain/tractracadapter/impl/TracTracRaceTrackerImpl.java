@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Course;
@@ -199,6 +200,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * from the {@link RacingEventService} after having received all stored data.
      */
     private final boolean isLiveTracking;
+
+    /**
+     * Tells whether the {@link #stop(boolean)} method has been called. This prevents further calls to that method
+     * from having any effects.
+     */
+    private boolean stopped;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -432,21 +439,26 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     
     @Override
     public void stop() throws InterruptedException {
-        stop(/* stop receivers preemtively */ false);
+        if (!stopped) {
+            stop(/* stop receivers preemtively */false);
+        }
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
-        raceSubscriber.stop();
-        eventSubscriber.stop();
-        for (Receiver receiver : receivers) {
-            if (stopReceiversPreemtively) {
-                receiver.stopPreemptively();
-            } else {
-                receiver.stopAfterProcessingQueuedEvents();
+        if (!stopped) {
+            stopped = true;
+            raceSubscriber.stop();
+            eventSubscriber.stop();
+            for (Receiver receiver : receivers) {
+                if (stopReceiversPreemtively) {
+                    receiver.stopPreemptively();
+                } else {
+                    receiver.stopAfterProcessingQueuedEvents();
+                }
             }
+            lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+            updateStatusOfTrackedRaces();
         }
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
-        updateStatusOfTrackedRaces();
     }
 
     /**
@@ -558,8 +570,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
-        // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
-        // we have seen many more fixes been transmitted after having received stopped()
+        if (!stopped) {
+            try {
+                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
+                // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
+                // at this point without missing any data.
+                stop();
+            } catch (InterruptedException e) {
+                logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
+            }
+        }
     }
 
     @Override

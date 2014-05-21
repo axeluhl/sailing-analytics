@@ -16,6 +16,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -127,6 +129,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
 
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(tractracRace.getId());
         DynamicTrackedRace trackedRace = null;
+        // When the tracked race is created, we noted that for REPLAY races the TracAPI transmission of race times is not reliable.
+        // Therefore, we poke the tracking start/end times and the race start time into the TrackedRace here when it's created here.
+        boolean needToUpdateRaceTimes = false;
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+tractracRace.getName()+": "+
                     event.getA().getControls());
@@ -137,6 +142,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     trackedRace = createTrackedRace(existingRaceDefinitionForRace, sidelines);
+                    needToUpdateRaceTimes = true;
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
@@ -151,18 +157,63 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
+            needToUpdateRaceTimes = true;
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }
         }
-        updateLiveDelay(tractracRace, trackedRace);
+        if (needToUpdateRaceTimes) {
+            updateRaceTimes(tractracRace, trackedRace);
+        }
     }
 
-    private void updateLiveDelay(IRace tractracRace, DynamicTrackedRace trackedRace) {
+    private void updateRaceTimes(IRace tractracRace, DynamicTrackedRace trackedRace) {
         final int liveDelayInSeconds = tractracRace.getLiveDelay();
         long delayInMillis = liveDelayInSeconds * 1000;
         if (trackedRace != null) {
             trackedRace.setDelayToLiveInMillis(delayInMillis);
+        }
+        final TimePoint startTime;
+        final long tractracRaceStartTime = tractracRace.getRaceStartTime();
+        if (tractracRaceStartTime != -1) {
+            if (getSimulator() != null) {
+                startTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracRaceStartTime));
+            } else {
+                startTime = null;
+            }
+        } else {
+            startTime = null;
+        }
+        if (startTime != null) {
+            trackedRace.setStartTimeReceived(startTime);
+        }
+        final TimePoint startTrackingTime;
+        final long tractracStartTrackingTime = tractracRace.getTrackingStartTime();
+        if (tractracStartTrackingTime != -1) {
+            if (getSimulator() != null) {
+                startTrackingTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracStartTrackingTime));
+            } else {
+                startTrackingTime = null;
+            }
+        } else {
+            startTrackingTime = null;
+        }
+        if (startTrackingTime != null) {
+            trackedRace.setStartOfTrackingReceived(startTrackingTime);
+        }
+        final TimePoint endTrackingTime;
+        final long tractracEndTrackingTime = tractracRace.getTrackingEndTime();
+        if (tractracEndTrackingTime != -1) {
+            if (getSimulator() != null) {
+                endTrackingTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracEndTrackingTime));
+            } else {
+                endTrackingTime = null;
+            }
+        } else {
+            endTrackingTime = null;
+        }
+        if (endTrackingTime != null) {
+            trackedRace.setEndOfTrackingReceived(endTrackingTime);
         }
     }
 
