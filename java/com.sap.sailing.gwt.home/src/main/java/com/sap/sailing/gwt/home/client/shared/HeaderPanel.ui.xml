@@ -4,16 +4,16 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field='i18n' type='com.sap.sailing.gwt.home.client.i18n.TextMessages'/>
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-	<ui:with field="cs" type="com.sap.sailing.gwt.home.client.shared.HeaderPanelCss" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.HeaderPanelResources" />
 	<g:HTMLPanel>
-<header class="{cs.s.siteheader}">
+<header class="{local_res.css.siteheader}">
   <div class="{res.mainCss.grid}">
-    <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{cs.s.logo}"></img></div>
+    <div class="{res.mainCss.small4} {res.mainCss.columns}"><img src="images/logo.png" alt="SAP Sailing Analytics" class="{local_res.css.logo}"></img></div>
     <div class="{res.mainCss.small8} {res.mainCss.columns}">
-        <g:FlowPanel styleName="{cs.s.sitenavigation}">
+        <g:FlowPanel styleName="{local_res.css.sitenavigation}">
 			<s:MainMenu ui:field="mainMenu" />
     	</g:FlowPanel>
-    	<g:FlowPanel styleName="{cs.s.languageSelection}">
+    	<g:FlowPanel styleName="{local_res.css.languageSelection}">
     		<s:LocaleSelection ui:field="localeSelection" />
     	</g:FlowPanel>
     </div>

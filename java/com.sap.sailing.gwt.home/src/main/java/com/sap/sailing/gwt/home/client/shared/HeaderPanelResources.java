@@ -8,7 +8,7 @@ public interface HeaderPanelResources extends ClientBundle {
     public static final HeaderPanelResources INSTANCE = GWT.create(HeaderPanelResources.class);
 
     @Source("com/sap/sailing/gwt/home/client/shared/HeaderPanel.css")
-    LocalCss s();
+    LocalCss css();
 
     public interface LocalCss extends CssResource {
         String siteheader();
