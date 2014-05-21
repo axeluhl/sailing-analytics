@@ -71,7 +71,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         tracTracEvents.startTrackingForRace(trackableRace);
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(trackedRace, Status.TRACKING);
+        trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(trackedRace);
     }
     

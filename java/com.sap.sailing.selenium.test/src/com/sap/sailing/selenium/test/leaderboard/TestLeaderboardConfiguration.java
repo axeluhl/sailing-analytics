@@ -231,7 +231,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         }
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.TRACKING);
+        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
         //       selection (Firefox on Windows)
         //trackedRacesList.stopTracking(this.trackedRaces);

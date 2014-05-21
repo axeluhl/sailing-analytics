@@ -75,8 +75,8 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.TRACKING);
-        assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.TRACKING));
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // with the TracAPI, REPLAY races reach status FINISHED when done loading
+        assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.FINISHED));
         trackedRacesList.stopTracking(this.trackedRace);
         trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED);
         assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.FINISHED));
