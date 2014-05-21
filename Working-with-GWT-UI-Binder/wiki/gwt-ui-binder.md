@@ -30,12 +30,11 @@ We'll probably try out both approaches in a small scale and then decide.
 
 For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low. We use the Gin framework to support us in this.
 
-## About the Gin Framework and how We Use It
+## About GWTP and the Gin Framework and how We Use Them
 
-Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) is a framework for dependency injection with GWT.
+GWPT (https://github.com/ArcBees/GWTP) is a model-view-presenter framework that uses Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) as an underlying framework for GWT-based dependency injection.
 
-
-## Our Bundle and Package Structure
+### Our Bundle and Package Structure
 
 The key bundle to the GWT UI Binder-based site is `com.sap.sailing.gwt.home`. The key module is described in `src/main/resources` under `com/sap/sailing/gwt/home/Home.gwt.xml`. It contains configuration entries of the form
 
@@ -66,4 +65,28 @@ As the example shows, the presenter module redirects by installing another modul
                 StartPagePresenter.MyProxy.class);
 </pre>
 
-Note the use of `MyProxy`. This is where GWT's code splitting capability comes into play. 
+Note the use of `MyProxy`. This is where GWT's code splitting capability comes into play.
+
+### Basic Use of GWTP
+
+The basic principles of GWTP suggest the use of a presenter, a view and a proxy that act together as a component. The view implements an interface declared in the presenter, usually called `MyView` which among other things may allow the presenter to update data to the view.
+
+The view class finally binds the GWTP component to the UI Binder logic. It extends some `Widget` subclass and implements the view interface declared by the presenter. The view class also defines a `UiBinder` subinterface which is used in a call to `GWT.create(...)`. Here is an example:
+
+<pre>
+public class EventsPageView extends Composite implements EventsPagePresenter.MyView {
+    private static EventsPageViewUiBinder uiBinder = GWT.create(EventsPageViewUiBinder.class);
+
+    interface EventsPageViewUiBinder extends UiBinder<Widget, EventsPageView> {
+    }
+
+    ...
+
+    @Inject
+    public EventsPageView(PlaceManager placeManager) {
+        super();
+        ... // initialize component and fields
+        initWidget(uiBinder.createAndBindUi(this));
+        ... // do more stuff after widget has been bound to .ui.xml
+    }
+</pre>
