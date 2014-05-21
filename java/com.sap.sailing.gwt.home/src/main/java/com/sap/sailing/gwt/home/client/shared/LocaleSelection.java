@@ -16,13 +16,13 @@ public class LocaleSelection extends Composite {
     interface LocaleSelectionCompositeUiBinder extends UiBinder<Widget, LocaleSelection> {
     }
 
-    @UiField(provided=true) ListBox localeSelection;
-    
+    @UiField(provided = true)
+    ListBox localeSelection;
+
     public LocaleSelection() {
         localeSelection = new ListBox(false);
         localeSelection.addItem("Deutsch");
         localeSelection.addItem("English");
-        
         initWidget(uiBinder.createAndBindUi(this));
     }
 

@@ -42,7 +42,7 @@ public class SailingEventsServiceImpl extends ProxiedRemoteServiceServlet implem
     @Override
     public EventDTO getEventById(String id) {
         EventDTO result = null;
-    	UUID eventUUID = UUID.fromString(id);
+        UUID eventUUID = UUID.fromString(id);
         Event event = getRacingEventService().getEvent(eventUUID);
         if (event != null) {
             result = convertToEventDTO(event);
@@ -59,7 +59,7 @@ public class SailingEventsServiceImpl extends ProxiedRemoteServiceServlet implem
         eventDTO.isPublic = event.isPublic();
         eventDTO.uuid = event.getId().toString();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
-        for (Regatta regatta: event.getRegattas()) {
+        for (Regatta regatta : event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
             regattaDTO.setName(regatta.getName());
             eventDTO.regattas.add(regattaDTO);

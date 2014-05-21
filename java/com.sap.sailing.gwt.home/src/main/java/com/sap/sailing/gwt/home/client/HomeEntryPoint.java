@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.ApplicationController;
 
 public class HomeEntryPoint implements EntryPoint {
     private static final ApplicationController controller = GWT.create(ApplicationController.class);
- 
+
     public void onModuleLoad() {
         controller.init();
     }

@@ -9,8 +9,8 @@ import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 @RemoteServiceRelativePath("sailingevents")
 public interface SailingEventsService extends RemoteService {
 
-	List<EventDTO> getEvents();
+    List<EventDTO> getEvents();
 
-	EventDTO getEventById(String eventId);
+    EventDTO getEventById(String eventId);
 
 }

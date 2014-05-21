@@ -1,4 +1,5 @@
 package com.sap.sailing.gwt.home.shared.dto;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class VenueDTO extends NamedDTO {
         super(name);
         this.courseAreas = new ArrayList<CourseAreaDTO>();
     }
+
     public VenueDTO(String name, List<CourseAreaDTO> courseAreas) {
         super(name);
         this.courseAreas = courseAreas;

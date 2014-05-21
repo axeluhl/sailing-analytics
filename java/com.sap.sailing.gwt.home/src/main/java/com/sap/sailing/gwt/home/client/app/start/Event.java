@@ -8,31 +8,32 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 
-
 public class Event extends Composite {
     private static EventUiBinder uiBinder = GWT.create(EventUiBinder.class);
 
     private EventDTO event;
-    
-    @UiField Label eventName;
-    @UiField Label eventLocation;
-    
+
+    @UiField
+    Label eventName;
+    @UiField
+    Label eventLocation;
+
     interface EventUiBinder extends UiBinder<Widget, Event> {
     }
 
     public Event() {
         super();
- 
+
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-	public EventDTO getEvent() {
-		return event;
-	}
+    public EventDTO getEvent() {
+        return event;
+    }
 
-	public void setEvent(EventDTO event) {
-		this.event = event;
-		eventName.setText(event.getName());
-		eventLocation.setText(event.venue.getName());
-	}
+    public void setEvent(EventDTO event) {
+        this.event = event;
+        eventName.setText(event.getName());
+        eventLocation.setText(event.venue.getName());
+    }
 }

@@ -12,7 +12,7 @@ public class SharedModule extends AbstractPresenterModule {
     @Override
     protected void configure() {
         install(new DefaultModule());
-    	install(new UiModule());
+        install(new UiModule());
 
         bindConstant().annotatedWith(DefaultPlace.class).to(PageNameConstants.startPage);
         bindConstant().annotatedWith(ErrorPlace.class).to(PageNameConstants.startPage);

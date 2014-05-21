@@ -30,90 +30,92 @@ public class EventsTable extends Composite {
     interface EventsTableUiBinder extends UiBinder<Widget, EventsTable> {
     }
 
-	private ListDataProvider<EventDTO> dataProvider = new ListDataProvider<EventDTO>();
+    private ListDataProvider<EventDTO> dataProvider = new ListDataProvider<EventDTO>();
 
-	@UiField(provided = true)
-	CellTable<EventDTO> cellTable;
+    @UiField(provided = true)
+    CellTable<EventDTO> cellTable;
 
-	/**
-	 * The pager used to change the range of data.
-	 */
-	@UiField(provided = true)
-	SimplePager pager;
+    /**
+     * The pager used to change the range of data.
+     */
+    @UiField(provided = true)
+    SimplePager pager;
 
-	/**
-	 * Constructor.
-	 * @param constants the constants
-	 */
-	public EventsTable() {
-		initTable();
+    /**
+     * Constructor.
+     * 
+     * @param constants
+     *            the constants
+     */
+    public EventsTable() {
+        initTable();
         initWidget(uiBinder.createAndBindUi(this));
-	}
+    }
 
-	public static final ProvidesKey<EventDTO> KEY_PROVIDER = new ProvidesKey<EventDTO>() {
-		public Object getKey(EventDTO item) {
-			return item == null ? null : item.uuid;
-		}
-	};
+    public static final ProvidesKey<EventDTO> KEY_PROVIDER = new ProvidesKey<EventDTO>() {
+        public Object getKey(EventDTO item) {
+            return item == null ? null : item.uuid;
+        }
+    };
 
-	public void initTable() {
-		cellTable = new CellTable<EventDTO>(KEY_PROVIDER);
-		cellTable.setWidth("100%", true);
+    public void initTable() {
+        cellTable = new CellTable<EventDTO>(KEY_PROVIDER);
+        cellTable.setWidth("100%", true);
 
-		ListHandler<EventDTO> sortHandler = new ListHandler<EventDTO>(dataProvider.getList());
-		cellTable.addColumnSortHandler(sortHandler);
+        ListHandler<EventDTO> sortHandler = new ListHandler<EventDTO>(dataProvider.getList());
+        cellTable.addColumnSortHandler(sortHandler);
 
-		// Create a Pager to control the table.
-		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
-		pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
-		pager.setDisplay(cellTable);
+        // Create a Pager to control the table.
+        SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
+        pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
+        pager.setDisplay(cellTable);
 
-		// Add a selection model so we can select cells.
-		final SelectionModel<EventDTO> selectionModel = new SingleSelectionModel<EventDTO>(KEY_PROVIDER);
-		cellTable.setSelectionModel(selectionModel, DefaultSelectionEventManager.<EventDTO> createCheckboxManager());
+        // Add a selection model so we can select cells.
+        final SelectionModel<EventDTO> selectionModel = new SingleSelectionModel<EventDTO>(KEY_PROVIDER);
+        cellTable.setSelectionModel(selectionModel, DefaultSelectionEventManager.<EventDTO> createCheckboxManager());
 
-		// Initialize the columns.
-		initTableColumns(selectionModel, sortHandler);
+        // Initialize the columns.
+        initTableColumns(selectionModel, sortHandler);
 
-		// Add the CellList to the adapter in the database.
-	    dataProvider.addDataDisplay(cellTable);
-	}
+        // Add the CellList to the adapter in the database.
+        dataProvider.addDataDisplay(cellTable);
+    }
 
-	public void setEvents(List<EventDTO> events) {
-		dataProvider.getList().clear();
-		dataProvider.getList().addAll(events);
-	}
-	
-	/**
-	 * Add the columns to the table.
-	 */
-	private void initTableColumns(final SelectionModel<EventDTO> selectionModel, ListHandler<EventDTO> sortHandler) {
-		// Checkbox column. This table will uses a checkbox column for selection.
-		// Alternatively, you can call cellTable.setSelectionEnabled(true) to enable mouse selection.
-		Column<EventDTO, Boolean> checkColumn = new Column<EventDTO, Boolean>(new CheckboxCell(true, false)) {
-			@Override
-			public Boolean getValue(EventDTO object) {
-				// Get the value from the selection model.
-				return selectionModel.isSelected(object);
-			}
-		};
-		cellTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
-		cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
+    public void setEvents(List<EventDTO> events) {
+        dataProvider.getList().clear();
+        dataProvider.getList().addAll(events);
+    }
 
-		// name.
-		Column<EventDTO, String> firstNameColumn = new Column<EventDTO, String>(new TextCell()) {
-			@Override
-			public String getValue(EventDTO object) {
-				return object.getName();
-			}
-		};
-		firstNameColumn.setSortable(true);
-		sortHandler.setComparator(firstNameColumn, new Comparator<EventDTO>() {
-			public int compare(EventDTO o1, EventDTO o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
-		cellTable.addColumn(firstNameColumn, "name");
-		cellTable.setColumnWidth(firstNameColumn, 20, Unit.PCT);
-	}
+    /**
+     * Add the columns to the table.
+     */
+    private void initTableColumns(final SelectionModel<EventDTO> selectionModel, ListHandler<EventDTO> sortHandler) {
+        // Checkbox column. This table will uses a checkbox column for selection.
+        // Alternatively, you can call cellTable.setSelectionEnabled(true) to enable mouse selection.
+        Column<EventDTO, Boolean> checkColumn = new Column<EventDTO, Boolean>(new CheckboxCell(true, false)) {
+            @Override
+            public Boolean getValue(EventDTO object) {
+                // Get the value from the selection model.
+                return selectionModel.isSelected(object);
+            }
+        };
+        cellTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
+        cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
+
+        // name.
+        Column<EventDTO, String> firstNameColumn = new Column<EventDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(EventDTO object) {
+                return object.getName();
+            }
+        };
+        firstNameColumn.setSortable(true);
+        sortHandler.setComparator(firstNameColumn, new Comparator<EventDTO>() {
+            public int compare(EventDTO o1, EventDTO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        cellTable.addColumn(firstNameColumn, "name");
+        cellTable.setColumnWidth(firstNameColumn, 20, Unit.PCT);
+    }
 }

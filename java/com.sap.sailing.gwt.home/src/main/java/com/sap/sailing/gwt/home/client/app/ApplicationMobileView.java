@@ -25,7 +25,7 @@ public class ApplicationMobileView extends ViewImpl implements AbstractRootPageP
 
     public final Widget widget;
 
-    @UiField(provided=true)
+    @UiField(provided = true)
     HeaderPanel headerPanel;
 
     @UiField
@@ -40,9 +40,9 @@ public class ApplicationMobileView extends ViewImpl implements AbstractRootPageP
     @Inject
     public ApplicationMobileView(HeaderPanel headerPanel) {
         this.headerPanel = headerPanel;
-        
+
         footerPanel = new FooterPanel();
-        
+
         widget = uiBinder.createAndBindUi(this);
     }
 

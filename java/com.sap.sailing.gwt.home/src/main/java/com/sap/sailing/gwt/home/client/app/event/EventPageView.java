@@ -16,7 +16,7 @@ public class EventPageView extends Composite implements EventPagePresenter.MyVie
     }
 
     private EventDTO event;
-    
+
     @UiField
     HeadingElement title;
 
@@ -38,11 +38,11 @@ public class EventPageView extends Composite implements EventPagePresenter.MyVie
     public void setInSlot(Object slot, IsWidget content) {
     }
 
-	@Override
-	public void setEvent(EventDTO event) {
-		this.event = event;
-		setTitle(event.getName());
-	}
+    @Override
+    public void setEvent(EventDTO event) {
+        this.event = event;
+        setTitle(event.getName());
+    }
 
     @Override
     public void setTitle(String title) {
@@ -50,4 +50,3 @@ public class EventPageView extends Composite implements EventPagePresenter.MyVie
     }
 
 }
-

@@ -32,10 +32,9 @@ public class StartPageTabletView extends Composite implements StartPagePresenter
     @Override
     public void setInSlot(Object slot, IsWidget content) {
     }
-    
-	@Override
-	public void setEvents(List<EventDTO> events) {
-	}
+
+    @Override
+    public void setEvents(List<EventDTO> events) {
+    }
 
 }
-

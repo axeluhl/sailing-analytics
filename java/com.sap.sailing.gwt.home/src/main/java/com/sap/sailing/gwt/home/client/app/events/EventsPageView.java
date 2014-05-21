@@ -34,7 +34,7 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     @UiField
     FlowPanel eventListPanel;
 
-    @UiField(provided=true)
+    @UiField(provided = true)
     EventsTable eventsTable;
 
     private final PlaceManager placeManager;
@@ -42,11 +42,11 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     @Inject
     public EventsPageView(PlaceManager placeManager) {
         super();
-        
+
         this.placeManager = placeManager;
 
         eventsTable = new EventsTable();
-        
+
         initWidget(uiBinder.createAndBindUi(this));
         queryInput.getElement().setId("queryInput");
     }
@@ -54,7 +54,7 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     @UiHandler("searchButton")
     void buttonClick(ClickEvent event) {
     }
- 
+
     @Override
     public void addToSlot(Object slot, IsWidget content) {
     }
@@ -67,19 +67,16 @@ public class EventsPageView extends Composite implements EventsPagePresenter.MyV
     public void setInSlot(Object slot, IsWidget content) {
     }
 
-	@Override
-	public void setEvents(List<EventDTO> events) {
-		eventListPanel.clear();
-        for (EventDTO event: events) {
-            PlaceRequest request = new PlaceRequest.Builder()
-                    .nameToken(PageNameConstants.eventPage)
-                    .with(EventParameterTokens.TOKEN_ID, event.uuid.toString())
-                    .build();
+    @Override
+    public void setEvents(List<EventDTO> events) {
+        eventListPanel.clear();
+        for (EventDTO event : events) {
+            PlaceRequest request = new PlaceRequest.Builder().nameToken(PageNameConstants.eventPage)
+                    .with(EventParameterTokens.TOKEN_ID, event.uuid.toString()).build();
             eventListPanel.add(new Hyperlink(event.getName(), placeManager.buildRelativeHistoryToken(request)));
         }
-		
-		eventsTable.setEvents(events);
-	}
+
+        eventsTable.setEvents(events);
+    }
 
 }
-

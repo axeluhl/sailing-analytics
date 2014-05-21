@@ -1,4 +1,5 @@
 package com.sap.sailing.gwt.home.shared.dto;
+
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -14,9 +15,10 @@ public class SeriesDTO extends NamedDTO {
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
-    
-    public SeriesDTO() {}
-    
+
+    public SeriesDTO() {
+    }
+
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
             boolean hasSplitFleetContiguousScoring) {
@@ -29,8 +31,7 @@ public class SeriesDTO extends NamedDTO {
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
-    
-    
+
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
@@ -58,7 +59,7 @@ public class SeriesDTO extends NamedDTO {
     public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
         this.raceColumns = raceColumns;
     }
-    
+
     /**
      * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
      *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
@@ -71,7 +72,7 @@ public class SeriesDTO extends NamedDTO {
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }
-    
+
     public void setDiscardThresholds(int[] discardThresholds) {
         this.discardThresholds = discardThresholds;
     }
@@ -83,7 +84,7 @@ public class SeriesDTO extends NamedDTO {
     public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
         this.startsWithZeroScore = startsWithZeroScore;
     }
-    
+
     public void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }

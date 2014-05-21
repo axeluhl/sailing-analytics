@@ -30,4 +30,3 @@ public class AboutUsPageView extends Composite implements AboutUsPagePresenter.M
     public void setInSlot(Object slot, IsWidget content) {
     }
 }
-

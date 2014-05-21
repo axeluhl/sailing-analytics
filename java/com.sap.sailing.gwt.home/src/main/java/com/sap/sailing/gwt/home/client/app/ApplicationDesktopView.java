@@ -25,7 +25,7 @@ public class ApplicationDesktopView extends ViewImpl implements AbstractRootPage
 
     public final Widget widget;
 
-    @UiField(provided=true)
+    @UiField(provided = true)
     HeaderPanel headerPanel;
 
     @UiField
@@ -40,7 +40,7 @@ public class ApplicationDesktopView extends ViewImpl implements AbstractRootPage
     @Inject
     public ApplicationDesktopView(HeaderPanel headerPanel) {
         this.headerPanel = headerPanel;
-        
+
         widget = uiBinder.createAndBindUi(this);
     }
 

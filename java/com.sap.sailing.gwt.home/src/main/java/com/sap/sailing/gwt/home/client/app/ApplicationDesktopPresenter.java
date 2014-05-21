@@ -10,9 +10,9 @@ public class ApplicationDesktopPresenter extends AbstractRootPagePresenter {
         super(eventBus, view, proxy);
     }
 
-	@Override
-	protected void onBind() {
-		// TODO Auto-generated method stub
-		super.onBind();
-	}
+    @Override
+    protected void onBind() {
+        // TODO Auto-generated method stub
+        super.onBind();
+    }
 }

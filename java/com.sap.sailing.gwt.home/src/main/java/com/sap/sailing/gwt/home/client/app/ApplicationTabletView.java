@@ -25,7 +25,7 @@ public class ApplicationTabletView extends ViewImpl implements AbstractRootPageP
 
     public final Widget widget;
 
-    @UiField(provided=true)
+    @UiField(provided = true)
     HeaderPanel headerPanel;
 
     @UiField
@@ -40,7 +40,7 @@ public class ApplicationTabletView extends ViewImpl implements AbstractRootPageP
     @Inject
     public ApplicationTabletView(HeaderPanel headerPanel) {
         this.headerPanel = headerPanel;
-        
+
         widget = uiBinder.createAndBindUi(this);
     }
 

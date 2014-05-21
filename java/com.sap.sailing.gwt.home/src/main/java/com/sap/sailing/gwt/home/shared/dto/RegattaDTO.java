@@ -1,4 +1,5 @@
 package com.sap.sailing.gwt.home.shared.dto;
+
 import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -18,9 +19,10 @@ public class RegattaDTO extends NamedDTO {
     public String defaultCourseAreaUuid;
     public String defaultCourseAreaName;
 
-    public RegattaDTO() {}
+    public RegattaDTO() {
+    }
 
-    public RegattaDTO(String name, ScoringSchemeType scoringScheme /*, List<CompetitorDTO> competitors*/) {
+    public RegattaDTO(String name, ScoringSchemeType scoringScheme /* , List<CompetitorDTO> competitors */) {
         super(name);
         this.scoringScheme = scoringScheme;
     }
@@ -28,11 +30,11 @@ public class RegattaDTO extends NamedDTO {
     public RegattaIdentifier getRegattaIdentifier() {
         return new RegattaName(getName());
     }
-        
+
     /**
      * @return whether this regatta defines its local per-series result discarding rules; if so, any leaderboard based
-     *         on the regatta has to respect this and has to use a result discarding rule implementation that
-     *         keeps discards local to each series rather than spreading them across the entire leaderboard.
+     *         on the regatta has to respect this and has to use a result discarding rule implementation that keeps
+     *         discards local to each series rather than spreading them across the entire leaderboard.
      */
     public boolean definesSeriesDiscardThresholds() {
         for (SeriesDTO s : series) {

@@ -25,18 +25,18 @@ public class ApplicationDesktopModule extends AbstractPresenterModule {
         bind(AbstractRootPagePresenter.MyView.class).to(ApplicationDesktopView.class);
         bind(AbstractRootPagePresenter.class).to(ApplicationDesktopPresenter.class);
 
-        bind(PlaceManager.class).in(Singleton.class); 
-        
+        bind(PlaceManager.class).in(Singleton.class);
+
         // Presenters
         bindPresenter(StartPagePresenter.class, StartPagePresenter.MyView.class, StartPageView.class,
-        		StartPagePresenter.MyProxy.class);
+                StartPagePresenter.MyProxy.class);
         bindPresenter(EventsPagePresenter.class, EventsPagePresenter.MyView.class, EventsPageView.class,
-        		EventsPagePresenter.MyProxy.class);
+                EventsPagePresenter.MyProxy.class);
         bindPresenter(EventPagePresenter.class, EventPagePresenter.MyView.class, EventPageView.class,
-        		EventPagePresenter.MyProxy.class);
+                EventPagePresenter.MyProxy.class);
         bindPresenter(AboutUsPagePresenter.class, AboutUsPagePresenter.MyView.class, AboutUsPageView.class,
-        		AboutUsPagePresenter.MyProxy.class);
+                AboutUsPagePresenter.MyProxy.class);
         bindPresenter(ContactPagePresenter.class, ContactPagePresenter.MyView.class, ContactPageView.class,
-        		ContactPagePresenter.MyProxy.class);
+                ContactPagePresenter.MyProxy.class);
     }
 }

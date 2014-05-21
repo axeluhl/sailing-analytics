@@ -17,7 +17,7 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public String uuid;
 
     private Date currentServerTime;
-    
+
     public EventDTO() {
         initCurrentServerTime();
     }

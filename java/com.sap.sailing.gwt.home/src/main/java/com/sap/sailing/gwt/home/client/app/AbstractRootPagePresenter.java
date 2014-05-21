@@ -13,7 +13,8 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
-public abstract class AbstractRootPagePresenter extends Presenter<AbstractRootPagePresenter.MyView, AbstractRootPagePresenter.MyProxy> {
+public abstract class AbstractRootPagePresenter extends
+        Presenter<AbstractRootPagePresenter.MyView, AbstractRootPagePresenter.MyProxy> {
 
     /**
      * {@link RootPagePresenter}'s proxy.

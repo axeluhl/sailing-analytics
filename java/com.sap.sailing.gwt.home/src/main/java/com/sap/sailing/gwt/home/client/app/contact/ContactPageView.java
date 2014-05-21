@@ -30,4 +30,3 @@ public class ContactPageView extends Composite implements ContactPagePresenter.M
     public void setInSlot(Object slot, IsWidget content) {
     }
 }
-

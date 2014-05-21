@@ -22,18 +22,18 @@ import com.sap.sailing.gwt.home.shared.dto.EventDTO;
 
 public class EventPagePresenter extends Presenter<EventPagePresenter.MyView, EventPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
-    private final SailingEventsServiceAsync sailingEventsService; 
+    private final SailingEventsServiceAsync sailingEventsService;
 
     private EventDTO event;
-    private String eventIdParam; 
+    private String eventIdParam;
 
     public interface MyView extends View {
-    	public void setEvent(EventDTO event);
+        public void setEvent(EventDTO event);
     }
 
     /**
-     * Child presenters can fire a RevealContentEvent with TYPE_SetMainContent to set themselves
-     * as children of this presenter.
+     * Child presenters can fire a RevealContentEvent with TYPE_SetMainContent to set themselves as children of this
+     * presenter.
      */
     @ContentSlot
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
@@ -45,9 +45,9 @@ public class EventPagePresenter extends Presenter<EventPagePresenter.MyView, Eve
 
     @Inject
     public EventPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
-    		SailingEventsServiceAsync sailingEventsService) {
+            SailingEventsServiceAsync sailingEventsService) {
         super(eventBus, view, proxy);
-        
+
         this.placeManager = placeManager;
         this.sailingEventsService = sailingEventsService;
     }
@@ -59,25 +59,25 @@ public class EventPagePresenter extends Presenter<EventPagePresenter.MyView, Eve
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
-      super.prepareFromRequest(request);
-      eventIdParam = request.getParameter("id", "");
+        super.prepareFromRequest(request);
+        eventIdParam = request.getParameter("id", "");
     }
-    
-	@Override
-	protected void onReset() {
-		super.onReset();
-		
-		sailingEventsService.getEventById(eventIdParam, new AsyncCallback<EventDTO>() {
-			@Override
-			public void onSuccess(EventDTO result) {
-				event = result;
-				getView().setEvent(event);
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				Window.alert("Shit happens");
-			}
-		}); 
-	}
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+
+        sailingEventsService.getEventById(eventIdParam, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(EventDTO result) {
+                event = result;
+                getView().setEvent(event);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Shit happens");
+            }
+        });
+    }
 }

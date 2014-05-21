@@ -17,13 +17,13 @@ import com.sap.sailing.gwt.home.client.shared.PageNameConstants;
 
 public class AboutUsPagePresenter extends Presenter<AboutUsPagePresenter.MyView, AboutUsPagePresenter.MyProxy> {
     private final PlaceManager placeManager;
-    
+
     public interface MyView extends View {
     }
 
     /**
-     * Child presenters can fire a RevealContentEvent with TYPE_SetMainContent to set themselves
-     * as children of this presenter.
+     * Child presenters can fire a RevealContentEvent with TYPE_SetMainContent to set themselves as children of this
+     * presenter.
      */
     @ContentSlot
     public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
@@ -36,7 +36,7 @@ public class AboutUsPagePresenter extends Presenter<AboutUsPagePresenter.MyView,
     @Inject
     public AboutUsPagePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager) {
         super(eventBus, view, proxy);
-        
+
         this.placeManager = placeManager;
     }
 
