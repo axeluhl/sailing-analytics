@@ -1109,7 +1109,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final LeaderboardDTO result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this
-                        .getScoringScheme().isHigherBetter(), new UUIDGenerator());
+                        .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
