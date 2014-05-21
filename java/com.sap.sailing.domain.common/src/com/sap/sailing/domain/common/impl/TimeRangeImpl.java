@@ -16,13 +16,20 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
 
     public TimeRangeImpl(TimePoint from, TimePoint to) {
         super(from == null ? BeginningOfTime : from, to == null ? EndOfTime : to);
-        if (from().after(to())) throw new IllegalArgumentException(String.format("from (%s) must lie before to (%s) in a TimeRange", from(), to()));
+        if (from().after(to())) {
+            throw new IllegalArgumentException("from " + from() + " must lie before to " + to() + " in a TimeRange");
+        }
     }
 
     @Override
     public int compareTo(TimeRange other) {
-        if (other.from().equals(from()) && other.to().equals(to())) return 0;
-        return startsBefore(other) ? -1 : 1;
+        final int result;
+        if (other.from().equals(from()) && other.to().equals(to())) {
+            result = 0;
+        } else {
+            result = startsBefore(other) ? -1 : 1;
+        }
+        return result;
     }
 
     @Override
@@ -80,10 +87,15 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
 
     @Override
     public TimeRange union(TimeRange other) {
-        if (! intersects(other)) return null;
-        TimePoint newFrom = startsBefore(other) ? from() : other.from();
-        TimePoint newTo = endsAfter(other) ? to() : other.to();
-        return new TimeRangeImpl(newFrom, newTo);
+        final TimeRange result;
+        if (!intersects(other)) {
+            result = null;
+        } else {
+            TimePoint newFrom = startsBefore(other) ? from() : other.from();
+            TimePoint newTo = endsAfter(other) ? to() : other.to();
+            result = new TimeRangeImpl(newFrom, newTo);
+        }
+        return result;
     }
 
     @Override
@@ -98,20 +110,30 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
 
     @Override
     public TimeRange intersection(TimeRange other) {
-        if (! intersects(other)) return null;
-        TimePoint newFrom = startsBefore(other) ? other.from() : from();
-        TimePoint newTo = endsAfter(other) ? other.to() : to();
-        return new TimeRangeImpl(newFrom, newTo);
+        final TimeRange result;
+        if (!intersects(other)) {
+            result = null;
+        } else {
+            TimePoint newFrom = startsBefore(other) ? other.from() : from();
+            TimePoint newTo = endsAfter(other) ? other.to() : to();
+            result = new TimeRangeImpl(newFrom, newTo);
+        }
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof TimeRange) {
-            TimeRange other = (TimeRange) obj;
-            return from().equals(other.from()) && to().equals(other.to());
+        final boolean result;
+        if (this == obj) {
+            result = true;
+        } else {
+            if (obj instanceof TimeRange) {
+                TimeRange other = (TimeRange) obj;
+                return from().equals(other.from()) && to().equals(other.to());
+            }
+            result = super.equals(obj);
         }
-        return super.equals(obj);
+        return result;
     }
     
     @Override
