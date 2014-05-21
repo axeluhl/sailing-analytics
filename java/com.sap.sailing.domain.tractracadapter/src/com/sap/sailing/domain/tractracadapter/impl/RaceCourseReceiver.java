@@ -175,11 +175,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         }
         final TimePoint startTime;
         final long tractracRaceStartTime = tractracRace.getRaceStartTime();
-        if (tractracRaceStartTime != -1) {
+        if (tractracRaceStartTime != 0) {
             if (getSimulator() != null) {
                 startTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracRaceStartTime));
             } else {
-                startTime = null;
+                startTime = new MillisecondsTimePoint(tractracRaceStartTime);
             }
         } else {
             startTime = null;
@@ -189,11 +189,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         }
         final TimePoint startTrackingTime;
         final long tractracStartTrackingTime = tractracRace.getTrackingStartTime();
-        if (tractracStartTrackingTime != -1) {
+        if (tractracStartTrackingTime != 0) {
             if (getSimulator() != null) {
                 startTrackingTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracStartTrackingTime));
             } else {
-                startTrackingTime = null;
+                startTrackingTime = new MillisecondsTimePoint(tractracStartTrackingTime);
             }
         } else {
             startTrackingTime = null;
@@ -203,11 +203,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         }
         final TimePoint endTrackingTime;
         final long tractracEndTrackingTime = tractracRace.getTrackingEndTime();
-        if (tractracEndTrackingTime != -1) {
+        if (tractracEndTrackingTime != 0) {
             if (getSimulator() != null) {
                 endTrackingTime = getSimulator().advanceStartTime(new MillisecondsTimePoint(tractracEndTrackingTime));
             } else {
-                endTrackingTime = null;
+                endTrackingTime = new MillisecondsTimePoint(tractracEndTrackingTime);
             }
         } else {
             endTrackingTime = null;
