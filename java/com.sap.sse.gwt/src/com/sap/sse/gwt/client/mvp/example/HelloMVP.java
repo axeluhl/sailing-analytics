@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.mvp.AppActivityMapper;
-import com.sap.sse.gwt.client.mvp.AppPlaceHistoryMapper;
 import com.sap.sse.gwt.client.mvp.example.hello.HelloPlace;
 
 /**
@@ -25,9 +24,21 @@ public class HelloMVP implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        // Create ClientFactory using deferred binding so we can replace with different
-        // impls in gwt.xml
-        ClientFactory clientFactory = GWT.create(ClientFactory.class);
+        // There are two typical ways in which to tell the concrete views to use, based on a responsive pattern:
+        //  1) Use deferred binding in the GWT module's .gwt.xml flie, as in:
+        //
+        //   <replace-with class="com.hellomvp.client.ClientFactoryImpl">
+        //     <when-type-is class="com.hellomvp.client.ClientFactory"/>
+        //   </replace-with>
+        AppClientFactory clientFactory = GWT.create(AppClientFactory.class);
+
+        //  2) Use some case distinction here in the entry point to figure out device type and instantiate programmatically
+        // final AppClientFactory clientFactory;
+        // if (I'm on such and such a device) {
+        //     clientFactory = new MySuchAndSuchClientFactory();
+        // } else {
+        //     clientFactory = new MyThisAndThatClientFactory();
+        // }
         EventBus eventBus = clientFactory.getEventBus();
         PlaceController placeController = clientFactory.getPlaceController();
 

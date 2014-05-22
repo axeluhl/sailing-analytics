@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.mvp;
+package com.sap.sse.gwt.client.mvp.example;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;

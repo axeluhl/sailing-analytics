@@ -3,7 +3,7 @@ package com.sap.sse.gwt.client.mvp;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
-import com.sap.sse.gwt.client.mvp.example.ClientFactory;
+import com.sap.sse.gwt.client.mvp.example.AppClientFactory;
 import com.sap.sse.gwt.client.mvp.example.goodbye.GoodbyeActivityProxy;
 import com.sap.sse.gwt.client.mvp.example.goodbye.GoodbyePlace;
 import com.sap.sse.gwt.client.mvp.example.hello.HelloActivityProxy;
@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.mvp.example.hello.HelloPlace;
 
 public class AppActivityMapper implements ActivityMapper {
 
-    private ClientFactory clientFactory;
+    private AppClientFactory clientFactory;
 
     /**
      * AppActivityMapper associates each Place with its corresponding {@link Activity}
@@ -19,7 +19,7 @@ public class AppActivityMapper implements ActivityMapper {
      * @param clientFactory
      *            Factory to be passed to activities
      */
-    public AppActivityMapper(ClientFactory clientFactory) {
+    public AppActivityMapper(AppClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }

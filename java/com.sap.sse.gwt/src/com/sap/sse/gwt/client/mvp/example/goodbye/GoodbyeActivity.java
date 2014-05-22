@@ -3,14 +3,14 @@ package com.sap.sse.gwt.client.mvp.example.goodbye;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.gwt.client.mvp.example.ClientFactory;
+import com.sap.sse.gwt.client.mvp.example.AppClientFactory;
 
 public class GoodbyeActivity extends AbstractActivity {
-    private ClientFactory clientFactory;
+    private AppClientFactory clientFactory;
     // Name that will be appended to "Good-bye, "
     private String name;
 
-    public GoodbyeActivity(GoodbyePlace place, ClientFactory clientFactory) {
+    public GoodbyeActivity(GoodbyePlace place, AppClientFactory clientFactory) {
         this.name = place.getGoodbyeName();
         this.clientFactory = clientFactory;
     }

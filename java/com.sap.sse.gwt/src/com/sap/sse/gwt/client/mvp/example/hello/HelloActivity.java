@@ -4,16 +4,16 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.gwt.client.mvp.example.ClientFactory;
+import com.sap.sse.gwt.client.mvp.example.AppClientFactory;
 
 public class HelloActivity extends AbstractActivity implements HelloView.Presenter {
     // Used to obtain views, eventBus, placeController
     // Alternatively, could be injected via GIN
-    private ClientFactory clientFactory;
+    private AppClientFactory clientFactory;
     // Name that will be appended to "Hello,"
     private String name;
 
-    public HelloActivity(HelloPlace place, ClientFactory clientFactory) {
+    public HelloActivity(HelloPlace place, AppClientFactory clientFactory) {
         this.name = place.getHelloName();
         this.clientFactory = clientFactory;
     }
