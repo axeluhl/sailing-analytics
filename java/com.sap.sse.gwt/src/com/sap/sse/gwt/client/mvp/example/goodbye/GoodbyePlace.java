@@ -25,5 +25,4 @@ public class GoodbyePlace extends Place {
             return new GoodbyePlace(token);
         }
     }
-
 }
