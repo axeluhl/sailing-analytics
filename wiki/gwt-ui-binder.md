@@ -38,67 +38,18 @@ Alternatively, it is possible to declare the string messages class and the metho
 
 We'll probably try out both approaches in a small scale and then decide.
 
+## UI Architecture
+
+We looked at GWTP but discarded it again for its complexity in conjunction with the GIN injection framework that drives complexity a lot when combined with UI Binder. If you want to learn more about GWTP and GIN, read this: GWPT (https://github.com/ArcBees/GWTP and https://github.com/arcbees/gwtp/wiki) is a model-view-presenter framework that uses Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) as an underlying framework for GWT-based dependency injection.
+
+Instead, we decided to use a very simple, light-weight MVP (Model, View, Presenter) approach that uses the standard GWT mechanisms of `Activity`, `Place`, `ActivityMapper` and `PlaceHistoryMapper` together with GWT's capabilities for [code splitting](#GWT-Code-Splitting). We assume a stage area that is used to display the activities' views, and the activities are bound to the places by an activity mapper. The place history manager keeps track of the places and their URL parameters and offers browser back/forth navigation through the places. Code splitting intends to produce one fragment for each component consisting of a `Place`, an `Activity`, a view which is typically a UI Binder widget in our case, and a proxy for code splitting.
+
+## Creating UI Components
+
+A micro framework in package com.sap.sse.gwt.client.mvp supports developers in the implementation of UI components. It offers an `AbstractEntryPoint` class that manages most of the configuration tasks and establishes the links between the activity manager, place history manager, activity mapper and the event bus. The `AbstractActivityProxy` helps in applying code splitting to activities. The `example` subpackage contains two sample components that demonstrate how to use the micro framework. There is also some Javadoc on the most important classes.
+
 ## GWT Code Splitting
 
-For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low. We use the Gin framework to support us in this.
+For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low.
 
-## About GWTP and the Gin Framework and how We Use Them
-
-GWPT (https://github.com/ArcBees/GWTP and https://github.com/arcbees/gwtp/wiki) is a model-view-presenter framework that uses Gin (GWT INjection, see https://code.google.com/p/google-gin/ and the tutorial at https://code.google.com/p/google-gin/wiki/GinTutorial) as an underlying framework for GWT-based dependency injection.
-
-### Our Bundle and Package Structure
-
-The key bundle to the GWT UI Binder-based site is `com.sap.sailing.gwt.home`. The key module is described in `src/main/resources` under `com/sap/sailing/gwt/home/Home.gwt.xml`. It contains configuration entries of the form
-
-<pre>
-    &lt;set-configuration-property name="gin.ginjector.module.desktop"
-                                value="com.sap.sailing.gwt.home.client.gin.DesktopModule" /&gt;
-    &lt;set-configuration-property name="gin.ginjector.module.mobile"
-                                value="com.sap.sailing.gwt.home.client.gin.MobileModule" /&gt;
-    &lt;set-configuration-property name="gin.ginjector.module.tablet"
-                                value="com.sap.sailing.gwt.home.client.gin.TabletModule" /&gt;
-</pre>
-
-which instructs Gin to activate the modules mentioned for the respective type of user agent (desktop, mobile, tablet). Each such module implementation is trivial, as seen in the desktop module:
-
-<pre>
-public class DesktopModule extends AbstractPresenterModule {
-    @Override
-    protected void configure() {
-        install(new ApplicationDesktopModule());
-    }
-}
-</pre>
-
-As the example shows, the presenter module redirects by installing another module, showing that modules can be nested. A nested module, such as `ApplicationDesktopModule` then binds views to presenters, as in
-
-<pre>
-        bindPresenter(StartPagePresenter.class, StartPagePresenter.MyView.class, StartPageView.class,
-                StartPagePresenter.MyProxy.class);
-</pre>
-
-Note the use of `MyProxy`. This is where GWT's code splitting capability comes into play.
-
-### Basic Use of GWTP
-
-The basic principles of GWTP suggest the use of a presenter, a view and a proxy that act together as a component. The view implements an interface declared in the presenter, usually called `MyView` which among other things may allow the presenter to update data to the view.
-
-The view class finally binds the GWTP component to the UI Binder logic. It extends some `Widget` subclass and implements the view interface declared by the presenter. The view class also defines a `UiBinder` subinterface which is used in a call to `GWT.create(...)`. Here is an example:
-
-<pre>
-public class EventsPageView extends Composite implements EventsPagePresenter.MyView {
-    private static EventsPageViewUiBinder uiBinder = GWT.create(EventsPageViewUiBinder.class);
-
-    interface EventsPageViewUiBinder extends UiBinder<Widget, EventsPageView> {
-    }
-
-    ...
-
-    @Inject
-    public EventsPageView(PlaceManager placeManager) {
-        super();
-        ... // initialize component and fields
-        initWidget(uiBinder.createAndBindUi(this));
-        ... // do more stuff after widget has been bound to .ui.xml
-    }
-</pre>
+Note that one code split fragment is produced per occurrence of the `GWT.runAsync` idiom in the code. To split each activity into its own fragment, each activity needs to have its own proxy invoking `GWT.runAsync`. To make the implementation of these proxies as easy as possible, we provide the class `com.sap.sse.gwt.client.mvp.AbstractActivityProxy`. Check out its Javadoc.
