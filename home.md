@@ -24,6 +24,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
+  * [[Working with GWT UI Binder/wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
 * Information for Webdesigners

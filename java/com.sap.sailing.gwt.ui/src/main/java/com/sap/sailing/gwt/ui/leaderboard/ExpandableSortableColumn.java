@@ -148,6 +148,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      */
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
+            final boolean oldBusyState = getLeaderboardPanel().getBusyIndicator().isBusy(); 
             getLeaderboardPanel().getBusyIndicator().setBusy(true);
             setTogglingInProcess(true);
             final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
@@ -175,7 +176,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();
                         }
-                        getLeaderboardPanel().getBusyIndicator().setBusy(false);
+                        getLeaderboardPanel().getBusyIndicator().setBusy(oldBusyState);
                         setTogglingInProcess(false);
                     }
                 });

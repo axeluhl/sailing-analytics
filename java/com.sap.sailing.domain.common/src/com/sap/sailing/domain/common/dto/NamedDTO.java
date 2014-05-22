@@ -2,7 +2,9 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-public class NamedDTO implements Serializable {
+import com.sap.sailing.domain.common.Named;
+
+public class NamedDTO implements Named, Serializable {
     private static final long serialVersionUID = -6620231501480297257L;
     private String name;
 
