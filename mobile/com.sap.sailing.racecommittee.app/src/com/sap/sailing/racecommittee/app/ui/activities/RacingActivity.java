@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -202,7 +203,11 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private void setupActionBar(CourseArea courseArea) {
         ActionBar actionBar = getActionBar();
-        actionBar.setTitle(String.format(getString(R.string.racingview_header), courseArea.getName()));
+        RaceLogEventAuthor author = preferences.getAuthor();
+        String title = String.format(getString(R.string.racingview_header), courseArea.getName());
+        title += " (" + author.getName() + ")";
+
+        actionBar.setTitle(title);
 
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         ArrayAdapter<ManagedRaceListFragment.FilterMode> adapter = new ArrayAdapter<ManagedRaceListFragment.FilterMode>(
