@@ -32,14 +32,18 @@ public class TabletAndDesktopEventsView extends Composite implements EventsView 
     @UiField(provided=true)
     EventsTable eventsTable;
 
-    public TabletAndDesktopEventsView(Iterable<EventDTO> events, EventsActivity activity) {
+    public TabletAndDesktopEventsView(EventsActivity activity) {
         super();
         this.activity = activity;
         eventsTable = new EventsTable(activity);
         initWidget(uiBinder.createAndBindUi(this));
+        queryInput.getElement().setId("queryInput");
+    }
+    
+    public void setEvents(Iterable<EventDTO> events) {
         eventListPanel.clear();
         for (final EventDTO event : events) {
-            Anchor request = new Anchor();
+            Anchor request = new Anchor(event.getName());
             request.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent e) {
@@ -49,7 +53,6 @@ public class TabletAndDesktopEventsView extends Composite implements EventsView 
             eventListPanel.add(request);
         }
         eventsTable.setEvents(events);
-        queryInput.getElement().setId("queryInput");
     }
 
     @UiHandler("searchButton")

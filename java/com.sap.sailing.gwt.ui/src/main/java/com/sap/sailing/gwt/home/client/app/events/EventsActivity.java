@@ -20,10 +20,12 @@ public class EventsActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
+        panel.setWidget(eventsView.asWidget());
         clientFactory.getSailingService().getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> events) {
-                panel.setWidget(clientFactory.createEventsView(events, EventsActivity.this).asWidget());
+                eventsView.setEvents(events);
             }
 
             @Override

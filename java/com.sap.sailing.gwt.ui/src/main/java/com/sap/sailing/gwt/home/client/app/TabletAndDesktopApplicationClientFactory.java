@@ -32,8 +32,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public EventsView createEventsView(Iterable<EventDTO> events, EventsActivity activity) {
-        return new TabletAndDesktopEventsView(events, activity);
+    public EventsView createEventsView(EventsActivity activity) {
+        return new TabletAndDesktopEventsView(activity);
     }
 
     @Override

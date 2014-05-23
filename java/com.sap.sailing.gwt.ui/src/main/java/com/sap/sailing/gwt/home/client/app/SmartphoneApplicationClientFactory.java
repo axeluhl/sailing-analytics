@@ -31,7 +31,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     @Override
-    public EventsView createEventsView(Iterable<EventDTO> events, EventsActivity activity) {
+    public EventsView createEventsView(EventsActivity activity) {
         // TODO Auto-generated method stub
         return null;
     }
