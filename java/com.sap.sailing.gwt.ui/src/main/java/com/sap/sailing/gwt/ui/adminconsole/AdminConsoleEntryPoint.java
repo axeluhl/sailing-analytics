@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -51,9 +52,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-        registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
 
         BetterDateTimeBox.initialize();
         
@@ -109,6 +110,12 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addScrollableTab(tabPanel, swisstimingEventManagementPanel, stringMessages.swissTimingEvents());
         regattaDisplayers.add(swisstimingEventManagementPanel);
 
+        final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
+                sailingService, this, this, this, stringMessages);
+        raceLogTrackingEventManagementPanel.setSize("90%", "90%");
+        addScrollableTab(tabPanel, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking());
+        regattaDisplayers.add(raceLogTrackingEventManagementPanel);
+
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         igtimiAccountsPanel.setSize("90%", "90%");
@@ -156,8 +163,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addScrollableTab(tabPanel, leaderboardConfigPanel, stringMessages.leaderboardConfiguration());
         regattaDisplayers.add(leaderboardConfigPanel);
 
-        addScrollableTab(tabPanel, new ResultImportUrlsManagementPanel(sailingService, this, stringMessages),
-                stringMessages.resultImportUrls());
+        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
+        addScrollableTab(tabPanel, resultImportUrlsManagementPanel, stringMessages.resultImportUrls());
+
+        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
+        addScrollableTab(tabPanel, sailingServerInstancesManagementPanel, stringMessages.sailingServers());
 
         ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         // replicationPanel.ensureDebugId("ReplicationManagement");
@@ -189,6 +199,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 }
                 if (competitorPanel.isVisible()) {
                     competitorPanel.refreshCompetitorList();
+                }
+                if (raceLogTrackingEventManagementPanel.isVisible()) {
+                    raceLogTrackingEventManagementPanel.loadLeaderboards();
                 }
             }
         });

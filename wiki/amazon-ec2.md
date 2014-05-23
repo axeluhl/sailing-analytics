@@ -60,7 +60,7 @@ USE_ENVIRONMENT=
 
 #### Receiving wind from Expedition
 
-- To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
+- To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
 
 #### Setting up Master and Replica
 

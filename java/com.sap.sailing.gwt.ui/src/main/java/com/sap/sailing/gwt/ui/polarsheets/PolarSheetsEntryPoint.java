@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class PolarSheetsEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
 
@@ -26,7 +27,7 @@ public class PolarSheetsEntryPoint extends AbstractEntryPoint implements Regatta
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
         createUI();

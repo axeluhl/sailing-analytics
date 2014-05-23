@@ -33,6 +33,9 @@
 		<module>com.sap.sailing.domain.igtimiadapter</module>
 		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
@@ -68,8 +71,6 @@
 		<module>com.sap.sailing.simulator</module>
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
-		<module>com.sap.sailing.gwt</module>
-		<module>com.sap.sailing.gwt.home</module>
 		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.tractracadapter.test</module>

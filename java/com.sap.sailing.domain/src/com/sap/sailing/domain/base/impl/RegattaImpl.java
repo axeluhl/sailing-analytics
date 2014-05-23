@@ -34,6 +34,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
@@ -159,11 +160,20 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
-     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is assembled
+     * for this empty race log and applied to all columns.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
+        for (Series series : getSeries()) {
+            if (series.getRaceColumns() != null) {
+                for (RaceColumnInSeries column : series.getRaceColumns()) {
+                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
+                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                }
+            }
+        }
         regattaListeners = new HashSet<RegattaListener>();
     }
 

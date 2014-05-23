@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -85,6 +86,8 @@ public interface DomainObjectFactory {
 
     Iterable<Event> loadAllEvents();
 
+    Iterable<RemoteSailingServerReference> loadAllRemoteSailingServerReferences();
+    
     Regatta loadRegatta(String name, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry);

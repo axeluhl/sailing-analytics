@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -80,6 +81,14 @@ public interface MongoObjectFactory {
     void removeEvent(Serializable id);
 
     /**
+     * Stores a registered sailing server 
+     * @param serves the servers to store
+     */
+    void storeSailingServer(RemoteSailingServerReference server);
+
+    void removeSailingServer(String name);
+
+    /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
      * {@link Event} to which the regatta belongs.
      * @param oldSeriesNameNewName 
@@ -109,7 +118,6 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
-
     void removeRaceLog(RaceLogIdentifier identifier);
 
 }

@@ -19,6 +19,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
@@ -67,11 +68,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     /**
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
-     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is
+     * assembled for this empty race log and applied to all columns. 
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
+        for (RaceColumn column : getRaceColumns()) {
+            column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore, new RaceLogOnLeaderboardIdentifier(
+                    this, column.getName())));
+        }
     }
 
     @Override

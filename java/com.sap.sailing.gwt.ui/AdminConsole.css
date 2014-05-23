@@ -206,3 +206,7 @@ select {
 .gwt-SuggestBoxPopup .item-selected {
 	background-color: #ffc;
 }
+
+.wrap-cols td div {
+	white-space: normal;
+}

@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -177,6 +178,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                     jsonCompetitor.put("name", competitor.getName());
                     jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
+                    jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
                     
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     JSONArray jsonFixes = new JSONArray();
@@ -588,7 +590,22 @@ public class RegattasResource extends AbstractSailingServerResource {
                             jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                             jsonCompetitorInLeg.put("name", competitor.getName());
                             jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                            jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
 
+                            Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
+                            if(averageSpeedOverGround != null) {
+                                jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
+                            }
+                            try {
+								Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
+								Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+								Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint);
+                                jsonCompetitorInLeg.put("tacks", numberOfTacks);
+                                jsonCompetitorInLeg.put("jibes", numberOfJibes);
+                                jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
+							} catch (NoWindException e) {
+							}
+                            
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));

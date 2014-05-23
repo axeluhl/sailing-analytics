@@ -15,14 +15,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -40,6 +43,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -51,6 +55,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -261,7 +266,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
-    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
@@ -387,6 +392,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void removeEvent(UUID id);
 
+    
+    /**
+     * @return a thread-safe copy of the events (or the exception that occurred trying to obtain the events; arranged in
+     *         a {@link Pair}) of from all sailing server instances currently known by the service; it's safe for
+     *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
+     *         exists
+     */
+    Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
+
+    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
+
+    void removeRemoteSailingServerReference(String name);
+
+    
     CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
@@ -507,6 +526,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     WindStore getWindStore();
 
+    GPSFixStore getGPSFixStore();
+    
+    RaceTracker getRaceTrackerById(Object id);
+    
+    RaceLogEventAuthor getServerAuthor();
+    
+    CompetitorStore getCompetitorStore();
+    
+    TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
+
     /**
      * This lock exists to allow only one master data import at a time to avoid situation where multiple Imports
      * override each other in unpredictable fashion
@@ -528,4 +557,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
 
     void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
+
+    /**
+     * For the reference to a remote sailing server, updates its events cache and returns the event list
+     * or, if fetching the event list from the remote server did fail, the exception for which it failed.
+     */
+    Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
 }

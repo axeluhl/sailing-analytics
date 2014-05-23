@@ -61,4 +61,37 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
     ImageResource exportXMLIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/add_racelog_tracker.png")
+    ImageResource addRaceLogTracker();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/denote_for_racelog_tracking.png")
+    ImageResource denoteForRaceLogTracking();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/undenote_for_racelog_tracking.png")
+    ImageResource unDenoteForRaceLogTracking();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/start_racelog_tracking.png")
+    ImageResource startRaceLogTracking();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/competitor_registrations.png")
+    ImageResource competitorRegistrations();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/define_course.png")
+    ImageResource defineCourse();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/map_devices.png")
+    ImageResource mapDevices();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/ping.png")
+    ImageResource ping();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/copy_course.png")
+    ImageResource copyCourse();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/copy.png")
+    ImageResource copy();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/close_time_range.png")
+    ImageResource closeTimeRange();
 }

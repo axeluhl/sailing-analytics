@@ -59,7 +59,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     /**
      *  Set the canvas to be the size of the map and set it to the top left corner of the map 
      */
-    protected void setCanvasSettings() {
+    public void setCanvasSettings() {
         int canvasWidth = getMap().getDiv().getClientWidth();
         int canvasHeight = getMap().getDiv().getClientHeight();
    

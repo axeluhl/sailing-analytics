@@ -38,6 +38,29 @@
 					<h2 class="articleSubheadline">May 2014</h2>
 
 					<ul class="bulletList">
+						<li>Fixed an issue with the wind speed charts. Charts that only had a single, unchanged
+						    wind speed crashed the browser. The solution scales the right hand side Y-axis denoting
+						    the wind speed such that it always starts at 0kts.
+						</li> 
+						<li>Analysis of tacks and jibes around mark passings has now been improved. Before,
+						    a jibe followed by a tack that turns in the same direction (e.g., to port) so far
+						    was always called a penalty maneuver. Now, if a mark passing separates such a tack
+						    from such a jibe, no penalty is called anymore, and the two maneuvers are identified
+						    correctly.
+						</li>
+						<li>Another note on maneuver analysis: we received questions regarding the maneuvers
+						    involved in clearing an OCS. The SAP Sailing Analytics treat a clearing of
+						    an OCS, going back behind the start line and crossing it again, as if the competitor
+						    started again. In particular this means that all maneuvers prior to this new start
+						    do not count for the metrics; neither does the distance sailed between the first (OCS)
+						    start and the clear start.
+						</li>
+						<li>A hint regarding the "distance to start line" metrics: please keep in mind that currently this
+						    measurement is calculated as the distance of the GPS tracker from the line. Unless the tracker
+						    is mounted near the bow (or at the bow sprit, if any), the distance calculated this way will
+						    be greater than what counts for crossing the line. Ordering, comparing and aggregating over this
+						    figure still makes sense as long as you remember this detail.
+						</li>
 						<li>Introduced a new leaderboard entry "XTE +/-" featuring a signed cross-track error which shows
 						    for a leg and also aggregated for an entire race on which side of the leg a competitor stayed on
 						    average. Currently, the "side" is defined as viewing in the leg's direction, so "left" for a downwind

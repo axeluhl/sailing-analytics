@@ -191,7 +191,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         } catch (ParseHttpParameterException e1) {
         }
         boolean useCache = true; // default
-        if(useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
+        if (useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
             useCache = false;
         }
         if (leaderboardName == null) {
