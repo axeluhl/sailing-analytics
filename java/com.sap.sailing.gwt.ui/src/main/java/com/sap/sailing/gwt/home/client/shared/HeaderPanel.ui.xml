@@ -10,7 +10,7 @@
 		<header class="{local_res.css.siteheader}">
 			<div class="{res.mainCss.grid}">
 				<div class="{res.mainCss.small4} {res.mainCss.columns}">
-					<img src="images/logo.png" alt="SAP Sailing Analytics" class="{local_res.css.logo}"></img>
+					<g:Image resource="{local_res.logo}" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"></g:Image>
 				</div>
 				<div class="{res.mainCss.small8} {res.mainCss.columns}">
 					<g:FlowPanel styleName="{local_res.css.sitenavigation}">
@@ -23,5 +23,4 @@
 			</div>
 		</header>
 	</g:HTMLPanel>
-
 </ui:UiBinder>

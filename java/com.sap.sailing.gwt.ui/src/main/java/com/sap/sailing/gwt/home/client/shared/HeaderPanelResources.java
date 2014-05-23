@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.shared;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface HeaderPanelResources extends ClientBundle {
     public static final HeaderPanelResources INSTANCE = GWT.create(HeaderPanelResources.class);
@@ -19,4 +20,7 @@ public interface HeaderPanelResources extends ClientBundle {
 
         String languageSelection();
     }
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/logo.png")
+    ImageResource logo();
 }
