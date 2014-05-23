@@ -14,7 +14,6 @@ public class HomeEntryPoint extends AbstractEntryPoint {
     public void onModuleLoad() {
         ApplicationClientFactory clientFactory = GWT.create(ApplicationClientFactory.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getSailingService(), RemoteServiceMappingConstants.sailingServiceRemotePath);
-        onModuleLoad(clientFactory.getStage(), clientFactory.getRoot(), clientFactory.getDefaultPlace(), clientFactory,
-                ApplicationHistoryMapper.class, new ApplicationActivityMapper(clientFactory));
+        onModuleLoad(clientFactory, ApplicationHistoryMapper.class, new ApplicationActivityMapper(clientFactory));
     }
 }

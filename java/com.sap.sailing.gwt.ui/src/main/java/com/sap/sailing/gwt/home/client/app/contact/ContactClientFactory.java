@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.app.contact;
 
-import com.sap.sse.gwt.client.mvp.ClientFactory;
+import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 
-public interface ContactClientFactory extends ClientFactory {
+public interface ContactClientFactory extends SailingClientFactory {
 
 }

@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.client.mvp.example;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sse.gwt.client.mvp.AbstractEntryPoint;
-import com.sap.sse.gwt.client.mvp.example.hello.HelloPlace;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -30,8 +28,6 @@ public class ExampleEntryPoint extends AbstractEntryPoint {
         // } else {
         //     clientFactory = new MyThisAndThatClientFactory();
         // }
-        SimplePanel rootWidgetAndStage = new SimplePanel();
-        onModuleLoad(rootWidgetAndStage, rootWidgetAndStage, new HelloPlace("World!"), clientFactory,
-                AppPlaceHistoryMapper.class, new AppActivityMapper(clientFactory));
+        onModuleLoad(clientFactory, AppPlaceHistoryMapper.class, new AppActivityMapper(clientFactory));
     }
 }

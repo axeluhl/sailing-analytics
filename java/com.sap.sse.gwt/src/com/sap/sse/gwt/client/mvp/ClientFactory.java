@@ -1,6 +1,9 @@
 package com.sap.sse.gwt.client.mvp;
 
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -24,4 +27,20 @@ public interface ClientFactory {
     EventBus getEventBus();
 
     PlaceController getPlaceController();
+
+    /**
+     * The root widget to use as the entry point's root panel contents
+     */
+    Widget getRoot();
+    
+    /**
+     * The stage in which to display the activity views when places are switched. Expected to be equal to
+     * or contained by {@link #getRoot()}.
+     */
+    AcceptsOneWidget getStage();
+
+    /**
+     * In case the URL doesn't specify a place to navigate to, this place will be used as the initial place.
+     */
+    Place getDefaultPlace();
 }

@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link TabletAndDesktopApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class TabletAndDesktopApplicationView extends Composite implements TopLevelView {
+public class TabletAndDesktopApplicationView extends Composite implements ApplicationTopLevelView {
     interface TabletAndDesktopApplicationViewUiBinder extends UiBinder<Widget, TabletAndDesktopApplicationView> {
     }
 

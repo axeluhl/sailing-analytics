@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.app.events;
 
-import com.sap.sse.gwt.client.mvp.ClientFactory;
+import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 
-public interface EventsClientFactory extends ClientFactory {
+public interface EventsClientFactory extends SailingClientFactory {
 
 }
