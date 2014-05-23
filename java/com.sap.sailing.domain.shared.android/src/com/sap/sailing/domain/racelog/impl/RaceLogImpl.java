@@ -172,10 +172,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             throw new NotRevokableException("RevokeEvent added, that refers to non-existent event to be revoked");
         }
 
-        if (revokedEventIds.contains(revokedEvent.getId())) {
-            throw new NotRevokableException("Event has already been revoked");
-        }
-
         if (! (revokedEvent instanceof Revokable)) {
             throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
         }
@@ -429,7 +425,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
     
     @Override
-    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+    public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         if (toRevoke == null) {
             throw new NotRevokableException("Received null as event to revoke");
         }
@@ -437,5 +433,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
                 getCurrentPassId(), toRevoke.getId());
         checkIfSuccessfullyRevokes(revokeEvent);
         add(revokeEvent);
+        return revokeEvent;
     }
 }
