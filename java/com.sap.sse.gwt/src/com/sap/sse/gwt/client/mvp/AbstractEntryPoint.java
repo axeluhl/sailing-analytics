@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
 
 /**
  * Subclasses implement their {@link EntryPoint#onModuleLoad()} by delegating to

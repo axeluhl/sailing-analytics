@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.mvp;
+package com.sap.sse.gwt.client.mvp.impl;
 
 import java.util.ArrayList;
 import java.util.List;
