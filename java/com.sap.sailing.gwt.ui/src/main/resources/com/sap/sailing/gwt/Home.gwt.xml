@@ -9,7 +9,8 @@
 	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
-
+	<inherits name='com.sap.sailing.gwt.FormFactor'/>
+	
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
 	<!-- any one of the following lines. -->
@@ -23,8 +24,20 @@
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 
+	<!-- Default is Tablet/Desktop -->
+	<replace-with
+		class="com.sap.sailing.gwt.home.client.app.TabletAndDesktopApplicationClientFactory">
+		<when-type-is class="com.sap.sailing.gwt.home.client.app.ApplicationClientFactory" />
+	</replace-with>
+
 	<replace-with class="com.sap.sailing.gwt.home.client.app.TabletAndDesktopApplicationClientFactory">
 		<when-type-is class="com.sap.sailing.gwt.home.client.app.ApplicationClientFactory" />
+		<when-property-is name="formfactor" value="tablet" />
+	</replace-with>
+
+	<replace-with class="com.sap.sailing.gwt.home.client.app.SmartphoneApplicationClientFactory">
+		<when-type-is class="com.sap.sailing.gwt.home.client.app.ApplicationClientFactory" />
+		<when-property-is name="formfactor" value="mobile" />
 	</replace-with>
 
 	<!-- Specify the app entry point class. -->
