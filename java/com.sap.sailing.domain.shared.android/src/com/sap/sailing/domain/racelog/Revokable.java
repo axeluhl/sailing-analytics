@@ -2,7 +2,7 @@ package com.sap.sailing.domain.racelog;
 
 
 /**
- * Any {@link RaceLogEvent} marked as {@code Revokable} can be revoked by an {@link RevokeEvent}.
+ * Any {@link RaceLogEvent} marked as {@code Revokable} can be revoked by a {@link RevokeEvent}.
  * This means that if an {@code RevokeEvent} {@code r} is added to the {@code RaceLog}, that
  * {@link RevokeEvent#getRevokedEventId() revokes} an already existing event {@code e}, then the
  * revoked event {@code e} will subsequently not appear in the event-iterators of the {@code RaceLog}
