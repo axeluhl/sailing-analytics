@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sse.gwt.server;
 
 import java.io.IOException;
 import java.util.Date;

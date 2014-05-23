@@ -6,7 +6,7 @@
 
 	<filter>
 		<filter-name>GWTCacheControlServletFilter</filter-name>
-		<filter-class>com.sap.sailing.gwt.ui.server.GWTCacheControlServletFilter</filter-class>
+		<filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>GWTCacheControlServletFilter</filter-name>

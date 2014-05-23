@@ -10,7 +10,7 @@
   <artifactId>com.sap.sailing.gwt.home</artifactId>
   <packaging>eclipse-plugin</packaging>
   <properties>
-      <gwt.version>2.6.0</gwt.version>
+      <gwt.version>2.6.1</gwt.version>
   </properties>
 
   <repositories>
