@@ -97,14 +97,6 @@
 		    </div>
 		  </div>
 		</div>
-	   	<g:FlowPanel styleName="{style.events}">
-	        <s:Event ui:field="event1" />
-	        <s:Event ui:field="event2" />
-			<s:Event ui:field="event3" />
-	        <s:Event ui:field="event4" />
-	        <s:Event ui:field="event5" />
-	        <s:Event ui:field="event6" />
-	   	</g:FlowPanel>
 		<button class="{res.mainCss.button} events_show-all">Show all events</button>
    	</g:HTMLPanel>
    		

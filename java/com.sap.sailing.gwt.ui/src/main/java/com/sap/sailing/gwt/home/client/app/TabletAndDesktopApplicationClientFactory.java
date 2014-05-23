@@ -5,6 +5,8 @@ import com.sap.sailing.gwt.home.client.app.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.app.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.app.events.EventsView;
 import com.sap.sailing.gwt.home.client.app.events.TabletAndDesktopEventsView;
+import com.sap.sailing.gwt.home.client.app.start.StartView;
+import com.sap.sailing.gwt.home.client.app.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 
@@ -21,5 +23,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public EventsView createEventsView(Iterable<EventDTO> events, EventsActivity activity) {
         return new TabletAndDesktopEventsView(events, activity);
+    }
+
+    @Override
+    public StartView createStartView() {
+        return new TabletAndDesktopStartView();
     }
 }
