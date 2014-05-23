@@ -29,12 +29,13 @@ public class TabletAndDesktopEventsView extends Composite implements EventsView 
     Button searchButton;
     @UiField
     FlowPanel eventListPanel;
-    @UiField
+    @UiField(provided=true)
     EventsTable eventsTable;
 
     public TabletAndDesktopEventsView(Iterable<EventDTO> events, EventsActivity activity) {
         super();
         this.activity = activity;
+        eventsTable = new EventsTable(activity);
         initWidget(uiBinder.createAndBindUi(this));
         eventListPanel.clear();
         for (final EventDTO event : events) {

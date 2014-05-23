@@ -10,7 +10,7 @@ public class HeaderPanel extends Composite {
     @UiField
     LocaleSelection localeSelection;
 
-    @UiField
+    @UiField(provided=true)
     MainMenu mainMenu;
 
     interface HeaderPanelUiBinder extends UiBinder<Widget, HeaderPanel> {
@@ -18,8 +18,9 @@ public class HeaderPanel extends Composite {
     
     private static HeaderPanelUiBinder uiBinder = GWT.create(HeaderPanelUiBinder.class);
 
-    HeaderPanel() {
+    public HeaderPanel(MainMenuNavigator navigator) {
         HeaderPanelResources.INSTANCE.css().ensureInjected();
+        mainMenu = new MainMenu(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

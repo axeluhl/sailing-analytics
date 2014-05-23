@@ -14,12 +14,22 @@ import com.google.web.bindery.event.shared.EventBus;
  *
  */
 public abstract class ClientFactoryImpl implements ClientFactory {
-    private static final EventBus eventBus = new SimpleEventBus();
-    private static final PlaceController placeController = new PlaceController(eventBus);
+    private final EventBus eventBus;
+    private final PlaceController placeController;
     private final TopLevelView root;
     
     public ClientFactoryImpl(TopLevelView root) {
+        this(root, new SimpleEventBus());
+    }
+    
+    protected ClientFactoryImpl(TopLevelView root, EventBus eventBus) {
+        this(root, eventBus, new PlaceController(eventBus));
+    }
+    
+    protected ClientFactoryImpl(TopLevelView root, EventBus eventBus, PlaceController placeController) {
         this.root = root;
+        this.eventBus = eventBus;
+        this.placeController = placeController;
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.home.client.shared;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.InlineHyperlink;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -16,20 +18,43 @@ public class MainMenu extends Composite {
 
     private static MainMenuUiBinder uiBinder = GWT.create(MainMenuUiBinder.class);
     
+    private final MainMenuNavigator navigator;
+    
     @UiField
-    InlineHyperlink startPageLink;
+    Anchor startPageLink;
 
     @UiField
-    InlineHyperlink eventsPageLink;
+    Anchor eventsPageLink;
 
     @UiField
-    InlineHyperlink aboutUsPageLink;
+    Anchor aboutUsPageLink;
 
     @UiField
-    InlineHyperlink contactPageLink;
+    Anchor contactPageLink;
 
-    MainMenu() {
+    MainMenu(MainMenuNavigator navigator) {
         initWidget(uiBinder.createAndBindUi(this));
+        this.navigator = navigator;
+    }
+    
+    @UiHandler("startPageLink")
+    public void goToHome(ClickEvent e) {
+        navigator.goToHome();
+    }
+
+    @UiHandler("eventsPageLink")
+    public void goToEvents(ClickEvent e) {
+        navigator.goToEvents();
+    }
+
+    @UiHandler("aboutUsPageLink")
+    public void goToAboutUs(ClickEvent e) {
+        navigator.goToAboutUs();
+    }
+
+    @UiHandler("contactPageLink")
+    public void goToContact(ClickEvent e) {
+        navigator.goToContact();
     }
 
     public void voidSetActiveLink(String pageNameToken) {

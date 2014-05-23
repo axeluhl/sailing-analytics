@@ -37,10 +37,10 @@
 	    
 	</ui:style>
     <g:HTMLPanel>
-    	<g:InlineHyperlink ui:field="startPageLink" styleName="{style.sitenavigation_link}" targetHistoryToken="{pageNames.getStartPage}" text="{i18n.home}" />
-        <g:InlineHyperlink ui:field="eventsPageLink" styleName="{style.sitenavigation_link}" targetHistoryToken="{pageNames.getEventsPage}" text="{i18n.events}" />
-        <g:InlineHyperlink ui:field="aboutUsPageLink" styleName="{style.sitenavigation_link}" targetHistoryToken="{pageNames.getAboutUsPage}" text="{i18n.aboutUs}" />
-        <g:InlineHyperlink ui:field="contactPageLink" styleName="{style.sitenavigation_link}" targetHistoryToken="{pageNames.getContactPage}" text="{i18n.contact}" />
+    	<g:Anchor ui:field="startPageLink" styleName="{style.sitenavigation_link}" text="{i18n.home}" href="javascript:;"/>
+        <g:Anchor ui:field="eventsPageLink" styleName="{style.sitenavigation_link}" text="{i18n.events}" href="javascript:;"/>
+        <g:Anchor ui:field="aboutUsPageLink" styleName="{style.sitenavigation_link}" text="{i18n.aboutUs}" href="javascript:;"/>
+        <g:Anchor ui:field="contactPageLink" styleName="{style.sitenavigation_link}" text="{i18n.contact}" href="javascript:;"/>
         
         <a href="" class="{style.sitenavigation_link} {style.sitenavigation_linksearch}"><img src="images/search-icon.png" alt="Search"></img></a>
 	</g:HTMLPanel>

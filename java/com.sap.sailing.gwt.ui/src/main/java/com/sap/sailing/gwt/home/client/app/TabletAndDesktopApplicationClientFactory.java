@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.client.app;
 
+import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.app.event.EventView;
 import com.sap.sailing.gwt.home.client.app.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.app.events.EventsActivity;
@@ -12,7 +15,15 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
     public TabletAndDesktopApplicationClientFactory() {
-        super(new TabletAndDesktopApplicationView());
+        this(new SimpleEventBus());
+    }
+    
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus) {
+        this(eventBus, new PlaceController(eventBus));
+    }
+
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
+        super(new TabletAndDesktopApplicationView(new MainMenuNavigatorImpl(placeController)), eventBus, placeController);
     }
 
     @Override

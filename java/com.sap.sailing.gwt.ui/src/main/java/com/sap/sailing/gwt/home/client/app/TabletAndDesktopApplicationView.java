@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.FooterPanel;
 import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
+import com.sap.sailing.gwt.home.client.shared.MainMenuNavigator;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -22,7 +23,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
 
     private static TabletAndDesktopApplicationViewUiBinder uiBinder = GWT.create(TabletAndDesktopApplicationViewUiBinder.class);
 
-    @UiField
+    @UiField(provided=true)
     HeaderPanel headerPanel;
 
     @UiField
@@ -34,7 +35,8 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     Element loadingMessage;
 
-    public TabletAndDesktopApplicationView() {
+    public TabletAndDesktopApplicationView(MainMenuNavigator navigator) {
+        headerPanel = new HeaderPanel(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
 
