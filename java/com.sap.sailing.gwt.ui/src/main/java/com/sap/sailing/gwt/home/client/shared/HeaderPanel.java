@@ -10,7 +10,7 @@ public class HeaderPanel extends Composite {
     @UiField
     LocaleSelection localeSelection;
 
-    @UiField(provided = true)
+    @UiField
     MainMenu mainMenu;
 
     interface HeaderPanelUiBinder extends UiBinder<Widget, HeaderPanel> {

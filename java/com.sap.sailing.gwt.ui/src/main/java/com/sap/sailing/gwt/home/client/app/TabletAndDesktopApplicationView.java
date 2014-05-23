@@ -22,7 +22,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
 
     private static TabletAndDesktopApplicationViewUiBinder uiBinder = GWT.create(TabletAndDesktopApplicationViewUiBinder.class);
 
-    @UiField(provided = true)
+    @UiField
     HeaderPanel headerPanel;
 
     @UiField

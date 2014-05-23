@@ -33,6 +33,7 @@
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
 
-	<source path='client' />
-	<source path='shared' />
+	<source path='ui/client' />
+	<source path='ui/shared' />
+	<source path='home' />
 </module>
