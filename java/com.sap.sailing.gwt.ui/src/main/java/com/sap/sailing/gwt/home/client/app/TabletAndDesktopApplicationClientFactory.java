@@ -10,7 +10,7 @@ public class TabletAndDesktopApplicationClientFactory extends ClientFactoryImpl 
 
     @Override
     public Widget getRoot() {
-        return new ApplicationDesktopView();
+        return new TabletAndDesktopApplicationView();
     }
 
     @Override

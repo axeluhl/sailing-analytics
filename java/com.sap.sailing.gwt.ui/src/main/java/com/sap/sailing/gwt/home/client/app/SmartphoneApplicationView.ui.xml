@@ -8,7 +8,7 @@
 
 		<s:HeaderPanel ui:field="headerPanel" />
         
-		<g:FlowPanel ui:field="mainContentPanel" />
+		<g:SimplePanel ui:field="mainContentPanel" />
 
       	<s:FooterPanel ui:field="footerPanel" />
    </g:HTMLPanel>

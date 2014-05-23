@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.home.client.app.start.StartPlace;
 public class ApplicationActivityMapper implements ActivityMapper {
     private final ApplicationClientFactory clientFactory;
 
-    protected ApplicationActivityMapper(ApplicationClientFactory clientFactory) {
+    public ApplicationActivityMapper(ApplicationClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }
@@ -34,6 +34,8 @@ public class ApplicationActivityMapper implements ActivityMapper {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
+        } else {
+            return null;
         }
     }
 }

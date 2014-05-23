@@ -12,7 +12,7 @@ public class ContactActivity extends AbstractActivity {
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        // TODO Auto-generated method stub
+        panel.setWidget(new ContactView());
     }
 
 }

@@ -3,12 +3,11 @@ package com.sap.sailing.gwt.home.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 public interface HomeResources extends ClientBundle {
     public static final HomeResources INSTANCE = GWT.create(HomeResources.class);
 
-    @Source("com/sap/sailing/gwt/home/css/main.css")
+    @Source("com/sap/sailing/gwt/home/main.css")
     MainCss mainCss();
 
     public interface MainCss extends CssResource {
@@ -70,58 +69,6 @@ public interface HomeResources extends ClientBundle {
 
         String smalluncentered();
 
-        // String medium1();
-        // String medium2();
-        // String medium3();
-        // String medium4();
-        // String medium5();
-        // String medium6();
-        // String medium7();
-        // String medium8();
-        // String medium9();
-        // String medium10();
-        // String medium11();
-        // String medium12();
-        // String mediumoffset0();
-        // String mediumoffset1();
-        // String mediumoffset2();
-        // String mediumoffset3();
-        // String mediumoffset4();
-        // String mediumoffset5();
-        // String mediumoffset6();
-        // String mediumoffset7();
-        // String mediumoffset8();
-        // String mediumoffset9();
-        // String mediumoffset10();
-        // String mediumoffset11();
-        // String mediumcentered();
-        // String mediumuncentered();
-        // String large1();
-        // String large2();
-        // String large3();
-        // String large4();
-        // String large5();
-        // String large6();
-        // String large7();
-        // String large8();
-        // String large9();
-        // String large10();
-        // String large11();
-        // String large12();
-        // String largeoffset0();
-        // String largeoffset1();
-        // String largeoffset2();
-        // String largeoffset3();
-        // String largeoffset4();
-        // String largeoffset5();
-        // String largeoffset6();
-        // String largeoffset7();
-        // String largeoffset8();
-        // String largeoffset9();
-        // String largeoffset10();
-        // String largeoffset11();
-        // String largecentered();
-        // String largeuncentered();
         String button();
 
         String buttoninactive();
@@ -148,10 +95,4 @@ public interface HomeResources extends ClientBundle {
 
         String dummy();
     }
-
-    @Source("com/sap/sailing/gwt/home/images/sap_300_transparent.png")
-    ImageResource sapLogo300();
-
-    @Source("com/sap/sailing/gwt/home/images/sap_66_transparent.png")
-    ImageResource sapLogo66();
 }

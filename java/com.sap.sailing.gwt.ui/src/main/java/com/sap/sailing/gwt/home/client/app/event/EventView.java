@@ -7,12 +7,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.dto.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class EventPageView extends Composite implements EventPagePresenter.MyView {
-    private static EventPageViewUiBinder uiBinder = GWT.create(EventPageViewUiBinder.class);
+public class EventView extends Composite implements EventPagePresenter.MyView {
+    private static EventViewUiBinder uiBinder = GWT.create(EventViewUiBinder.class);
 
-    interface EventPageViewUiBinder extends UiBinder<Widget, EventPageView> {
+    interface EventViewUiBinder extends UiBinder<Widget, EventView> {
     }
 
     private EventDTO event;
@@ -20,7 +20,7 @@ public class EventPageView extends Composite implements EventPagePresenter.MyVie
     @UiField
     HeadingElement title;
 
-    public EventPageView() {
+    public EventView() {
         super();
 
         initWidget(uiBinder.createAndBindUi(this));
