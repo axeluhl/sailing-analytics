@@ -4,26 +4,26 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class EventPlace extends Place {
-    private final String eventId;
+    private final String eventUuidAsString;
     
-    protected EventPlace(String eventId) {
+    public EventPlace(String eventUuidAsString) {
         super();
-        this.eventId = eventId;
+        this.eventUuidAsString = eventUuidAsString;
     }
 
-    public String getEventId() {
-        return eventId;
+    public String getEventUuidAsString() {
+        return eventUuidAsString;
     }
 
     public static class Tokenizer implements PlaceTokenizer<EventPlace> {
         @Override
         public String getToken(EventPlace place) {
-            return place.getEventId();
+            return place.getEventUuidAsString();
         }
 
         @Override
-        public EventPlace getPlace(String eventId) {
-            return new EventPlace(eventId);
+        public EventPlace getPlace(String eventUuidAsString) {
+            return new EventPlace(eventUuidAsString);
         }
     }
 }

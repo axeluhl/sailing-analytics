@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 public class ContactActivity extends AbstractActivity {
 
     public ContactActivity(ContactPlace place, ContactClientFactory clientFactory) {
-        // TODO Auto-generated constructor stub
     }
 
     @Override

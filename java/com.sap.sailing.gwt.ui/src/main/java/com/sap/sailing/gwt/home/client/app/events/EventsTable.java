@@ -1,12 +1,14 @@
 package com.sap.sailing.gwt.home.client.app.events;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -22,7 +24,10 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.home.shared.dto.EventDTO;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.gwt.home.client.app.event.EventPlace;
+import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventsTable extends Composite {
     private static EventsTableUiBinder uiBinder = GWT.create(EventsTableUiBinder.class);
@@ -41,20 +46,23 @@ public class EventsTable extends Composite {
     @UiField(provided = true)
     SimplePager pager;
 
+    private final EventsActivity activity;
+
     /**
      * Constructor.
      * 
      * @param constants
      *            the constants
      */
-    public EventsTable() {
+    public EventsTable(EventsActivity activity) {
+        this.activity = activity;
         initTable();
         initWidget(uiBinder.createAndBindUi(this));
     }
 
     public static final ProvidesKey<EventDTO> KEY_PROVIDER = new ProvidesKey<EventDTO>() {
-        public Object getKey(EventDTO item) {
-            return item == null ? null : item.uuid;
+        public UUID getKey(EventDTO item) {
+            return item == null ? null : item.id;
         }
     };
 
@@ -81,9 +89,9 @@ public class EventsTable extends Composite {
         dataProvider.addDataDisplay(cellTable);
     }
 
-    public void setEvents(List<EventDTO> events) {
+    public void setEvents(Iterable<EventDTO> events) {
         dataProvider.getList().clear();
-        dataProvider.getList().addAll(events);
+        Util.addAll(events, dataProvider.getList());
     }
 
     /**
@@ -103,19 +111,29 @@ public class EventsTable extends Composite {
         cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
 
         // name.
-        Column<EventDTO, String> firstNameColumn = new Column<EventDTO, String>(new TextCell()) {
+        Column<EventDTO, SafeHtml> nameColumn = new Column<EventDTO, SafeHtml>(new ClickableSafeHtmlCell()) {
             @Override
-            public String getValue(EventDTO object) {
-                return object.getName();
+            public SafeHtml getValue(EventDTO event) {
+                final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+                safeHtmlBuilder.appendHtmlConstant("<a>");
+                safeHtmlBuilder.appendEscaped(event.getName());
+                safeHtmlBuilder.appendHtmlConstant("</a>");
+                return safeHtmlBuilder.toSafeHtml();
             }
         };
-        firstNameColumn.setSortable(true);
-        sortHandler.setComparator(firstNameColumn, new Comparator<EventDTO>() {
+        nameColumn.setFieldUpdater(new FieldUpdater<EventDTO, SafeHtml>() {
+            @Override
+            public void update(int index, EventDTO object, SafeHtml value) {
+                activity.goTo(new EventPlace(object.id.toString()));
+            }
+        });
+        nameColumn.setSortable(true);
+        sortHandler.setComparator(nameColumn, new Comparator<EventDTO>() {
             public int compare(EventDTO o1, EventDTO o2) {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        cellTable.addColumn(firstNameColumn, "name");
-        cellTable.setColumnWidth(firstNameColumn, 20, Unit.PCT);
+        cellTable.addColumn(nameColumn, "name");
+        cellTable.setColumnWidth(nameColumn, 20, Unit.PCT);
     }
 }

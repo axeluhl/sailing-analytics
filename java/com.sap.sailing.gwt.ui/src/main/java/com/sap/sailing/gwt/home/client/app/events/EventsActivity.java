@@ -1,31 +1,29 @@
 package com.sap.sailing.gwt.home.client.app.events;
 
+import java.util.List;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.app.event.EventView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventsActivity extends AbstractActivity {
 
     private final EventsClientFactory clientFactory;
-    private final EventsPlace place;
 
     public EventsActivity(EventsPlace place, EventsClientFactory clientFactory) {
         this.clientFactory = clientFactory;
-        this.place = place;
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        panel.setWidget(new EventView());
-        sailingEventsService.getEventById(eventIdParam, new AsyncCallback<EventDTO>() {
+    public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        clientFactory.getSailingService().getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
-            public void onSuccess(EventDTO result) {
-                event = result;
-                getView().setEvent(event);
+            public void onSuccess(List<EventDTO> events) {
+                panel.setWidget(clientFactory.createEventsView(events, EventsActivity.this).asWidget());
             }
 
             @Override
@@ -34,5 +32,8 @@ public class EventsActivity extends AbstractActivity {
             }
         });
     }
-
+    
+    void goTo(Place place) {
+        clientFactory.getPlaceController().goTo(place);
+    }
 }

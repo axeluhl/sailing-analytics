@@ -7,27 +7,26 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventActivity extends AbstractActivity {
-    private final SailingServiceAsync sailingService;
+    private final EventClientFactory clientFactory;
 
     private final EventPlace eventPlace;
 
 
     public EventActivity(EventPlace place, EventClientFactory clientFactory) {
-        sailingService = clientFactory.getSailingService();
+        this.clientFactory = clientFactory;
         this.eventPlace = place;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        sailingService.getEventById(UUID.fromString(eventPlace.getEventId()), new AsyncCallback<EventDTO>() {
+        clientFactory.getSailingService().getEventById(UUID.fromString(eventPlace.getEventUuidAsString()), new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO event) {
-                final EventView view = new EventView(event);
-                panel.setWidget(view);
+                final EventView view = clientFactory.createEventView(event);
+                panel.setWidget(view.asWidget());
             }
 
             @Override

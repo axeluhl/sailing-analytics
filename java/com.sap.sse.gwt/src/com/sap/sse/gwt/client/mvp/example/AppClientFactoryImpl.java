@@ -21,12 +21,6 @@ public class AppClientFactoryImpl extends ClientFactoryImpl implements AppClient
             private SimplePanel root = new SimplePanel();
             
             @Override
-            public void showLoading(boolean visibile) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
             public AcceptsOneWidget getStage() {
                 return root;
             }

@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 public class AboutUsActivity extends AbstractActivity {
 
     public AboutUsActivity(AboutUsPlace place, AboutUsClientFactory clientFactory) {
-        // TODO Auto-generated constructor stub
     }
 
     @Override
