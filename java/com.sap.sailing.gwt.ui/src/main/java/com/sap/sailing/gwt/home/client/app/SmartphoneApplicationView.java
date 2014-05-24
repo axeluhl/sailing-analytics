@@ -23,7 +23,7 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
 
     private static ApplicationMobileViewUiBinder uiBinder = GWT.create(ApplicationMobileViewUiBinder.class);
 
-    @UiField
+    @UiField(provided=true)
     HeaderPanel headerPanel;
 
     @UiField
