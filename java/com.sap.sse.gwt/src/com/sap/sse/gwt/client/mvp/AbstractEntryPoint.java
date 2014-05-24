@@ -31,12 +31,12 @@ public abstract class AbstractEntryPoint implements EntryPoint {
      * <p>
      * @param clientFactory
      *            used to determine the event bus and the place controller.
-     * @param placeHistoryMapperClass
+     * @param placeHistoryMapper
      *            used to create a place history mapper with {@link GWT#create(Class)}
      * @param activityMappers
      *            used for a composite activity mapper; the first mapper to provide an activity for a place gets its way
      */
-    public void onModuleLoad(ClientFactory clientFactory, Class<? extends PlaceHistoryMapper> placeHistoryMapperClass, ActivityMapper... activityMappers) {
+    public void onModuleLoad(ClientFactory clientFactory, PlaceHistoryMapper historyMapper, ActivityMapper... activityMappers) {
         // Start ActivityManager for the main widget with our ActivityMapper
         ActivityMapperRegistry activityMapperRegistry = new ActivityMapperRegistry();
         for (ActivityMapper activityMapper : activityMappers) {
@@ -47,7 +47,6 @@ public abstract class AbstractEntryPoint implements EntryPoint {
         activityManager.setDisplay(clientFactory.getStage());
 
         // Start PlaceHistoryHandler with our PlaceHistoryMapper
-        PlaceHistoryMapper historyMapper = GWT.create(placeHistoryMapperClass);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(clientFactory.getPlaceController(), eventBus, clientFactory.getDefaultPlace());
 

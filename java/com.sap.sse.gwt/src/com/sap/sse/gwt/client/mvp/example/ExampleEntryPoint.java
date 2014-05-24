@@ -28,6 +28,7 @@ public class ExampleEntryPoint extends AbstractEntryPoint {
         // } else {
         //     clientFactory = new MyThisAndThatClientFactory();
         // }
-        onModuleLoad(clientFactory, AppPlaceHistoryMapper.class, new AppActivityMapper(clientFactory));
+        AppPlaceHistoryMapper historyMapper = GWT.create(AppPlaceHistoryMapper.class);
+        onModuleLoad(clientFactory, historyMapper, new AppActivityMapper(clientFactory));
     }
 }
