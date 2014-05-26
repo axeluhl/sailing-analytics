@@ -233,11 +233,15 @@
     <servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
-			<init-param>
-         		<param-name>javax.ws.rs.Application</param-name>
-         		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
-     		</init-param>
-    	<load-on-startup>1</load-on-startup>
+		<init-param>
+        		<param-name>javax.ws.rs.Application</param-name>
+        		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
+   		</init-param>
+		<init-param>
+   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+		</init-param>   
+		<load-on-startup>1</load-on-startup>
   	</servlet>
   	<servlet-mapping>
     	<servlet-name>Jersey REST API</servlet-name>
@@ -246,11 +250,15 @@
 	<servlet>
     	<servlet-name>Jersey REST SPI</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
-			<init-param>
-         		<param-name>javax.ws.rs.Application</param-name>
-         		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
-     		</init-param>
-    	<load-on-startup>1</load-on-startup>
+		<init-param>
+       		<param-name>javax.ws.rs.Application</param-name>
+       		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
+   		</init-param>
+		<init-param>
+   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+		</init-param>   
+		<load-on-startup>1</load-on-startup>
   	</servlet>
   	<servlet-mapping>
     	<servlet-name>Jersey REST SPI</servlet-name>
