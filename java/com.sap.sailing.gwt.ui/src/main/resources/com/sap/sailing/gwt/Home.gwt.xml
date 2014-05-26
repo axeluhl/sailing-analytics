@@ -25,6 +25,17 @@
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 
+		<!-- Highcharts API -->
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  	<inherits name='com.google.gwt.maps.Maps' />
+	
+  	<!--  Bootstrap API -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+  	
 	<!-- Default is Tablet/Desktop -->
 	<replace-with
 		class="com.sap.sailing.gwt.home.client.app.TabletAndDesktopApplicationClientFactory">
@@ -47,7 +58,10 @@
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
 
+	<source path='ui/common' />
 	<source path='ui/client' />
 	<source path='ui/shared' />
+	<source path='ui/actions' />
+	<source path='ui/simulator' />
 	<source path='home' />
 </module>
