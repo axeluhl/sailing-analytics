@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.server;
+package com.sap.sse.gwt.shared;
 
 public class ParseHttpParameterException extends Exception {
     private static final long serialVersionUID = -6999866727315263021L;
