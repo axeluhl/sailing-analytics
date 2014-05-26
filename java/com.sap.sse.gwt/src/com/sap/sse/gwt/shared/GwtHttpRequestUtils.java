@@ -1,8 +1,9 @@
-package com.sap.sse.gwt.server;
+package com.sap.sse.gwt.shared;
 
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
+import com.sap.sse.gwt.server.ParseHttpParameterException;
 
 /**
  * A utility class for parsing the request parameters of a HTTP request in a type safe way.

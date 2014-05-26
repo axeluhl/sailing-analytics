@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.useragent.UserAgentChecker;
-import com.sap.sse.gwt.server.GwtHttpRequestUtils;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;

@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
-import com.sap.sse.gwt.server.GwtHttpRequestUtils;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
  * 
