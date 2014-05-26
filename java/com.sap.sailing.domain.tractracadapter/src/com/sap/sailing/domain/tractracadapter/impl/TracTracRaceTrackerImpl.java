@@ -13,11 +13,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -48,6 +50,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
@@ -56,6 +59,7 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
+import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
@@ -318,6 +322,23 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, storedURI);
+        eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
+            @Override
+            public void updateCompetitor(ICompetitor competitor) {
+                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
+                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
+                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
+                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+            }
+            
+            @Override
+            public void deleteCompetitor(UUID competitorId) {
+            }
+            
+            @Override
+            public void addCompetitor(ICompetitor competitor) {
+            }
+        });
         // Start live and stored data streams
         Regatta effectiveRegatta = regatta;
         raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
