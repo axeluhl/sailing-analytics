@@ -335,12 +335,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return resources.settingsIcon();
     }
 
-    public void updateSettings(LeaderboardSettings newSettings) {
+    public void updateSettings(final LeaderboardSettings newSettings) {
+        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+        if (newSettings.getOverallDetailsToShow() != null) {
+            selectedOverallDetailColumns.clear();
+            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
+        }
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
         setShowAddedScores(newSettings.isShowAddedScores());
-        List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
+        final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof ExpandableSortableColumn<?>) {
@@ -365,10 +370,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (newSettings.getRaceDetailsToShow() != null) {
             selectedRaceDetails.clear();
             selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
-        }
-        if (newSettings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.clear();
-            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
         // update strategy for determining the race columns to show; if settings' race columns to show is null, use the
         // previously selected race columns / number of race columns for the new configuration
@@ -414,24 +415,64 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
             break;
         }
-        setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it
-                                             // was expanded before
-        // update leaderboard after settings panel column selection change
-        updateLeaderboard(leaderboard);
-        setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
+        
+        final boolean oldBusyState = getBusyIndicator().isBusy(); 
+        getBusyIndicator().setBusy(true);
+        Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
+            @Override
+            public void run() {
+                setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later
+                                                     // if it was expanded before
+                // update leaderboard after settings panel column selection change
+                updateLeaderboard(leaderboard);
+                setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
 
-        if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-        }
-        for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-            expandableSortableColumn.toggleExpansion();
-        }
-        if (newSettings.getNameOfRaceToSort() != null) {
-            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
-            if (raceColumnByRaceName != null) {
-                getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+                    timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
+                }
+                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+                    expandableSortableColumn.toggleExpansion();
+                }
+                if (newSettings.getNameOfRaceToSort() != null) {
+                    final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings
+                            .getNameOfRaceToSort());
+                    if (raceColumnByRaceName != null) {
+                        getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                    }
+                }
+                getBusyIndicator().setBusy(oldBusyState);
             }
+        };
+        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails || getLeaderboard().hasOverallDetails()) {
+            doWhenNecessaryDetailHasBeenLoaded.run();
+        } else { // meaning that now the details need to be loaded from the server
+            updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
         }
+    }
+
+    /**
+     * @param callWhenExpansionDataIsLoaded
+     */
+    private void updateLeaderboardAndRun(final Runnable callWhenExpansionDataIsLoaded) {
+        final LeaderboardDTO previousLeaderboard = getLeaderboard();
+        getSailingService().getLeaderboardByName(getLeaderboardName(),
+                timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
+                shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
+                                callWhenExpansionDataIsLoaded.run();
+                            }
+  
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError(
+                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                        true /* silentMode */);
+                            }
+                        }));
     }
 
     private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
@@ -638,7 +679,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
                 if (entryBefore.totalPoints != null) {
                     addedScores += entryBefore.totalPoints;
-                }
+                } 
                 if (raceColumn.getName().equals(getRaceColumnName())) {
                     break; // we've reached the current column - stop here
                 }
@@ -666,9 +707,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             	boolean isLive = isLive(entry.fleet);
             	
                 String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
-                String totalOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
+                String totalOrAddedPointsAsText = isShowAddedScores() ? (entry.totalPoints != null ? scoreFormat.format(computeAddedScores(object)) : "")
                         : entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
-                String netOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
+                String netOrAddedPointsAsText = isShowAddedScores() ? (entry.netPoints != null ? scoreFormat.format(computeAddedScores(object)) : "")
                         : entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
                 
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
@@ -712,7 +753,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     if (isShowAddedScores()) {
                         double o1AddedScore = computeAddedScores(o1);
                         double o2AddedScore = computeAddedScores(o2);
-                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? -1. : 1. : o1AddedScore - o2AddedScore;
+                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? 1. : -1. : o2AddedScore - o1AddedScore;
                         return result > 0 ? 1 : result < 0 ? -1 : 0;
                     } else {
                         List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
@@ -788,25 +829,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             if (getLeaderboard().getLegCount(getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
-                final LeaderboardDTO previousLeaderboard = getLeaderboard();
-                getSailingService().getLeaderboardByName(getLeaderboardName(),
-                        timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
-                        /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
-                                new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                                    @Override
-                                    public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                        updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
-                                        callWhenExpansionDataIsLoaded.run();
-                                    }
-        
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        getErrorReporter().reportError(
-                                                stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                                true /* silentMode */);
-                                    }
-                                }));
+                updateLeaderboardAndRun(callWhenExpansionDataIsLoaded);
             }
         }
 

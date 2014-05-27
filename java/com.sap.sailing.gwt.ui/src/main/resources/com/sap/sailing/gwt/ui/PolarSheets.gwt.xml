@@ -7,6 +7,28 @@
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
 
+	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint">
+	</entry-point>
+
+	<!-- Highcharts API -->
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  	<inherits name='com.google.gwt.maps.Maps' />
+	
+  	<!--  Bootstrap API -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+
+	<!-- Other module inherits -->
+	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+    <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+	<inherits name="com.sap.sse.SSECommon" />    
+   	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
+  	
+  	<source path='common'/>
 	<source path="client" />
 	<source path="polarsheets" />
 	<source path='leaderboard' />
@@ -18,19 +40,4 @@
 	<source path='actions' />
 	<source path='masterdataimport'/>
   	<source path='simulator'/>
-	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint">
-	</entry-point>
-
-	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.Maps' />
-
-	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
-
-	<!-- Other module inherits -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-    <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sse.SSECommon" />    
-   	<inherits name="com.sap.sailing.domain.SailingDomain" />
-  	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
 </module>

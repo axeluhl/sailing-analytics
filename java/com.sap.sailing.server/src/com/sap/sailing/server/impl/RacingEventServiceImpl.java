@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -44,6 +45,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -55,6 +57,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -187,8 +190,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
      * {@link Event} objects that exist outside this service for events not (yet) registered here.
      */
-    protected final ConcurrentHashMap<Serializable, Event> eventsById;
+    private final ConcurrentHashMap<Serializable, Event> eventsById;
 
+    private final RemoteSailingServerSet remoteSailingServerSet;
+    
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
      * {@link Regatta} objects that exist outside this service for regattas not (yet) registered here.
@@ -199,7 +204,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private final ConcurrentHashMap<RaceDefinition, CourseChangeReplicator> courseListeners;
 
-    protected final ConcurrentHashMap<Regatta, ConcurrentSkipListSet<RaceTracker>> raceTrackersByRegatta;
+    protected final ConcurrentHashMap<Regatta, Set<RaceTracker>> raceTrackersByRegatta;
     
     /**
      * Although {@link #raceTrackersByRegatta} is a concurrent hash map, entering sets as values needs to be
@@ -251,7 +256,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     private final CompetitorStore competitorStore;
 
-    private ConcurrentSkipListSet<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new ConcurrentSkipListSet<DynamicTrackedRegatta>();
+    /**
+     * A set based on a concurrent hash map, therefore being thread safe
+     */
+    private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = Collections.newSetFromMap(new ConcurrentHashMap<DynamicTrackedRegatta, Boolean>());
 
     private final MongoObjectFactory mongoObjectFactory;
 
@@ -306,7 +314,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * object so that service lookups become possible.
      */
     private BundleContext bundleContext;
-    
+
     private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
@@ -388,6 +396,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.windStore = windStore;
         this.dataImportLock = new DataImportLockWithProgress();
         
+        remoteSailingServerSet = new RemoteSailingServerSet(scheduler);
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for "+this, /* fair */ false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
@@ -417,6 +426,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         this.gpsFixStore = gpsFixStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
+        this.serviceFinderFactory = serviceFinderFactory;
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -428,7 +438,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
-        this.serviceFinderFactory = serviceFinderFactory;
+        loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
     }
 
     @Override
@@ -496,7 +506,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 eventsById.put(event.getId(), event);
         }
     }
-
+    
+    private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
+        for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
+            remoteSailingServerSet.add(sailingServer);
+        }
+    }
+    
     /**
      * Collects media track references from the configured sources (mongo DB by default, ftp folder yet to be
      * implemented). The method is expected to be called initially blocking the API until finished.
@@ -845,6 +861,30 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
+    }
+
+    @Override
+    public RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url) {
+    	RemoteSailingServerReference result = new RemoteSailingServerReferenceImpl(name, url);
+    	remoteSailingServerSet.add(result);
+    	mongoObjectFactory.storeSailingServer(result);
+    	return result;
+    }
+
+    @Override
+    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+        return remoteSailingServerSet.getEventsOrException(ref);
+    }
+
+    @Override
+    public void removeRemoteSailingServerReference(String name) {
+        remoteSailingServerSet.remove(name);
+    	mongoObjectFactory.removeSailingServer(name);
+    }
+
+    @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
     }
@@ -1026,9 +1066,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
                 try {
                     raceTrackersByID.put(trackerID, tracker);
-                    ConcurrentSkipListSet<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
+                    Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                     if (trackers == null) {
-                        trackers = new ConcurrentSkipListSet<RaceTracker>();
+                        trackers = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
                         raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
                     }
                     trackers.add(tracker);
@@ -1317,7 +1357,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        final ConcurrentSkipListSet<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
+        final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
         if (trackersForRegatta != null) {
             for (RaceTracker raceTracker : trackersForRegatta) {
                 final Set<RaceDefinition> races = raceTracker.getRaces();
@@ -1965,7 +2005,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorStore);
         logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
-        logger.info(logoutput.toString());
         
         logger.info("Serializing configuration map...");
         oos.writeObject(configurationMap);
@@ -1974,7 +2013,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             logoutput.append(String.format("%3s\n", matcher.toString()));
         }
         
-        logger.info(logoutput.toString());    }
+        logger.info("Serializing remote sailing server references...");
+        final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet.getCachedEventsForRemoteSailingServers().keySet());
+        oos.writeObject(remoteServerReferences);
+        logoutput.append("Serialized "+remoteServerReferences.size()+" remote sailing server references\n");
+        
+        logger.info(logoutput.toString());
+    }
 
     @SuppressWarnings("unchecked")
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
@@ -2009,7 +2054,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             try {
                 regattaTrackingCache.clear();
             } finally {
-                LockUtil.unlockAfterRead(regattaTrackingCacheLock);
+                LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
             }
             LockUtil.lockForWrite(raceTrackersByRegattaLock);
             try {
@@ -2032,6 +2077,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             eventsById.clear();
             mediaLibrary.clear();
             competitorStore.clear();
+            remoteSailingServerSet.clear();
 
             StringBuffer logoutput = new StringBuffer();
 
@@ -2089,7 +2135,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
             
-
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
             logger.info("Reading competitors...");
@@ -2105,6 +2150,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
                 logoutput.append(String.format("%3s\n", matcher.toString()));
             }
+            
+            logger.info("Reading remote sailing server references...");
+            for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois.readObject()) {
+                remoteSailingServerSet.add(remoteSailingServerReference);
+                logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
+            }
+            
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);

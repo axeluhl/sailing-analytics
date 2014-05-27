@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -181,6 +183,15 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
             }
         });
         buttonPanel.add(addCompetitorButton);
+        
+        Button importBtn = new Button(stringMessages.importFixes());
+        importBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                importFixes();
+            }
+        });
+        buttonPanel.add(importBtn);
 
         super.addButtons(buttonPanel);
     }
@@ -278,5 +289,32 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
     
     private void addMapping() {
         showAddMappingDialog(null);
+    }
+    
+    private void importFixes() {
+        new ImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages,
+                leaderboardName, raceColumnName, fleetName, new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
+
+            @Override
+            public void ok(Collection<DeviceMappingDTO> editedObject) {
+                for (DeviceMappingDTO mapping : editedObject) {
+                    sailingService.addDeviceMappingToRaceLog(leaderboardName, raceColumnName, fleetName, mapping,
+                            new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            refresh();
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void cancel() {}
+        }).show();
     }
 }

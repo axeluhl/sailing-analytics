@@ -167,6 +167,17 @@ Assume you want to forward UDP packets from machine A (port 2014) to machine B (
 
 Now also UDP packets get transmitted through.
 
+### Set limits for a Linux server
+
+Especially our EC2 CentOS Linux installations use `/etc/security/limits.conf` and `/etc/security/limits.d/*` to specify upper bounds for the number of processes / threads and file handles that a user may use. On EC2, in particular the `/etc/security/limits.d/90-nproc.conf` file set a small limit for the soft limit for the number of processes:
+<pre>
+    *          soft    nproc     1024
+</pre>
+Changing this to a greater value, such as 65536, helps, e.g., to avoid the following message:
+<pre>
+    su: cannot set user id: Resource temporarily unavailable
+</pre>
+
 ### Set limits (ulimit) for a running process
 
 <pre>
@@ -221,3 +232,11 @@ When installing a new version of server code that contains changes related to GW
 <pre>
 -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog
 </pre>
+
+### Review branch in eclipse
+
+Before merging into master in some cases you want to review a branch. The easiest way to do this is to use EGit from within Eclipse. Here are the steps based on reviewing branch tracapi. This tutorial assumes that you have checked out the current master branch!
+
+- Open "GIT Repository Exploring" and select the branch that you want to review. Right click on that branch and select "Synchronize with Workspace".
+
+- A new view ("Team Synchronizing") will open and show you the changes on the left side. For each file you can now check for changes. Sometimes there will be resources that you do not want to review. In that case simply select a resource and hit "Remove from view".

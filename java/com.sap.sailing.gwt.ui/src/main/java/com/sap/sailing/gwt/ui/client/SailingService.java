@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -91,6 +92,8 @@ public interface SailingService extends RemoteService {
     List<RegattaDTO> getRegattas();
 
     List<EventDTO> getEvents();
+
+    List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers();
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
 
@@ -294,13 +297,19 @@ public interface SailingService extends RemoteService {
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
+    List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences();
+
+    void removeSailingServers(Set<String> toRemove) throws Exception;
+
+    RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws Exception;
+
     List<String> getResultImportUrls(String resultProviderName);
 
     void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception;
 
     void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
-    Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+    void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
     List<String> getUrlResultProviderNames();

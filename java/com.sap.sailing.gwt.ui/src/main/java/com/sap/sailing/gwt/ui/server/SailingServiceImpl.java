@@ -61,6 +61,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -68,6 +69,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -286,6 +288,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -318,6 +321,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -337,6 +341,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
@@ -391,7 +396,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterTracker;
 
     private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
-    
+
     private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
     
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
@@ -2226,8 +2231,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
-        return getService().apply(
+    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
+        getService().apply(
                 new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName,
                         timePointOfLastCorrectionValidity == null ? null : new MillisecondsTimePoint(timePointOfLastCorrectionValidity),
                                 comment));
@@ -2950,6 +2955,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers() {
+        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
+            final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
+            final RemoteSailingServerReferenceDTO sailingServerDTO = createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+            result.add(sailingServerDTO);
+        }
+        return result;
+    }
+
+    private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
+            final RemoteSailingServerReference serverRef,
+            final Pair<Iterable<EventBase>, Exception> eventsOrException) {
+        final Iterable<EventBase> events = eventsOrException.getA();
+        final Iterable<EventDTO> eventDTOs;
+        final RemoteSailingServerReferenceDTO sailingServerDTO;
+        if (events == null) {
+            eventDTOs = null;
+            final Exception exception = eventsOrException.getB();
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(serverRef.getName(),
+                    serverRef.getURL().toExternalForm(), exception==null?null:exception.getMessage());
+        } else {
+            eventDTOs = convertToEventDTOs(events);
+            sailingServerDTO = new RemoteSailingServerReferenceDTO(
+                    serverRef.getName(), serverRef
+                            .getURL().toExternalForm(), eventDTOs);
+        }
+        return sailingServerDTO;
+    }
+    
+    private Iterable<EventDTO> convertToEventDTOs(Iterable<EventBase> events) {
+        List<EventDTO> result = new ArrayList<>();
+        for (EventBase event : events) {
+            EventDTO eventDTO = convertToEventDTO(event);
+            result.add(eventDTO);
+        }
+        return result;
+    }
+
+    @Override
     public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -3013,6 +3060,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private EventDTO convertToEventDTO(EventBase event) {
+        EventDTO eventDTO = new EventDTO(event.getName());
+        eventDTO.venue = new VenueDTO();
+        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
+        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
+        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
+        eventDTO.isPublic = event.isPublic();
+        eventDTO.id = (UUID) event.getId();
+        return eventDTO;
+    }
+    
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
@@ -3254,6 +3312,41 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
+        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
+                    getService().getPublicEventsOfAllSailingServers().entrySet()) {
+            RemoteSailingServerReferenceDTO dto = createRemoteSailingServerReferenceDTO(
+                    remoteSailingServerRefAndItsCachedEvent.getKey(),
+                    remoteSailingServerRefAndItsCachedEvent.getValue());
+            result.add(dto);
+        }
+        return result;
+    }
+
+    @Override
+    public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
+        for (String serverName : namesOfSailingServersToRemove) {
+            getService().apply(new RemoveRemoteSailingServerReference(serverName));
+        }
+    }
+
+    @Override
+    public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        final String expandedURL;
+        if (sailingServer.getUrl().contains("//")) {
+            expandedURL = sailingServer.getUrl();
+        } else {
+            expandedURL = "http://" + sailingServer.getUrl();
+        }
+        URL serverURL = new URL(expandedURL);
+        RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
+        Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
+        
     }
 
     @Override
@@ -3781,7 +3874,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
         }
     }
-    
+
     @Override
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
@@ -4084,7 +4177,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
     }
-    
+
     @Override
     public void denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws Exception {
