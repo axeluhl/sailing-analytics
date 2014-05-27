@@ -14,7 +14,6 @@ public class Stage extends Composite {
     @UiField Label message;
     @UiField Label message2;
     @UiField Label name;
-    @UiField Label action;
 
     interface StageUiBinder extends UiBinder<Widget, Stage> {
     }

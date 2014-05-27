@@ -18,7 +18,9 @@
 						<div class="{local_res.css.stage_band_message}"><g:Label ui:field='message2' />&nbsp;-
 						</div>
 						<div class="{local_res.css.stage_band_name}"><g:Label ui:field='name' /></div>
-						<button class="{res.mainCss.button} {local_res.css.stage_band_action}"><g:Label ui:field='action' text='Full event schedule'/></button>
+						<button class="{res.mainCss.button} {local_res.css.stage_band_action}">
+							<ui:text from='{i18n.fullEventSchedule}'/>.
+						</button>
 					</div>
 				</div>
 			</div>

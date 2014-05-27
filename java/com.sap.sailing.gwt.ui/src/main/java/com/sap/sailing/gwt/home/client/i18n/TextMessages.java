@@ -18,4 +18,6 @@ public interface TextMessages extends Messages {
     String german();
 
     String english();
+    
+    String fullEventSchedule();
 }
