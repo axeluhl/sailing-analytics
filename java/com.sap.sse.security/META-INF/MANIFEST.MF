@@ -8,22 +8,22 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/scribe-1.3.5.jar,
- lib/shiro-core-1.2.2.jar,
+Bundle-ClassPath: lib/shiro-core-1.2.2.jar,
  lib/shiro-web-1.2.2.jar,
  .,
- lib/slf4j-api-1.7.5.jar,
- lib/slf4j-simple-1.7.5.jar,
  lib/commons-beanutils-1.9.0.jar,
  lib/commons-logging-1.1.3.jar,
- lib/commons-collections-3.2.1.jar
+ lib/commons-collections-3.2.1.jar,
+ lib/org.apache.servicemix.bundles.scribe-1.3.3_1.jar
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.security.userstore;bundle-version="1.0.0",
- com.google.gwt.osgi
+ com.google.gwt.osgi,
+ slf4j.api;bundle-version="1.6.4"
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
  org.apache.shiro,
  org.apache.shiro.authc,
+ org.apache.shiro.authz.annotation,
  org.apache.shiro.crypto,
  org.apache.shiro.crypto.hash,
  org.apache.shiro.subject,

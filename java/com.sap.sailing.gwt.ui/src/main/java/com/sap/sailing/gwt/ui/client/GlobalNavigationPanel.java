@@ -43,7 +43,8 @@ public class GlobalNavigationPanel extends FlowPanel {
             }
             String leaderBoardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
             addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard", "Go to the overview and see all Races in one Leaderboard");
-        }        
+        }
+        addLoginPanel();
     }
 
     private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension, String htmlTitle) {
@@ -53,5 +54,9 @@ public class GlobalNavigationPanel extends FlowPanel {
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
+    }
+    
+    private void addLoginPanel(){
+        
     }
 }

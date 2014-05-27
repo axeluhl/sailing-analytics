@@ -12,8 +12,16 @@ public interface UserManagementServiceAsync {
 
     void getCurrentUser(AsyncCallback<UserDTO> callback);
 
-    void login(String username, String password, AsyncCallback<String> callback);
+    void login(String username, String password, AsyncCallback<SuccessInfo> callback);
 
-    void logout(AsyncCallback<Void> callback);
+    void logout(AsyncCallback<SuccessInfo> callback);
+
+    void createSimpleUser(String name, String password, AsyncCallback<UserDTO> callback);
+
+    void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
+
+    void addRoleForUser(String username, String role, AsyncCallback<SuccessInfo> callback);
+
+    void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
 
 }

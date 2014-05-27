@@ -1,11 +1,9 @@
 package com.sap.sse.security;
 
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
-import org.apache.shiro.codec.Base64;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.util.ByteSource;
-import org.apache.shiro.util.SimpleByteSource;
 
 public class SimpleSaltedAuthenticationInfo implements SaltedAuthenticationInfo {
 

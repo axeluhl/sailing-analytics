@@ -1,5 +1,8 @@
 package com.sap.sse.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -13,6 +16,7 @@ import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
 
 public class UsernamePasswordRealm extends AuthorizingRealm {
@@ -29,8 +33,18 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
     }
 
     @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection arg0) {
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
+        List<String> roles = new ArrayList<>();
+        for (Object r : principals.asList()){
+            String name = r.toString();
+            try {
+                roles.addAll(store.getRolesFromUser(name));
+            } catch (UserManagementException e) {
+               throw new AuthenticationException(e.getMessage());
+            }
+        }
+        ai.addRoles(roles);
         return ai;
     }
 
@@ -44,12 +58,22 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
         }
 
         // read password hash and salt from db
-        final String saltedPassword = store.getSaltedPassword(username);
+        String saltedPassword = null;
+        try {
+            saltedPassword = store.getSaltedPassword(username);
+        } catch (UserManagementException e) {
+            throw new AuthenticationException(e.getMessage());
+        }
         if (saltedPassword == null) {
             return null;
         }
 
-        final ByteSource salt = (ByteSource) store.getSalt(username);
+        ByteSource salt = null;
+        try {
+            salt = (ByteSource) store.getSalt(username);
+        } catch (UserManagementException e) {
+            throw new AuthenticationException(e.getMessage());
+        }
         if (salt == null) {
             return null;
         }

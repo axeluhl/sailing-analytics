@@ -10,9 +10,17 @@ public interface UserManagementService extends RemoteService {
     
     Collection<UserDTO> getUserList();
     
+    Collection<UserDTO> getFilteredSortedUserList(String filter);
+    
     UserDTO getCurrentUser();
     
-    String login(String username, String password);
+    SuccessInfo login(String username, String password);
     
-    void logout();
+    UserDTO createSimpleUser(String name, String password);
+    
+    SuccessInfo deleteUser(String username);
+    
+    SuccessInfo logout();
+    
+    SuccessInfo addRoleForUser(String username, String role);
 }

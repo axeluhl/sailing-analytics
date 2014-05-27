@@ -5,13 +5,14 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
+import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserList extends CellList<UserDTO> {
 
-    public UserList() {
-        super(new UserCell());
+    public UserList(ProvidesKey<UserDTO> keyProvider) {
+        super(new UserCell(), keyProvider);
     }
 
     public static class UserCell extends AbstractCell<UserDTO> {

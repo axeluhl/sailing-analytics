@@ -4,10 +4,7 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import com.sap.sse.security.userstore.shared.UserStore;
 
 public class Activator implements BundleActivator {
 

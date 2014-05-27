@@ -1,11 +1,13 @@
 package com.sap.sse.security;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.mgt.SecurityManager;
@@ -17,7 +19,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.security.userstore.shared.SimpleUser;
 import com.sap.sse.security.userstore.shared.User;
+import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
 
 public class SecurityServiceImpl  extends RemoteServiceServlet implements SecurityService {
@@ -53,7 +57,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
 
     @Override
-    public String login(String username, String password) {
+    public String login(String username, String password) throws AuthenticationException {
         String redirectUrl;
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         System.out.println("Trying to login: " + username);
@@ -81,6 +85,31 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     @Override
     public User getUserByName(String name) {
         return store.getUserByName(name);
+    }
+
+    @Override
+    public SimpleUser createSimpleUser(String name, String password) throws UserManagementException {
+        return store.createSimpleUser(name, password);
+    }
+
+    @Override
+    public Set<String> getRolesFromUser(String name) throws UserManagementException {
+        return store.getRolesFromUser(name);
+    }
+
+    @Override
+    public void addRoleForUser(String name, String role) throws UserManagementException {
+        store.addRoleForUser(name, role);
+    }
+
+    @Override
+    public void removeRoleFromUser(String name, String role) throws UserManagementException {
+        store.removeRoleFromUser(name, role);
+    }
+
+    @Override
+    public void deleteUser(String username) throws UserManagementException {
+        store.deleteUser(username);
     }
 
 }

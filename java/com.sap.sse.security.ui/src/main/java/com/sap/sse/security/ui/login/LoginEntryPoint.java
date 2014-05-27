@@ -3,17 +3,21 @@ package com.sap.sse.security.ui.login;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -26,10 +30,14 @@ public class LoginEntryPoint implements EntryPoint {
         registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
         
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
+        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.PX);
         rootPanel.add(dockPanel);
         
         FlowPanel fp = new FlowPanel();
+        
+        LoginPanel loginPanel = new LoginPanel();
+        rootPanel.add(loginPanel);
+        
         Label nameLabel = new Label("Name: ");
         fp.add(nameLabel);
         final TextBox nameText = new TextBox();
@@ -38,16 +46,19 @@ public class LoginEntryPoint implements EntryPoint {
         
         Label pwLabel = new Label("Password: ");
         fp.add(pwLabel);
-        final TextBox pwText = new TextBox();
+        final PasswordTextBox pwText = new PasswordTextBox();
         pwText.setName("password");
         fp.add(pwText);
         
         SubmitButton submit = new SubmitButton("login");
-        submit.addClickHandler(new ClickHandler() {
+        fp.add(submit);
+        
+        FormPanel formPanel = new FormPanel();
+        formPanel.addSubmitHandler(new SubmitHandler() {
             
             @Override
-            public void onClick(ClickEvent event) {
-                userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<String>() {
+            public void onSubmit(SubmitEvent event) {
+                userManagementService.login(nameText.getText(), pwText.getText(), new AsyncCallback<SuccessInfo>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -55,24 +66,23 @@ public class LoginEntryPoint implements EntryPoint {
                     }
 
                     @Override
-                    public void onSuccess(String result) {
-                        if (result != null && !result.equals("")){
-                            Window.Location.replace(result);
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful() && !result.getMessage().equals("")){
+                            Window.Location.replace(result.getMessage());
                         }
-                        else if (result != null && result.equals("")) {
+                        else if (result.isSuccessful()) {
                             Window.alert("Logged in!");
                         }
                         else {
-                            Window.alert("Invalid Credentials!");
+                            Window.alert(result.getMessage());
                         }
                         
                     }
                 });
             }
         });
-        fp.add(submit);
-        
-        dockPanel.add(fp);
+        formPanel.add(fp);
+        dockPanel.add(formPanel);
     }
     
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {

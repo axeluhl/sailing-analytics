@@ -1,9 +1,14 @@
 package com.sap.sse.security.userstore.shared;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class User {
     
     protected String name;
     
+    protected Set<String> roles = new HashSet<>();
+
     public User(String name) {
         super();
         this.name = name;
@@ -15,6 +20,18 @@ public abstract class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Set<String> getRoles() {
+        return roles;
+    }
+    
+    public void addRole(String role){
+        roles.add(role);
+    }
+    
+    public void removeRole(String role){
+        roles.remove(role);
     }
     
     public abstract AccountType getAccountType();
