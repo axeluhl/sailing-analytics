@@ -18,10 +18,12 @@ public interface VectorField {
 	public double motionScale(int zoomLevel);
 
 	public double particleWeight(Position p, Vector v);
+	
+	public int getIntensity(double speed);
 
 	public String[] getColors();
 
-	public double lineWidth(int alpha);
+	public double lineWidth(double speed);
 	
 	public Position getFieldNE();
 	

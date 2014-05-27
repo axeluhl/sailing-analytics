@@ -161,7 +161,12 @@ public class RectField implements VectorField {
 		return colors;
 	}
 
-	public double lineWidth(int alpha) {
+	public int getIntensity(double speed) {
+		double s = speed / maxLength;
+		return (int)Math.min(255, 90 + Math.round(350 * s));
+	}	
+
+	public double lineWidth(double speed) {
 		return 1.0;
 	}
 

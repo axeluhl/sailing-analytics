@@ -40,6 +40,7 @@ public class SimulatorField implements VectorField {
 	public Position visSW;
 	public Position visNE;
 
+	private double minLength;
 	private double maxLength;
 	private double particleFactor;
 	
@@ -93,6 +94,7 @@ public class SimulatorField implements VectorField {
     	this.data = new double[steps][imax][2*jmax];
     	
     	double maxWindSpeed = 0;
+    	double minWindSpeed = 100;
     	for(int s=0; s<steps; s++) {
     		for(int i=0; i<imax; i++) {
         		for(int j=0; j<jmax; j++) {
@@ -101,6 +103,9 @@ public class SimulatorField implements VectorField {
    					if (wind.trueWindSpeedInKnots > maxWindSpeed) {
 						maxWindSpeed = wind.trueWindSpeedInKnots;
 					}
+   					if (wind.trueWindSpeedInKnots < minWindSpeed) {
+						minWindSpeed = wind.trueWindSpeedInKnots;
+					}
 
    					this.data[s][i][2*j+1] = wind.trueWindSpeedInKnots*Math.cos(wind.trueWindBearingDeg*Math.PI/180.0);
    					this.data[s][i][2*j] = wind.trueWindSpeedInKnots*Math.sin(wind.trueWindBearingDeg*Math.PI/180.0);
@@ -108,8 +113,9 @@ public class SimulatorField implements VectorField {
         		}
     		}
     	}
+    	this.minLength = minWindSpeed;
     	this.maxLength = maxWindSpeed;
-		
+
     	this.particleFactor = 2.0;
 		
 		double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
@@ -251,7 +257,7 @@ public class SimulatorField implements VectorField {
 	}
 
 	public double motionScale(int zoomLevel) {
-		return 0.08 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+		return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
 	}
 
 	public double particleWeight(Position p, Vector v) {
@@ -260,17 +266,47 @@ public class SimulatorField implements VectorField {
 
 	public String[] getColors() {
 		String[] colors = new String[256];
-		double alpha = 0.7;
+		double alphaMin = 0.0;
+		double alphaMax = 1.0;
 		int greyValue = 255;
 		for (int i = 0; i < 256; i++) {
-			colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alpha*i/255.0) + ")";
+			colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alphaMin + (alphaMax-alphaMin)*i/255.0) + ")";
 			//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
 		}
 		return colors;
 	}
 
-	public double lineWidth(int alpha) {
-		return 1.0;
+	public int getIntensity(double speed) {
+		
+		/* normalized intensity:
+		 * speed == average wind speed => intensity 0.5
+ 		 * speed <= minimum wind speed => intensity 0.0 
+ 		 * speed between 0.0 and 1.0  
+		double s;
+		if (minLength == maxLength) {
+			s = 0.5;
+		} else if (speed <= minLength) {
+			s = 0.0;
+		} else {
+			s = (speed - minLength) / (maxLength - minLength);
+		}*/
+		
+		/* absolute intensity
+		 * speed == 12kn => intensity 0.7
+		 * speed == 20kn => intensity 1.0
+		 * speed ==  0kn => intensity 0.25 
+		 */
+		double s = 0.7 + 0.0375*(speed - 12.0);
+		return (int)Math.max(0, Math.min(255, Math.round(255 * s)));
+	}
+	
+	public double lineWidth(double speed) {
+		/* absolute linewidth
+		 * speed == 12kn => linewidth 1.5 
+		 * speed == 24kn => linewidth 3.0 
+		 * speed ==  6kn => linewidth 0.75 
+		 */
+		return Math.round(speed / 8.0 * 100.0) / 100.0;
 	}
 
 	public Position getFieldNE() {

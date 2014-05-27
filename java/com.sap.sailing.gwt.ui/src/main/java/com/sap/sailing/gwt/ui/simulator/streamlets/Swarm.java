@@ -97,7 +97,7 @@ public class Swarm {
     				particle.age = 1 + (int)Math.round(Math.random()*40);
     			}
     			particle.pxOld = projection.latlng2pixel(particle.pos);
-    			particle.alpha = 0;
+    			particle.speed = 0;
     			particle.v = v;
     			done = true;
     		}
@@ -118,10 +118,6 @@ public class Swarm {
     public void onBoundsChanged() {
     	projection.clearCanvas();
     	swarmPause = 5;
-    }
-    
-    public void onMoveEnd() {
-    	
     }
     
     public static native void console(String msg) /*-{
@@ -185,7 +181,7 @@ public class Swarm {
     	double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
 
     	this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
-    	//console("#particles: "+this.nParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
+    	//System.out.println("#particles: "+this.nParticles + " at " + (boundsWidthpx) +"x" + (boundsHeightpx) + "px  (" + (boundsWidthpx * boundsHeightpx) + " pixels)");
     };
 
     public Vector isVisible(Position pos) {
@@ -247,8 +243,8 @@ public class Swarm {
     		if (particle.age == 0) {
     			continue;
     		}
-    		ctxt.setLineWidth(field.lineWidth(particle.alpha));
-    		ctxt.setStrokeStyle(color[particle.alpha]);
+    		ctxt.setLineWidth(field.lineWidth(particle.speed));
+    		ctxt.setStrokeStyle(color[field.getIntensity(particle.speed)]);
     		ctxt.beginPath();
     		ctxt.moveTo(particle.pxOld.x, particle.pxOld.y);
     		particle.pxOld = projection.latlng2pixel(particle.pos);
@@ -267,8 +263,7 @@ public class Swarm {
     			double latDeg = particle.pos.getLatDeg() + speed*particle.v.y;
     			double lngDeg = particle.pos.getLngDeg() + speed*particle.v.x;
     			particle.pos = new DegreePosition(latDeg, lngDeg);
-    			double s = particle.v.length() / field.getMaxLength();
-    			particle.alpha = (int)Math.min(255, 90 + Math.round(350 * s));
+    			particle.speed = particle.v.length();
     			particle.age--;
     			if ((particle.age > 0) && (this.field.inBounds(particle.pos))) {
     				particle.v = field.getVector(particle.pos);

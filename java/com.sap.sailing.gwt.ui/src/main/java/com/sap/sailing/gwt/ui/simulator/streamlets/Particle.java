@@ -7,7 +7,7 @@ public class Particle {
 
 	public Position pos;
 	public Vector pxOld;
-	public int alpha;
+	public double speed;
 	public int age;
 	public Vector v;
 
