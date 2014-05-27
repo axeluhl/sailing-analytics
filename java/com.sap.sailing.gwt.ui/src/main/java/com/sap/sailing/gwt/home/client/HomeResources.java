@@ -9,7 +9,7 @@ public interface HomeResources extends ClientBundle {
     public static final HomeResources INSTANCE = GWT.create(HomeResources.class);
 
     @Source("com/sap/sailing/gwt/home/main.css")
-    MainCss css();
+    MainCss mainCss();
 
     @Shared
     public interface MainCss extends CssResource {

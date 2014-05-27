@@ -17,7 +17,7 @@ public class HomeEntryPoint extends AbstractEntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) clientFactory.getSailingService(), RemoteServiceMappingConstants.sailingServiceRemotePath);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         onModuleLoad(clientFactory, applicationHistoryMapper, new ApplicationActivityMapper(clientFactory));
-        HomeResources.INSTANCE.css().ensureInjected();
+        HomeResources.INSTANCE.mainCss().ensureInjected();
         StyleInjector.injectAtEnd("@media (min-width: 25em) { "+HomeResources.INSTANCE.smallCss().getText()+"}");
         StyleInjector.injectAtEnd("@media (min-width: 50em) { "+HomeResources.INSTANCE.mediumCss().getText()+"}");
     }

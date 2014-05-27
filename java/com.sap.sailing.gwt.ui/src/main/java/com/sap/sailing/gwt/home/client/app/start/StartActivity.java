@@ -5,14 +5,16 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 public class StartActivity extends AbstractActivity {
+    private final StartClientFactory clientFactory;
 
     public StartActivity(StartPlace place, StartClientFactory clientFactory) {
-        // TODO Auto-generated constructor stub
+        this.clientFactory = clientFactory;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        // TODO Auto-generated method stub
+        final StartView view = clientFactory.createStartView();
+        panel.setWidget(view.asWidget());
     }
 
 }

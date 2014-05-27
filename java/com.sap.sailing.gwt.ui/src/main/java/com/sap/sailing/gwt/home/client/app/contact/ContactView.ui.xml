@@ -13,8 +13,8 @@
 	<g:VerticalPanel styleName="{style.panel}">
     	<g:HTML>
     		Contact content
-    		<div class="{res.css.smalloffset11}">Humba Humba</div>
-    		<div class="{res.css.medium9}">Humba Humba</div>
+    		<div class="{res.mainCss.smalloffset11}">Humba Humba</div>
+    		<div class="{res.mainCss.medium9}">Humba Humba</div>
     	</g:HTML>
     </g:VerticalPanel> 
 </ui:UiBinder>    

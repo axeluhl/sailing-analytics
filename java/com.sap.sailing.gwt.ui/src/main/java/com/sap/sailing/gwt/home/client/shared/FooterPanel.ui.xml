@@ -35,9 +35,9 @@
 </ui:style>
         <g:HTMLPanel>
 <footer class="{style.sitefooter}">
-  <div class="{res.css.grid}">
-    <div class="{res.css.small6} {res.css.columns} {style.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
-    <div class="{res.css.small6} {res.css.columns} {style.sitefooter_links}"><a href="" class="{style.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{style.sitefooter_links_link}">Privacy</a></div>
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
+    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_links}"><a href="" class="{style.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{style.sitefooter_links_link}">Privacy</a></div>
   </div>
 </footer>
         </g:HTMLPanel>

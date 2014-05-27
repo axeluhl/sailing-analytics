@@ -8,11 +8,11 @@
 		type="com.sap.sailing.gwt.home.client.shared.HeaderPanelResources" />
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
-			<div class="{res.css.grid}">
-				<div class="{res.css.small4} {res.css.columns}">
+			<div class="{res.mainCss.grid}">
+				<div class="{res.mainCss.small4} {res.mainCss.columns}">
 					<g:Image resource="{local_res.logo}" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"></g:Image>
 				</div>
-				<div class="{res.css.small8} {res.css.columns}">
+				<div class="{res.mainCss.small8} {res.mainCss.columns}">
 					<g:FlowPanel styleName="{local_res.css.sitenavigation}">
 						<s:MainMenu ui:field="mainMenu" />
 					</g:FlowPanel>
