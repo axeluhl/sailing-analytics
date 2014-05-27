@@ -48,7 +48,7 @@ public abstract class ClientFactoryImpl implements ClientFactory {
     }
 
     @Override
-    public AcceptsOneWidget getStage() {
-        return root.getStage();
+    public AcceptsOneWidget getContent() {
+        return root.getContent();
     }
 }

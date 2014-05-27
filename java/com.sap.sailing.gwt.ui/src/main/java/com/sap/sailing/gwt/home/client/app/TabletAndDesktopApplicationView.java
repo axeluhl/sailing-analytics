@@ -41,7 +41,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     }
 
     @Override
-    public AcceptsOneWidget getStage() {
+    public AcceptsOneWidget getContent() {
         return mainContentPanel;
     }
     

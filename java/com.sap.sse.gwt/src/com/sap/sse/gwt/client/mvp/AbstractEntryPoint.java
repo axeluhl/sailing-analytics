@@ -25,7 +25,7 @@ public abstract class AbstractEntryPoint implements EntryPoint {
      * by passing <code>placeHistoryMapperClass</code> to a {@link GWT#create(Class)} call. An {@link ActivityManager}
      * is configured using a composite {@link ActivityMapperRegistry activity mapper} considering all the
      * <code>activityMappers</code> passed to this method. As display for the activities' views the activity manager
-     * uses the <code>stage</code> which is assumed to be or to be contained in the <code>rootWidget</code> which is
+     * uses the <code>content</code> which is assumed to be or to be contained in the <code>rootWidget</code> which is
      * finally set as the entry point's root panel content element. Ultimately, the history handler is asked to navigate
      * to the place identified by the URL or to the <code>defaultPlace</code>.
      * <p>
@@ -44,7 +44,7 @@ public abstract class AbstractEntryPoint implements EntryPoint {
         }
         EventBus eventBus = clientFactory.getEventBus();
         ActivityManager activityManager = new ActivityManager(activityMapperRegistry, eventBus);
-        activityManager.setDisplay(clientFactory.getStage());
+        activityManager.setDisplay(clientFactory.getContent());
 
         // Start PlaceHistoryHandler with our PlaceHistoryMapper
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);

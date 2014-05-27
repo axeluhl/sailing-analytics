@@ -40,7 +40,7 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
     }
 
     @Override
-    public AcceptsOneWidget getStage() {
+    public AcceptsOneWidget getContent() {
         return mainContentPanel;
     }
 

@@ -21,7 +21,7 @@ public class AppClientFactoryImpl extends ClientFactoryImpl implements AppClient
             private SimplePanel root = new SimplePanel();
             
             @Override
-            public AcceptsOneWidget getStage() {
+            public AcceptsOneWidget getContent() {
                 return root;
             }
 

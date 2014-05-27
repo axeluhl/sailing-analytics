@@ -34,10 +34,10 @@ public interface ClientFactory {
     Widget getRoot();
     
     /**
-     * The stage in which to display the activity views when places are switched. Expected to be equal to
-     * or contained by {@link #getRoot()}.
+     * The content area in which to display the activity views when places are switched. Expected to be equal to or
+     * contained by {@link #getRoot()}.
      */
-    AcceptsOneWidget getStage();
+    AcceptsOneWidget getContent();
 
     /**
      * In case the URL doesn't specify a place to navigate to, this place will be used as the initial place.

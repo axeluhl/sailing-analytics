@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 public interface TopLevelView {
-    AcceptsOneWidget getStage();
+    AcceptsOneWidget getContent();
     
     Widget asWidget();
 }
