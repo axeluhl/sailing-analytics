@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.client.app;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.client.app.event.EventView;
-import com.sap.sailing.gwt.home.client.app.events.EventsActivity;
-import com.sap.sailing.gwt.home.client.app.events.EventsView;
-import com.sap.sailing.gwt.home.client.app.start.SmartphoneStartView;
-import com.sap.sailing.gwt.home.client.app.start.StartView;
+import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
+import com.sap.sailing.gwt.home.client.place.events.EventsView;
+import com.sap.sailing.gwt.home.client.place.start.SmartphoneStartView;
+import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 

@@ -12,6 +12,8 @@ public interface TextMessages extends Messages {
     String aboutUs();
 
     String contact();
+    
+    String search();
 
     String german();
 

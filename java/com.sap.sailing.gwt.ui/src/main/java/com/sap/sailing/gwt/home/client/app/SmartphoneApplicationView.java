@@ -9,9 +9,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.FooterPanel;
-import com.sap.sailing.gwt.home.client.shared.HeaderPanel;
-import com.sap.sailing.gwt.home.client.shared.MainMenuNavigator;
+import com.sap.sailing.gwt.home.client.shared.footer.FooterPanel;
+import com.sap.sailing.gwt.home.client.shared.header.Header;
+import com.sap.sailing.gwt.home.client.shared.mainmenu.MainMenuNavigator;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -24,7 +24,7 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
     private static ApplicationMobileViewUiBinder uiBinder = GWT.create(ApplicationMobileViewUiBinder.class);
 
     @UiField(provided=true)
-    HeaderPanel headerPanel;
+    Header headerPanel;
 
     @UiField
     FooterPanel footerPanel;

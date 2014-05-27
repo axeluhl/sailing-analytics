@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
-import com.sap.sailing.gwt.home.client.app.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.app.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.app.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.app.start.StartPlace;
-import com.sap.sailing.gwt.home.client.shared.MainMenuNavigator;
+import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
+import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.client.shared.mainmenu.MainMenuNavigator;
 
 public class MainMenuNavigatorImpl implements MainMenuNavigator {
     private final PlaceController placeController;
