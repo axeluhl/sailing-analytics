@@ -48,6 +48,112 @@ Instead, we decided to use a very simple, light-weight MVP (Model, View, Present
 
 A micro framework in package com.sap.sse.gwt.client.mvp supports developers in the implementation of UI components. It offers an `AbstractEntryPoint` class that manages most of the configuration tasks and establishes the links between the activity manager, place history manager, activity mapper and the event bus. The `AbstractActivityProxy` helps in applying code splitting to activities. The `example` subpackage contains two sample components that demonstrate how to use the micro framework. There is also some Javadoc on the most important classes.
 
+## Dealing with CSS Media Queries
+
+GWT doesn't handle media queries in `CssResource` interfaces. To still cope, we agreed to use the following approach. Each CSS file that contains media queries of the form `@media ...` are copied so that for each media query in the original CSS file one additional copy is created. We then remove (or comment out) the contents of all CSS rule sets enclosed in any media queries from the original CSS file so that the declarations remain with an empty body. In each of the media query-specific copies we do the same, only for all rule sets that were not contained in the media query section. The `@media` enclosings are removed from or commented out in the original CSS file and all copies.
+
+The Java resource file that describes the CSS file then has to declare a CSS resource for each of the copies and the original CSS file. The interface for the main resource that has to extend `CssResource` must be declared using the `@Shared` annotation. This ensures that the specializing media query-specific interfaces receive the same obfuscated class names as the main CSS resource. For each media query-specific copy, another interface that extends the main CSS's interface needs to be declared.
+
+Example: Assume we have an original CSS document of the following form:
+<pre>
+.a {
+  width: 75px;
+}
+@media (min-width: 25em) {
+  .b {
+    height: 10px;
+  }
+}
+@media (min-width: 50em) {
+  .b {
+    height: 20px;
+  }
+}
+</pre>
+
+Then the cleaned version of the original CSS looks like this:
+<pre>
+.a {
+  width: 75px;
+}
+/* @media (min-width: 25em) { */
+  .b {
+  }
+/* } */
+/* @media (min-width: 50em) { */
+  .b {
+  }
+/* } */
+</pre>
+
+The copy for the first media query:
+<pre>
+.a {
+}
+/* @media (min-width: 25em) { */
+  .b {
+    height: 10px;
+  }
+/* } */
+/* @media (min-width: 50em) { */
+  .b {
+  }
+/* } */
+</pre>
+
+and for the second media query:
+
+<pre>
+.a {
+}
+/* @media (min-width: 25em) { */
+  .b {
+  }
+/* } */
+/* @media (min-width: 50em) { */
+  .b {
+    height: 20px;
+  }
+/* } */
+</pre>
+
+The Java resource interface then would look something like this:
+
+<pre>
+public interface MyResources extends ClientBundle {
+    public static final MyResources INSTANCE = GWT.create(MyResources.class);
+
+    @Source("path/to/main.css")
+    MainCss mainCss();
+
+    @Shared
+    public interface MainCss extends CssResource {
+        String a();
+        String b();
+    }
+
+    public interface Media1Css extends MainCss {
+    }
+
+    @Source("path/to/media1.css")
+    Media1Css media1Css();
+
+    public interface Media2Css extends MainCss {
+    }
+
+    @Source("path/to/media2.css")
+    Media2Css media2Css();
+}
+</pre>
+
+The injection then has to happen in the component to which the CSS belongs which could be an entry point's `onModuleLoad()` method or a widget's / UiBinder's constructor. Example:
+
+<pre>
+  MyResources.INSTANCE.mainCss().ensureInjected();
+  StyleInjector.injectAtEnd("@media (min-width: 25em) { "+MyResources.INSTANCE.media1().getText()+"}");
+  StyleInjector.injectAtEnd("@media (min-width: 50em) { "+MyResources.INSTANCE.media2().getText()+"}");
+</pre>
+
 ## GWT Code Splitting
 
 For the various areas of the site we don't always want to have to load a new page. Instead, we'd like to use the "places" pattern with a local history management. This goes together well with GWT Code Splitting (see http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html#patterns) which allows an application to load its parts when they are needed. This speeds up the initial loading process and keeps bandwidth consumption low.
