@@ -87,17 +87,17 @@
 		    </h3>
 		  </div>
 		  <div class="{style.events-banner_band}">
-		    <div class="{res.mainCss.grid}">
-		      <div class="{res.mainCss.small12} {res.mainCss.columns}">
+		      <div class="{res.css.grid}">
+		      <div class="{res.css.small12} {res.css.columns}">
 		        <div class="{style.events-banner_band_message}"><g:Label ui:field="upcomingMessage" />&nbsp;-
 		        </div>
 		        <div class="{style.events-banner_band_name}"><g:Label ui:field="upcomingName" /></div>
-		        <button class="{res.mainCss.button} {style.events-banner_band_action}"><g:Label ui:field="upcomingAction" /></button>
+		        <button class="{res.css.button} {style.events-banner_band_action}"><g:Label ui:field="upcomingAction" /></button>
 		      </div>
 		    </div>
 		  </div>
 		</div>
-		<button class="{res.mainCss.button} events_show-all">Show all events</button>
+		<button class="{res.css.button} events_show-all">Show all events</button>
    	</g:HTMLPanel>
    		
 </ui:UiBinder>    
