@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.footer.FooterPanel;
+import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
 import com.sap.sailing.gwt.home.client.shared.header.MainMenuNavigator;
 
@@ -27,7 +27,7 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
     Header headerPanel;
 
     @UiField
-    FooterPanel footerPanel;
+    Footer footerPanel;
 
     @UiField
     SimplePanel mainContentPanel;

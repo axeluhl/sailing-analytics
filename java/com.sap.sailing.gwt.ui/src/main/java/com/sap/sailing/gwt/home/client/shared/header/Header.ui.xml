@@ -5,13 +5,12 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.header.HeaderResources" />
-    <g:HTMLPanel>
 <!-- Website header-->
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
 			<div class="{res.mainCss.grid}">
 				<div class="{res.mainCss.small4} {res.mainCss.columns}">
-					<g:Image resource="{local_res.logo} altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
+					<g:Image resource="{local_res.logo}" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
 				</div>
 				<div class="{res.mainCss.small8} {res.mainCss.columns}">
 					<nav class="{local_res.css.sitenavigation}">
@@ -23,7 +22,7 @@
 							styleName="{local_res.css.sitenavigation_link}" text="{i18n.aboutUs}" href="javascript:;"/>
 						<g:Anchor ui:field="contactPageLink"
 							styleName="{local_res.css.sitenavigation_link} {local_res.css.sitenavigation_linksearch}" text="{i18n.search}" href="javascript:;">
-							<img src="images/search-icon.png" alt="Search">
+							<img src="images/search-icon.png" alt="Search" />
 						</g:Anchor>
 					</nav>
 				</div>
