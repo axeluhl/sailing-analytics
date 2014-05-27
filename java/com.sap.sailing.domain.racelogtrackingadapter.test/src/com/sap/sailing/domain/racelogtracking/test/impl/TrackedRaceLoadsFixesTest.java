@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
+    @Ignore
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
