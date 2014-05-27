@@ -6,10 +6,10 @@
 	<g:HTMLPanel>
 		<div ui:field="loadingMessage" style="display: none; position:absolute; top:0; left:0; background-color:yellow;">Loading...</div>
 
-		<s:HeaderPanel ui:field="headerPanel" />
+		<s:header.HeaderPanel ui:field="headerPanel" />
         
 		<g:SimplePanel ui:field="mainContentPanel" />
 
-      	<s:FooterPanel ui:field="footerPanel" />
+      	<s:footer.FooterPanel ui:field="footerPanel" />
    </g:HTMLPanel>
 </ui:UiBinder>

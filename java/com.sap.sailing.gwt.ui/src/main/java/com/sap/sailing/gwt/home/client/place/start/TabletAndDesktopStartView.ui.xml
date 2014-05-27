@@ -5,7 +5,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
  
    	<g:HTMLPanel>
-   	    <s:Stage ui:field='stage'/>
+   	    <s:stage.Stage ui:field='stage'/>
    	</g:HTMLPanel>
    		
 </ui:UiBinder>    

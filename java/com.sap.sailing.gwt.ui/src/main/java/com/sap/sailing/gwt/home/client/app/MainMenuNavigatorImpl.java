@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.shared.mainmenu.MainMenuNavigator;
+import com.sap.sailing.gwt.home.client.shared.header.MainMenuNavigator;
 
 public class MainMenuNavigatorImpl implements MainMenuNavigator {
     private final PlaceController placeController;
