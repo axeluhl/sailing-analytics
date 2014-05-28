@@ -87,12 +87,33 @@ drwxrwxr-x.  8 backup backup 4.0K May 27 13:20 .git
 
 The first requirement to backup data from an instance is that it is running on CentOS. The backup script hasn't been tested on other systems. If you want to run it on other systems you most probably will need some effort to recompile bup and adapt some properties.
 
+## Setup
+
 - First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. That template contains everything needed to backup. It is a good idea to extract it to _/opt_. In addition to that one can find the script in the main GIT repository under _configuration/backup.sh_. You can download a version of bup here: https://github.com/bup/bup/releases. Be aware of the fact that you need to compile the whole thing.
 
-- After having extracted or installed the script and binaries you need to adapt some settings. Check the documentation in the script - it should be self explaining. Then you could add the following entry to _/etc/crontab_: `0 22 * * * root /opt/backup.sh`. 
+- After having extracted or installed the script and binaries you need to adapt some settings. Make sure to at least configure PREFIX and BACKUP_DIRECTORIES. Check the documentation in the script - it should be self explaining. Then you could add the following entry to _/etc/crontab_: `0 22 * * * root /opt/backup.sh`. 
 
 - Now make sure to copy the SSH key to the backup server by using `ssh-copy-id -i /root/.ssh/id_dsa backup@172.31.25.136`. The remote repositories are stored at _backup@172.31.25.136:/home/backup_. The password for the backup user is the same as for the trac user on the webserver. 
 
 - To make sure everything is right you should execute the script once before having it automatically executed - just run `/opt/backup.sh`.
+
+## Check
+
+After having successfully run a first backup you can check that your backup has been stored correctly. Unfortunately listing the contents of your backup is not possible from the client. You need to log into the backup server with the user backup.
+
+According to the PREFIX that you have configured the backup script will have created a new directory at /home/backup/PREFIX. The following example assumes that your prefix is build and that you have created a backup named dir-home-hudson-repo-jobs-SAPSailingAnalytics-master.
+
+<pre>
+[backup@ip-172-31-25-136 build]$ /opt/bup/bup -d /home/backup/build/ ls dir-home-hudson-repo-jobs-SAPSailingAnalytics-master
+2014-05-27-170544  latest                                                                                                                                                                                                                              
+</pre>
+
+The output will contain all runs of the backup. There will always be a symbolic link that points to the latest backup. Using ls you can easily navigate through the tree structure.
+
+<pre>
+[backup@ip-172-31-25-136 build]$ /opt/bup/bup -d /home/backup/build/ ls dir-home-hudson-repo-jobs-SAPSailingAnalytics-master/latest/home/hudson/repo/jobs/SAPSailingAnalytics-master
+builds           config.xml       lastStable       lastSuccessful   nextBuildNumber  scm-polling.log                                                                                                                                                           
+</pre>
+
 
 # Restore 
