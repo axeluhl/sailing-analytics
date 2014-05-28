@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -32,6 +33,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
@@ -83,7 +85,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
 
-        master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
+        Event event = master.addEvent(eventName, eventStartDate, eventEndDate, venue, false, eventId);
         assertNotNull(master.getEvent(eventId));
         assertNull(replica.getEvent(eventId));
         
@@ -112,9 +114,11 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         leaderboardNames.add(leaderboardName);
         int[] overallLeaderboardDiscardThresholds = new int[] {};
         ScoringSchemeType overallLeaderboardScoringSchemeType = ScoringSchemeType.HIGH_POINT;
-        master.addLeaderboardGroup(leaderBoardGroupName, "Some descriptive Description", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+        LeaderboardGroup leaderboardGroup = master.addLeaderboardGroup(leaderBoardGroupName, "Some descriptive Description", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         assertNotNull(master.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
+        
+        event.addLeaderboardGroup(leaderboardGroup);
         
         /* Media Library */
         MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", new Date(), 1, MimeType.mp4);
@@ -136,12 +140,14 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
             }
         }
 
-        assertNotNull(replica.getEvent(eventId));
+        Event replicaEvent = replica.getEvent(eventId);
+        assertNotNull(replicaEvent);
         assertNotNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
-        assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
+        LeaderboardGroup replicaLeaderboardGroup = replica.getLeaderboardGroupByName(leaderBoardGroupName);
+        assertNotNull(replicaLeaderboardGroup);
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
-        
+        assertSame(replicaLeaderboardGroup, replicaEvent.getLeaderboardGroups().iterator().next());
         //System.out.println("InitialLoadReplicationObjectIdentityTest.testInitialLoad - replica.getAllMediaTracks: " + replica.getAllMediaTracks());
         
         assertThat(replica.getAllMediaTracks().size(), is(3));

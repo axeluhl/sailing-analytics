@@ -37,5 +37,9 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     
     void addLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
-    void removeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+    /**
+     * @return <code>true</code> if and only if a leaderboard group equal to <code>leaderboardGroup</code> was part of
+     *         {@link #getLeaderboardGroups()} and therefore was actually removed
+     */
+    boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 }

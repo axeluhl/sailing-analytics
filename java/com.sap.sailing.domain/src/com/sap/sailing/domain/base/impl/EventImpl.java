@@ -62,7 +62,7 @@ public class EventImpl extends EventBaseImpl implements Event {
     }
 
     @Override
-    public void removeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
-        leaderboardGroups.remove(leaderboardGroup);
+    public boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        return leaderboardGroups.remove(leaderboardGroup);
     }
 }
