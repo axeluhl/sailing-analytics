@@ -130,10 +130,33 @@ Depending on what has crashed or where data got lost you need to look at differe
 
 ### Amazon Ireland is not available / has crashed
 
-Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then quit your job.
+Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then make sure to point to others being responsible (reading bofh.ntk.net/Bastard1.html can help).
 
 ### One Instance has crashed and can not be recovered
 
 Look out for an AMI that represents the system setup and binaries. If there is one then you can create a new instance from that AMI. Please keep in mind that not all AMIs contain all volumes needed for operation. Normally very large volumes containing databases and such are not persisted along with an AMI. In case of a recovery you most probably need to recreate these volumes and then restore data from backup.
+
+<table>
+<tr>
+<td>Server</td>
+<td>AMI Name</td>
+<td>Notes</td>
+</tr>
+<tr>
+<td>Webserver</td>
+<td>Sailing Webserver 1.0</td>
+<td>Only contains $SYSTEM and $HOME partition. /var/log/old and /var/log are not included. Upon recovery you most probably need to recreate at least /var/log/httpd.</td>
+</tr>
+<tr>
+<td>Database</td>
+<td></td>
+<td>No AMI created until now. Recovery could be done by starting up a new instance from AMI "Centos 6 Basic Image" and then adding an empty volume that will contain database files. Make sure to also copy the script from $GIT/configuration/init.d/mongodb to $SYSTEM/etc/init.d and execute chkconfig mongodb --add and chkconfig mongodb on. Now you can proceed by first recovering /etc/mongodb from backup and then also the database files.</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>Build/Test with Hudson installed</td>
+<td>All volumes are available in this AMI. In most cases you will need to recover $HOME/hudson from backup.</td>
+</tr>
+</table>
 
 ### Volume has crashed or data has been lost
