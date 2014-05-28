@@ -129,8 +129,9 @@ public class Swarm {
     	Position mapNE = new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds().getNorthEast().getLongitude());
     	Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds().getSouthWest().getLongitude());
 
-    	Position fieldNE = this.field.getFieldNE();
-    	Position fieldSW = this.field.getFieldSW();
+    	Position[] fieldCorners = this.field.getFieldCorners();
+    	Position fieldNE = fieldCorners[1];
+    	Position fieldSW = fieldCorners[0];
 
     	Vector visibleNE = this.isVisible(fieldNE);
     	Vector visibleSW = this.isVisible(fieldSW);
@@ -173,6 +174,7 @@ public class Swarm {
 
     	this.field.setVisSW(this.boundsSW);
     	this.field.setVisNE(this.boundsNE);
+    	this.field.setVisFullCanvas((!useBoundsNorth)&&(!useBoundsEast)&&(!useBoundsSouth)&&(!useBoundsWest));
 
     	Vector boundsSWpx = this.projection.latlng2pixel(this.boundsSW);
     	Vector boundsNEpx = this.projection.latlng2pixel(this.boundsNE);

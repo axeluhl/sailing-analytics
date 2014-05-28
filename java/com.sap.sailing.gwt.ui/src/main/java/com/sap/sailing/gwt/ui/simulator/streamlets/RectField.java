@@ -22,7 +22,8 @@ public class RectField implements VectorField {
 	
 	public Position visSW;
 	public Position visNE;
-
+	public boolean visFull = false;
+		
 	private int w;
 	private int h;
 
@@ -170,20 +171,26 @@ public class RectField implements VectorField {
 		return 1.0;
 	}
 
-	public Position getFieldNE() {
-		return new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+	public Position[] getFieldCorners() {
+		
+		DegreePosition[] result = new DegreePosition[2];
+
+		result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+		result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+		
+		return result;
 	}
 	
-	public Position getFieldSW() {
-		return new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-	}
-
 	public void setVisNE(Position visNE) {
 		this.visNE = visNE;
 	}
 	
 	public void setVisSW(Position visSW) {
 		this.visSW = visSW;
+	}
+
+	public void setVisFullCanvas(boolean full) {
+		this.visFull = full;
 	}
 
 	public double getParticleFactor() {

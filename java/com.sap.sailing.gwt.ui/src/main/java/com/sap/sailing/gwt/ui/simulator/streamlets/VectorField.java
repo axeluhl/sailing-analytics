@@ -25,13 +25,13 @@ public interface VectorField {
 
 	public double lineWidth(double speed);
 	
-	public Position getFieldNE();
+	public Position[] getFieldCorners();
 	
-	public Position getFieldSW();
-
 	public void setVisNE(Position visNE);
 	
 	public void setVisSW(Position visSW);
+
+	public void setVisFullCanvas(boolean full);
 
 	public double getParticleFactor();
 	
