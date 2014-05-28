@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
@@ -55,15 +56,16 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         regattas.add("Day2");
         final Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
         final String leaderboardGroupName = "LGName";
-        master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */false, /* leaderboardNames */
+        LeaderboardGroup lg = master.apply(new CreateLeaderboardGroup(leaderboardGroupName, "LGDescription", /* displayGroupsInReverseOrder */
+                false, /* leaderboardNames */
                 Collections.<String> emptyList(), /* overallLeaderboardDiscardThresholds */null, /* overallLeaderboardScoringSchemeType */
                 null));
-        master.apply(new AddLeaderboardGroupToEvent(masterEvent.getId(), leaderboardGroupName));
+        master.apply(new AddLeaderboardGroupToEvent(masterEvent.getId(), lg.getId()));
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertEquals(1, Util.size(replicatedEvent.getLeaderboardGroups()));
         assertEquals(leaderboardGroupName, replicatedEvent.getLeaderboardGroups().iterator().next().getName());
-        assertTrue(master.apply(new RemoveLeaderboardGroupFromEvent(masterEvent.getId(), leaderboardGroupName)));
+        assertTrue(master.apply(new RemoveLeaderboardGroupFromEvent(masterEvent.getId(), lg.getId())));
         Thread.sleep(1000);
         assertTrue(Util.isEmpty(replicatedEvent.getLeaderboardGroups()));
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -30,6 +31,8 @@ public class LeaderboardGroupDTO extends NamedDTO {
      */
     private Date currentServerTime;
     
+    private UUID id;
+    
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
      * the leaderboards. The {@link #currentServerTime} will be set to the creation time on the system that creates this
@@ -51,6 +54,10 @@ public class LeaderboardGroupDTO extends NamedDTO {
         currentServerTime = new Date();
         this.description = description;
         this.leaderboards = leaderboards;
+    }
+    
+    public UUID getId() {
+        return id;
     }
     
     public boolean hasOverallLeaderboard() {
@@ -207,6 +214,10 @@ public class LeaderboardGroupDTO extends NamedDTO {
 
     public Date getCurrentServerTime() {
         return currentServerTime;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
     
 }

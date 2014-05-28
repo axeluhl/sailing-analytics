@@ -2861,6 +2861,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
+        groupDTO.setId(leaderboardGroup.getId());
         groupDTO.setName(leaderboardGroup.getName());
         groupDTO.description = leaderboardGroup.getDescription();
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
