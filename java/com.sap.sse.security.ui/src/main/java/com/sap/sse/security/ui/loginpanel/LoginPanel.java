@@ -1,8 +1,12 @@
 package com.sap.sse.security.ui.loginpanel;
 
+import java.util.HashMap;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -11,11 +15,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -30,7 +37,7 @@ public class LoginPanel extends FlowPanel {
     private SimplePanel infoPanel;
 
     private boolean expanded = false;
-    private UserDTO currentUser = null;
+    private static UserDTO currentUser = null;
 
     private Label loginTitle1;
     private Anchor loginLink;
@@ -45,9 +52,13 @@ public class LoginPanel extends FlowPanel {
     public LoginPanel() {
         registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
         
+        StylesheetResources.INSTANCE.css().ensureInjected();
+        
         wrapperPanel = new FlowPanel();
-        wrapperPanel.addStyleName("loginPanel");
-        wrapperPanel.addStyleName("loginPanel-collapsed");
+        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanel());
+        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+        FlowPanel titlePanel = new FlowPanel();
+        titlePanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelTitlePanel());
         loginTitle1 = new Label("");
         loginTitle2 = new Label("");
         loginLink = new Anchor("Login");
@@ -65,7 +76,6 @@ public class LoginPanel extends FlowPanel {
 
                         @Override
                         public void onSuccess(SuccessInfo result) {
-                            Window.alert(result.getMessage());
                             currentUser = null;
                             updateStatus();
                         }
@@ -76,11 +86,15 @@ public class LoginPanel extends FlowPanel {
                 }
             }
         });
-        wrapperPanel.add(loginTitle1);
-        wrapperPanel.add(loginLink);
-        wrapperPanel.add(loginTitle2);
+        final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userIcon();
+        ImageResourceRenderer renderer = new ImageResourceRenderer();
+        titlePanel.add(new HTML(renderer.render(userImageResource)));
+        titlePanel.add(loginTitle1);
+        titlePanel.add(loginLink);
+        titlePanel.add(loginTitle2);
+        wrapperPanel.add(titlePanel);
         infoPanel = new SimplePanel();
-        infoPanel.addStyleName("loginPanel-infoPanel");
+        infoPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelInfoPanel());
         initLoginContent();
         initUserContent();
         infoPanel.setWidget(loginPanel);
@@ -126,6 +140,8 @@ public class LoginPanel extends FlowPanel {
         formContent.add(password);
         SubmitButton submit = new SubmitButton("Login");
         formContent.add(submit);
+        Anchor register = new Anchor("Register", EntryPointLinkFactory.createRegistrationLink(new HashMap<String, String>()));
+        formContent.add(register);
 
         loginPanel.setWidget(formContent);
     }
@@ -137,8 +153,8 @@ public class LoginPanel extends FlowPanel {
     private void updateUserContent() {
         if (currentUser != null) {
             userPanel.clear();
-            Label name = new Label(currentUser.getName());
-            userPanel.add(name);
+//            Label name = new Label(currentUser.getName());
+//            userPanel.add(name);
         }
     }
 
@@ -172,26 +188,29 @@ public class LoginPanel extends FlowPanel {
             loginTitle2.setText("");
         }
         expanded = false;
-        wrapperPanel.addStyleName("loginPanel-collapsed");
-        wrapperPanel.removeStyleName("loginPanel-expanded");
+        wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+        wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
     }
 
     private void toggleLoginPanel() {
         if (expanded) {
             expanded = false;
-            wrapperPanel.addStyleName("loginPanel-collapsed");
-            wrapperPanel.removeStyleName("loginPanel-expanded");
+            wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+            wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
         } else {
             expanded = true;
-            wrapperPanel.addStyleName("loginPanel-expanded");
-            wrapperPanel.removeStyleName("loginPanel-collapsed");
+            wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
+            wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
         }
     }
     
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
         String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        
-        serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
+        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.indexOf('/', moduleBaseURL.indexOf(':')+3)+1);
+        serviceToRegister.setServiceEntryPoint(baseURL + "security/ui/" + servicePath);
+    }
+    
+    public static UserDTO getCurrentUser(){
+        return currentUser;
     }
 }

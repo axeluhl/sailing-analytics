@@ -14,15 +14,17 @@
   <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
-<!--   <stylesheet src="/security/ui/Login.css" /> -->
+  <stylesheet src="../Register.css" />
   
   
   <inherits name="com.google.gwt.resources.Resources" />
   <inherits name="com.google.gwt.logging.Logging"/>
   
   
-  
   <super-source path="jre" />
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.sap.sse.security.ui.registration.RegisterEntryPoint'/>
 
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -36,7 +38,7 @@
 
   <!-- Specify the paths for translatable code                    -->
 <extend-property name="locale" values="de"/>
-  <source path='loginpanel'/>
-  <source path='shared'/>
   <source path='client'/>
+  <source path='registration'/>
+  <source path='shared'/>
 </module>

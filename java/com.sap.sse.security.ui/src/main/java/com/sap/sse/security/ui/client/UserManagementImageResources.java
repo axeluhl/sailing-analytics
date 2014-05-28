@@ -13,4 +13,7 @@ public interface UserManagementImageResources extends ClientBundle {
     
     @Source("com/sap/sse/security/ui/images/user_small.png")
     ImageResource userSmall();
+    
+    @Source("com/sap/sse/security/ui/images/user_icon.png")
+    ImageResource userIcon();
 }

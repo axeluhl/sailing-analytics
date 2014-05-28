@@ -61,7 +61,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -84,7 +83,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
@@ -131,13 +129,12 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
 
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
-        this.user = theUser;
         this.stringMessages = stringMessages;
         this.raceboardViewConfiguration = raceboardViewConfiguration;
         this.raceSelectionProvider = theRaceSelectionProvider;
@@ -272,7 +269,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
     
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, getConfiguration().isAutoSelectMedia());
 //      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);

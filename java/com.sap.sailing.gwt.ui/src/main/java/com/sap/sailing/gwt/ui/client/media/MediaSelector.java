@@ -39,7 +39,6 @@ import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -64,7 +63,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private final MediaServiceAsync mediaService;
     private StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final UserDTO user;
     private boolean autoSelectMedia;
 
     private MediaPlayer activeAudioPlayer;
@@ -74,14 +72,13 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     public MediaSelector(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserDTO user, boolean autoSelectMedia) {
+            ErrorReporter errorReporter, boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.user = user;
 		this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
@@ -273,7 +270,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     @Override
     public void onFailure(Throwable caught) {
-        setWidgetsVisible((this.user != null));
+        //TODO setWidgetsVisible((this.user != null));
+        setWidgetsVisible(true);
         errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
     }
 
@@ -284,7 +282,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         for (MediaTrack mediaTrack : this.mediaTracks) {
             setStatus(mediaTrack);
         }
-        setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        //TODO setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        setWidgetsVisible(true);
         
         toggleMediaButton.setValue(autoSelectMedia);
         if (autoSelectMedia) {
@@ -377,7 +376,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
             final VideoPlayer popupPlayer;
 
-            boolean showSynchControls = this.user != null;
+            //TODO boolean showSynchControls = this.user != null;
+            boolean showSynchControls = true;
             if (videoTrack.isYoutube()) {
                 // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
                 popupPlayer = new YoutubeEmbeddedPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer,
@@ -553,7 +553,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     @Override
     public boolean allowsAddDelete() {
-        return this.user != null;
+        //TODO return this.user != null;
+        return true;
     }
 
     private void showSelectionDialog() {
@@ -573,7 +574,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
         }
 
-        boolean showAddButton = MediaSelector.this.user != null;
+        //TODO boolean showAddButton = MediaSelector.this.user != null;
+        boolean showAddButton = true;
         mediaSelectionDialog.show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
                 playingAudioTrack, showAddButton, toggleMediaButton);
     }

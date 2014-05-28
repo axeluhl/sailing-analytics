@@ -44,16 +44,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>User Management Service</display-name>
-	    <servlet-name>UserManagementService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.UserManagementServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>UserManagementService</servlet-name>
-		<url-pattern>/service/usermanagement</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<display-name>Data Mining Service</display-name>
 	    <servlet-name>DataMiningService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>

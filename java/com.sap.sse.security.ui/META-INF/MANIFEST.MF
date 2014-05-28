@@ -16,4 +16,5 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.google.gwt.osgi;bundle-version="2.6.0",
  com.sap.sse.security;bundle-version="1.0.0"
 Web-ContextPath: /security/ui
-Export-Package: com.sap.sse.security.ui.loginpanel
+Export-Package: com.sap.sse.security.ui.loginpanel,
+ com.sap.sse.security.ui.server

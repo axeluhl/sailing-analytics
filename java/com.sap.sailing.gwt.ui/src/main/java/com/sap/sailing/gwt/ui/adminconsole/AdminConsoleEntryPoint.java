@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,8 +29,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.UserManagementService;
-import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;
@@ -45,13 +46,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
         registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
 
@@ -63,7 +62,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         DockPanel topInformationPanel = new DockPanel();
         topInformationPanel.setSize("100%", "95%");
-        UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
+        UserStatusPanel userStatusPanel = new UserStatusPanel(this);
         userStatusPanel.ensureDebugId("UserStatus");
         topInformationPanel.add(userStatusPanel, DockPanel.WEST);
         topInformationPanel.add(persistentAlertLabel, DockPanel.CENTER);
@@ -210,6 +209,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         sysinfoPanel.ensureDebugId("SystemInformation");
         dockPanel.addSouth(sysinfoPanel, 2.0);
         dockPanel.add(tabPanel);
+        RootPanel.get().add(new LoginPanel());
     }
 
     private void addScrollableTab(TabLayoutPanel tabPanel, Widget widget, String tabTitle) {

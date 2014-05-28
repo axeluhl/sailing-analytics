@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.server.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -108,6 +109,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             } else {
                                 RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                             }
+                            RootPanel.get().add(new LoginPanel());
                         }
         
                         @Override
@@ -127,7 +129,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private void createUI(boolean showRaceDetails, boolean embedded, boolean hideToolbar) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
-        //RootLayoutPanel.get().add(new LoginPanel());
         LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
             // Hack to shorten the leaderboardName in case of overall leaderboards
