@@ -192,9 +192,19 @@ dir-etc mongodb-databases mysql-databases
 var
 [backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup
 mongodb-10201       mongodb-10201-wind  mongodb-10202       mongodb-10202-wind  mysql
-[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup/mongodb-10201
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup/mongodb-10202
 COMMAND_MESSAGES.json         CONFIGURATIONS.json           LAST_MESSAGE_COUNT.json       LEADERBOARD_GROUPS.json       RACE_LOGS.json                REGATTA_FOR_RACE_ID.json      VIDEOS.json                                                 
 COMPETITORS.json              EVENTS.json                   LEADERBOARDS.json             RACES_MESSAGES.json           REGATTAS.json                 TRACTRAC_CONFIGURATIONS.json                                                              
 </pre>
 
-- We know now that
+- We know that we want to recover the file LEADERBOARDS.json as it contains the score corrections (at least the ones manually entered). Let's now recover that file.
+
+<pre>
+[backup@ip-172-31-25-136 ~]$ /opt/bup/bup -d /home/backup/database/ restore --outdir=/home/backup/restored-files mongodb-databases/latest/var/lib/mysql/backup/mongodb-10201/LEADERBOARDS.json
+Restoring: 1, done.
+[backup@ip-172-31-25-136 ~]$ ls -lah restored-files/
+total 132K
+-rw-r--r--. 1 backup backup 121K May 27 22:05 LEADERBOARDS.json
+</pre>
+
+- Now we can copy the recovered files to the instance.
