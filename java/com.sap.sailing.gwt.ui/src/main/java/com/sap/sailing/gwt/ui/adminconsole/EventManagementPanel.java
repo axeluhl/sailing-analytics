@@ -46,12 +46,13 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
- * is not connected with any regatta and it used only to manage of basic attributes of the an event.
+ * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event is not
+ * connected with any regatta and it used only to manage of basic attributes of the an event.
+ * 
  * @author Frank Mittag (C5163974)
  * 
  */
-public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
+public class EventManagementPanel extends SimplePanel implements EventRefresher {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -80,7 +81,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public SailingEventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;

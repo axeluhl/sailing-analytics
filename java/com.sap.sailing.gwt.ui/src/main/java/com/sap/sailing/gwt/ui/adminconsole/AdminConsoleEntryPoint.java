@@ -93,7 +93,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.ensureDebugId("AdministrationTabs");
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
-        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this,
+        EventManagementPanel sailingEventManagementPanel = new EventManagementPanel(sailingService, this,
                 stringMessages);
         addToTabPanel(tabPanel, user, sailingEventManagementPanel, stringMessages.events(), AdminConsoleFeatures.MANAGE_EVENTS);
 

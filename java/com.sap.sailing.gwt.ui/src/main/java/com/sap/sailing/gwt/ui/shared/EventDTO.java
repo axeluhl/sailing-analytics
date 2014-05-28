@@ -17,8 +17,7 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public boolean isPublic;
     public UUID id;
 
-    // maybe temporary: as long it's not clear how a leaderboard group relates to a sailing event
-    public LeaderboardGroupDTO leaderboardGroup;
+    private List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
 
     private Date currentServerTime;
     
@@ -38,5 +37,13 @@ public class EventDTO extends NamedDTO implements IsSerializable {
 
     public Date getCurrentServerTime() {
         return currentServerTime;
+    }
+    
+    public void addLeaderboardGroup(LeaderboardGroupDTO leaderboardGroup) {
+        leaderboardGroups.add(leaderboardGroup);
+    }
+    
+    public Iterable<LeaderboardGroupDTO> getLeaderboardGroups() {
+        return leaderboardGroups;
     }
 }

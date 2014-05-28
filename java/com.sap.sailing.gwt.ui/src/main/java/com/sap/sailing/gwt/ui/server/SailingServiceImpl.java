@@ -3073,13 +3073,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private EventDTO convertToEventDTO(Event event) {
-        EventDTO eventDTO = new EventDTO(event.getName());
-        eventDTO.venue = new VenueDTO();
-        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
-        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
-        eventDTO.isPublic = event.isPublic();
-        eventDTO.id = event.getId();
+        EventDTO eventDTO = convertToEventDTO((EventBase) event);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
