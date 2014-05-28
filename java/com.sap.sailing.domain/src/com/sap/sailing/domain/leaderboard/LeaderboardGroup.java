@@ -5,7 +5,21 @@ import java.util.Collection;
 import com.sap.sailing.domain.common.Renamable;
 
 /**
- * A leaderboard group is used to group one or more {@link Leaderboard}s.
+ * A leaderboard group is used to group one or more {@link Leaderboard}s. If can be used to represent all or part of the
+ * regattas of an event or to establish a collection of regattas or leaderboards otherwise belonging together according
+ * to some context. This could, for example, be a leaderboard group of all the interesting races in a particular boat
+ * class or races at a particular event over time.<p>
+ * 
+ * The leaderboards grouped by this object have an iteration order that equals their insertion order. We have seen
+ * cases where a user interface shall display the leaderboards in reverse insertion order. This behavior is described
+ * by {@link #isDisplayGroupsInReverseOrder()}.<p>
+ * 
+ * Optionally, a leaderboard group can specify an "Overall Leaderboard." The typical use case for this is a regatta series
+ * such as the Extreme Sailing Series or the German Sailing League ("Bundesliga") where several regatta results are
+ * combined into a series score. The overall leaderboard, if defined, has its own scoring scheme and obtains its
+ * "tracked results" from the results of the respective leaderboard. Each leaderboard in this group then represents
+ * one race column in the overall leaderboard.
+ * 
  * @author Frank Mittag (c5163874)
  */
 public interface LeaderboardGroup extends Renamable {
