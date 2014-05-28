@@ -14,6 +14,8 @@ The central backup server is configured with enough space to hold a large amount
 
 <img src="/wiki/images/amazon/EC2BackupStrategy.jpg" width="100%" height="100%"/>
 
+This image only depicts backup of data. For each instance there should be an AMI containing at least the system configuration and binaries. The process of creating these AMIs is a manual one and has no defined schedule.
+
 ## Technology
 
 BUP is the tool that is being used to create the backups. You can access it's documentation and code here: https://github.com/bup/bup. If you look at it in detail then this is just a very sophisticated wrapper around GIT. Unlike git, it writes packfiles directly (instead of having a separate garbage collection / repacking stage) so it's fast even with gratuitously huge amounts of data. bup's improved index formats also allow you to track far more filenames than git (millions) and keep track of far more objects (hundreds or thousands of gigabytes). It uses a rolling checksum algorithm (similar to rsync) to split large files into chunks. The most useful result of this is you can backup huge virtual machine (VM) disk images, databases, and XML files incrementally, even though they're typically all in one huge file, and not use tons of disk space for multiple versions.
@@ -122,4 +124,16 @@ You can also display any text files by replacing `ls` by `cat-file`.
 this is dummy content to test the backup
 </pre>
 
-# Restore 
+# Restore
+
+Depending on what has crashed or where data got lost you need to look at different places to restore content and functionality.
+
+## Amazon Ireland is not available / has crashed
+
+Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then quit your job.
+
+## One Instance has crashed and can not be recovered
+
+Look out for an AMI that represents the system setup and binaries. If there is one then you can create a new instance from that AMI. Please keep in mind that not all AMIs contain all volumes needed for operation. Normally very large volumes containing databases and such are not persisted along with an AMI. In case of a recovery you most probably need to recreate these volumes and then restore data from backup.
+
+## Volume has crashed or data has been lost
