@@ -9,3 +9,5 @@ With respect to the available admin resources for this project the aim of a back
 The technology behind our backup solution is based on a customized use of GIT repositories that are located on a central backup server. Each client creates an index of all files to backup and then pushes them to that server. That approach guarantees that we have a full history for each file including diffs for plaintext and that space consumption is kept to a minimum by storing only the differences. In addition to that our tool will split and pack files to save space.
 
 The central backup server is configured with enough space to hold a large amount of backup data. To be able to also recover data in case of a failure or data loss all repositories are sync'd to a S3 bucket.
+
+<img src="/wiki/images/amazon/EC2BackupStrategy.jpg" width="100%" height="100%"/>
