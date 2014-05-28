@@ -10,7 +10,9 @@ With respect to the available admin resources for this project the aim of a back
 
 The technology behind our backup solution is based on a customized use of GIT repositories that are located on a central backup server. Each client creates an index of all files to backup and then pushes them to that server. That approach guarantees that we have a full history for each file including diffs for plaintext and that space consumption is kept to a minimum by storing only the differences. In addition to that our tool will split and pack files to save space.
 
-The central backup server is configured with enough space to hold a large amount of backup data. To be able to also recover data in case of a failure or data loss all repositories are sync'd to a S3 bucket. The following image depicts the current structure. On the left hand you see the instances involved. For each of these instances you see the directories or data stores being backup'd. In addition to that you can see the time each of the backups runs. On the right hand you see the structure of the backup server with separate git repositories for each instance.
+The central backup server is configured with enough space to hold a large amount of backup data. To be able to also recover data in case of a failure or data loss all repositories are sync'd to a S3 bucket. This operation is executed weekly (each Saturday) and will behave like a rsync as it will only copy changed files.
+
+The following image depicts the current structure. On the left hand you see the instances involved. For each of these instances you see the directories or data stores being backup'd. In addition to that you can see the time each of the backups runs. On the right hand you see the structure of the backup server with separate git repositories for each instance.
 
 <img src="/wiki/images/amazon/EC2BackupStrategy.jpg" width="100%" height="100%"/>
 
@@ -130,7 +132,7 @@ Depending on what has crashed or where data got lost you need to look at differe
 
 ### Amazon Ireland is not available / has crashed
 
-Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then make sure to point to others being responsible (reading bofh.ntk.net/Bastard1.html can help).
+Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then make sure to point to others being responsible (reading http://bofh.ntk.net/Bastard1.html can help).
 
 ### One Instance has crashed and can not be recovered
 
@@ -157,6 +159,13 @@ Look out for an AMI that represents the system setup and binaries. If there is o
 <td>Build/Test with Hudson installed</td>
 <td>All volumes are available in this AMI. In most cases you will need to recover $HOME/hudson from backup.</td>
 </tr>
+<tr>
+<td>Other</td>
+<td>n/a</td>
+<td>Most instances should be recoverable by at least starting with a fresh instance based on "Centos 6 Basic Image" and then recovering files from backup.</td>
+</tr>
 </table>
 
 ### Volume has crashed or data has been lost
+
+If volume data
