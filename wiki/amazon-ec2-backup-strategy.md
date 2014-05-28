@@ -183,5 +183,18 @@ In this case the data stored on the backup server can come in handy. Assuming th
 dir-etc mongodb-databases mysql-databases
 </pre>
 
-- Let's assume that you want to recover some score corrections from the archive server
+- Let's assume that you want to recover some score corrections from the archive server. We need to have a look at mongodb-databases and check what is contained there. Keep in mind that wind information is only updated once a week so that not every named backup will contain wind information.
 
+<pre>
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases
+2014-05-27-170544 latest
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest
+var
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup
+mongodb-10201       mongodb-10201-wind  mongodb-10202       mongodb-10202-wind  mysql
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/database/ ls mongodb-databases/latest/var/lib/mysql/backup/mongodb-10201
+COMMAND_MESSAGES.json         CONFIGURATIONS.json           LAST_MESSAGE_COUNT.json       LEADERBOARD_GROUPS.json       RACE_LOGS.json                REGATTA_FOR_RACE_ID.json      VIDEOS.json                                                 
+COMPETITORS.json              EVENTS.json                   LEADERBOARDS.json             RACES_MESSAGES.json           REGATTAS.json                 TRACTRAC_CONFIGURATIONS.json                                                              
+</pre>
+
+- We know now that
