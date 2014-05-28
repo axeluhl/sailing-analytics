@@ -300,15 +300,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         urls = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
-        this.windStore = windStore;
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
         this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
+            // don't write the transformed wind fixes into the DB again... see also bug 1974 
+            this.windStore = EmptyWindStore.INSTANCE;
         } else {
             simulator = null;
+            this.windStore = windStore;
         }
         // check if there is a directory configured where stored data files can be cached
         // only cache files for races in REPLAY state
