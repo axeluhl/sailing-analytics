@@ -1,1 +1,7 @@
 # Amazon EC2 Backup Strategy
+
+It is crucial that all data stored on various instances of our infrastructure is backup'd regularly so that one can recover in case of data loss or hardware failure. Each data store must be represented in the backup and it must be possible to recover all data at any time. This also holds for configurations that define how applications and instances run. 
+
+With respect to the available admin resources for this project the aim of a backup solution is not find a way between perfection and chaos that keeps the amount of work to a minimum level without compromising the aim. One building block to achieve this is to make the setup of a backup for a data store (or whole instance) as easy as possible. That is being made possible by providing all administrators a simple backup script that can be configured in 5 minutes. Another building block is to define that backups are not accurate to the minute or even hour but are executed once every day. That means that you can loose at most 23 hours of data if hardware fails 23 hours after the last backup. Considering the non linear increasing amount of additional work required to build a solution that would give minute accuracy the current timeframe is deemed ok for the data we're dealing with.
+
+The technology behind our backup solution is based on a customized use of GIT repositories
