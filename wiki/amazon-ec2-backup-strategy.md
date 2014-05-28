@@ -38,3 +38,53 @@ Reading index: 1188, done.
 Saving: 100.00% (24426/24426k, 1188/1188 files), done.    
 bloom: creating from 1 file (3635 objects). 
 </pre>
+
+To procedure to store a backup to a remote server involves just one additional parameter to save. Remember that building the index is still done locally. The remote server has to be reachable by SSH, have bup available and in most cases it makes sense to having setup ssh password-less authentication. A typical operation would look like this:
+
+<pre>
+$ bup index
+Reinitialized existing Git repository in /home/.bup/
+$ bup add /etc
+Indexing: 1188, done (2196 paths/s).
+$ bup save -r backup@123.254.254.0:/home/backup/gitrepository --date=`date +%s` -n etc /etc
+Reading index: 1188, done.
+Saving: 100.00% (24426/24426k, 1188/1188 files), done.    
+bloom: creating from 1 file (3635 objects). 
+</pre>
+
+As bup is using the standard GIT repository layout one does not need to use bup to access files. But yuo have to keep in mind that as bup is splitting the files it would require some additional effort to put these files together again. The following chain shows how to access a repository. It assumes that one has logged into the backup server.
+
+<pre>
+[backup@ip-172-31-25-136 ~]$ git clone file:///home/backup/database dbtest
+Initialized empty Git repository in /home/backup/dbtest/.git/
+remote: Counting objects: 217784, done.
+remote: Compressing objects: 100% (217147/217147), done.
+remote: Total 217784 (delta 107), reused 217677 (delta 0)
+Receiving objects: 100% (217784/217784), 444.86 MiB | 20.11 MiB/s, done.
+Resolving deltas: 100% (107/107), done.
+warning: remote HEAD refers to nonexistent ref, unable to checkout.
+</pre>
+
+The error message is ok and can be ignored because bup has not created any HEAD reference but only branches. Checking out the given branch makes the error go away.
+
+<pre>
+[backup@ip-172-31-25-136 ~]$ cd dbtest/
+[backup@ip-172-31-25-136 dbtest]$ git checkout database--etc
+Branch database--etc set up to track remote branch database--etc from origin.
+Switched to a new branch 'database--etc'
+[backup@ip-172-31-25-136 dbtest]$ ls -lah
+total 20K
+drwxr-xr-x.  4 backup backup 4.0K May 27 13:20 .
+drwxr-xr-x. 10 backup backup 4.0K May 27 13:18 ..
+-rw-rw-r--.  1 backup backup   98 May 27 13:20 .bupm
+drwxrwxr-x. 77 backup backup 4.0K May 27 13:20 etc
+drwxrwxr-x.  8 backup backup 4.0K May 27 13:20 .git
+</pre>
+
+# Backup
+
+The first requirement to backup data from an instance is that it is running on CentOS. The backup script hasn't been tested on other systems. If you want to run it on other systems you most probably will need some effort to recompile bup and adapt some properties.
+
+- First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. In addition to that one can find the script in the main GIT repository under
+
+# Restore 
