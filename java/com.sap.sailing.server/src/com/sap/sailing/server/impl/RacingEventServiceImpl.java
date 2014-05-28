@@ -2213,6 +2213,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         event.setEndDate(endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
+        // TODO bug 1970 use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         mongoObjectFactory.storeEvent(event);
     }
 
