@@ -683,7 +683,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
+                boolean hasUUID = o.containsField(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                final LeaderboardGroup leaderboardGroup = loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry);
+                leaderboardGroups.add(leaderboardGroup);
+                if (!hasUUID) {
+                    // in an effort to migrate leaderboard groups without ID to such that have a UUID as their ID, we need
+                    // to write a leaderboard group to the database again after it just received a UUID for the first time:
+                    logger.info("Existing LeaderboardGroup " + leaderboardGroup.getName()
+                            + " received a UUID during migration; updating the leaderboard group in the database");
+                    new MongoObjectFactoryImpl(database).storeLeaderboardGroup(leaderboardGroup);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
@@ -696,6 +705,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        UUID uuid = (UUID) o.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+            logger.info("Leaderboard group "+name+" receives UUID "+uuid+" in a migration effort");
+            // migration: leaderboard groups that don't yet have a UUID receive a random one
+        }
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
         boolean displayGroupsInReverseOrder = false; // default value 
         Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
@@ -718,7 +733,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, displayGroupsInReverseOrder, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;

@@ -420,6 +420,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         BasicDBObject dbLeaderboardGroup = new BasicDBObject();
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroup.getId());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name(), leaderboardGroup.isDisplayGroupsInReverseOrder());
