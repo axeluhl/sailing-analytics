@@ -1,5 +1,7 @@
 # Amazon EC2 Backup Strategy
 
+[[_TOC_]]
+
 # Rationale
 
 It is crucial that all data stored on various instances of our infrastructure is backup'd regularly so that one can recover in case of data loss or hardware failure. Each data store must be represented in the backup and it must be possible to recover all data at any time. This also holds for configurations that define how applications and instances run. 
@@ -12,9 +14,9 @@ The central backup server is configured with enough space to hold a large amount
 
 <img src="/wiki/images/amazon/EC2BackupStrategy.jpg" width="100%" height="100%"/>
 
-# BUP: Technology
+# Technology
 
-BUP is the tool that is being used to create the backups. If you look at it in detail then this is just a very sophisticated wrapper around GIT. Unlike git, it writes packfiles directly (instead of having a separate garbage collection / repacking stage) so it's fast even with gratuitously huge amounts of data. bup's improved index formats also allow you to track far more filenames than git (millions) and keep track of far more objects (hundreds or thousands of gigabytes). It uses a rolling checksum algorithm (similar to rsync) to split large files into chunks. The most useful result of this is you can backup huge virtual machine (VM) disk images, databases, and XML files incrementally, even though they're typically all in one huge file, and not use tons of disk space for multiple versions.
+BUP is the tool that is being used to create the backups. You can access it's documentation and code here: https://github.com/bup/bup. If you look at it in detail then this is just a very sophisticated wrapper around GIT. Unlike git, it writes packfiles directly (instead of having a separate garbage collection / repacking stage) so it's fast even with gratuitously huge amounts of data. bup's improved index formats also allow you to track far more filenames than git (millions) and keep track of far more objects (hundreds or thousands of gigabytes). It uses a rolling checksum algorithm (similar to rsync) to split large files into chunks. The most useful result of this is you can backup huge virtual machine (VM) disk images, databases, and XML files incrementally, even though they're typically all in one huge file, and not use tons of disk space for multiple versions.
 
 As with git you have three stages when starting a backup.
 
@@ -85,6 +87,6 @@ drwxrwxr-x.  8 backup backup 4.0K May 27 13:20 .git
 
 The first requirement to backup data from an instance is that it is running on CentOS. The backup script hasn't been tested on other systems. If you want to run it on other systems you most probably will need some effort to recompile bup and adapt some properties.
 
-- First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. In addition to that one can find the script in the main GIT repository under
+- First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. In addition to that one can find the script in the main GIT repository under _configuration/backup.sh_.
 
 # Restore 
