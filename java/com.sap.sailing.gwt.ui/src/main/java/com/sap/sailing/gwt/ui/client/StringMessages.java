@@ -1028,4 +1028,5 @@ public interface StringMessages extends Messages {
     String importFixes();
     String noSailingServerInstancesYet();
     String registeredSailingServerInstances();
+    String filterEventsByName();
 }

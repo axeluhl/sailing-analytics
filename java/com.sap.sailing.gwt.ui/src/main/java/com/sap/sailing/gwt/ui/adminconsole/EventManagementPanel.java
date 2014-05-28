@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePane
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -176,6 +177,24 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
             }
         };
         
+        final SafeHtmlCell leaderboardGroupsCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> leaderboardGroupsColumn = new Column<EventDTO, SafeHtml>(leaderboardGroupsCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                boolean first = true;
+                for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
+                    builder.appendEscaped(lg.getName());
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                }
+                return builder.toSafeHtml();
+            }
+        };
+
         final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
         Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
             @Override
@@ -214,6 +233,7 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
         isPublicColumn.setSortable(true);
         startEndDateColumn.setSortable(true);
         courseAreasColumn.setSortable(true);
+        leaderboardGroupsColumn.setSortable(true);
 
         eventTable = new CellTable<EventDTO>(10000, tableRes);
         eventTable.addColumn(eventNameColumn, stringMessages.event());
@@ -221,6 +241,7 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
         eventTable.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
+        eventTable.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
@@ -239,9 +260,8 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
                 venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn));
-        filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
+        filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventProvider) {
-
             @Override
             public Iterable<String> getSearchableStrings(EventDTO t) {
                 List<String> result = new ArrayList<String>();
@@ -249,6 +269,9 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
                 result.add(t.venue.getName());
                 for (CourseAreaDTO c : t.venue.getCourseAreas()) {
                     result.add(c.getName());
+                }
+                for (LeaderboardGroupDTO lg : t.getLeaderboardGroups()) {
+                    result.add(lg.getName());
                 }
                 return result;
             }

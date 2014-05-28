@@ -3086,6 +3086,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
             eventDTO.venue.getCourseAreas().add(courseAreaDTO);
         }
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
+        }
         return eventDTO;
     }
 
