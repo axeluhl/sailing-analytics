@@ -128,12 +128,12 @@ this is dummy content to test the backup
 
 Depending on what has crashed or where data got lost you need to look at different places to restore content and functionality.
 
-## Amazon Ireland is not available / has crashed
+### Amazon Ireland is not available / has crashed
 
 Go on vacation for a week and mute your phone and emails. If situation has not recovered after your return then quit your job.
 
-## One Instance has crashed and can not be recovered
+### One Instance has crashed and can not be recovered
 
 Look out for an AMI that represents the system setup and binaries. If there is one then you can create a new instance from that AMI. Please keep in mind that not all AMIs contain all volumes needed for operation. Normally very large volumes containing databases and such are not persisted along with an AMI. In case of a recovery you most probably need to recreate these volumes and then restore data from backup.
 
-## Volume has crashed or data has been lost
+### Volume has crashed or data has been lost
