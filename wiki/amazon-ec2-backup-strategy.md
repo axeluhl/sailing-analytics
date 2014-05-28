@@ -91,8 +91,8 @@ The first requirement to backup data from an instance is that it is running on C
 
 - After having extracted or installed the script and binaries you need to adapt some settings. Check the documentation in the script - it should be self explaining. Then you could add the following entry to _/etc/crontab_: `0 22 * * * root /opt/backup.sh`. 
 
-- Now make sure to copy the SSH key to the backup server. The remote repositories are stored at _backup@172.31.25.136:/home/backup_. The password for the backup user is the same as for the trac user on the webserver. 
+- Now make sure to copy the SSH key to the backup server by using `ssh-copy-id -i /root/.ssh/id_dsa backup@172.31.25.136`. The remote repositories are stored at _backup@172.31.25.136:/home/backup_. The password for the backup user is the same as for the trac user on the webserver. 
 
-- To make sure everything is right you should execute the script once before having it automatically executed. 
+- To make sure everything is right you should execute the script once before having it automatically executed - just run `/opt/backup.sh`.
 
 # Restore 
