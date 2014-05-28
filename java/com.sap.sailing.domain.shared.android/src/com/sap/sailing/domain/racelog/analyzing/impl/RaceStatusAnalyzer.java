@@ -8,7 +8,9 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventComparator;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     
@@ -38,12 +40,16 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     @Override
     protected RaceLogRaceStatus performAnalysis() {
-        for (RaceLogEvent event : getPassEventsDescending()) {
-            if (event instanceof RaceLogRaceStatusEvent) {
-                RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-                statusEvent.accept(eventDispatcher);
-                return eventDispatcher.nextStatus;
+        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<RaceLogRaceStatusEvent>(RaceLogRaceStatusEventComparator.INSTANCE);
+        for(RaceLogEvent event: getPassEvents()) {
+            if(event instanceof RaceLogRaceStatusEvent) {
+                statusEvents.add((RaceLogRaceStatusEvent) event);
             }
+        }
+        for (RaceLogRaceStatusEvent event : statusEvents.descendingSet()) {
+            RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
+            statusEvent.accept(eventDispatcher);
+            return eventDispatcher.nextStatus;
         }
         
         return RaceLogRaceStatus.UNSCHEDULED;

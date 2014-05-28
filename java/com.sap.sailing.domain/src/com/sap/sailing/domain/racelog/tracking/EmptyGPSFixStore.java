@@ -25,7 +25,7 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void addListener(GPSFixReceivedListener listener) {
+    public void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
     }
 
     @Override

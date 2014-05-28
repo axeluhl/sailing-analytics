@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.server.GwtHttpRequestUtils;
 
 
@@ -155,33 +156,34 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
-        Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
+        // make a single live request as the default but don't continue to play by default
+        Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
-        }
+            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing" if an auto-refresh
+        } // interval has been specified
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
         boolean showCharts = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_CHARTS, false);
         boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_OVERALL_LEADERBOARD, false);
         boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_SERIES_LEADERBOARDS, false);
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(PARAM_CHART_DETAIL, null);
         DetailType chartDetailType;
-        if(chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
+        if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
                 DetailType.REGATTA_TOTAL_POINTS.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);
         } else {
             chartDetailType = leaderboardType.isMetaLeaderboard() ?  DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
         }
         
-        Widget leaderboardViewer;
+        final Widget leaderboardViewer;
         if (leaderboardType.isMetaLeaderboard()) {
             leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showSeriesLeaderboards);
+                    timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages,
+                    userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showSeriesLeaderboards);
         } else {
             leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
+                    timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages,
+                    userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
         }
         contentScrollPanel.setWidget(leaderboardViewer);
         mainPanel.add(contentScrollPanel);

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.common.client;
 
 import java.util.Date;
 

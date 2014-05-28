@@ -163,7 +163,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }));
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
-        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
+        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
@@ -171,10 +171,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         return new Long(value < 0 ? value + 360 : value).toString();
                     }
                 }));
-        
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
-            .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
-        
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)
+            .setMaxPadding(0.05).setStartOnTick(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
@@ -200,7 +198,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         List<Series> currentSeries = Arrays.asList(chart.getSeries());
         Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
         
-        if(settings.isShowWindDirectionsSeries()) {
+        if (settings.isShowWindDirectionsSeries()) {
             for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
                 Series series = e.getValue();
                 if (settings.getWindDirectionSourcesToDisplay().contains(e.getKey().getType())) {
@@ -245,7 +243,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 }
             }
         }
-        
         chart.redraw();
     }
 
@@ -338,7 +335,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     newMaxTimepoint = wind.requestTimepoint;
                 }
      
-                if((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                if ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {

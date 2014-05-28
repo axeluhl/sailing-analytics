@@ -269,6 +269,9 @@ class MediaLibrary {
         }
     }
 
+    /**
+     * Returns a non-live copy of the media tracks
+     */
     Collection<MediaTrack> allTracks() {
         readLock.lock();
         try {

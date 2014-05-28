@@ -599,8 +599,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                             try {
 								Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
 								Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+								Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
+                                jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
 							} catch (NoWindException e) {
 							}
                             

@@ -39,7 +39,7 @@ public enum FieldNames {
     
     VENUE,
     VENUE_NAME,
-    
+
     COURSE_AREAS,
     COURSE_AREA_NAME,
     COURSE_AREA_ID,
@@ -84,7 +84,10 @@ public enum FieldNames {
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_NAME, still used to migrate old races*/ @Deprecated GATE_NAME,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_LEFT, still used to migrate old races*/ @Deprecated GATE_LEFT,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_RIGHT, still used to migrate old races*/ @Deprecated GATE_RIGHT,
-    
+
+    // sailing server
+    SERVER_NAME,
+    SERVER_URL,
     
     // configurations
     CONFIGURATION_MATCHER, CONFIGURATION_CONFIG, CONFIGURATION_MATCHER_ID, CONFIGURATION_MATCHER_TYPE, CONFIGURATION_MATCHER_CLIENTS, 

@@ -47,7 +47,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
-    private final Set<Serializable> revokedEventIds = new HashSet<Serializable>();
+    private Set<Serializable> revokedEventIds = new HashSet<Serializable>();
 
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
@@ -103,7 +103,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             this.currentPassId = newPassId;
         }
     }
-
+    
     @Override
     public boolean add(RaceLogEvent event) {
         boolean isAdded = false;
@@ -122,7 +122,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             eventsById.put(event.getId(), event);
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
+            logger.fine(String.format("%s (%s) was not added to race log %s because it already existed there.", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }
@@ -142,8 +142,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             revokeIfNecessary(event);
             eventsById.put(event.getId(), event);
         } else {
-            logger.warning(String
-                    .format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
+            logger.fine(String
+                    .format("%s (%s) was not loaded into log because it already existed there.", event, event.getClass().getName()));
         }
         return isAdded;
     }
@@ -172,10 +172,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             throw new NotRevokableException("RevokeEvent added, that refers to non-existent event to be revoked");
         }
 
-        if (revokedEventIds.contains(revokedEvent.getId())) {
-            throw new NotRevokableException("Event has already been revoked");
-        }
-
         if (! (revokedEvent instanceof Revokable)) {
             throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
         }
@@ -202,7 +198,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             revokeIfNecessary(event);
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            logger.fine(String.format("%s (%s) was not added to log because it already eists there.", event, event.getClass().getName()));
         }
         return getEventsToDeliver(clientId, event);
     }
@@ -279,12 +275,39 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
 
     /**
-     * When deserializing, needs to initialize empty set of listeners.
+     * When deserializing, needs to initialize empty set of listeners. Furthermore, as a migration effort, when the
+     * {@link #eventsById} field was introduced, old clients get <code>null</code> as its value when deserializing which
+     * leads to NPEs later on. However, since the map is redundant to the contents of the <code>fixes</code> collection,
+     * it can be reconstructed here.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
         eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
+        if (eventsById == null) {
+            eventsById = new HashMap<Serializable, RaceLogEvent>();
+            lockForRead();
+            try {
+                for (RaceLogEvent event : getRawFixes()) {
+                    eventsById.put(event.getId(), event);
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
+        if (revokedEventIds == null) {
+            revokedEventIds = new HashSet<Serializable>();
+            lockForRead();
+            try {
+                for (RaceLogEvent event : getRawFixes()) {
+                    if (event instanceof RevokeEvent) {
+                        revokedEventIds.add(event.getId());
+                    }
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
     }
 
     @Override
@@ -402,7 +425,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
     
     @Override
-    public void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
+    public RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         if (toRevoke == null) {
             throw new NotRevokableException("Received null as event to revoke");
         }
@@ -410,5 +433,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
                 getCurrentPassId(), toRevoke.getId());
         checkIfSuccessfullyRevokes(revokeEvent);
         add(revokeEvent);
+        return revokeEvent;
     }
 }

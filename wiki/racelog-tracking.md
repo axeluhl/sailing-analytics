@@ -22,8 +22,8 @@ Following the numbers in the diagram, this is a possible race log tracking scena
 1. The race is defined through events that are added to the RaceLog.
 2. The RaceTracker is created.
 3. As soon as the "StartTrackingEvent" is added to the RaceLog, the RaceTracker creates the TrackedRace.
-4. Tracking devices submit GPS fixes to the tracking adapter.
-5. If these fixes match the mappings defined for this race in the RaceLog, they are added to the TrackedRace. 
+4. Tracking devices submit GPS fixes to the tracking adapter. This adds these fixes to the global GPSFixStore.
+5. The GPSFixStore notifies its listeners - among them the RaceTrackers - of new fixes. Each RaceTracker checks whether a new fix matches the mappings defined in its RaceLog, and if so adds it to the TrackedRace. 
 
 Not all identifiers represent actual class or bundle names. For a more technical documentation, refer to the JavaDoc in the various ``*.racelog.tracking`` packages and the ``com.sap.sailing.domain.racelogtrackingadapter`` bundle. The following interfaces and classes are good starting points:
 * DeviceIdentifier
@@ -39,14 +39,7 @@ When thinking about smartphone tracking, it would of course be a good idea to al
 
 ## Steps for setting up a racelog-tracked race in the AdminConsole
 
-1. Precondition: A RegattaLeaderboard with one race (and automatically RaceLog) has to exist.
-2. Denote the race for racelog-tracking and add a race tracker.
-3. Register competitors for the race (these need to exist in the CompetitorStore).
-4. Define the course layout, including the definition of marks. Optionally, the course layout and competitor registrations can be copied from a different race in the same leaderboard.
-5. Create the mappings from tracking devices to competitors and/or marks.
-6. Start tracking the race.
-7. Change the course layout, or add device mappings during tracking. Removing mappings will not have the effect of removing the fixes from the race, as this is not currently supported by the underlying GPSFixTrack.
-8. Stop tracking (stop the tracker).
+[[Walkthrough with screenshots|wiki/racelog-tracking/walkthrough]]
 
 ## Reloading a race that has already been tracked
 

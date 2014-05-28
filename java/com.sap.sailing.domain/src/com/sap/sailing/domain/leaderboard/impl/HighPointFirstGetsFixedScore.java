@@ -21,12 +21,23 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
 
     private final double scoreForRaceWinner;
     
+    private final double minimumScoreFromRank;
+    
     public HighPointFirstGetsFixedScore(double scoreForRaceWinner) {
+        this(scoreForRaceWinner, /* minimumScoreFromRank */ 1.0);
+    }
+    
+    protected HighPointFirstGetsFixedScore(double scoreForRaceWinner, double minimumScoreFromRank) {
         this.scoreForRaceWinner = scoreForRaceWinner;
+        this.minimumScoreFromRank = minimumScoreFromRank;
     }
     
     protected double getScoreForRaceWinner() {
         return scoreForRaceWinner;
+    }
+    
+    private double getMinimumScoreFromRank() {
+        return minimumScoreFromRank;
     }
 
     @Override
@@ -36,7 +47,7 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
         if (effectiveRank == 0) {
             result = null;
         } else {
-            result = Math.max(1.0, (double) (getScoreForRaceWinner() - effectiveRank + 1));
+            result = Math.max(getMinimumScoreFromRank(), (double) (getScoreForRaceWinner() - effectiveRank + 1));
         }
         return result;
     }

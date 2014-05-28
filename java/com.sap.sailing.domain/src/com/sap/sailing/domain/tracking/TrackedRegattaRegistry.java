@@ -44,7 +44,7 @@ public interface TrackedRegattaRegistry {
      */
     Regatta getRememberedRegattaForRace(Serializable raceID);
 
-    boolean isRaceBeingTracked(RaceDefinition r);
+    boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r);
 
     /**
      * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
