@@ -1,6 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -13,17 +12,17 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final TimePoint startDate;
     private final TimePoint endDate;
     private final boolean isPublic;
-    private final List<String> regattaNames;
+    private final Iterable<UUID> leaderboardGroupIds;
     private final String eventName;
 
-    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames) {
+    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
         super(id);
         this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.venueName = venueName;
         this.isPublic = isPublic;
-        this.regattaNames = regattaNames;
+        this.leaderboardGroupIds = leaderboardGroupIds;
     }
 
     @Override
@@ -40,7 +39,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, regattaNames);
+        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, leaderboardGroupIds);
         return null;
     }
 }

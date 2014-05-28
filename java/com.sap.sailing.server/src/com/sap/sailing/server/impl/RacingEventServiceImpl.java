@@ -159,7 +159,6 @@ import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
-import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
@@ -2204,7 +2203,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, List<String> regattaNames) {
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2214,9 +2213,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         event.setEndDate(endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
-        // TODO need to update regattas if they are once linked to event objects
         mongoObjectFactory.storeEvent(event);
-        replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
     }
 
     @Override

@@ -398,11 +398,13 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
     }
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
-        List<String> regattaNames = new ArrayList<String>();
         List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
-
+        List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
+        for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
+            updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
+        }
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
-                updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
+                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
