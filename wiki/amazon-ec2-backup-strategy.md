@@ -87,6 +87,8 @@ drwxrwxr-x.  8 backup backup 4.0K May 27 13:20 .git
 
 The first requirement to backup data from an instance is that it is running on CentOS. The backup script hasn't been tested on other systems. If you want to run it on other systems you most probably will need some effort to recompile bup and adapt some properties.
 
-- First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. In addition to that one can find the script in the main GIT repository under _configuration/backup.sh_.
+- First you need to download the script and the required binaries. There is a template that can be downloaded from S3 by using the following URL: s3://backup-template/backup-template-<version>.tar.gz. That template contains everything needed to backup. It is a good idea to extract it to _/opt_. In addition to that one can find the script in the main GIT repository under _configuration/backup.sh_. You can download a version of bup here: https://github.com/bup/bup/releases. Be aware of the fact that you need to compile the whole thing.
+
+- After having extracted or installed the script and binaries you need to adapt some settings. Check the documentation in the script - it should be self explaining. Then you could add the following entry to _/etc/crontab_: `0 22 * * * root /opt/backup.sh`. To make sure everything is right you should execute the script once before having it automatically executed.
 
 # Restore 
