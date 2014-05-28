@@ -163,10 +163,10 @@ public class ImportMasterDataOperation extends
                 overallLeaderboardDiscardThresholds = rule.getDiscardIndexResultsStartingWithHowManyRaces();
                 overallLeaderboardScoringSchemeType = metaLeaderboard.getScoringScheme().getType();
             }
-            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getName(),
-                    leaderboardGroup.getDescription(), leaderboardGroup.isDisplayGroupsInReverseOrder(),
-                    leaderboardNames, overallLeaderboardDiscardThresholds,
-                    overallLeaderboardScoringSchemeType);
+            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getId(),
+                    leaderboardGroup.getName(), leaderboardGroup.getDescription(),
+                    leaderboardGroup.isDisplayGroupsInReverseOrder(), leaderboardNames,
+                    overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
         } else {
             leaderboardGroup = existingLeaderboardGroup;

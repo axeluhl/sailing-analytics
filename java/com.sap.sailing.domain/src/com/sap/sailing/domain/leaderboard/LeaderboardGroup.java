@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.leaderboard;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.Renamable;
+import com.sap.sailing.domain.common.WithID;
 
 /**
  * A leaderboard group is used to group one or more {@link Leaderboard}s. If can be used to represent all or part of the
@@ -44,4 +46,9 @@ public interface LeaderboardGroup extends Renamable {
      */
     Leaderboard getOverallLeaderboard();
     void setOverallLeaderboard(Leaderboard leaderboard);
+    
+    /**
+     * Specializes the {@link WithID#getId()} method regarding its return type.
+     */
+    UUID getId();
 }

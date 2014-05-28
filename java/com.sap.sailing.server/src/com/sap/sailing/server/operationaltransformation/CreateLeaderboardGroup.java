@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -9,6 +10,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<LeaderboardGroup> {
     private static final long serialVersionUID = -5028997286564650805L;
+    private final UUID id;
     private final String description;
     private final boolean displayGroupsInReverseOrder;
     private final List<String> leaderboardNames;
@@ -18,6 +20,7 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     public CreateLeaderboardGroup(String leaderboardGroupName, String description, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         super(leaderboardGroupName);
+        this.id = UUID.randomUUID();
         this.description = description;
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboardNames = leaderboardNames;
@@ -40,8 +43,8 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     @Override
     public LeaderboardGroup internalApplyTo(RacingEventService toState) {
         // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
-        return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, displayGroupsInReverseOrder, leaderboardNames,
-                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+        return toState.addLeaderboardGroup(id, getLeaderboardGroupName(), description, displayGroupsInReverseOrder,
+                leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
     }
 
 }

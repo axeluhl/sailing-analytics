@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFact
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -85,7 +86,7 @@ import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, TrackerManager {
+        LeaderboardRegistry, LeaderboardGroupResolver, TrackerManager {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -223,15 +224,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<String, LeaderboardGroup> getLeaderboardGroups();
 
     /**
-     * @param groupName The name of the requested leaderboard group
-     * @return The leaderboard group with the name <code>groupName</code>, or <code>null</code> if theres no such group
-     */
-    LeaderboardGroup getLeaderboardGroupByName(String groupName);
-
-    /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * 
+     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
@@ -240,10 +235,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
+     * 
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
+            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
