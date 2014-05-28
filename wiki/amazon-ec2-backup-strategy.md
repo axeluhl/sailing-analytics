@@ -166,6 +166,22 @@ Look out for an AMI that represents the system setup and binaries. If there is o
 </tr>
 </table>
 
-### Volume has crashed or data has been lost
+### A whole volume has crashed
 
-If volume data
+If a whole volume has crashed then the best approach is to stop the instance and trying to create a snapshot of that volume for forensic analysis and possibly recovery of some parts. Then detach that volume from your instance and attach a freshly created volume with the same size. You then would need to repartition that volume - in most cases you will want to use ext4 as filesystem on a primary partition of type linux (partition table is msdos). Start the instance again, retrieve the UUID and edit /etc/fstab to reflect the changes. Then continue with the next step.
+
+### Data has been lost or overwritten
+
+In this case the data stored on the backup server can come in handy. Assuming that the instance that has lost data is ready and error free a typical restore process would look like this:
+
+- Log into the backup server with user backup.
+- Locate the repository corresponding to your instance by looking at $HOME of backup user.
+- Now you can look out for the right backup as there might be more than one in that repository
+
+<pre>
+[backup@ip-172-31-25-136 database]$ /opt/bup/bup -d /home/backup/build/ ls
+dir-etc mongodb-databases mysql-databases
+</pre>
+
+- Let's assume that you want to recover some score corrections from the archive server
+
