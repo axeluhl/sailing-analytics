@@ -14,10 +14,27 @@ The central backup server is configured with enough space to hold a large amount
 
 # BUP: Technology
 
-BUP is the tool that is being used to create the backups. If you look at it in detail then this is just a very sophisticated wrapper around GIT. Unlike git, it writes packfiles directly (instead of having a separate garbage collection / repacking stage) so it's fast even with gratuitously huge amounts of data. bup's improved index formats also allow you to track far more filenames than git (millions) and keep track of far more objects (hundreds or thousands of gigabytes). As with git you have three stages when starting a backup.
+BUP is the tool that is being used to create the backups. If you look at it in detail then this is just a very sophisticated wrapper around GIT. Unlike git, it writes packfiles directly (instead of having a separate garbage collection / repacking stage) so it's fast even with gratuitously huge amounts of data. bup's improved index formats also allow you to track far more filenames than git (millions) and keep track of far more objects (hundreds or thousands of gigabytes). It uses a rolling checksum algorithm (similar to rsync) to split large files into chunks. The most useful result of this is you can backup huge virtual machine (VM) disk images, databases, and XML files incrementally, even though they're typically all in one huge file, and not use tons of disk space for multiple versions.
+
+As with git you have three stages when starting a backup.
 
 - First you need to initialize the repository (comparable to `git init`). This is also needed when using a remote repository. In that case the local repository is used to hold the index of files and to determine wether files have changed. The initialization is executed by invoking `bup [-d /path/to/repo] init`. In most cases you can just omit the directory - bup will then set it to $HOME/.bup.
 - Second you need to tell bup to create or update the index (comparable to `git add`). That operation will list all files and add them to the index. That index contains information about changes to the tree structure. At this stage you can specify wether to ignore certain files (--exclude and --exclude-rx). An index command could look like this: `bup index /etc`.
 - Third all indexed files need to be saved (comparable to `git commit`). That process can either store files locally (comparable to `git commit`) or push them to a remote repository (`git commit && git push`).
 
-The last stage involves some magic because bup does not expose the notion of branches or HEAD to the user. In most cases one will save files by specifying the name of a backup (`bup save -n <name>`). Internally this will create or update a branch that matches the name given. More importantly this operation will remove all files not matching the index just created. Assuming that you save /etc by specifying mybackup as the name of the backup. Then you save /var/log by using the same name. That will lead to /etc not being included into the commit on that branch because it does not match path /var/log.
+The last stage involves some magic because bup does not expose the notion of branches or HEAD to the user. In most cases one will save files by specifying the name of a backup (`bup save -n <name>`). Internally this will create or update a branch that matches the name given. More importantly this operation will remove all files not matching the index just created. 
+
+Assuming that you save _/etc_ by specifying mybackup as the name of the backup. Then you save _/var/log_ by using the same backup name. That will lead to _/etc_ not being included into the commit on that branch because it does not match path _/var/log_. It will be recognized as deleted as /etc is no longer contained in the index. As a general rule keep in mind that you for each backup-name the index should be stable at least in terms of paths. 
+
+Unfortunately there is no way of changing bup's behaviour. To make sure that one can still restore files on different branches being connected somehow one must provide a date parameter during save. This date parameter will then be used to distinguish the different backups. A typical backup run could then look like this:
+
+<pre>
+$ bup index
+Reinitialized existing Git repository in /home/.bup/
+$ bup add /etc
+Indexing: 1188, done (2196 paths/s).
+$ bup save --date=`date +%s` -n etc /etc
+Reading index: 1188, done.
+Saving: 100.00% (24426/24426k, 1188/1188 files), done.    
+bloom: creating from 1 file (3635 objects). 
+</pre>
