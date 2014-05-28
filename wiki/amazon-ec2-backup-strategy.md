@@ -115,5 +115,11 @@ The output will contain all runs of the backup. There will always be a symbolic 
 builds           config.xml       lastStable       lastSuccessful   nextBuildNumber  scm-polling.log                                                                                                                                                           
 </pre>
 
+You can also display any text files by replacing `ls` by `cat-file`.
+
+<pre>
+[backup@ip-172-31-25-136 webserver]$ /opt/bup/bup -d /home/backup/webserver/ cat-file dir-home-scores/latest/home/scores/dummy.txt
+this is dummy content to test the backup
+</pre>
 
 # Restore 
