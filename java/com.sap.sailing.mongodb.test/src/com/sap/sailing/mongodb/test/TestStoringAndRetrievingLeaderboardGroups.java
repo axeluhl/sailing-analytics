@@ -105,6 +105,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
                 /* leaderboardRegistry */ null);
         assertNotNull(loadedLeaderboardGroup.getOverallLeaderboard());
+        assertEquals(leaderboardGroup.getId(), loadedLeaderboardGroup.getId());
         assertNotSame(leaderboardGroup.getOverallLeaderboard(), loadedLeaderboardGroup.getOverallLeaderboard());
         assertSame(ScoringSchemeType.HIGH_POINT_ESS_OVERALL, loadedLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
     }

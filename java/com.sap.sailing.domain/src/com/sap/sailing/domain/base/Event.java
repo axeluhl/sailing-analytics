@@ -28,7 +28,7 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     UUID getId();
     
     /**
-     * Returns the live but unmodifiable collection of leaderboard groups that were previously
+     * Returns a non-<code>null</code> live but unmodifiable collection of leaderboard groups that were previously
      * {@link #addLeaderboardGroup(LeaderboardGroup) added} to this event, in the order of their addition. Therefore, to
      * change the iteration order, {@link #removeLeaderboardGroup(LeaderboardGroup)} and
      * {@link #addLeaderboardGroup(LeaderboardGroup)} need to be used.

@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -86,7 +87,7 @@ import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, LeaderboardGroupResolver, TrackerManager {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -326,15 +327,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
     Iterable<Event> getAllEvents();
-
-    /**
-     * Returns the event with given id. When no event is found, <b>null</b> is returned.
-     * 
-     * @param id
-     * 			The id of the event.
-     * @return The event with given id.
-     */
-    Event getEvent(Serializable id);
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with the

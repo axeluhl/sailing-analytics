@@ -92,9 +92,11 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -880,6 +882,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         track.add(wind);
         return new Pair<Wind, WindSource>(wind, windSource);
+    }
+
+    @Override
+    public void loadLeaderboardGroupLinksForEvents(EventResolver eventResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver) {
+        DBCollection links = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
+        for (Object o : links.find()) {
+            DBObject dbLink = (DBObject) o;
+            UUID eventId = (UUID) dbLink.get(FieldNames.EVENT_ID.name());
+            Event event = eventResolver.getEvent(eventId);
+            if (event == null) {
+                logger.info("Found leaderboard group IDs for event with ID "+eventId+" but couldn't find that event.");
+            } else {
+                @SuppressWarnings("unchecked")
+                List<UUID> leaderboardGroupIDs = (List<UUID>) dbLink.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                for (UUID leaderboardGroupID : leaderboardGroupIDs) {
+                    LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.getLeaderboardGroupByID(leaderboardGroupID);
+                    if (leaderboardGroup != null) {
+                        event.addLeaderboardGroup(leaderboardGroup);
+                    }
+                }
+            }
+        }
     }
 
     @Override

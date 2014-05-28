@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,11 +56,15 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -85,9 +90,13 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public TestStoringAndLoadingEventsAndRegattas() throws UnknownHostException, MongoException {
         super();
     }
+    
+    private LeaderboardGroup createLeaderboardGroup(String name) {
+        return new LeaderboardGroupImpl(name, "Description for "+name, /* displayInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+    }
 
     @Test
-    public void testLoadStoreSimpleEvent() {
+    public void testLoadStoreSimpleEventWithLinkToLeaderboardGroups() {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
@@ -104,13 +113,37 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, startDate, endDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        final Event event = new EventImpl(eventName, startDate, endDate, venue, /*isPublic*/ true, UUID.randomUUID());
+        final LeaderboardGroup lg1 = createLeaderboardGroup("lg1");
+        final LeaderboardGroup lg2 = createLeaderboardGroup("lg2");
+        event.addLeaderboardGroup(lg1);
+        event.addLeaderboardGroup(lg2);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
-        Event loadedEvent = dof.loadEvent(eventName);
+        final Event loadedEvent = dof.loadEvent(eventName);
+        dof.loadLeaderboardGroupLinksForEvents(new EventResolver() {
+            @Override
+            public Event getEvent(Serializable id) {
+                return id.equals(loadedEvent.getId()) ? loadedEvent : null;
+            }
+        }, new LeaderboardGroupResolver() {
+            @Override
+            public LeaderboardGroup getLeaderboardGroupByName(String leaderboardGroupName) {
+                return leaderboardGroupName.equals(lg1.getName()) ? lg1 : leaderboardGroupName.equals(lg2.getName()) ? lg2 : null;
+            }
+            
+            @Override
+            public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+                return leaderboardGroupID.equals(lg1.getId()) ? lg1 : leaderboardGroupID.equals(lg2.getId()) ? lg2 : null;
+            }
+        });
         assertNotNull(loadedEvent);
         assertEquals(eventName, loadedEvent.getName());
+        assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
+        Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
+        assertSame(lg1, lgIter.next());
+        assertSame(lg2, lgIter.next());
         final Venue loadedVenue = loadedEvent.getVenue();
         assertNotNull(loadedVenue);
         assertEquals(venueName, loadedVenue.getName());

@@ -25,10 +25,16 @@ public enum CollectionNames {
     LEADERBOARD_GROUPS,
     
     /**
-     * Top-level event information about events such as Kiel Week 2011, or IDM Travem�nde 2011, including name and
+     * Top-level event information about events such as Kieler Woche 2011, or IDM Travemuende 2011, including name and
      * course areas.
      */
     EVENTS,
+    
+    /**
+     * The links that connect events to leaderboard groups; each element stores the ID of an event and a list
+     * of leaderboard group IDs.
+     */
+    LEADERBOARD_GROUP_LINKS_FOR_EVENTS,
     
     /** 
      * Stores the registered sailing servers.

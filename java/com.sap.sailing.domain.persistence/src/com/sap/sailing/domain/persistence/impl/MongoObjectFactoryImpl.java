@@ -499,6 +499,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+        // now store the links to the leaderboard groups
+        DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
+        linksCollection.ensureIndex(FieldNames.EVENT_ID.name());
+        BasicDBList lgUUIDs = new BasicDBList();
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            lgUUIDs.add(lg.getId());
+        }
+        DBObject dbLinks = new BasicDBObject();
+        dbLinks.put(FieldNames.EVENT_ID.name(), event.getId());
+        dbLinks.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), lgUUIDs);
+        linksCollection.update(query, dbLinks, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override

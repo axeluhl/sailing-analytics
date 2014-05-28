@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.UUID;
+
 public interface LeaderboardGroupResolver {
     /**
      * @param leaderboardGroupName
@@ -8,4 +10,6 @@ public interface LeaderboardGroupResolver {
      *         no such group within this resolver
      */
     LeaderboardGroup getLeaderboardGroupByName(String leaderboardGroupName);
+
+    LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID);
 }

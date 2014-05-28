@@ -246,8 +246,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * {@link #renameLeaderboard(String, String)}.
      */
     private final NamedReentrantReadWriteLock leaderboardsByNameLock;
-
+    
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
     
     /**
      * See {@link #leaderboardsByNameLock}
@@ -407,6 +409,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
+        leaderboardGroupsByID = new ConcurrentHashMap<>();
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for "+this, /* fair */ false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for "+this, /* fair */ false);
@@ -436,6 +439,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
+        loadLinksFromEventsToLeaderboardGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
@@ -507,6 +511,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
     
+    private void loadLinksFromEventsToLeaderboardGroups() {
+        domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */ this, /* leaderboardGroupResolver */ this);
+    }
+    
     private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
         for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
             remoteSailingServerSet.add(sailingServer);
@@ -560,6 +568,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+                leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -1794,6 +1803,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         return leaderboardGroupsByName.get(groupName);
     }
+    
+    @Override
+    public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+        return leaderboardGroupsByID.get(leaderboardGroupID);
+    }
 
     @Override
     public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName,
@@ -1822,6 +1836,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
             leaderboardGroupsByName.put(groupName, result);
+            leaderboardGroupsByID.put(result.getId(), result);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -1835,6 +1850,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
+            if (leaderboardGroup != null) {
+                leaderboardGroupsByID.remove(leaderboardGroup.getId());
+            }
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -2065,6 +2083,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.clear();
+                leaderboardGroupsByID.clear();
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -2110,6 +2129,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
             for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+                leaderboardGroupsByID.put(lg.getId(), lg);
                 logoutput.append(String.format("%3s\n", lg.toString()));
             }
 
