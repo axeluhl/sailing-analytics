@@ -4,16 +4,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
     
     private final Set<Regatta> regattas;
+    
+    private final ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
 
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -25,6 +29,7 @@ public class EventImpl extends EventBaseImpl implements Event {
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.regattas = new HashSet<Regatta>();
+        this.leaderboardGroups = new ConcurrentLinkedQueue<>();
     }
     
     @Override
@@ -44,5 +49,20 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     public String toString() {
         return getId() + " " + getName() + " " + getVenue().getName() + " " + isPublic();
+    }
+
+    @Override
+    public Iterable<LeaderboardGroup> getLeaderboardGroups() {
+        return Collections.unmodifiableCollection(leaderboardGroups);
+    }
+
+    @Override
+    public void addLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        leaderboardGroups.add(leaderboardGroup);
+    }
+
+    @Override
+    public void removeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        leaderboardGroups.remove(leaderboardGroup);
     }
 }

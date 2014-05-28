@@ -342,7 +342,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the
-     * regattas with the names in <code>regattaNames</code> and saves it in the database.
+     * regattas with the names in <code>regattaNames</code> and saves it in the database. Use for TESTING only!
      * 
      * @param eventName
      *            The name of the new event
