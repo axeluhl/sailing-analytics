@@ -170,7 +170,7 @@ Look out for an AMI that represents the system setup and binaries. If there is o
 
 If a whole volume has crashed then the best approach is to stop the instance and trying to create a snapshot of that volume for forensic analysis and possibly recovery of some parts. Then detach that volume from your instance and attach a freshly created volume with the same size. You then would need to repartition that volume - in most cases you will want to use ext4 as filesystem on a primary partition of type linux (partition table is msdos). Start the instance again, retrieve the UUID and edit /etc/fstab to reflect the changes. Then continue with the next step.
 
-### Data has been lost or overwritten
+### Data has been lost or overwritten (Backup Server is available)
 
 In this case the data stored on the backup server can come in handy. Assuming that the instance that has lost data is ready and error free a typical restore process would look like this:
 
@@ -208,3 +208,18 @@ total 132K
 </pre>
 
 - Now we can copy the recovered files to the instance.
+
+### Data has been lost or overwritten (Backup Server is NOT available)
+
+Fire up a new instance with enough space (500GB) based on AMI "Centos 6 Basic Image". Then install s3cmd tools from http://s3tools.org/download. Extract them at /opt. Now create a file $HOME/.s3cfg copied from our $GIT/configuration/s3cfg.template. You need to add AWS security credentials. Either you can find some in our webserver at /root/.s3cfg or you can create a new IAM user, give him rights to read and write from S3 and then generate access credentials.
+
+After you have setup s3cmd you need to retrieve data from S3.
+
+<pre>
+[root@analytics-webserver ~]# /opt/s3cmd-1.5.0-beta1/s3cmd ls s3://backup-of-backup-server
+                       DIR   s3://backup-of-backup-server/backup/
+[root@analytics-webserver ~]# mkdir /mnt/volume-with-space/restored-git-repositories
+[root@analytics-webserver ~]# /opt/s3cmd-1.5.0-beta1/s3cmd sync s3://backup-of-backup-server /mnt/volume-with-space/restored-git-repositories
+</pre>
+
+That process can take a while. After it has finished you can proceed with the steps described in "Data has been lost or overwritten (Backup Server is available)"
