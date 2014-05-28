@@ -604,7 +604,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     /**
      * Determines whether a candidate is on the correct side of a waypoint. This is defined by the crossing information.
-     * The cross-track error of <code>p</code> to the crossing Position and the crossing Bearing rotated by 90° need to
+     * The cross-track error of <code>p</code> to the crossing Position and the crossing Bearing rotated by 90ï¿½ need to
      * be negative. If the passing Instructions are line, it checks whether the boat passed between the two marks.
      */
     private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t, boolean portMark) {
@@ -716,8 +716,10 @@ public class CandidateFinderImpl implements CandidateFinder {
             break;
         case Gate:
             Pair<Mark, Mark> posGate = getPortAndStarboardMarks(t, w);
-            Position portGatePosition = race.getOrCreateTrack(posGate.getA()).getEstimatedPosition(t, false);
-            Position starboardGatePosition = race.getOrCreateTrack(posGate.getB()).getEstimatedPosition(t, false);
+            Position portGatePosition = posGate.getA() == null ? null :
+                race.getOrCreateTrack(posGate.getA()).getEstimatedPosition(t, false);
+            Position starboardGatePosition = posGate.getB() == null ? null :
+                race.getOrCreateTrack(posGate.getB()).getEstimatedPosition(t, false);
             distances.add(portGatePosition != null ? p.getDistance(portGatePosition) : null);
             distances.add(starboardGatePosition != null ? p.getDistance(starboardGatePosition) : null);
 

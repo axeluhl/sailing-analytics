@@ -38,5 +38,4 @@ public interface CandidateFinder {
     Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addWaypoint(Waypoint w, int index);
 
     Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> removeWaypoint(Waypoint w, int index);
-
 }
