@@ -478,16 +478,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public void onSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
                         TracTracEventManagementPanel.this.availableTracTracRaces.clear();
-                        
                         final String eventName = result.getA();
                         final List<TracTracRaceRecordDTO> eventRaces = result.getB();
-                        
                         if (eventRaces != null) {
                             TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
+                            racesFilterablePanel.updateAll(availableTracTracRaces);
                         }
-                        
                         List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
-                        
                         races.clear();
                         races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
                         
