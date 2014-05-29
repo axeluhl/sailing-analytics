@@ -233,12 +233,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         }
         return result;
     }
-    
-//    private void addScrollableTab(TabLayoutPanel tabPanel, Widget widget, String tabTitle) {
-//        ScrollPanel widgetScroller = new ScrollPanel();
-//        widgetScroller.add(widget);
-//        tabPanel.add(widgetScroller, tabTitle, false);
-//    }
 
     @Override
     public void fillRegattas() {

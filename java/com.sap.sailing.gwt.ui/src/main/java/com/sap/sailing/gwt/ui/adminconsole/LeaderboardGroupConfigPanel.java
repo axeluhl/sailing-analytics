@@ -448,7 +448,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
         leaderboardGroupsFunctionPanel.add(removeButton);
-
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fillLeaderboardGroups();
+                loadLeaderboards();
+            }
+        });
+        leaderboardGroupsFunctionPanel.add(refreshButton);
         AnchorCell anchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
