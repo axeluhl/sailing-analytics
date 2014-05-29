@@ -806,10 +806,21 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
             @Override
             public void onSuccess(List<EventDTO> result) {
+                Set<UUID> selectedEventUUIDs = new HashSet<>();
+                for (EventDTO selectedEvent : eventSelectionModel.getSelectedSet()) {
+                    selectedEventUUIDs.add(selectedEvent.id);
+                }
+                eventSelectionModel.clear();
                 allEvents.clear();
                 allEvents.addAll(result);
                 eventTable.getColumnSortList().push(startEndDateColumn);
                 filterTextbox.updateAll(allEvents);
+                for (EventDTO e : allEvents) {
+                    if (selectedEventUUIDs.contains(e.id)) {
+                        eventSelectionModel.setSelected(e, true);
+                    }
+                }
+                updateLeaderboardGroupAssignmentPanel(eventSelectionModel.getSelectedSet());
             }
         });
     }
