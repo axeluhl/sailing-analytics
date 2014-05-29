@@ -35,20 +35,6 @@ import org.moxieapps.gwt.highcharts.client.Series;
  */
 public class AreaPlotOptions extends BaseAreaPlotOptions<AreaPlotOptions> {
 
-    /**
-     * Convenience method for setting the 'threshold' option of the area plot options.  Equivalent to:
-     * <pre><code>
-     *     areaPlotOptions.setOption("threshold", 0.5);
-     * </code></pre>
-     * The Y axis value to serve as the base for the area, for distinguishing between values above and
-     * below a threshold. Defaults to 0.
-     *
-     * @param threshold The Y axis value to serve as the base for the area, for distinguishing between
-     *                  values above and below a threshold.
-     * @return A reference to this {@link AreaPlotOptions} instance for convenient method chaining.
-     */
-    public AreaPlotOptions setThreshold(String threshold) {
-        return this.setOption("threshold", threshold);
-    }
+    // All needed methods are inherited from {@link BaseAreaPlotOptions}
 
 }
