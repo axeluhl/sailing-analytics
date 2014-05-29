@@ -329,7 +329,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
 
     /**
-     * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with the
+     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
      * names in <code>regattaNames</code>, saves it in the database and replicates it. Use for TESTING only!
      * 
      * @param eventName

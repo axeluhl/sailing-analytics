@@ -2,6 +2,7 @@ package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -186,6 +187,7 @@ public class MasterDataImportTest {
         leaderboardNames.add(leaderboard.getName());
         LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
                 false, leaderboardNames, null, null);
+        event.addLeaderboardGroup(group);
 
         // Set tracked Race with competitors
         List<Competitor> competitors = new ArrayList<Competitor>();
@@ -288,6 +290,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(eventOnTarget);
         LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
         Assert.assertNotNull(leaderboardGroupOnTarget);
+        assertSame(leaderboardGroupOnTarget, eventOnTarget.getLeaderboardGroups().iterator().next());
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
