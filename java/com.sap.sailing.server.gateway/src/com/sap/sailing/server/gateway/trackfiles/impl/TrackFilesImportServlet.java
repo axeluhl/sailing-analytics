@@ -2,11 +2,15 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,30 +22,65 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONArray;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.domain.trackimport.GPSFixImporter;
+import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
-import com.sap.sailing.server.trackfiles.Import;
-import com.sap.sailing.server.trackfiles.Import.FixCallback;
 
 /**
  * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
- * Returns a JSON array of generated device identifiers.
+ * Returns a JSON array of generated device identifiers.<p>
+ * 
+ * The available importers are tried one by one in the following order, until the first
+ * one is found that does not fail with an {@link FormatNotSupportedException}:
+ * <ul>
+ * <li>If the type of a {@link #PREFERRED_IMPORTER preferred importer} is transmitted,
+ * this is the first that is used.</li>
+ * <li>Then the importers registered for a matching {@link GPSFixImporter#FILE_EXTENSION_PROPERTY
+ * file extension} are used.</li>
+ * <li>If all this fails, all other available importers are used.</li></ul>
  * @author Fredrik Teschke
  *
  */
 public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
+    public static final String PREFERRED_IMPORTER = "preferredImporter";
     private static final long serialVersionUID = 1120226743039934620L;
+    private static final Logger logger = Logger.getLogger(TrackFilesImportServlet.class.getName());
+    
+    private DeviceIdentifier currentDevice;
     
     private void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         getService().getGPSFixStore().storeFix(deviceIdentifier, fix);
+    }
+    
+    private Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
+        List<GPSFixImporter> result = new ArrayList<>();
+        Collection<ServiceReference<GPSFixImporter>> refs;
+        try {
+            Filter filter = null;
+            if (fileExtension != null) {
+                filter = getContext().createFilter(String.format("(%s=%s)",
+                        GPSFixImporter.FILE_EXTENSION_PROPERTY, fileExtension));
+            }
+            refs = getContext().getServiceReferences(GPSFixImporter.class, filter == null ? null : filter.toString());
+            for (ServiceReference<GPSFixImporter> ref : refs) {
+                result.add(getContext().getService(ref));
+            }
+        } catch (InvalidSyntaxException e) {
+            logger.log(Level.WARNING, "Could not create OSGi filter for file extension");
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -61,28 +100,65 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         } catch (FileUploadException e) {
             throw new IOException("Could not parse request");
         }
+        
+        String prefImporterType = null;
         for (FileItem item : items) {
             if (!item.isFormField())
                 files.add(item);
+            else {
+                if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
+                    prefImporterType = item.getString();
+                }
+            }
+        }
+        GPSFixImporter preferredImporter = null;
+        if (prefImporterType != null && ! prefImporterType.isEmpty()) {
+            preferredImporter = getServiceFinderFactory().createServiceFinder(GPSFixImporter.class).
+                    findService(prefImporterType);
         }
         
         final List<DeviceIdentifier> deviceIdList = new ArrayList<>();
         for (FileItem file : files) {
             final String fileName = file.getName();
-            final Map<String, DeviceIdentifier> deviceIds = new HashMap<>();
+            String fileExt = null;
+            if (fileName.contains(".")) {
+                fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
+            }
             
-            Import.INSTANCE.importFixes(file.getInputStream(), new FixCallback() {
-                @Override
-                public void addFix(GPSFix fix, int numberOfFixes, TimeRange trackTimeRange, String trackName) {
-                    DeviceIdentifier deviceId = deviceIds.get(trackName);
-                    if (deviceId == null) {
-                        deviceId = new TrackFileImportDeviceIdentifierImpl(fileName, trackName, trackTimeRange, numberOfFixes);
-                        deviceIds.put(trackName, deviceId);
-                        deviceIdList.add(deviceId);
-                    }
-                    storeFix(fix, deviceId);
+            Set<GPSFixImporter> importersToTry = new LinkedHashSet<>();
+            if (preferredImporter != null) {
+                importersToTry.add(preferredImporter);
+            }
+            
+            importersToTry.addAll(getGPSFixImporters(fileExt));
+            importersToTry.addAll(getGPSFixImporters(null));
+            
+            boolean done = false;
+            Iterator<GPSFixImporter> iter = importersToTry.iterator();
+            while (iter.hasNext() && ! done) {
+                boolean failed = false;
+                GPSFixImporter importer = iter.next();
+                try {
+                    importer.importFixes(file.getInputStream(), new Callback() {
+                        @Override
+                        public void startTrack(String name, Map<String, String> properties) {
+                            currentDevice = new TrackFileImportDeviceIdentifierImpl(fileName, name);
+                            deviceIdList.add(currentDevice);
+                        }
+
+                        @Override
+                        public void addFix(GPSFix fix) {
+                            storeFix(fix, currentDevice);
+                        }
+                        
+                    }, true);
+                } catch (FormatNotSupportedException e) {
+                    failed = true;
                 }
-            }, true);
+                if (! failed) {
+                    done = true;
+                }
+            }
         }
         
         //setJsonResponseHeader(resp);

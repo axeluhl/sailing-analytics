@@ -93,16 +93,14 @@ import slash.navigation.zip.ZipFormat;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.server.trackfiles.Import;
+import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 /**
  * Only supports such navigation formats for which RouteConverter implements own parser.
@@ -115,7 +113,7 @@ import com.sap.sailing.server.trackfiles.Import;
  * @author Fredrik Teschke
  *
  */
-public class ImportImpl implements Import {
+public class RouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {
     /**
      * A list of the track file formats that RouteConverter can parse out of the box.
      * @see NavigationFormats#SUPPORTED_FORMATS
@@ -226,7 +224,8 @@ public class ImportImpl implements Import {
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void importFixes(InputStream inputStream, FixCallback callback, boolean inferSpeedAndBearing) throws IOException {
+    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
+            throws IOException, FormatNotSupportedException {
         //TODO dirty hack, because no public read method for inputstream and custom list of formats
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;
@@ -236,7 +235,7 @@ public class ImportImpl implements Import {
             m.setAccessible(true);
             ParserResult result = (ParserResult) m.invoke(parser, inputStream, 1024 * 1024, null, SUPPORTED_READ_FORMATS);
             if (result == null) {
-                throw new IOException("Could not parse track-file. Unknown or broken format.");
+                throw new FormatNotSupportedException();
             }
             routes = result.getAllRoutes();
         } catch (Exception e) {
@@ -246,15 +245,8 @@ public class ImportImpl implements Import {
         for (BaseRoute route : routes) {
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
             String routeName = route.getName();
-            int numberOfFixes = route.getPositionCount();
             route.ensureIncreasingTime();
-            TimeRange timeRange = null;
-            if (numberOfFixes > 0) {
-                long fromMillis = route.getPosition(0).getTime().getTimeInMillis();
-                long toMillis = route.getPosition(numberOfFixes-1).getTime().getTimeInMillis();
-                timeRange = TimeRangeImpl.create(fromMillis, toMillis);
-            }
-            GPSFix previousFix = null;
+            callback.startTrack(routeName, null);
             for (BaseNavigationPosition p : positions) {
                 try {
                     Date t = p.getTime().getTime();
@@ -266,25 +258,14 @@ public class ImportImpl implements Import {
 
                     Position pos = new DegreePosition(p.getLatitude(), p.getLongitude());
                     TimePoint timePoint = new MillisecondsTimePoint(t);
-
-                    SpeedWithBearing speedWithBearing = null;
                     
                     if (speed != null && heading != null) {
-                        speedWithBearing = new KnotSpeedWithBearingImpl(speed, new DegreeBearingImpl(heading));
-                    } else if (inferSpeedAndBearing && previousFix != null) {
-                        GPSFix tmpFix = new GPSFixImpl(pos, timePoint);
-                        speedWithBearing = previousFix.getSpeedAndBearingRequiredToReach(tmpFix);
-                    }
-                    
-                    GPSFix fix = null;
-                    if (speedWithBearing != null) {
-                        fix = new GPSFixMovingImpl(pos, timePoint, speedWithBearing);
+                        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(
+                                speed, new DegreeBearingImpl(heading));
+                        addFixAndInfer(callback, inferSpeedAndBearing, new GPSFixMovingImpl(pos, timePoint, speedWithBearing));
                     } else {
-                        fix = new GPSFixImpl(pos, timePoint);
+                        addFixAndInfer(callback, inferSpeedAndBearing, new GPSFixImpl(pos, timePoint));
                     }
-                    
-                    callback.addFix(fix, numberOfFixes, timeRange, routeName);
-                    previousFix = fix;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -292,4 +273,14 @@ public class ImportImpl implements Import {
         }
     }
 
+    @Override
+    public Iterable<String> getSupportedFileExtensions() {
+        //TODO the list is not yet complete
+        return Arrays.asList("gpx", "kml", "kmz");
+    }
+
+    @Override
+    public String getType() {
+        return "RouteConverter";
+    }
 }
