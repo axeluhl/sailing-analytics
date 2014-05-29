@@ -315,6 +315,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
                 filterablePanelEvents.getTextBox().setText(null);
+                filterablePanelEvents.updateAll(races);
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeSwissTimingArchiveConfiguration(swissTimingJsonUrl,
                         new AsyncCallback<Void>() {
