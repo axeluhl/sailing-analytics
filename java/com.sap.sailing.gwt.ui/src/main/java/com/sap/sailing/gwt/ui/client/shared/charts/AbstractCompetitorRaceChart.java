@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.BaseChart;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -132,7 +133,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
      */
     private Chart createChart() {
-        Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
+        Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
                 .setWidth100()
                 .setHeight100()
