@@ -104,7 +104,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
 
-        EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, stringMessages);
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(tabPanel, user, eventManagementPanel, stringMessages.events(), AdminConsoleFeatures.MANAGE_EVENTS);
         leaderboardGroupsDisplayers.add(eventManagementPanel);
 
@@ -206,16 +206,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 final Widget selectedPanel = ((ScrollPanel) tabPanel.getWidget(tabPanel.getSelectedIndex())).getWidget();
-                if (selectedPanel == leaderboardConfigPanel) {
+                if (selectedPanel == eventManagementPanel) {
+                    eventManagementPanel.fillEvents();
+                    fillLeaderboardGroups();
+                } else if (selectedPanel == leaderboardConfigPanel) {
                     fillLeaderboards();
-                }
-                if (selectedPanel == mediaPanel) {
+                } else if (selectedPanel == mediaPanel) {
                     mediaPanel.onShow();
-                }
-                if (selectedPanel == competitorPanel) {
+                } else if (selectedPanel == competitorPanel) {
                     competitorPanel.refreshCompetitorList();
-                }
-                if (selectedPanel == raceLogTrackingEventManagementPanel) {
+                } else if (selectedPanel == raceLogTrackingEventManagementPanel) {
+                    fillLeaderboards();
+                } else if (selectedPanel == leaderboardGroupConfigPanel) {
+                    fillLeaderboardGroups();
                     fillLeaderboards();
                 }
             }
