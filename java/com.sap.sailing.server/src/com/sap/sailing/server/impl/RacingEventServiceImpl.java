@@ -2213,7 +2213,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         event.setEndDate(endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
-        // TODO bug 1970 use diffutils to compute diff between old and new leaderboard groups list and apply the patch
+        List<LeaderboardGroup> leaderboardGroups = new ArrayList<>();
+        for (UUID lgid : leaderboardGroupIds) {
+            LeaderboardGroup lg = getLeaderboardGroupByID(lgid);
+            if (lg != null) {
+                leaderboardGroups.add(lg);
+            } else {
+                logger.info("Couldn't find leaderboard group with ID "+lgid+" while updating event "+event.getName());
+            }
+        }
+        event.setLeaderboardGroups(leaderboardGroups);
+        // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
     }
 

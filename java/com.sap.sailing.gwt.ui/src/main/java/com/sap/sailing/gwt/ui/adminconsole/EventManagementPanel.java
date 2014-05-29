@@ -484,13 +484,12 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel switchLeaderboardGroupsPanel = new VerticalPanel();
         switchLeaderboardGroupsPanel.setSpacing(5);
         switchLeaderboardGroupsPanel.setWidth("5%");
-
         addToEventButton = new Button("<-");
         addToEventButton.ensureDebugId("AddLeaderboardGroupsButton");
         addToEventButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-//                addSelectedLeaderboardGroupsToEvent(); TODO
+                addSelectedLeaderboardGroupsToEvent();
             }
         });
         addToEventButton.setEnabled(false);
@@ -501,12 +500,63 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         removeFromEventButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-//                removeSelectedLeaderboardGroupsFromEvent(); TODO
+                removeSelectedLeaderboardGroupsFromEvent();
             }
         });
         removeFromEventButton.setEnabled(false);
         switchLeaderboardGroupsPanel.add(removeFromEventButton);
         return switchLeaderboardGroupsPanel;
+    }
+
+    private void addSelectedLeaderboardGroupsToEvent() {
+        Set<LeaderboardGroupDTO> leaderboardGroupsToAdd = availableLeaderboardGroupsSelectionModel.getSelectedSet();
+        EventDTO selectedEvent = eventSelectionModel.getSelectedSet().iterator().next();
+        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
+        for (LeaderboardGroupDTO lg : selectedEvent.getLeaderboardGroups()) {
+            eventLeaderboardGroupUUIDs.add(lg.getId());
+        }
+        for (LeaderboardGroupDTO lg : leaderboardGroupsToAdd) {
+            eventLeaderboardGroupUUIDs.add(lg.getId());
+        }
+        updateEventLeaderboardGroups(selectedEvent, eventLeaderboardGroupUUIDs);
+    }
+
+    private void updateEventLeaderboardGroups(EventDTO event, List<UUID> eventLeaderboardGroupUUIDs) {
+        sailingService.updateEvent(event.id, event.getName(), event.startDate, event.endDate, event.venue,
+                event.isPublic, eventLeaderboardGroupUUIDs,
+                new AsyncCallback<EventDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to update event's leaderboard list: "+caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(EventDTO updatedEvent) {
+                        // replace event in events table and re-calculate everything else from there
+                        int i=0;
+                        for (EventDTO e : eventProvider.getList()) {
+                            if (e.id.equals(updatedEvent.id)) {
+                                eventProvider.getList().set(i, updatedEvent);
+                                updateLeaderboardGroupAssignmentPanel(eventSelectionModel.getSelectedSet());
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+        });
+    }
+    
+    private void removeSelectedLeaderboardGroupsFromEvent() {
+        Set<LeaderboardGroupDTO> leaderboardGroupsToRemove = selectedEventLeaderboardGroupsSelectionModel.getSelectedSet();
+        EventDTO selectedEvent = eventSelectionModel.getSelectedSet().iterator().next();
+        List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
+        for (LeaderboardGroupDTO lg : selectedEvent.getLeaderboardGroups()) {
+            eventLeaderboardGroupUUIDs.add(lg.getId());
+        }
+        for (LeaderboardGroupDTO lg : leaderboardGroupsToRemove) {
+            eventLeaderboardGroupUUIDs.remove(lg.getId());
+        }
+        updateEventLeaderboardGroups(selectedEvent, eventLeaderboardGroupUUIDs);
     }
 
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
@@ -633,14 +683,14 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
-                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, new AsyncCallback<Void>() {
+                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(EventDTO result) {
                 fillEvents();
                 if (!oldEvent.getName().equals(updatedEvent.getName())) {
                     sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
@@ -652,7 +702,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
-                                            
                         }
                     });
                 }
@@ -745,6 +794,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
         availableLeaderboardGroups = leaderboardGroups;
-        availableLeaderboardGroupsFilterablePanel.updateAll(leaderboardGroups);
+        updateLeaderboardGroupAssignmentPanel(eventSelectionModel.getSelectedSet());
     }
 }

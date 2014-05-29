@@ -42,4 +42,10 @@ public interface Event extends Named, Renamable, WithID, EventBase {
      *         {@link #getLeaderboardGroups()} and therefore was actually removed
      */
     boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+
+    /**
+     * Replaces the {@link #getLeaderboardGroups() current contents of the leaderboard groups sequence} by the
+     * leaderboard groups in <code>leaderboardGroups</code>.
+     */
+    void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
 }

@@ -349,7 +349,7 @@ public interface SailingServiceAsync {
     void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, AsyncCallback<Void> callback);
+            Iterable<UUID> leaderboardGroupIds, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 

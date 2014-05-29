@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 public class EventImpl extends EventBaseImpl implements Event {
@@ -54,6 +55,12 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public Iterable<LeaderboardGroup> getLeaderboardGroups() {
         return Collections.unmodifiableCollection(leaderboardGroups);
+    }
+    
+    @Override
+    public void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups) {
+        this.leaderboardGroups.clear();
+        Util.addAll(leaderboardGroups, this.leaderboardGroups);
     }
 
     @Override

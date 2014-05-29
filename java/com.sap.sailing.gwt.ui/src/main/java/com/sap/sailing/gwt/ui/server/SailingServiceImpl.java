@@ -2998,10 +2998,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
+    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds));
+        return getEventById(eventId);
     }
 
     @Override
