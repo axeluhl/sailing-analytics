@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-public interface EventRefresher {
-    
+public interface EventsRefresher {
     void fillEvents();
-
 }

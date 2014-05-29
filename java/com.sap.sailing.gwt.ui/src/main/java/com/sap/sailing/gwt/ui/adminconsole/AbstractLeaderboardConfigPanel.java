@@ -29,10 +29,13 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
@@ -41,8 +44,8 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Pair;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
-public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
-TrackedRaceChangedListener {
+public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
+        RegattasDisplayer, RaceSelectionChangeListener, TrackedRaceChangedListener, LeaderboardsDisplayer {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -73,6 +76,8 @@ TrackedRaceChangedListener {
     protected final MultiSelectionModel<StrippedLeaderboardDTO> leaderboardSelectionModel;
 
     protected final RaceSelectionProvider raceSelectionProvider;
+
+    private final LeaderboardsRefresher leaderboardsRefresher;
 
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Pair<RaceColumnDTO, FleetDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
@@ -113,14 +118,15 @@ TrackedRaceChangedListener {
         }
     }
 
-    public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            final ErrorReporter errorReporter, StringMessages theStringConstants,
-            SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel) {
+    public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
+            LeaderboardsRefresher leaderboardsRefresher, final ErrorReporter errorReporter,
+            StringMessages theStringConstants, SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = errorReporter;
+        this.leaderboardsRefresher = leaderboardsRefresher;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
         mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
@@ -141,7 +147,8 @@ TrackedRaceChangedListener {
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents, availableLeaderboardList, leaderboardTable, leaderboardList) {
+        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
+                availableLeaderboardList, leaderboardTable, leaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -202,7 +209,7 @@ TrackedRaceChangedListener {
         trackedRacesCaptionPanel.setStyleName("bold");
 
         raceSelectionProvider = new RaceSelectionModel();
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -246,8 +253,6 @@ TrackedRaceChangedListener {
         vPanel.add(selectedLeaderboardRaceButtonPanel);
         
         addSelectedLeaderboardRacesControls(selectedLeaderboardRaceButtonPanel);
-
-        loadLeaderboards();
     }
     
     protected abstract void addLeaderboardConfigControls(Panel configPanel);
@@ -256,27 +261,16 @@ TrackedRaceChangedListener {
     protected abstract void addColumnsToLeaderboardTable(CellTable<StrippedLeaderboardDTO> leaderboardTable);
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
-
-    public void loadLeaderboards() {
-        sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-                    @Override
-                    public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
-                        leaderboardList.getList().clear();
-                        availableLeaderboardList.clear();
-                        leaderboardList.getList().addAll(leaderboards);
-                        availableLeaderboardList.addAll(leaderboards);
-                        filterLeaderboardPanel.updateAll(availableLeaderboardList);
-                        leaderboardSelectionChanged();
-                        leaderboardRaceColumnSelectionChanged();
-                    }
-        
-                    @Override
-                    public void onFailure(Throwable t) {
-                        AbstractLeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboards: "
-                                + t.getMessage());
-                    }
-                }));
+    
+    @Override
+    public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
+        leaderboardList.getList().clear();
+        availableLeaderboardList.clear();
+        Util.addAll(leaderboards, leaderboardList.getList());
+        Util.addAll(leaderboards, availableLeaderboardList);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList);
+        leaderboardSelectionChanged();
+        leaderboardRaceColumnSelectionChanged();
     }
 
     /**
@@ -303,6 +297,7 @@ TrackedRaceChangedListener {
                                 selectRaceColumn(nameOfRaceColumnToSelect);
                             }
                             leaderboardSelectionChanged();
+                            getLeaderboardsRefresher().updateLeaderboards(leaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
                         }
             
                         @Override
@@ -493,5 +488,9 @@ TrackedRaceChangedListener {
     @Override
     public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null : leaderboardSelectionModel.getSelectedSet().iterator().next();
+    }
+
+    protected LeaderboardsRefresher getLeaderboardsRefresher() {
+        return leaderboardsRefresher;
     }
 }

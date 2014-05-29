@@ -29,8 +29,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -49,20 +50,22 @@ public class MasterDataImportPanel extends VerticalPanel {
     private SailingServiceAsync sailingService;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
-    private final EventRefresher eventRefresher;
-    private final LeaderboardGroupRefresher leaderboardGroupRefresher;
+    private final EventsRefresher eventRefresher;
+    private final LeaderboardsRefresher leaderboardsRefresher;
+    private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private TextBox filterBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, EventRefresher eventRefresher,
-            LeaderboardGroupRefresher leaderboardGroupRefresher) {
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
+            LeaderboardGroupsRefresher leaderboardGroupsRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.eventRefresher = eventRefresher;
-        this.leaderboardGroupRefresher = leaderboardGroupRefresher;
+        this.eventRefresher = eventsRefresher;
+        this.leaderboardsRefresher = leaderboardsRefresher;
+        this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
@@ -205,7 +208,10 @@ public class MasterDataImportPanel extends VerticalPanel {
             eventRefresher.fillEvents();
         }
         if (leaderboardGroupsCreated > 0) {
-            leaderboardGroupRefresher.fillLeaderboardGroups();
+            leaderboardGroupsRefresher.fillLeaderboardGroups();
+        }
+        if (leaderboardsCreated > 0) {
+            leaderboardsRefresher.fillLeaderboards();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,

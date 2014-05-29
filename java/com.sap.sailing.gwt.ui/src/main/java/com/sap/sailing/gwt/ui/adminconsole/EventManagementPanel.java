@@ -34,7 +34,8 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
@@ -51,9 +52,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * connected with any regatta and it used only to manage of basic attributes of the an event.
  * 
  * @author Frank Mittag (C5163974)
- * 
+ * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventRefresher {
+public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -249,7 +250,8 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
         eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                removeEventsButton.setEnabled(!eventSelectionModel.getSelectedSet().isEmpty());
+                final boolean somethingSelected = !eventSelectionModel.getSelectedSet().isEmpty();
+                removeEventsButton.setEnabled(somethingSelected);
             }
         });
         eventTable.setSelectionModel(eventSelectionModel);
@@ -511,5 +513,11 @@ public class EventManagementPanel extends SimplePanel implements EventRefresher 
                 filterTextbox.updateAll(allEvents);
             }
         });
+    }
+
+    @Override
+    public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
+        // TODO Auto-generated method stub
+        
     }
 }
