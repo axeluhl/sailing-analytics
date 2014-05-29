@@ -1,6 +1,5 @@
 package com.sap.sailing.selenium.pages.leaderboard;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -8,8 +7,6 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
-import com.sap.sailing.selenium.pages.common.CSSConstants;
-import com.sap.sailing.selenium.pages.common.HTMLConstants;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
 /**
@@ -22,15 +19,11 @@ public class LeaderboardPage extends HostPage {
     
     private static final String LEADERBOAR_PARAMTER_NAME = "name"; //$NON-NLS-1$
     private static final String SHOW_RACE_DETAILS_PARAMTER_NAME = "showRaceDetails"; //$NON-NLS-1$
+    private static final String REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis"; //$NON-NLS-1$
     
-    private static final String AUTO_REFRESH_ENABLED_IMAGE = "url(\"data:image/png;base64," +           //$NON-NLS-1$
-            "iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAR0lEQVR42mOoqan5T2vMMGoJxZZUV1fPB9IOWDC" + //$NON-NLS-1$
-            "ymgJ0eagY0T5pYMAC0NQ4YJF3GLVk1JJRS0YtGbVkSFhCr/pktI4fOEsA89uCDGg41QoAAAAASUVORK5CYII=\")"; //$NON-NLS-1$
+    private static final String AUTO_REFRESH_ENABLED_STRING = "Pause automatic refresh"; //$NON-NLS-1$
     
-    private static final String AUTO_REFRESH_DISABLED_IMAGE = "url(\"data:image/png;base64," +          //$NON-NLS-1$
-            "iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAhElEQVR42mOoqan5T2vMMGoJVSyprq6eD6TX09o" + //$NON-NLS-1$
-            "nDQxAAKQDgBbep6klIFBfXy9QW1vbT1NLYKCqqsoAKH6eppbAADD4CoDy72lqCTQIFYhNGGRbAgPEJAyKLSEmYV" + //$NON-NLS-1$
-            "DFEhgAWpQwdH1C0ziheeqiaT6haY6nedlF01KYXvXJaB0/MJYAANIIBwANoTb3AAAAAElFTkSuQmCC\")";        //$NON-NLS-1$
+    private static final String AUTO_REFRESH_DISABLED_STRING = "Refresh automatically";  //$NON-NLS-1$
     
     public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard) {
         return goToPage(driver, root, leaderboard, false);
@@ -49,8 +42,13 @@ public class LeaderboardPage extends HostPage {
      *   The page object for the administration console.
      */
     public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard, boolean raceDetails) {
+        return goToPage(driver, root, leaderboard, raceDetails, /* autoRefreshIntervalInMillis */ null);
+    }
+    
+    public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard, boolean raceDetails, Long autoRefreshIntervalInMillis) {
         driver.get(root + "gwt/Leaderboard.html?" + getLeaderboard(leaderboard) + //$NON-NLS-1$
-                "&" + getGWTCodeServer() + "&" + getShowRaceDeatails(raceDetails)); //$NON-NLS-1$
+                "&" + getGWTCodeServer() + "&" + getShowRaceDeatails(raceDetails) +
+                (autoRefreshIntervalInMillis==null ? "" : ("&" + getAutoRefreshIntervalMillis(autoRefreshIntervalInMillis)))); //$NON-NLS-1$
         
         return new LeaderboardPage(driver, leaderboard);
     }
@@ -61,6 +59,10 @@ public class LeaderboardPage extends HostPage {
     
     private static String getShowRaceDeatails(boolean raceDetails) {
         return SHOW_RACE_DETAILS_PARAMTER_NAME + "=" + raceDetails; //$NON-NLS-1$
+    }
+    
+    private static String getAutoRefreshIntervalMillis(long autoRefreshIntervalInMillis) {
+        return REFRESH_INTERVAL_MILLIS + "=" + autoRefreshIntervalInMillis; //$NON-NLS-1$
     }
     
     @FindBy(how = BySeleniumId.class, using = "LeaderboardDisplayCheckBox")
@@ -90,15 +92,13 @@ public class LeaderboardPage extends HostPage {
     }
     
     public boolean isAutoRefreshEnabled() {
-        WebElement image = this.playAndPauseAnchor.findElement(By.tagName(HTMLConstants.IMAGE_TAG_NAME));
-        String background = image.getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
-        
-        if(AUTO_REFRESH_ENABLED_IMAGE.equals(background))
+        String playPauseAnchorTitle = this.playAndPauseAnchor.getAttribute("title");
+        if (AUTO_REFRESH_ENABLED_STRING.equals(playPauseAnchorTitle)) {
             return true;
-        
-        if(AUTO_REFRESH_DISABLED_IMAGE.equals(background))
+        }
+        if (AUTO_REFRESH_DISABLED_STRING.equals(playPauseAnchorTitle)) {
             return false;
-        
+        }
         throw new RuntimeException("Can not determine auto refresh state"); //$NON-NLS-1$
     }
     
@@ -106,24 +106,19 @@ public class LeaderboardPage extends HostPage {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         Long finishedCalls = (Long) executor.executeScript(
                 "return window.PENDING_AJAX_CALLS.numberOfFinishedCalls(arguments[0])", "loadLeaderboardData");
-        
         this.playAndPauseAnchor.click();
-        
         waitForAjaxRequestsExecuted("loadLeaderboardData", finishedCalls.intValue() + 1);
-        
         this.playAndPauseAnchor.click();
     }
     
     public CompetitorChartsSettingsDialogPO getCompetitorChartsSettings() {
         this.competitorChartsSettingsButton.click();
-        
         return new CompetitorChartsSettingsDialogPO(this.driver,
                 findElementBySeleniumId(this.driver, "CompetitorChartsSettingsDialog"));
     }
     
     public LeaderboardSettingsDialogPO getLeaderboardSettings() {
         this.leaderboardSettingsButton.click();
-        
         return new LeaderboardSettingsDialogPO(this.driver,
                 findElementBySeleniumId(this.driver, "LeaderboardSettingsDialog"));
     }
