@@ -1030,4 +1030,6 @@ public interface StringMessages extends Messages {
     String registeredSailingServerInstances();
     String filterEventsByName();
     String leaderboardsExceptFromSelectedGroup();
+    String availableLeaderboardGroups();
+    String leaderboardGroupsOfSelectedEvent();
 }

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -25,6 +26,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -46,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -68,7 +71,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private Button removeEventsButton;
     private TextColumn<EventDTO> startEndDateColumn;
 
-    private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> selectedEventLeaderboardGroupsFilterablePanel;
     private CellTable<LeaderboardGroupDTO> selectedEventLeaderboardGroupsTable;
     private MultiSelectionModel<LeaderboardGroupDTO> selectedEventLeaderboardGroupsSelectionModel;
     private ListDataProvider<LeaderboardGroupDTO> selectedEventLeaderboardGroupsProvider;
@@ -94,6 +96,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final HorizontalPanel splitPanel;
+    private Button addToEventButton;
+    private Button removeFromEventButton;
 
     public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
@@ -264,6 +268,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             public void onSelectionChange(SelectionChangeEvent event) {
                 final boolean somethingSelected = !eventSelectionModel.getSelectedSet().isEmpty();
                 removeEventsButton.setEnabled(somethingSelected);
+                updateLeaderboardGroupAssignmentPanel(eventSelectionModel.getSelectedSet());
             }
         });
         eventTable.setSelectionModel(eventSelectionModel);
@@ -302,9 +307,118 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         mainPanel.add(splitPanel);
 
         splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
-//        splitPanel.add(createLeaderboardGroupOfEventsPanel(tableRes)); TODO
-        splitPanel.add(createSwitchLeaderboardGroupsGUI());
-//        splitPanel.add(createAvailableLeaderboardGroupsPanel(tableRes)); TODO
+        final Widget switchingButtonsPanel = createSwitchLeaderboardGroupsGUI(); // initialize this before the two tables because their event
+        // handlers require the buttons to be assigned
+        splitPanel.add(createLeaderboardGroupOfEventsPanel()); 
+        splitPanel.add(switchingButtonsPanel);
+        splitPanel.add(createAvailableLeaderboardGroupsPanel(tableRes));
+    }
+    
+    private Widget createLeaderboardGroupOfEventsPanel() {
+        selectedEventLeaderboardGroupsTable = new CellTable<LeaderboardGroupDTO>(10000000, tableRes);
+        CaptionPanel result = new CaptionPanel(stringMessages.leaderboardGroupsOfSelectedEvent());
+        result.add(selectedEventLeaderboardGroupsTable);
+        selectedEventLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
+        selectedEventLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                removeFromEventButton.setEnabled(!selectedEventLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
+            }
+        });
+        selectedEventLeaderboardGroupsTable.setSelectionModel(selectedEventLeaderboardGroupsSelectionModel);
+        selectedEventLeaderboardGroupsProvider = new ListDataProvider<>();
+        selectedEventLeaderboardGroupsProvider.addDataDisplay(selectedEventLeaderboardGroupsTable);
+        return result;
+    }
+
+    private Widget createAvailableLeaderboardGroupsPanel(AdminConsoleTableResources tableRes2) {
+        availableLeaderboardGroupsTable = new CellTable<LeaderboardGroupDTO>(10000000, tableRes);
+        CaptionPanel result = new CaptionPanel(stringMessages.availableLeaderboardGroups());
+        availableLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
+        availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                addToEventButton.setEnabled(!availableLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
+            }
+        });
+        availableLeaderboardGroupsTable.setSelectionModel(availableLeaderboardGroupsSelectionModel);
+        availableLeaderboardGroupsProvider = new ListDataProvider<>();
+        availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
+        availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(new Label(
+                stringMessages.filterLeaderboardGroupsByName()), Collections.<LeaderboardGroupDTO> emptyList(),
+                availableLeaderboardGroupsTable, availableLeaderboardGroupsProvider) {
+            @Override
+            public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
+                List<String> result = new ArrayList<>();
+                result.add(t.getName());
+                result.add(t.description);
+                return result;
+            }
+        };
+        VerticalPanel vp = new VerticalPanel();
+        vp.add(availableLeaderboardGroupsFilterablePanel);
+        vp.add(availableLeaderboardGroupsTable);
+        result.add(vp);
+        
+        TextColumn<LeaderboardGroupDTO> leaderboardGroupNameColumn = new TextColumn<LeaderboardGroupDTO>() {
+            @Override
+            public String getValue(LeaderboardGroupDTO event) {
+                return event.getName();
+            }
+        };
+        TextColumn<LeaderboardGroupDTO> leaderboardGroupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
+            @Override
+            public String getValue(LeaderboardGroupDTO event) {
+                return event.description;
+            }
+        };
+        final SafeHtmlCell leaderboardsCell = new SafeHtmlCell();
+        Column<LeaderboardGroupDTO, SafeHtml> associatedLeaderboardsColumn = new Column<LeaderboardGroupDTO, SafeHtml>(leaderboardsCell) {
+            @Override
+            public SafeHtml getValue(LeaderboardGroupDTO leaderboardGroup) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                boolean first = true;
+                for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    builder.appendEscaped(leaderboard.name);
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        
+        leaderboardGroupNameColumn.setSortable(true);
+        leaderboardGroupDescriptionColumn.setSortable(true);
+        selectedEventLeaderboardGroupsTable.addColumn(leaderboardGroupNameColumn, stringMessages.name());
+        selectedEventLeaderboardGroupsTable.addColumn(leaderboardGroupDescriptionColumn, stringMessages.description());
+        selectedEventLeaderboardGroupsTable.addColumn(associatedLeaderboardsColumn, stringMessages.leaderboards());
+        ListHandler<LeaderboardGroupDTO> sortHandler = new ListHandler<LeaderboardGroupDTO>(selectedEventLeaderboardGroupsProvider.getList());
+        sortHandler.setComparator(leaderboardGroupNameColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO e1, LeaderboardGroupDTO e2) {
+                return new NaturalComparator().compare(e1.getName(), e2.getName());
+            }
+        });
+        sortHandler.setComparator(leaderboardGroupDescriptionColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO e1, LeaderboardGroupDTO e2) {
+                return new NaturalComparator().compare(e1.description, e2.description);
+            }
+        });
+        selectedEventLeaderboardGroupsTable.addColumnSortHandler(sortHandler);
+        return result;
+    }
+
+    private void updateLeaderboardGroupAssignmentPanel(Set<EventDTO> set) {
+        if (set.isEmpty()) {
+            splitPanel.setVisible(false);
+        } else {
+            splitPanel.setVisible(true);
+            
+        }
     }
 
     private Widget createSwitchLeaderboardGroupsGUI() {
@@ -312,7 +426,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         switchLeaderboardGroupsPanel.setSpacing(5);
         switchLeaderboardGroupsPanel.setWidth("5%");
 
-        Button addToEventButton = new Button("<-");
+        addToEventButton = new Button("<-");
         addToEventButton.ensureDebugId("AddLeaderboardGroupsButton");
         addToEventButton.addClickHandler(new ClickHandler() {
             @Override
@@ -323,7 +437,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         addToEventButton.setEnabled(false);
         switchLeaderboardGroupsPanel.add(addToEventButton);
 
-        Button removeFromEventButton = new Button("->");
+        removeFromEventButton = new Button("->");
         removeFromEventButton.ensureDebugId("RemoveLeaderboardGroupsButton");
         removeFromEventButton.addClickHandler(new ClickHandler() {
             @Override
@@ -571,7 +685,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
     @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
-        // TODO Auto-generated method stub
-        
+        availableLeaderboardGroupsFilterablePanel.updateAll(leaderboardGroups);
     }
 }
