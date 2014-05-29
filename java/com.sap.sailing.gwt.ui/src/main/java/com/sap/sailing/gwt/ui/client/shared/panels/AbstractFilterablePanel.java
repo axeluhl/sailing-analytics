@@ -45,6 +45,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     };
     
+    /**
+     * @param all
+     *            the sequence of all objects that may be displayed in the table and from which the filter may choose.
+     *            This panel keeps a copy, so modifications to the <code>all</code> object do not reflect in the table
+     *            contents. Use {@link #updateAll(Iterable)} instead to update the sequence of available objects.
+     */
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         setSpacing(5);
         this.display = display;
@@ -62,14 +68,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     private void setAll(Iterable<T> all) {
-        if (all instanceof Collection) {
-            this.all = (Collection<T>) all;
-        } else {
-            this.all = new ArrayList<T>();
-            if (all != null) {
-                for (T t : all) {
-                    this.all.add(t);
-                }
+        this.all = new ArrayList<T>();
+        if (all != null) {
+            for (T t : all) {
+                this.all.add(t);
             }
         }
     }
@@ -88,7 +90,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * Updates the set of all objects to be shown in the table and applies the search filter to update the
      * table view.
      */
-    
     public void updateAll(Iterable<T> all){
         setAll(all);
         filter();

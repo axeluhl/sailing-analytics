@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -67,6 +68,16 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private Button removeEventsButton;
     private TextColumn<EventDTO> startEndDateColumn;
 
+    private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> selectedEventLeaderboardGroupsFilterablePanel;
+    private CellTable<LeaderboardGroupDTO> selectedEventLeaderboardGroupsTable;
+    private MultiSelectionModel<LeaderboardGroupDTO> selectedEventLeaderboardGroupsSelectionModel;
+    private ListDataProvider<LeaderboardGroupDTO> selectedEventLeaderboardGroupsProvider;
+    
+    private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> availableLeaderboardGroupsFilterablePanel;
+    private CellTable<LeaderboardGroupDTO> availableLeaderboardGroupsTable;
+    private MultiSelectionModel<LeaderboardGroupDTO> availableLeaderboardGroupsSelectionModel;
+    private ListDataProvider<LeaderboardGroupDTO> availableLeaderboardGroupsProvider;
+
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -82,6 +93,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final HorizontalPanel splitPanel;
 
     public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
@@ -280,6 +292,48 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         };
         eventsPanel.add(filterTextbox);
         fillEvents();
+
+        // prepare the caption panels and buttons for leaderboard group assignment but leave invisible for now
+        splitPanel = new HorizontalPanel();
+        splitPanel.ensureDebugId("EventLeaderboardGroupsAssignmentDetailsPanel");
+        splitPanel.setSpacing(5);
+        splitPanel.setWidth("100%");
+        splitPanel.setVisible(false);
+        mainPanel.add(splitPanel);
+
+        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
+//        splitPanel.add(createLeaderboardGroupOfEventsPanel(tableRes)); TODO
+        splitPanel.add(createSwitchLeaderboardGroupsGUI());
+//        splitPanel.add(createAvailableLeaderboardGroupsPanel(tableRes)); TODO
+    }
+
+    private Widget createSwitchLeaderboardGroupsGUI() {
+        VerticalPanel switchLeaderboardGroupsPanel = new VerticalPanel();
+        switchLeaderboardGroupsPanel.setSpacing(5);
+        switchLeaderboardGroupsPanel.setWidth("5%");
+
+        Button addToEventButton = new Button("<-");
+        addToEventButton.ensureDebugId("AddLeaderboardGroupsButton");
+        addToEventButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+//                addSelectedLeaderboardGroupsToEvent(); TODO
+            }
+        });
+        addToEventButton.setEnabled(false);
+        switchLeaderboardGroupsPanel.add(addToEventButton);
+
+        Button removeFromEventButton = new Button("->");
+        removeFromEventButton.ensureDebugId("RemoveLeaderboardGroupsButton");
+        removeFromEventButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+//                removeSelectedLeaderboardGroupsFromEvent(); TODO
+            }
+        });
+        removeFromEventButton.setEnabled(false);
+        switchLeaderboardGroupsPanel.add(removeFromEventButton);
+        return switchLeaderboardGroupsPanel;
     }
 
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,

@@ -264,11 +264,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     @Override
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
-        leaderboardList.getList().clear();
         availableLeaderboardList.clear();
-        Util.addAll(leaderboards, leaderboardList.getList());
         Util.addAll(leaderboards, availableLeaderboardList);
-        filterLeaderboardPanel.updateAll(availableLeaderboardList);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
     }
@@ -289,9 +287,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                     break;
                                 }
                             }
-            
-                            replaceLeaderboardInList(leaderboardList.getList(), leaderboardName, leaderboard);
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
+                            filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
                             leaderboardSelectionModel.setSelected(leaderboard, true);
                             if (nameOfRaceColumnToSelect != null) {
                                 selectRaceColumn(nameOfRaceColumnToSelect);

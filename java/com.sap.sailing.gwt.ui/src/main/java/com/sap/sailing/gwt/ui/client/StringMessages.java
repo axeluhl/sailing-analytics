@@ -1029,4 +1029,5 @@ public interface StringMessages extends Messages {
     String noSailingServerInstancesYet();
     String registeredSailingServerInstances();
     String filterEventsByName();
+    String leaderboardsExceptFromSelectedGroup();
 }

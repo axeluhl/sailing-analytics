@@ -168,7 +168,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private Widget createLeaderboardsGUI(Resources tableRes) {
-        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
+        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboardsExceptFromSelectedGroup());
         leaderboardsCaptionPanel.setWidth("95%");
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -406,7 +406,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         VerticalPanel leaderboardsGroupPanel = new VerticalPanel();
         leaderboardGroupsCaptionPanel.add(leaderboardsGroupPanel);
 
-        //Create functional elements for the leaderboard groups
+        // Create functional elements for the leaderboard groups
         HorizontalPanel leaderboardGroupsFunctionPanel = new HorizontalPanel();
         leaderboardGroupsFunctionPanel.setSpacing(5);
         leaderboardsGroupPanel.add(leaderboardGroupsFunctionPanel);
@@ -564,8 +564,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         if (groups != null) {
             Util.addAll(groups, availableLeaderboardGroups);
         }
-        groupsProvider.getList().clear();
-        groupsProvider.getList().addAll(availableLeaderboardGroups);
+        groupsFilterablePanel.updateAll(availableLeaderboardGroups);
     }
 
     @Override
@@ -574,8 +573,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         if (leaderboards != null) {
             Util.addAll(leaderboards, availableLeaderboards);
         }
-        leaderboardsProvider.getList().clear();
-        leaderboardsProvider.getList().addAll(availableLeaderboards);
+        leaderboardsFilterablePanel.updateAll(availableLeaderboards);
     }
 
     /**
@@ -642,7 +640,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             @Override
                             public void onSuccess(LeaderboardGroupDTO newGroup) {
                                 availableLeaderboardGroups.add(newGroup);
-                                groupsProvider.getList().add(newGroup);
+                                groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 groupsSelectionModel.clear();
                                 groupsSelectionModel.setSelected(newGroup, true);
                                 leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
@@ -682,6 +680,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                         }
                                     }
                                 }
+                                groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                                 groupsProvider.refresh();
                             }
@@ -755,7 +754,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void removeGroupFromTable(final LeaderboardGroupDTO group) {
         availableLeaderboardGroups.remove(group);
-        groupsProvider.getList().remove(group);
+        groupsFilterablePanel.updateAll(availableLeaderboardGroups);
         groupsSelectionModel.setSelected(group, false);
     }
 
@@ -776,12 +775,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
 
-            //Reload available leaderboards and remove leaderboards of the group from the list
+            // Tell leaderboards filter panel to use all available leaderboards except the leaderboards of the group from the list
             leaderboardsSelectionModel.clear();
-            leaderboardsFilterablePanel.getTextBox().setText("");
-            leaderboardsProvider.getList().clear();
-            leaderboardsProvider.getList().addAll(availableLeaderboards);
-            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
+            ArrayList<StrippedLeaderboardDTO> allLeaderboardsExceptThoseOfSelectedLeaderboardGroup = new ArrayList<>(availableLeaderboards);
+            allLeaderboardsExceptThoseOfSelectedLeaderboardGroup.removeAll(selectedGroup.leaderboards);
+            leaderboardsFilterablePanel.updateAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
         }
     }
 

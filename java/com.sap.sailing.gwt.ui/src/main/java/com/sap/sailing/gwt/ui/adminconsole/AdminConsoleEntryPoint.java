@@ -168,6 +168,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(tabPanel, user, leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), AdminConsoleFeatures.MANAGE_LEADERBOARD_GROUPS);
         regattasDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
+        leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
 
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this,
                 stringMessages, /* showRaceDetails */true, this);
