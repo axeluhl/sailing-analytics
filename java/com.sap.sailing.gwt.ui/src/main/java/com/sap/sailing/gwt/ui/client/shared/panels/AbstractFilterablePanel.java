@@ -111,6 +111,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void filter() {
         filtered.getList().clear();
         filtered.getList().addAll(filterer.applyFilter(getTextBox().getText(), all));
+        filtered.refresh();
         sort();
     }
    

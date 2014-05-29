@@ -204,12 +204,12 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 boolean first = true;
                 for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
-                    builder.appendEscaped(lg.getName());
                     if (first) {
                         first = false;
                     } else {
                         builder.appendHtmlConstant("<br>");
                     }
+                    builder.appendEscaped(lg.getName());
                 }
                 return builder.toSafeHtml();
             }
@@ -473,10 +473,25 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             selectedEventLeaderboardGroupsProvider.getList().clear();
             final Iterable<LeaderboardGroupDTO> leaderboardGroupsOfSelectedEvent = set.iterator().next().getLeaderboardGroups();
             Util.addAll(leaderboardGroupsOfSelectedEvent, selectedEventLeaderboardGroupsProvider.getList());
+            // deselect all items that are no longer in the list; this shall adjust the switch button enablement
+            for (LeaderboardGroupDTO lg : selectedEventLeaderboardGroupsSelectionModel.getSelectedSet()) {
+                if (!selectedEventLeaderboardGroupsProvider.getList().contains(lg)) {
+                    selectedEventLeaderboardGroupsSelectionModel.setSelected(lg, false);
+                }
+            }
+            selectedEventLeaderboardGroupsProvider.refresh();
             List<LeaderboardGroupDTO> allButEventsLeaderboardGroups = new ArrayList<>();
             Util.addAll(availableLeaderboardGroups, allButEventsLeaderboardGroups);
             Util.removeAll(leaderboardGroupsOfSelectedEvent, allButEventsLeaderboardGroups);
             availableLeaderboardGroupsFilterablePanel.updateAll(allButEventsLeaderboardGroups);
+            // deselect all items that are no longer in the list; this shall adjust the switch button enablement
+            for (LeaderboardGroupDTO lg : availableLeaderboardGroupsSelectionModel.getSelectedSet()) {
+                if (!allButEventsLeaderboardGroups.contains(lg)) {
+                    availableLeaderboardGroupsSelectionModel.setSelected(lg, false);
+                }
+            }
+            addToEventButton.setEnabled(!availableLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
+            removeFromEventButton.setEnabled(!selectedEventLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
         }
     }
 
@@ -521,7 +536,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         updateEventLeaderboardGroups(selectedEvent, eventLeaderboardGroupUUIDs);
     }
 
-    private void updateEventLeaderboardGroups(EventDTO event, List<UUID> eventLeaderboardGroupUUIDs) {
+    private void updateEventLeaderboardGroups(final EventDTO event, List<UUID> eventLeaderboardGroupUUIDs) {
         sailingService.updateEvent(event.id, event.getName(), event.startDate, event.endDate, event.venue,
                 event.isPublic, eventLeaderboardGroupUUIDs,
                 new AsyncCallback<EventDTO>() {
@@ -532,11 +547,19 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
                     @Override
                     public void onSuccess(EventDTO updatedEvent) {
+                        final boolean eventWasSelected = eventSelectionModel.getSelectedSet().contains(event);
+                        if (eventWasSelected) {
+                            eventSelectionModel.setSelected(event, false);
+                        }
                         // replace event in events table and re-calculate everything else from there
                         int i=0;
-                        for (EventDTO e : eventProvider.getList()) {
+                        for (EventDTO e : allEvents) {
                             if (e.id.equals(updatedEvent.id)) {
-                                eventProvider.getList().set(i, updatedEvent);
+                                allEvents.set(i, updatedEvent);
+                                filterTextbox.updateAll(allEvents);
+                                if (eventWasSelected) {
+                                    eventSelectionModel.setSelected(updatedEvent, true);
+                                }
                                 updateLeaderboardGroupAssignmentPanel(eventSelectionModel.getSelectedSet());
                                 break;
                             }
