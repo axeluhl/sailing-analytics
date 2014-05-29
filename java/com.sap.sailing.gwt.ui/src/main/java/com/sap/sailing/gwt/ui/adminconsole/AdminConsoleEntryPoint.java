@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -89,7 +90,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         dockPanel.addNorth(topInformationPanel, 2.5);
 
-        TabLayoutPanel tabPanel = new ScrolledTabLayoutPanel(2.5, Unit.EM, resources.arrowLeft(), resources.arrowRight(), 200);
+        final TabLayoutPanel tabPanel = new ScrolledTabLayoutPanel(2.5, Unit.EM, resources.arrowLeft(), resources.arrowRight(), 200);
         tabPanel.ensureDebugId("AdministrationTabs");
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
@@ -192,16 +193,17 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
-                if (leaderboardConfigPanel.isVisible()) {
+                final Widget selectedPanel = ((ScrollPanel) tabPanel.getWidget(tabPanel.getSelectedIndex())).getWidget();
+                if (selectedPanel == leaderboardConfigPanel) {
                     leaderboardConfigPanel.loadLeaderboards();
                 }
-                if (mediaPanel.isVisible()) {
+                if (selectedPanel == mediaPanel) {
                     mediaPanel.onShow();
                 }
-                if (competitorPanel.isVisible()) {
+                if (selectedPanel == competitorPanel) {
                     competitorPanel.refreshCompetitorList();
                 }
-                if (raceLogTrackingEventManagementPanel.isVisible()) {
+                if (selectedPanel == raceLogTrackingEventManagementPanel) {
                     raceLogTrackingEventManagementPanel.loadLeaderboards();
                 }
             }
