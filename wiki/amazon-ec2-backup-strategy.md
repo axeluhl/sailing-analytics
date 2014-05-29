@@ -12,7 +12,7 @@ The technology behind our backup solution is based on a customized use of GIT re
 
 The central backup server is configured with enough space to hold a large amount of backup data. To be able to also recover data in case of a failure or data loss all repositories are sync'd to a S3 bucket. This operation is executed weekly (each Saturday) and will behave like a rsync as it will only copy changed files.
 
-The following image depicts the current structure. On the left hand you see the instances involved. For each of these instances you see the directories or data stores being backup'd. In addition to that you can see the time each of the backups runs. On the right hand you see the structure of the backup server with separate git repositories for each instance.
+The following image depicts the current structure. On the left hand you see the instances involved. For each of these instances you see the directories or data stores being backed up. In addition to that you can see the time each of the backups runs. On the right hand you see the structure of the backup server with separate git repositories for each instance.
 
 <img src="/wiki/images/amazon/EC2BackupStrategy.jpg" width="100%" height="100%"/>
 
