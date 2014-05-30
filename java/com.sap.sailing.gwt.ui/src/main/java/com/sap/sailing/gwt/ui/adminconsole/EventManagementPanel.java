@@ -282,6 +282,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
                 venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn));
+        eventTable.getColumnSortList().push(startEndDateColumn);
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventProvider) {
             @Override
@@ -813,7 +814,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 eventSelectionModel.clear();
                 allEvents.clear();
                 allEvents.addAll(result);
-                eventTable.getColumnSortList().push(startEndDateColumn);
                 filterTextbox.updateAll(allEvents);
                 for (EventDTO e : allEvents) {
                     if (selectedEventUUIDs.contains(e.id)) {
