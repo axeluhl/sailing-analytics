@@ -842,7 +842,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());
             }
 
             @Override
