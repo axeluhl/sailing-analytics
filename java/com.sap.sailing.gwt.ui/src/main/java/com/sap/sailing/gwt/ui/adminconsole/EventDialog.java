@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +33,8 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected StringListInlineEditorComposite courseAreaNameList;
+    protected StringListInlineEditorComposite imageURLList;
+    protected StringListInlineEditorComposite videoURLList;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -95,14 +98,20 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
 
     }
 
-    public EventDialog(EventParameterValidator validator, StringMessages stringConstants,
+    public EventDialog(EventParameterValidator validator, StringMessages stringMessages,
             DialogCallback<EventDTO> callback) {
-        super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
+        super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
-        this.stringMessages = stringConstants;
+        this.stringMessages = stringMessages;
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringConstants, resources.removeIcon(), /* suggestValues */
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames));
+        imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                /* suggestValues */ Arrays.asList(new String[] { "http://", "https://" })));
+        videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                /* suggestValues */Arrays.asList(new String[] { "http://", "https://"})));
     }
 
     @Override
@@ -121,7 +130,12 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
             courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
         }
-
+        for (String imageURL : imageURLList.getValue()) {
+            result.addImageURL(imageURL);
+        }
+        for (String videoURL : videoURLList.getValue()) {
+            result.addVideoURL(videoURL);
+        }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return result;
     }

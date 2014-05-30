@@ -3001,9 +3001,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        List<URL> imageURLs = new ArrayList<>();
+        for (String imageURLString : imageURLStrings) {
+            imageURLs.add(new URL(imageURLString));
+        }
+        List<URL> videoURLs = new ArrayList<>();
+        for (String videoURLString : videoURLStrings) {
+            videoURLs.add(new URL(videoURLString));
+        }
         getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
         return getEventById(eventId);
     }
@@ -3094,10 +3102,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
         }
         for (URL imageURL : event.getImageURLs()) {
-            eventDTO.addImageURL(imageURL);
+            eventDTO.addImageURL(imageURL.toString());
         }
         for (URL videoURL : event.getVideoURLs()) {
-            eventDTO.addVideoURL(videoURL);
+            eventDTO.addVideoURL(videoURL.toString());
         }
         return eventDTO;
     }

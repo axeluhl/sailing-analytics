@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -273,7 +272,7 @@ public interface SailingService extends RemoteService {
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
     EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
+            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
 
     EventDTO createEvent(String eventName, Date startDate, Date endDate, String venueName, boolean isPublic, List<String> courseAreaNames);
 
