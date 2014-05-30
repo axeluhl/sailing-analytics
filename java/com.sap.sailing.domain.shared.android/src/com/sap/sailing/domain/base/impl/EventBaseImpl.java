@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.net.URL;
+import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 
 public class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
@@ -15,6 +19,8 @@ public class EventBaseImpl implements EventBase {
     private final UUID id;
     private TimePoint startDate;
     private TimePoint endDate;
+    private final ConcurrentLinkedQueue<URL> imageURLs;
+    private final ConcurrentLinkedQueue<URL> videoURLs;
 
     public EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -31,6 +37,8 @@ public class EventBaseImpl implements EventBase {
         this.endDate = endDate;
         this.venue = venue;
         this.isPublic = isPublic;
+        this.imageURLs = new ConcurrentLinkedQueue<URL>();
+        this.videoURLs = new ConcurrentLinkedQueue<URL>();
     }
 
     @Override
@@ -86,6 +94,52 @@ public class EventBaseImpl implements EventBase {
     @Override
     public void setEndDate(TimePoint endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public Iterable<URL> getImageURLs() {
+        return Collections.unmodifiableCollection(imageURLs);
+    }
+    
+    @Override
+    public void addImageURL(URL imageURL) {
+        if (!imageURLs.contains(imageURL)) {
+            imageURLs.add(imageURL);
+        }
+    }
+
+    @Override
+    public void removeImageURL(URL imageURL) {
+        imageURLs.remove(imageURL);
+    }
+
+    @Override
+    public void setImageURLs(Iterable<URL> imageURLs) {
+        this.imageURLs.clear();
+        Util.addAll(imageURLs, this.imageURLs);
+    }
+
+    @Override
+    public Iterable<URL> getVideoURLs() {
+        return Collections.unmodifiableCollection(videoURLs);
+    }
+
+    @Override
+    public void addVideoURL(URL videoURL) {
+        if (!videoURLs.contains(videoURL)) {
+            videoURLs.add(videoURL);
+        }
+    }
+
+    @Override
+    public void removeVideoURL(URL videoURL) {
+        videoURLs.remove(videoURL);
+    }
+
+    @Override
+    public void setVideoURLs(Iterable<URL> videoURLs) {
+        this.videoURLs.clear();
+        Util.addAll(videoURLs, this.videoURLs);
     }
 
 }

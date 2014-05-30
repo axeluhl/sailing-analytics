@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,10 +20,6 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     private final ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
-    private final ConcurrentLinkedQueue<URL> imageURLs;
-    
-    private final ConcurrentLinkedQueue<URL> videoURLs;
-
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
     }
@@ -36,8 +31,6 @@ public class EventImpl extends EventBaseImpl implements Event {
         super(name, startDate, endDate, venue, isPublic, id);
         this.regattas = new HashSet<Regatta>();
         this.leaderboardGroups = new ConcurrentLinkedQueue<>();
-        this.imageURLs = new ConcurrentLinkedQueue<>();
-        this.videoURLs = new ConcurrentLinkedQueue<>();
     }
     
     @Override
@@ -59,52 +52,6 @@ public class EventImpl extends EventBaseImpl implements Event {
         return getId() + " " + getName() + " " + getVenue().getName() + " " + isPublic();
     }
     
-    @Override
-    public Iterable<URL> getImageURLs() {
-        return Collections.unmodifiableCollection(imageURLs);
-    }
-    
-    @Override
-    public void addImageURL(URL imageURL) {
-        if (!imageURLs.contains(imageURL)) {
-            imageURLs.add(imageURL);
-        }
-    }
-
-    @Override
-    public void removeImageURL(URL imageURL) {
-        imageURLs.remove(imageURL);
-    }
-
-    @Override
-    public void setImageURLs(Iterable<URL> imageURLs) {
-        this.imageURLs.clear();
-        Util.addAll(imageURLs, this.imageURLs);
-    }
-
-    @Override
-    public Iterable<URL> getVideoURLs() {
-        return Collections.unmodifiableCollection(videoURLs);
-    }
-
-    @Override
-    public void addVideoURL(URL videoURL) {
-        if (!videoURLs.contains(videoURL)) {
-            videoURLs.add(videoURL);
-        }
-    }
-
-    @Override
-    public void removeVideoURL(URL videoURL) {
-        videoURLs.remove(videoURL);
-    }
-
-    @Override
-    public void setVideoURLs(Iterable<URL> videoURLs) {
-        this.videoURLs.clear();
-        Util.addAll(videoURLs, this.videoURLs);
-    }
-
     @Override
     public Iterable<LeaderboardGroup> getLeaderboardGroups() {
         return Collections.unmodifiableCollection(leaderboardGroups);
