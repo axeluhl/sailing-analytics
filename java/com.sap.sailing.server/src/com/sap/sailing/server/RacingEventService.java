@@ -351,7 +351,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
      * the names in <code>regattaNames</code> and updates it in the database.
-     * 
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -364,9 +363,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param leaderboardGroupIds
      *            TODO
+     * @param imageURLs TODO
+     * @param videoURLs TODO
+     * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds);
+    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},

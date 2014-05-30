@@ -2203,7 +2203,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2223,6 +2223,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         }
         event.setLeaderboardGroups(leaderboardGroups);
+        event.setImageURLs(imageURLs);
+        event.setVideoURLs(videoURLs);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
     }

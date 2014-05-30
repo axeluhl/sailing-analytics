@@ -539,7 +539,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
     private void updateEventLeaderboardGroups(final EventDTO event, List<UUID> eventLeaderboardGroupUUIDs) {
         sailingService.updateEvent(event.id, event.getName(), event.startDate, event.endDate, event.venue,
-                event.isPublic, eventLeaderboardGroupUUIDs,
+                event.isPublic, eventLeaderboardGroupUUIDs, event.getImageURLs(), event.getVideoURLs(),
                 new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -707,7 +707,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
-                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, new AsyncCallback<EventDTO>() {
+                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(),
+                new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());

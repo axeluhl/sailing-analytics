@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -349,7 +350,8 @@ public interface SailingServiceAsync {
     void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, AsyncCallback<EventDTO> callback);
+            Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs,
+            AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 

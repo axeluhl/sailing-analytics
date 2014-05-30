@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,8 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public UUID id;
 
     private List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
+    private List<URL> imageURLs = new ArrayList<>();
+    private List<URL> videoURLs = new ArrayList<>();
 
     private Date currentServerTime;
     
@@ -45,5 +48,21 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     
     public Iterable<LeaderboardGroupDTO> getLeaderboardGroups() {
         return leaderboardGroups;
+    }
+    
+    public void addImageURL(URL imageURL) {
+        imageURLs.add(imageURL);
+    }
+    
+    public void addVideoURL(URL videoURL) {
+        videoURLs.add(videoURL);
+    }
+
+    public Iterable<URL> getImageURLs() {
+        return imageURLs;
+    }
+
+    public Iterable<URL> getVideoURLs() {
+        return videoURLs;
     }
 }

@@ -3000,10 +3000,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds) {
+    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds));
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
         return getEventById(eventId);
     }
 
@@ -3091,6 +3092,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
+        }
+        for (URL imageURL : event.getImageURLs()) {
+            eventDTO.addImageURL(imageURL);
+        }
+        for (URL videoURL : event.getVideoURLs()) {
+            eventDTO.addVideoURL(videoURL);
         }
         return eventDTO;
     }

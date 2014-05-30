@@ -61,6 +61,12 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     void addImageURL(URL imageURL);
     
     void removeImageURL(URL imageURL);
+    
+    /**
+     * Replaces the {@link #getImageURLs() current contents of the image URL sequence} by the
+     * image URLs in <code>imageURLs</code>.
+     */
+    void setImageURLs(Iterable<URL> imageURLs);
 
     /**
      * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to video resources that can be
@@ -73,4 +79,11 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     void addVideoURL(URL videoURL);
     
     void removeVideoURL(URL videoURL);
+
+    /**
+     * Replaces the {@link #getVideoURLs() current contents of the video URL sequence} by the
+     * video URLs in <code>videoURLs</code>.
+     */
+    void setVideoURLs(Iterable<URL> videoURLs);
+
 }

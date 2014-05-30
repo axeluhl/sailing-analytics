@@ -77,6 +77,12 @@ public class EventImpl extends EventBaseImpl implements Event {
     }
 
     @Override
+    public void setImageURLs(Iterable<URL> imageURLs) {
+        this.imageURLs.clear();
+        Util.addAll(imageURLs, this.imageURLs);
+    }
+
+    @Override
     public Iterable<URL> getVideoURLs() {
         return Collections.unmodifiableCollection(videoURLs);
     }
@@ -91,6 +97,12 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void removeVideoURL(URL videoURL) {
         videoURLs.remove(videoURL);
+    }
+
+    @Override
+    public void setVideoURLs(Iterable<URL> videoURLs) {
+        this.videoURLs.clear();
+        Util.addAll(videoURLs, this.videoURLs);
     }
 
     @Override
