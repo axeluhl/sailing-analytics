@@ -19,10 +19,22 @@ public class DeckmanGPSFixImporter implements GPSFixImporter {
     public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
             throws FormatNotSupportedException, IOException {
         DeckmanAdapter deckmanAdapter = DeckmanAdapterFactoryImpl.INSTANCE.createDeckmanAdapter();
-        callback.startTrack(getType()+"@"+new Date(), /* properties */ null);
-        for (Iterator<Record> i=deckmanAdapter.parseLogFile(new InputStreamReader(inputStream)); i.hasNext(); ) {
-            Record record = i.next();
-            callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed()));
+        callback.startTrack(getType() + "@" + new Date(), /* properties */null);
+        try {
+            for (Iterator<Record> i = deckmanAdapter.parseLogFile(new InputStreamReader(inputStream)); i.hasNext();) {
+                Record record = i.next();
+                callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed()));
+            }
+        } catch (RuntimeException e) {
+            if (e.getCause() != null) {
+                if (e.getCause() instanceof IOException) {
+                    throw (IOException) e.getCause();
+                } else {
+                    throw new FormatNotSupportedException("Error reading Deckman CSV file", e.getCause());
+                }
+            } else {
+                throw new FormatNotSupportedException("Error reading Deckman CSV file", e);
+            }
         }
     }
 
