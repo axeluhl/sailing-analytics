@@ -21,7 +21,11 @@ import com.google.gwt.user.client.ui.HasValue;
  * displaying a value, and a "remove" button next to it. The popup that displays the "expanded" strategy editor has a
  * "Save" and a "Cancel" button at its bottom.<p>
  * 
- * 
+ * To use this micro-framework for list editing, you can either provide only an "expanded" editor, or you can provide
+ * a "collapsed" and an "expanded" editor which are then used as a cascade. If your values are of type {@link String}, you
+ * may use the pre-defined {@link StringListEditorComposite} or {@link StringListInlineEditorComposite} classes. A
+ * "collapsed" editor UI strategy requires the corresponding "expanded" strategy (which is used for the "edit" pop-up
+ * dialog) as a constructor argument.
  * 
  * @author Lukas Niemeier
  * @author Axel Uhl (D043530)

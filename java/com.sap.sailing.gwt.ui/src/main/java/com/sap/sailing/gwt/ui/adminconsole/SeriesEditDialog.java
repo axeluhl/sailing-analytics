@@ -390,14 +390,12 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 @Override
                 public void onClick(ClickEvent event) {
                     SeriesDTO selectedSeries = getSelectedSeries();
-                    if(selectedSeries != null) {
+                    if (selectedSeries != null) {
                         List<String> raceNamesToAdd = resolveRaceNamesToAdd();
-                        for(String raceToAdd: raceNamesToAdd) {
+                        for (String raceToAdd : raceNamesToAdd) {
                             addValue(raceToAdd);
-                            }
+                        }
                         validate();
-//                        updateFromToListboxesSelection();
-//                        updateHintLabel();
                     } else {
                         Window.alert(stringMessages.pleaseSelectASeriesFirst());
                     }
