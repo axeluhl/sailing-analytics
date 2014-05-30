@@ -2,13 +2,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -17,12 +16,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class EventDialog extends DataEntryDialog<EventDTO> {
+    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextBox venueEntryField;
@@ -30,9 +31,7 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     protected DateBox endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
-    protected List<TextBox> courseAreaNameEntryFields;
-
-    private Grid courseAreasGrid;
+    protected StringListInlineEditorComposite courseAreaNameList;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -101,21 +100,9 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
                 callback);
         this.stringMessages = stringConstants;
-        courseAreaNameEntryFields = new ArrayList<TextBox>();
-        courseAreasGrid = new Grid(0, 0);
-    }
-
-    protected void addCourseAreaWidget(String courseAreaName, boolean isEnabled) {
-        createCourseAreaNameWidget(courseAreaName, isEnabled);
-    }
-
-    private Widget createCourseAreaNameWidget(String defaultName, boolean isEnabled) {
-        TextBox textBox = createTextBox(defaultName); 
-        textBox.setVisibleLength(40);
-        textBox.setEnabled(isEnabled);
-        textBox.setWidth("175px");
-        courseAreaNameEntryFields.add(textBox);
-        return textBox; 
+        courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new StringListInlineEditorComposite.ExpandedUi(stringConstants, resources.removeIcon(), /* suggestValues */
+                        SuggestedCourseAreaNames.suggestedCourseAreaNames));
     }
 
     @Override
@@ -129,10 +116,9 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         result.id = id;
 
         List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
-        int count = courseAreaNameEntryFields.size();
-        for(int i = 0; i < count; i++) {
+        for (String courseAreaName : courseAreaNameList.getValue()) {
             CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
-            courseAreaDTO.setName(courseAreaNameEntryFields.get(i).getValue());
+            courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
         }
 
@@ -163,33 +149,8 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         formGrid.setWidget(4, 1, isPublicCheckBox);
 
         panel.add(createHeadlineLabel(stringMessages.courseAreas()));
-        panel.add(courseAreasGrid);
-        updateCourseAreasGrid(panel);
-
-        Button addCourseAreaButton = new Button(stringMessages.addCourseArea());
-        addCourseAreaButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addCourseAreaWidget("", true);
-                updateCourseAreasGrid(panel);
-                courseAreaNameEntryFields.get(courseAreaNameEntryFields.size()-1).setFocus(true);
-            }
-        });
-        panel.add(addCourseAreaButton);
+        panel.add(courseAreaNameList);
         return panel;
-    }
-
-    protected void updateCourseAreasGrid(VerticalPanel parentPanel) {
-        int widgetIndex = parentPanel.getWidgetIndex(courseAreasGrid);
-        parentPanel.remove(courseAreasGrid);
-        int courseAreasCount = courseAreaNameEntryFields.size();
-        courseAreasGrid = new Grid(courseAreasCount + 1, 1);
-        courseAreasGrid.setCellSpacing(4);
-        courseAreasGrid.setHTML(0, 0, stringMessages.name());
-        for(int i = 0; i < courseAreasCount; i++) {
-            courseAreasGrid.setWidget(i+1, 0, courseAreaNameEntryFields.get(i));
-        }
-        parentPanel.insert(courseAreasGrid, widgetIndex);
     }
 
     @Override
