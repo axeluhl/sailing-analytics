@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -28,9 +29,12 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceWithTimeRange;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
@@ -38,6 +42,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceWithTimeRangeJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
@@ -88,9 +93,12 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return result;
     }
     
-    public List<DeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
+    public Iterable<DeviceWithTimeRange> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
         final List<DeviceIdentifier> deviceIdList = new ArrayList<>();
+        final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
+        final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
+        
         for (Pair<String, InputStream> file : files) {
             final String fileName = file.getA();
             String fileExt = null;
@@ -137,6 +145,16 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                         @Override
                         public void addFix(GPSFix fix) {
                             storeFix(fix, currentDevice);
+                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(currentDevice);
+                            if (earliestFixSoFarFromCurrentDevice == null || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
+                                earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                from.put(currentDevice, earliestFixSoFarFromCurrentDevice);
+                            }
+                            TimePoint latestFixSoFarFromCurrentDevice = to.get(currentDevice);
+                            if (latestFixSoFarFromCurrentDevice == null || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
+                                latestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                to.put(currentDevice, latestFixSoFarFromCurrentDevice);
+                            }
                         }
 
                     }, true);
@@ -149,7 +167,11 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 }
             }
         }
-        return deviceIdList;
+        List<DeviceWithTimeRange> result = new ArrayList<>();
+        for (DeviceIdentifier deviceId : deviceIdList) {
+            result.add(new DeviceWithTimeRangeImpl(deviceId, new TimeRangeImpl(from.get(deviceId), to.get(deviceId))));
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -186,7 +208,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                     findService(prefImporterType);
         }
         
-        final List<DeviceIdentifier> deviceIdList = importFiles(files, preferredImporter);
+        final Iterable<DeviceWithTimeRange> mappingList = importFiles(files, preferredImporter);
         
         //setJsonResponseHeader(resp);
         //DO NOT set a JSON response header. This causes the browser to wrap the response in a
@@ -195,12 +217,11 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         
         TypeBasedServiceFinder<DeviceIdentifierJsonHandler> serviceFinder =
                 getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class);
-        JsonSerializer<DeviceIdentifier> serializer = new DeviceIdentifierJsonSerializer(serviceFinder);
+        JsonSerializer<DeviceWithTimeRange> serializer = new DeviceWithTimeRangeJsonSerializer(new DeviceIdentifierJsonSerializer(serviceFinder));
         JSONArray array = new JSONArray();
-        for (DeviceIdentifier deviceId : deviceIdList) {
-            array.add(serializer.serialize(deviceId));
+        for (DeviceWithTimeRange mapping : mappingList) {
+            array.add(serializer.serialize(mapping));
         }
-        
         array.writeJSONString(resp.getWriter());
     }
 }

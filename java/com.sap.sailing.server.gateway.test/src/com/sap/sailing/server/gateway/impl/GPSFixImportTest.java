@@ -37,7 +37,6 @@ public class GPSFixImportTest {
         
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", in)), new AlwaysFailingGPSFixImporter());
-        
-        //getting to here without errors is good enough
+        // getting to here without errors is good enough
     }
 }
