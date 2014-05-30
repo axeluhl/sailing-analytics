@@ -50,6 +50,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -223,6 +224,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
+import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -4523,5 +4525,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet);
+    }
+    
+    @Override
+    public Collection<String> getGPSFixImporterTypes() {
+        Set<String> result = new HashSet<>();
+        Collection<ServiceReference<GPSFixImporter>> refs = Collections.emptyList();
+        try {
+            refs = Activator.getDefault(). getServiceReferences(GPSFixImporter.class, null);
+        } catch (InvalidSyntaxException e) {
+            //shouldn't happen, as we are passing null for the filter
+        }
+        for (ServiceReference<GPSFixImporter> ref : refs) {
+            result.add((String) ref.getProperty(TypeBasedServiceFinder.TYPE));
+        }
+        return result;
     }
 }

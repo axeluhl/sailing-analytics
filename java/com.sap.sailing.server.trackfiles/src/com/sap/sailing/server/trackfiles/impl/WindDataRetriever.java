@@ -10,9 +10,9 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class WindDataRetriever extends AbstractDataRetriever {
 

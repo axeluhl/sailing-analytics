@@ -8,7 +8,6 @@ import com.sap.sailing.gwt.ui.adminconsole.TrackFileImportDeviceIdentifierTableW
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 
 public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<TrackFileImportDeviceIdentifier, SingleSelectionModel<TrackFileImportDeviceIdentifier>> {
     public static class TrackFileImportDeviceIdentifier {
@@ -47,32 +46,32 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<Tr
             }
         };
         
-        TextColumn<TrackFileImportDeviceIdentifier> fromColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
-            @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
-                return DateAndTimeFormatterUtil.formatDateAndTime(object.from);
-            }
-        };
-        
-        TextColumn<TrackFileImportDeviceIdentifier> toColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
-            @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
-                return DateAndTimeFormatterUtil.formatDateAndTime(object.to);
-            }
-        };
-        
-        TextColumn<TrackFileImportDeviceIdentifier> numberOfFixesColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
-            @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
-                return "" + object.numberOfFixes;
-            }
-        };
+//        TextColumn<TrackFileImportDeviceIdentifier> fromColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+//            @Override
+//            public String getValue(TrackFileImportDeviceIdentifier object) {
+//                return DateAndTimeFormatterUtil.formatDateAndTime(object.from);
+//            }
+//        };
+//        
+//        TextColumn<TrackFileImportDeviceIdentifier> toColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+//            @Override
+//            public String getValue(TrackFileImportDeviceIdentifier object) {
+//                return DateAndTimeFormatterUtil.formatDateAndTime(object.to);
+//            }
+//        };
+//        
+//        TextColumn<TrackFileImportDeviceIdentifier> numberOfFixesColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+//            @Override
+//            public String getValue(TrackFileImportDeviceIdentifier object) {
+//                return "" + object.numberOfFixes;
+//            }
+//        };
         
         table.addColumn(fileNameColumn, "Filename");
         table.addColumn(trackNameColumn, "Trackname");
-        table.addColumn(fromColumn, stringMessages.from());
-        table.addColumn(toColumn, stringMessages.to());
-        table.addColumn(numberOfFixesColumn, "# fixes");
+//        table.addColumn(fromColumn, stringMessages.from());
+//        table.addColumn(toColumn, stringMessages.to());
+//        table.addColumn(numberOfFixesColumn, "# fixes");
     }
 
 }
