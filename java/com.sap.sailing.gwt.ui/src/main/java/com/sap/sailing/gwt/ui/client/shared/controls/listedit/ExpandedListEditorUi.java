@@ -75,9 +75,9 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     }
     
     protected void setValueFromValueWidget(ValueBoxBase<ValueType> valueWidget, ValueType newValue, boolean fireEvents) {
-        for(int i = 0; i < expandedValuesGrid.getRowCount(); i++) {
+        for (int i = 0; i < expandedValuesGrid.getRowCount(); i++) {
             Widget gridWidget = expandedValuesGrid.getWidget(i, 0);
-            if(gridWidget.getElement() == valueWidget.getElement()) {
+            if (gridWidget.getElement() == valueWidget.getElement()) {
                 context.getValue().set(i, newValue);
                 if (fireEvents) {
                     context.onChange();
