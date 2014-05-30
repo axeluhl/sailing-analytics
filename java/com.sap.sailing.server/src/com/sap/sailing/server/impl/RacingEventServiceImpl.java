@@ -2182,16 +2182,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
 
+    // Used for TESTING only
     @Override
     public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
-        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
+        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
+                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList());
+        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
+                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList()));
         return result;
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
+        result.setImageURLs(imageURLs);
+        result.setVideoURLs(videoURLs);
         if (eventsById.containsKey(result.getId())) {
             throw new IllegalArgumentException("Event with ID " + result.getId()
                     + " already exists which is pretty surprising...");

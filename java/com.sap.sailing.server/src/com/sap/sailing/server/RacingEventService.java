@@ -457,7 +457,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
-            UUID id);
+            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 

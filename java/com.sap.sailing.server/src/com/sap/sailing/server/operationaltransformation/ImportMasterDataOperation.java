@@ -442,9 +442,8 @@ public class ImportMasterDataOperation extends
                 TimePoint endDate = event.getEndDate();
                 String venueName = event.getVenue().getName();
                 boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id);
-                newEvent.setImageURLs(event.getImageURLs());
-                newEvent.setVideoURLs(event.getVideoURLs());
+                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id,
+                        event.getImageURLs(), event.getVideoURLs());
                 creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",

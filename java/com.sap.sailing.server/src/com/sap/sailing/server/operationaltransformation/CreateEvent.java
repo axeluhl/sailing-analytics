@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Event;
@@ -21,14 +22,19 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final TimePoint endDate;
     private final boolean isPublic;
     private final String eventName;
+    private final Iterable<URL> videoURLs;
+    private final Iterable<URL> imageURLs;
     
-    public CreateEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+    public CreateEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
+            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         super(id);
         this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.venue = venue;
         this.isPublic = isPublic;
+        this.imageURLs = imageURLs;
+        this.videoURLs = videoURLs;
     }
 
     @Override
@@ -49,7 +55,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
 
     @Override
     public Event internalApplyTo(RacingEventService toState) {
-        return toState.createEventWithoutReplication(getEventName(), startDate, endDate, venue, isPublic, getId());
+        return toState.createEventWithoutReplication(getEventName(), startDate, endDate, venue, isPublic, getId(), imageURLs, videoURLs);
     }
 
 }

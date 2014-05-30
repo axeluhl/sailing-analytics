@@ -63,8 +63,12 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     void removeImageURL(URL imageURL);
     
     /**
-     * Replaces the {@link #getImageURLs() current contents of the image URL sequence} by the
-     * image URLs in <code>imageURLs</code>.
+     * Replaces the {@link #getImageURLs() current contents of the image URL sequence} by the image URLs in
+     * <code>imageURLs</code>.
+     * 
+     * @param imageURLs
+     *            if <code>null</code>, the internal sequence of image URLs is cleared but remains valid (non-
+     *            <code>null</code>)
      */
     void setImageURLs(Iterable<URL> imageURLs);
 
@@ -81,8 +85,12 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     void removeVideoURL(URL videoURL);
 
     /**
-     * Replaces the {@link #getVideoURLs() current contents of the video URL sequence} by the
-     * video URLs in <code>videoURLs</code>.
+     * Replaces the {@link #getVideoURLs() current contents of the video URL sequence} by the video URLs in
+     * <code>videoURLs</code>.
+     * 
+     * @param videoURLs
+     *            if <code>null</code>, the internal sequence of image URLs is cleared but remains valid (non-
+     *            <code>null</code>)
      */
     void setVideoURLs(Iterable<URL> videoURLs);
 

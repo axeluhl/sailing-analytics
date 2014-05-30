@@ -3004,24 +3004,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        List<URL> imageURLs = new ArrayList<>();
-        for (String imageURLString : imageURLStrings) {
-            imageURLs.add(new URL(imageURLString));
-        }
-        List<URL> videoURLs = new ArrayList<>();
-        for (String videoURLString : videoURLStrings) {
-            videoURLs.add(new URL(videoURLString));
-        }
+        List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
+        List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
         getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
         return getEventById(eventId);
     }
 
+    /**
+     * @param urlStrings
+     * @return
+     * @throws MalformedURLException
+     */
+    private List<URL> createURLsFromStrings(Iterable<String> urlStrings) throws MalformedURLException {
+        List<URL> imageURLs = new ArrayList<>();
+        for (String imageURLString : urlStrings) {
+            imageURLs.add(new URL(imageURLString));
+        }
+        return imageURLs;
+    }
+
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
+    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames,
+            Iterable<String> imageURLs, Iterable<String> videoURLs) throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
+        getService().apply(
+                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
+                        createURLsFromStrings(videoURLs)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }

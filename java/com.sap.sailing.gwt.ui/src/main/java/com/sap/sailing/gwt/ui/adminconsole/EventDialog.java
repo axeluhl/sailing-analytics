@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -103,16 +105,27 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
+        final ValueChangeHandler<List<String>> valueChangeHandler = new ValueChangeHandler<List<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<String>> event) {
+                validate();
+            }
+        };
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames));
-        final List<String> defaultSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
+        courseAreaNameList.addValueChangeHandler(valueChangeHandler);
+        final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ defaultSuggestionURLs));
+                /* suggestValues */ imageSuggestionURLs));
+        imageURLList.addValueChangeHandler(valueChangeHandler);
+        List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
+        videoURLSuggestions.add("http://www.youtube.com/watch?v=");
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ defaultSuggestionURLs));
+                /* suggestValues */ videoURLSuggestions));
+        videoURLList.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override

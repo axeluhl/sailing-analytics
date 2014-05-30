@@ -215,6 +215,42 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             }
         };
 
+        final SafeHtmlCell imageURLsCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> imageURLsColumn = new Column<EventDTO, SafeHtml>(imageURLsCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                boolean first = true;
+                for (String imageURL : event.getImageURLs()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    builder.appendEscaped(imageURL);
+                }
+                return builder.toSafeHtml();
+            }
+        };
+
+        final SafeHtmlCell videoURLsCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> videoURLsColumn = new Column<EventDTO, SafeHtml>(videoURLsCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                boolean first = true;
+                for (String videoURL : event.getVideoURLs()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    builder.appendEscaped(videoURL);
+                }
+                return builder.toSafeHtml();
+            }
+        };
+
         final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
         Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
             @Override
@@ -253,6 +289,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         isPublicColumn.setSortable(true);
         startEndDateColumn.setSortable(true);
         courseAreasColumn.setSortable(true);
+        imageURLsColumn.setSortable(true);
+        videoURLsColumn.setSortable(true);
         leaderboardGroupsColumn.setSortable(true);
 
         eventTable = new CellTable<EventDTO>(10000, tableRes);
@@ -262,6 +300,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
         eventTable.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
+        eventTable.addColumn(imageURLsColumn, stringMessages.imageURLs());
+        eventTable.addColumn(videoURLsColumn, stringMessages.videoURLs());
         eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
@@ -281,7 +321,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         mainPanel.add(eventTable);
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
-                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn));
+                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn, imageURLsColumn, videoURLsColumn));
         eventTable.getColumnSortList().push(startEndDateColumn);
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventProvider) {
@@ -586,7 +626,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
             Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
             TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn,
-            Column<EventDTO, SafeHtml> courseAreasColumn) {
+            Column<EventDTO, SafeHtml> courseAreasColumn, Column<EventDTO, SafeHtml> imageURLsColumn,
+            Column<EventDTO, SafeHtml> videoURLsColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
@@ -629,9 +670,21 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                         Arrays.toString(e2.venue.getCourseAreas().toArray()));
             }
         });
-
+        result.setComparator(imageURLsColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return new NaturalComparator().compare(Arrays.toString(Util.toArray(e1.getImageURLs(), new String[0])),
+                        Arrays.toString(Util.toArray(e2.getImageURLs(), new String[0])));
+            }
+        });
+        result.setComparator(videoURLsColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return new NaturalComparator().compare(Arrays.toString(Util.toArray(e1.getVideoURLs(), new String[0])),
+                        Arrays.toString(Util.toArray(e2.getVideoURLs(), new String[0])));
+            }
+        });
         return result;
-
     }
 
     private void removeEvents(Collection<EventDTO> events) {
@@ -786,7 +839,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.startDate, newEvent.endDate, newEvent.venue.getName(),
-                newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
+                newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(), newEvent.getVideoURLs(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
