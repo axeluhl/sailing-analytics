@@ -14,6 +14,8 @@ public enum FieldNames {
     EVENT_IS_PUBLIC,
     EVENT_START_DATE,
     EVENT_END_DATE,
+    EVENT_IMAGE_URLS,
+    EVENT_VIDEO_URLS,
     
     REGATTA_NAME,
     REGATTA_ID,

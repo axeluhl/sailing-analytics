@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.Named;
@@ -48,4 +49,28 @@ public interface Event extends Named, Renamable, WithID, EventBase {
      * leaderboard groups in <code>leaderboardGroups</code>.
      */
     void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
+    
+    /**
+     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to image resources that can be
+     * used to represent the event, e.g., on a web page.
+     * 
+     * @return a non-<code>null</code> value which may be empty
+     */
+    Iterable<URL> getImageURLs();
+    
+    void addImageURL(URL imageURL);
+    
+    void removeImageURL(URL imageURL);
+
+    /**
+     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to video resources that can be
+     * used to represent the event, e.g., on a web page.
+     * 
+     * @return a non-<code>null</code> value which may be empty
+     */
+    Iterable<URL> getVideoURLs();
+    
+    void addVideoURL(URL videoURL);
+    
+    void removeVideoURL(URL videoURL);
 }

@@ -9,6 +9,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,7 +98,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
 
     @Test
-    public void testLoadStoreSimpleEventWithLinkToLeaderboardGroups() {
+    public void testLoadStoreSimpleEventWithLinkToLeaderboardGroups() throws MalformedURLException {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
@@ -118,6 +120,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final LeaderboardGroup lg2 = createLeaderboardGroup("lg2");
         event.addLeaderboardGroup(lg1);
         event.addLeaderboardGroup(lg2);
+        event.addImageURL(new URL("http://some.host/with/some/file1.jpg"));
+        event.addImageURL(new URL("http://some.host/with/some/file2.jpg"));
+        event.addVideoURL(new URL("http://some.host/with/some/file1.mp4"));
+        event.addVideoURL(new URL("http://some.host/with/some/file2.mp4"));
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -152,6 +158,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         for (CourseArea loadedCourseArea : loadedVenue.getCourseAreas()) {
             assertEquals(courseAreaNames[i++], loadedCourseArea.getName());
         }
+        assertTrue("image URLs "+loadedEvent.getImageURLs()+" but expected "+event.getImageURLs(), Util.equals(event.getImageURLs(), loadedEvent.getImageURLs()));
+        assertTrue("video URLs "+loadedEvent.getVideoURLs()+" but expected "+event.getVideoURLs(), Util.equals(event.getVideoURLs(), loadedEvent.getVideoURLs()));
     }
     
     @Test

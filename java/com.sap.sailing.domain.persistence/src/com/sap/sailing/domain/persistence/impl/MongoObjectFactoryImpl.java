@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -498,6 +499,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
+        BasicDBList imageURLs = new BasicDBList();
+        for (URL imageURL : event.getImageURLs()) {
+            imageURLs.add(imageURL.toString());
+        }
+        eventDBObject.put(FieldNames.EVENT_IMAGE_URLS.name(), imageURLs);
+        BasicDBList videoURLs = new BasicDBList();
+        for (URL videoURL : event.getVideoURLs()) {
+            videoURLs.add(videoURL.toString());
+        }
+        eventDBObject.put(FieldNames.EVENT_VIDEO_URLS.name(), videoURLs);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
