@@ -106,12 +106,13 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames));
+        final List<String> defaultSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
         imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */ Arrays.asList(new String[] { "http://", "https://" })));
+                /* suggestValues */ defaultSuggestionURLs));
         videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
-                /* suggestValues */Arrays.asList(new String[] { "http://", "https://"})));
+                /* suggestValues */ defaultSuggestionURLs));
     }
 
     @Override
@@ -164,6 +165,10 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
 
         panel.add(createHeadlineLabel(stringMessages.courseAreas()));
         panel.add(courseAreaNameList);
+        panel.add(createHeadlineLabel(stringMessages.imageURLs()));
+        panel.add(imageURLList);
+        panel.add(createHeadlineLabel(stringMessages.videoURLs()));
+        panel.add(videoURLList);
         return panel;
     }
 

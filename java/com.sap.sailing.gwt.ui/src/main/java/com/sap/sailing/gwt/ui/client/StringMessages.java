@@ -1035,4 +1035,6 @@ public interface StringMessages extends Messages {
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
+    String imageURLs();
+    String videoURLs();
 }
