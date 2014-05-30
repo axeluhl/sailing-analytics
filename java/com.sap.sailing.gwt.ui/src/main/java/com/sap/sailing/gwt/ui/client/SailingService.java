@@ -473,4 +473,6 @@ public interface SailingService extends RemoteService {
      */
     void revokeRaceLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<Serializable> eventIds)
             throws NotRevokableException;
+    
+    Collection<String> getGPSFixImporterTypes();
 }

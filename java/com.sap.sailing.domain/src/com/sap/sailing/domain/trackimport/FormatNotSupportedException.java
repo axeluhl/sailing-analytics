@@ -1,4 +1,4 @@
-package com.sap.sailing.server.trackfiles.common;
+package com.sap.sailing.domain.trackimport;
 
 public class FormatNotSupportedException extends Exception {
 
@@ -6,5 +6,9 @@ public class FormatNotSupportedException extends Exception {
 
     public FormatNotSupportedException(String msg) {
         super(msg);
+    }
+
+    public FormatNotSupportedException() {
+        super();
     }
 }

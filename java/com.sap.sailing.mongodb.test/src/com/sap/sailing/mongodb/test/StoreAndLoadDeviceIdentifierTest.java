@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
@@ -142,7 +141,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         TypeBasedServiceFinderFactory forLoading = new MockSmartphoneImeiServiceFinderFactory();
         TypeBasedServiceFinderFactory forStoring = new MockEmptyServiceFinderFactory();
         
-        DeviceIdentifier trackFile = new TrackFileImportDeviceIdentifierImpl("FILE", "track", TimeRangeImpl.create(100, 200), 30);
+        DeviceIdentifier trackFile = new TrackFileImportDeviceIdentifierImpl("FILE", "track");
         DeviceIdentifier loaded = storeAndLoad(trackFile, forStoring, forLoading);
         assertTrue(loaded instanceof PlaceHolderDeviceIdentifier);
         assertEquals(trackFile.getIdentifierType(), loaded.getIdentifierType());

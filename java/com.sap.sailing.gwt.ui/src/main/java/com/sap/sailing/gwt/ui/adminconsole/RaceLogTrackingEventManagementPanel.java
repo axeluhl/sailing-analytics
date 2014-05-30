@@ -54,7 +54,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         VerticalPanel importContent = new VerticalPanel();
         mainPanel.add(importPanel);
         deviceIdentifierTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
-        TrackFileImportWidget importWidget = new TrackFileImportWidget(deviceIdentifierTable, stringMessages);
+        TrackFileImportWidget importWidget = new TrackFileImportWidget(deviceIdentifierTable, stringMessages,
+                sailingService, errorReporter);
         importPanel.add(importContent);
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);

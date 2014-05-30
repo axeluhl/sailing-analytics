@@ -52,7 +52,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         this.stringMessages = stringMessages;
 
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
-        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages);
+        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages, sailingService, errorReporter);
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
