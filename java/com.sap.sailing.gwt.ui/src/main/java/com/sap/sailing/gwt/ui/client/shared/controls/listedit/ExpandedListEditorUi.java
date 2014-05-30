@@ -46,11 +46,6 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         }
     }
 
-    @Override
-    public boolean isCollapsed() {
-        return false;
-    }
-
     private void addRow(ValueType newValue) {
         int rowIndex = expandedValuesGrid.insertRow(expandedValuesGrid.getRowCount());
 

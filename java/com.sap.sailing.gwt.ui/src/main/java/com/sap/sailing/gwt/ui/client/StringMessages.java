@@ -1032,4 +1032,7 @@ public interface StringMessages extends Messages {
     String leaderboardsExceptFromSelectedGroup();
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
+    String addRaces();
+    String withNamePrefix();
+    String pleaseSelectASeriesFirst();
 }

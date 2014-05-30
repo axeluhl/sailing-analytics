@@ -78,11 +78,6 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
         collapsedValuesBox.setTitle(text);
     }
 
-    @Override
-    public boolean isCollapsed() {
-        return true;
-    }
-
     private class PopupEditDialog extends DataEntryDialog<List<ValueType>> {
 
         private ListEditorComposite<ValueType> expandedComposite;

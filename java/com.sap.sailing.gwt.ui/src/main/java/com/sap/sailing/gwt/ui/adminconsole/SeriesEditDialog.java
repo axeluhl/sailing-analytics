@@ -344,7 +344,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             HorizontalPanel addRacesPanel = new HorizontalPanel();
             addRacesPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             addRacesPanel.setSpacing(5);
-            addRacesPanel.add(new Label("Add races"));
+            addRacesPanel.add(new Label(stringMessages.addRaces()));
 
             for(int i = 1; i <= 50; i++) {
                 addRacesFromListBox.addItem("" + i);
@@ -366,9 +366,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             });
             
             addRacesPanel.add(addRacesFromListBox);
-            addRacesPanel.add(new Label("to"));
+            addRacesPanel.add(new Label(stringMessages.to()));
             addRacesPanel.add(addRacesToListBox);
-            addRacesPanel.add(new Label("with name prefix"));
+            addRacesPanel.add(new Label(stringMessages.withNamePrefix()));
 
             raceNamePrefixTextBox.setWidth("20px");
             if ("Default".equals(seriesName)) {
@@ -399,7 +399,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
 //                        updateFromToListboxesSelection();
 //                        updateHintLabel();
                     } else {
-                        Window.alert("Please select a series first.");
+                        Window.alert(stringMessages.pleaseSelectASeriesFirst());
                     }
                 }
             });

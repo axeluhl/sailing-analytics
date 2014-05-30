@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 
-public class ListEditorComposite<ValueType> extends Composite implements HasValue<List<ValueType>>,
+public abstract class ListEditorComposite<ValueType> extends Composite implements HasValue<List<ValueType>>,
         HasValueChangeHandlers<List<ValueType>> {
 
     private final ListEditorUiStrategy<ValueType> activeUi;
@@ -53,9 +53,4 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
     public void onChange() {
         ValueChangeEvent.fire(this, getValue());
     }
-
-    public boolean isCollapsed() {
-        return activeUi.isCollapsed();
-    }
-
 }
