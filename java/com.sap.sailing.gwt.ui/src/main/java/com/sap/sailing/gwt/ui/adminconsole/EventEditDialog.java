@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -35,5 +36,11 @@ public class EventEditDialog extends EventDialog {
             }
         }
         courseAreaNameList.setValue(courseAreaNames);
+        List<String> imageURLStringsAsList = new ArrayList<>();
+        Util.addAll(event.getImageURLs(), imageURLStringsAsList);
+        imageURLList.setValue(imageURLStringsAsList);
+        List<String> videoURLStringsAsList = new ArrayList<>();
+        Util.addAll(event.getVideoURLs(), videoURLStringsAsList);
+        videoURLList.setValue(videoURLStringsAsList);
     }
 }
