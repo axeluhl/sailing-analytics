@@ -19,14 +19,14 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesImportServlet;
-import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
+import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
 
 public class GPSFixImportTest {
     
     @Test
     public void testReusingImportStream() throws IOException {
         TrackFilesImportServlet servlet = spy(new TrackFilesImportServlet());
-        doReturn(Arrays.asList((GPSFixImporter) new RouteConverterGPSFixImporterImpl())).
+        doReturn(Arrays.asList((GPSFixImporter) RouteConverterGPSFixImporterFactory.INSTANCE.createRouteConverterGPSFixImporter())).
                 when(servlet).getGPSFixImporters(anyString());
         doAnswer(new Answer<Void>() {
             @Override

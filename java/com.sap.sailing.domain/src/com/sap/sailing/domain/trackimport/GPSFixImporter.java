@@ -42,8 +42,11 @@ public interface GPSFixImporter {
         /**
          * Is called when the beginning of a track is found. Some track file formats (e.g. GPX) can contain multiple
          * tracks. Implementations of the {@link GPSFixImporter} are expected to call this method before calling
-         * {@link #addFix}, even if no metadata is known (and then pass {@code null} values for the {@code name} and
-         * {@code properties}).
+         * {@link #addFix}, even if no metadata is known (and then pass {@code null} for {@code properties}).
+         * 
+         * @param name
+         *            a non-<code>null</code> value; can be made up, e.g., by providing the importer type and a
+         *            string-formatted time stamp or similar, at least as a default
          */
         void startTrack(String name, Map<String, String> properties);
 
@@ -63,7 +66,8 @@ public interface GPSFixImporter {
 
     /**
      * Return the file extensions supported by this importer. If the importer is not intended
-     * for file-based input, this may return an empty iterable.
+     * for file-based input, this may return an empty iterable. Expects only the extension without
+     * any leading period, e.g., "gpx" or "kml".
      */
     Iterable<String> getSupportedFileExtensions();
     

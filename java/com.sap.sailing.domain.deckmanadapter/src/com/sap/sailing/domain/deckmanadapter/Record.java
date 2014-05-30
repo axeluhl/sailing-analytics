@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.deckmanadapter.impl;
+package com.sap.sailing.domain.deckmanadapter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.deckmanadapter.impl.FieldType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.Wind;

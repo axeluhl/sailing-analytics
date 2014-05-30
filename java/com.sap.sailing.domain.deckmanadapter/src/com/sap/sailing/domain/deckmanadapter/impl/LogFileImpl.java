@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.deckmanadapter.LogFile;
+import com.sap.sailing.domain.deckmanadapter.Record;
 
 /**
  * A log file as produced by Deckman, in CSV format. The first line is expected to contain the column headers.
