@@ -428,9 +428,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                     if (fix instanceof GPSFixMoving) {
                         trackedRace.recordFix(comp, (GPSFixMoving) fix);
                     } else {
-                        logger.log(Level.WARNING, String.format(
-                                "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving", comp,
-                                params.getRaceLog()));
+                        logger.log(
+                                Level.WARNING,
+                                String.format(
+                                        "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving, meaning it is missing COG/SOG values",
+                                        comp, params.getRaceLog()));
                     }
                 }
             }

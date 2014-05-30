@@ -15,9 +15,9 @@ import java.util.zip.ZipOutputStream;
 
 import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.trackfiles.Export;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
+import com.sap.sailing.server.trackfiles.TrackFileExporter;
 
 /**
  * Export data to well-known formats such as GPX, KML etc. Internally, the RouteConverter Library is used.
@@ -27,8 +27,8 @@ import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
  * @author Fredrik Teschke
  * 
  */
-public class ExportImpl implements Export {
-    private static final Logger log = Logger.getLogger(ExportImpl.class.toString());
+public class TrackFileExporterImpl implements TrackFileExporter {
+    private static final Logger log = Logger.getLogger(TrackFileExporterImpl.class.toString());
 
     /**
      * Writes the wanted data of all the races to the output stream. One file per race and data type.

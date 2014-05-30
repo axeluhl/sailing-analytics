@@ -112,7 +112,7 @@ public class RaceLogSerializationTest {
         setup(DeviceIdentifierJsonDeserializer.create(new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE),
                 new DeviceIdentifierJsonSerializer(onlyFallback));
         //track file device id can't be restored from string rep
-        DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl("file", "track", null, 1);
+        DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl("file", "track");
         DeviceCompetitorMappingEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
                 t(), author, device, competitor, 0, t(), t());
         

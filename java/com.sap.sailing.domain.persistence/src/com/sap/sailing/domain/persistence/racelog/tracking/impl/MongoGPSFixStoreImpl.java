@@ -124,12 +124,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
         try {
             Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
             String type = fix.getClass().getName();
-
             Object fixObject = fixServiceFinder.findService(type).transformForth(fix);
-            DBObject entry = new BasicDBObjectBuilder()
-            .add(FieldNames.DEVICE_ID.name(), dbDeviceId)
-            .add(FieldNames.GPSFIX_TYPE.name(), type)
-            .add(FieldNames.GPSFIX.name(), fixObject).get();
+            DBObject entry = new BasicDBObjectBuilder().add(FieldNames.DEVICE_ID.name(), dbDeviceId)
+                    .add(FieldNames.GPSFIX_TYPE.name(), type).add(FieldNames.GPSFIX.name(), fixObject).get();
             mongoOF.storeTimed(fix, entry);
 
             collection.insert(entry);
@@ -137,7 +134,6 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
             logger.log(Level.WARNING, "Could not store fix in MongoDB");
             e.printStackTrace();
         }
-
         notifyListeners(device, fix);
     }
 

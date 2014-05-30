@@ -35,7 +35,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.Smartp
 import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifier;
 
 public class Activator implements BundleActivator {
-	private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
 	
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
