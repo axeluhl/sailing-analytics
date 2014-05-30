@@ -7,7 +7,7 @@ import java.util.Map;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
- * Importer for extracting GPS fixes from an InputStream. Importers are picked up via
+ * Importer for extracting GPS fixes from an {@link InputStream}. Importers are picked up via
  * the OSGi service registry, so make sure to register them (the {@link GPSFixImporterRegistration}
  * class can help with this).
  * 
