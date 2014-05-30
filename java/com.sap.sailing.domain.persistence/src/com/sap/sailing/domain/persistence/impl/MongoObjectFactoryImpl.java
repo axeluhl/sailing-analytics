@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
@@ -101,12 +102,12 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 
-public class MongoObjectFactoryImpl implements MongoObjectFactory {    
+public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
-    
+
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
      * Use this constructor only for testing purposes or in cases where there will happen absolutely no access to
@@ -144,7 +145,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             result.put(fieldName, timePoint.asMillis());
         }
     }
-    
+
     public static void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
         storeTimePoint(timePoint, result, field.name());
     }
@@ -464,6 +465,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void storeSailingServer(RemoteSailingServerReference server) {
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        serverCollection.ensureIndex(FieldNames.SERVER_NAME.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.SERVER_NAME.name(), server.getName());
+        DBObject serverDBObject = new BasicDBObject();
+        serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
+        serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
+        serverCollection.update(query, serverDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeSailingServer(String name) {
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.SERVER_NAME.name(), name);
+        serverCollection.remove(query);
+    }
+    
+    @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
         eventCollection.ensureIndex(FieldNames.EVENT_ID.name());
@@ -718,7 +738,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
         return result;
     }
-
+    
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DeviceCompetitorMappingEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -806,7 +826,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_PATHFINDER_ID.name(), pathfinderEvent.getPathfinderId());
         return result;
     }
-    
+
     private void storeRaceLogDeviceMappingEvent(DeviceMappingEvent<? extends WithID> event, DBObject result) {
         DBObject deviceId = null;
         try {
@@ -900,7 +920,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
         return result;
     }
-
+    
     private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(startTimeEvent, result);
@@ -1132,7 +1152,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
         configurationsCollections.remove(query);
     }
-    
+
     public static DBObject storeDeviceId(
     		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
     				throws TransformationException, NoCorrespondingServiceRegisteredException {

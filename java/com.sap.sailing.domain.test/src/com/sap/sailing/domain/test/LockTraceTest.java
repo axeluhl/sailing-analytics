@@ -48,13 +48,17 @@ public class LockTraceTest {
         NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantReadLocking-Lock", /* fair */ true);
         LockUtil.lockForRead(lock);
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(1, lock.getReaders().size());
         LockUtil.lockForRead(lock);
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(2, lock.getReaders().size());
         LockUtil.unlockAfterRead(lock);
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(1, lock.getReaders().size());
         LockUtil.unlockAfterRead(lock);
         assertFalse(lock.getReaders().contains(Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
+        assertEquals(0, lock.getReaders().size());
     }
     
     @Test

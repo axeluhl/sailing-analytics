@@ -60,7 +60,7 @@ public class TestColumnSwapping {
                 public String generateRandomUUID() {
                     return UUID.randomUUID().toString();
                 }
-            });
+            }, /* hasOverallDetails */ false);
             leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
@@ -123,7 +123,7 @@ public class TestColumnSwapping {
             public String generateRandomUUID() {
                 return UUID.randomUUID().toString();
             }
-        });
+        }, /* hasOverallDetails */ false);
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);
         lb.addRace("2", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);

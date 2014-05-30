@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.trackfiles;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 /**
@@ -20,10 +19,4 @@ public interface TrackFileImportDeviceIdentifier extends DeviceIdentifier {
     String getFileName();
     String getTrackName();
     TimePoint getUploadedAt();
-    /**
-     * Return the total time range over which the fixes for the track are spread.
-     * @return
-     */
-    TimeRange getFixesTimeRange();
-    long getNumberOfFixes();
 }

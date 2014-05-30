@@ -76,7 +76,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-.getAllMediaTracks(), exportWind);
+                .getAllMediaTracks(), exportWind);
 
         ResponseBuilder resp;
         if (compress) {

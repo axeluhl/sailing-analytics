@@ -23,7 +23,9 @@ public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAut
 
     @Override
     public int compareTo(RaceLogEventAuthor other) {
-        return new Integer(other.getPriority()).compareTo(getPriority());
+        /** as '0' has a higher priority than '1' the compare method ranks a '0' priority higher than a '1' priority */
+        Integer result = new Integer(getPriority()).compareTo(other.getPriority());
+        return -result;
     }
     
     @Override

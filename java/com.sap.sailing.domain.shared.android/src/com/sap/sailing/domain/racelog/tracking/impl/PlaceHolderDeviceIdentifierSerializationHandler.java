@@ -22,7 +22,7 @@ public class PlaceHolderDeviceIdentifierSerializationHandler {
     }
 
     public Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
-        return new Pair<String, String>(object.getIdentifierType(), null);
+        return new Pair<String, String>(object.getIdentifierType(), object.getStringRepresentation());
     }
 
 }

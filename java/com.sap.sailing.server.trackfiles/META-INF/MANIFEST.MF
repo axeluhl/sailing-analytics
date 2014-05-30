@@ -8,9 +8,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.server.trackfiles,
  com.sap.sailing.server.trackfiles.common,
- com.sap.sailing.server.trackfiles.impl;x-friends:="com.sap.sailing.server.trackfiles.test"
+ com.sap.sailing.server.trackfiles.impl;x-friends:="com.sap.sailing.server.trackfiles.test,com.sap.sailing.server.gateway.test"
 Require-Bundle: 
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  routeconverter
+Import-Package: org.osgi.framework;version="1.7.0"
+Bundle-Activator: com.sap.sailing.server.trackfiles.impl.Activator
 

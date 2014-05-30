@@ -3,8 +3,13 @@ package com.sap.sailing.domain.common.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.sap.sailing.domain.common.Named;
 
 public class Util {
     /**
@@ -23,7 +28,7 @@ public class Util {
         }
     }
 
-    public static <T> T[] toArray(Iterable<T> what, T[] arr) {
+    public static <T> T[] toArray(Iterable<? extends T> what, T[] arr) {
         List<T> list = new ArrayList<T>();
         addAll(what, list);
         return list.toArray(arr);
@@ -271,4 +276,46 @@ public class Util {
         return result;
     }
     
+    /**
+     * Return the default value instead of null, if the map does not contain the key.
+     */
+    public static <K, V> V get(Map<K, V> map, K key, V defaultVal) {
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        return defaultVal;
+    }
+    
+    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        if (! map.containsKey(key)) {
+            map.put(key, new HashSet<V>());
+        }
+        map.get(key).add(value);
+    }
+    
+    public static String join(String separator, Iterable<? extends Named> nameds) {
+        return join(separator, toArray(nameds, new Named[size(nameds)]));
+    }
+
+    public static String join(String separator, Named... nameds) {
+        String[] strings = new String[nameds.length];
+        for (int i=0; i<nameds.length; i++) {
+            strings[i] = nameds[i].getName();
+        }
+        return join(separator, strings);
+    }
+    
+    public static String join(String separator, String...strings) {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for (String string : strings) {
+            if (first) {
+                first = false;
+            } else {
+                result.append(separator);
+            }
+            result.append(string);
+        }
+        return result.toString();
+    }
 }
