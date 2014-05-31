@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URL;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -47,6 +49,8 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
+        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
 
         // ... and the serializer itself.		
         serializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
