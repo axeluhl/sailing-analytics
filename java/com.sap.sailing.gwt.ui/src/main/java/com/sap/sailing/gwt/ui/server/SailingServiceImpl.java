@@ -2863,6 +2863,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
+        groupDTO.setId(leaderboardGroup.getId());
         groupDTO.setName(leaderboardGroup.getName());
         groupDTO.description = leaderboardGroup.getDescription();
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
@@ -2999,18 +3000,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
+    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, regattaNames));
+        List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
+        List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
+        return getEventById(eventId);
+    }
+
+    /**
+     * @param urlStrings
+     * @return
+     * @throws MalformedURLException
+     */
+    private List<URL> createURLsFromStrings(Iterable<String> urlStrings) throws MalformedURLException {
+        List<URL> imageURLs = new ArrayList<>();
+        for (String imageURLString : urlStrings) {
+            imageURLs.add(new URL(imageURLString));
+        }
+        return imageURLs;
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
+    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames,
+            Iterable<String> imageURLs, Iterable<String> videoURLs) throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
+        getService().apply(
+                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
+                        createURLsFromStrings(videoURLs)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3074,13 +3095,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private EventDTO convertToEventDTO(Event event) {
-        EventDTO eventDTO = new EventDTO(event.getName());
-        eventDTO.venue = new VenueDTO();
-        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
-        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
-        eventDTO.isPublic = event.isPublic();
-        eventDTO.id = event.getId();
+        EventDTO eventDTO = convertToEventDTO((EventBase) event);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -3092,6 +3107,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
             eventDTO.venue.getCourseAreas().add(courseAreaDTO);
+        }
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
+        }
+        for (URL imageURL : event.getImageURLs()) {
+            eventDTO.addImageURL(imageURL.toString());
+        }
+        for (URL videoURL : event.getVideoURLs()) {
+            eventDTO.addVideoURL(videoURL.toString());
         }
         return eventDTO;
     }

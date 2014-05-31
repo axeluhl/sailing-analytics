@@ -5,14 +5,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
 
-public class LeaderboardGroupImpl implements LeaderboardGroup {
+public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
     
     private static final long serialVersionUID = 2035927369446736934L;
+    private final UUID id;
     private String name;
     private String description;
     private boolean displayGroupsInReverseOrder;
@@ -26,12 +29,28 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
      */
     private Leaderboard overallLeaderboard;
 
+    /**
+     * Creates a new leaderboard group with a new UUID as its ID.
+     */
     public LeaderboardGroupImpl(String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        this(UUID.randomUUID(), name, description, displayGroupsInReverseOrder, leaderboards);
+    }
+
+    /**
+     * Use this constructor when loading or deserializing a leaderboard group and the ID is known and is provided to the constructor.
+     */
+    public LeaderboardGroupImpl(UUID id, String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     @Override

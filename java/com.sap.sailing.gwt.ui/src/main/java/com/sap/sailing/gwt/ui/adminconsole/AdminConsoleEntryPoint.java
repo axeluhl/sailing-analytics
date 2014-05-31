@@ -19,11 +19,16 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -34,15 +39,19 @@ import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
-public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
-    private Set<RegattaDisplayer> regattaDisplayers;
+public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
+    private Set<RegattasDisplayer> regattasDisplayers;
+    private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
+    private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -90,41 +99,44 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         dockPanel.addNorth(topInformationPanel, 2.5);
 
-        TabLayoutPanel tabPanel = new ScrolledTabLayoutPanel(2.5, Unit.EM, resources.arrowLeft(), resources.arrowRight(), 200);
+        final TabLayoutPanel tabPanel = new ScrolledTabLayoutPanel(2.5, Unit.EM, resources.arrowLeft(), resources.arrowRight(), 200);
         tabPanel.ensureDebugId("AdministrationTabs");
-        regattaDisplayers = new HashSet<RegattaDisplayer>();
+        regattasDisplayers = new HashSet<>();
+        leaderboardsDisplayers = new HashSet<>();
+        leaderboardGroupsDisplayers = new HashSet<>();
 
-        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this,
-                stringMessages);
-        addToTabPanel(tabPanel, user, sailingEventManagementPanel, stringMessages.events(), AdminConsoleFeatures.MANAGE_EVENTS);
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, stringMessages);
+        addToTabPanel(tabPanel, user, eventManagementPanel, stringMessages.events(), AdminConsoleFeatures.MANAGE_EVENTS);
+        leaderboardGroupsDisplayers.add(eventManagementPanel);
 
-        RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(
+        RegattaStructureManagementPanel regattaManagementPanel = new RegattaStructureManagementPanel(
                 sailingService, this, stringMessages, this);
-        eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
-        addToTabPanel(tabPanel, user, eventStructureManagementPanel, stringMessages.regattas(), AdminConsoleFeatures.MANAGE_REGATTAS);
-        regattaDisplayers.add(eventStructureManagementPanel);
+        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
+        addToTabPanel(tabPanel, user, regattaManagementPanel, stringMessages.regattas(), AdminConsoleFeatures.MANAGE_REGATTAS);
+        regattasDisplayers.add(regattaManagementPanel);
 
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService,
                 this, this, stringMessages);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         addToTabPanel(tabPanel, user, tractracEventManagementPanel, stringMessages.tracTracEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
-        regattaDisplayers.add(tractracEventManagementPanel);
+        regattasDisplayers.add(tractracEventManagementPanel);
 
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
                 sailingService, this, this, stringMessages);
         addToTabPanel(tabPanel, user, swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
-        regattaDisplayers.add(swissTimingReplayConnectorPanel);
+        regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
                 sailingService, this, this, stringMessages);
         // swisstimingEventManagementPanel.ensureDebugId("SwissTimingEventManagement");
         addToTabPanel(tabPanel, user, swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
-        regattaDisplayers.add(swisstimingEventManagementPanel);
+        regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
                 sailingService, this, this, this, stringMessages);
         addToTabPanel(tabPanel, user, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking(), AdminConsoleFeatures.MANAGE_RACELOG_TRACKING);
-        regattaDisplayers.add(raceLogTrackingEventManagementPanel);
+        regattasDisplayers.add(raceLogTrackingEventManagementPanel);
+        leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
@@ -134,35 +146,37 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 this, stringMessages);
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         addToTabPanel(tabPanel, user, trackedRacesManagementPanel, stringMessages.trackedRaces(), AdminConsoleFeatures.SHOW_TRACKED_RACES);
-        regattaDisplayers.add(trackedRacesManagementPanel);
+        regattasDisplayers.add(trackedRacesManagementPanel);
 
         final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, stringMessages, this);
         addToTabPanel(tabPanel, user, competitorPanel, stringMessages.competitors(), AdminConsoleFeatures.MANAGE_ALL_COMPETITORS);
 
-        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this,
-                stringMessages);
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
         // raceCourseManagementPanel.ensureDebugId("RaceCourseManagement");
         addToTabPanel(tabPanel, user, raceCourseManagementPanel, stringMessages.courseLayout(), AdminConsoleFeatures.MANAGE_COURSE_LAYOUT);
-        regattaDisplayers.add(raceCourseManagementPanel);
+        regattasDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
         // windPanel.ensureDebugId("WindManagement");
-        regattaDisplayers.add(windPanel);
+        regattasDisplayers.add(windPanel);
         addToTabPanel(tabPanel, user, windPanel, stringMessages.wind(), AdminConsoleFeatures.MANAGE_WIND);
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService,
-                this, this, stringMessages);
+                this, this, this, this, stringMessages);
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         addToTabPanel(tabPanel, user, leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), AdminConsoleFeatures.MANAGE_LEADERBOARD_GROUPS);
-        regattaDisplayers.add(leaderboardGroupConfigPanel);
+        regattasDisplayers.add(leaderboardGroupConfigPanel);
+        leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
+        leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
 
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this,
-                stringMessages, /* showRaceDetails */true);
+                stringMessages, /* showRaceDetails */true, this);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         addToTabPanel(tabPanel, user, leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), AdminConsoleFeatures.MANAGE_LEADERBOARDS);
-        regattaDisplayers.add(leaderboardConfigPanel);
+        regattasDisplayers.add(leaderboardConfigPanel);
+        leaderboardsDisplayers.add(leaderboardConfigPanel);
 
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(tabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
@@ -178,7 +192,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addToTabPanel(tabPanel, user, mediaPanel, stringMessages.mediaPanel(), AdminConsoleFeatures.MANAGE_MEDIA);
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService,
-                this, sailingEventManagementPanel, leaderboardGroupConfigPanel);
+                this, eventManagementPanel, this, this);
         addToTabPanel(tabPanel, user, masterDataImportPanel, stringMessages.masterDataImportPanel(), AdminConsoleFeatures.MANAGE_MASTERDATA_IMPORT);
 
         /*final DeviceConfigurationPanel deviceConfigurationAdminPanel = new DeviceConfigurationPanel(sailingService,
@@ -193,21 +207,27 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
-                if (leaderboardConfigPanel.isVisible()) {
-                    leaderboardConfigPanel.loadLeaderboards();
-                }
-                if (mediaPanel.isVisible()) {
+                final Widget selectedPanel = ((ScrollPanel) tabPanel.getWidget(tabPanel.getSelectedIndex())).getWidget();
+                if (selectedPanel == eventManagementPanel) {
+                    eventManagementPanel.fillEvents();
+                    fillLeaderboardGroups();
+                } else if (selectedPanel == leaderboardConfigPanel) {
+                    fillLeaderboards();
+                } else if (selectedPanel == mediaPanel) {
                     mediaPanel.onShow();
-                }
-                if (competitorPanel.isVisible()) {
+                } else if (selectedPanel == competitorPanel) {
                     competitorPanel.refreshCompetitorList();
-                }
-                if (raceLogTrackingEventManagementPanel.isVisible()) {
-                    raceLogTrackingEventManagementPanel.loadLeaderboards();
+                } else if (selectedPanel == raceLogTrackingEventManagementPanel) {
+                    fillLeaderboards();
+                } else if (selectedPanel == leaderboardGroupConfigPanel) {
+                    fillLeaderboardGroups();
+                    fillLeaderboards();
                 }
             }
         });
         fillRegattas();
+        fillLeaderboardGroups();
+        fillLeaderboards();
 
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
@@ -235,11 +255,60 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         return result;
     }
     
-//    private void addScrollableTab(TabLayoutPanel tabPanel, Widget widget, String tabTitle) {
-//        ScrollPanel widgetScroller = new ScrollPanel();
-//        widgetScroller.add(widget);
-//        tabPanel.add(widgetScroller, tabTitle, false);
-//    }
+    @Override
+    public void fillLeaderboards() {
+        sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
+                new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+                    @Override
+                    public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
+                        for (LeaderboardsDisplayer leaderboardsDisplayer : leaderboardsDisplayers) {
+                            leaderboardsDisplayer.fillLeaderboards(leaderboards);
+                        }
+                    }
+        
+                    @Override
+                    public void onFailure(Throwable t) {
+                        reportError("Error trying to obtain list of leaderboards: "+ t.getMessage());
+                    }
+                }));
+    }
+    
+    @Override
+    public void updateLeaderboards(Iterable<StrippedLeaderboardDTO> updatedLeaderboards, LeaderboardsDisplayer origin) {
+        for (LeaderboardsDisplayer leaderboardsDisplayer : leaderboardsDisplayers) {
+            if (leaderboardsDisplayer != origin) {
+                leaderboardsDisplayer.fillLeaderboards(updatedLeaderboards);
+            }
+        }
+    }
+
+    @Override
+    public void fillLeaderboardGroups() {
+        sailingService.getLeaderboardGroups(false /*withGeoLocationData*/,
+                new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(
+                        new AsyncCallback<List<LeaderboardGroupDTO>>() {
+                            @Override
+                            public void onSuccess(List<LeaderboardGroupDTO> groups) {
+                                for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
+                                    leaderboardGroupsDisplayer.fillLeaderboardGroups(groups);
+                                }
+                            }
+                            @Override
+                            public void onFailure(Throwable t) {
+                                reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
+                            }
+                        }));
+    }
+
+    @Override
+    public void updateLeaderboardGroups(Iterable<LeaderboardGroupDTO> updatedLeaderboardGroups,
+            LeaderboardGroupsDisplayer origin) {
+        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
+            if (leaderboardGroupsDisplayer != origin) {
+                leaderboardGroupsDisplayer.fillLeaderboardGroups(updatedLeaderboardGroups);
+            }
+        }
+    }
 
     @Override
     public void fillRegattas() {
@@ -247,7 +316,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 new AsyncCallback<List<RegattaDTO>>() {
                     @Override
                     public void onSuccess(List<RegattaDTO> result) {
-                        for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
+                        for (RegattasDisplayer regattaDisplayer : regattasDisplayers) {
                             regattaDisplayer.fillRegattas(result);
                         }
                     }

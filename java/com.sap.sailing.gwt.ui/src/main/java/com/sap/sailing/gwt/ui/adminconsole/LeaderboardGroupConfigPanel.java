@@ -34,11 +34,15 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,7 +56,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupRefresher {
+public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -95,13 +99,18 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
     private ArrayList<StrippedLeaderboardDTO> availableLeaderboards;
+    private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
+    private final LeaderboardsRefresher leaderboardsRefresher;
 
     public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
+            LeaderboardGroupsRefresher leaderboardGroupsRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         availableLeaderboards = new ArrayList<StrippedLeaderboardDTO>();
+        this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
+        this.leaderboardsRefresher = leaderboardsRefresher;
 
         //Build GUI
         mainPanel = new VerticalPanel();
@@ -124,8 +133,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         splitPanel.add(createLeaderboardsGUI(tableRes));
 
         //Load Data
-        fillLeaderboardGroups();
-        loadLeaderboards();
+        leaderboardGroupsRefresher.fillLeaderboardGroups();
+        leaderboardsRefresher.fillLeaderboards();
     }
 
     private Widget createSwitchLeaderboardsGUI() {
@@ -159,7 +168,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private Widget createLeaderboardsGUI(Resources tableRes) {
-        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
+        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboardsExceptFromSelectedGroup());
         leaderboardsCaptionPanel.setWidth("95%");
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -397,7 +406,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         VerticalPanel leaderboardsGroupPanel = new VerticalPanel();
         leaderboardGroupsCaptionPanel.add(leaderboardsGroupPanel);
 
-        //Create functional elements for the leaderboard groups
+        // Create functional elements for the leaderboard groups
         HorizontalPanel leaderboardGroupsFunctionPanel = new HorizontalPanel();
         leaderboardGroupsFunctionPanel.setSpacing(5);
         leaderboardsGroupPanel.add(leaderboardGroupsFunctionPanel);
@@ -448,7 +457,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
         leaderboardGroupsFunctionPanel.add(removeButton);
-
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                leaderboardGroupsRefresher.fillLeaderboardGroups();
+                leaderboardsRefresher.fillLeaderboards();
+            }
+        });
+        leaderboardGroupsFunctionPanel.add(refreshButton);
         AnchorCell anchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
@@ -540,43 +558,22 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         return leaderboardGroupsCaptionPanel;
     }
 
-    public void fillLeaderboardGroups() {
-        sailingService.getLeaderboardGroups(false /*withGeoLocationData*/,
-                new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(
-                        new AsyncCallback<List<LeaderboardGroupDTO>>() {
-                            @Override
-                            public void onSuccess(List<LeaderboardGroupDTO> groups) {
-                                availableLeaderboardGroups.clear();
-                                if (groups != null) {
-                                    availableLeaderboardGroups.addAll(groups);
-                                }
-                                groupsProvider.getList().clear();
-                                groupsProvider.getList().addAll(availableLeaderboardGroups);
-                            }
-                            @Override
-                            public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
-                            }
-                        }));
+    @Override
+    public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> groups) {
+        availableLeaderboardGroups.clear();
+        if (groups != null) {
+            Util.addAll(groups, availableLeaderboardGroups);
+        }
+        groupsFilterablePanel.updateAll(availableLeaderboardGroups);
     }
 
-    private void loadLeaderboards() {
-        sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
-                    }
-                    @Override
-                    public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
-                        availableLeaderboards.clear();
-                        if (leaderboards != null) {
-                            availableLeaderboards.addAll(leaderboards);
-                        }
-                        leaderboardsProvider.getList().clear();
-                        leaderboardsProvider.getList().addAll(availableLeaderboards);
-                    }
-                }));
+    @Override
+    public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
+        availableLeaderboards.clear();
+        if (leaderboards != null) {
+            Util.addAll(leaderboards, availableLeaderboards);
+        }
+        leaderboardsFilterablePanel.updateAll(availableLeaderboards);
     }
 
     /**
@@ -643,9 +640,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             @Override
                             public void onSuccess(LeaderboardGroupDTO newGroup) {
                                 availableLeaderboardGroups.add(newGroup);
-                                groupsProvider.getList().add(newGroup);
+                                groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 groupsSelectionModel.clear();
                                 groupsSelectionModel.setSelected(newGroup, true);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                             }
                         }));
     }
@@ -682,6 +680,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                         }
                                     }
                                 }
+                                groupsFilterablePanel.updateAll(availableLeaderboardGroups);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                                 groupsProvider.refresh();
                             }
                         }));
@@ -727,6 +727,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                         public void onSuccess(Void result) {
                             for (LeaderboardGroupDTO group : groups) {
                                 removeGroupFromTable(group);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                             }
                         }
                     }));
@@ -746,13 +747,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     @Override
                     public void onSuccess(Void v) {
                         removeGroupFromTable(group);
+                        leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                     }
                 }));
     }
 
     private void removeGroupFromTable(final LeaderboardGroupDTO group) {
         availableLeaderboardGroups.remove(group);
-        groupsProvider.getList().remove(group);
+        groupsFilterablePanel.updateAll(availableLeaderboardGroups);
         groupsSelectionModel.setSelected(group, false);
     }
 
@@ -773,12 +775,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
 
-            //Reload available leaderboards and remove leaderboards of the group from the list
+            // Tell leaderboards filter panel to use all available leaderboards except the leaderboards of the group from the list
             leaderboardsSelectionModel.clear();
-            leaderboardsFilterablePanel.getTextBox().setText("");
-            leaderboardsProvider.getList().clear();
-            leaderboardsProvider.getList().addAll(availableLeaderboards);
-            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
+            ArrayList<StrippedLeaderboardDTO> allLeaderboardsExceptThoseOfSelectedLeaderboardGroup = new ArrayList<>(availableLeaderboards);
+            allLeaderboardsExceptThoseOfSelectedLeaderboardGroup.removeAll(selectedGroup.leaderboards);
+            leaderboardsFilterablePanel.updateAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
         }
     }
 
@@ -891,5 +892,4 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private LeaderboardGroupDTO getSelectedGroup() {
         return groupsSelectionModel.getSelectedSet().isEmpty() ? null : groupsSelectionModel.getSelectedSet().iterator().next();
     }
-
 }

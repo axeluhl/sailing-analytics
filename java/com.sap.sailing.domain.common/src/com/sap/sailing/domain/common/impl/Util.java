@@ -14,18 +14,30 @@ import com.sap.sailing.domain.common.Named;
 public class Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
+     * If <code>what</code> is <code>null</code>, this operation does nothing, not even fail with an exception, but
+     * return the unmodified <code>addTo</code>.
      */
     public static <T> Collection<T> addAll(Iterable<? extends T> what, Collection<T> addTo) {
-        for (T t : what) {
-            addTo.add(t);
+        if (what != null) {
+            for (T t : what) {
+                addTo.add(t);
+            }
         }
         return addTo;
     }
     
-    public static <T> void removeAll(Iterable<T> what, Collection<T> removeFrom) {
-        for (T t : what) {
-            removeFrom.remove(t);
+    /**
+     * Removes all elements in <code>what</code> from <code>removeFrom</code> and returns <code>removeFrom</code> for chained use.
+     * If <code>what</code> is <code>null</code>, this operation does nothing, not even fail with an exception, but
+     * return the unmodified <code>removeFrom</code>.
+     */
+    public static <T> Collection<T> removeAll(Iterable<T> what, Collection<T> removeFrom) {
+        if (what != null) {
+            for (T t : what) {
+                removeFrom.remove(t);
+            }
         }
+        return removeFrom;
     }
 
     public static <T> T[] toArray(Iterable<? extends T> what, T[] arr) {
