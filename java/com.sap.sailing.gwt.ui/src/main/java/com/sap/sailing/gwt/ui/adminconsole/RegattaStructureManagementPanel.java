@@ -21,11 +21,11 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -40,7 +40,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class RegattaStructureManagementPanel extends SimplePanel implements RegattaDisplayer, RegattaSelectionChangeListener {
+public class RegattaStructureManagementPanel extends SimplePanel implements RegattasDisplayer, RegattaSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;

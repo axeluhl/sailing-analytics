@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class PolarSheetsEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
 
-    private Set<RegattaDisplayer> regattaDisplayers;
+    private Set<RegattasDisplayer> regattaDisplayers;
 
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
@@ -28,7 +28,7 @@ public class PolarSheetsEntryPoint extends AbstractEntryPoint implements Regatta
         
         registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
-        regattaDisplayers = new HashSet<RegattaDisplayer>();
+        regattaDisplayers = new HashSet<RegattasDisplayer>();
         createUI();
         fillRegattas();
     }
@@ -46,7 +46,7 @@ public class PolarSheetsEntryPoint extends AbstractEntryPoint implements Regatta
         sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
             @Override
             public void onSuccess(List<RegattaDTO> result) {
-                for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
+                for (RegattasDisplayer regattaDisplayer : regattaDisplayers) {
                     regattaDisplayer.fillRegattas(result);
                 }
             }

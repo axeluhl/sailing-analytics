@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -25,4 +26,27 @@ public interface Event extends Named, Renamable, WithID, EventBase {
      * For events, the ID is always a UUID.
      */
     UUID getId();
+    
+    /**
+     * Returns a non-<code>null</code> live but unmodifiable collection of leaderboard groups that were previously
+     * {@link #addLeaderboardGroup(LeaderboardGroup) added} to this event, in the order of their addition. Therefore, to
+     * change the iteration order, {@link #removeLeaderboardGroup(LeaderboardGroup)} and
+     * {@link #addLeaderboardGroup(LeaderboardGroup)} need to be used.
+     */
+    Iterable<LeaderboardGroup> getLeaderboardGroups();
+    
+    void addLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+    
+    /**
+     * @return <code>true</code> if and only if a leaderboard group equal to <code>leaderboardGroup</code> was part of
+     *         {@link #getLeaderboardGroups()} and therefore was actually removed
+     */
+    boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+
+    /**
+     * Replaces the {@link #getLeaderboardGroups() current contents of the leaderboard groups sequence} by the
+     * leaderboard groups in <code>leaderboardGroups</code>.
+     */
+    void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
+    
 }

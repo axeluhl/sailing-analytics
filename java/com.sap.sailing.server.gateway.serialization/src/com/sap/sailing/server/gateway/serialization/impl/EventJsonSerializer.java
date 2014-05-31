@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.net.URL;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
@@ -12,6 +15,8 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_START_DATE = "startDate";
     public static final String FIELD_END_DATE = "endDate";
     public static final String FIELD_VENUE = "venue";
+    public static final String FIELD_IMAGE_URLS = "imageURLs";
+    public static final String FIELD_VIDEO_URLS = "videoURLs";
 
     private final JsonSerializer<Venue> venueSerializer;
 
@@ -22,13 +27,21 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
 
     public JSONObject serialize(EventBase event) {
         JSONObject result = new JSONObject();
-
         result.put(FIELD_ID, event.getId().toString());
         result.put(FIELD_NAME, event.getName());
         result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
-
+        result.put(FIELD_IMAGE_URLS, getURLsAsStringArray(event.getImageURLs()));
+        result.put(FIELD_VIDEO_URLS, getURLsAsStringArray(event.getVideoURLs()));
         return result;
+    }
+
+    private JSONArray getURLsAsStringArray(Iterable<URL> urls) {
+        JSONArray jsonImageURLs = new JSONArray();
+        for (URL url : urls) {
+            jsonImageURLs.add(url.toString());
+        }
+        return jsonImageURLs;
     }
 }

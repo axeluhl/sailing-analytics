@@ -39,10 +39,13 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
@@ -55,8 +58,8 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
-TrackedRaceChangedListener {
+public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer, RaceSelectionChangeListener,
+TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
     private final boolean showRaceDetails;
@@ -82,11 +85,12 @@ TrackedRaceChangedListener {
     }
     
 
-    public LeaderboardConfigPanel(final SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails) {
-        super(sailingService, adminConsole, errorReporter, theStringConstants, new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+    public LeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
+            final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails,
+            LeaderboardsRefresher leaderboardsRefresher) {
+        super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter, theStringConstants,
+                new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         this.showRaceDetails = showRaceDetails;
-        
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }
     
@@ -857,12 +861,9 @@ TrackedRaceChangedListener {
                 leaderboardNames.add(leaderboard.name);
             }
             sailingService.removeLeaderboards(leaderboardNames, new AsyncCallback<Void>() {
-
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove the leaderboards:" + caught.getMessage());
-
-
                 }
 
                 @Override
@@ -870,6 +871,7 @@ TrackedRaceChangedListener {
                     for (StrippedLeaderboardDTO leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
                     }
+                    getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList, LeaderboardConfigPanel.this);
                 }
             });
         }
@@ -887,6 +889,7 @@ TrackedRaceChangedListener {
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
+                        getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList, LeaderboardConfigPanel.this);
                     }
                 }));
     }

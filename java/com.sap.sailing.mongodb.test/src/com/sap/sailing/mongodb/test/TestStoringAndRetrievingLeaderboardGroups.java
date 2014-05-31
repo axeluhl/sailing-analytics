@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,6 +105,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
                 /* leaderboardRegistry */ null);
         assertNotNull(loadedLeaderboardGroup.getOverallLeaderboard());
+        assertEquals(leaderboardGroup.getId(), loadedLeaderboardGroup.getId());
         assertNotSame(leaderboardGroup.getOverallLeaderboard(), loadedLeaderboardGroup.getOverallLeaderboard());
         assertSame(ScoringSchemeType.HIGH_POINT_ESS_OVERALL, loadedLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
     }
@@ -145,8 +147,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new LowPoint(), null);
         racingEventService.addLeaderboard(leaderboard);
 
-        LeaderboardGroup leaderboardGroup = racingEventService.addLeaderboardGroup(groupName, groupDescription, false, Arrays.asList(leaderboardNames), new int[0],
-                ScoringSchemeType.HIGH_POINT_ESS_OVERALL);
+        LeaderboardGroup leaderboardGroup = racingEventService.addLeaderboardGroup(UUID.randomUUID(), groupName, groupDescription, false, Arrays.asList(leaderboardNames),
+                new int[0], ScoringSchemeType.HIGH_POINT_ESS_OVERALL);
         final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
         racingEventService.apply(new UpdateLeaderboardScoreCorrection(overallLeaderboard.getName(), "Leaderboard 3",

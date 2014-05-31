@@ -270,7 +270,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private LatLngBounds currentMapBounds;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
-            CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
+            CompetitorSelectionProvider competitorSelection, StringMessages stringMessages, boolean showMapControls) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -291,13 +291,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
-        initializeData();
+        initializeData(showMapControls);
         
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
         combinedWindPanel.setVisible(false);
     }
     
-    private void loadMapsAPIV3() {
+    private void loadMapsAPIV3(final boolean showMapControls) {
         boolean sensor = true;
 
         // load all the libs for use in the maps
@@ -310,9 +310,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = MapOptions.newInstance();
               mapOptions.setScrollWheel(true);
-              mapOptions.setMapTypeControl(true);
-              mapOptions.setPanControl(true);
-              mapOptions.setZoomControl(true);
+              mapOptions.setMapTypeControl(showMapControls);
+              mapOptions.setPanControl(showMapControls);
+              mapOptions.setZoomControl(showMapControls);
               mapOptions.setScaleControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
@@ -331,15 +331,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
               scaleControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
               mapOptions.setScaleControlOptions(scaleControlOptions);
+              mapOptions.setStreetViewControl(false);
+              if (showMapControls) {
+                  ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
+                  zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  mapOptions.setZoomControlOptions(zoomControlOptions);
 
-              ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-              zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-              mapOptions.setZoomControlOptions(zoomControlOptions);
-
-              PanControlOptions panControlOptions = PanControlOptions.newInstance();
-              panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-              mapOptions.setPanControlOptions(panControlOptions);
-              
+                  PanControlOptions panControlOptions = PanControlOptions.newInstance();
+                  panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  mapOptions.setPanControlOptions(panControlOptions);
+              }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
               RaceMap.this.add(combinedWindPanel, 10, 10);
@@ -1790,8 +1791,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void initializeData() {
-        loadMapsAPIV3();
+    public void initializeData(boolean showMapControls) {
+        loadMapsAPIV3(showMapControls);
     }
 
     @Override

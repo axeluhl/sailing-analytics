@@ -1,7 +1,12 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
@@ -31,8 +36,33 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         } else {
             venue = null;
         }
-        return new EventBaseImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
+        EventBaseImpl result = new EventBaseImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
                 endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, true, id);
+        if (object.get(EventJsonSerializer.FIELD_IMAGE_URLS) != null) {
+            try {
+                result.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventJsonSerializer.FIELD_IMAGE_URLS)));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing image URLs for event "+name, e);
+            }
+        }
+        if (object.get(EventJsonSerializer.FIELD_VIDEO_URLS) != null) {
+            try {
+                result.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventJsonSerializer.FIELD_VIDEO_URLS)));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing video URLs for event "+name, e);
+            }
+        }
+        return result;
+    }
+    
+    private Iterable<URL> getURLsFromStrings(JSONArray strings) throws MalformedURLException {
+        List<URL> result = new ArrayList<URL>();
+        if (strings != null) {
+            for (Object string : strings) {
+                result.add(new URL(string.toString()));
+            }
+        }
+        return result;
     }
 
 }
