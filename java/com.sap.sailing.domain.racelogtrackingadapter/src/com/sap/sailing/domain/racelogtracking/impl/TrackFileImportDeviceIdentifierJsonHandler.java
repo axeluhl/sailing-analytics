@@ -9,9 +9,9 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
 public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentifierJsonHandler {
     private static enum Fields {UUID, FILE_NAME, TRACK_NAME, UPLOADED_MILLIS};

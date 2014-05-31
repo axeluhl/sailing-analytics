@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -166,4 +167,13 @@ public class TopLevelMasterData implements Serializable {
         return eventForLeaderboardGroup;
     }
 
+    public Iterable<Event> getAllEvents() {
+        Map<UUID, Event> allEventsInMasterData = new HashMap<>();
+        for (Set<Event> events : eventForLeaderboardGroup.values()) {
+            for (Event e : events) {
+                allEventsInMasterData.put(e.getId(), e);
+            }
+        }
+        return allEventsInMasterData.values();
+    }
 }
