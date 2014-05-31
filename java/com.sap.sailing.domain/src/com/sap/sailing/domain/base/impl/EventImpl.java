@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +20,7 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     private final Set<Regatta> regattas;
     
-    private final ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
+    private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -31,6 +33,13 @@ public class EventImpl extends EventBaseImpl implements Event {
         super(name, startDate, endDate, venue, isPublic, id);
         this.regattas = new HashSet<Regatta>();
         this.leaderboardGroups = new ConcurrentLinkedQueue<>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        if (leaderboardGroups == null) {
+            leaderboardGroups = new ConcurrentLinkedQueue<>();
+        }
     }
     
     @Override

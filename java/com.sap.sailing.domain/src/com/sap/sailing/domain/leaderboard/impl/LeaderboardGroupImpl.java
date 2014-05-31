@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,7 +17,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
 public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
     
     private static final long serialVersionUID = 2035927369446736934L;
-    private final UUID id;
+    private UUID id;
     private String name;
     private String description;
     private boolean displayGroupsInReverseOrder;
@@ -46,6 +48,13 @@ public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
     }
 
     @Override
