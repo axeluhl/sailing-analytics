@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.UUID;
@@ -19,8 +21,8 @@ public class EventBaseImpl implements EventBase {
     private final UUID id;
     private TimePoint startDate;
     private TimePoint endDate;
-    private final ConcurrentLinkedQueue<URL> imageURLs;
-    private final ConcurrentLinkedQueue<URL> videoURLs;
+    private ConcurrentLinkedQueue<URL> imageURLs;
+    private ConcurrentLinkedQueue<URL> videoURLs;
 
     public EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -39,6 +41,16 @@ public class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.imageURLs = new ConcurrentLinkedQueue<URL>();
         this.videoURLs = new ConcurrentLinkedQueue<URL>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        if (imageURLs == null) {
+            imageURLs = new ConcurrentLinkedQueue<URL>();
+        }
+        if (videoURLs == null) {
+            videoURLs = new ConcurrentLinkedQueue<URL>();
+        }
     }
 
     @Override

@@ -134,7 +134,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.user = theUser;
@@ -168,7 +168,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         toolbarPanel.add(viewControlsPanel);
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
@@ -206,9 +206,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
+        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages, showMapControls);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
