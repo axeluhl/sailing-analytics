@@ -310,11 +310,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = MapOptions.newInstance();
               mapOptions.setScrollWheel(true);
-              if (showMapControls) {
-                  mapOptions.setMapTypeControl(true);
-                  mapOptions.setPanControl(true);
-                  mapOptions.setZoomControl(true);
-              }
+              mapOptions.setMapTypeControl(showMapControls);
+              mapOptions.setPanControl(showMapControls);
+              mapOptions.setZoomControl(showMapControls);
               mapOptions.setScaleControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
