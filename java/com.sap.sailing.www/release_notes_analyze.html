@@ -35,6 +35,25 @@
 				<h2 class="articleHeadline">Analyzing Races, Leaderboards</h2>
 
 				<div class="innerContent">
+					<h2 class="articleSubheadline">June 2014</h2>
+
+					<ul class="bulletList">
+						<li>Switched to the latest version of the Highcharts charting framework. This leads to improvements
+						    especially on mobile devices. Charts can be zoomed using pinch gestures now.
+						</li>
+						<li>To support the use of the SAP Sailing Analytics also for live video streaming formats, we
+						    introduced a new URL parameter <tt>viewShowMapControls</tt> for the <tt>Spectator.html</tt>
+						    and the <tt>RaceBoard.html</tt> pages. This will suppress the zoom, pan and map type selection
+						    controls on the map display. When used for the <tt>Spectator.html</tt> URL, this will apply
+						    to all <tt>RaceBoard.html</tt> pages (all races) reached from there. Of course, the map
+						    can still be panned and zoomed using the usual mouse gestures. A left double click zooms
+						    in, a right double click zooms out. Zoom can also be controlled using the mouse wheel.
+						    And panning works by clicking on the map and dragging the mouse. Without the map type
+						    control, switching to satellite view is not possible (keep this in mind when tracking
+						    races in China, see below for Google's random coordinate transformations there).
+						</li>
+					</ul>
+					
 					<h2 class="articleSubheadline">May 2014</h2>
 
 					<ul class="bulletList">
