@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -420,6 +421,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         BasicDBObject dbLeaderboardGroup = new BasicDBObject();
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), leaderboardGroup.getId());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name(), leaderboardGroup.isDisplayGroupsInReverseOrder());
@@ -497,7 +499,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
+        BasicDBList imageURLs = new BasicDBList();
+        for (URL imageURL : event.getImageURLs()) {
+            imageURLs.add(imageURL.toString());
+        }
+        eventDBObject.put(FieldNames.EVENT_IMAGE_URLS.name(), imageURLs);
+        BasicDBList videoURLs = new BasicDBList();
+        for (URL videoURL : event.getVideoURLs()) {
+            videoURLs.add(videoURL.toString());
+        }
+        eventDBObject.put(FieldNames.EVENT_VIDEO_URLS.name(), videoURLs);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+        // now store the links to the leaderboard groups
+        DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
+        linksCollection.ensureIndex(FieldNames.EVENT_ID.name());
+        BasicDBList lgUUIDs = new BasicDBList();
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            lgUUIDs.add(lg.getId());
+        }
+        DBObject dbLinks = new BasicDBObject();
+        dbLinks.put(FieldNames.EVENT_ID.name(), event.getId());
+        dbLinks.put(FieldNames.LEADERBOARD_GROUP_UUID.name(), lgUUIDs);
+        linksCollection.update(query, dbLinks, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override

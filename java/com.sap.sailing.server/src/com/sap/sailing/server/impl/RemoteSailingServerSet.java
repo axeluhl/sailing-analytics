@@ -31,13 +31,15 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 
 /**
- * A set of {@link RemoteSailingServerReference}s including a cache of their {@link Event}s that is
+ * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
  * periodically updated.
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public class RemoteSailingServerSet {
+    private static final int POLLING_INTERVAL_IN_SECONDS = 60;
+
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
     
     /**
@@ -55,7 +57,7 @@ public class RemoteSailingServerSet {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() { @Override public void run() { updateRemoteSailingServerReferenceEventCaches(); } },
-                /* initialDelay */ 0, /* period */ 60, TimeUnit.SECONDS);
+                /* initialDelay */ 0, POLLING_INTERVAL_IN_SECONDS, TimeUnit.SECONDS);
     }
 
     public void clear() {

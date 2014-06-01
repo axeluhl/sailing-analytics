@@ -159,7 +159,6 @@ import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
-import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
@@ -246,8 +245,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * {@link #renameLeaderboard(String, String)}.
      */
     private final NamedReentrantReadWriteLock leaderboardsByNameLock;
-
+    
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
     
     /**
      * See {@link #leaderboardsByNameLock}
@@ -407,6 +408,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
+        leaderboardGroupsByID = new ConcurrentHashMap<>();
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for "+this, /* fair */ false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for "+this, /* fair */ false);
@@ -436,6 +438,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
+        loadLinksFromEventsToLeaderboardGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
@@ -507,6 +510,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
     
+    private void loadLinksFromEventsToLeaderboardGroups() {
+        domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */ this, /* leaderboardGroupResolver */ this);
+    }
+    
     private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
         for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
             remoteSailingServerSet.add(sailingServer);
@@ -560,6 +567,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+                leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -1794,11 +1802,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         return leaderboardGroupsByName.get(groupName);
     }
+    
+    @Override
+    public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+        return leaderboardGroupsByID.get(leaderboardGroupID);
+    }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(String groupName, String description,
-            boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+    public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName,
+            String description, boolean displayGroupsInReverseOrder,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         for (String leaderboardName : leaderboardNames) {
             Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
@@ -1808,7 +1821,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, displayGroupsInReverseOrder,
+        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayGroupsInReverseOrder,
                 leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings
@@ -1822,6 +1835,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
             leaderboardGroupsByName.put(groupName, result);
+            leaderboardGroupsByID.put(result.getId(), result);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -1835,6 +1849,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
+            if (leaderboardGroup != null) {
+                leaderboardGroupsByID.remove(leaderboardGroup.getId());
+            }
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -2065,6 +2082,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.clear();
+                leaderboardGroupsByID.clear();
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -2110,6 +2128,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
             for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+                leaderboardGroupsByID.put(lg.getId(), lg);
                 logoutput.append(String.format("%3s\n", lg.toString()));
             }
 
@@ -2163,16 +2182,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
 
+    // Used for TESTING only
     @Override
     public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
-        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
+        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
+                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList());
+        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
+                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList()));
         return result;
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
+        result.setImageURLs(imageURLs);
+        result.setVideoURLs(videoURLs);
         if (eventsById.containsKey(result.getId())) {
             throw new IllegalArgumentException("Event with ID " + result.getId()
                     + " already exists which is pretty surprising...");
@@ -2184,7 +2209,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, List<String> regattaNames) {
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2194,9 +2219,20 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         event.setEndDate(endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
-        // TODO need to update regattas if they are once linked to event objects
+        List<LeaderboardGroup> leaderboardGroups = new ArrayList<>();
+        for (UUID lgid : leaderboardGroupIds) {
+            LeaderboardGroup lg = getLeaderboardGroupByID(lgid);
+            if (lg != null) {
+                leaderboardGroups.add(lg);
+            } else {
+                logger.info("Couldn't find leaderboard group with ID "+lgid+" while updating event "+event.getName());
+            }
+        }
+        event.setLeaderboardGroups(leaderboardGroups);
+        event.setImageURLs(imageURLs);
+        event.setVideoURLs(videoURLs);
+        // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
-        replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
     }
 
     @Override

@@ -64,9 +64,20 @@ public interface MongoObjectFactory {
     void renameLeaderboardGroup(String oldName, String newName);
 
     /**
-     * Stores the event with its name, venue and the venue's course areas. The regattas obtained by
-     * {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored separately
-     * by calls to {@link #storeRegatta} where a reference to their owning event is stored. 
+     * Stores the event with its name, venue and the venue's course areas, as well as the links to the
+     * {@link Event#getLeaderboardGroups() leaderboard groups associated with the event}. These links are stored
+     * separately and are not loaded by the corresponding {@link DomainObjectFactory#loadEvent(String)} call again. The
+     * rationale behind this is that the events are usually loaded as the first thing in a server. The leaderboard
+     * groups are not yet loaded at that time, so we usually cannot establish the links at the time the event is loaded.
+     * Instead, a separate call, {@link DomainObjectFactory#loadLeaderboardGroupLinksForEvents}, is required after both,
+     * the events and the leaderboard groups have been loaded, to establish the links again.
+     * <p>
+     * 
+     * The regattas obtained by {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored
+     * separately by calls to {@link #storeRegatta} where a reference to their owning event is stored.
+     * <p>
+     * 
+     * 
      */
     void storeEvent(Event event);
 

@@ -26,6 +26,8 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,15 +39,15 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
+public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
     private Button startTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     
-    public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            RegattaRefresher regattaRefresher,
+    public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        super(sailingService, adminConsole, errorReporter, stringMessages,
-                new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+        super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
+                stringMessages, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         
         //add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
