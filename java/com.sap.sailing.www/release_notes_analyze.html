@@ -43,8 +43,11 @@
 						</li>
 						<li>To support the use of the SAP Sailing Analytics also for live video streaming formats, we
 						    introduced a new URL parameter <tt>viewShowMapControls</tt> for the <tt>Spectator.html</tt>
-						    and the <tt>RaceBoard.html</tt> pages. This will suppress the zoom, pan and map type selection
-						    controls on the map display. When used for the <tt>Spectator.html</tt> URL, this will apply
+						    and the <tt>RaceBoard.html</tt> pages. Setting this parameter to "false"
+						    will suppress the zoom, pan and map type selection
+						    controls on the map display. Example:
+						    <a href="http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false">http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false</a>.
+						    When used for the <tt>Spectator.html</tt> URL, this will apply
 						    to all <tt>RaceBoard.html</tt> pages (all races) reached from there. Of course, the map
 						    can still be panned and zoomed using the usual mouse gestures. A left double click zooms
 						    in, a right double click zooms out. Zoom can also be controlled using the mouse wheel.
