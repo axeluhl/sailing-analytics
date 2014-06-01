@@ -255,7 +255,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
         race.recordFix(ron, fix1);
         race.recordFix(ron, fix2);
-
+  
         CandidateFinder finder = new CandidateFinderImpl(race);
         Waypoint newWaypoint = new WaypointImpl(reaching, PassingInstruction.Port);
         Course course = race.getRace().getCourse();
@@ -267,7 +267,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
         // The process of adding
         course.addWaypoint(4, newWaypoint);
-        Pair<Iterable<Candidate>, Iterable<Candidate>> addedCans = finder.addWaypoint(newWaypoint, 4).get(ron);
+        Pair<List<Candidate>, List<Candidate>> addedCans = finder.updateWaypoints(Arrays.asList(newWaypoint), new ArrayList<Waypoint>(), 4).get(ron);
         assertEquals(Util.size(addedCans.getA()), 1);
         for (Candidate c : addedCans.getA()) {
             assertEquals(c.getWaypoint(), newWaypoint);
@@ -280,7 +280,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
         // The Process of removing
         course.removeWaypoint(4);
-        Pair<Iterable<Candidate>, Iterable<Candidate>> removedCans = finder.removeWaypoint(newWaypoint, 4).get(ron);
+        Pair<List<Candidate>, List<Candidate>> removedCans = finder.updateWaypoints(new ArrayList<Waypoint>(), Arrays.asList(newWaypoint), 4).get(ron);
         assertEquals(Util.size(removedCans.getB()), 1);
         for (Candidate c : removedCans.getB()) {
             assertEquals(c.getWaypoint(), newWaypoint);

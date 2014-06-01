@@ -34,8 +34,7 @@ public interface CandidateFinder {
      * {@link Candidate}s are needed instead of just the deltas.
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
+    
+    Map<Competitor, Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex);
 
-    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> addWaypoint(Waypoint w, int index);
-
-    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> removeWaypoint(Waypoint w, int index);
 }

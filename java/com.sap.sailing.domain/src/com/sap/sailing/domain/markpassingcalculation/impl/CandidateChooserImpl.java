@@ -51,6 +51,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
+    private Map<Competitor, Waypoint> suppressedPassings = new HashMap<>();
     private TimePoint raceStartTime;
     private final CandidateWithSettableTime start;
     private final Candidate end;
@@ -107,8 +108,6 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void removeWaypoints(Iterable<Waypoint> ways) {
-        // TODO Decrease Index of all Candidates + Increase for added!!
-        // TODO Recalculate Edges (LegEstimation!!)
         for (Competitor c : currentMarkPasses.keySet()) {
             for (Waypoint w : ways) {
                 currentMarkPasses.get(c).remove(w);
@@ -250,13 +249,15 @@ public class CandidateChooserImpl implements CandidateChooser {
             }
         }
         if (changed) {
+            currentPasses.clear();
             List<MarkPassing> newMarkPassings = new ArrayList<>();
             for (Candidate can : mostLikelyCandidates) {
                 if (can != start && can != end) {
-                    newMarkPassings.add(new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c));
+                    MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
+                    currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
+                    newMarkPassings.add(newMarkPassing);
                 }
             }
-
             logger.fine("Updating MarkPasses for " + c);
             race.updateMarkPassings(c, newMarkPassings);
         }
@@ -351,5 +352,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         public void setTimePoint(TimePoint t) {
             p = t;
         }
+    }
+
+    @Override
+    public void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void stopSuppressingMarkPassings(Competitor c) {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -90,8 +90,9 @@ public class MarkPassingCalculator {
             boolean finished = false;
             Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
             Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
-            Map<Waypoint, Integer> addedWaypoints = new HashMap<>();
-            Map<Waypoint, Integer> removedWaypoints = new HashMap<>();
+            List<Waypoint> addedWaypoints = new ArrayList<>();
+            List<Waypoint> removedWaypoints = new ArrayList<>();
+            Integer smallestChangedWaypointIndex = null;
             List<MarkPassing> fixedMarkPassings = new ArrayList<>();
             List<MarkPassing> removedMarkPassings = new ArrayList<>();
             while (!finished) {
@@ -108,17 +109,21 @@ public class MarkPassingCalculator {
                         finished = true;
                     } else {
                         fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                fixedMarkPassings, removedMarkPassings);
+                                smallestChangedWaypointIndex, fixedMarkPassings, removedMarkPassings);
                     }
                 }
                 if (!suspended) {
-                    for (Entry<Waypoint, Integer> way : removedWaypoints.entrySet()) {
-                        finder.removeWaypoint(way.getKey(), way.getValue());
+                    // TODO Interplay between changing waypoints and setting fixed passes?
+                    if (smallestChangedWaypointIndex != null) {
+                        Map<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
+                                .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
+                        chooser.removeWaypoints(removedWaypoints);
+                        for (Entry<Competitor, Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
+                                .entrySet()) {
+                            Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                            chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                        }
                     }
-                    for (Entry<Waypoint, Integer> way : addedWaypoints.entrySet()) {
-                        finder.addWaypoint(way.getKey(), way.getValue());
-                    }
-
                     updateFixedMarkPassings(fixedMarkPassings, removedMarkPassings);
                     computeMarkPasses(competitorFixes, markFixes);
                     competitorFixes.clear();
@@ -241,8 +246,8 @@ public class MarkPassingCalculator {
         listener.getQueue().add(new StorePositionUpdateStrategy() {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
-                    Map<Mark, List<GPSFix>> markFixes, Map<Waypoint, Integer> addedWaypoints,
-                    Map<Waypoint, Integer> removedWaypoints, List<MarkPassing> fixMarkPassing,
+                    Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                    Integer smallestChangedWaypointIndex, List<MarkPassing> fixMarkPassing,
                     List<MarkPassing> removeFixedMarkPassing) {
             }
         });
@@ -260,11 +265,12 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
     }
-    
-    public void addFixedPassing(MarkPassing m){
+
+    public void addFixedPassing(MarkPassing m) {
         listener.addFixedPassing(m);
     }
-    public void removeFixedPassing(MarkPassing m){
+
+    public void removeFixedPassing(MarkPassing m) {
         listener.removeFixedPassing(m);
     }
 }

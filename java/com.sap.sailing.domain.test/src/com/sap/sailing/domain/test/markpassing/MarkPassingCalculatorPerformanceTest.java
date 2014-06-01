@@ -71,47 +71,39 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     @Test
     public void testChooser() {
-        long time = timeToAddCandidatesToChooser(500, 1);
+        long time = timeToAddCandidatesToChooser(500, 1, 25);
+        System.out.println(time);
         result.put("ChooserPerformance", time);
         assertTrue(time < 800);
     }
 
-    private long timeToAddCandidatesToChooser(int numberOfCandidates, int numberToAdd) {
-        List<Candidate> newCans = new ArrayList<>();
-        for (int i = 0; i < numberOfCandidates; i++) {
-            newCans.add(randomCan());
-        }
-        time = System.currentTimeMillis();
-        CandidateChooserImpl c = new CandidateChooserImpl(race);
-        c.calculateMarkPassDeltas(ron, newCans, new ArrayList<Candidate>());
-        time = System.currentTimeMillis() - time;
-        List<Long> times = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            List<Candidate> old = new ArrayList<>();
-            List<Candidate> ne = new ArrayList<>();
-            for (int j = 0; j < numberToAdd; j++) {
-                ne.add(randomCan());
+    private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {
+        long totalTime = 0;
+        for (int i = 0; i < numberOfRepititions; i++) {
+            CandidateChooserImpl c = new CandidateChooserImpl(race);
+            for (int j = 0; j < numberOfTimesAdding; j++) {
+                List<Candidate> newCandidates = new ArrayList<>();
+                for (int k = 0; k < numberToAddEachTime; k++) {
+                    newCandidates.add(randomCan());
+                }
+
+                time = System.currentTimeMillis();
+                c.calculateMarkPassDeltas(ron, newCandidates, new ArrayList<Candidate>());
+                totalTime += System.currentTimeMillis() - time;
             }
-            time = System.currentTimeMillis();
-            c.calculateMarkPassDeltas(ron, ne, old);
-            times.add(System.currentTimeMillis() - time);
-            old = ne;
         }
-        long total = 0;
-        for (long l : times) {
-            total = total + l;
-        }
-        return total / times.size();
+        return totalTime / numberOfRepititions;
     }
 
     private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
-        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)), 0.5 + 0.5 * rnd.nextDouble(), Util.get(race.getRace().getCourse()
-                .getWaypoints(), id));
+        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)),
+                0.5 + 0.5 * rnd.nextDouble(), Util.get(race.getRace().getCourse().getWaypoints(), id));
     }
 
     private GPSFixMoving rndFix() {
-        DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001, 0.0002 - rnd.nextDouble() * 0.0004);
+        DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001,
+                0.0002 - rnd.nextDouble() * 0.0004);
         TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
         return new GPSFixMovingImpl(position, p, speed);
