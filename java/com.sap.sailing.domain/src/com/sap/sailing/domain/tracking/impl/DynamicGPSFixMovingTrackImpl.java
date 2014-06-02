@@ -63,8 +63,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
                 int i=0;
                 GPSFixMoving last = relevantFixes.get(i);
                 // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
-                // "relevant" fix is found
-                if (maxSpeedForSmoothing == null || last.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                // "relevant" fix is found; exclude SOG/COG of fixes with SOG/COG==0/0
+                if ((last.getSpeed().getBearing().getDegrees() != 0 || last.getSpeed().getKnots() > 0) && (maxSpeedForSmoothing == null || last.getSpeed().compareTo(maxSpeedForSmoothing) <= 0)) {
                     SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                             last.getSpeed(),
                             /* original confidence */0.9, last.getTimePoint());
@@ -78,8 +78,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
                     // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
-                    // "relevant" fix is found
-                    if (maxSpeedForSmoothing == null || next.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                    // "relevant" fix is found; exclude announced SOG/COG if 0/0
+                    if ((last.getSpeed().getBearing().getDegrees() != 0 || last.getSpeed().getKnots() > 0)
+                            && (maxSpeedForSmoothing == null || next.getSpeed().compareTo(maxSpeedForSmoothing) <= 0)) {
                         SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                                 next.getSpeed(), /* original confidence */0.9, next.getTimePoint());
                         speeds.add(computedSpeedWithConfidence);
