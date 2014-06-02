@@ -21,13 +21,13 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
 import com.sap.sailing.velum.resultimport.impl.ScoreCorrectionProviderImpl;
+import com.sap.sse.common.Util;
 
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF = "Star_HNVPokal4WF.csv";
@@ -86,7 +86,7 @@ public class ParserTest {
     public void testScoreCorrectionProviderNixdorfFinal() throws Exception {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 CsvParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL,
                 "Star", hasResultsFor.get(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL).iterator().next().getB());
         assertNotNull(starResult);

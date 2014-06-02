@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.player;
 
 import java.util.Date;
 
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.UtilNew.Pair;
 
 public interface TimeRangeWithZoomProvider extends TimeRangeProvider {
 

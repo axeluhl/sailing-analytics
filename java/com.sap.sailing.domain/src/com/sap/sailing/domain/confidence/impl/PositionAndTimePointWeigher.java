@@ -4,7 +4,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * A weigher that uses a {@link Position} and a {@link TimePoint} to compute a confidence based on
@@ -15,7 +15,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  *
  */
-public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, TimePoint>> {
+public class PositionAndTimePointWeigher implements Weigher<UtilNew.Pair<Position, TimePoint>> {
     private static final long serialVersionUID = -262428237738496818L;
     private final Weigher<TimePoint> weigher;
     
@@ -24,7 +24,7 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
     }
     
     @Override
-    public double getConfidence(Util.Pair<Position, TimePoint> fix, Util.Pair<Position, TimePoint> request) {
+    public double getConfidence(UtilNew.Pair<Position, TimePoint> fix, UtilNew.Pair<Position, TimePoint> request) {
         return weigher.getConfidence(fix.getB(), request.getB());
     }
 }

@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class CollectionUtils {
 

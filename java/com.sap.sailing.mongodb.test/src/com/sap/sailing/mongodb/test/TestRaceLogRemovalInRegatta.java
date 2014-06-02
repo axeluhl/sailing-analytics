@@ -13,11 +13,11 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sse.common.Util;
 
 public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     private final String blueFleetName = "Blue";

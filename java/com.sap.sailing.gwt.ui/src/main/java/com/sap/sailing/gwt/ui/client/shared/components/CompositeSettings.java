@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.components;
 
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class CompositeSettings {
-    public static class ComponentAndSettingsPair<SettingsType> extends Util.Pair<Component<SettingsType>, SettingsType> {
+    public static class ComponentAndSettingsPair<SettingsType> extends UtilNew.Pair<Component<SettingsType>, SettingsType> {
         private static final long serialVersionUID = -569811233041583043L;
 
         public ComponentAndSettingsPair(Component<SettingsType> a, SettingsType b) {

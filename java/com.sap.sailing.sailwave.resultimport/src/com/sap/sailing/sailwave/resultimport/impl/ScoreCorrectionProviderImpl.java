@@ -17,7 +17,7 @@ import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionPro
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 import com.sap.sailing.sailwave.resultimport.CsvParser;
 import com.sap.sailing.sailwave.resultimport.CsvParserFactory;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;
@@ -39,15 +39,15 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
-        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
+    public Map<String, Set<UtilNew.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
+        Map<String, Set<UtilNew.Pair<String, TimePoint>>> result = new HashMap<String, Set<UtilNew.Pair<String, TimePoint>>>();
         for (CsvParser parser : getAllRegattaResults()) {
             try {
                 parser.parseResults();
                 String boatClass = parser.getBoatClass();
                 
                 result.put(/* use document name as "event" name */ parser.getFilename(),
-                        Collections.singleton(new Util.Pair<String, TimePoint>(boatClass, parser.getLastModified())));
+                        Collections.singleton(new UtilNew.Pair<String, TimePoint>(boatClass, parser.getLastModified())));
 
             } catch (Exception e) {
                 logger.info("Parse error during CSV import. Ignoring document " + parser.toString());

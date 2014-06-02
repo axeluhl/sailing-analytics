@@ -28,7 +28,7 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorCombined;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorImpl;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Test for @WindFieldGenerator
@@ -128,7 +128,7 @@ public class WindFieldGeneratorTest {
         assertEquals("StartTime Last Wind Speed ", 9, windList.get(windList.size() - 1).getKnots(), 0);
         // Check the angle
         assertEquals("StartTime First Wind Angle ", 0, windList.get(0).getBearing().getRadians(), 0);
-        Util.Pair<Integer, Integer> pairIndex = getIndex(windList.size(), hSteps);
+        UtilNew.Pair<Integer, Integer> pairIndex = getIndex(windList.size(), hSteps);
         logger.info(pairIndex.toString());
         assertEquals("StartTime One before Middle Wind Angle ", 0.3224948, windList.get(windList.size() / 2 - 2).getBearing()
                 .getRadians(), epsilon);
@@ -274,15 +274,15 @@ public class WindFieldGeneratorTest {
        
     }
     
-    private Util.Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
-        Util.Pair<Integer, Integer> indexPair = new Util.Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
+    private UtilNew.Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
+        UtilNew.Pair<Integer, Integer> indexPair = new UtilNew.Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
                 + (listIndex - 1) % numCols);
         return indexPair;
     }
 
     @Test
     public void testIndex() {
-        Util.Pair<Integer, Integer> pairIndex = getIndex(1, 30);
+        UtilNew.Pair<Integer, Integer> pairIndex = getIndex(1, 30);
         assertEquals("Index 1 RowIndex ", 1, (int) pairIndex.getA());
         assertEquals("Index 1 ColIndex ", 1, (int) pairIndex.getB());
         pairIndex = getIndex(30, 30);

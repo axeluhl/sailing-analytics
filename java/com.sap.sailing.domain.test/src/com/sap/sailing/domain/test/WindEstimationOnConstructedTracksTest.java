@@ -44,7 +44,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
@@ -116,14 +116,14 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         // produces estimated bearing of 170deg; result should be averaged between 170 (estimation) and 180 (web) deg
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
-        WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
+        WindWithConfidence<UtilNew.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
                 .getWindWithConfidence(/* position */null, now);
         final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
         // now produce a minimum cluster size of 2, raising the estimation's confidence
         setBearingForCompetitor(competitors.get(2), now, 305);
         setBearingForCompetitor(competitors.get(3), now, 35);
-        WindWithConfidence<Util.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
+        WindWithConfidence<UtilNew.Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
                 .getWindWithConfidence(/* position */null, now);
         final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);

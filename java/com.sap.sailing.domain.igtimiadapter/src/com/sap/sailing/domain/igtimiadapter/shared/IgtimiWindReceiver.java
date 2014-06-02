@@ -19,7 +19,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.Util;
 
 /**
  * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
@@ -179,14 +179,14 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     
     private Wind getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        com.sap.sse.common.Util.Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(deviceSerialNumber), timePoint);
+        com.sap.sse.common.UtilNew.Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(deviceSerialNumber), timePoint);
         Bearing awa = getAWA(timePoint, awaPair);
-        com.sap.sse.common.Util.Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(deviceSerialNumber), timePoint);
+        com.sap.sse.common.UtilNew.Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(deviceSerialNumber), timePoint);
         Speed aws = getAWS(timePoint, awsPair);
-        com.sap.sse.common.Util.Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(deviceSerialNumber), timePoint);
+        com.sap.sse.common.UtilNew.Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(deviceSerialNumber), timePoint);
         Position pos = getPosition(timePoint, gpsPair);
-        com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
-        com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
+        com.sap.sse.common.UtilNew.Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
+        com.sap.sse.common.UtilNew.Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
         Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
         if (awa != null && aws != null && pos != null && heading != null) {
             Bearing apparentWindDirection = heading.add(awa);
@@ -214,9 +214,9 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
              * So again, my personal preference would be to work with the data that should be the most accurate
              * (COG/SOG) and consider algorithms that handle smoothing of that data best."
              */
-            com.sap.sse.common.Util.Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
+            com.sap.sse.common.UtilNew.Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
             Speed sog = getSOG(timePoint, sogPair);
-            com.sap.sse.common.Util.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
+            com.sap.sse.common.UtilNew.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
             Bearing cog = getCOG(timePoint, cogPair);
             SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
             SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
@@ -227,7 +227,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return result;
     }
 
-    private Bearing getAWA(TimePoint timePoint, com.sap.sse.common.Util.Pair<AWA, AWA> awaPair) {
+    private Bearing getAWA(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<AWA, AWA> awaPair) {
         final Bearing awaFrom;
         if (awaPair.getA() == null) {
             if (awaPair.getB() == null) {
@@ -247,7 +247,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return awaFrom == null ? null : awaFrom.reverse();
     }
 
-    private Speed getAWS(TimePoint timePoint, com.sap.sse.common.Util.Pair<AWS, AWS> awsPair) {
+    private Speed getAWS(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<AWS, AWS> awsPair) {
         final Speed aws;
         if (awsPair.getA() == null) {
             if (awsPair.getB() == null) {
@@ -267,7 +267,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return aws;
     }
 
-    private Speed getSOG(TimePoint timePoint, com.sap.sse.common.Util.Pair<SOG, SOG> sogPair) {
+    private Speed getSOG(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<SOG, SOG> sogPair) {
         final Speed sog;
         if (sogPair.getA() == null) {
             if (sogPair.getB() == null) {
@@ -287,7 +287,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return sog;
     }
 
-    private Bearing getCOG(TimePoint timePoint, com.sap.sse.common.Util.Pair<COG, COG> cogPair) {
+    private Bearing getCOG(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<COG, COG> cogPair) {
         final Bearing sog;
         if (cogPair.getA() == null) {
             if (cogPair.getB() == null) {
@@ -307,7 +307,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return sog;
     }
 
-    private Position getPosition(TimePoint timePoint, com.sap.sse.common.Util.Pair<GpsLatLong, GpsLatLong> gpsPair) {
+    private Position getPosition(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<GpsLatLong, GpsLatLong> gpsPair) {
         final Position pos;
         if (gpsPair.getA() == null) {
             if (gpsPair.getB() == null) {
@@ -327,7 +327,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return pos;
     }
 
-    private Bearing getHDG(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair) {
+    private Bearing getHDG(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<HDG, HDG> hdgPair) {
         final Bearing hdg;
         if (hdgPair.getA() == null) {
             if (hdgPair.getB() == null) {
@@ -347,7 +347,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return hdg;
     }
 
-    private Bearing getHDGM(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair) {
+    private Bearing getHDGM(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<HDGM, HDGM> hdgmPair) {
         final Bearing hdgm;
         if (hdgmPair.getA() == null) {
             if (hdgmPair.getB() == null) {
@@ -367,7 +367,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return hdgm;
     }
 
-    private Bearing getHeading(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair, com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair, Position position) throws ClassNotFoundException, IOException, ParseException {
+    private Bearing getHeading(TimePoint timePoint, com.sap.sse.common.UtilNew.Pair<HDG, HDG> hdgPair, com.sap.sse.common.UtilNew.Pair<HDGM, HDGM> hdgmPair, Position position) throws ClassNotFoundException, IOException, ParseException {
         final Bearing trueHeading;
         Bearing hdg = getHDG(timePoint, hdgPair);
         if (hdg != null) {
@@ -396,10 +396,10 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return acc;
     }
 
-    private <T extends Timed> com.sap.sse.common.Util.Pair<T, T> getSurroundingFixes(Track<T> track, TimePoint timePoint) {
+    private <T extends Timed> com.sap.sse.common.UtilNew.Pair<T, T> getSurroundingFixes(Track<T> track, TimePoint timePoint) {
         T left = track.getLastFixAtOrBefore(timePoint);
         T right = track.getFirstFixAtOrAfter(timePoint);
-        com.sap.sse.common.Util.Pair<T, T> result = new com.sap.sse.common.Util.Pair<>(left, right);
+        com.sap.sse.common.UtilNew.Pair<T, T> result = new com.sap.sse.common.UtilNew.Pair<>(left, right);
         return result;
     }
 

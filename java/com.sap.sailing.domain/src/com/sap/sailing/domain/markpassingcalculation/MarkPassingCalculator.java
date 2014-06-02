@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using a {@link AbstractCandidateFinder} and a
@@ -43,7 +43,7 @@ import com.sap.sse.common.Util;
  */
 public class MarkPassingCalculator {
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
-    private final static Util.Pair<Object, GPSFix> end = new Util.Pair<Object, GPSFix>(null, null);
+    private final static UtilNew.Pair<Object, GPSFix> end = new UtilNew.Pair<Object, GPSFix>(null, null);
     private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
             .availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
@@ -76,7 +76,7 @@ public class MarkPassingCalculator {
             boolean finished = false;
             LinkedHashMap<Object, List<GPSFix>> combinedFixes = new LinkedHashMap<>();
             while (!finished) {
-                List<Util.Pair<Object, GPSFix>> allNewFixes = new ArrayList<Util.Pair<Object, GPSFix>>();
+                List<UtilNew.Pair<Object, GPSFix>> allNewFixes = new ArrayList<UtilNew.Pair<Object, GPSFix>>();
                 try {
                     allNewFixes.add(listener.getQueue().take());
                 } catch (InterruptedException e) {
@@ -84,7 +84,7 @@ public class MarkPassingCalculator {
                             + " while waiting for new GPSFixes");
                 }
                 listener.getQueue().drainTo(allNewFixes);
-                for (Util.Pair<Object, GPSFix> fix : allNewFixes) {
+                for (UtilNew.Pair<Object, GPSFix> fix : allNewFixes) {
                     if (fix == end) {
                         finished = true;
                         continue;

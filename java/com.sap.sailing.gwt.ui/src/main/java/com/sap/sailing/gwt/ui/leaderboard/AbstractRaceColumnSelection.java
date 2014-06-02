@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractRaceColumnSelection implements RaceColumnSelection {
     @Override

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public interface TracTracAdapter {
     DomainFactory getTracTracDomainFactory();
@@ -105,7 +105,7 @@ public interface TracTracAdapter {
      *            and {@link #addTracTracRace(TrackerManager, URL, URI, URI, URI, RaceLogStore, WindStore, long, String, String)} will
      *            fetch the JSON and clientparams.php documents to work with up-to-date data.
      */
-    Util.Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException,
+    UtilNew.Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;

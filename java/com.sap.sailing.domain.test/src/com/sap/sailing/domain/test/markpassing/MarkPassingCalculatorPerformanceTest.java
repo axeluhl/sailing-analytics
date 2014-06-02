@@ -22,7 +22,7 @@ import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
@@ -72,7 +72,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         }
         time = System.currentTimeMillis();
         CandidateChooser c = new CandidateChooser(trackedRace);
-        c.calculateMarkPassDeltas(bob, new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
+        c.calculateMarkPassDeltas(bob, new UtilNew.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
         ArrayList<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -82,7 +82,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
                 ne.add(randomCan());
             }
             time = System.currentTimeMillis();
-            c.calculateMarkPassDeltas(bob, new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(ne, old));
+            c.calculateMarkPassDeltas(bob, new UtilNew.Pair<Iterable<Candidate>, Iterable<Candidate>>(ne, old));
             times.add(System.currentTimeMillis() - time);
             old = ne;
         }

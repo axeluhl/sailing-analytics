@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -54,7 +54,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * the time point for the query, the names of the races for which details are requested and the flag telling
      * whether overall details for the leaderboard are requested.
      */
-    private final Map<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> leaderboardCache;
+    private final Map<UtilNew.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> leaderboardCache;
     private final NamedReentrantReadWriteLock leaderboardCacheLock;
     private int leaderboardByNameCacheHitCount;
     private int leaderboardByNameCacheMissCount;
@@ -84,10 +84,10 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         this.leaderboard = leaderboard;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // Note: don't use access-based ordering as it turns the get(...) call into a "write" access
-        this.leaderboardCache = new LinkedHashMap<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>>(16, 0.75f) {
+        this.leaderboardCache = new LinkedHashMap<UtilNew.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>>(16, 0.75f) {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
-            protected boolean removeEldestEntry(Map.Entry<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> e) {
+            protected boolean removeEldestEntry(Map.Entry<UtilNew.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> e) {
                 return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
             }
         };
@@ -136,7 +136,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         } else {
             adjustedTimePoint = timePoint;
         }
-        Util.Triple<TimePoint, Collection<String>, Boolean> key = new Util.Triple<TimePoint, Collection<String>, Boolean>(adjustedTimePoint,
+        UtilNew.Triple<TimePoint, Collection<String>, Boolean> key = new UtilNew.Triple<TimePoint, Collection<String>, Boolean>(adjustedTimePoint,
                 namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
         FutureTask<LeaderboardDTO> future = null;
         boolean cacheHit = false;

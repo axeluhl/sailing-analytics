@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Base interface for handlers of serialization and deserialization of {@link DeviceIdentifier}s.
@@ -29,7 +29,7 @@ public interface DeviceIdentifierSerializationHandler<T> {
      * @param deviceIdentifier
      * @return A pair: <{@code device type}, {@code serialized identifier}>
      */
-    Util.Pair<String, ? extends T> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException;
+    UtilNew.Pair<String, ? extends T> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException;
     
     /**
      * Deserialize the identifier. In case this is a fallback deserializer (e.g. for {@link PlaceHolderDeviceIdentifier}),

@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.Date;
 
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesCalculationUtil {
 
-    public static Util.Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
+    public static UtilNew.Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
         Date min = null;
         Date max = null;
 
@@ -55,7 +55,7 @@ public class RaceTimesCalculationUtil {
             break;
         }
         
-        return new Util.Pair<Date, Date>(min, max);
+        return new UtilNew.Pair<Date, Date>(min, max);
     }
     
     private static long calculateRaceExtensionTime(Date startTime, Date endTime) {

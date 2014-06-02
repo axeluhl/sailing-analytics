@@ -41,7 +41,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class AdminApp extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
@@ -382,7 +382,7 @@ public class AdminApp extends SailingServerHttpServlet {
 
     private void listWindTrackers(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JSONArray windTrackers = new JSONArray();
-        for (Util.Triple<Regatta, RaceDefinition, String> regattaAndRaceAndPort : getService().getWindTrackedRaces()) {
+        for (UtilNew.Triple<Regatta, RaceDefinition, String> regattaAndRaceAndPort : getService().getWindTrackedRaces()) {
             JSONObject windTracker = new JSONObject();
             windTracker.put("regattaname", regattaAndRaceAndPort.getA().getName());
             windTracker.put("racename", regattaAndRaceAndPort.getB().getName());

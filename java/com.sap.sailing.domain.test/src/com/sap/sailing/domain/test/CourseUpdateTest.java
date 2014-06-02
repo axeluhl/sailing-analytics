@@ -30,7 +30,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -45,6 +44,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.RouteData;
@@ -81,7 +81,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 }, /* delayToLiveInMillis */ 0l, 
                 /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null) {
             @Override
-            protected void handleEvent(com.sap.sse.common.Util.Triple<Route, RouteData, Race> event) {
+            protected void handleEvent(com.sap.sse.common.UtilNew.Triple<Route, RouteData, Race> event) {
                 super.handleEvent(event);
                 synchronized (routeData) {
                     routeData[0] = event.getB();

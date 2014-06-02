@@ -12,11 +12,11 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
-public class CompetitorPositioningListAdapter extends ArrayAdapter<Util.Triple<Serializable, String, MaxPointsReason>> {
+public class CompetitorPositioningListAdapter extends ArrayAdapter<UtilNew.Triple<Serializable, String, MaxPointsReason>> {
     
-    public CompetitorPositioningListAdapter(Context context, int textViewResourceId, List<Util.Triple<Serializable, String, MaxPointsReason>> objects) {
+    public CompetitorPositioningListAdapter(Context context, int textViewResourceId, List<UtilNew.Triple<Serializable, String, MaxPointsReason>> objects) {
         super(context, textViewResourceId, objects);
     }
 
@@ -29,7 +29,7 @@ public class CompetitorPositioningListAdapter extends ArrayAdapter<Util.Triple<S
             view = li.inflate(R.layout.welter_positioning_item, null);
         }
 
-        Util.Triple<Serializable, String, MaxPointsReason> competitorMaxPoint = getItem(position);
+        UtilNew.Triple<Serializable, String, MaxPointsReason> competitorMaxPoint = getItem(position);
 
         TextView positionText = (TextView) view.findViewById(R.id.Welter_Cell_Positioning_columnOne_txtTitle);
 

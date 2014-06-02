@@ -43,7 +43,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceWithTimeRangeJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
@@ -90,13 +90,13 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return result;
     }
     
-    public Iterable<DeviceWithTimeRange> importFiles(Iterable<Util.Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
+    public Iterable<DeviceWithTimeRange> importFiles(Iterable<UtilNew.Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
         final Set<DeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         
-        for (Util.Pair<String, InputStream> file : files) {
+        for (UtilNew.Pair<String, InputStream> file : files) {
             final String fileName = file.getA();
             String fileExt = null;
             if (fileName.contains(".")) {
@@ -175,7 +175,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             return;
         }
 
-        Set<Util.Pair<String, InputStream>> files = new HashSet<>();
+        Set<UtilNew.Pair<String, InputStream>> files = new HashSet<>();
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items;
@@ -188,7 +188,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         String prefImporterType = null;
         for (FileItem item : items) {
             if (!item.isFormField())
-                files.add(new Util.Pair<String, InputStream>(item.getName(), item.getInputStream()));
+                files.add(new UtilNew.Pair<String, InputStream>(item.getName(), item.getInputStream()));
             else {
                 if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
                     prefImporterType = item.getString();

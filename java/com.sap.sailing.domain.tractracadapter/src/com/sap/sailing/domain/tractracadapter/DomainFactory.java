@@ -41,7 +41,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
@@ -65,7 +65,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints);
+    Course createCourse(String name, Iterable<UtilNew.Pair<TracTracControlPoint, PassingInstruction>> controlPoints);
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
@@ -232,7 +232,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<UtilNew.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
@@ -249,7 +249,7 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
+    UtilNew.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,

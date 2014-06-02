@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Implements the (Ramer)-Douglas-Peucker algorithm on a segment of a {@link GPSFixTrack} with a configurable distance
@@ -47,10 +47,10 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
         this.executor = executor;
     }
 
-    private Util.Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorInInterval(TimePoint from, TimePoint to) {
+    private UtilNew.Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorInInterval(TimePoint from, TimePoint to) {
         Distance maxDistance = Distance.NULL;
         FixType firstFixAtOrAfter = track.getFirstFixAtOrAfter(from);
-        Util.Pair<GPSFix, Distance> result = null;
+        UtilNew.Pair<GPSFix, Distance> result = null;
         if (firstFixAtOrAfter != null) {
             final Position fromPosition = firstFixAtOrAfter.getPosition();
             FixType toFix = track.getLastFixAtOrBefore(to);
@@ -76,7 +76,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
                                 fixFurthestAway = fix;
                             }
                         }
-                        result = new Util.Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
+                        result = new UtilNew.Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
                     }
                 } finally {
                     track.unlockAfterRead();
@@ -86,29 +86,29 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
         return result;
     }
 
-    private Util.Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorUsingExecutor(TimePoint to, Distance maxDistance,
+    private UtilNew.Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorUsingExecutor(TimePoint to, Distance maxDistance,
             final Position fromPosition, final Bearing bearing, Iterator<FixType> fixIter) {
         FixType fixFurthestAway = null;
-        Util.Pair<GPSFix, Distance> result;
-        Collection<Future<Util.Pair<FixType, Distance>>> crossTrackErrorFutures = new HashSet<Future<Util.Pair<FixType, Distance>>>();
+        UtilNew.Pair<GPSFix, Distance> result;
+        Collection<Future<UtilNew.Pair<FixType, Distance>>> crossTrackErrorFutures = new HashSet<Future<UtilNew.Pair<FixType, Distance>>>();
         while (fixIter.hasNext()) {
             final FixType fix = fixIter.next();
             if (fix.getTimePoint().compareTo(to) > 0) {
                 break;
             }
-            RunnableFuture<Util.Pair<FixType, Distance>> crossTrackErrorFuture = new FutureTask<Util.Pair<FixType, Distance>>(
-                    new Callable<Util.Pair<FixType, Distance>>() {
+            RunnableFuture<UtilNew.Pair<FixType, Distance>> crossTrackErrorFuture = new FutureTask<UtilNew.Pair<FixType, Distance>>(
+                    new Callable<UtilNew.Pair<FixType, Distance>>() {
                         @Override
-                        public Util.Pair<FixType, Distance> call() throws Exception {
-                            return new Util.Pair<FixType, Distance>(fix, fix.getPosition().absoluteCrossTrackError(
+                        public UtilNew.Pair<FixType, Distance> call() throws Exception {
+                            return new UtilNew.Pair<FixType, Distance>(fix, fix.getPosition().absoluteCrossTrackError(
                                     fromPosition, bearing));
                         }
                     });
             executor.execute(crossTrackErrorFuture);
             crossTrackErrorFutures.add(crossTrackErrorFuture);
         }
-        for (Future<Util.Pair<FixType, Distance>> crossTrackErrorFuture : crossTrackErrorFutures) {
-            Util.Pair<FixType, Distance> fixAndCrossTrackError;
+        for (Future<UtilNew.Pair<FixType, Distance>> crossTrackErrorFuture : crossTrackErrorFutures) {
+            UtilNew.Pair<FixType, Distance> fixAndCrossTrackError;
             try {
                 fixAndCrossTrackError = crossTrackErrorFuture.get();
             } catch (InterruptedException e) {
@@ -121,7 +121,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
                 fixFurthestAway = fixAndCrossTrackError.getA();
             }
         }
-        result = new Util.Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
+        result = new UtilNew.Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
         return result;
     }
     
@@ -155,7 +155,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
      */
     private List<FixType> approximateWithoutFirst(Distance maxDistance, TimePoint from, TimePoint to) {
         List<FixType> result;
-        Util.Pair<GPSFix, Distance> fixAndDistance = getFixWithGreatestCrossTrackErrorInInterval(from, to);
+        UtilNew.Pair<GPSFix, Distance> fixAndDistance = getFixWithGreatestCrossTrackErrorInInterval(from, to);
         if (fixAndDistance == null || fixAndDistance.getB().compareTo(maxDistance) < 0) {
             // reached desired accuracy for interval from..to
             FixType lastFixAtOrBefore = track.getLastFixAtOrBefore(to);

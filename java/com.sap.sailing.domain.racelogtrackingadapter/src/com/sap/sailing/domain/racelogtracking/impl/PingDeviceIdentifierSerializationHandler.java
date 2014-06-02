@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class PingDeviceIdentifierSerializationHandler {
     private PingDeviceIdentifier castIdentifier(DeviceIdentifier identifier) throws TransformationException {
@@ -15,8 +15,8 @@ public class PingDeviceIdentifierSerializationHandler {
         return (PingDeviceIdentifier) identifier;
     }
 
-    public Util.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Util.Pair<String, String>(PingDeviceIdentifier.TYPE, castIdentifier(deviceIdentifier).getId().toString());
+    public UtilNew.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+        return new UtilNew.Pair<String, String>(PingDeviceIdentifier.TYPE, castIdentifier(deviceIdentifier).getId().toString());
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class HighPointFirstGets10LastBreaksTie extends HighPointFirstGetsFixedScore {
     private static final long serialVersionUID = 1L;
@@ -19,7 +19,7 @@ public class HighPointFirstGets10LastBreaksTie extends HighPointFirstGetsFixedSc
     }
 
     @Override
-    public int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<UtilNew.Pair<RaceColumn, Double>> o1Scores, List<UtilNew.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         return 0;
     }
 }

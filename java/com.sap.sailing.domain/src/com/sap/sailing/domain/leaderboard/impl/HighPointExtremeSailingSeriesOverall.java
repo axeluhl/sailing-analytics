@@ -10,10 +10,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sse.common.Util;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
@@ -51,7 +51,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
      */
     @Override
-    public int compareByBetterScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<com.sap.sse.common.UtilNew.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.UtilNew.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
@@ -66,9 +66,9 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * Counts a competitor's wins by comparing the scores to {@link #MAX_POINTS} which is the score attributed to a race
      * won
      */
-    private int getWins(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
+    private int getWins(List<com.sap.sse.common.UtilNew.Pair<RaceColumn, Double>> scores) {
         int wins = 0;
-        for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
+        for (com.sap.sse.common.UtilNew.Pair<RaceColumn, Double> score : scores) {
             if (Math.abs(score.getB() - MAX_POINTS * score.getA().getFactor()) < 0.0000001) {
                 wins++;
             }

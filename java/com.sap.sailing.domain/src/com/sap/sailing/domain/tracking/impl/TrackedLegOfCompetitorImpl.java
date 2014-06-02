@@ -29,7 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -150,7 +150,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
+    public UtilNew.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {

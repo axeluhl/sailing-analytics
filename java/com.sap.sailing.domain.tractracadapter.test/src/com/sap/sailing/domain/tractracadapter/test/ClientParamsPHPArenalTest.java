@@ -11,11 +11,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.ControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.setup.KeyValue;
 

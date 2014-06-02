@@ -7,9 +7,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
-public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<Util.Triple<Double, Double, Boolean>> {
+public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<UtilNew.Triple<Double, Double, Boolean>> {
     private static final long serialVersionUID = -977025759476022993L;
     private final String competitorIdAsString;
     private final Double correctedScore;
@@ -39,7 +39,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     }
 
     @Override
-    public Util.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
+    public UtilNew.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         Double newNetPoints;
         Double newTotalPoints;
@@ -64,7 +64,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
         updateStoredLeaderboard(toState, leaderboard);
-        return new Util.Triple<Double, Double, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
+        return new UtilNew.Triple<Double, Double, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
     }
 
 }

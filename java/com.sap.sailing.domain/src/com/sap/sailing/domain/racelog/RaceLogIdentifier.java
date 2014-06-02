@@ -2,7 +2,7 @@ package com.sap.sailing.domain.racelog;
 
 import java.io.Serializable;
 
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public interface RaceLogIdentifier extends Serializable {
     
@@ -10,7 +10,7 @@ public interface RaceLogIdentifier extends Serializable {
     
     String getFleetName();
 
-    Util.Triple<String, String, String> getIdentifier();
+    UtilNew.Triple<String, String, String> getIdentifier();
     
     String getDeprecatedIdentifier();
     

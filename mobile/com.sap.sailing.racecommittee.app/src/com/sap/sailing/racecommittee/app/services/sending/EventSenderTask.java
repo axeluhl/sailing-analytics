@@ -12,9 +12,9 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.http.HttpJsonPostRequest;
 import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
-public class EventSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent, Boolean, InputStream>> {
+public class EventSenderTask extends AsyncTask<Intent, Void, UtilNew.Triple<Intent, Boolean, InputStream>> {
     
     private static String TAG = EventSenderTask.class.getName();
 
@@ -30,17 +30,17 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent,
 
     @SuppressWarnings("unused")
     @Override
-    protected Util.Triple<Intent, Boolean, InputStream> doInBackground(Intent... params) {
-        Util.Triple<Intent, Boolean, InputStream> result;
+    protected UtilNew.Triple<Intent, Boolean, InputStream> doInBackground(Intent... params) {
+        UtilNew.Triple<Intent, Boolean, InputStream> result;
         Intent intent = params[0];
         if (intent == null) {
-            return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            return new UtilNew.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         Bundle extras = intent.getExtras();
         String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
         String url = extras.getString(AppConstants.EXTRAS_URL);
         if (serializedEventAsJson == null || url == null) {
-            return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            return new UtilNew.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         InputStream responseStream = null;
         try {
@@ -48,7 +48,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent,
             HttpRequest post = new HttpJsonPostRequest(new URL(url), serializedEventAsJson);
             responseStream = post.execute();
             ExLog.i(TAG, "Post successful for the following event: " + serializedEventAsJson);
-            result = new Util.Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
+            result = new UtilNew.Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
         } catch (IOException e) {
             if (responseStream != null) {
                 try {
@@ -56,13 +56,13 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent,
                 } catch (IOException ie) { }
             }
             ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));
-            result = new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            result = new UtilNew.Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
         return result;
     }
 
     @Override
-    protected void onPostExecute(Util.Triple<Intent, Boolean, InputStream> resultTriple) {
+    protected void onPostExecute(UtilNew.Triple<Intent, Boolean, InputStream> resultTriple) {
         super.onPostExecute(resultTriple);
         listener.onEventSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
     }

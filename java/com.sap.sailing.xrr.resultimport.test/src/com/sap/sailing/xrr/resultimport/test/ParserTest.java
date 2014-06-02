@@ -31,13 +31,13 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.common.Util;
 
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_LASER = "Laser_20130403_111958.xml";
@@ -90,7 +90,7 @@ public class ParserTest {
             ParserConfigurationException, JAXBException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         assertTrue(hasResultsFor.containsKey("Star Men"));
         // expecting 2013-04-03T13:20:23.000+0200 = 2013-04-03T11:20:23.000Z
         Calendar cal = new GregorianCalendar(2013, /* 3 means April; zero-based */ 3, 3, 11, 20, 23);
@@ -106,7 +106,7 @@ public class ParserTest {
             ParserConfigurationException, JAXBException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "STR", hasResultsFor.get("Star Men").iterator().next().getB());
         assertNotNull(starResult);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
@@ -143,7 +143,7 @@ public class ParserTest {
             ParserConfigurationException, JAXBException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections _470Result = scoreCorrectionProvider.getScoreCorrections("470 Men", "470", hasResultsFor.get("470 Men").iterator().next().getB());
         assertNotNull(_470Result);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _470Result.getScoreCorrectionsForRaces();

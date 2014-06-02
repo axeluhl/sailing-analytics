@@ -19,8 +19,8 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<String, String, String> getIdentifier() {
-        return new com.sap.sse.common.Util.Triple<String, String, String>(template.getParentObjectName(), raceColumnName, fleetName);
+    public com.sap.sse.common.UtilNew.Triple<String, String, String> getIdentifier() {
+        return new com.sap.sse.common.UtilNew.Triple<String, String, String>(template.getParentObjectName(), raceColumnName, fleetName);
     }
 
     @Override

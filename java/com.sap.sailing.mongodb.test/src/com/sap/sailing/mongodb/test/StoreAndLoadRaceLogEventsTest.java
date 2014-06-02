@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -51,6 +50,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sse.common.Util;
 
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
@@ -76,7 +76,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         logIdentifier = mock(RaceLogIdentifier.class);
-        when(logIdentifier.getIdentifier()).thenReturn(new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
+        when(logIdentifier.getIdentifier()).thenReturn(new com.sap.sse.common.UtilNew.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
     }
 
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {

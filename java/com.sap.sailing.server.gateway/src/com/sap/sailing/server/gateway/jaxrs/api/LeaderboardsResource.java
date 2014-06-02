@@ -43,7 +43,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 @Path("/v1/leaderboards")
 public class LeaderboardsResource extends AbstractSailingServerResource {   
@@ -82,7 +82,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                 JSONObject jsonLeaderboard;
                 if (resultTimePoint != null) {
-                    Util.Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Util.Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
+                    UtilNew.Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new UtilNew.Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
                     jsonLeaderboard = getLeaderboardJson(leaderboard, resultStateAndTimePoint);
                 } else {
                     jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint, maxCompetitorsCount);
@@ -101,7 +101,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return response;
     }
    
-    private JSONObject getLeaderboardJson(Leaderboard leaderboard, Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) 
+    private JSONObject getLeaderboardJson(Leaderboard leaderboard, UtilNew.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) 
                     throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePointAndResultStateAndMaxCompetitorsCount.getA(),
                 Collections.<String> emptyList(), /* addOverallDetails */ false, getService(), getService().getBaseDomainFactory());

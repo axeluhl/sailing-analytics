@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of

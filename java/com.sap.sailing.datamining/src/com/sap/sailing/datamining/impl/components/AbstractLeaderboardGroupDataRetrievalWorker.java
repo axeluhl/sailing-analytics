@@ -17,7 +17,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 import com.sap.sse.datamining.impl.workers.retrievers.AbstractRetrievalWorker;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 
@@ -36,8 +36,8 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
         return group;
     }
 
-    private static Collection<Util.Pair<TrackedLeg, HasTrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
-        Collection<Util.Pair<TrackedLeg, HasTrackedLegContext>> data = new ArrayList<Util.Pair<TrackedLeg, HasTrackedLegContext>>();
+    private static Collection<UtilNew.Pair<TrackedLeg, HasTrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
+        Collection<UtilNew.Pair<TrackedLeg, HasTrackedLegContext>> data = new ArrayList<UtilNew.Pair<TrackedLeg, HasTrackedLegContext>>();
         for (Leaderboard leaderboard : group.getLeaderboards()) {
             CourseArea courseArea = leaderboard.getDefaultCourseArea();
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -50,7 +50,7 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
                             if (trackedLeg != null) {
                                 HasTrackedLegContext dataContext = new HasTrackedLegContextImpl(group, leaderboard,
                                         courseArea, fleet, trackedRace, trackedLeg, legNumber);
-                                data.add(new Util.Pair<TrackedLeg, HasTrackedLegContext>(trackedLeg, dataContext));
+                                data.add(new UtilNew.Pair<TrackedLeg, HasTrackedLegContext>(trackedLeg, dataContext));
                                 legNumber++;
                             }
                         }
@@ -61,18 +61,18 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
         return data;
     }
 
-    protected static Collection<Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> retrieveDataTillTrackedLegOfCompetitor(
+    protected static Collection<UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> retrieveDataTillTrackedLegOfCompetitor(
             LeaderboardGroup group) {
-        Collection<Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> data = new ArrayList<Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>>();
-        Collection<Util.Pair<TrackedLeg, HasTrackedLegContext>> baseData = retrieveDataTillTrackedLeg(group);
-        for (Util.Pair<TrackedLeg, HasTrackedLegContext> baseDataEntry : baseData) {
+        Collection<UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> data = new ArrayList<UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>>();
+        Collection<UtilNew.Pair<TrackedLeg, HasTrackedLegContext>> baseData = retrieveDataTillTrackedLeg(group);
+        for (UtilNew.Pair<TrackedLeg, HasTrackedLegContext> baseDataEntry : baseData) {
             TrackedLeg trackedLeg = baseDataEntry.getA();
             HasTrackedLegContext trackedLegContext = baseDataEntry.getB();
             for (Competitor competitor : trackedLegContext.getTrackedRace().getRace().getCompetitors()) {
                 TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
                 HasTrackedLegOfCompetitorContext dataContext = new HasTrackedLegOfCompetitorContextImpl(trackedLegContext,
                         competitor);
-                data.add(new Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>(trackedLegOfCompetitor,
+                data.add(new UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>(trackedLegOfCompetitor,
                         dataContext));
             }
         }

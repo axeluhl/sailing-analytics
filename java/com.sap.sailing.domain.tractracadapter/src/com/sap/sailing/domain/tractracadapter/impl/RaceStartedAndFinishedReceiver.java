@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.StartStopTimesData;
@@ -49,7 +49,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
             TypeController startStopListener = StartStopTimesData.subscribeRace(race, new ICallbackData<Race, StartStopTimesData>() {
                 @Override
                 public void gotData(Race race, StartStopTimesData record, boolean isLiveData) {
-                    enqueue(new Util.Triple<Race, StartStopTimesData, Boolean>(race, record, isLiveData));
+                    enqueue(new UtilNew.Triple<Race, StartStopTimesData, Boolean>(race, record, isLiveData));
                 }
             });
             result.add(startStopListener);
@@ -59,7 +59,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     }
 
     @Override
-    protected void handleEvent(Util.Triple<Race, StartStopTimesData, Boolean> event) {
+    protected void handleEvent(UtilNew.Triple<Race, StartStopTimesData, Boolean> event) {
         System.out.print("StartStop");
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
         if (trackedRace != null) {

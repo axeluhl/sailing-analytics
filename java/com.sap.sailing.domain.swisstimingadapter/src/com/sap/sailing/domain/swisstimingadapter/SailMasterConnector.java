@@ -9,7 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
@@ -38,7 +38,7 @@ public interface SailMasterConnector {
      *         <code>boatID</code> passed the mark.
      * @throws InterruptedException 
      */
-    Map<Integer, Util.Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
+    Map<Integer, UtilNew.Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException, InterruptedException;
     
     /**
@@ -68,7 +68,7 @@ public interface SailMasterConnector {
      * @return the list of mark index / mark time / sail number triplets telling when which leader
      * first passed the mark with the respective index
      */
-    List<Util.Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
+    List<UtilNew.Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
     
     /**
      * Stops this connector's thread that is started upon creation and responsible for receiving spontaneous events

@@ -7,15 +7,15 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class TrackFileImportDeviceIdentifierStringSerializationHandler implements
         DeviceIdentifierStringSerializationHandler {
 
     @Override
-    public Util.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+    public UtilNew.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
-        return new Util.Pair<String, String>(TrackFileImportDeviceIdentifier.TYPE, id.getStringRepresentation());
+        return new UtilNew.Pair<String, String>(TrackFileImportDeviceIdentifier.TYPE, id.getStringRepresentation());
     }
 
     @Override

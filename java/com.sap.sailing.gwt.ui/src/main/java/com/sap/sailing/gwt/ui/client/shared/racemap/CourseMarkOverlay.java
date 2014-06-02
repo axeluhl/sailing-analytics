@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing course marks (images) and the buoy zone if the mark is a buoy.
@@ -36,7 +36,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     private final MarkVectorGraphics markVectorGraphics;
 
-    private Map<Integer, Util.Pair<Double, Size>> markScaleAndSizePerZoomCache; 
+    private Map<Integer, UtilNew.Pair<Double, Size>> markScaleAndSizePerZoomCache; 
 
     public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO) {
         super(map, zIndex);
@@ -46,7 +46,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         this.showBuoyZone = false;
     
         markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        markScaleAndSizePerZoomCache = new HashMap<Integer, UtilNew.Pair<Double,Size>>();
         
         setCanvasSize(50, 50);
     }
@@ -57,7 +57,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         if (mapProjection != null && mark != null && position != null) {
             int zoom = map.getZoom();
 
-            Util.Pair<Double, Size> markScaleAndSize = markScaleAndSizePerZoomCache.get(zoom);
+            UtilNew.Pair<Double, Size> markScaleAndSize = markScaleAndSizePerZoomCache.get(zoom);
             if(markScaleAndSize == null) {
                 markScaleAndSize = getMarkScaleAndSize(position);
                 markScaleAndSizePerZoomCache.put(zoom, markScaleAndSize);
@@ -107,7 +107,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         }
     }
 
-    public Util.Pair<Double, Size> getMarkScaleAndSize(PositionDTO markPosition) {
+    public UtilNew.Pair<Double, Size> getMarkScaleAndSize(PositionDTO markPosition) {
         double minMarkHeight = 20;
         
         // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
@@ -126,7 +126,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         // To calculate the display real mark size the scale factor from canvas units to the real   
         double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
 
-        return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
+        return new UtilNew.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 
     private String getTitle() {

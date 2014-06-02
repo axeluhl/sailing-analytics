@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.tracking.impl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Can be used as the last option, if no other service is available when trying to load an identifier
@@ -21,8 +21,8 @@ public class PlaceHolderDeviceIdentifierSerializationHandler {
         return new PlaceHolderDeviceIdentifier(type, stringRepresentation);
     }
 
-    public Util.Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
-        return new Util.Pair<String, String>(object.getIdentifierType(), object.getStringRepresentation());
+    public UtilNew.Pair<String, String> serialize(DeviceIdentifier object) throws TransformationException {
+        return new UtilNew.Pair<String, String>(object.getIdentifierType(), object.getStringRepresentation());
     }
 
 }

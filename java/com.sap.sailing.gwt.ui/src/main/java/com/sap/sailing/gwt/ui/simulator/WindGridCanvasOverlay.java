@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
@@ -47,7 +47,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private int xRes;
     private int yRes;
     private SimulatorWindDTO[][] windMatrix;
-    private Map<Util.Pair<Integer, Integer>, GridCell> gridCellMap;
+    private Map<UtilNew.Pair<Integer, Integer>, GridCell> gridCellMap;
     private WindGridColorPalette colorPalette;
 
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
@@ -359,7 +359,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             if (numRow >= 4) {
                 final int numCol = windMatrix[0].length;
                 if (numCol >= 2) {
-                    gridCellMap = new HashMap<Util.Pair<Integer, Integer>, GridCell>();
+                    gridCellMap = new HashMap<UtilNew.Pair<Integer, Integer>, GridCell>();
                     for (int i = 1; i < numRow - 1; ++i) {
                         for (int j = 1; j < numCol - 1; ++j) {
                             final PositionDTO bl = getCenter(windMatrix[i - 1][j - 1].position, windMatrix[i - 1][j].position,
@@ -371,7 +371,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                             final PositionDTO tr = getCenter(windMatrix[i][j].position, windMatrix[i][j + 1].position,
                                     windMatrix[i + 1][j].position, windMatrix[i + 1][j + 1].position);
                             final GridCell cell = new GridCell(bl, br, tl, tr, windMatrix[i - 1][j].trueWindSpeedInKnots);
-                            final Util.Pair<Integer, Integer> cellPair = new Util.Pair<Integer, Integer>(i, j);
+                            final UtilNew.Pair<Integer, Integer> cellPair = new UtilNew.Pair<Integer, Integer>(i, j);
                             gridCellMap.put(cellPair, cell);
                             // drawGridCell(cell);
                         }
@@ -390,7 +390,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                 if (numCol >= 2) {
                     for (int i = 1; i < numRow - 1; ++i) {
                         for (int j = 1; j < numCol - 1; ++j) {
-                            final Util.Pair<Integer, Integer> cellPair = new Util.Pair<Integer, Integer>(i, j);
+                            final UtilNew.Pair<Integer, Integer> cellPair = new UtilNew.Pair<Integer, Integer>(i, j);
                             final GridCell cell = gridCellMap.get(cellPair);
                             cell.windSpeedInKnots = windMatrix[i - 1][j].trueWindSpeedInKnots;
                         }
@@ -403,7 +403,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private void drawGridCell() {
         if (gridCellMap != null & !gridCellMap.isEmpty()) {
-            for (final Entry<Util.Pair<Integer, Integer>, GridCell> cell : gridCellMap.entrySet()) {
+            for (final Entry<UtilNew.Pair<Integer, Integer>, GridCell> cell : gridCellMap.entrySet()) {
                 drawGridCell(cell.getValue());
             }
         }
@@ -460,16 +460,16 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final PositionDTO[] corners = new PositionDTO[4];
             final int numRow = windMatrix.length;
             final int numCol = windMatrix[0].length;
-            final Util.Pair<Integer, Integer> cellPair1 = new Util.Pair<Integer, Integer>(1, 1);
+            final UtilNew.Pair<Integer, Integer> cellPair1 = new UtilNew.Pair<Integer, Integer>(1, 1);
             corners[0] = gridCellMap.get(cellPair1).bottomLeft;
 
-            final Util.Pair<Integer, Integer> cellPair2 = new Util.Pair<Integer, Integer>(1, numCol-2);
+            final UtilNew.Pair<Integer, Integer> cellPair2 = new UtilNew.Pair<Integer, Integer>(1, numCol-2);
             corners[1] = gridCellMap.get(cellPair2).bottomRight;
 
-            final Util.Pair<Integer, Integer> cellPair3 = new Util.Pair<Integer, Integer>(numRow-2, numCol-2);
+            final UtilNew.Pair<Integer, Integer> cellPair3 = new UtilNew.Pair<Integer, Integer>(numRow-2, numCol-2);
             corners[2] = gridCellMap.get(cellPair3).topRight;
 
-            final Util.Pair<Integer, Integer> cellPair4 = new Util.Pair<Integer, Integer>(numRow-2, 1);
+            final UtilNew.Pair<Integer, Integer> cellPair4 = new UtilNew.Pair<Integer, Integer>(numRow-2, 1);
             corners[3] = gridCellMap.get(cellPair4).topLeft;
 
             return corners;

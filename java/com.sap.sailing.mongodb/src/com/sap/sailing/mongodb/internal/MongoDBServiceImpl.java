@@ -18,13 +18,13 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, Mongo> mongos;
+    private final Map<com.sap.sse.common.UtilNew.Pair<String, Integer>, Mongo> mongos;
     
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, DB> dbs;
+    private final Map<com.sap.sse.common.UtilNew.Pair<String, Integer>, DB> dbs;
     
     public MongoDBServiceImpl() {
-        mongos = new HashMap<com.sap.sse.common.Util.Pair<String, Integer>, Mongo>();
-        dbs = new HashMap<com.sap.sse.common.Util.Pair<String,Integer>, DB>();
+        mongos = new HashMap<com.sap.sse.common.UtilNew.Pair<String, Integer>, Mongo>();
+        dbs = new HashMap<com.sap.sse.common.UtilNew.Pair<String,Integer>, DB>();
     }
 
     public MongoDBServiceImpl(MongoDBConfiguration configuration) {
@@ -54,7 +54,7 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
     
     private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
-        com.sap.sse.common.Util.Pair<String, Integer> key = new com.sap.sse.common.Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+        com.sap.sse.common.UtilNew.Pair<String, Integer> key = new com.sap.sse.common.UtilNew.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
         DB db = dbs.get(key);
         if (db == null) {
             Mongo mongo = mongos.get(key);

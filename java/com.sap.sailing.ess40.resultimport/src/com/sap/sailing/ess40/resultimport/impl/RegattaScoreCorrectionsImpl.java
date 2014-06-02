@@ -6,14 +6,14 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
     private final ScoreCorrectionProviderImpl provider;
     private final Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces;
     
     public RegattaScoreCorrectionsImpl(ScoreCorrectionProviderImpl scoreCorrectionProviderImpl,
-            Map<String, List<Util.Pair<String, Double>>> actResults) {
+            Map<String, List<UtilNew.Pair<String, Double>>> actResults) {
         this.provider = scoreCorrectionProviderImpl;
         List<ScoreCorrectionsForRace> scfr = new ArrayList<ScoreCorrectionsForRace>();
         int maxSize = getMaxListSize(actResults);
@@ -23,9 +23,9 @@ public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
         this.scoreCorrectionsForRaces = scfr;
     }
 
-    private int getMaxListSize(Map<String, List<Util.Pair<String, Double>>> actResults) {
+    private int getMaxListSize(Map<String, List<UtilNew.Pair<String, Double>>> actResults) {
         int result = 0;
-        for (Map.Entry<String, List<Util.Pair<String, Double>>> e : actResults.entrySet()) {
+        for (Map.Entry<String, List<UtilNew.Pair<String, Double>>> e : actResults.entrySet()) {
             result = Math.max(result, e.getValue().size());
         }
         return result;

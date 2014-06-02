@@ -40,7 +40,6 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -52,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -302,9 +302,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
                 Date toDate = timer.getLiveTimePointAsDate();
-                List<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
+                List<com.sap.sse.common.UtilNew.Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                 List<Point> markPassingPoints = new ArrayList<Point>();
-                for (com.sap.sse.common.Util.Triple<String, Date, Double> markPassingData : markPassingsData) {
+                for (com.sap.sse.common.UtilNew.Triple<String, Date, Double> markPassingData : markPassingsData) {
                     if (markPassingData.getB() != null && markPassingData.getC() != null) {
                         if (markPassingData.getB().before(toDate)) {
                             Point markPassingPoint = new Point(markPassingData.getB().getTime(),
@@ -317,11 +317,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 markPassingSeries.setPoints(markPassingPoints.toArray(new Point[0]), false);
 
                 Point[] oldRaceDataPoints = competitorDataSeries.getPoints();
-                List<com.sap.sse.common.Util.Pair<Date, Double>> raceData = competitorData.getRaceData();
+                List<com.sap.sse.common.UtilNew.Pair<Date, Double>> raceData = competitorData.getRaceData();
 
                 Point[] raceDataPointsToAdd = new Point[raceData.size()];
                 int currentPointIndex = 0;
-                for (com.sap.sse.common.Util.Pair<Date, Double> raceDataPoint : raceData) {
+                for (com.sap.sse.common.UtilNew.Pair<Date, Double> raceDataPoint : raceData) {
                     Double dataPointValue = raceDataPoint.getB();
                     if(dataPointValue != null) {
                         long dataPointTimeAsMillis = raceDataPoint.getA().getTime();
@@ -490,7 +490,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
                 chart = createChart();
                 if (isZoomed) {
-                	com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                	com.sap.sse.common.UtilNew.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
                     onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
@@ -565,7 +565,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      *         error happened or false, if the error happens before two passings were in the selection. B can be
      *         <code>null</code>.
      */
-    public com.sap.sse.common.Util.Pair<Boolean, Boolean> checkPassingRelationToSelection(ArrayList<ArrayList<Boolean>> markPassingInRange) {
+    public com.sap.sse.common.UtilNew.Pair<Boolean, Boolean> checkPassingRelationToSelection(ArrayList<ArrayList<Boolean>> markPassingInRange) {
         boolean everyPassingInRange = true;
         Boolean twoPassingsInRangeBeforeError = null;
         ArrayList<Boolean> competitorPassings = markPassingInRange.get(0);
@@ -590,7 +590,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             }
         }
 
-        return new com.sap.sse.common.Util.Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
+        return new com.sap.sse.common.UtilNew.Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * A color defined in the RGB color schema
@@ -66,11 +66,11 @@ public class RGBColor extends AbstractColor {
     }
 
     @Override
-    public Util.Triple<Integer, Integer, Integer> getAsRGB() {
-        return new Util.Triple<Integer, Integer, Integer>(red, green, blue);
+    public UtilNew.Triple<Integer, Integer, Integer> getAsRGB() {
+        return new UtilNew.Triple<Integer, Integer, Integer>(red, green, blue);
     }
 
-    public Util.Triple<Float, Float, Float> getAsHSV() {
+    public UtilNew.Triple<Float, Float, Float> getAsHSV() {
         float hue, saturation, brightness;
         int cmax = (red > green) ? red : green;
         if (blue > cmax) {
@@ -107,7 +107,7 @@ public class RGBColor extends AbstractColor {
             }
         }
 
-        Util.Triple<Float, Float, Float> HSVColor = new Util.Triple<Float, Float, Float>(hue, saturation, brightness);
+        UtilNew.Triple<Float, Float, Float> HSVColor = new UtilNew.Triple<Float, Float, Float>(hue, saturation, brightness);
         return HSVColor;
     }
 

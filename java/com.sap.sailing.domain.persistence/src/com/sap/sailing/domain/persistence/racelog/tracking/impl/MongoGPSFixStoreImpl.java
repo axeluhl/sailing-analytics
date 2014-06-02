@@ -16,7 +16,6 @@ import com.mongodb.QueryBuilder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -37,6 +36,7 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingF
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.Util;
 
 public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     private static final Logger logger = Logger.getLogger(MongoGPSFixStore.class.getName());

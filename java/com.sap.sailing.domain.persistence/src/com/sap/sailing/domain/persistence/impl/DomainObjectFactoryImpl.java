@@ -154,7 +154,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -843,7 +843,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (windFixesFoundByName.hasNext()) {
                 List<DBObject> windFixesToMigrate = new ArrayList<DBObject>();
                 for (DBObject dbWind : windFixesFoundByName) {
-                    Util.Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
+                    UtilNew.Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
                     // write the wind fix with the new ID-based key and remove the legacy wind fix from the DB
                     windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
@@ -863,7 +863,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Util.Pair<Wind, WindSource> loadWindFix(Map<WindSource, WindTrack> result, DBObject dbWind, long millisecondsOverWhichToAverageWind) {
+    private UtilNew.Pair<Wind, WindSource> loadWindFix(Map<WindSource, WindTrack> result, DBObject dbWind, long millisecondsOverWhichToAverageWind) {
         Wind wind = loadWind((DBObject) dbWind.get(FieldNames.WIND.name()));
         WindSourceType windSourceType = WindSourceType.valueOf((String) dbWind.get(FieldNames.WIND_SOURCE_NAME.name()));
         WindSource windSource;
@@ -880,7 +880,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.put(windSource, track);
         }
         track.add(wind);
-        return new Util.Pair<Wind, WindSource>(wind, windSource);
+        return new UtilNew.Pair<Wind, WindSource>(wind, windSource);
     }
 
     @Override
@@ -1483,7 +1483,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
-            Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Util.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
+            UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new UtilNew.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         return positionedCompetitors;
@@ -1661,7 +1661,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         
         try {
             for (DBObject dbObject : configurationCollection.find()) {
-                Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
+                UtilNew.Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
                 result.put(entry.getA(), entry.getB());
             }
         } catch (Exception e) {
@@ -1672,10 +1672,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result.entrySet();
     }
 
-    private Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
+    private UtilNew.Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
         DBObject matcherObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_MATCHER.name());
         DBObject configObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
-        return new Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), 
+        return new UtilNew.Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), 
                 loadConfiguration(configObject));
     }
 

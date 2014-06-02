@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayParserImpl;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplaySer
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayToDomainAdapter;
 import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 
 public class SwissTimingReplayAdapterServiceTest {
     

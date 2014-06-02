@@ -34,9 +34,9 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
 import com.sap.sailing.util.ClonerImpl;
+import com.sap.sse.common.Util;
 
 /**
  * Tests the compressing / de-compressing functionality of {@link LeaderboardDTO} and {@link IncrementalLeaderboardDTO}.
@@ -144,18 +144,18 @@ public class LeaderboardDTODiffingTest {
         }
         newVersion.rows = newRows;
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
-        Map<com.sap.sse.common.Util.Pair<CompetitorDTO, String>, List<LegEntryDTO>> previousLegDetailsBeforeStripping = new HashMap<>();
+        Map<com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String>, List<LegEntryDTO>> previousLegDetailsBeforeStripping = new HashMap<>();
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : rowsBeforeStripping.entrySet()) {
             for (Map.Entry<String, LeaderboardEntryDTO> e2 : e.getValue().fieldsByRaceColumnName.entrySet()) {
                 if (e2.getValue().legDetails != null) {
-                    previousLegDetailsBeforeStripping.put(new com.sap.sse.common.Util.Pair<CompetitorDTO, String>(e.getKey(), e2.getKey()),
+                    previousLegDetailsBeforeStripping.put(new com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String>(e.getKey(), e2.getKey()),
                             new ArrayList<>(e2.getValue().legDetails));
                 }
             }
         }
         newVersion.strip(previousVersion);
         // see bug 1455; check that the stripping doesn't kill the previous leaderboard's legDetails lists
-        for (Map.Entry<com.sap.sse.common.Util.Pair<CompetitorDTO, String>, List<LegEntryDTO>> e : previousLegDetailsBeforeStripping.entrySet()) {
+        for (Map.Entry<com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String>, List<LegEntryDTO>> e : previousLegDetailsBeforeStripping.entrySet()) {
             final LeaderboardRowDTO leaderboardRowDTO = rowsBeforeStripping.get(e.getKey().getA());
             if (leaderboardRowDTO != null) {
                 List<LegEntryDTO> newLegDetails = leaderboardRowDTO.fieldsByRaceColumnName.get(e.getKey().getB()).legDetails;

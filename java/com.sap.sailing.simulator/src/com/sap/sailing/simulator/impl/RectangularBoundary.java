@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Boundary;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class RectangularBoundary implements Boundary {
 
@@ -221,7 +221,7 @@ public class RectangularBoundary implements Boundary {
 
     }
 
-    public Util.Pair<Integer, Integer> getGridIndex(Position x) {
+    public UtilNew.Pair<Integer, Integer> getGridIndex(Position x) {
 
         double[] scX = new double[2];
         scX[0] = x.getLatDeg() - rcStart.getLatDeg();
@@ -233,7 +233,7 @@ public class RectangularBoundary implements Boundary {
         int hIdx = Math.min(Math.max(-this.borderX, (int) Math.round(sPrd + (hPoints - 1) / 2.)), hPoints - 1 + this.borderX);
 
         // System.out.println("getGridIndex: "+vIdx+","+hIdx+"("+vPoints+","+hPoints+")");
-        return new Util.Pair<Integer, Integer>(vIdx, hIdx);
+        return new UtilNew.Pair<Integer, Integer>(vIdx, hIdx);
 
     }
 

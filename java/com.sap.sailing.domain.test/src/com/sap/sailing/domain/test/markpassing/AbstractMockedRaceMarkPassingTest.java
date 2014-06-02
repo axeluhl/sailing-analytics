@@ -42,7 +42,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class AbstractMockedRaceMarkPassingTest {
     protected Competitor bob = new CompetitorImpl("Bob", "Bob", null, null, null);
@@ -71,9 +71,9 @@ public class AbstractMockedRaceMarkPassingTest {
         trackedRace.setStartTimeReceived(new MillisecondsTimePoint(System.currentTimeMillis() - 120000));
         List<MillisecondsTimePoint> tps = Arrays.asList(new MillisecondsTimePoint(System.currentTimeMillis()), new MillisecondsTimePoint(System.currentTimeMillis() - 30000),
                 new MillisecondsTimePoint(System.currentTimeMillis() + 30000));
-        List<Util.Pair<Mark, Position>> pos = Arrays.asList(new Util.Pair<Mark, Position>(m, new DegreePosition(0, 0)), new Util.Pair<Mark, Position>(m2, new DegreePosition(-0.001, -0.00005)),
-                new Util.Pair<Mark, Position>(m3, new DegreePosition(-0.001, 0.00005)));
-        for (Util.Pair<Mark, Position> pair : pos) {
+        List<UtilNew.Pair<Mark, Position>> pos = Arrays.asList(new UtilNew.Pair<Mark, Position>(m, new DegreePosition(0, 0)), new UtilNew.Pair<Mark, Position>(m2, new DegreePosition(-0.001, -0.00005)),
+                new UtilNew.Pair<Mark, Position>(m3, new DegreePosition(-0.001, 0.00005)));
+        for (UtilNew.Pair<Mark, Position> pair : pos) {
             for (TimePoint t : tps) {
                 trackedRace.recordFix(pair.getA(), new GPSFixImpl(pair.getB(), t));
             }

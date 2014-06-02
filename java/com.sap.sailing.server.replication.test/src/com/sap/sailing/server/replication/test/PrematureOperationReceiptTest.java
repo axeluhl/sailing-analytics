@@ -13,7 +13,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.impl.Replicator;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class PrematureOperationReceiptTest extends AbstractServerReplicationTest {
     private Replicator replicator;
@@ -25,7 +25,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
     @Before
     @Override
     public void setUp() throws Exception {
-        Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
+        UtilNew.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
                 /* replica=null means create a new one */ null);
         replicationService = result.getA();
         replicator = replicationService.startToReplicateFromButDontYetFetchInitialLoad(result.getB(), /* startReplicatorSuspended */ true);

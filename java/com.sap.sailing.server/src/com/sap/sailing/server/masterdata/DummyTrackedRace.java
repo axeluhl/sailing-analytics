@@ -43,7 +43,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
@@ -85,7 +85,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
+    public Iterable<UtilNew.Pair<Waypoint, UtilNew.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
         return null;
     }
 
@@ -353,7 +353,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -365,7 +365,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;

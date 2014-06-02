@@ -20,7 +20,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulatorUISelection;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 
@@ -231,7 +231,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path gpsPath = null;
         Path gpsPathPoly = null;
 
-        Util.Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
+        UtilNew.Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
                 selection.getLegIndex());
         allPaths = result.getA();
         this.raceCourse = result.getB();

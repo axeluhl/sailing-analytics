@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -87,7 +87,7 @@ public interface TrackedRace extends Serializable {
      * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over
      * the result must <code>synchronize</code> on the result.
      */
-    Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
+    Iterable<UtilNew.Pair<Waypoint, UtilNew.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
@@ -465,7 +465,7 @@ public interface TrackedRace extends Serializable {
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.
      */
-    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
 
     /**
      * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
@@ -479,7 +479,7 @@ public interface TrackedRace extends Serializable {
      * by each wind source are used during computing the averaged result across the wind sources. The result has the
      * averaged confidence attached.
      */
-    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude);
 
     /**

@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class RaceLogFinishPositioningConfirmedEventSerializer extends BaseRaceLogEventSerializer {
 
@@ -42,11 +42,11 @@ public class RaceLogFinishPositioningConfirmedEventSerializer extends BaseRaceLo
         return result;
     }
     
-    private JSONArray serializePositionedCompetitors(List<Util.Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+    private JSONArray serializePositionedCompetitors(List<UtilNew.Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         JSONArray jsonPositionedCompetitors = new JSONArray();
         
         if (positionedCompetitors != null) { // for backwards compatibility reasons
-            for (Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+            for (UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
                 JSONObject jsonPositionedCompetitor = new JSONObject();
 
                 jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());

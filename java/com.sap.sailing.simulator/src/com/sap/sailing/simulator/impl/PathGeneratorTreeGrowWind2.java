@@ -24,7 +24,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
@@ -95,7 +95,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
     // generate step in one of the possible directions
     // default: L - left, R - right
     // extended: M - wide left, S - wide right
-    Util.Pair<TimedPosition,Wind> getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
+    UtilNew.Pair<TimedPosition,Wind> getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
 
         double offDeg = 3.0;
         WindFieldGenerator wf = this.parameters.getWindField();
@@ -133,7 +133,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
             travelTime = new MillisecondsTimePoint(nextTime.asMillis() - turnLoss);
         }
 
-        return new Util.Pair<TimedPosition,Wind>(new TimedPositionImpl(nextTime, travelSpeed.travelTo(curPosition, curTime, travelTime)), appWind);
+        return new UtilNew.Pair<TimedPosition,Wind>(new TimedPositionImpl(nextTime, travelSpeed.travelTo(curPosition, curTime, travelTime)), appWind);
     }
 
     // use base direction to distinguish direction changes that do or don't require a turn
@@ -171,7 +171,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         }
 
         // calculate next path position (taking turn-loss into account)
-        Util.Pair<TimedPosition,Wind> nextStep = this.getStep(path.pos, timeStep, turnLoss, sameBaseDirection, nextDirection);
+        UtilNew.Pair<TimedPosition,Wind> nextStep = this.getStep(path.pos, timeStep, turnLoss, sameBaseDirection, nextDirection);
         TimedPosition pathPos = nextStep.getA();
         Wind posWind = nextStep.getB();
 
@@ -263,7 +263,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         return result;
     }
 
-    Util.Pair<List<PathCandidate>,List<PathCandidate>> generateCandidate(List<PathCandidate> oldPaths, long timeStep, long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) {
+    UtilNew.Pair<List<PathCandidate>,List<PathCandidate>> generateCandidate(List<PathCandidate> oldPaths, long timeStep, long turnLoss, Position posStart, Position posMiddle, Position posEnd, double tgtHeight) {
 
         List<PathCandidate> newPathCands;
         List<PathCandidate> leftPaths = new ArrayList<PathCandidate>();
@@ -288,7 +288,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
         }
 
-        Util.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = new Util.Pair<List<PathCandidate>,List<PathCandidate>>(leftPaths, rightPaths);
+        UtilNew.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = new UtilNew.Pair<List<PathCandidate>,List<PathCandidate>>(leftPaths, rightPaths);
         return newPaths;
     }
 
@@ -436,7 +436,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
             }
 
             // generate new candidates (inside regatta-area)
-            Util.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = this.generateCandidate(allPaths, timeStep, turnLoss, startPos, middlePos, endPos, distStartEndMeters);
+            UtilNew.Pair<List<PathCandidate>,List<PathCandidate>> newPaths = this.generateCandidate(allPaths, timeStep, turnLoss, startPos, middlePos, endPos, distStartEndMeters);
 
 
             // select good candidates

@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -324,7 +324,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<UtilNew.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
@@ -344,7 +344,7 @@ public class CourseImpl extends NamedImpl implements Course {
                     }
                     wpl.add(waypoint);
                 }
-                for (Util.Pair<ControlPoint, PassingInstruction> newDomainControlPoint : newControlPoints) {
+                for (UtilNew.Pair<ControlPoint, PassingInstruction> newDomainControlPoint : newControlPoints) {
                     List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
                     Waypoint waypoint;
                     if (waypoints == null || waypoints.isEmpty()) {

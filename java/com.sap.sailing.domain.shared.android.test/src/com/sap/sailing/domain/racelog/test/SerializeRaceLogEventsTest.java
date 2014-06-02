@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sse.common.Util;
 
 /**
  * Perform a few tests around race log and race log event serialization / deserialization

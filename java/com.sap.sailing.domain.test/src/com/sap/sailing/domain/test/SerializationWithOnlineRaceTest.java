@@ -24,12 +24,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
 
 public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
     public SerializationWithOnlineRaceTest() throws MalformedURLException, URISyntaxException {
@@ -50,11 +50,11 @@ public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
                         new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
     }
     
-    private com.sap.sse.common.Util.Pair<Integer, Long> getSerializationSizeAndTime(Serializable s) throws IOException {
+    private com.sap.sse.common.UtilNew.Pair<Integer, Long> getSerializationSizeAndTime(Serializable s) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         long start = System.currentTimeMillis();
         new ObjectOutputStream(bos).writeObject(s);
-        return new com.sap.sse.common.Util.Pair<Integer, Long>(bos.size(), System.currentTimeMillis()-start);
+        return new com.sap.sse.common.UtilNew.Pair<Integer, Long>(bos.size(), System.currentTimeMillis()-start);
     }
     
     @Test
@@ -66,7 +66,7 @@ public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
         cloneOfFindelsTrack.lockForRead();
         try {
             assertEquals(Util.size(findelsTrack.getFixes()), Util.size(cloneOfFindelsTrack.getFixes()));
-            com.sap.sse.common.Util.Pair<Integer, Long> sizeAndTime = getSerializationSizeAndTime(findelsTrack);
+            com.sap.sse.common.UtilNew.Pair<Integer, Long> sizeAndTime = getSerializationSizeAndTime(findelsTrack);
             System.out.println(sizeAndTime);
             assertTrue(sizeAndTime.getA() > 100000);
         } finally {

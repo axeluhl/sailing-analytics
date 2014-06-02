@@ -26,7 +26,6 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
+import com.sap.sse.common.Util;
 
 public class SailMasterConnectivityTest {
     private static final Logger logger = Logger.getLogger(SailMasterConnectivityTest.class.getName());
@@ -100,13 +100,13 @@ public class SailMasterConnectivityTest {
         final Collection<Fix> fixesResult = new ArrayList<Fix>();
         connector4702.addSailMasterListener(new SailMasterListener() {
             @Override
-            public void receivedTimingData(String raceID, String boatID, List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {}
+            public void receivedTimingData(String raceID, String boatID, List<com.sap.sse.common.UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {}
             @Override
             public void receivedStartList(String raceID, StartList startList) {}
             @Override
             public void receivedCourseConfiguration(String raceID, Course course) {}
             @Override
-            public void receivedClockAtMark(String raceID, List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {}
+            public void receivedClockAtMark(String raceID, List<com.sap.sse.common.UtilNew.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {}
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override

@@ -74,7 +74,7 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
     private static final long serialVersionUID = 4445427185387524086L;
@@ -336,7 +336,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public PolarDiagramDTOAndNotificationMessage getPolarDiagram(Double bearingStep, int boatClassIndex)
             throws ConfigurationException {
 
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
+        UtilNew.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
 
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getA()
                 .polarDiagramPlot(bearingStep);
@@ -377,7 +377,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         // this.stepSizeMeters);
         // int noOfPointsMinus1 = points.size() - 1;
 
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
+        UtilNew.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
@@ -470,7 +470,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, this.stepSizeMeters);
         int noOfPointsMinus1 = points.size() - 1;
 
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
+        UtilNew.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
@@ -531,7 +531,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     @Override
     public Response1TurnerDTO get1Turner(Request1TurnerDTO requestData) throws ConfigurationException {
 
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
+        UtilNew.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
@@ -947,7 +947,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         LOGGER.info("Retrieving simulated paths");
 
-        Util.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(selection.boatClassIndex);
+        UtilNew.Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(selection.boatClassIndex);
         PolarDiagram pd = polarDiagramAndNotificationMessage.getA();
 
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode, showOmniscient, showOpportunist);
@@ -1008,7 +1008,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return new SimulatedPathsEvenTimedResultDTO(pathDTOs, rcDTO, null, polarDiagramAndNotificationMessage.getB());
     }
 
-    private Util.Pair<PolarDiagram, String> getPolarDiagram(int boatClassIndex) throws ConfigurationException {
+    private UtilNew.Pair<PolarDiagram, String> getPolarDiagram(int boatClassIndex) throws ConfigurationException {
 
         ConfigurationManager config = ConfigurationManager.INSTANCE;
         PolarDiagram polarDiagram = null;
@@ -1034,7 +1034,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                             + exception.getMessage());
         }
 
-        return new Util.Pair<PolarDiagram, String>(polarDiagram, notificationMessage);
+        return new UtilNew.Pair<PolarDiagram, String>(polarDiagram, notificationMessage);
     }
 
     private PathDTO getPolylinePathDTO(Path gpsPoly, Path gpsTrack) {

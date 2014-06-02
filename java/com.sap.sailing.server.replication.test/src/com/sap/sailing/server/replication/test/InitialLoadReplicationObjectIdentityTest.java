@@ -46,10 +46,10 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.impl.Replicator;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
-    private Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private UtilNew.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.

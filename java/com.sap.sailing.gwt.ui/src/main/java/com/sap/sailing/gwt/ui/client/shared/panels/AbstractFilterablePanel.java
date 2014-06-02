@@ -11,8 +11,8 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
+import com.sap.sse.common.Util;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to

@@ -13,15 +13,15 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class GPSFixLeaderboardGroupDataRetrievalWorker extends AbstractLeaderboardGroupDataRetrievalWorker<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> doWork() {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        Collection<Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
-        for (Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext> baseDataEntry : baseData) {
+        Collection<UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
+        for (UtilNew.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext> baseDataEntry : baseData) {
             HasGPSFixContext context = new HasGPSFixContextImpl(baseDataEntry.getB());
             data.addAll(retrieveDataFor(context));
         }

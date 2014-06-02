@@ -27,7 +27,7 @@ import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.EventGender;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
@@ -57,8 +57,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
-        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
+    public Map<String, Set<UtilNew.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+        Map<String, Set<UtilNew.Pair<String, TimePoint>>> result = new HashMap<String, Set<UtilNew.Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
@@ -67,12 +67,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                     if(resultDocDescr.getCompetitorGenderType() != null) {
                         boatClass += ", " + resultDocDescr.getCompetitorGenderType().name();
                     }
-                    Set<Util.Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
+                    Set<UtilNew.Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
                     if(eventResultsSet == null) {
-                        eventResultsSet = new HashSet<Util.Pair<String, TimePoint>>();
+                        eventResultsSet = new HashSet<UtilNew.Pair<String, TimePoint>>();
                         result.put(eventName, eventResultsSet);
                     }
-                    eventResultsSet.add(new Util.Pair<String, TimePoint>(boatClass, resultDocDescr.getLastModified()));
+                    eventResultsSet.add(new UtilNew.Pair<String, TimePoint>(boatClass, resultDocDescr.getLastModified()));
                 }
             }
         } catch (IOException e) {

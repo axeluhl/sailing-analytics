@@ -10,10 +10,10 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceIdentifier, F extends GPSFix> implements
-        JsonSerializer<Util.Triple<D, Serializable, List<F>>> {
+        JsonSerializer<UtilNew.Triple<D, Serializable, List<F>>> {
     
     private final JsonSerializer<DeviceIdentifier> deviceSerializer;
     private final JsonSerializer<F> fixSerializer;
@@ -25,7 +25,7 @@ public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceId
     }
 
     @Override
-    public JSONObject serialize(Util.Triple<D, Serializable, List<F>> data) {
+    public JSONObject serialize(UtilNew.Triple<D, Serializable, List<F>> data) {
         JSONObject result = new JSONObject();
         
         JSONObject deviceIdJson = deviceSerializer.serialize(data.getA());

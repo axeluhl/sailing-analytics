@@ -18,7 +18,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<ResultType>, ResultType>
         extends RaceLogAnalyzerTest<AnalyzerType> {
     
-    protected class TargetPair extends com.sap.sse.common.Util.Pair<Collection<? extends RaceLogEvent>, ResultType> {
+    protected class TargetPair extends com.sap.sse.common.UtilNew.Pair<Collection<? extends RaceLogEvent>, ResultType> {
         private static final long serialVersionUID = 7961879340006633439L;
 
         public TargetPair(Collection<? extends RaceLogEvent> a, ResultType b) {

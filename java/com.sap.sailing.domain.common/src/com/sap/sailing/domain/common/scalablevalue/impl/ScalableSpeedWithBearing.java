@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * Separately scales speed and bearing. Instead of considering speed and bearing a single vector that can be scaled, the
@@ -19,7 +19,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public class ScalableSpeedWithBearing implements ScalableValue<Util.Triple<Speed, Double, Double>, SpeedWithBearing> {
+public class ScalableSpeedWithBearing implements ScalableValue<UtilNew.Triple<Speed, Double, Double>, SpeedWithBearing> {
     private final Speed speed;
     private final double sin;
     private final double cos;
@@ -42,7 +42,7 @@ public class ScalableSpeedWithBearing implements ScalableValue<Util.Triple<Speed
     }
 
     @Override
-    public ScalableSpeedWithBearing add(ScalableValue<Util.Triple<Speed, Double, Double>, SpeedWithBearing> t) {
+    public ScalableSpeedWithBearing add(ScalableValue<UtilNew.Triple<Speed, Double, Double>, SpeedWithBearing> t) {
         Speed newSpeed = new KnotSpeedImpl(speed.getKnots() + t.getValue().getA().getKnots());
         return new ScalableSpeedWithBearing(newSpeed, sin+t.getValue().getB(), cos+t.getValue().getC());
     }
@@ -61,8 +61,8 @@ public class ScalableSpeedWithBearing implements ScalableValue<Util.Triple<Speed
     }
 
     @Override
-    public Util.Triple<Speed, Double, Double> getValue() {
-        return new Util.Triple<Speed, Double, Double>(speed, sin, cos);
+    public UtilNew.Triple<Speed, Double, Double> getValue() {
+        return new UtilNew.Triple<Speed, Double, Double>(speed, sin, cos);
     }
     
 }

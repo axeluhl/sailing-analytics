@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 /**
  * A virtual wind track based on some virtual sequence of raw wind fixes. Subclasses should override
@@ -46,7 +46,7 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
      */
     @Override
     public Wind getAveragedWind(Position p, TimePoint at) {
-        final WindWithConfidence<Util.Pair<Position, TimePoint>> windWithConfidence = getAveragedWindUnsynchronized(p, at);
+        final WindWithConfidence<UtilNew.Pair<Position, TimePoint>> windWithConfidence = getAveragedWindUnsynchronized(p, at);
         return windWithConfidence == null ? null : windWithConfidence.getObject();
     }
     
@@ -57,8 +57,8 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
      * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
      */
     @Override
-    public WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
-        WindWithConfidence<Util.Pair<Position, TimePoint>> result = null;
+    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+        WindWithConfidence<UtilNew.Pair<Position, TimePoint>> result = null;
         TimePoint adjustedAt;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();

@@ -158,7 +158,6 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -375,6 +374,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.common.Util;
 
 /**
  * The server side implementation of the RPC service.
@@ -432,7 +432,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * have been obtained by {@link IncrementalLeaderboardDTO#strip(LeaderboardDTO)}. The cache size is limited to
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
-    private final LinkedHashMap<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
+    private final LinkedHashMap<com.sap.sse.common.UtilNew.Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
 
     private final SwissTimingReplayService swissTimingReplayService;
 
@@ -460,10 +460,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        leaderboardDifferenceCacheByIdPair = new LinkedHashMap<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
+        leaderboardDifferenceCacheByIdPair = new LinkedHashMap<com.sap.sse.common.UtilNew.Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
-            protected boolean removeEldestEntry(Entry<com.sap.sse.common.Util.Pair<String, String>, IncrementalLeaderboardDTO> eldest) {
+            protected boolean removeEldestEntry(Entry<com.sap.sse.common.UtilNew.Pair<String, String>, IncrementalLeaderboardDTO> eldest) {
                 return this.size() > LEADERBOARD_DIFFERENCE_CACHE_SIZE;
             }
         };
@@ -593,12 +593,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private ScoreCorrectionProviderDTO convertScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider)
             throws Exception {
-        Map<String, Set<com.sap.sse.common.Util.Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Set<com.sap.sse.common.Util.Pair<String,Date>>>();
-        for (Map.Entry<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> e : scoreCorrectionProvider
+        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Set<com.sap.sse.common.UtilNew.Pair<String,Date>>>();
+        for (Map.Entry<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> e : scoreCorrectionProvider
                 .getHasResultsForBoatClassFromDateByEventName().entrySet()) {
-            Set<com.sap.sse.common.Util.Pair<String, Date>> set = new HashSet<com.sap.sse.common.Util.Pair<String, Date>>();
-            for (com.sap.sse.common.Util.Pair<String, TimePoint> p : e.getValue()) {
-                set.add(new com.sap.sse.common.Util.Pair<String, Date>(p.getA(), p.getB().asDate()));
+            Set<com.sap.sse.common.UtilNew.Pair<String, Date>> set = new HashSet<com.sap.sse.common.UtilNew.Pair<String, Date>>();
+            for (com.sap.sse.common.UtilNew.Pair<String, TimePoint> p : e.getValue()) {
+                set.add(new com.sap.sse.common.UtilNew.Pair<String, Date>(p.getA(), p.getB().asDate()));
             }
             hasResultsForBoatClassFromDateByEventName.put(e.getKey(), set);
         }
@@ -664,7 +664,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final IncrementalLeaderboardDTO cachedDiff;
                 if (previousLeaderboardId != null) {
                     synchronized (leaderboardDifferenceCacheByIdPair) {
-                        cachedDiff = leaderboardDifferenceCacheByIdPair.get(new com.sap.sse.common.Util.Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()));
+                        cachedDiff = leaderboardDifferenceCacheByIdPair.get(new com.sap.sse.common.UtilNew.Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()));
                     }
                     if (cachedDiff == null) {
                         leaderboardDifferenceCacheByIdPairMisses++;
@@ -681,7 +681,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (cachedDiff == null) {
                         IncrementalLeaderboardDTO preResult = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
                         synchronized (leaderboardDifferenceCacheByIdPair) {
-                            leaderboardDifferenceCacheByIdPair.put(new com.sap.sse.common.Util.Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()), preResult);
+                            leaderboardDifferenceCacheByIdPair.put(new com.sap.sse.common.UtilNew.Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()), preResult);
                         }
                         incrementalResult = preResult;
                     } else {
@@ -928,8 +928,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        com.sap.sse.common.Util.Pair<String,List<RaceRecord>> raceRecords;
+    public com.sap.sse.common.UtilNew.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        com.sap.sse.common.UtilNew.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getTracTracAdapter().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
@@ -943,7 +943,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
                     raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString()));
         }
-        return new com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
+        return new com.sap.sse.common.UtilNew.Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
 
     @Override
@@ -1193,7 +1193,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Double minWindConfidence = 2.0;
                     Double maxWindConfidence = -1.0;
                     for (int i = 0; i < numberOfFixes; i++) {
-                        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
+                        WindWithConfidence<com.sap.sse.common.UtilNew.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
                         if (averagedWindWithConfidence != null) {
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             double confidence = averagedWindWithConfidence.getConfidence();
@@ -1276,7 +1276,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Double maxWindConfidence = -1.0;
                     for (int i = 0; i < numberOfFixes && (!onlyUpToNewestEvent ||
                             (newestEvent != null && timePoint.before(newestEvent))); i++) {
-                        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
+                        WindWithConfidence<com.sap.sse.common.UtilNew.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
                             if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
                                 logger.finest("Found averaged wind: " + averagedWindWithConfidence);
@@ -1531,18 +1531,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceTimesInfo.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
 
-            Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
+            Iterable<com.sap.sse.common.UtilNew.Pair<Waypoint, com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
             synchronized (markPassingsTimes) {
                 int numberOfWaypoints = Util.size(markPassingsTimes);
                 int wayPointNumber = 1;
-                for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
+                for (com.sap.sse.common.UtilNew.Pair<Waypoint, com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
                     MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
                     String name = "M" + (wayPointNumber - 1);
                     if (wayPointNumber == numberOfWaypoints) {
                         name = "F";
                     }
                     markPassingTimesDTO.setName(name);
-                    com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
+                    com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
                     TimePoint firstPassingTime = timesPair.getA();
                     TimePoint lastPassingTime = timesPair.getB();
                     markPassingTimesDTO.firstPassingDate = firstPassingTime == null ? null : firstPassingTime.asDate();
@@ -1739,12 +1739,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * Otherwise, a new control point is created using the default {@link com.sap.sailing.domain.base.DomainFactory}
      * instance.
      */
-    private List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> resolveControlPoints(
-            CourseBase old, List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
+    private List<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>> resolveControlPoints(
+            CourseBase old, List<com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
         Map<ControlPointDTO, ControlPoint> newlyCreatedCache = new HashMap<ControlPointDTO, ControlPoint>();
         Iterable<Waypoint> waypoints = old.getWaypoints();
-        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
-        for (com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
+        List<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>>();
+        for (com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
             ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
             ControlPoint match = null;
             if (newlyCreatedCache.containsKey(controlPointDTO)) {
@@ -1760,7 +1760,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             if (match != null) {
-                newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(match, controlPointAndPassingInstruction.getB()));
+                newControlPoints.add(new com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>(match, controlPointAndPassingInstruction.getB()));
             } else {
                 // no match found; create new control point:
                 ControlPoint newControlPoint;
@@ -1775,11 +1775,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
                     Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
                     newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
-                    newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
+                    newControlPoints.add(new com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
                 } else {
                     newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
                     PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
-                    newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
+                    newControlPoints.add(new com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
                 }
                 newlyCreatedCache.put(controlPointDTO, newControlPoint);
             }
@@ -1796,11 +1796,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * the course of the race identified by <code>raceIdentifier</code>.
      */
     @Override
-    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
+    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
-            List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> newControlPoints = resolveControlPoints(course, controlPoints);
+            List<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>> newControlPoints = resolveControlPoints(course, controlPoints);
             try {
                 course.update(newControlPoints, baseDomainFactory);
             } catch (Exception e) {
@@ -1946,8 +1946,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName) {
-        com.sap.sse.common.Util.Pair<String, LeaderboardType> result = null;
+    public com.sap.sse.common.UtilNew.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName) {
+        com.sap.sse.common.UtilNew.Pair<String, LeaderboardType> result = null;
 
         if(getService().getLeaderboards().containsKey(leaderboardName)) {
             Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
@@ -1959,7 +1959,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 type = isRegattaLeaderboard ? LeaderboardType.RegattaLeaderboard : LeaderboardType.FlexibleLeaderboard;
             }
-            result = new com.sap.sse.common.Util.Pair<String, LeaderboardType>(leaderboard.getName(), type);
+            result = new com.sap.sse.common.UtilNew.Pair<String, LeaderboardType>(leaderboard.getName(), type);
         }
         
         return result;
@@ -2148,8 +2148,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void addColumnsToLeaderboard(String leaderboardName, List<com.sap.sse.common.Util.Pair<String, Boolean>> columnsToAdd) {
-        for(com.sap.sse.common.Util.Pair<String, Boolean> columnToAdd: columnsToAdd) {
+    public void addColumnsToLeaderboard(String leaderboardName, List<com.sap.sse.common.UtilNew.Pair<String, Boolean>> columnsToAdd) {
+        for(com.sap.sse.common.UtilNew.Pair<String, Boolean> columnToAdd: columnsToAdd) {
             getService().apply(new AddColumnToLeaderboard(columnToAdd.getA(), leaderboardName, columnToAdd.getB()));
         }
     }
@@ -2218,7 +2218,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
+    public com.sap.sse.common.UtilNew.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date) throws NoWindException {
         return getService().apply(
                 new UpdateLeaderboardMaxPointsReason(leaderboardName, raceColumnName, competitorIdAsString,
@@ -2226,7 +2226,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
+    public com.sap.sse.common.UtilNew.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
             String competitorIdAsString, String columnName, Double correctedScore, Date date) throws NoWindException {
         return getService().apply(
                 new UpdateLeaderboardScoreCorrection(leaderboardName, columnName, competitorIdAsString, correctedScore,
@@ -2552,8 +2552,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             public CompetitorRaceDataDTO call() throws NoWindException {
                                 Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                         competitorDTO.getIdAsString());
-                                ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
-                                ArrayList<com.sap.sse.common.Util.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.Util.Pair<Date, Double>>();
+                                ArrayList<com.sap.sse.common.UtilNew.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.UtilNew.Triple<String, Date, Double>>();
+                                ArrayList<com.sap.sse.common.UtilNew.Pair<Date, Double>> raceData = new ArrayList<com.sap.sse.common.UtilNew.Pair<Date, Double>>();
                                 // Filling the mark passings
                                 Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
                                 if (competitorMarkPassings != null) {
@@ -2564,7 +2564,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                             Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
                                                     trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
                                             if (competitorMarkPassingsData != null) {
-                                                markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
+                                                markPassingsData.add(new com.sap.sse.common.UtilNew.Triple<String, Date, Double>(markPassing
                                                         .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
                                             }
                                         }
@@ -2578,7 +2578,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
                                                 competitor, time, leaderboardGroupName, leaderboardName);
                                         if (competitorRaceData != null) {
-                                            raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
+                                            raceData.add(new com.sap.sse.common.UtilNew.Pair<Date, Double>(time.asDate(), competitorRaceData));
                                         }
                                     }
                                 }
@@ -2605,7 +2605,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> getTotalPointsForRaceColumn(LeaderboardDTO leaderboard,
+    private com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>> getTotalPointsForRaceColumn(LeaderboardDTO leaderboard,
             RaceColumnDTO raceColumn) throws NoWindException {
         List<Double> values = new ArrayList<Double>();
         List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
@@ -2614,13 +2614,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
             competitorDTOs.add(entry.getKey());
         }
-        return new com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.getName(), competitorDTOs, values);
+        return new com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.getName(), competitorDTOs, values);
     }
 
     @Override
-    public List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
+    public List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
             Date date, DetailType detailType) throws Exception {
-        List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<com.sap.sse.common.Util.Triple<String,List<CompetitorDTO>,List<Double>>>();
+        List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<com.sap.sse.common.UtilNew.Triple<String,List<CompetitorDTO>,List<Double>>>();
         // Attention: The reason why we read the data from the LeaderboardDTO and not from the leaderboard directly is to ensure
         // the use of the leaderboard cache.
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -2655,7 +2655,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
                             rank++;
                         }
-                        result.add(new com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
+                        result.add(new com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
                     }
                     break;
                 default:
@@ -2668,7 +2668,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<com.sap.sse.common.Util.Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName) {
+    public List<com.sap.sse.common.UtilNew.Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(metaLeaderboardName);
         if (leaderboard == null) {
             throw new IllegalArgumentException("Couldn't find leaderboard named "+metaLeaderboardName);
@@ -2676,10 +2676,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if(!(leaderboard instanceof MetaLeaderboard)) {
             throw new IllegalArgumentException("The leaderboard "+metaLeaderboardName + " is not a metaleaderboard");
         }
-        List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
+        List<com.sap.sse.common.UtilNew.Pair<String, String>> result = new ArrayList<com.sap.sse.common.UtilNew.Pair<String, String>>();
         MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboard;
         for(Leaderboard containedLeaderboard: metaLeaderboard.getLeaderboards()) {
-            result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
+            result.add(new com.sap.sse.common.UtilNew.Pair<String, String>(containedLeaderboard.getName(),
                     containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName() : containedLeaderboard.getName()));
         }
         return result;
@@ -2963,9 +2963,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (EventDTO localEvent : getEvents()) {
             result.add(localEvent);
         }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+        for (Entry<RemoteSailingServerReference, com.sap.sse.common.UtilNew.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
                         getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final com.sap.sse.common.UtilNew.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
             final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
             final Iterable<EventBase> remoteEvents = eventsOrException.getA();
             String baseURL = getBaseURL(serverRef.getURL()).toString();
@@ -2997,7 +2997,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException) {
+            final com.sap.sse.common.UtilNew.Pair<Iterable<EventBase>, Exception> eventsOrException) {
         final Iterable<EventBase> events = eventsOrException.getA();
         final Iterable<EventBaseDTO> eventDTOs;
         final RemoteSailingServerReferenceDTO sailingServerDTO;
@@ -3379,7 +3379,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
         List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
+        for (Entry<RemoteSailingServerReference, com.sap.sse.common.UtilNew.Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :
                     getService().getPublicEventsOfAllSailingServers().entrySet()) {
             RemoteSailingServerReferenceDTO dto = createRemoteSailingServerReferenceDTO(
                     remoteSailingServerRefAndItsCachedEvent.getKey(),
@@ -3406,7 +3406,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         URL serverURL = new URL(expandedURL);
         RemoteSailingServerReference serverRef = getService().apply(new AddRemoteSailingServerReference(sailingServer.getName(), serverURL));
-        com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
+        com.sap.sse.common.UtilNew.Pair<Iterable<EventBase>, Exception> eventsOrException = getService().updateRemoteServerEventCacheSynchronously(serverRef);
         return createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
         
     }
@@ -3727,7 +3727,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
-        com.sap.sse.common.Util.Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
+        com.sap.sse.common.UtilNew.Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
         String hostname = hostnameAndPort.getA();
         int port = hostnameAndPort.getB();
         final String path = "/sailingserver/api/v1/leaderboardgroups";
@@ -3777,7 +3777,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     }
 
-    private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
+    private com.sap.sse.common.UtilNew.Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
@@ -3803,7 +3803,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        return new com.sap.sse.common.Util.Pair<String, Integer>(hostname, port);
+        return new com.sap.sse.common.UtilNew.Pair<String, Integer>(hostname, port);
     }
 
     @Override
@@ -3820,7 +3820,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 long startTime = System.currentTimeMillis();
                 getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
                         "Setting up connection", 0.5);
-                com.sap.sse.common.Util.Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
+                com.sap.sse.common.UtilNew.Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
                 String hostname = hostnameAndPort.getA();
                 int port = hostnameAndPort.getB();
                 String query;
@@ -4124,12 +4124,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
-        com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName);
+    public com.sap.sse.common.UtilNew.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
+        com.sap.sse.common.UtilNew.Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName);
         if (result == null || result.getA() == null) {
             return null;
         }
-        return new com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType>(result.getA() == null ? null : result.getA().asDate(), result.getB(), result.getC());
+        return new com.sap.sse.common.UtilNew.Triple<Date, Integer, RacingProcedureType>(result.getA() == null ? null : result.getA().asDate(), result.getB(), result.getC());
     }
 
     @Override
@@ -4266,7 +4266,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @param triple leaderboard and racecolumn and fleet names
      * @return
      */
-    private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) {
+    private RaceLog getRaceLog(com.sap.sse.common.UtilNew.Triple<String, String, String> triple) {
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
     }
     
@@ -4347,7 +4347,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
+            List<com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String name = String.format("Course for %s - %s - %s", leaderboardName, raceColumnName, fleetName);
         
@@ -4356,7 +4356,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             lastPublishedCourse = new CourseDataImpl(name);
         }
         
-        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> waypoints = resolveControlPoints(lastPublishedCourse, courseDTO);
+        List<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>> waypoints = resolveControlPoints(lastPublishedCourse, courseDTO);
         Course course = new CourseImpl(name, lastPublishedCourse.getWaypoints());
         
         try {
@@ -4419,11 +4419,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void copyCourseAndCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
+    public void copyCourseAndCompetitorsToOtherRaceLogs(com.sap.sse.common.UtilNew.Triple<String, String, String> fromTriple,
+            Set<com.sap.sse.common.UtilNew.Triple<String, String, String>> toTriples) {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (com.sap.sse.common.UtilNew.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
 

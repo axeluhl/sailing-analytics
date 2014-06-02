@@ -12,11 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AntHrm;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
+import com.sap.sse.common.Util;
 
 public class FixFactoryTest {
     private static final String demoJson = "{\n"+

@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 import difflib.Patch;
 

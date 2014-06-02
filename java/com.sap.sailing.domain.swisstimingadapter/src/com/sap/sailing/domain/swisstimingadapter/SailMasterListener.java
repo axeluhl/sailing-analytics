@@ -5,16 +5,16 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public interface SailMasterListener {
     void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
             Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeader,
             Collection<Fix> fixes);
     
-    void receivedTimingData(String raceID, String boatID, List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds);
+    void receivedTimingData(String raceID, String boatID, List<UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds);
     
-    void receivedClockAtMark(String raceID, List<Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs);
+    void receivedClockAtMark(String raceID, List<UtilNew.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs);
     
     void receivedStartList(String raceID, StartList startList);
     

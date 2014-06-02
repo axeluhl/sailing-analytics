@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.UtilNew;
 
 public interface WindTrack extends DynamicTrack<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
@@ -22,7 +22,7 @@ public interface WindTrack extends DynamicTrack<Wind> {
      */
     Wind getAveragedWind(Position p, TimePoint at);
     
-    WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
 
     /**
      * A listener is notified whenever a new fix is added to this track

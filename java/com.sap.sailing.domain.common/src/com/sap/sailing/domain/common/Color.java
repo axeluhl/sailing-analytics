@@ -31,9 +31,9 @@ public interface Color extends Serializable {
 
     final Color BLUE = new RGBColor(0, 0, 255);
 
-    com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB();
+    com.sap.sse.common.UtilNew.Triple<Integer, Integer, Integer> getAsRGB();
 
-    com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV();
+    com.sap.sse.common.UtilNew.Triple<Float, Float, Float> getAsHSV();
 
     String getAsHtml();
 }
