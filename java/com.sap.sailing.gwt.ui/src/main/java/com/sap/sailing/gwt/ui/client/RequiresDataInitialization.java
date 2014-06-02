@@ -7,7 +7,7 @@ package com.sap.sailing.gwt.ui.client;
  */
 public interface RequiresDataInitialization {
 
-    public void initializeData();
+    public void initializeData(boolean showMapControls);
     public boolean isDataInitialized();
     
 }

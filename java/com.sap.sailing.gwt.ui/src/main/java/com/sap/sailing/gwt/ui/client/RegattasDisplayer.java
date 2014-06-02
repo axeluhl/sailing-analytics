@@ -4,6 +4,6 @@ import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public interface RegattaDisplayer {
+public interface RegattasDisplayer {
     void fillRegattas(List<RegattaDTO> result);
 }

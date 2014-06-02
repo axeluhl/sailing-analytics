@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -65,9 +65,9 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
             @Override
             public SafeHtml getValue(RemoteSailingServerReferenceDTO server) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                final Iterable<EventDTO> events = server.getEvents();
+                final Iterable<EventBaseDTO> events = server.getEvents();
                 if (events != null) {
-                    for (EventDTO event : events) {
+                    for (EventBaseDTO event : events) {
                         builder.appendEscaped(event.getName());
                         builder.appendHtmlConstant("<br>");
                     }
@@ -125,7 +125,7 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
                 strings.add(t.getName());
                 strings.add(t.getUrl());
                 if (t.getEvents() != null) {
-                    for (EventDTO e : t.getEvents()) {
+                    for (EventBaseDTO e : t.getEvents()) {
                         strings.add(e.getName());
                     }
                 }

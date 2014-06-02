@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Waypoint;
@@ -24,9 +25,13 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -81,6 +86,20 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         int[] intArray = new int[] { 5, 8 };
         int[] clone = cloneBySerialization(intArray, receiverDomainFactory);
         assertTrue(Arrays.equals(intArray, clone));
+    }
+
+    @Test
+    public void testSerializingEventWithLeaderboardGroups() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Event e = new EventImpl("Event Name", MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(
+                Duration.ONE_DAY.times(10)), "At Home", /* is public */true, UUID.randomUUID());
+        LeaderboardGroup lg1 = new LeaderboardGroupImpl("LG1", "LG1 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        e.addLeaderboardGroup(lg1);
+        LeaderboardGroup lg2 = new LeaderboardGroupImpl("LG2", "LG2 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        e.addLeaderboardGroup(lg2);
+        Event deserialized = cloneBySerialization(e, receiverDomainFactory);
+        assertEquals(Util.size(e.getLeaderboardGroups()), Util.size(deserialized.getLeaderboardGroups()));
+        assertEquals(e.getLeaderboardGroups().iterator().next().getName(), deserialized.getLeaderboardGroups().iterator().next().getName());
     }
     
     /**

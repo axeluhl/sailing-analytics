@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -58,8 +59,8 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -323,7 +324,7 @@ public interface SailingServiceAsync {
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
-	void getPublicEventsOfAllSailingServers(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
+    void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
      * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
@@ -346,10 +347,13 @@ public interface SailingServiceAsync {
 
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
-    void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
+    void createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
+            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            List<String> regattaNames, AsyncCallback<Void> callback);
+            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 

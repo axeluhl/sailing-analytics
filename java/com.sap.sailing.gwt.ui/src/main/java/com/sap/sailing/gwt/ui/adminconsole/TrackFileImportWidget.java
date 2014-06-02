@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
+import java.util.Date;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -40,11 +41,10 @@ public class TrackFileImportWidget implements IsWidget {
                     String uuid = deviceIdJson.get("UUID").isString().stringValue();
                     String fileName = deviceIdJson.get("FILE_NAME").isString().stringValue();
                     String trackName = deviceIdJson.get("TRACK_NAME").isString().stringValue();
-//                    long fromMillis = (long) deviceIdJson.get("FROM_MILLIS").isNumber().doubleValue();
-//                    long toMillis = (long) deviceIdJson.get("TO_MILLIS").isNumber().doubleValue();
-//                    long numFixes = (long) deviceIdJson.get("NUM_FIXES").isNumber().doubleValue();
-                    TrackFileImportDeviceIdentifier deviceId = new TrackFileImportDeviceIdentifier(
-                            uuid, fileName, trackName, null, null, 0);//new Date(fromMillis), new Date(toMillis), numFixes);
+                    long fromMillis = (long) obj.get("FROM_MILLIS").isNumber().doubleValue();
+                    long toMillis = (long) obj.get("TO_MILLIS").isNumber().doubleValue();
+                    TrackFileImportDeviceIdentifier deviceId = new TrackFileImportDeviceIdentifier(uuid, fileName,
+                            trackName, new Date(fromMillis), new Date(toMillis), /* number of fixes */ 0);
                     table.getDataProvider().getList().add(deviceId);
                 }
             }

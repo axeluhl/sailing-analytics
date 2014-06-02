@@ -28,16 +28,19 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 
 /**
- * A set of {@link RemoteSailingServerReference}s including a cache of their {@link Event}s that is
+ * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
  * periodically updated.
  * 
  * @author Axel Uhl (D043530)
  *
  */
 public class RemoteSailingServerSet {
+    private static final int POLLING_INTERVAL_IN_SECONDS = 60;
+
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
     
     /**
@@ -55,7 +58,7 @@ public class RemoteSailingServerSet {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() { @Override public void run() { updateRemoteSailingServerReferenceEventCaches(); } },
-                /* initialDelay */ 0, /* period */ 60, TimeUnit.SECONDS);
+                /* initialDelay */ 0, POLLING_INTERVAL_IN_SECONDS, TimeUnit.SECONDS);
     }
 
     public void clear() {
@@ -93,7 +96,7 @@ public class RemoteSailingServerSet {
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
-                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
                 JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
                 final Set<EventBase> events = new HashSet<>();
                 for (Object eventAsObject : eventsAsJsonArray) {

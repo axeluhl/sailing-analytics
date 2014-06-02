@@ -399,6 +399,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 raceList.getList().addAll(availableSwissTimingRaces);
 
                 filterablePanelEvents.getTextBox().setText(null);
+                filterablePanelEvents.updateAll(result.races);
 
                 // store a successful configuration in the database for later retrieval
                 final String hostname = result.trackingDataHost;

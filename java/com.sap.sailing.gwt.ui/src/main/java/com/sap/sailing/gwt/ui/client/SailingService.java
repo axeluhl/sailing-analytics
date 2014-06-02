@@ -54,6 +54,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -91,9 +92,9 @@ public interface SailingService extends RemoteService {
     
     List<RegattaDTO> getRegattas();
 
-    List<EventDTO> getEvents();
+    List<EventDTO> getEvents() throws Exception;
 
-    List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers();
+    List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws Exception;
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
 
@@ -271,10 +272,11 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            List<String> regattaNames);
+    EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
+            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
 
-    EventDTO createEvent(String eventName, Date startDate, Date endDate, String venueName, boolean isPublic, List<String> courseAreaNames);
+    EventDTO createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
+            List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
 
     void removeEvent(UUID eventId);
 

@@ -6,8 +6,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializationHandler;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
 public class TrackFileImportDeviceIdentifierStringSerializationHandler implements
         DeviceIdentifierStringSerializationHandler {

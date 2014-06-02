@@ -4,15 +4,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
- * Importer for extracting GPS fixes from an InputStream. Importers are picked up via
- * the OSGi service registry, so make sure to register them (the {@link GPSFixImporterRegistration}
- * class can help with this).
+ * Importer for extracting GPS fixes from an {@link InputStream}. Importers are picked up via the OSGi service registry,
+ * so make sure to register them (the {@link GPSFixImporterRegistration} class can help with this).
+ * <p>
+ * 
+ * Implementers need to {@link #getType() provide a unique type name} for the importer and may
+ * {@link #getSupportedFileExtensions() specify the file name extensions} for the file types supported.
+ * The actual work is done by the implementation of {@link #importFixes(InputStream, Callback, boolean)} which
+ * receives the input stream that the importer shall analyze. When the start of a track is found, the importer must call the
+ * {@link Callback#startTrack(String, Map)} method. From that point onwards, all fixes that the importer recognizes in the
+ * stream and that it passes to {@link Callback#addFix(GPSFix)} are then assigned to that track which means that
+ * for each track an artificial {@link DeviceIdentifier} is created which can later be used to associate the track
+ * with a tracked object such as a competitor or a mark. Note that this means that all fixes of a single track need
+ * to be passed to the callback before fixes of any other track can be passed to the callback.<p>
+ * 
+ * If the data source to import from does not deliver course and speed over ground (COG/SOG) but only time-stamped
+ * latitude and longitude values, consider using <code>BaseGPSFixImporterImpl</code> which infers COG and SOG values
+ * from the positions and time stamps.
  * 
  * @author Fredrik Teschke
- *
+ * 
  */
 public interface GPSFixImporter {    
     String FILE_EXTENSION_PROPERTY = "fileExt";
@@ -25,16 +40,19 @@ public interface GPSFixImporter {
      */
     interface Callback {
         /**
-         * Is called when the beginning of a track is found. Some track file formats (e.g. GPX)
-         * can contain multiple tracks.
-         * Implementations of the {@link GPSFixImporter} are expected to call this method before
-         * calling {@link #addFix}, even if no metadata is known (and then pass {@code null} values
-         * for the {@code name} and {@code properties}).
+         * Is called when the beginning of a track is found. Some track file formats (e.g. GPX) can contain multiple
+         * tracks. Implementations of the {@link GPSFixImporter} are expected to call this method before calling
+         * {@link #addFix}, even if no metadata is known (and then pass {@code null} for {@code properties}).
+         * 
+         * @param name
+         *            a non-<code>null</code> value; can be made up, e.g., by providing the importer type and a
+         *            string-formatted time stamp or similar, at least as a default
          */
         void startTrack(String name, Map<String, String> properties);
+
         void addFix(GPSFix fix);
     }
-    
+
     /**
      * Retrieves the fixes from the {@code inputStream}, and calls the
      * {@code callback} with every new fix.
@@ -48,8 +66,8 @@ public interface GPSFixImporter {
 
     /**
      * Return the file extensions supported by this importer. If the importer is not intended
-     * for file-based input, this may return an empty iterable.
-     * @return
+     * for file-based input, this may return an empty iterable. Expects only the extension without
+     * any leading period, e.g., "gpx" or "kml".
      */
     Iterable<String> getSupportedFileExtensions();
     

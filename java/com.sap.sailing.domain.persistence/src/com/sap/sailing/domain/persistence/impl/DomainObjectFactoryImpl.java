@@ -92,9 +92,11 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -683,7 +685,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
+                boolean hasUUID = o.containsField(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                final LeaderboardGroup leaderboardGroup = loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry);
+                leaderboardGroups.add(leaderboardGroup);
+                if (!hasUUID) {
+                    // in an effort to migrate leaderboard groups without ID to such that have a UUID as their ID, we need
+                    // to write a leaderboard group to the database again after it just received a UUID for the first time:
+                    logger.info("Existing LeaderboardGroup " + leaderboardGroup.getName()
+                            + " received a UUID during migration; updating the leaderboard group in the database");
+                    new MongoObjectFactoryImpl(database).storeLeaderboardGroup(leaderboardGroup);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
@@ -696,6 +707,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        UUID uuid = (UUID) o.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+            logger.info("Leaderboard group "+name+" receives UUID "+uuid+" in a migration effort");
+            // migration: leaderboard groups that don't yet have a UUID receive a random one
+        }
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
         boolean displayGroupsInReverseOrder = false; // default value 
         Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
@@ -718,7 +735,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, displayGroupsInReverseOrder, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;
@@ -868,6 +885,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
+    public void loadLeaderboardGroupLinksForEvents(EventResolver eventResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver) {
+        DBCollection links = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
+        for (Object o : links.find()) {
+            DBObject dbLink = (DBObject) o;
+            UUID eventId = (UUID) dbLink.get(FieldNames.EVENT_ID.name());
+            Event event = eventResolver.getEvent(eventId);
+            if (event == null) {
+                logger.info("Found leaderboard group IDs for event with ID "+eventId+" but couldn't find that event.");
+            } else {
+                @SuppressWarnings("unchecked")
+                List<UUID> leaderboardGroupIDs = (List<UUID>) dbLink.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                for (UUID leaderboardGroupID : leaderboardGroupIDs) {
+                    LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.getLeaderboardGroupByID(leaderboardGroupID);
+                    if (leaderboardGroup != null) {
+                        event.addLeaderboardGroup(leaderboardGroup);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public Event loadEvent(String name) {
         Event result;
         BasicDBObject query = new BasicDBObject();
@@ -942,6 +982,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
+        BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        if (imageURLs != null) {
+            for (Object imageURL : imageURLs) {
+                try {
+                    result.addImageURL(new URL((String) imageURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing image URL "+imageURL+" for event "+name+". Ignoring this image URL.");
+                }
+            }
+        }
+        BasicDBList videoURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        if (videoURLs != null) {
+            for (Object videoURL : videoURLs) {
+                try {
+                    result.addVideoURL(new URL((String) videoURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
+                }
+            }
+        }
         return result;
     }
 

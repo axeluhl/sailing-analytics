@@ -64,6 +64,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -264,9 +265,11 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfiguration
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
@@ -1462,7 +1465,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                             Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
-                            GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
+                            GPSFixDTO fixDTO = createGPSFixDTO(fix, track.getEstimatedSpeed(fix.getTimePoint()), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
@@ -2862,9 +2865,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData) {
-        LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
-        groupDTO.setName(leaderboardGroup.getName());
-        groupDTO.description = leaderboardGroup.getDescription();
+        LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO(leaderboardGroup.getId(), leaderboardGroup.getName(), leaderboardGroup.getDescription());
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData));
@@ -2947,33 +2948,60 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<EventDTO> getEvents() {
+    public List<EventDTO> getEvents() throws MalformedURLException {
+        String requestBaseURL = getRequestBaseURL().toString();
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
             EventDTO eventDTO = convertToEventDTO(event);
+            eventDTO.setBaseURL(requestBaseURL);
             result.add(eventDTO);
         }
         return result;
     }
 
     @Override
-    public List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers() {
-        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+    public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
+        List<EventBaseDTO> result = new ArrayList<>();
+        for (EventDTO localEvent : getEvents()) {
+            result.add(localEvent);
+        }
         for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
                         getService().getPublicEventsOfAllSailingServers().entrySet()) {
             final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
             final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final RemoteSailingServerReferenceDTO sailingServerDTO = createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
-            result.add(sailingServerDTO);
+            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
+            String baseURL = getBaseURL(serverRef.getURL()).toString();
+            if (remoteEvents != null) {
+                for (EventBase remoteEvent : remoteEvents) {
+                    EventBaseDTO remoteEventDTO = convertToEventDTO(remoteEvent);
+                    remoteEventDTO.setBaseURL(baseURL);
+                    result.add(remoteEventDTO);
+                }
+            }
         }
         return result;
+    }
+
+    /**
+     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
+     * to <code>http://sapsailing.com</code>.
+     * @throws MalformedURLException 
+     */
+    private URL getRequestBaseURL() throws MalformedURLException {
+        final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
+        final URL baseURL = getBaseURL(url);
+        return baseURL;
+    }
+
+    private URL getBaseURL(URL url) throws MalformedURLException {
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
             final RemoteSailingServerReference serverRef,
             final Pair<Iterable<EventBase>, Exception> eventsOrException) {
         final Iterable<EventBase> events = eventsOrException.getA();
-        final Iterable<EventDTO> eventDTOs;
+        final Iterable<EventBaseDTO> eventDTOs;
         final RemoteSailingServerReferenceDTO sailingServerDTO;
         if (events == null) {
             eventDTOs = null;
@@ -2989,28 +3017,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return sailingServerDTO;
     }
     
-    private Iterable<EventDTO> convertToEventDTOs(Iterable<EventBase> events) {
-        List<EventDTO> result = new ArrayList<>();
+    private Iterable<EventBaseDTO> convertToEventDTOs(Iterable<EventBase> events) {
+        List<EventBaseDTO> result = new ArrayList<>();
         for (EventBase event : events) {
-            EventDTO eventDTO = convertToEventDTO(event);
+            EventBaseDTO eventDTO = convertToEventDTO(event);
             result.add(eventDTO);
         }
         return result;
     }
 
     @Override
-    public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
+    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, regattaNames));
+        List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
+        List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
+        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
+        return getEventById(eventId);
+    }
+
+    /**
+     * @param urlStrings
+     * @return
+     * @throws MalformedURLException
+     */
+    private List<URL> createURLsFromStrings(Iterable<String> urlStrings) throws MalformedURLException {
+        List<URL> imageURLs = new ArrayList<>();
+        for (String imageURLString : urlStrings) {
+            imageURLs.add(new URL(imageURLString));
+        }
+        return imageURLs;
     }
 
     @Override
-    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
+    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames,
+            Iterable<String> imageURLs, Iterable<String> videoURLs) throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        getService().apply(new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid));
+        getService().apply(
+                new CreateEvent(eventName, startTimePoint, endTimePoint, venue, isPublic, eventUuid, createURLsFromStrings(imageURLs),
+                        createURLsFromStrings(videoURLs)));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -3062,25 +3110,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private EventDTO convertToEventDTO(EventBase event) {
-        EventDTO eventDTO = new EventDTO(event.getName());
+    private EventBaseDTO convertToEventDTO(EventBase event) {
+        List<LeaderboardGroupBaseDTO> lgDTOs = new ArrayList<>();
+        if (event.getLeaderboardGroups() != null) {
+            for (LeaderboardGroupBase lgBase : event.getLeaderboardGroups()) {
+                lgDTOs.add(new LeaderboardGroupBaseDTO(lgBase.getId(), lgBase.getName(), lgBase.getDescription(), lgBase.hasOverallLeaderboard()));
+            }
+        }
+        EventBaseDTO eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
+        copyEventBaseFieldToDTO(event, eventDTO);
+        return eventDTO;
+    }
+    
+    private void copyEventBaseFieldToDTO(EventBase event, EventBaseDTO eventDTO) {
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = (UUID) event.getId();
-        return eventDTO;
     }
     
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
-        eventDTO.venue = new VenueDTO();
-        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
-        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
-        eventDTO.isPublic = event.isPublic();
-        eventDTO.id = event.getId();
+        convertToEventDTO(event);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -3092,6 +3145,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
             eventDTO.venue.getCourseAreas().add(courseAreaDTO);
+        }
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
+        }
+        for (URL imageURL : event.getImageURLs()) {
+            eventDTO.addImageURL(imageURL.toString());
+        }
+        for (URL videoURL : event.getVideoURLs()) {
+            eventDTO.addVideoURL(videoURL.toString());
         }
         return eventDTO;
     }

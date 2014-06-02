@@ -7,6 +7,10 @@ public class FormatNotSupportedException extends Exception {
     public FormatNotSupportedException(String msg) {
         super(msg);
     }
+    
+    public FormatNotSupportedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
     public FormatNotSupportedException() {
         super();

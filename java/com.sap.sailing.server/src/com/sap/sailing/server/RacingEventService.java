@@ -44,9 +44,11 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -85,7 +87,7 @@ import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, TrackerManager {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -223,15 +225,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<String, LeaderboardGroup> getLeaderboardGroups();
 
     /**
-     * @param groupName The name of the requested leaderboard group
-     * @return The leaderboard group with the name <code>groupName</code>, or <code>null</code> if theres no such group
-     */
-    LeaderboardGroup getLeaderboardGroupByName(String groupName);
-
-    /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * 
+     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
@@ -240,10 +236,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
+     * 
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
+            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
@@ -332,17 +329,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
 
     /**
-     * Returns the event with given id. When no event is found, <b>null</b> is returned.
-     * 
-     * @param id
-     * 			The id of the event.
-     * @return The event with given id.
-     */
-    Event getEvent(Serializable id);
-
-    /**
-     * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the
-     * regattas with the names in <code>regattaNames</code> and saves it in the database.
+     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
+     * names in <code>regattaNames</code>, saves it in the database and replicates it. Use for TESTING only!
      * 
      * @param eventName
      *            The name of the new event
@@ -361,9 +349,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
-     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
-     * regattas with the names in <code>regattaNames</code> and updates it in the database.
-     * @param id TODO
+     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
+     * the names in <code>regattaNames</code> and updates it in the database.
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -374,12 +361,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
-     * @param regattaNames
-     *            The names of the regattas contained in the event.<br />
+     * @param leaderboardGroupIds
+     *            TODO
+     * @param imageURLs TODO
+     * @param videoURLs TODO
      * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -468,7 +457,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
-            UUID id);
+            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 

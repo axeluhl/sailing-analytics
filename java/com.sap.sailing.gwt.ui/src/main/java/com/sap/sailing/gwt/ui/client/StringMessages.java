@@ -1028,4 +1028,13 @@ public interface StringMessages extends Messages {
     String importFixes();
     String noSailingServerInstancesYet();
     String registeredSailingServerInstances();
+    String filterEventsByName();
+    String leaderboardsExceptFromSelectedGroup();
+    String availableLeaderboardGroups();
+    String leaderboardGroupsOfSelectedEvent();
+    String addRaces();
+    String withNamePrefix();
+    String pleaseSelectASeriesFirst();
+    String imageURLs();
+    String videoURLs();
 }
