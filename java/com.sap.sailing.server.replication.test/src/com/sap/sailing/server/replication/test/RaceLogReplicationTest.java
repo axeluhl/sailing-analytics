@@ -64,7 +64,7 @@ import com.sap.sse.common.Util;
 public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     private static final String BOAT_CLASS_NAME_49er = "49er";
 
-    private com.sap.sse.common.UtilNew.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
+    private com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
     
     private RaceLogEvent raceLogEvent;
     private RaceLogEvent anotherRaceLogEvent;

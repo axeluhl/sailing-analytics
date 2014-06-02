@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -50,7 +50,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final Timer timer;
 
     private VerticalPanel mainPanel;
-    private final List<UtilNew.Pair<String, String>> leaderboardNamesAndDisplayNames;
+    private final List<Util.Pair<String, String>> leaderboardNamesAndDisplayNames;
     private final Map<String, LeaderboardSettings> leaderboardNamesAndSettings;
 
     private TabPanel leaderboardsTabPanel;
@@ -73,7 +73,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         
         selectedLeaderboardFlowPanel = null;
         selectedLeaderboardPanel = null;
-        leaderboardNamesAndDisplayNames = new ArrayList<UtilNew.Pair<String, String>>();
+        leaderboardNamesAndDisplayNames = new ArrayList<Util.Pair<String, String>>();
         leaderboardNamesAndSettings = new HashMap<String, LeaderboardSettings>();
     }
 
@@ -142,7 +142,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         selectedLeaderboardPanel.updateSettings(newSettings);
     }
 
-    public void setLeaderboardNames(List<UtilNew.Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
+    public void setLeaderboardNames(List<Util.Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
         leaderboardNamesAndDisplayNames.clear();
         leaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
         
@@ -150,10 +150,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     private void readAndUpdateLeaderboardsOfMetaleaderboard() {
-        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<UtilNew.Pair<String, String>>>() {
+        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<Util.Pair<String, String>>>() {
             
             @Override
-            public void onSuccess(List<UtilNew.Pair<String, String>> leaderboardNamesAndDisplayNames) {
+            public void onSuccess(List<Util.Pair<String, String>> leaderboardNamesAndDisplayNames) {
                 setLeaderboardNames(leaderboardNamesAndDisplayNames);
             }
             
@@ -169,7 +169,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             int index = 0;
             int leaderboardCount = leaderboardNamesAndDisplayNames.size();
-            for (UtilNew.Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
+            for (Util.Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
                 FlowPanel tabFlowPanel = new FlowPanel();
                 leaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
 

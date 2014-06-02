@@ -126,7 +126,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
-        List<com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason>> positioningList;
+        List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positioningList;
         
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
@@ -141,7 +141,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         }
         
         if (positioningList != null) {
-            for (com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
+            for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getA());
 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
@@ -165,7 +165,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
-            TimePoint timePoint, com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor, Competitor competitor) {
+            TimePoint timePoint, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor, Competitor competitor) {
         boolean scoreHasBeenCorrected = false;
         
         MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
@@ -226,7 +226,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
      * @param positionedCompetitor the competitor whose rank shall be determined
      * @return the rank of the given positionedCompetitor
      */
-    private int getRankInPositioningListByRaceCommittee(List<com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason>> positioningList, com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
+    private int getRankInPositioningListByRaceCommittee(List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positioningList, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
         return positioningList.indexOf(positionedCompetitor) + 1; // indexOf gives the zero-based position requested competitor in the list, + 1 gives the one-based rank
     }
 

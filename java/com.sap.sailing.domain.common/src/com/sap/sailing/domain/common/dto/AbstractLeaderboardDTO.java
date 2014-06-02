@@ -13,7 +13,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractLeaderboardDTO implements Serializable {
     private static final long serialVersionUID = -205106531931903527L;
@@ -277,12 +277,12 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public List<UtilNew.Pair<RaceColumnDTO, FleetDTO>> getLiveRaces(long serverTimePointAsMillis) {
-        List<UtilNew.Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<UtilNew.Pair<RaceColumnDTO, FleetDTO>>();
+    public List<Util.Pair<RaceColumnDTO, FleetDTO>> getLiveRaces(long serverTimePointAsMillis) {
+        List<Util.Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Util.Pair<RaceColumnDTO, FleetDTO>>();
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 if (race.isLive(fleet, serverTimePointAsMillis)) {
-                    result.add(new UtilNew.Pair<RaceColumnDTO, FleetDTO>(race, fleet));
+                    result.add(new Util.Pair<RaceColumnDTO, FleetDTO>(race, fleet));
                 }
             }
         }

@@ -31,8 +31,8 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
     
     @Override
-    public com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
-        return new com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>(competitor, this);
+    public com.sap.sse.common.Util.Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
+        return new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, this);
     }
 
     public RaceColumnListeners getRaceColumnListeners() {

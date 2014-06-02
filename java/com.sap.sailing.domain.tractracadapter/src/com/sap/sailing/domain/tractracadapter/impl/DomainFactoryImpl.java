@@ -91,15 +91,15 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
-    private final Map<com.sap.sse.common.UtilNew.Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
+    private final Map<com.sap.sse.common.Util.Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
     
     private final Map<Serializable, DynamicTeam> teamCache = new HashMap<>();
     
     /**
      * Caches regattas by their name and their boat class's name
      */
-    private final Map<com.sap.sse.common.UtilNew.Pair<String, String>, com.sap.sailing.domain.base.Regatta> regattaCache =
-            new HashMap<com.sap.sse.common.UtilNew.Pair<String, String>, com.sap.sailing.domain.base.Regatta>();
+    private final Map<com.sap.sse.common.Util.Pair<String, String>, com.sap.sailing.domain.base.Regatta> regattaCache =
+            new HashMap<com.sap.sse.common.Util.Pair<String, String>, com.sap.sailing.domain.base.Regatta>();
     
     /**
      * A cache based on weak references to the TracTrac event, allowing for quick Event lookup as long as the
@@ -151,11 +151,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, Iterable<com.sap.sse.common.UtilNew.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException {
-        List<com.sap.sse.common.UtilNew.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<com.sap.sse.common.UtilNew.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
-        for (com.sap.sse.common.UtilNew.Pair<TracTracControlPoint, PassingInstruction> tractracControlPoint : controlPoints) {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException {
+        List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
+        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
-            newDomainControlPoints.add(new com.sap.sse.common.UtilNew.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
+            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
@@ -202,9 +202,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Course createCourse(String name, Iterable<com.sap.sse.common.UtilNew.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) {
+    public Course createCourse(String name, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (com.sap.sse.common.UtilNew.Pair<TracTracControlPoint, PassingInstruction> controlPoint: controlPoints) {
+        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint: controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }
@@ -283,7 +283,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public DynamicPerson getOrCreatePerson(String name, Nationality nationality, UUID competitorId) {
         synchronized (personCache) {
-            com.sap.sse.common.UtilNew.Pair<String, UUID> key = new com.sap.sse.common.UtilNew.Pair<String, UUID>(name, competitorId);
+            com.sap.sse.common.Util.Pair<String, UUID> key = new com.sap.sse.common.Util.Pair<String, UUID>(name, competitorId);
             DynamicPerson result = personCache.get(key);
             if (result == null) {
                 result = new PersonImpl(name, nationality, /* date of birth unknown */null, /* description */"");
@@ -361,7 +361,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     competitorClassList.add(c.getCompetitorClass());
                 }
                 BoatClass boatClass = getDominantBoatClass(competitorClassList);
-                com.sap.sse.common.UtilNew.Pair<String, String> key = new com.sap.sse.common.UtilNew.Pair<String, String>(event.getName(), boatClass == null ? null
+                com.sap.sse.common.Util.Pair<String, String> key = new com.sap.sse.common.Util.Pair<String, String>(event.getName(), boatClass == null ? null
                         : boatClass.getName());
                 result = regattaCache.get(key);
                 // FIXME When a Regatta is removed from RacingEventService, it isn't removed here. We use a "stale" regatta here.
@@ -450,7 +450,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 competitorClassList.add(c.getCompetitorClass());
             }
             BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            com.sap.sse.common.UtilNew.Pair<String, String> key = new com.sap.sse.common.UtilNew.Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
+            com.sap.sse.common.Util.Pair<String, String> key = new com.sap.sse.common.Util.Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
                     : boatClass.getName());
             synchronized (regattaCache) {
                 Regatta regatta = regattaCache.get(key);
@@ -538,7 +538,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public com.sap.sse.common.UtilNew.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
+    public com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
         List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (RaceCompetitor rc : race.getRaceCompetitorList()) {
@@ -548,7 +548,7 @@ public class DomainFactoryImpl implements DomainFactory {
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        com.sap.sse.common.UtilNew.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.UtilNew.Pair<Iterable<Competitor>, BoatClass>(
+        com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
                 competitors, dominantBoatClass);
         return competitorsAndDominantBoatClass;
     }

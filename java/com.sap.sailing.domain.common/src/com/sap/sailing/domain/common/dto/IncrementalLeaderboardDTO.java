@@ -176,14 +176,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         /**
          * @param previousVersion needed because after serialization/deserialization, the transient {@link #previousLeaderboard} will be <code>null</code>
          */
-        public Set<com.sap.sse.common.UtilNew.Pair<CompetitorDTO, K>> getAllUnchangedCompetitorsAndKeys(LeaderboardDTO previousVersion) {
-            Set<com.sap.sse.common.UtilNew.Pair<CompetitorDTO, K>> result = new HashSet<com.sap.sse.common.UtilNew.Pair<CompetitorDTO,K>>();
+        public Set<com.sap.sse.common.Util.Pair<CompetitorDTO, K>> getAllUnchangedCompetitorsAndKeys(LeaderboardDTO previousVersion) {
+            Set<com.sap.sse.common.Util.Pair<CompetitorDTO, K>> result = new HashSet<com.sap.sse.common.Util.Pair<CompetitorDTO,K>>();
             for (Map.Entry<K, long[]> raceColumnNameAndBitSet : unchanged.entrySet()) {
                 final long[] bitset = raceColumnNameAndBitSet.getValue();
                 if (bitset == null) {
                     // this means that all entries for the column are unchanged for all competitors
                     for (CompetitorDTO competitor : previousVersion.competitors) {
-                        result.add(new com.sap.sse.common.UtilNew.Pair<CompetitorDTO, K>(competitor, raceColumnNameAndBitSet.getKey()));
+                        result.add(new com.sap.sse.common.Util.Pair<CompetitorDTO, K>(competitor, raceColumnNameAndBitSet.getKey()));
                     }
                 } else {
                     int competitorNumber = 0;
@@ -191,7 +191,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                         long bitValue = 1;
                         for (int bit=0; bit<Long.SIZE; bit++) {
                             if ((bitset[arrayIndex] & bitValue) != 0) {
-                                result.add(new com.sap.sse.common.UtilNew.Pair<CompetitorDTO, K>(previousVersion.competitors.get(competitorNumber), raceColumnNameAndBitSet.getKey()));
+                                result.add(new com.sap.sse.common.Util.Pair<CompetitorDTO, K>(previousVersion.competitors.get(competitorNumber), raceColumnNameAndBitSet.getKey()));
                             }
                             bitValue <<= 1;
                             competitorNumber++;
@@ -258,7 +258,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
      * @author Axel Uhl (d043530)
      * 
      */
-    static class UnchangedLegDetails extends UnchangedWithCompetitorsInBitSet<com.sap.sse.common.UtilNew.Pair<String, Integer>> {
+    static class UnchangedLegDetails extends UnchangedWithCompetitorsInBitSet<com.sap.sse.common.Util.Pair<String, Integer>> {
         private static final long serialVersionUID = 8726138955651801210L;
         
         UnchangedLegDetails() {} // for (de)serialization
@@ -276,7 +276,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
          * by <code>null</code>, meaning the race column / leg details are unchnaged for all competitors. 
          */
         public void compact() {
-            for (com.sap.sse.common.UtilNew.Pair<String, Integer> key : getAllUnchangedKeys()) {
+            for (com.sap.sse.common.Util.Pair<String, Integer> key : getAllUnchangedKeys()) {
                 if (key.getB() != null) {
                     tryToCompact(key);
                 }
@@ -289,11 +289,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
          * or for which all entries in the race column are unchanged.
          */
         @Override
-        protected int getNumberOfSetBits(com.sap.sse.common.UtilNew.Pair<String, Integer> key) {
+        protected int getNumberOfSetBits(com.sap.sse.common.Util.Pair<String, Integer> key) {
             int result;
             if (key.getB() != null) {
                 long[] bitset = getUnchangedBitset(key);
-                long[] nullBitset = getUnchangedBitset(new com.sap.sse.common.UtilNew.Pair<String, Integer>(key.getA(), null));
+                long[] nullBitset = getUnchangedBitset(new com.sap.sse.common.Util.Pair<String, Integer>(key.getA(), null));
                 long[] orBitset = or(bitset, nullBitset);
                 result = getNumberOfBitsSet(orBitset);
             } else {
@@ -412,16 +412,16 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             }
             final Set<CompetitorDTO> rowsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
             if (rowsUnchanged != null) {
-                for (com.sap.sse.common.UtilNew.Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
+                for (com.sap.sse.common.Util.Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
                     rowsUnchangedForCompetitors.add(rowUnchanged.getA());
                     rows.put(rowUnchanged.getA(), previousVersion.rows.get(rowUnchanged.getA()));
                 }
             }
-            final Set<com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String>> allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames =
-                    unchangedLeaderboardEntries == null ? new HashSet<com.sap.sse.common.UtilNew.Pair<CompetitorDTO,String>>() :
+            final Set<com.sap.sse.common.Util.Pair<CompetitorDTO, String>> allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames =
+                    unchangedLeaderboardEntries == null ? new HashSet<com.sap.sse.common.Util.Pair<CompetitorDTO,String>>() :
                         unchangedLeaderboardEntries.getAllUnchangedCompetitorsAndKeys(previousVersion);
             if (unchangedLeaderboardEntries != null) {
-                for (com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String> competitorAndColumnName : allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames) {
+                for (com.sap.sse.common.Util.Pair<CompetitorDTO, String> competitorAndColumnName : allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames) {
                     CompetitorDTO previousCompetitor = competitorAndColumnName.getA();
                     if (!rowsUnchangedForCompetitors.contains(previousCompetitor)) { // only care if not the entire row was marked unchanged
                         LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(
@@ -434,14 +434,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 }
             }
             if (legDetailsUnchanged != null) {
-                for (com.sap.sse.common.UtilNew.Pair<CompetitorDTO, com.sap.sse.common.UtilNew.Pair<String, Integer>> competitorInPreviosAndColumnNameAndLegDetailsIndex : legDetailsUnchanged
+                for (com.sap.sse.common.Util.Pair<CompetitorDTO, com.sap.sse.common.Util.Pair<String, Integer>> competitorInPreviosAndColumnNameAndLegDetailsIndex : legDetailsUnchanged
                         .getAllUnchangedCompetitorsAndKeys(previousVersion)) {
                     CompetitorDTO previousCompetitor = competitorInPreviosAndColumnNameAndLegDetailsIndex.getA();
                     final String raceColumnName = competitorInPreviosAndColumnNameAndLegDetailsIndex.getB().getA();
                     // if it's already clear that the entire LeaderboardEntryDTO was unchanged, the entry in legDetailsUnchanged was
                     // merely a hint for column compression within legDetailsUnchanged and doesn't need to be handled here
                     if (!allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames
-                            .contains(new com.sap.sse.common.UtilNew.Pair<CompetitorDTO, String>(previousCompetitor, raceColumnName))) {
+                            .contains(new com.sap.sse.common.Util.Pair<CompetitorDTO, String>(previousCompetitor, raceColumnName))) {
                         final LeaderboardRowDTO leaderboardRowDTO = rows.get(previousCompetitor);
                         LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO == null ? null
                                 : leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
@@ -605,7 +605,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                         // also mark all leg details for the competitor for this column as unchanged; this will ensure
                         // that column compression can work for leg details
                         getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
-                                new com.sap.sse.common.UtilNew.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
+                                new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
                     } else {
                         LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
                         cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
@@ -626,7 +626,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                         && previousVersion.competitors.contains(competitorAndRow.getKey())) {
                                     getLegDetailsUnchanged(previousVersion).unchanged(
                                             competitorAndRow.getKey(),
-                                            new com.sap.sse.common.UtilNew.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(),
+                                            new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(),
                                                     legDetailsIndex));
                                     newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
                                 }
@@ -640,7 +640,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                 // however, mark the legDetails as unchanged in legDetailsUnchanged so as to allow for
                                 // all-column compression
                                 getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
-                                        new com.sap.sse.common.UtilNew.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
+                                        new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
                             }
                         }
                     }
@@ -692,7 +692,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         if (row != null && row.fieldsByRaceColumnName != null) {
             for (Map.Entry<String, LeaderboardEntryDTO> e : row.fieldsByRaceColumnName.entrySet()) {
                 getUnchangedLeaderboardEntries(previousVersion).unchanged(competitor, e.getKey());
-                getLegDetailsUnchanged(previousVersion).unchanged(competitor, new com.sap.sse.common.UtilNew.Pair<String, Integer>(e.getKey(), /* all legs unchanged */ null));
+                getLegDetailsUnchanged(previousVersion).unchanged(competitor, new com.sap.sse.common.Util.Pair<String, Integer>(e.getKey(), /* all legs unchanged */ null));
             }
         }
     }

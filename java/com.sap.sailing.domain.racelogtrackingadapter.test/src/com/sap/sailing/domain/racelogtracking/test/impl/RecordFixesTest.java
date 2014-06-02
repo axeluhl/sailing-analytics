@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class RecordFixesTest extends AbstractGPSFixStoreTest {
     private RecordFixesPostServlet servlet;
@@ -50,7 +50,7 @@ public class RecordFixesTest extends AbstractGPSFixStoreTest {
         List<GPSFix> fixes = new ArrayList<>();
         fixes.add(createFix(timepoint, 0, 0, 0, 0));
         fixes.add(createFix(timepoint+1, 0, 0, 0, 0));
-        UtilNew.Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new UtilNew.Triple<>(device, null, fixes);
+        Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new Util.Triple<>(device, null, fixes);
         servlet.process(null, data);
 
         DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<>(comp, 0);

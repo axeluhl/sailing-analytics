@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ColorMap;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 
 /**
@@ -64,7 +64,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     public boolean addBlockedColor(Color color) {
         boolean result = false;
         if(color != null) {
-            UtilNew.Triple<Float, Float, Float> asHSV = color.getAsHSV();
+            Util.Triple<Float, Float, Float> asHSV = color.getAsHSV();
             result = blockedColors.add(new HSVColor(asHSV.getA(), asHSV.getB(), asHSV.getC()));
         }
         return result; 
@@ -73,7 +73,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     public boolean removeBlockedColor(Color color) {
         boolean result = false;
         if(color != null) {
-            UtilNew.Triple<Float, Float, Float> asHSV = color.getAsHSV();
+            Util.Triple<Float, Float, Float> asHSV = color.getAsHSV();
             result = blockedColors.remove(new HSVColor(asHSV.getA(), asHSV.getB(), asHSV.getC()));
         }
         return result;

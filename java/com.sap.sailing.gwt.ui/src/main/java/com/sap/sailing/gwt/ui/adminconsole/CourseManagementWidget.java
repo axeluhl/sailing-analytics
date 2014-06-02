@@ -262,10 +262,10 @@ public abstract class CourseManagementWidget implements IsWidget {
         updateWaypointButtons();
     }
     
-    protected List<com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction>> createWaypointPairs() {
-        List<com.sap.sse.common.UtilNew.Pair<ControlPointDTO, PassingInstruction>> result = new ArrayList<>();
+    protected List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> createWaypointPairs() {
+        List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> result = new ArrayList<>();
         for (WaypointDTO waypoint : waypoints.getDataProvider().getList()) {
-            result.add(new com.sap.sse.common.UtilNew.Pair<>(waypoint.controlPoint, waypoint.passingInstructions));
+            result.add(new com.sap.sse.common.Util.Pair<>(waypoint.controlPoint, waypoint.passingInstructions));
         }
         return result;
     }

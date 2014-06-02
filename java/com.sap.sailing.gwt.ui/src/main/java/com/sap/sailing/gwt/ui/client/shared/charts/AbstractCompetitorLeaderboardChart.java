@@ -223,9 +223,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 sailingService, leaderboardName, /* date */ null, selectedDetailType);
         
         asyncActionsExecutor.execute(getLeaderboardDataEntriesAction, LODA_LEADERBOARD_CHART_DATA_CATEGORY,
-                new AsyncCallback<List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>>>() {
+                new AsyncCallback<List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>>>() {
                     @Override
-                    public void onSuccess(List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>> result) {
+                    public void onSuccess(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result) {
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         setWidget(chart);
@@ -259,7 +259,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 });
     }
 
-    private void fillTotalRanksSeries(List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
             for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
@@ -268,7 +268,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        for (com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if(hasValidValues(dataValues)) {
@@ -298,7 +298,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
-    private void fillTotalPointsSeries(List<com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalPointsSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
@@ -309,7 +309,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
         Map<CompetitorDTO, Double> sumTotalPointsMap = new HashMap<CompetitorDTO, Double>();
-        for (com.sap.sse.common.UtilNew.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if(hasValidValues(dataValues)) {

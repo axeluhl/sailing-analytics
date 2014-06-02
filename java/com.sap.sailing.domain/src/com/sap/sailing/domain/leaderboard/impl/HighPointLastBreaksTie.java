@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * In this variant of the {@link HighPoint} scoring scheme, scoring by "better race" (sometimes referred to as a
@@ -18,7 +18,7 @@ public class HighPointLastBreaksTie extends HighPoint {
     private static final long serialVersionUID = -5338636946886101669L;
 
     @Override
-    public int compareByBetterScore(List<UtilNew.Pair<RaceColumn, Double>> o1Scores, List<UtilNew.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         return 0;
     }
 

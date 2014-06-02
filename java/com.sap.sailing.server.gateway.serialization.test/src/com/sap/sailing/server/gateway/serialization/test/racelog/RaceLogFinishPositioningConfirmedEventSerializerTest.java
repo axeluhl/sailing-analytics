@@ -54,7 +54,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
-        positioningList.add(new com.sap.sse.common.UtilNew.Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
+        positioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
                 MaxPointsReason.NONE));
         event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);

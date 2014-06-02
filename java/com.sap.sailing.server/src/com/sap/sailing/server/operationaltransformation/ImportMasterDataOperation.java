@@ -302,7 +302,7 @@ public class ImportMasterDataOperation extends
      * @param leaderboard
      * @return the race column and fleet the dummy was attached to
      */
-    public com.sap.sse.common.UtilNew.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
+    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
             Regatta regatta) {
         RaceColumn raceColumn = null;
         Fleet fleet = null;
@@ -318,7 +318,7 @@ public class ImportMasterDataOperation extends
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
-        return new com.sap.sse.common.UtilNew.Pair<RaceColumn, Fleet>(raceColumn, fleet);
+        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
     }
 
     private void createWindTracks(RacingEventService toState) {

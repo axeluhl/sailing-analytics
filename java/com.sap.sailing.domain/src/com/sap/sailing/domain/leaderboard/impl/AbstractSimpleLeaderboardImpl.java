@@ -133,7 +133,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private final Set<Competitor> suppressedCompetitors;
     private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
 
-    private transient Map<com.sap.sse.common.UtilNew.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
+    private transient Map<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
 
     /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
@@ -277,7 +277,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
         private void invalidateCacheAndRemoveThisListenerFromTrackedRace() {
             synchronized (raceDetailsAtEndOfTrackingCache) {
-                raceDetailsAtEndOfTrackingCache.remove(new com.sap.sse.common.UtilNew.Pair<TrackedRace, Competitor>(trackedRace, competitor));
+                raceDetailsAtEndOfTrackingCache.remove(new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor));
                 removeFromTrackedRace();
             }
         }
@@ -355,7 +355,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.suppressedCompetitors = new HashSet<Competitor>();
         this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
         this.raceColumnListeners = new RaceColumnListeners();
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.UtilNew.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
         initTransientFields();
     }
     
@@ -374,7 +374,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private void initTransientFields() {
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.UtilNew.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
         this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
@@ -547,11 +547,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        final Map<Competitor, com.sap.sse.common.UtilNew.Pair<Double, Fleet>> netPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.UtilNew.Pair<Double, Fleet>>();
+        final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> netPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
             Double netPoints = getNetPoints(competitor, raceColumn, timePoint);
             if (netPoints != null) {
-                netPointsAndFleet.put(competitor, new com.sap.sse.common.UtilNew.Pair<Double, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
+                netPointsAndFleet.put(competitor, new com.sap.sse.common.Util.Pair<Double, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
             }
         }
         List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleet.keySet());
@@ -691,8 +691,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Map<com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>, Entry> getContent(final TimePoint timePoint) throws NoWindException {
-        Map<com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>, Entry> result = new HashMap<com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>, Entry>();
+    public Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Entry> getContent(final TimePoint timePoint) throws NoWindException {
+        Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Entry> result = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Entry>();
         Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
         for (final RaceColumn raceColumn : getRaceColumns()) {
             for (final Competitor competitor : getCompetitors()) {
@@ -716,7 +716,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 discarded ? DOUBLE_0 : (correctedScore==null?null:
                                         Double.valueOf((correctedScore * raceColumn.getFactor()))), correctedResults.getMaxPointsReason(),
                                 discarded, raceColumn.getFleetOfCompetitor(competitor));
-                result.put(new com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
+                result.put(new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
         return result;
@@ -851,8 +851,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public com.sap.sse.common.UtilNew.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-        com.sap.sse.common.UtilNew.Pair<GPSFixMoving, Speed> result = null;
+    public com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> result = null;
         // TODO should we ensure that competitor participated in all race columns?
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
@@ -867,7 +867,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     } else {
                         to = timePoint;
                     }
-                    com.sap.sse.common.UtilNew.Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                    com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
                     if (result == null || result.getB() == null ||
                             (maxSpeed != null && maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
                         result = maxSpeed;
@@ -1265,7 +1265,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private void addOverallDetailsToRow(final TimePoint timePoint,
             final Competitor competitor, LeaderboardRowDTO row) throws NoWindException {
-        final com.sap.sse.common.UtilNew.Pair<GPSFixMoving, Speed> maximumSpeedOverGround = this.getMaximumSpeedOverGround(competitor, timePoint);
+        final com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> maximumSpeedOverGround = this.getMaximumSpeedOverGround(competitor, timePoint);
         if (maximumSpeedOverGround != null && maximumSpeedOverGround.getB() != null) {
             row.maximumSpeedOverGroundInKnots = maximumSpeedOverGround.getB().getKnots();
             row.whenMaximumSpeedOverGroundWasAchieved = maximumSpeedOverGround.getA().getTimePoint().asDate();
@@ -1448,7 +1448,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private RaceDetails getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
             final Competitor competitor, final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache)
                     throws NoWindException, InterruptedException, ExecutionException {
-        final com.sap.sse.common.UtilNew.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.UtilNew.Pair<TrackedRace, Competitor>(trackedRace, competitor);
+        final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
         synchronized (raceDetailsAtEndOfTrackingCache) {
             raceDetails = raceDetailsAtEndOfTrackingCache.get(key);

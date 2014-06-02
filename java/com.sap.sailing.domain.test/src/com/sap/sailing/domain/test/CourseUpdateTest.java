@@ -81,7 +81,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 }, /* delayToLiveInMillis */ 0l, 
                 /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null) {
             @Override
-            protected void handleEvent(com.sap.sse.common.UtilNew.Triple<Route, RouteData, Race> event) {
+            protected void handleEvent(com.sap.sse.common.Util.Triple<Route, RouteData, Race> event) {
                 super.handleEvent(event);
                 synchronized (routeData) {
                     routeData[0] = event.getB();

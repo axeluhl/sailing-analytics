@@ -143,8 +143,8 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         }
     }
     
-    public com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
-        return new com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
+    public com.sap.sse.common.Util.Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
+        return new com.sap.sse.common.Util.Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
     
     @Override

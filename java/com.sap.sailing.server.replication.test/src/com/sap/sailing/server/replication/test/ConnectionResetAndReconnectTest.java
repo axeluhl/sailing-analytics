@@ -85,7 +85,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     @Before
     public void setUp() throws Exception {
         try {
-            com.sap.sse.common.UtilNew.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
+            com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
                     true, /* master=null means create a new one */ null,
             /* replica=null means create a new one */null);
             masterReplicationDescriptor = MasterReplicationDescriptorMock.from(result.getB());

@@ -23,15 +23,15 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     //Initializing the lists to prevent a null pointer exception in the first validation call
-    private List<UtilNew.Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<UtilNew.Pair<CheckBox, ManeuverType>>();
-    private List<UtilNew.Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<UtilNew.Pair<CheckBox,ZoomTypes>>();
-    private List<UtilNew.Pair<CheckBox, HelpLineTypes>> checkboxAndHelpLineType = new ArrayList<UtilNew.Pair<CheckBox,HelpLineTypes>>();
+    private List<Util.Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Util.Pair<CheckBox, ManeuverType>>();
+    private List<Util.Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Util.Pair<CheckBox,ZoomTypes>>();
+    private List<Util.Pair<CheckBox, HelpLineTypes>> checkboxAndHelpLineType = new ArrayList<Util.Pair<CheckBox,HelpLineTypes>>();
     private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
@@ -76,7 +76,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
                 cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
-                checkboxAndZoomType.add(new UtilNew.Pair<CheckBox, ZoomTypes>(cb, zoomType));
+                checkboxAndZoomType.add(new Util.Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
                 //Save specific checkboxes for easier value change handling
@@ -105,7 +105,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
-            checkboxAndManeuverType.add(new UtilNew.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
+            checkboxAndManeuverType.add(new Util.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
             vp.add(checkbox);
         }
         showDouglasPeuckerPointsCheckBox = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
@@ -168,13 +168,13 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox createHelpLineCheckBox(DataEntryDialog<?> dialog, HelpLineTypes helpLineType) {
         CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatHelpLineType(helpLineType, stringMessages));
         cb.setValue(initialSettings.getHelpLinesSettings().isVisible(helpLineType));
-        checkboxAndHelpLineType.add(new UtilNew.Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
+        checkboxAndHelpLineType.add(new Util.Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
         return cb;
     }
     
     private void zoomSettingsChanged() {
         boolean disableOnlySelected = true;
-        for (UtilNew.Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+        for (Util.Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
             pair.getA().setEnabled(true);
             if (disableOnlySelectedWhenAreFalse.contains(pair.getA())) {
                 if (pair.getA().getValue()) {
@@ -192,7 +192,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public RaceMapSettings getResult() {
         RaceMapSettings result = new RaceMapSettings();
-        for (UtilNew.Pair<CheckBox, ManeuverType> p : checkboxAndManeuverType) {
+        for (Util.Pair<CheckBox, ManeuverType> p : checkboxAndManeuverType) {
             result.showManeuverType(p.getB(), p.getA().getValue());
         }
         RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
@@ -214,7 +214,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private RaceMapZoomSettings getZoomSettings() {
         ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
         boolean noAutoZoomSelected = true;
-        for (UtilNew.Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+        for (Util.Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
             if (pair.getA().getValue()) {
                 zoomTypes.add(pair.getB());
                 noAutoZoomSelected = false;
@@ -228,7 +228,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
 
     private RaceMapHelpLinesSettings getHelpLinesSettings() {
         Set<HelpLineTypes> helpLineTypes = new HashSet<HelpLineTypes>();
-        for (UtilNew.Pair<CheckBox, HelpLineTypes> pair : checkboxAndHelpLineType) {
+        for (Util.Pair<CheckBox, HelpLineTypes> pair : checkboxAndHelpLineType) {
             if (pair.getA().getValue()) {
                 helpLineTypes.add(pair.getB());
             }

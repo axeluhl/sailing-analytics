@@ -41,7 +41,6 @@ import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePane
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.UtilNew.Pair;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
@@ -79,7 +78,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     private final LeaderboardsRefresher leaderboardsRefresher;
 
-    public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Pair<RaceColumnDTO, FleetDTO> {
+    public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Util.Pair<RaceColumnDTO, FleetDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
         public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b) {

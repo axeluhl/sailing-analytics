@@ -22,16 +22,16 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Triple<String, String, UtilNew.Pair<String, Date>>> {
+public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<String, String, Util.Pair<String, Date>>> {
     /**
      * a unique and human-readable string key for a eventNameBoatClassNameAndLastModfied pair
      */
-    private final LinkedHashMap<String, UtilNew.Pair<String, UtilNew.Pair<String, Date>>> scoreCorrections;
+    private final LinkedHashMap<String, Util.Pair<String, Util.Pair<String, Date>>> scoreCorrections;
     private final ListBox scoreCorrectionListBox;
     private final ListBox scoreCorrectionProviderListBox;
     private final BusyIndicator busyIndicator;
@@ -52,7 +52,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
 
         boatClasses = leaderboardPanel.getLeaderboard().getBoatClasses();
 
-        this.scoreCorrections = new LinkedHashMap<String, UtilNew.Pair<String, UtilNew.Pair<String, Date>>>();
+        this.scoreCorrections = new LinkedHashMap<String, Util.Pair<String, Util.Pair<String, Date>>>();
 
         scoreCorrectionProviderListBox = createListBox(/* isMultipleSelect */ false);
         scoreCorrectionListBox = createListBox(/* isMultipleSelect */ false);
@@ -118,17 +118,17 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
         if(scp != null) {
             scoreCorrectionListBox.addItem("Please select a scoring result...");
             
-            List<UtilNew.Pair<String, UtilNew.Pair<String, Date>>> eventNameBoatClassNameAndLastModified = new ArrayList<UtilNew.Pair<String, UtilNew.Pair<String, Date>>>();
-            for (Entry<String, Set<UtilNew.Pair<String, Date>>> entry : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
-                for (UtilNew.Pair<String, Date> se : entry.getValue()) {
-                    eventNameBoatClassNameAndLastModified.add(new UtilNew.Pair<String, UtilNew.Pair<String, Date>>(entry.getKey(), se));
+            List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameAndLastModified = new ArrayList<Util.Pair<String, Util.Pair<String, Date>>>();
+            for (Entry<String, Set<Util.Pair<String, Date>>> entry : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
+                for (Util.Pair<String, Date> se : entry.getValue()) {
+                    eventNameBoatClassNameAndLastModified.add(new Util.Pair<String, Util.Pair<String, Date>>(entry.getKey(), se));
                 }
             }
             sortOfficialResultsByRelevance(eventNameBoatClassNameAndLastModified);
             
-            for (UtilNew.Pair<String, UtilNew.Pair<String, Date>> pair : eventNameBoatClassNameAndLastModified) {
+            for (Util.Pair<String, Util.Pair<String, Date>> pair : eventNameBoatClassNameAndLastModified) {
                 String eventName = pair.getA();
-                UtilNew.Pair<String, Date> boatClassAndLastModified = pair.getB();
+                Util.Pair<String, Date> boatClassAndLastModified = pair.getB();
                 
                 String scoreCorrectionName = eventName + ", " + boatClassAndLastModified.getA() + ", " + boatClassAndLastModified.getB(); 
                 scoreCorrections.put(scoreCorrectionName, pair);
@@ -137,15 +137,15 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
         }
     }
 
-    private void sortOfficialResultsByRelevance(List<UtilNew.Pair<String, UtilNew.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
+    private void sortOfficialResultsByRelevance(List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameCapturedWhen) {
         final Set<String> lowercaseBoatClassNames = new HashSet<String>();
         for (BoatClassDTO boatClass : boatClasses) {
             lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
         }
         Collections.sort(eventNameBoatClassNameCapturedWhen,
-                new Comparator<UtilNew.Pair<String, UtilNew.Pair<String, Date>>>() {
+                new Comparator<Util.Pair<String, Util.Pair<String, Date>>>() {
                     @Override
-                    public int compare(UtilNew.Pair<String, UtilNew.Pair<String, Date>> o1, UtilNew.Pair<String, UtilNew.Pair<String, Date>> o2) {
+                    public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
                         int result;
                         // TODO consider looking for longest common substring to handle things like "470 M" vs.
                         // "470 Men"
@@ -168,9 +168,9 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
                 });
     }
 
-    private static class Validator implements DataEntryDialog.Validator<UtilNew.Triple<String, String, UtilNew.Pair<String, Date>>> {
+    private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
         @Override
-        public String getErrorMessage(UtilNew.Triple<String, String, UtilNew.Pair<String, Date>> valueToValidate) {
+        public String getErrorMessage(Util.Triple<String, String, Util.Pair<String, Date>> valueToValidate) {
             String errorMessage = null;
             if(valueToValidate == null) {
                 errorMessage = "";
@@ -179,7 +179,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
         }
     }
     
-    private static class Callback implements DialogCallback<UtilNew.Triple<String, String, UtilNew.Pair<String, Date>>> {
+    private static class Callback implements DialogCallback<Util.Triple<String, String, Util.Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
@@ -199,7 +199,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
         }
 
         @Override
-        public void ok(UtilNew.Triple<String, String, UtilNew.Pair<String, Date>> providerNameAndEventNameBoatClassNameCapturedWhen) {
+        public void ok(Util.Triple<String, String, Util.Pair<String, Date>> providerNameAndEventNameBoatClassNameCapturedWhen) {
             final String scoreCorrectionProviderName = providerNameAndEventNameBoatClassNameCapturedWhen.getA();
             final String eventName = providerNameAndEventNameBoatClassNameCapturedWhen.getB();
             final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
@@ -240,16 +240,16 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<UtilNew.Tripl
     }
 
      @Override
-    protected UtilNew.Triple<String, String, UtilNew.Pair<String, Date>> getResult() {
-         UtilNew.Triple<String, String, UtilNew.Pair<String, Date>> result = null; 
+    protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
+         Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
 
          int selectedProviderIndex = scoreCorrectionProviderListBox.getSelectedIndex();
          if (selectedProviderIndex > 0) {
              String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedProviderIndex);
              int selectedScoreCorrectionIndex = scoreCorrectionListBox.getSelectedIndex();
              if(selectedScoreCorrectionIndex > 0) {
-                 UtilNew.Pair<String, UtilNew.Pair<String, Date>> pair = scoreCorrections.get(scoreCorrectionListBox.getValue(selectedScoreCorrectionIndex));
-                 result = new UtilNew.Triple<String, String, UtilNew.Pair<String, Date>>(selectedProviderName, pair.getA(), pair.getB());
+                 Util.Pair<String, Util.Pair<String, Date>> pair = scoreCorrections.get(scoreCorrectionListBox.getValue(selectedScoreCorrectionIndex));
+                 result = new Util.Triple<String, String, Util.Pair<String, Date>>(selectedProviderName, pair.getA(), pair.getB());
              }
          }
          return result;

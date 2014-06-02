@@ -86,7 +86,7 @@ public class ParserTest {
     public void testScoreCorrectionProviderNixdorfFinal() throws Exception {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 CsvParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL,
                 "Star", hasResultsFor.get(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL).iterator().next().getB());
         assertNotNull(starResult);

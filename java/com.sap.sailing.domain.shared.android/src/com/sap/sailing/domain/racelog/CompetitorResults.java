@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
-public interface CompetitorResults extends List<UtilNew.Triple<Serializable, String, MaxPointsReason>> {
+public interface CompetitorResults extends List<Util.Triple<Serializable, String, MaxPointsReason>> {
 
 }

@@ -33,7 +33,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 @SuppressWarnings("restriction")
 public class SimulatorUtils {
@@ -170,7 +170,7 @@ public class SimulatorUtils {
         return result;
     }
 
-    public static UtilNew.Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex,
+    public static Util.Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex,
             int selectedCompetitorIndex, int selectedLegIndex) {
         HashMap<String, Path> paths = new HashMap<String, Path>();
 
@@ -198,10 +198,10 @@ public class SimulatorUtils {
                 + SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
                         "racecourse"));
 
-        return new UtilNew.Pair<Map<String, Path>, Path>(paths, raceCourse);
+        return new Util.Pair<Map<String, Path>, Path>(paths, raceCourse);
     }
 
-    public static UtilNew.Pair<Map<String, Path>, Path> readPathsFromResources() {
+    public static Util.Pair<Map<String, Path>, Path> readPathsFromResources() {
         HashMap<String, Path> paths = new HashMap<String, Path>();
         Path path = null;
         String filePath = "";
@@ -221,7 +221,7 @@ public class SimulatorUtils {
 
         Path raceCourse = (Path) readObjectFromResources("resources/" + RACECOURSE_DAT);
 
-        return new UtilNew.Pair<Map<String, Path>, Path>(paths, raceCourse);
+        return new Util.Pair<Map<String, Path>, Path>(paths, raceCourse);
     }
 
     public static Object readObjectExternalFile(String fileName) {

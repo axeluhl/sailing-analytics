@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.common.UtilNew.Pair;
+import com.sap.sse.common.Util;
 
 public class TimeRangeModel implements TimeRangeProvider {
 
@@ -46,8 +46,8 @@ public class TimeRangeModel implements TimeRangeProvider {
         }
     }
     
-    public Pair<Date, Date> getTimeRange() {
-        return new Pair<Date, Date>(fromTime, toTime);
+    public Util.Pair<Date, Date> getTimeRange() {
+        return new Util.Pair<Date, Date>(fromTime, toTime);
     }
 
     public Date getFromTime() {

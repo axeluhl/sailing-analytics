@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.Color;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractColor implements Color {
     private static final long serialVersionUID = 7758884012281863458L;
 
     @Override
     public String getAsHtml() {
-        UtilNew.Triple<Integer, Integer, Integer> asRGB = getAsRGB();
+        Util.Triple<Integer, Integer, Integer> asRGB = getAsRGB();
         return "#" + toBrowserHexValue(asRGB.getA()) + toBrowserHexValue(asRGB.getB())
                 + toBrowserHexValue(asRGB.getC());
     }

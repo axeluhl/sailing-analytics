@@ -57,7 +57,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -618,7 +618,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
@@ -631,7 +631,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -667,7 +667,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Iterable<UtilNew.Pair<Waypoint, UtilNew.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
+    public Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -945,7 +945,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public UtilNew.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
+    public Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         // TODO Auto-generated method stub
         return null;
     }

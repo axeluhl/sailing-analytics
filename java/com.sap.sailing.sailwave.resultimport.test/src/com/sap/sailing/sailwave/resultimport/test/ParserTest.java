@@ -74,7 +74,7 @@ public class ParserTest {
     public void testScoreCorrectionProvider49er() throws Exception {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 CsvParserFactory.INSTANCE);
-        Map<String, Set<com.sap.sse.common.UtilNew.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections result49er = scoreCorrectionProvider.getScoreCorrections(SAMPLE_INPUT_NAME_49er,
                 "49er", hasResultsFor.get(SAMPLE_INPUT_NAME_49er).iterator().next().getB());
         assertNotNull(result49er);

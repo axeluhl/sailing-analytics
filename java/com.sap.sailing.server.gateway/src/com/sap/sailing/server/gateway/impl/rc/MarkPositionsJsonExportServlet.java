@@ -23,7 +23,7 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionedMarkJsonSerializer;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
 
@@ -91,7 +91,7 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
                     
                     //The position of the mark needs to be in the course area
                     //if (isMarkInCourseArea(courseAreaCenterPosition, courseAreaRadius, position)) {
-                        result.add(positionedMarkSerializer.serialize(new UtilNew.Pair<Mark, Position>(mark, position)));
+                        result.add(positionedMarkSerializer.serialize(new Util.Pair<Mark, Position>(mark, position)));
                     //}
                     
                 }

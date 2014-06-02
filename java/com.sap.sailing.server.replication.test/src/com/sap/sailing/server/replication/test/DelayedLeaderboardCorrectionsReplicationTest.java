@@ -113,7 +113,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // replicate the re-loaded environment
-        com.sap.sse.common.UtilNew.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
+        com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
         // starting to replicate will clear the competitor store used by the replica in this test;

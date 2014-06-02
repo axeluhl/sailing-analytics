@@ -382,18 +382,18 @@ public class RegattasResource extends AbstractSailingServerResource {
                 
                 JSONArray jsonMarkPassingTimes = new JSONArray();
                 List<TimePoint> firstPassingTimepoints = new ArrayList<>();
-                Iterable<com.sap.sse.common.UtilNew.Pair<Waypoint, com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
+                Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
                 synchronized (markPassingsTimes) {
                     int numberOfWaypoints = Util.size(markPassingsTimes);
                     int wayPointNumber = 1;
-                    for (com.sap.sse.common.UtilNew.Pair<Waypoint, com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
+                    for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
                         JSONObject jsonMarkPassing = new JSONObject();
                         String name = "M" + (wayPointNumber - 1);
                         if (wayPointNumber == numberOfWaypoints) {
                             name = "F";
                         }
                         jsonMarkPassing.put("name", name);
-                        com.sap.sse.common.UtilNew.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
+                        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
                         TimePoint firstPassingTime = timesPair.getA();
                         TimePoint lastPassingTime = timesPair.getB();
                         jsonMarkPassing.put("firstPassing-ms", firstPassingTime == null ? null : firstPassingTime.asMillis());

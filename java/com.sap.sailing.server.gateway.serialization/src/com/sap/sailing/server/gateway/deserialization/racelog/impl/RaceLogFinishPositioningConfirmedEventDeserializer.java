@@ -17,7 +17,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRaceLogEventDeserializer {
     
@@ -48,7 +48,7 @@ public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRace
             String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
             
-            UtilNew.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new UtilNew.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
+            Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Util.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         

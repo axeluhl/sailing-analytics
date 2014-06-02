@@ -27,7 +27,7 @@ import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
@@ -154,12 +154,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public Wind getAveragedWind(Position p, TimePoint at) {
-        final WindWithConfidence<UtilNew.Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, at);
+        final WindWithConfidence<Util.Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, at);
         return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
     @Override
-    public WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         return getAveragedWindUnsynchronized(p, at);
     }
 
@@ -179,16 +179,16 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      *            if <code>null</code>, the averaged position of the original wind fixes is returned; otherwise,
      *            <code>p</code> is used as the result's position and may be used for confidence determination.
      */
-    protected WindWithConfidence<UtilNew.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         lockForRead();
         try {
-            List<WindWithConfidence<UtilNew.Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<UtilNew.Pair<Position, TimePoint>>>();
+            List<WindWithConfidence<Util.Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Util.Pair<Position, TimePoint>>>();
             // don't measure speed with separate confidence; return confidence obtained from averaging bearings
-            ConfidenceBasedWindAverager<UtilNew.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
+            ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
                     .createWindAverager(new PositionAndTimePointWeigher(
                     /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
             DummyWind atTimed = new DummyWind(at);
-            UtilNew.Pair<Position, TimePoint> relativeTo = new UtilNew.Pair<Position, TimePoint>(p, at);
+            Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
             NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
             Iterator<Wind> beforeIter = beforeSet.descendingIterator();
@@ -211,8 +211,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             }
             do {
                 if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<UtilNew.Pair<Position, TimePoint>>(beforeWind,
-                            getBaseConfidence(), new UtilNew.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
+                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(beforeWind,
+                            getBaseConfidence(), new Util.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
                                     .getTimePoint()), useSpeed));
                     if (beforeIntervalEnd == null) {
                         beforeIntervalEnd = beforeWind.getTimePoint();
@@ -225,8 +225,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                         beforeWind = null;
                     }
                 } else if (afterWind != null) {
-                    windFixesToAverage.add(new WindWithConfidenceImpl<UtilNew.Pair<Position, TimePoint>>(afterWind,
-                            getBaseConfidence(), new UtilNew.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
+                    windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(afterWind,
+                            getBaseConfidence(), new Util.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
                                     .getTimePoint()), useSpeed));
                     if (afterIntervalStart == null) {
                         afterIntervalStart = afterWind.getTimePoint();
@@ -244,7 +244,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             if (windFixesToAverage.isEmpty()) {
                 return null;
             } else {
-                WindWithConfidence<UtilNew.Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
+                WindWithConfidence<Util.Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
                 return average;
             }
         } finally {

@@ -156,10 +156,10 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     }
 
     private void refreshCurrentStartTime() {
-        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<com.sap.sse.common.UtilNew.Triple<Date,Integer, RacingProcedureType>>() {
+        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<com.sap.sse.common.Util.Triple<Date,Integer, RacingProcedureType>>() {
             
             @Override
-            public void onSuccess(com.sap.sse.common.UtilNew.Triple<Date, Integer, RacingProcedureType> result) {
+            public void onSuccess(com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType> result) {
                 if (result == null) {
                     currentStartTimeLabel.setText(stringMessages.notAvailable());
                     currentPassIdBox.setText(stringMessages.notAvailable());

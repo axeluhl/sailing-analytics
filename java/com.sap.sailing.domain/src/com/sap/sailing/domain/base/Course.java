@@ -3,7 +3,7 @@ package com.sap.sailing.domain.base;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -40,5 +40,5 @@ public interface Course extends CourseBase {
      * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
      * had been used.
      */
-    void update(Iterable<UtilNew.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 }

@@ -32,7 +32,7 @@ import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class BarbadosResultImportTest {
     private static final MillisecondsTimePoint NOW = MillisecondsTimePoint.now();
@@ -74,16 +74,16 @@ public class BarbadosResultImportTest {
     
     @Test
     public void testHasResultsThroughScoreCorrectionProvider() throws Exception {
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> hasResultsFor = scp.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<Util.Pair<String, TimePoint>>> hasResultsFor = scp.getHasResultsForBoatClassFromDateByEventName();
         assertNotNull(hasResultsFor);
         assertEquals(1, hasResultsFor.size());
-        Entry<String, Set<UtilNew.Pair<String, TimePoint>>> entry = hasResultsFor.entrySet().iterator().next();
+        Entry<String, Set<Util.Pair<String, TimePoint>>> entry = hasResultsFor.entrySet().iterator().next();
         assertEquals("505", entry.getValue().iterator().next().getA());
     }
 
     @Test
     public void testResultsThroughScoreCorrectionProvider() throws Exception {
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> hasResultsFor = scp.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<Util.Pair<String, TimePoint>>> hasResultsFor = scp.getHasResultsForBoatClassFromDateByEventName();
         String eventName = hasResultsFor.entrySet().iterator().next().getKey();
         String boatClassName = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getA();
         TimePoint timePoint = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getB();
@@ -125,7 +125,7 @@ public class BarbadosResultImportTest {
                 return result;
             }
         });
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> hasResultsFor = scp2.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<Util.Pair<String, TimePoint>>> hasResultsFor = scp2.getHasResultsForBoatClassFromDateByEventName();
         String eventName = hasResultsFor.entrySet().iterator().next().getKey();
         String boatClassName = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getA();
         TimePoint timePoint = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getB();

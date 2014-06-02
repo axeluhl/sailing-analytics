@@ -1933,16 +1933,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
             
-            List<com.sap.sse.common.UtilNew.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+            List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
             boolean hasLiveRace = !liveRaces.isEmpty();
             if (hasLiveRace) {
             	String liveRaceText = "";
             	if(liveRaces.size() == 1) {
-                	com.sap.sse.common.UtilNew.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                	com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
                 	liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
             	} else {
             		String raceNames = "";
-            		for(com.sap.sse.common.UtilNew.Pair<RaceColumnDTO, FleetDTO> liveRace: liveRaces) {
+            		for(com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace: liveRaces) {
             			raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
             		}
             		// remove last ", "

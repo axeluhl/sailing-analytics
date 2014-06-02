@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * A track records the {@link GPSFix}es received for an object of type
@@ -75,7 +75,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     /**
      * @return <code>null</code> if <code>from</code> is before <code>to</code>
      */
-    UtilNew.Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to);
+    Util.Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to);
 
     /**
      * Using an averaging / smoothening algorithm, computes the estimated speed determined
@@ -118,7 +118,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *         <code>new MillisecondsTimePoint(0)</code>). If no fix after <code>fix</code> is found, the second
      *         component is the end of time (<code>new MillisecondsTimePoint(Long.MAX_VALUE)</code>).
      */
-    UtilNew.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
+    Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
 
     /**
      * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, but produces an iterator for all {@link Timed} objects

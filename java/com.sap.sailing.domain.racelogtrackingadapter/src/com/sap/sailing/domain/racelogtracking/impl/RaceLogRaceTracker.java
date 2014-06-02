@@ -63,7 +63,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -332,10 +332,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         if (trackedRace == null) return;
         
         CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<UtilNew.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
         
         for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new UtilNew.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
         }
         
         try {

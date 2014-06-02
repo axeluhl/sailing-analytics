@@ -221,14 +221,14 @@ public class PolarSheetGenerationTest {
         }
         
         @Override
-        public WindWithConfidence<com.sap.sse.common.UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
-            return new WindWithConfidenceImpl<com.sap.sse.common.UtilNew.Pair<Position, TimePoint>>(new WindImpl(p, at,
+        public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+            return new WindWithConfidenceImpl<com.sap.sse.common.Util.Pair<Position, TimePoint>>(new WindImpl(p, at,
                     new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(180.0))), 0.9,
-                    new com.sap.sse.common.UtilNew.Pair<Position, TimePoint>(p, at), true);
+                    new com.sap.sse.common.Util.Pair<Position, TimePoint>(p, at), true);
         }
         
         @Override
-        public WindWithConfidence<com.sap.sse.common.UtilNew.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+        public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
                 Iterable<WindSource> windSourcesToExclude) {
             return getWindWithConfidence(p, at);
         }

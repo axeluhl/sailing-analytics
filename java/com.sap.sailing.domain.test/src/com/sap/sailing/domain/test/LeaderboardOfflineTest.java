@@ -322,7 +322,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         int medalRacePoints = getMedalRacePoints(competitor, now, defaultFleet);
         for (TrackedRace race : testRaces) {
             RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
-            com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn> key = new com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn>(competitor, raceColumn);
+            com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitor, now);
                 assertEquals(rank, leaderboard.getTrackedRank(competitor, raceColumn, now));

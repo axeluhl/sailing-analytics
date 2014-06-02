@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4870646572106575667L;
@@ -45,15 +45,15 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
      * @return A pair whose first component is the time point of the last modification to the act results, the second
      *         element is a map whose keys are the sail IDs (in the Extreme Sailing Series we'll use the team names as
      *         the sail IDs, such as "SAP Extreme Sailing Team" or just "SAP" for short); values with be a list
-     *         representing the act's races, from first to last, where each {@link UtilNew.Pair} holds in its first component a
+     *         representing the act's races, from first to last, where each {@link Util.Pair} holds in its first component a
      *         string describing the rank, which could be an integer number formatted as a string, or a three-letter
      *         disqualification reason such as "DNC", "DNF" or "DNS"; the second component is the points the competitor
      *         scored in that race. Usually, if the first component is a number, the score can be expected to be
      *         <code>#competitors+1 - rank</code>. A disqualification gets 0 points.
      */
-    private UtilNew.Pair<TimePoint, Map<String, List<UtilNew.Pair<String, Double>>>> getActResults(URL actUrl) throws IOException {
+    private Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>> getActResults(URL actUrl) throws IOException {
         Pattern quotedCompetitorNameAndAllTheRest = Pattern.compile("^\"([^\"]*)\",(.*)$");
-        Map<String, List<UtilNew.Pair<String, Double>>> result = new HashMap<String, List<UtilNew.Pair<String, Double>>>();
+        Map<String, List<Util.Pair<String, Double>>> result = new HashMap<String, List<Util.Pair<String, Double>>>();
         HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
         authenticate(conn);
         TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
@@ -75,16 +75,16 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
                 split = new String[preSplit.length-1];
                 System.arraycopy(preSplit, 1, split, 0, split.length);
             }
-            List<UtilNew.Pair<String, Double>> competitorEntry = new ArrayList<UtilNew.Pair<String, Double>>();
+            List<Util.Pair<String, Double>> competitorEntry = new ArrayList<Util.Pair<String, Double>>();
             result.put(sailID, competitorEntry);
             for (int i=0; i<split.length-1; i+=2) {
                 String rankOrMaxPointsReason = split[i];
                 Double points = Double.valueOf(split[i+1]);
-                competitorEntry.add(new UtilNew.Pair<String, Double>(rankOrMaxPointsReason, points));
+                competitorEntry.add(new Util.Pair<String, Double>(rankOrMaxPointsReason, points));
             }
             line = br.readLine();
         }
-        return new UtilNew.Pair<TimePoint, Map<String, List<UtilNew.Pair<String, Double>>>>(lastModified, result);
+        return new Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>>(lastModified, result);
     }
 
     private void authenticate(HttpURLConnection conn) {
@@ -93,12 +93,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     }
 
     @Override
-    public Map<String, Set<UtilNew.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> result = new HashMap<String, Set<UtilNew.Pair<String, TimePoint>>>();
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (String actName : getAvailableActNames()) {
             URL actUrl = getCsvUrls(actName).iterator().next();
-            UtilNew.Pair<TimePoint, Map<String, List<UtilNew.Pair<String, Double>>>> actResults = getActResults(actUrl);
-            result.put(actName, Collections.singleton(new UtilNew.Pair<String, TimePoint>(EXTREME_40_CLASS_NAME, actResults.getA())));
+            Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>> actResults = getActResults(actUrl);
+            result.put(actName, Collections.singleton(new Util.Pair<String, TimePoint>(EXTREME_40_CLASS_NAME, actResults.getA())));
         }
         return result;
     }
@@ -124,7 +124,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     public RegattaScoreCorrections getScoreCorrections(String actName, String boatClassName,
             TimePoint timePoint) throws Exception {
         URL actUrl = getCsvUrls(actName).iterator().next();
-        UtilNew.Pair<TimePoint, Map<String, List<UtilNew.Pair<String, Double>>>> actResults = getActResults(actUrl);
+        Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>> actResults = getActResults(actUrl);
         return new RegattaScoreCorrectionsImpl(this, actResults.getB());
     }
 

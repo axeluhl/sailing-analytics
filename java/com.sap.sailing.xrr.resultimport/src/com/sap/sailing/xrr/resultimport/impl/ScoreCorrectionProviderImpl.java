@@ -24,7 +24,7 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
@@ -45,9 +45,9 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Map<String, Set<UtilNew.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> result = new HashMap<String, Set<UtilNew.Pair<String, TimePoint>>>();
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (Parser parser : getAllRegattaResults()) {
             try {
                 RegattaResults regattaResult = parser.parse();
@@ -59,12 +59,12 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
                             if (eventO instanceof Division) {
                                 Division division = (Division) eventO;
                                 String boatClassName = parser.getBoatClassName(division);
-                                Set<UtilNew.Pair<String, TimePoint>> set = result.get(event.getTitle());
+                                Set<Util.Pair<String, TimePoint>> set = result.get(event.getTitle());
                                 if (set == null) {
                                     set = new HashSet<>();
                                     result.put(event.getTitle(), set);
                                 }
-                                set.add(new UtilNew.Pair<String, TimePoint>(boatClassName, timePoint));
+                                set.add(new Util.Pair<String, TimePoint>(boatClassName, timePoint));
                             }
                         }
                     }

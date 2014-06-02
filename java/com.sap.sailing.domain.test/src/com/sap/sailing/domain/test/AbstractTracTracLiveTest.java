@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
@@ -205,10 +205,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         System.err.println("Error with live data "+arg0);
     }
 
-    public static Iterable<UtilNew.Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<ControlPoint> controlPoints) {
-        List<UtilNew.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<UtilNew.Pair<TracTracControlPoint, PassingInstruction>>();
+    public static Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<ControlPoint> controlPoints) {
+        List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Util.Pair<TracTracControlPoint, PassingInstruction>>();
         for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
-            ttControlPoints.add(new UtilNew.Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
+            ttControlPoints.add(new Util.Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
         }
         return ttControlPoints;
     }

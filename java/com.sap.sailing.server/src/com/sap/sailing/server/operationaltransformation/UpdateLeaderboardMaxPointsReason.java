@@ -9,9 +9,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
-public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation<UtilNew.Triple<Double, Double, Boolean>> {
+public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation<Util.Triple<Double, Double, Boolean>> {
     private static final long serialVersionUID = -492130952256848047L;
     private final String competitorIdAsString;
     private final MaxPointsReason newMaxPointsReason;
@@ -38,7 +38,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
     }
 
     @Override
-    public UtilNew.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
+    public Util.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -51,7 +51,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
                 updateStoredLeaderboard(toState, leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                 boolean isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint);
-                return new UtilNew.Triple<Double, Double, Boolean>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints(), isScoreCorrected);
+                return new Util.Triple<Double, Double, Boolean>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints(), isScoreCorrected);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor with ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());
             }

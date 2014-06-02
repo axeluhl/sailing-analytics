@@ -19,7 +19,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
@@ -49,7 +49,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
                     public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
-                        enqueue(new UtilNew.Triple<RaceCompetitor, MarkPassingsData, Boolean>(competitor, record, isLiveData));
+                        enqueue(new Util.Triple<RaceCompetitor, MarkPassingsData, Boolean>(competitor, record, isLiveData));
                     }
                 });
             result.add(controlPointListener);
@@ -58,7 +58,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         return result;
     }
     
-    protected void handleEvent(UtilNew.Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
+    protected void handleEvent(Util.Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
         System.out.print("L"); // as in "Leg"
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
         if (trackedRace != null) {

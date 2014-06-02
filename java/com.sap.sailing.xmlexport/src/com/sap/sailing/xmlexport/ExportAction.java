@@ -181,7 +181,7 @@ public abstract class ExportAction {
             if (!markPassings.isEmpty()) {
                 TimePoint from = markPassings.first().getTimePoint();
                 TimePoint to = trackedRace.getEndOfRace();
-                com.sap.sse.common.UtilNew.Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
                 if (maxSpeedWithGPSFix != null) {
                     maxSpeed = maxSpeedWithGPSFix.getB();
                 }

@@ -21,7 +21,7 @@ import com.sap.sailing.kiworesultimport.ZipFile;
 import com.sap.sailing.kiworesultimport.ZipFileParser;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {
     private static final long serialVersionUID = -4596215011753860781L;
@@ -38,17 +38,17 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
     }
 
     @Override
-    public Map<String, Set<UtilNew.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> result = new HashMap<String, Set<UtilNew.Pair<String, TimePoint>>>();
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
             String eventName = regattaSummary.getEventName();
-            Set<UtilNew.Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
+            Set<Util.Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
             if (resultTimesForBoatClassNames == null) {
-                resultTimesForBoatClassNames = new HashSet<UtilNew.Pair<String, TimePoint>>();
+                resultTimesForBoatClassNames = new HashSet<Util.Pair<String, TimePoint>>();
                 result.put(eventName, resultTimesForBoatClassNames);
             }
-            resultTimesForBoatClassNames.add(new UtilNew.Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
+            resultTimesForBoatClassNames.add(new Util.Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
                     regattaSummary.getTimePointPublished()));
         }
         return result;

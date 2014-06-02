@@ -125,7 +125,7 @@ public interface RaceColumn extends Named {
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
-    com.sap.sse.common.UtilNew.Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+    com.sap.sse.common.Util.Pair<Competitor, RaceColumn> getKey(Competitor competitor);
 
     RaceColumnListeners getRaceColumnListeners();
 

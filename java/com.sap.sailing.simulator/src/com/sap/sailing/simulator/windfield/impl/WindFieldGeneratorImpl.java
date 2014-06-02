@@ -21,7 +21,7 @@ import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
@@ -136,8 +136,8 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     	return this.positions[i][j];
     }
 
-    public UtilNew.Pair<Integer, Integer> getPositionIndex(Position p) {
-    	UtilNew.Pair<Integer, Integer> gIdx = boundary.getGridIndex(p);
+    public Util.Pair<Integer, Integer> getPositionIndex(Position p) {
+    	Util.Pair<Integer, Integer> gIdx = boundary.getGridIndex(p);
         if ((gIdx.getA() != null) && (gIdx.getB() != null)) {
             return gIdx;
         } else {

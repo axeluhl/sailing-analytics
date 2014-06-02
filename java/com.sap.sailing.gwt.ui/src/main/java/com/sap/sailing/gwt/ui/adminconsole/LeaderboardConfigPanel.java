@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -687,11 +687,11 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     private void updateRaceColumnsOfLeaderboard(final String leaderboardName, List<RaceColumnDTO> existingRaceColumns, List<RaceColumnDTO> newRaceColumns) {
-        final List<UtilNew.Pair<String, Boolean>> raceColumnsToAdd = new ArrayList<UtilNew.Pair<String, Boolean>>();
+        final List<Util.Pair<String, Boolean>> raceColumnsToAdd = new ArrayList<Util.Pair<String, Boolean>>();
 
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
             if (!existingRaceColumns.contains(newRaceColumn)) {
-                raceColumnsToAdd.add(new UtilNew.Pair<String, Boolean>(newRaceColumn.getName(), newRaceColumn.isMedalRace()));
+                raceColumnsToAdd.add(new Util.Pair<String, Boolean>(newRaceColumn.getName(), newRaceColumn.isMedalRace()));
             }
         }
 

@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing boats (images)
@@ -44,7 +44,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private Color color; 
 
-    private Map<Integer, UtilNew.Pair<Double, Size>> boatScaleAndSizePerZoomCache; 
+    private Map<Integer, Util.Pair<Double, Size>> boatScaleAndSizePerZoomCache; 
 
     private final BoatClassVectorGraphics boatVectorGraphics;
 
@@ -70,7 +70,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         this.boatClass = competitorDTO.getBoatClass();
         this.color = color;
 
-        boatScaleAndSizePerZoomCache = new HashMap<Integer, UtilNew.Pair<Double,Size>>();
+        boatScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }
     
@@ -79,7 +79,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         if (mapProjection != null && boatFix != null) {
             // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
             int zoom = map.getZoom();
-            UtilNew.Pair<Double, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.get(zoom);
+            Util.Pair<Double, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.get(zoom);
             if (boatScaleAndSize == null) {
                 boatScaleAndSize = getBoatScaleAndSize(boatClass);
                 boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
@@ -152,7 +152,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         this.boatFix = boatFix;
     }
 
-    public UtilNew.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
+    public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
 
@@ -168,6 +168,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
         // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length 
         double scaledCanvasSize = (boatVectorGraphics.getOverallLengthInPx()) * boatSizeScaleFactor; 
 
-        return new UtilNew.Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
+        return new Util.Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
     }
 }

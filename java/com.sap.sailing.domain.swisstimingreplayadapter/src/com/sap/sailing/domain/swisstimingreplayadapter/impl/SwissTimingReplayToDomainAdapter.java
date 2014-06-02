@@ -289,9 +289,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Course course = race.getCourse();
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>>();
+                    List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
                     for (ControlPoint cp : currentCourseDefinition) {
-                        courseToUpdate.add(new com.sap.sse.common.UtilNew.Pair<ControlPoint, PassingInstruction>(cp, null));
+                        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {

@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -73,8 +73,8 @@ public interface ScoringScheme extends Serializable {
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
      * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
      */
-    int compareByBetterScore(List<UtilNew.Pair<RaceColumn, Double>> competitor1Scores,
-            List<UtilNew.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter);
+    int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> competitor1Scores,
+            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -88,7 +88,7 @@ public interface ScoringScheme extends Serializable {
     /**
      * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
      */
-    int compareByLastRace(List<UtilNew.Pair<RaceColumn, Double>> o1Scores, List<UtilNew.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter);
+    int compareByLastRace(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter);
 
     /**
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used

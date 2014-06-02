@@ -94,7 +94,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     @Test
     public void testGetClockAtMark() throws UnknownHostException, IOException, InterruptedException, ParseException {
         Race race = connector.getRace();
-        List<com.sap.sse.common.UtilNew.Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
+        List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
         assertFalse(clockAtMark.isEmpty());
     }
     
@@ -148,9 +148,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         int numberOfMarks = Util.size(course.getMarks());
         Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();
         for (Competitor competitor : competitors) {
-            Map<Integer, com.sap.sse.common.UtilNew.Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
+            Map<Integer, com.sap.sse.common.Util.Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
             for (Integer markIndex : markPassingTimes.keySet()) {
-                com.sap.sse.common.UtilNew.Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
+                com.sap.sse.common.Util.Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
                 for (int i=0; i<numberOfMarks; i++) {
                     if (i != markIndex && markPassingTimes.containsKey(numberOfMarks)) {
                         if (markPassingTimes.get(i).getB() != null && rankAndTime.getB() != null) {
@@ -173,12 +173,12 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<com.sap.sse.common.UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
     }
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<com.sap.sse.common.UtilNew.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
     }
 
     @Override

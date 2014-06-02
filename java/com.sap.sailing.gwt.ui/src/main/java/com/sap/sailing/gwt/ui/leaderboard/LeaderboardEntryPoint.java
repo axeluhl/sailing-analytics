@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -97,10 +97,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
 
         if (leaderboardName != null) {
-            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<UtilNew.Pair<String, LeaderboardType>>(
-                    new AsyncCallback<UtilNew.Pair<String, LeaderboardType>>() {
+            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
+                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
                         @Override
-                        public void onSuccess(UtilNew.Pair<String, LeaderboardType> leaderboardNameAndType) {
+                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
                             if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
                                 Window.setTitle(leaderboardName);
                                 leaderboardType = leaderboardNameAndType.getB();

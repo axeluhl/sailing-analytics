@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class FlagPoleStateRenderer {
     
@@ -76,8 +76,8 @@ public class FlagPoleStateRenderer {
     }
     
     private int getFleetColorId() {
-        UtilNew.Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor() == null ? 
-                new UtilNew.Triple<Integer, Integer, Integer>(0, 0, 0) : race.getFleet().getColor().getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor() == null ? 
+                new Util.Triple<Integer, Integer, Integer>(0, 0, 0) : race.getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
     }
     

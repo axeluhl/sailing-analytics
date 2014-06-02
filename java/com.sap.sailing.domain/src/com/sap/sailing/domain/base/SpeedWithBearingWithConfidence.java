@@ -3,9 +3,9 @@ package com.sap.sailing.domain.base;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public interface SpeedWithBearingWithConfidence<RelativeTo> extends
-        HasConfidence<UtilNew.Triple<Speed, Double, Double>, SpeedWithBearing, RelativeTo> {
+        HasConfidence<Util.Triple<Speed, Double, Double>, SpeedWithBearing, RelativeTo> {
     SpeedWithBearing getObject();
 }

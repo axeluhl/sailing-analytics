@@ -17,20 +17,20 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.ess40.resultimport.impl.ScoreCorrectionProviderImpl;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class SimpleESS40ResultImportTest {
     @Test
     public void testProviderFound() throws Exception {
         ScoreCorrectionProvider scp = new ScoreCorrectionProviderImpl();
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> hasResult = scp.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<Util.Pair<String, TimePoint>>> hasResult = scp.getHasResultsForBoatClassFromDateByEventName();
         assertTrue(hasResult.containsKey("qingdao"));
     }
 
     @Test
     public void testQingdaoResults() throws Exception {
         ScoreCorrectionProvider scp = new ScoreCorrectionProviderImpl();
-        Map<String, Set<UtilNew.Pair<String, TimePoint>>> hasResult = scp.getHasResultsForBoatClassFromDateByEventName();
+        Map<String, Set<Util.Pair<String, TimePoint>>> hasResult = scp.getHasResultsForBoatClassFromDateByEventName();
         RegattaScoreCorrections qingdaoResults = scp.getScoreCorrections("qingdao", "extreme 40", hasResult.get("qingdao").iterator().next().getB());
         assertNotNull(qingdaoResults);
         for (ScoreCorrectionsForRace scfr : qingdaoResults.getScoreCorrectionsForRaces()) {

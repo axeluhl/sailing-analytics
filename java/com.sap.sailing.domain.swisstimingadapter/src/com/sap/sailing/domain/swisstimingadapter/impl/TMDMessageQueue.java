@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * When TMD messages about mark passings arrive with their race start time-relative time stamp, and no race start time
@@ -31,10 +31,10 @@ public class TMDMessageQueue {
     private static class TMDMessageContents {
         private final String raceID;
         private final String boatID;
-        private final List<UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds;
+        private final List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds;
 
         public TMDMessageContents(String raceID, String boatID,
-                List<UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+                List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
             super();
             this.raceID = raceID;
             this.boatID = boatID;
@@ -49,7 +49,7 @@ public class TMDMessageQueue {
             return boatID;
         }
 
-        public List<UtilNew.Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
+        public List<Util.Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
             return markIndicesRanksAndTimesSinceStartInMilliseconds;
         }
         
@@ -58,7 +58,7 @@ public class TMDMessageQueue {
             StringBuilder result = new StringBuilder("TMD|"+getRaceID()+"|"+getBoatID()+"|");
             result.append(getMarkIndicesRanksAndTimesSinceStartInMilliseconds().size());
             result.append('|');
-            for (UtilNew.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
+            for (Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
                 result.append(markIndexRankAndTimeSinceStartInMilliseconds.getA());
                 result.append(';');
                 if (markIndexRankAndTimeSinceStartInMilliseconds.getB() != null) {
@@ -82,7 +82,7 @@ public class TMDMessageQueue {
         queuedMessages = new HashSet<>();
     }
     
-    public synchronized void enqueue(String raceID, String boatID, List<UtilNew.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+    public synchronized void enqueue(String raceID, String boatID, List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         final TMDMessageContents message = new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
         queuedMessages.add(message);
         logger.info("Queued TMD message "+message+" for replay when start time has been received");
@@ -132,7 +132,7 @@ public class TMDMessageQueue {
                 // just have been guessed.
                 // This will avoid that the start time inference
                 // rules consider them and let them take precedence over the start time received
-                for (UtilNew.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents
+                for (Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents
                         .getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
                     if (cleansedMarkPassingsForCompetitor.containsKey(markIndexRankAndTimeSinceStartInMilliseconds
                             .getA())) {

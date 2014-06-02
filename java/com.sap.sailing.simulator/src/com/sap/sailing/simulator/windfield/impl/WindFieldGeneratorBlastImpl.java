@@ -17,7 +17,7 @@ import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
@@ -182,7 +182,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {
         Position p = timedPosition.getPosition();
-        UtilNew.Pair<Integer, Integer> positionIndex = getPositionIndex(p);
+        Util.Pair<Integer, Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
             int rowIndex = positionIndex.getA() + this.boundary.getBorderY();
             int colIndex = positionIndex.getB() + this.boundary.getBorderX();

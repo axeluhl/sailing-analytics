@@ -140,12 +140,12 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
 
         @Override
-        public com.sap.sse.common.UtilNew.Triple<Integer, Integer, Integer> getAsRGB() {
+        public com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB() {
             return null;
         }
 
         @Override
-        public com.sap.sse.common.UtilNew.Triple<Float, Float, Float> getAsHSV() {
+        public com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV() {
             return null;
         }
 

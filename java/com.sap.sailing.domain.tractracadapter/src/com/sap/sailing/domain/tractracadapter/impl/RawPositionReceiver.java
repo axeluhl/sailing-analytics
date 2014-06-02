@@ -11,7 +11,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.CompetitorPositionRawData;
@@ -35,7 +35,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             public void gotData(RaceCompetitor tracked,
                     CompetitorPositionRawData record, boolean isLiveData) {
-                enqueue(new UtilNew.Triple<RaceCompetitor, CompetitorPositionRawData, Boolean>(tracked, record, isLiveData));
+                enqueue(new Util.Triple<RaceCompetitor, CompetitorPositionRawData, Boolean>(tracked, record, isLiveData));
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
@@ -49,7 +49,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
     }
 
     @Override
-    protected void handleEvent(UtilNew.Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
+    protected void handleEvent(Util.Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
         if (received++ % 1000 == 0) {
             System.out.print("P");
             if ((received / 1000 + 1) % 80 == 0) {

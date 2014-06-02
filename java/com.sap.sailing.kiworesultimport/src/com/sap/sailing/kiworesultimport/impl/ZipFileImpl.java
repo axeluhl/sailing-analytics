@@ -15,11 +15,11 @@ import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.Start;
 import com.sap.sailing.kiworesultimport.StartReport;
 import com.sap.sailing.kiworesultimport.ZipFile;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ZipFileImpl implements ZipFile {
     private final Iterable<StartReport> startReports;
-    private final Map<UtilNew.Triple<String, Integer, String>, Start> startsByBoatclassAndRaceNumberAndFleetName;
+    private final Map<Util.Triple<String, Integer, String>, Start> startsByBoatclassAndRaceNumberAndFleetName;
     private final Iterable<ResultList> resultLists;
     private final Map<String, RegattaSummary> regattaSummaryByBoatClass;
     
@@ -28,12 +28,12 @@ public class ZipFileImpl implements ZipFile {
         Map<String, ResultList> latestResultListForBoatClass = new HashMap<>();
         HashMap<String, Map<Integer, Set<String>>> fleetNamesPerBoatClassAndRaceNumber = new HashMap<String, Map<Integer, Set<String>>>();
         this.startReports = startReports;
-        this.startsByBoatclassAndRaceNumberAndFleetName = new HashMap<UtilNew.Triple<String, Integer, String>, Start>();
+        this.startsByBoatclassAndRaceNumberAndFleetName = new HashMap<Util.Triple<String, Integer, String>, Start>();
         this.resultLists = resultLists;
         for (StartReport startReport : startReports) {
             for (Start start : startReport.getStarts()) {
                 startsByBoatclassAndRaceNumberAndFleetName.put(
-                        new UtilNew.Triple<String, Integer, String>(start.getBoatClass(), start.getRaceNumber(), start
+                        new Util.Triple<String, Integer, String>(start.getBoatClass(), start.getRaceNumber(), start
                                 .getFleetName()), start);
                 Map<Integer, Set<String>> fleetsForBoatClass = fleetNamesPerBoatClassAndRaceNumber.get(start.getBoatClass());
                 if (fleetsForBoatClass == null) {

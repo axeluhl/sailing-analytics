@@ -6,7 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 /**
  * A CandidateFinder converts the incoming GPSFixes of competitors and marks into {@link Candidate}s for each
@@ -31,7 +31,7 @@ public interface AbstractCandidateFinder {
      * @param c
      * @return
      */
-    UtilNew.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
+    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
     /**
      * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the Candidates
@@ -41,5 +41,5 @@ public interface AbstractCandidateFinder {
      *            the competitor whose {@link Candidate}s should be returned
      * @return all of the Candidates for the specified competitor
      */
-    UtilNew.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
+    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
 }

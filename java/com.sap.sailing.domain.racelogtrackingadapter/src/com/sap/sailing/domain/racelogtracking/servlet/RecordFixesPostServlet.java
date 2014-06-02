@@ -18,10 +18,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonD
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class RecordFixesPostServlet extends
-        AbstractJsonPostServlet<UtilNew.Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {
+        AbstractJsonPostServlet<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {
     private static final long serialVersionUID = 2778739335260621119L;
     private DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer;
 
@@ -37,7 +37,7 @@ public class RecordFixesPostServlet extends
     }
 
     @Override
-    public JsonDeserializer<UtilNew.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> getRequestDeserializer() {
+    public JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> getRequestDeserializer() {
         return deserializer;
     }
 
@@ -48,7 +48,7 @@ public class RecordFixesPostServlet extends
 
     @Override
     public Void process(Map<String, String> parameterValues,
-            UtilNew.Triple<DeviceIdentifier, Serializable, List<GPSFix>> domainObject) throws HttpExceptionWithMessage {
+            Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>> domainObject) throws HttpExceptionWithMessage {
         DeviceIdentifier device = domainObject.getA();
         // might use the session id in the future
         // Serializable sessionId = domainObject.getB();

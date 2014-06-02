@@ -76,7 +76,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         logIdentifier = mock(RaceLogIdentifier.class);
-        when(logIdentifier.getIdentifier()).thenReturn(new com.sap.sse.common.UtilNew.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
+        when(logIdentifier.getIdentifier()).thenReturn(new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
     }
 
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {

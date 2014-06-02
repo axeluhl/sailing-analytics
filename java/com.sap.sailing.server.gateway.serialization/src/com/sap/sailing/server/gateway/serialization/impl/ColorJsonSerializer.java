@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ColorJsonSerializer implements JsonSerializer<Color> {
     public static final String FIELD_RED = "r";
@@ -15,7 +15,7 @@ public class ColorJsonSerializer implements JsonSerializer<Color> {
     public JSONObject serialize(Color color) {
         JSONObject result = new JSONObject();
 
-        UtilNew.Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
         result.put(FIELD_RED, rgb.getA());
         result.put(FIELD_GREEN, rgb.getB());
         result.put(FIELD_BLUE, rgb.getC());

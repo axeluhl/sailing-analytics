@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.domain.common.impl.SerializablePositionImpl;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.geocoding.ReverseGeocoder;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class ReverseGeocoderImpl implements ReverseGeocoder {
 
@@ -43,12 +43,12 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private final int MAX_ROW_NUMBER = 1000;
     private final int MAX_RADIUS = 300;
 
-    private QuadTree<UtilNew.Triple<Position, Double, List<Placemark>>> cache = new QuadTree<UtilNew.Triple<Position,Double,List<Placemark>>>();;
+    private QuadTree<Util.Triple<Position, Double, List<Placemark>>> cache = new QuadTree<Util.Triple<Position,Double,List<Placemark>>>();;
 
     @Override
     public Placemark getPlacemarkNearest(Position position) throws IOException, ParseException {
         Placemark p = null;
-        UtilNew.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
+        Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
 
         if (cachedPlacemarks != null && cachedPlacemarks.getC() != null && !cachedPlacemarks.getC().isEmpty()) {
             p = cachedPlacemarks.getC().get(0);
@@ -71,7 +71,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     @Override
     public List<Placemark> getPlacemarksNear(Position position, double radius) throws IOException, ParseException {
         List<Placemark> placemarks = null;
-        UtilNew.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
+        Util.Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
         
         //Calculating the search radius and the maximum number of returning Placemarks
         double limitedRadius = Math.min(radius, MAX_RADIUS);
@@ -198,7 +198,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         Collections.sort(placemarks, new Placemark.ByDistance(position));
         if (position != null) {
             synchronized (cache) {
-                cache.put(position, new UtilNew.Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+                cache.put(position, new Util.Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
             }
         }
     }
@@ -217,7 +217,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private void updateCachedPlacemarks(Position cachedPoint, Double newRadius, List<Placemark> newPlacemarks) {
         if (cachedPoint != null) {
             synchronized (cache) {
-                cache.replace(cachedPoint, new UtilNew.Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+                cache.replace(cachedPoint, new Util.Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
             }
         }
     }
@@ -229,7 +229,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *         <code>null</code>, if there's nothing cached around <code>position</code> within
      *         {@link ReverseGeocoderImpl#POSITION_CACHE_DISTANCE_LIMIT the distance limit}
      */
-    private UtilNew.Triple<Position, Double, List<Placemark>> checkCache(Position position) {
+    private Util.Triple<Position, Double, List<Placemark>> checkCache(Position position) {
         synchronized (cache) {
             return cache.get(position, POSITION_CACHE_DISTANCE_LIMIT);
         }

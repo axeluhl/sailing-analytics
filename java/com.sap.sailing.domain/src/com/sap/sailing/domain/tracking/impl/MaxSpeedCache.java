@@ -15,8 +15,8 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sse.common.UtilNew;
-import com.sap.sse.common.UtilNew.Pair;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
@@ -61,14 +61,14 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * navigable set is ordered according to ascending <code>to</code> time points, yielding shorter cache intervals
      * before longer intervals.
      */
-    private final Map<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> cache;
+    private final Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> cache;
     
     private final NamedReentrantReadWriteLock lock;
     
     public MaxSpeedCache(GPSFixTrackImpl<ItemType, FixType> track) {
         this.track = track;
         track.addListener(this);
-        cache = new HashMap<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>>();
+        cache = new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
         lock = new NamedReentrantReadWriteLock(MaxSpeedCache.class.getSimpleName()+" for track of "+track.getTrackedItem(), /* fair */ false);
     }
 
@@ -80,14 +80,14 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     @Override
     public void gpsFixReceived(FixType fix, ItemType item) {
         // find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
-        UtilNew.Pair<TimePoint, TimePoint> invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
+        Util.Pair<TimePoint, TimePoint> invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
         LockUtil.lockForWrite(lock);
-        HashMap<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> additionalCacheEntries =
-                new HashMap<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>>();
+        HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> additionalCacheEntries =
+                new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
         try {
             // find all cache entries that overlap with this interval
-            for (Iterator<Map.Entry<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>>> i = cache.entrySet().iterator(); i.hasNext(); ) {
-                Entry<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> next = i.next();
+            for (Iterator<Map.Entry<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>> i = cache.entrySet().iterator(); i.hasNext(); ) {
+                Entry<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> next = i.next();
                 additionalCacheEntries.putAll(invalidateEntriesAndReturnAdditionalCacheEntries(next, invalidationInterval));
                 if (next.getValue().isEmpty()) {
                     i.remove();
@@ -109,10 +109,10 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     }
 
     private void mergeAdditionalCacheEntries(
-            Map<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> additionalCacheEntries) {
+            Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> additionalCacheEntries) {
         assert lock.writeLock().isHeldByCurrentThread();
-        for (Map.Entry<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> additionalCacheEntry : additionalCacheEntries.entrySet()) {
-            NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>> existingEntry = cache.get(additionalCacheEntry.getKey());
+        for (Map.Entry<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> additionalCacheEntry : additionalCacheEntries.entrySet()) {
+            NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>> existingEntry = cache.get(additionalCacheEntry.getKey());
             if (existingEntry == null) {
                 cache.put(additionalCacheEntry.getKey(), additionalCacheEntry.getValue()); 
             } else {
@@ -121,12 +121,12 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         }
     }
 
-    private Map<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> invalidateEntriesAndReturnAdditionalCacheEntries(
-            Entry<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> cacheEntry,
-            UtilNew.Pair<TimePoint, TimePoint> invalidationInterval) {
+    private Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> invalidateEntriesAndReturnAdditionalCacheEntries(
+            Entry<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> cacheEntry,
+            Util.Pair<TimePoint, TimePoint> invalidationInterval) {
         assert lock.writeLock().isHeldByCurrentThread();
         // cannot modify cache here because caller is in an iteration over cache's entry set; request additions by returning them
-        Map<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> result = new HashMap<>();
+        Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> result = new HashMap<>();
         if (!cacheEntry.getKey().after(invalidationInterval.getB())) {
             // invalidation can only become necessary if the cache entry doesn't start after the end of the invalidation interval
             TimePoint croppedFrom; // start of the remaining valid part of the cache entries
@@ -136,10 +136,10 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                 croppedFrom = invalidationInterval.getB(); // cache entry starts in the invalidationInterval; earliest valid point is end of invalidation interval
             }
             // now scan all entries whose "to" is at or after the invalidationInterval's start:
-            for (Iterator<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>> toAndResultIter = cacheEntry.getValue().tailSet(
-                    new UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>(invalidationInterval.getA(), null), /* inclusive */ true).iterator();
+            for (Iterator<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>> toAndResultIter = cacheEntry.getValue().tailSet(
+                    new Util.Pair<TimePoint, Util.Pair<FixType, Speed>>(invalidationInterval.getA(), null), /* inclusive */ true).iterator();
                     toAndResultIter.hasNext(); ) {
-                UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>> toAndResult = toAndResultIter.next();
+                Util.Pair<TimePoint, Util.Pair<FixType, Speed>> toAndResult = toAndResultIter.next();
                 // cacheEntry's from is before or in the invalidation interval; the current "to" in this loop iteration is in or after the interval
                 // and at or after "from"; in any case the record needs to be deleted:
                 toAndResultIter.remove();
@@ -167,8 +167,8 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         }
     }
 
-    public UtilNew.Pair<FixType, Speed> getMaxSpeed(TimePoint from, TimePoint to) {
-        UtilNew.Pair<FixType, Speed> result = null;
+    public Util.Pair<FixType, Speed> getMaxSpeed(TimePoint from, TimePoint to) {
+        Util.Pair<FixType, Speed> result = null;
         if (!to.before(from)) {
             result = cacheLookup(from, to);
             if (result == null) {
@@ -184,16 +184,16 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * maximum in the missing tail, producing another cache entry for both, the tail and the extended interval. Otherwise, <code>null</code>
      * is returned.
      */
-    private UtilNew.Pair<FixType, Speed> cacheLookup(TimePoint from, TimePoint to) {
+    private Util.Pair<FixType, Speed> cacheLookup(TimePoint from, TimePoint to) {
         assert !from.after(to);
-        UtilNew.Pair<FixType, Speed> result = null;
-        NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>> entry;
-        UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>> entryForLongestSubseries = null;
+        Util.Pair<FixType, Speed> result = null;
+        NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>> entry;
+        Util.Pair<TimePoint, Util.Pair<FixType, Speed>> entryForLongestSubseries = null;
         LockUtil.lockForRead(lock);
         try {
             entry = cache.get(from);
             if (entry != null) {
-                entryForLongestSubseries = entry.floor(new UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>(to, null));
+                entryForLongestSubseries = entry.floor(new Util.Pair<TimePoint, Util.Pair<FixType, Speed>>(to, null));
             }
         } finally {
             LockUtil.unlockAfterRead(lock);
@@ -203,7 +203,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
             // avoid endless recursion in case entryTo is not after from:
             if (entryTo.equals(to) || entryTo.after(from)) {
                 if (entryTo.before(to)) {
-                    UtilNew.Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
+                    Util.Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
                     if (maxInMissingTail != null && maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
                         // the maximum speed is in the tail that was not part of the interval retrieved from the cache
                         result = maxInMissingTail;
@@ -220,7 +220,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         return result;
     }
 
-    private void cache(TimePoint from, TimePoint to, UtilNew.Pair<FixType, Speed> fixAtMaxSpeed) {
+    private void cache(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed) {
         LockUtil.lockForWrite(lock);
         try {
             addEntryToMap(from, to, fixAtMaxSpeed, cache);
@@ -229,27 +229,27 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         }
     }
 
-    private void addEntryToMap(TimePoint from, TimePoint to, UtilNew.Pair<FixType, Speed> fixAtMaxSpeed,
-            Map<TimePoint, NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>> map) {
-        NavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>> setForFrom = map.get(from);
+    private void addEntryToMap(TimePoint from, TimePoint to, Util.Pair<FixType, Speed> fixAtMaxSpeed,
+            Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> map) {
+        NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>> setForFrom = map.get(from);
         if (setForFrom == null) {
-            setForFrom = new ArrayListNavigableSet<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>(
-                    new Comparator<UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>>() {
+            setForFrom = new ArrayListNavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>(
+                    new Comparator<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>() {
                         @Override
-                        public int compare(UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>> o1,
-                                UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>> o2) {
+                        public int compare(Util.Pair<TimePoint, Util.Pair<FixType, Speed>> o1,
+                                Util.Pair<TimePoint, Util.Pair<FixType, Speed>> o2) {
                             return o1.getA().compareTo(o2.getA());
                         }
                     });
             map.put(from, setForFrom);
         }
-        setForFrom.add(new UtilNew.Pair<TimePoint, UtilNew.Pair<FixType, Speed>>(to, fixAtMaxSpeed));
+        setForFrom.add(new Util.Pair<TimePoint, Util.Pair<FixType, Speed>>(to, fixAtMaxSpeed));
     }
     
     /**
      * @return <code>null</code>, if no fix exists in the interval specified
      */
-    private UtilNew.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
+    private Util.Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
             // fetch all fixes on this leg so far and determine their maximum speed
@@ -269,7 +269,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     }
                 }
             }
-            return maxSpeedFix == null ? null : new UtilNew.Pair<FixType, Speed>(maxSpeedFix, max);
+            return maxSpeedFix == null ? null : new Util.Pair<FixType, Speed>(maxSpeedFix, max);
         } finally {
             track.unlockAfterRead();
         }

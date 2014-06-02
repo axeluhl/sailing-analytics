@@ -21,7 +21,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
-import com.sap.sse.common.UtilNew;
+import com.sap.sse.common.Util;
 
 public class PathGeneratorDijkstra extends PathGeneratorBase {
 
@@ -73,12 +73,12 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         // create tentative distance matrix
         // additional to tentative distances, the matrix also contains the root of each position
         // that can be </null> if unavailable
-        Map<Position, UtilNew.Pair<Long, Position>> tentativeDistances = new HashMap<Position, UtilNew.Pair<Long, Position>>();
+        Map<Position, Util.Pair<Long, Position>> tentativeDistances = new HashMap<Position, Util.Pair<Long, Position>>();
         for (Position p : graph.keySet()) {
-            tentativeDistances.put(p, new UtilNew.Pair<Long, Position>(Long.MAX_VALUE, null));
+            tentativeDistances.put(p, new Util.Pair<Long, Position>(Long.MAX_VALUE, null));
         }
-        tentativeDistances.put(start, new UtilNew.Pair<Long, Position>(startTime.asMillis(), null));
-        tentativeDistances.put(end, new UtilNew.Pair<Long, Position>(Long.MAX_VALUE, null));
+        tentativeDistances.put(start, new Util.Pair<Long, Position>(startTime.asMillis(), null));
+        tentativeDistances.put(end, new Util.Pair<Long, Position>(Long.MAX_VALUE, null));
 
         // create set of unvisited nodes
         List<Position> unvisited = new ArrayList<Position>(graph.keySet());
@@ -118,7 +118,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
 
                 Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
                 if (tentativeDistanceToP < tentativeDistances.get(p).getA()) {
-                    tentativeDistances.put(p, new UtilNew.Pair<Long, Position>(tentativeDistanceToP, currentPosition));
+                    tentativeDistances.put(p, new Util.Pair<Long, Position>(tentativeDistanceToP, currentPosition));
                 }
             }
 
