@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormats;
@@ -190,7 +191,13 @@ public class RouteConverterGPSFixImporterImpl extends BaseRouteConverterGPSFixIm
     }
     
     public GPSFix convertToGPSFix(BaseNavigationPosition position) throws Exception {
-        Date t = position.getTime().getTime();
+        final CompactCalendar time = position.getTime();
+        final Date t;
+        if (time == null) {
+            t = new Date(); // use "now" as the time for the fix which otherwise would be lacking a time stamp
+        } else {
+            t = time.getTime();
+        }
         Double heading = null;
         if (position instanceof Wgs84Position) {
             heading = ((Wgs84Position) position).getHeading();

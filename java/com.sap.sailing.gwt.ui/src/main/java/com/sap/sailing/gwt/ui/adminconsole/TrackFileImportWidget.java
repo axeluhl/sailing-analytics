@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -20,33 +18,36 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.adminconsole.TrackFileImportDeviceIdentifierTableWrapper.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 
 public class TrackFileImportWidget implements IsWidget {
     private final Panel mainPanel = new VerticalPanel();
     
     public TrackFileImportWidget(final TrackFileImportDeviceIdentifierTableWrapper table, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter) {
+            final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         this(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                JSONArray json = JSONParser.parseLenient(event.getResults()).isArray();
                 table.getDataProvider().getList().clear();
-                for (int i=0; i<json.size(); i++) {
-                    JSONObject obj = json.get(i).isObject();
-                    JSONObject deviceIdJson = obj.get("id").isObject();
-                    String uuid = deviceIdJson.get("UUID").isString().stringValue();
-                    String fileName = deviceIdJson.get("FILE_NAME").isString().stringValue();
-                    String trackName = deviceIdJson.get("TRACK_NAME").isString().stringValue();
-                    long fromMillis = (long) obj.get("FROM_MILLIS").isNumber().doubleValue();
-                    long toMillis = (long) obj.get("TO_MILLIS").isNumber().doubleValue();
-                    TrackFileImportDeviceIdentifier deviceId = new TrackFileImportDeviceIdentifier(uuid, fileName,
-                            trackName, new Date(fromMillis), new Date(toMillis), /* number of fixes */ 0);
-                    table.getDataProvider().getList().add(deviceId);
-                }
+                
+                String[] uuids = event.getResults().split("\\n");
+                sailingService.getTrackFileImportDeviceIds(Arrays.asList(uuids),
+                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                    
+                    @Override
+                    public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                        table.getDataProvider().getList().addAll(result);
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
+                    }
+                });
+                
             }
         }, stringMessages, sailingService, errorReporter);
     }

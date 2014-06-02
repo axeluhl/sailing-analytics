@@ -8,7 +8,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -28,7 +28,7 @@ public class TrackFileImportTest {
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void addFix(GPSFix fix, DeviceIdentifier device) {
+            public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                 if (fix instanceof GPSFixMoving) {
                     callbackCalled = true;
                 }
@@ -42,7 +42,7 @@ public class TrackFileImportTest {
         InputStream in = getClass().getResourceAsStream("/sam002903 - COMPETITORS.kml");
         new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void addFix(GPSFix fix, DeviceIdentifier device) {
+            public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                 if (fix instanceof GPSFix) {
                     callbackCalled = true;
                 }

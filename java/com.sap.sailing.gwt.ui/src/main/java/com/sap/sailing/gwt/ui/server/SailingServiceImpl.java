@@ -222,6 +222,8 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -306,6 +308,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -4321,7 +4324,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicGPSFixTrackImpl<Mark> track = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
             DeviceMappingEvent<Mark> lastPingMappingEvent = new LastPingMappingEventFinder<Mark>(raceLog, mark).analyze();
             if (lastPingMappingEvent != null) {
-                getService().getGPSFixStore().loadMarkTrack(track, DeviceMappingImpl.convertToDeviceMapping(lastPingMappingEvent));
+                try {
+                    getService().getGPSFixStore().loadMarkTrack(track, DeviceMappingImpl.convertToDeviceMapping(lastPingMappingEvent));
+                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                    logger.log(Level.WARNING, "Could not convert to Mark DTO: " + mark);
+                }
             }
             Position lastPos = track.getLastRawFix() == null ? null : track.getLastRawFix().getPosition();
             dtos.add(convertToMarkDTO(mark, lastPos));
@@ -4598,6 +4605,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         for (ServiceReference<GPSFixImporter> ref : refs) {
             result.add((String) ref.getProperty(TypeBasedServiceFinder.TYPE));
+        }
+        return result;
+    }
+    
+    @Override
+    public List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+        List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
+        for (String uuidAsString : uuids) {
+            UUID uuid = UUID.fromString(uuidAsString);
+            TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
+            long numFixes = getService().getGPSFixStore().getNumberOfFixes(device);
+            TimeRange timeRange = getService().getGPSFixStore().getTimeRangeCoveredByFixes(device);
+            Date from = timeRange == null ? null : timeRange.from().asDate();
+            Date to = timeRange == null ? null : timeRange.to().asDate();
+            result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
+                    numFixes, from, to));
         }
         return result;
     }

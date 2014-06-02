@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -148,6 +149,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public static void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
         storeTimePoint(timePoint, result, field.name());
     }
+    
+    public static void storeTimeRange(TimeRange timeRange, DBObject result, FieldNames field) {
+        if (timeRange != null) {
+            DBObject timeRangeObj = new BasicDBObject();
+            storeTimePoint(timeRange.from(), timeRangeObj, FieldNames.FROM_MILLIS);
+            storeTimePoint(timeRange.to(), timeRangeObj, FieldNames.TO_MILLIS);
+            result.put(field.name(), timeRangeObj);
+        }
+    }
 
     public void storeTimed(Timed timed, DBObject result) {
         if (timed.getTimePoint() != null) {
@@ -193,7 +203,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject index = new BasicDBObject();
         index.put(FieldNames.DEVICE_ID.name(), null);
         index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        gpsFixCollection.ensureIndex(index);
         return gpsFixCollection;
+    }
+
+    public DBCollection getGPSFixMetadataCollection() {
+        DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES_METADATA.name());
+        DBObject index = new BasicDBObject();
+        index.put(FieldNames.DEVICE_ID.name(), null);
+        collection.ensureIndex(index);
+        return collection;
     }
     
     /**

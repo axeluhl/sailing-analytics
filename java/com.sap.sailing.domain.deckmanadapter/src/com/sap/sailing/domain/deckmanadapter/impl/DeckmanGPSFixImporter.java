@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 import com.sap.sailing.domain.deckmanadapter.DeckmanAdapter;
 import com.sap.sailing.domain.deckmanadapter.Record;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
@@ -21,7 +21,7 @@ public class DeckmanGPSFixImporter implements GPSFixImporter {
     public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
             throws FormatNotSupportedException, IOException {
         DeckmanAdapter deckmanAdapter = DeckmanAdapterFactoryImpl.INSTANCE.createDeckmanAdapter();
-        DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
+        TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         try {
             for (Iterator<Record> i = deckmanAdapter.parseLogFile(new InputStreamReader(inputStream)); i.hasNext();) {
                 Record record = i.next();

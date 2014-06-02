@@ -25,11 +25,13 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -250,7 +252,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         RaceLogEvent mapping = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time,
                 service.getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
         raceLog.add(mapping);
-        service.getGPSFixStore().storeFix(device, gpsFix);
+        try {
+            service.getGPSFixStore().storeFix(device, gpsFix);
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not pint mark " + mark);
+        }
     }
 
     @Override
