@@ -2,9 +2,6 @@ package com.sap.sailing.domain.base;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.common.Renamable;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
@@ -15,7 +12,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends Named, Renamable, WithID, EventBase {
+public interface Event extends EventBase {
     Iterable<Regatta> getRegattas();
     
     void addRegatta(Regatta regatta);
@@ -33,6 +30,7 @@ public interface Event extends Named, Renamable, WithID, EventBase {
      * change the iteration order, {@link #removeLeaderboardGroup(LeaderboardGroup)} and
      * {@link #addLeaderboardGroup(LeaderboardGroup)} need to be used.
      */
+    @Override
     Iterable<LeaderboardGroup> getLeaderboardGroups();
     
     void addLeaderboardGroup(LeaderboardGroup leaderboardGroup);

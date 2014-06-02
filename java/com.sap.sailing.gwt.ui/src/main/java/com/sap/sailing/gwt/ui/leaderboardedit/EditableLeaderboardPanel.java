@@ -144,7 +144,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      */
     private class SuppressedSailIDColumn extends SortableColumn<CompetitorDTO, String> {
         protected SuppressedSailIDColumn() {
-            super(new TextCell(), SortingOrder.ASCENDING);
+            super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
 
         @Override
@@ -189,7 +189,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         private final CompetitorColumnBase<CompetitorDTO> base;
 
         protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
-            super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING);
+            super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
             this.base = base;
         }
 

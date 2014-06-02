@@ -79,4 +79,6 @@ public interface EventBase extends Named, Renamable, WithID {
      *            <code>null</code>)
      */
     void setVideoURLs(Iterable<URL> videoURLs);
+
+    Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 }

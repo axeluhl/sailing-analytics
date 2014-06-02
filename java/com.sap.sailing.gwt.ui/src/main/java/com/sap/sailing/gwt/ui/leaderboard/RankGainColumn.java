@@ -12,8 +12,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 public class RankGainColumn extends DetailTypeColumn<Integer, Integer> {
     private static final LeaderboardResources leaderboardResources = GWT.create(LeaderboardResources.class);
 	
-    public RankGainColumn(String title, LegDetailField<Integer> field, String headerStyle, String columnStyle) {
-        super(DetailType.RANK_GAIN, field, new RankGainCell(), headerStyle, columnStyle);
+    public RankGainColumn(String title, LegDetailField<Integer> field, String headerStyle, String columnStyle,
+            DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(DetailType.RANK_GAIN, field, new RankGainCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     @Override

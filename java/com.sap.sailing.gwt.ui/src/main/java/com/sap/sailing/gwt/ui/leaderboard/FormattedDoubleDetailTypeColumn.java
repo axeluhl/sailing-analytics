@@ -5,7 +5,6 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
@@ -17,9 +16,11 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
     /**
      * Creates a new column for the given {@link DetailType}. Have a look at
      * {@link DetailTypeFormatter#getUnit(DetailType)}, to see if the given type is supported.
+     * @param displayedLeaderboardRowsProvider TODO
      */
-    public FormattedDoubleDetailTypeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
-        super(detailType, field, new TextCell(), headerStyle, columnStyle);
+    public FormattedDoubleDetailTypeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle,
+            String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(detailType, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
         formatter = createNumberFormatter(detailType);
         this.minMaxRenderer = createMinMaxRenderer();
     }
@@ -37,8 +38,8 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
     }
 
     @Override
-    protected void updateMinMax(LeaderboardDTO leaderboard) {
-        getMinMaxRenderer().updateMinMax(leaderboard.rows.values());
+    protected void updateMinMax() {
+        getMinMaxRenderer().updateMinMax(getDisplayedLeaderboardRowsProvider());
     }
 
     protected NumberFormat getFormatter() {

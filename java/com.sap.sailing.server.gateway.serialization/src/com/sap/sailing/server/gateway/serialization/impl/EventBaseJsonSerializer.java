@@ -6,10 +6,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class EventJsonSerializer implements JsonSerializer<EventBase> {
+public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_START_DATE = "startDate";
@@ -17,11 +18,13 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_VENUE = "venue";
     public static final String FIELD_IMAGE_URLS = "imageURLs";
     public static final String FIELD_VIDEO_URLS = "videoURLs";
+    public static final String FIELDS_LEADERBOARD_GROUPS = "leaderboardGroups";
 
     private final JsonSerializer<Venue> venueSerializer;
+    private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupSerializer;
 
-    public EventJsonSerializer(JsonSerializer<Venue> venueSerializer)
-    {
+    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer, JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupSerializer) {
+        this.leaderboardGroupSerializer = leaderboardGroupSerializer;
         this.venueSerializer = venueSerializer;
     }
 
@@ -34,6 +37,11 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
         result.put(FIELD_IMAGE_URLS, getURLsAsStringArray(event.getImageURLs()));
         result.put(FIELD_VIDEO_URLS, getURLsAsStringArray(event.getVideoURLs()));
+        JSONArray leaderboardGroups = new JSONArray();
+        result.put(FIELDS_LEADERBOARD_GROUPS, leaderboardGroups);
+        for (LeaderboardGroupBase lg : event.getLeaderboardGroups()) {
+            leaderboardGroups.add(leaderboardGroupSerializer.serialize(lg));
+        }
         return result;
     }
 
