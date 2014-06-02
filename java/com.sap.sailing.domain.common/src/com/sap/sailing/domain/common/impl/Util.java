@@ -11,7 +11,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.Named;
 
-public class Util {
+public class Util extends com.sap.sse.common.Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      * If <code>what</code> is <code>null</code>, this operation does nothing, not even fail with an exception, but

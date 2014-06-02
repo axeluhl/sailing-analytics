@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0"
+Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sse.common
 Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.configuration,
  com.sap.sailing.domain.base.configuration.impl,
