@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -323,7 +322,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         int medalRacePoints = getMedalRacePoints(competitor, now, defaultFleet);
         for (TrackedRace race : testRaces) {
             RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
-            Pair<Competitor, RaceColumn> key = new Pair<Competitor, RaceColumn>(competitor, raceColumn);
+            com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitor, now);
                 assertEquals(rank, leaderboard.getTrackedRank(competitor, raceColumn, now));

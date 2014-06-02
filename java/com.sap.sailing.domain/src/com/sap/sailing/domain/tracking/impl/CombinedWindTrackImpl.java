@@ -3,11 +3,11 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl.EstimatedWindFixesAsNavigableSet;
+import com.sap.sse.common.Util;
 
 /**
  * A wind track that delivers the result of
@@ -53,7 +53,7 @@ public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         return getTrackedRace().getWindWithConfidence(p, at);
     }
 }

@@ -25,11 +25,11 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sse.common.Util;
 
 /**
  * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
@@ -48,7 +48,7 @@ public class RemoteSailingServerSet {
      */
     private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
     
-    private final ConcurrentHashMap<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
+    private final ConcurrentHashMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     /**
      * @param scheduler
@@ -83,9 +83,9 @@ public class RemoteSailingServerSet {
         }.start();
     }
 
-    private Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+    private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
         BufferedReader bufferedReader = null;
-        Pair<Iterable<EventBase>, Exception> result;
+        Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
                 final URL eventsURL = getEventsURL(ref.getURL());
@@ -104,7 +104,7 @@ public class RemoteSailingServerSet {
                     EventBase event = deserializer.deserialize(eventAsJson);
                     events.add(event);
                 }
-                result = new Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
+                result = new Util.Pair<Iterable<EventBase>, Exception>(events, /* exception */ null);
             } finally {
                 if (bufferedReader != null) {
                     bufferedReader.close();
@@ -112,7 +112,7 @@ public class RemoteSailingServerSet {
             }
         } catch (IOException | ParseException e) {
             logger.log(Level.INFO, "Exception trying to fetch events from remote server "+ref+": "+e.getMessage(), e);
-            result = new Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
+            result = new Util.Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
         cachedEventsForRemoteSailingServers.put(ref, result);
         return result;
@@ -127,7 +127,7 @@ public class RemoteSailingServerSet {
         return new URL(getEventsUrl);
     }
 
-    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getCachedEventsForRemoteSailingServers() {
+    public Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getCachedEventsForRemoteSailingServers() {
         return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
     }
 
@@ -144,7 +144,7 @@ public class RemoteSailingServerSet {
      * result is cached. If <code>ref</code> was not yet part of this remote sailing server reference set,
      * it is automatically added.
      */
-    public Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
+    public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
         if (!remoteSailingServers.containsKey(ref.getName())) {
             remoteSailingServers.put(ref.getName(), ref);
         }

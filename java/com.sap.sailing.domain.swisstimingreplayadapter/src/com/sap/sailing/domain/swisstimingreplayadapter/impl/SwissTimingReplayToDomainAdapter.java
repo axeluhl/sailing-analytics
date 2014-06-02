@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -290,9 +289,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Course course = race.getCourse();
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
+                    List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
                     for (ControlPoint cp : currentCourseDefinition) {
-                        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, null));
+                        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {

@@ -21,12 +21,12 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.Util;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -256,7 +256,7 @@ public interface Leaderboard extends Named {
      * Note that in order to get the {@link #getTotalPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
-    Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
+    Map<Util.Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
 
     /**
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
@@ -372,7 +372,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
      */
-    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
     
     /**
      * @return <code>null</code> if no tracked race is available in this leaderboard, the competitor hasn't started

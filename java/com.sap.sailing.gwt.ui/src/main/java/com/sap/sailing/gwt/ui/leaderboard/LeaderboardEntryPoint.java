@@ -22,7 +22,6 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -32,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -97,10 +97,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
 
         if (leaderboardName != null) {
-            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<Pair<String, LeaderboardType>>(
-                    new AsyncCallback<Pair<String, LeaderboardType>>() {
+            sailingService.checkLeaderboardName(leaderboardName, new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
+                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
                         @Override
-                        public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
+                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
                             if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
                                 Window.setTitle(leaderboardName);
                                 leaderboardType = leaderboardNameAndType.getB();

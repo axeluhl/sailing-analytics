@@ -17,9 +17,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -86,7 +83,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
                 @Override
                 public void gotData(Route route, RouteData record, boolean isLiveData) {
-                    enqueue(new Triple<Route, RouteData, Race>(route, record, race));
+                    enqueue(new com.sap.sse.common.Util.Triple<Route, RouteData, Race>(route, record, race));
                 }
             });
             setAndStartThread(new Thread(this, getClass().getName()));
@@ -96,7 +93,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     }
     
     @Override
-    protected void handleEvent(Triple<Route, RouteData, Race> event) {
+    protected void handleEvent(com.sap.sse.common.Util.Triple<Route, RouteData, Race> event) {
         System.out.print("R");
         final Route route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
@@ -109,11 +106,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
-        List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
+        List<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
+            ttControlPoints.add(new com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 
@@ -142,7 +139,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+race.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
+            com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), race.getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,

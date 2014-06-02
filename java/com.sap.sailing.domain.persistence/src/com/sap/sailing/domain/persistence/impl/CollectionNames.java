@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.GPSFix;
+
 /**
  * Defines literals providing the names for MongoDB collections. The literal documentation described the semantics
  * of the collection identified by that literal.

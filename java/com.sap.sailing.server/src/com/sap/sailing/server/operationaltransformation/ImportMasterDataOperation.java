@@ -27,7 +27,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -303,7 +302,7 @@ public class ImportMasterDataOperation extends
      * @param leaderboard
      * @return the race column and fleet the dummy was attached to
      */
-    public Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
+    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
             Regatta regatta) {
         RaceColumn raceColumn = null;
         Fleet fleet = null;
@@ -319,7 +318,7 @@ public class ImportMasterDataOperation extends
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
-        return new Pair<RaceColumn, Fleet>(raceColumn, fleet);
+        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
     }
 
     private void createWindTracks(RacingEventService toState) {

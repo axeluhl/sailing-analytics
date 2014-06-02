@@ -14,7 +14,6 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
+import com.sap.sse.common.Util;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -85,7 +85,7 @@ public class Activator implements BundleActivator {
             serviceFinderFactory.close();
         }
         // stop the tracking of the wind and all races
-        for (Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {
+        for (Util.Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {
             racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
         for (Regatta regatta : racingEventService.getAllRegattas()) {

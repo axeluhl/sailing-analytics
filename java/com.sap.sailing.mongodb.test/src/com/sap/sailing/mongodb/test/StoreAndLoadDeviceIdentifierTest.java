@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -63,7 +62,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         dropTestDB();
 
         logIdentifier = mock(RaceLogIdentifier.class);
-        Triple<String, String, String> triple = new Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
+        com.sap.sse.common.Util.Triple<String, String, String> triple = new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
         when(logIdentifier.getIdentifier()).thenReturn(triple);
         when(logIdentifier.getDeprecatedIdentifier()).thenReturn("");
     }

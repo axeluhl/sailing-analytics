@@ -40,8 +40,6 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -262,12 +260,12 @@ public class TrackTest {
      */
     @Test
     public void testDistanceTraveledBackwardsQuery() {
-        final Set<Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
+        final Set<com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
         final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
             @Override
             public void cache(TimePoint from, TimePoint to, Distance distance) {
                 super.cache(from, to, distance);
-                cacheEntries.add(new Triple<>(from, to, distance));
+                cacheEntries.add(new com.sap.sse.common.Util.Triple<>(from, to, distance));
             }
             
         };
@@ -632,7 +630,7 @@ public class TrackTest {
         }
         invalidationCalls.clear();
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
-        final Pair<TimePoint, Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
+        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
         assertNotNull(fullIntervalCacheEntry); // no more entry for "to"-value start in cache
         assertEquals(start, fullIntervalCacheEntry.getA());
         assertEquals(now, fullIntervalCacheEntry.getB().getA());
@@ -648,7 +646,7 @@ public class TrackTest {
         final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
         assertEquals(speed.getMetersPerSecond() * (steps - 1),
                 track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.01);
-        final Pair<TimePoint, Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
+        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNotNull(newFullIntervalCacheEntry); // no more entry for "to"-value start in cache
         assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
@@ -665,7 +663,7 @@ public class TrackTest {
         assertTrue(invalidationCalls.iterator().next().equals(timePointOfLastRawFixBeforeLateOutlier));
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
-        final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
+        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache because new temporary outlier lies in previously cached interval
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
@@ -690,7 +688,7 @@ public class TrackTest {
         assertEquals(track.getLastFixBefore(timePointOfLastRawFixBeforeLateOutlier).getTimePoint().plus(1), invalidationCalls.iterator().next());
         assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
         // expect the invalidation to have started at the fix before the outlier, leaving the previous result ending at the fix right before the outlier intact
-        final Pair<TimePoint, Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
+        final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNull(stillStillPresentFullIntervalCacheEntry); // still nothing in the cache
         track.lockForRead();
@@ -796,11 +794,11 @@ public class TrackTest {
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
         assertTrue(invalidationCalls.isEmpty());
         // expect a cache entry exactly for the strip's boundaries
-        Pair<TimePoint, Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(stripFrom, stripTo);
+        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(stripFrom, stripTo);
         assertEquals(stripTo, stripCacheEntry.getA());
         assertEquals(stripFrom, stripCacheEntry.getB().getA());
         // expect a cache entry exactly for the full boundaries
-        Pair<TimePoint, Pair<TimePoint, Distance>> fullCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now, start);
+        com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now, start);
         assertEquals(start, fullCacheEntry.getA());
         assertEquals(now, fullCacheEntry.getB().getA());
     }
@@ -930,7 +928,7 @@ public class TrackTest {
                 speed.travel(firstFixSoFar.getTimePoint(), firstFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed);
         track.addGPSFix(newFirstFix);
-        Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
+        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
         Position newPositionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
         assertTrue(!intervalAffected.getA().after(beginningOfTime));
@@ -949,7 +947,7 @@ public class TrackTest {
                 speed.travel(lastFixSoFar.getTimePoint(), lastFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newLastFix = new GPSFixMovingImpl(newPosition, slightlyAfterLastFix, speed);
         track.addGPSFix(newLastFix);
-        Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
+        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
         Position newPositionAtEndOfTime = track.getEstimatedPosition(endOfTime, /* extrapolate */false);
         assertFalse(newPositionAtEndOfTime.equals(positionAtEndOfTime));
         assertTrue(!intervalAffected.getB().before(endOfTime));
@@ -967,7 +965,7 @@ public class TrackTest {
         assertNull(positionAtEndOfTime);
         GPSFixMoving newFix = new GPSFixMovingImpl(new DegreePosition(12, 34), now, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         myTrack.addGPSFix(newFix);
-        Pair<TimePoint, TimePoint> intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
+        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
         Position newPositionAtBeginningOfTime = myTrack.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         Position newPositionAtEndOfTime = myTrack.getEstimatedPosition(now, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));

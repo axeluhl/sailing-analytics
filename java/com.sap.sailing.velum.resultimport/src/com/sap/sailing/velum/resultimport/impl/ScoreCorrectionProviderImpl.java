@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
@@ -18,6 +17,7 @@ import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionPro
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 import com.sap.sailing.velum.resultimport.CsvParser;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
+import com.sap.sse.common.Util.Pair;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;

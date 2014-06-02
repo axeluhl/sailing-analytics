@@ -31,8 +31,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -82,6 +80,8 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -96,7 +96,7 @@ public interface SailingService extends RemoteService {
 
     List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws Exception;
 
-    Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
+    Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword) throws Exception;
@@ -216,10 +216,10 @@ public interface SailingService extends RemoteService {
      * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()} for time point
      * <code>date</code> after the max points reason has been updated to <code>maxPointsReasonAsString</code>.
      */
-    Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
+    Util.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
             String raceColumnName, MaxPointsReason maxPointsReason, Date date) throws NoWindException;
 
-    Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
+    Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
             String columnName, Double correctedScore, Date date) throws NoWindException;
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName);
@@ -316,9 +316,9 @@ public interface SailingService extends RemoteService {
 
     List<String> getUrlResultProviderNames();
     
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints);
 
-    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
+    void addColumnsToLeaderboard(String leaderboardName, List<Util.Pair<String, Boolean>> columnsToAdd);
 
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 
@@ -330,7 +330,7 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl);
 
-    List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName,
+    List<Util.Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName,
             Date date, DetailType detailType) throws Exception;
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
@@ -344,9 +344,9 @@ public interface SailingService extends RemoteService {
     
     CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName);
     
-    List<Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName);
+    List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName);
 
-    Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
+    Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
     
@@ -401,7 +401,7 @@ public interface SailingService extends RemoteService {
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
-    Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
+    Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
@@ -446,7 +446,7 @@ public interface SailingService extends RemoteService {
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
      * from the previous course definition in the racelog.
      */
-    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Pair<ControlPointDTO, PassingInstruction>> course);
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course);
     
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
     
@@ -455,8 +455,8 @@ public interface SailingService extends RemoteService {
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
     
-    void copyCourseAndCompetitorsToOtherRaceLogs(Triple<String, String, String> raceLogFrom,
-            Set<Triple<String, String, String>> raceLogsTo);
+    void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
+            Set<Util.Triple<String, String, String>> raceLogsTo);
     
     void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
             throws TransformationException;

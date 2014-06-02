@@ -3,7 +3,8 @@ package com.sap.sailing.domain.common;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Describes sources of official regatta results which may be imported and applied to <code>ScoreCorrection</code>
@@ -19,7 +20,7 @@ public interface ScoreCorrectionProvider extends Named {
      * score corrections taken at different times. Later score corrections are expected to be cumulative, meaning they
      * also contain all previous corrections.
      */
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
 
     /**
      * @param eventName

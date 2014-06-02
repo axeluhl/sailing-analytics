@@ -39,8 +39,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -67,6 +65,8 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -157,7 +157,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * comment where a wind tracker may provide information such as its type name or, if applicable,
      * connectivity information such as the network port on which it receives wind information.
      */
-    Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
+    Iterable<Util.Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
@@ -384,11 +384,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     /**
      * @return a thread-safe copy of the events (or the exception that occurred trying to obtain the events; arranged in
-     *         a {@link Pair}) of from all sailing server instances currently known by the service; it's safe for
+     *         a {@link Util.Pair}) of from all sailing server instances currently known by the service; it's safe for
      *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
      *         exists
      */
-    Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
+    Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
 
     RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
 
@@ -446,7 +446,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
-    Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
@@ -507,7 +507,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
+    Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     
@@ -551,5 +551,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * For the reference to a remote sailing server, updates its events cache and returns the event list
      * or, if fetching the event list from the remote server did fail, the exception for which it failed.
      */
-    Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
+    Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
 }

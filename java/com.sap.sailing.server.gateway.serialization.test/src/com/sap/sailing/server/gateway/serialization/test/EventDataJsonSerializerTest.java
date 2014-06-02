@@ -1,9 +1,9 @@
 package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
 
 import java.net.URL;
 import java.util.Collections;

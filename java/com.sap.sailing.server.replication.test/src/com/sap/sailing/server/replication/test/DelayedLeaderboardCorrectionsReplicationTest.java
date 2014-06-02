@@ -24,7 +24,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -114,7 +113,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // replicate the re-loaded environment
-        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
+        com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
         // starting to replicate will clear the competitor store used by the replica in this test;

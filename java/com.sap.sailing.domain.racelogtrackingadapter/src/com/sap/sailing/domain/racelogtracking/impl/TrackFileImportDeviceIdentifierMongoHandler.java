@@ -5,12 +5,12 @@ import java.util.UUID;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sse.common.Util;
 
 public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdentifierMongoHandler {
     private static enum Fields {UUID, FILE_NAME, TRACK_NAME, UPLOADED_MILLIS};
@@ -28,7 +28,7 @@ public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdenti
     }
 
     @Override
-    public Pair<String ,DBObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+    public Util.Pair<String ,DBObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
         DBObject result = new BasicDBObject();
         result.put(Fields.UUID.name(), id.getId().toString());
@@ -36,7 +36,7 @@ public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdenti
         result.put(Fields.TRACK_NAME.name(), id.getTrackName());
         result.put(Fields.UPLOADED_MILLIS.name(), TrackFileImportDeviceIdentifierJsonHandler.
                 storeTimePoint(id.getUploadedAt()));
-        return new Pair<String ,DBObject>(TrackFileImportDeviceIdentifier.TYPE, result);
+        return new Util.Pair<String ,DBObject>(TrackFileImportDeviceIdentifier.TYPE, result);
     }
 
 }

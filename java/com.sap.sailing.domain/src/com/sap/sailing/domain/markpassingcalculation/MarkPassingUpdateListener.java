@@ -5,12 +5,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sse.common.Util;
 
 /**
  * Listens for changes that might affect the MarkPassingCalculator: new Fixes of a Competitor or a Mark and when the
@@ -21,27 +21,27 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * 
  */
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
-    private final LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
-    private final Pair<Object, GPSFix> end;
+    private final LinkedBlockingQueue<Util.Pair<Object, GPSFix>> queue;
+    private final Util.Pair<Object, GPSFix> end;
 
-    public MarkPassingUpdateListener(TrackedRace race, Pair<Object, GPSFix> end) {
+    public MarkPassingUpdateListener(TrackedRace race, Util.Pair<Object, GPSFix> end) {
         race.addListener(this);
         queue = new LinkedBlockingQueue<>();
         this.end = end;
     }
 
-    public LinkedBlockingQueue<Pair<Object, GPSFix>> getQueue() {
+    public LinkedBlockingQueue<Util.Pair<Object, GPSFix>> getQueue() {
         return queue;
     }
 
     @Override
     public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-        queue.add(new Pair<Object, GPSFix>(item, fix));
+        queue.add(new Util.Pair<Object, GPSFix>(item, fix));
     }
 
     @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
-        queue.add(new Pair<Object, GPSFix>(mark, fix));
+        queue.add(new Util.Pair<Object, GPSFix>(mark, fix));
     }
 
     @Override

@@ -15,9 +15,10 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Manages the cache of {@link GPSFixDTO}s for the competitors and the polylines encoding the tails that visualize the
@@ -432,7 +433,7 @@ public class FixesAndTails {
      *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
      *         those requested or need to be replaced
      */
-    protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
+    protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
         Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
         Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
@@ -472,7 +473,7 @@ public class FixesAndTails {
                 overlapWithKnownFixes.put(competitor, overlap);
             }
         }
-        return new Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>>(from, to,
+        return new Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>>(from, to,
                 overlapWithKnownFixes);
     }
 

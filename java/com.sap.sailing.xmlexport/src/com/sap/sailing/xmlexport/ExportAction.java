@@ -26,7 +26,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -182,7 +181,7 @@ public abstract class ExportAction {
             if (!markPassings.isEmpty()) {
                 TimePoint from = markPassings.first().getTimePoint();
                 TimePoint to = trackedRace.getEndOfRace();
-                Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
                 if (maxSpeedWithGPSFix != null) {
                     maxSpeed = maxSpeedWithGPSFix.getB();
                 }

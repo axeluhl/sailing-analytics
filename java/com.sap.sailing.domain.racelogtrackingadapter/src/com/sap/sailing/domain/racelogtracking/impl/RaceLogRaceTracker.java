@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
@@ -64,6 +63,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -332,10 +332,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         if (trackedRace == null) return;
         
         CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
         
         for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
         }
         
         try {

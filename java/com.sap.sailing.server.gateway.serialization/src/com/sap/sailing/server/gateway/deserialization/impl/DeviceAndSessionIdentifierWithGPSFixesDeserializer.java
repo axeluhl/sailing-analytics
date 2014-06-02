@@ -7,7 +7,6 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -16,9 +15,10 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
+import com.sap.sse.common.Util;
 
 public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
-implements JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {
+implements JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {
 
     public static final String FIELD_DEVICE = "device";
     public static final String FIELD_SESSION_UUID = "sessionId";
@@ -35,7 +35,7 @@ implements JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>
     }
 
     @Override
-    public Triple<DeviceIdentifier, Serializable, List<GPSFix>> deserialize(JSONObject object) throws JsonDeserializationException {
+    public Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>> deserialize(JSONObject object) throws JsonDeserializationException {
         JSONObject deviceIdObject = Helpers.toJSONObjectSafe(object.get(FIELD_DEVICE));
         DeviceIdentifier deviceId = deviceDeserializer.deserialize(deviceIdObject);
 
@@ -56,7 +56,7 @@ implements JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>
             fixes.add(fix);
         }
 
-        return new Triple<DeviceIdentifier, Serializable, List<GPSFix>>(deviceId, sessionId, fixes);
+        return new Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>(deviceId, sessionId, fixes);
     }
 
 }

@@ -10,6 +10,17 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.ABSMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CCGMessage;
@@ -19,16 +30,6 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileService;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileServiceImpl;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 
 /**
  *

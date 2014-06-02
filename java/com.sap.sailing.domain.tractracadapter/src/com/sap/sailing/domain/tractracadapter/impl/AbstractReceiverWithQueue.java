@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 
@@ -27,7 +27,7 @@ import com.tractrac.clientmodule.Race;
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private static Logger logger = Logger.getLogger(AbstractReceiverWithQueue.class.getName());
     
-    private final LinkedBlockingQueue<Triple<A, B, C>> queue;
+    private final LinkedBlockingQueue<Util.Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final DynamicTrackedRegatta trackedRegatta;
@@ -47,7 +47,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
         this.simulator = simulator;
-        this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
+        this.queue = new LinkedBlockingQueue<Util.Triple<A, B, C>>();
     }
     
     protected synchronized void setAndStartThread(Thread thread) {
@@ -75,7 +75,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     @Override
     public void stopAfterProcessingQueuedEvents() {
-        queue.add(new Triple<A, B, C>(null, null, null));
+        queue.add(new Util.Triple<A, B, C>(null, null, null));
     }
     
     protected Simulator getSimulator() {
@@ -102,18 +102,18 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         }, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
-    protected void enqueue(Triple<A, B, C> event) {
+    protected void enqueue(Util.Triple<A, B, C> event) {
         queue.add(event);
         receivedEventDuringTimeout = true;
     }
     
-    private boolean isStopEvent(Triple<A, B, C> event) {
+    private boolean isStopEvent(Util.Triple<A, B, C> event) {
         return event.getA() == null && event.getB() == null && event.getC() == null;
     }
 
     @Override
     public void run() {
-        Triple<A, B, C> event = null;
+        Util.Triple<A, B, C> event = null;
         while (event == null || !isStopEvent(event)) {
             try {
                 event = queue.take();
@@ -143,7 +143,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         }
     }
 
-    protected abstract void handleEvent(Triple<A, B, C> event);
+    protected abstract void handleEvent(Util.Triple<A, B, C> event);
 
     /**
      * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta}

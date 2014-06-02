@@ -37,7 +37,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -466,8 +465,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String tractracUsername = tractracUsernameTextBox.getValue();
         final String tractracPassword = tractracPasswordTextBox.getValue();
 
-        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>(
-                new AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
+                new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         loadingMessageLabel.setText("");
@@ -475,7 +474,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
         
                     @Override
-                    public void onSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
+                    public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
                         TracTracEventManagementPanel.this.availableTracTracRaces.clear();
                         final String eventName = result.getA();

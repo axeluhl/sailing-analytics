@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -851,7 +850,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 result = before.middle(after.reverse());
             }
         } else if (instruction == PassingInstruction.Line) {
-            Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
+            com.sap.sse.common.Util.Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
             if (pos.getA() != null && pos.getB() != null) {
                 Position portPosition = getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
                 Position starboardPosition = getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
@@ -865,13 +864,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return result;
     }
     @Override
-    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
+    public com.sap.sse.common.Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark lineMark : w.getMarks()) {
             final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
             false);
             if (estimatedMarkPosition == null) {
-                return new Pair<Mark, Mark>(null,null);
+                return new com.sap.sse.common.Util.Pair<Mark, Mark>(null,null);
             }
             markPositions.add(estimatedMarkPosition);
         }
@@ -880,7 +879,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final boolean isStartLine = indexOfWaypoint == 0;
         final Bearing legDeterminingDirectionBearing = getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
         if (legDeterminingDirectionBearing == null) {
-            return new Pair<Mark, Mark>(null, null);
+            return new com.sap.sse.common.Util.Pair<Mark, Mark>(null, null);
         }
         Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1), legDeterminingDirectionBearing);
         final Mark starboardMarkWhileApproachingLine;
@@ -892,6 +891,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             portMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
         }
-        return new Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+        return new com.sap.sse.common.Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
     }
 }
