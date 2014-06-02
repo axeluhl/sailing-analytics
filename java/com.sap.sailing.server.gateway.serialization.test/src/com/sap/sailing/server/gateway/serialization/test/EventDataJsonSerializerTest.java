@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.test;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 import java.net.URL;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -36,7 +38,8 @@ public class EventDataJsonSerializerTest {
     protected final TimePoint expectedStartDate = new MillisecondsTimePoint(new Date());
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
-
+    protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
+    
     protected JsonSerializer<Venue> venueSerializer;
     protected EventBaseJsonSerializer serializer;
     protected EventBaseJsonDeserializer deserializer;
@@ -57,12 +60,17 @@ public class EventDataJsonSerializerTest {
         // ... and the serializer itself.		
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
+        
+        when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
+        when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
+        when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");
+        when(expectedLeaderbaordGroup.hasOverallLeaderboard()).thenReturn(false);
+        doReturn(Collections.<LeaderboardGroup>singleton(expectedLeaderbaordGroup)).when(event).getLeaderboardGroups();
     }
 
     @Test
     public void testBasicAttributes() {
         JSONObject result = serializer.serialize(event);
-
         assertEquals(
                 expectedId,
                 UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
@@ -85,6 +93,10 @@ public class EventDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedStartDate, deserializedEvent.getStartDate());
         assertEquals(expectedEndDate, deserializedEvent.getEndDate());
+        assertEquals(expectedLeaderbaordGroup.getName(), deserializedEvent.getLeaderboardGroups().iterator().next().getName());
+        assertEquals(expectedLeaderbaordGroup.getDescription(), deserializedEvent.getLeaderboardGroups().iterator().next().getDescription());
+        assertEquals(expectedLeaderbaordGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
+        assertEquals(expectedLeaderbaordGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
     }
 
     @Test
