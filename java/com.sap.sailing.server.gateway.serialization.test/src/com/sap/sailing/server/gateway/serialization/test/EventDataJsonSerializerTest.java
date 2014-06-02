@@ -22,10 +22,12 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class EventDataJsonSerializerTest {
@@ -36,7 +38,7 @@ public class EventDataJsonSerializerTest {
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
 
     protected JsonSerializer<Venue> venueSerializer;
-    protected EventJsonSerializer serializer;
+    protected EventBaseJsonSerializer serializer;
     protected EventBaseJsonDeserializer deserializer;
     protected EventBase event;
 
@@ -53,8 +55,8 @@ public class EventDataJsonSerializerTest {
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
         // ... and the serializer itself.		
-        serializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
     }
 
     @Test
@@ -63,16 +65,16 @@ public class EventDataJsonSerializerTest {
 
         assertEquals(
                 expectedId,
-                UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
+                UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
         assertEquals(
                 expectedName,
-                result.get(EventJsonSerializer.FIELD_NAME));
+                result.get(EventBaseJsonSerializer.FIELD_NAME));
         assertEquals(
                 expectedStartDate,
-                new MillisecondsTimePoint(((Number) result.get(EventJsonSerializer.FIELD_START_DATE)).longValue()));
+                new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_START_DATE)).longValue()));
         assertEquals(
                 expectedEndDate,
-                new MillisecondsTimePoint(((Number) result.get(EventJsonSerializer.FIELD_END_DATE)).longValue()));
+                new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_END_DATE)).longValue()));
     }
 
     @Test

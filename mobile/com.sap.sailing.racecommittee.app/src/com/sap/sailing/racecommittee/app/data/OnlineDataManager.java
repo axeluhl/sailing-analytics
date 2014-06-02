@@ -101,7 +101,7 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
                 DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), leaderboardGroupDeserializer));
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
                 ExLog.i(TAG, "getEventsLoader created new loader...");

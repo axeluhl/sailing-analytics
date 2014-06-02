@@ -2,6 +2,8 @@ package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,16 +17,20 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class EventWithNullStartAndEndDataJsonSerializerTest {
@@ -34,15 +40,21 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
     protected final TimePoint expectedStartDate = null;
     protected final TimePoint expectedEndDate = null;
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
+    protected final LeaderboardGroupBase expectedLeaderboardGroup = mock(LeaderboardGroupBase.class);
+    protected final Iterable<LeaderboardGroupBase> expectedLeaderboardGroups = Collections.singleton(expectedLeaderboardGroup);
 
     protected JsonSerializer<Venue> venueSerializer;
-    protected EventJsonSerializer serializer;
+    protected EventBaseJsonSerializer serializer;
     protected EventBaseJsonDeserializer deserializer;
     protected EventBase event;
 
     @Before
     public void setUp() {
         // Event and its basic attributes ...
+        when(expectedLeaderboardGroup.getId()).thenReturn(UUID.randomUUID());
+        when(expectedLeaderboardGroup.getName()).thenReturn("My Leaderboard Group");
+        when(expectedLeaderboardGroup.getDescription()).thenReturn("This is My Leaderboard Group");
+        when(expectedLeaderboardGroup.hasOverallLeaderboard()).thenReturn(true);
         event = mock(EventBase.class);
         when(event.getId()).thenReturn(expectedId);
         when(event.getName()).thenReturn(expectedName);
@@ -51,19 +63,20 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getVenue()).thenReturn(expectedVenue);
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
+        doReturn(expectedLeaderboardGroups).when(event).getLeaderboardGroups();
 
         // ... and the serializer itself.		
-        serializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
     }
 
     @Test
     public void testBasicAttributes() {
         JSONObject result = serializer.serialize(event);
-        assertEquals(expectedId, UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
-        assertEquals(expectedName, result.get(EventJsonSerializer.FIELD_NAME));
-        assertNull(result.get(EventJsonSerializer.FIELD_START_DATE));
-        assertNull(result.get(EventJsonSerializer.FIELD_END_DATE));
+        assertEquals(expectedId, UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
+        assertEquals(expectedName, result.get(EventBaseJsonSerializer.FIELD_NAME));
+        assertNull(result.get(EventBaseJsonSerializer.FIELD_START_DATE));
+        assertNull(result.get(EventBaseJsonSerializer.FIELD_END_DATE));
     }
 
     @Test
@@ -72,6 +85,10 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         final EventBase deserializedEvent = deserializer.deserialize(result);
         assertEquals(expectedId, deserializedEvent.getId());
         assertEquals(expectedName, deserializedEvent.getName());
+        LeaderboardGroupBase deserializedLg = deserializedEvent.getLeaderboardGroups().iterator().next();
+        assertEquals(expectedLeaderboardGroup.getName(), deserializedLg.getName());
+        assertEquals(expectedLeaderboardGroup.getDescription(), deserializedLg.getDescription());
+        assertEquals(expectedLeaderboardGroup.hasOverallLeaderboard(), deserializedLg.hasOverallLeaderboard());
         assertNull(deserializedEvent.getStartDate());
         assertNull(deserializedEvent.getEndDate());
     }

@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 
 /**
@@ -95,7 +96,7 @@ public class RemoteSailingServerSet {
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);
                 EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
-                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
+                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
                 JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
                 final Set<EventBase> events = new HashSet<>();
                 for (Object eventAsObject : eventsAsJsonArray) {
