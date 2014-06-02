@@ -13,6 +13,8 @@ import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.ParserResult;
 
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
@@ -51,7 +53,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
+    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
             throws IOException, FormatNotSupportedException {
         //TODO dirty hack, because no public read method for inputstream and custom list of formats
         NavigationFormatParser parser = new NavigationFormatParser();
@@ -72,11 +74,10 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         for (BaseRoute route : routes) {
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
             String routeName = route.getName();
-            route.ensureIncreasingTime();
-            callback.startTrack(routeName, null);
+            DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, routeName);
             for (BaseNavigationPosition p : positions) {
                 try {
-                    addFixAndInfer(callback, inferSpeedAndBearing, convertToGPSFix(p));
+                    addFixAndInfer(callback, inferSpeedAndBearing, convertToGPSFix(p), device);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

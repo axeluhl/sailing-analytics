@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -28,16 +28,12 @@ public class TrackFileImportTest {
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void addFix(GPSFix fix) {
+            public void addFix(GPSFix fix, DeviceIdentifier device) {
                 if (fix instanceof GPSFixMoving) {
                     callbackCalled = true;
                 }
             }
-
-            @Override
-            public void startTrack(String name, Map<String, String> properties) {
-            }
-        }, false);
+        }, false, "source");
         assertTrue(callbackCalled);
     }
     
@@ -46,16 +42,12 @@ public class TrackFileImportTest {
         InputStream in = getClass().getResourceAsStream("/sam002903 - COMPETITORS.kml");
         new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void startTrack(String name, Map<String, String> properties) {
-            }
-
-            @Override
-            public void addFix(GPSFix fix) {
+            public void addFix(GPSFix fix, DeviceIdentifier device) {
                 if (fix instanceof GPSFix) {
                     callbackCalled = true;
                 }
             }
-        }, false);
+        }, false, "source");
         assertTrue(callbackCalled);
     }
 }

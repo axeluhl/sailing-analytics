@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceWithTimeRange;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
@@ -67,9 +66,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     private static final Logger logger = Logger.getLogger(TrackFilesImportServlet.class.getName());
     
     private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
-    
-    private DeviceIdentifier currentDevice;
-    
+
     public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         getService().getGPSFixStore().storeFix(deviceIdentifier, fix);
     }
@@ -95,7 +92,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     
     public Iterable<DeviceWithTimeRange> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
-        final List<DeviceIdentifier> deviceIdList = new ArrayList<>();
+        final Set<DeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         
@@ -137,27 +134,23 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 try {
                     importer.importFixes(in, new Callback() {
                         @Override
-                        public void startTrack(String name, Map<String, String> properties) {
-                            currentDevice = new TrackFileImportDeviceIdentifierImpl(fileName, name);
-                            deviceIdList.add(currentDevice);
-                        }
-
-                        @Override
-                        public void addFix(GPSFix fix) {
-                            storeFix(fix, currentDevice);
-                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(currentDevice);
+                        public void addFix(GPSFix fix, DeviceIdentifier device) {
+                            deviceIds.add(device);
+                            
+                            storeFix(fix, device);
+                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
                             if (earliestFixSoFarFromCurrentDevice == null || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
                                 earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                from.put(currentDevice, earliestFixSoFarFromCurrentDevice);
+                                from.put(device, earliestFixSoFarFromCurrentDevice);
                             }
-                            TimePoint latestFixSoFarFromCurrentDevice = to.get(currentDevice);
+                            TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
                             if (latestFixSoFarFromCurrentDevice == null || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
                                 latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                to.put(currentDevice, latestFixSoFarFromCurrentDevice);
+                                to.put(device, latestFixSoFarFromCurrentDevice);
                             }
                         }
 
-                    }, true);
+                    }, true, fileName);
                 } catch (FormatNotSupportedException e) {
                     failed = true;
                 }
@@ -168,7 +161,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             }
         }
         List<DeviceWithTimeRange> result = new ArrayList<>();
-        for (DeviceIdentifier deviceId : deviceIdList) {
+        for (DeviceIdentifier deviceId : deviceIds) {
             result.add(new DeviceWithTimeRangeImpl(deviceId, new TimeRangeImpl(from.get(deviceId), to.get(deviceId))));
         }
         return result;

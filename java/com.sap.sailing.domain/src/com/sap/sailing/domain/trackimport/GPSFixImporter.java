@@ -33,24 +33,12 @@ public interface GPSFixImporter {
     String FILE_EXTENSION_PROPERTY = "fileExt";
     
     /**
-     * Callback through which fixes and track metadata found in the source stream
-     * are passed back.
+     * Callback through which fixes found in the source stream are passed back.
      * @author Fredrik Teschke
      *
      */
     interface Callback {
-        /**
-         * Is called when the beginning of a track is found. Some track file formats (e.g. GPX) can contain multiple
-         * tracks. Implementations of the {@link GPSFixImporter} are expected to call this method before calling
-         * {@link #addFix}, even if no metadata is known (and then pass {@code null} for {@code properties}).
-         * 
-         * @param name
-         *            a non-<code>null</code> value; can be made up, e.g., by providing the importer type and a
-         *            string-formatted time stamp or similar, at least as a default
-         */
-        void startTrack(String name, Map<String, String> properties);
-
-        void addFix(GPSFix fix);
+        void addFix(GPSFix fix, DeviceIdentifier device);
     }
 
     /**
@@ -60,8 +48,11 @@ public interface GPSFixImporter {
      * at the previous fix, if that data is not directly present within the file?
      * @throws FormatNotSupportedException If the input format cannot be read. The import process
      * might then decide to try attempt importing fixes using the next suitable importer.
+     * 
+     * @param sourceName some name that identifies the source, e.g. the file name if a file
      */
-    void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
+    void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
+            String sourceName)
             throws FormatNotSupportedException, IOException;
 
     /**
