@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.common.Pair;
+import com.sap.sse.common.Util.Pair;
 
 public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeWithZoomProvider {
     private Date zoomStartTimepoint;

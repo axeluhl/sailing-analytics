@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.player;
 
 import java.util.Date;
 
-import com.sap.sse.common.Pair;
+import com.sap.sse.common.Util.Pair;
 
 public interface TimeRangeProvider {
 
