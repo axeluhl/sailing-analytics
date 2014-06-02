@@ -1,6 +1,6 @@
 package com.sap.sailing.server.trackfiles.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -8,10 +8,6 @@ import static org.mockito.Mockito.spy;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
 
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -24,9 +20,6 @@ import slash.navigation.gpx.binding11.WptType;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.impl.BaseRouteConverterGPSFixImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
-import com.sap.sailing.server.trackfiles.test.equine.GallopStep;
-import com.sap.sailing.server.trackfiles.test.equine.Heartbeat;
-import com.sap.sailing.server.trackfiles.test.equine.PlannedMinute;
 
 public class RouteConverterGpx11ExtensionsTest {
     private boolean extensionsFound = false;
@@ -45,16 +38,9 @@ public class RouteConverterGpx11ExtensionsTest {
                 WptType waypoint = p.asGpxPosition().getOrigin(WptType.class);
                 final List<Object> extensions = waypoint.getExtensions().getAny();
                 for (Object o : extensions) {
-                    JAXBContext context = JAXBContext.newInstance(Heartbeat.class, GallopStep.class, PlannedMinute.class);
-                    Unmarshaller um = context.createUnmarshaller();
-                    try {
-                        Object extension = um.unmarshal((Element) o);
-                        System.out.println(extension);
-                        
-                        extensionsFound = true;
-                    } catch (UnmarshalException e) {
-                        //ignore
-                    }
+                    Element el = (Element) o;
+                    System.out.println(el.getLocalName() + " " + el.getTextContent());
+                    extensionsFound = true;
                 }
                 
                 return (GPSFix) invocation.callRealMethod();
