@@ -1,8 +1,9 @@
-package com.sap.sailing.gwt.ui.client.shared.filter;
+package com.sap.sse.common.filter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import com.sap.sse.common.Util;
 
 public abstract class AbstractListFilter<T> {
 
@@ -20,13 +21,12 @@ public abstract class AbstractListFilter<T> {
     /**
      * Constructs a list based on the contents of {@link #all} and the current search phrase {@link #text}. 
      */
-    public List<T> applyFilter(String text, Iterable<T> all) {
-        List<String> inputText = Arrays.asList(text.split(" "));
+    public Iterable<T> applyFilter(Iterable<String> keywords, Iterable<T> all) {
         List<T> sortedList = new ArrayList<T>();
         if (all != null) {
-            if (inputText != null && !inputText.isEmpty()) {
+            if (keywords != null && !Util.isEmpty(keywords)) {
                 for (T t : all) {
-                    if (containsText(t, inputText)) {
+                    if (containsText(t, keywords)) {
                         sortedList.add(t);
                     }
                 }
@@ -49,7 +49,7 @@ public abstract class AbstractListFilter<T> {
      * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
      *         <code>false</code> if not
      */
-    private boolean containsText(T obj, List<String> wordsToFilter) {
+    private boolean containsText(T obj, Iterable<String> wordsToFilter) {
         boolean failed = false;
         for (String word : wordsToFilter) {
             String textAsUppercase = word.toUpperCase().trim();

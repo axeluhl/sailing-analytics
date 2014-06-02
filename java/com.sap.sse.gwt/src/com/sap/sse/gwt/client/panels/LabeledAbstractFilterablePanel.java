@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.ui.client.shared.panels;
+package com.sap.sse.gwt.client.panels;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
+import com.sap.sse.common.filter.AbstractListFilter;
 
 /**
  * This Panel contains a label and a text box. Text entered into the text box filters the {@link CellTable} passed to

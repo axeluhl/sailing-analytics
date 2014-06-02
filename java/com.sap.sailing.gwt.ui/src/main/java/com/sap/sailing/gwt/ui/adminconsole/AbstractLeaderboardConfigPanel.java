@@ -37,11 +37,11 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
         RegattasDisplayer, RaceSelectionChangeListener, TrackedRaceChangedListener, LeaderboardsDisplayer {

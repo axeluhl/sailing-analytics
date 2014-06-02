@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
