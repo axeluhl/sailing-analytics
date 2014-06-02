@@ -2994,7 +2994,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private URL getBaseURL(URL url) throws MalformedURLException {
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ null);
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
 
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(
