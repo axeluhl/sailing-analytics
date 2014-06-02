@@ -71,9 +71,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -173,6 +170,7 @@ import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -869,8 +867,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
+    public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own stuff here... Is it enough to pass on the remote reference URL to the client for leaderboard group URL construction?
     }
 
     @Override
@@ -882,7 +880,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+    public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
         return remoteSailingServerSet.getEventsOrException(ref);
     }
 
@@ -950,7 +948,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public Regatta createRegatta(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
-        Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
+        com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
                 boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -960,7 +958,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
+    public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
@@ -998,7 +996,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        return new Pair<Regatta, Boolean>(regatta, wasCreated);
+        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
     }
 
     @Override
@@ -1684,14 +1682,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
-        List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
+    public Iterable<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
+        List<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>> result = new ArrayList<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
                 for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
                     WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
                     if (windTracker != null) {
-                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                        result.add(new com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
                     }
                 }
             }
@@ -2480,11 +2478,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
+    public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+            return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
         }
         return null;
     }

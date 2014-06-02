@@ -11,8 +11,6 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -27,6 +25,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
+import com.sap.sse.common.Util;
 
 public class RaceLogScoringReplicator implements RaceColumnListener {
     
@@ -127,7 +126,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
-        List<Triple<Serializable, String, MaxPointsReason>> positioningList;
+        List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positioningList;
         
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
@@ -142,7 +141,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         }
         
         if (positioningList != null) {
-            for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
+            for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getA());
 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
@@ -166,7 +165,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
-            TimePoint timePoint, Triple<Serializable, String, MaxPointsReason> positionedCompetitor, Competitor competitor) {
+            TimePoint timePoint, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor, Competitor competitor) {
         boolean scoreHasBeenCorrected = false;
         
         MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
@@ -227,7 +226,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
      * @param positionedCompetitor the competitor whose rank shall be determined
      * @return the rank of the given positionedCompetitor
      */
-    private int getRankInPositioningListByRaceCommittee(List<Triple<Serializable, String, MaxPointsReason>> positioningList, Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
+    private int getRankInPositioningListByRaceCommittee(List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positioningList, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
         return positioningList.indexOf(positionedCompetitor) + 1; // indexOf gives the zero-based position requested competitor in the list, + 1 gives the one-based rank
     }
 

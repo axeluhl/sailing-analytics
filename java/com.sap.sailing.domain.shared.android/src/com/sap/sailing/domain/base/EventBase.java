@@ -2,10 +2,10 @@ package com.sap.sailing.domain.base;
 
 import java.net.URL;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.Named;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared
@@ -79,4 +79,6 @@ public interface EventBase extends Named, Renamable, WithID {
      *            <code>null</code>)
      */
     void setVideoURLs(Iterable<URL> videoURLs);
+
+    Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 }

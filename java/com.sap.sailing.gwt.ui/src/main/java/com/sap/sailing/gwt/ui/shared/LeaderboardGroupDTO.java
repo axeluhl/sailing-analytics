@@ -10,15 +10,13 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class LeaderboardGroupDTO extends NamedDTO {
+public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
     private static final long serialVersionUID = -2923229069598593687L;
-    public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
     public boolean displayLeaderboardsInReverseOrder;
     
@@ -31,7 +29,7 @@ public class LeaderboardGroupDTO extends NamedDTO {
      */
     private Date currentServerTime;
     
-    private UUID id;
+    LeaderboardGroupDTO() {}
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
@@ -40,8 +38,16 @@ public class LeaderboardGroupDTO extends NamedDTO {
      * <p>
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    public LeaderboardGroupDTO() {
-        this("", "", new ArrayList<StrippedLeaderboardDTO>());
+    public LeaderboardGroupDTO(UUID id) {
+        this(id, "");
+    }
+    
+    public LeaderboardGroupDTO(UUID id, String name) {
+        this(id, name, "");
+    }
+
+    public LeaderboardGroupDTO(UUID id, String name, String description) {
+        this(id, name, description, new ArrayList<StrippedLeaderboardDTO>());
     }
 
     /**
@@ -49,15 +55,11 @@ public class LeaderboardGroupDTO extends NamedDTO {
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    private LeaderboardGroupDTO(String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
-        super(name);
+    private LeaderboardGroupDTO(UUID id, String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
+        super(id, name);
         currentServerTime = new Date();
         this.description = description;
         this.leaderboards = leaderboards;
-    }
-    
-    public UUID getId() {
-        return id;
     }
     
     public boolean hasOverallLeaderboard() {
@@ -216,8 +218,4 @@ public class LeaderboardGroupDTO extends NamedDTO {
         return currentServerTime;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-    
 }

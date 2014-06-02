@@ -24,10 +24,9 @@ import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
+import com.sap.sse.common.Util;
 
 public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTest {
     static final Logger logger = Logger.getLogger(ConnectionResetAndReconnectTest.class.getName());
@@ -86,7 +85,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     @Before
     public void setUp() throws Exception {
         try {
-            Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
+            com.sap.sse.common.Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
                     true, /* master=null means create a new one */ null,
             /* replica=null means create a new one */null);
             masterReplicationDescriptor = MasterReplicationDescriptorMock.from(result.getB());

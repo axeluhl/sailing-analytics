@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.analyzing.impl;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;

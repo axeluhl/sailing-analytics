@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.common.Pair;
+import com.sap.sse.common.Util;
 
 public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeWithZoomProvider {
     private Date zoomStartTimepoint;
@@ -51,8 +51,8 @@ public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeW
         }
     }
     
-    public Pair<Date, Date> getTimeZoom() {
-        return new Pair<Date, Date>(zoomStartTimepoint, zoomEndTimepoint);
+    public Util.Pair<Date, Date> getTimeZoom() {
+        return new Util.Pair<Date, Date>(zoomStartTimepoint, zoomEndTimepoint);
     }
     
     public boolean isZoomed() {

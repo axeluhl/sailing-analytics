@@ -11,5 +11,6 @@ Export-Package: com.sap.sailing.xrr.resultimport,
 Import-Package: org.osgi.framework;version="1.6.0"
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- com.sap.sailing.resultimport
+ com.sap.sailing.resultimport,
+ com.sap.sse.common
 Bundle-Activator: com.sap.sailing.xrr.resultimport.impl.Activator

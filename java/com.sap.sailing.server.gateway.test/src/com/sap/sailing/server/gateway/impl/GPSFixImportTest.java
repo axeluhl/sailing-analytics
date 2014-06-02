@@ -14,12 +14,12 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesImportServlet;
 import com.sap.sailing.server.trackfiles.RouteConverterGPSFixImporterFactory;
+import com.sap.sse.common.Util.Pair;
 
 public class GPSFixImportTest {
     

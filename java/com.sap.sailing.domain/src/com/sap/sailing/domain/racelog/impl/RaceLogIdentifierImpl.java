@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 
@@ -21,8 +19,8 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
     }
 
     @Override
-    public Triple<String, String, String> getIdentifier() {
-        return new Util.Triple<String, String, String>(template.getParentObjectName(), raceColumnName, fleetName);
+    public com.sap.sse.common.Util.Triple<String, String, String> getIdentifier() {
+        return new com.sap.sse.common.Util.Triple<String, String, String>(template.getParentObjectName(), raceColumnName, fleetName);
     }
 
     @Override

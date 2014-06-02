@@ -39,8 +39,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -54,6 +52,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
+import com.sap.sse.common.Util;
 
 /**
  * Implements the connector to the SwissTiming Sail Master system. It uses a host name and port number to establish the
@@ -284,14 +283,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         String raceID = message.getSections()[1];
         String boatID = message.getSections()[2];
         int count = Integer.valueOf(message.getSections()[3]);
-        List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds = new ArrayList<Triple<Integer,Integer,Long>>();
+        List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds = new ArrayList<Util.Triple<Integer,Integer,Long>>();
         for (int i = 0; i < count; i++) {
             String[] details = message.getSections()[4+i].split(";");
             Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer.valueOf(details[0]); 
             Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]); 
             Long timeSinceStartInMilliseconds = details.length <= 2 || details[2].trim().length() == 0 ? null :
                 parseHHMMSSToMilliseconds(details[2]);
-            markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
+            markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Util.Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
         for (SailMasterListener listener : getListeners()) {
             try {
@@ -304,7 +303,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
-        List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
+        List<Util.Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
         for (SailMasterListener listener : getListeners()) {
             try {
                 listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
@@ -770,7 +769,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     @Override
-    public Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
+    public Map<Integer, Util.Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.TMD, raceID, boatID);
         String[] sections = response.getSections();
@@ -778,12 +777,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID, sections[2]);
         int count = Integer.valueOf(sections[3]);
-        Map<Integer, Pair<Integer, Long>> result = new HashMap<Integer, Pair<Integer, Long>>();
+        Map<Integer, Util.Pair<Integer, Long>> result = new HashMap<Integer, Util.Pair<Integer, Long>>();
         for (int i=0; i<count; i++) {
             String[] markTimeDetail = sections[4+i].split(";");
             Long millisecondsSinceStart = markTimeDetail.length <= 2 || markTimeDetail[2].trim().length() == 0 ? null :
                 parseHHMMSSToMilliseconds(markTimeDetail[2]);
-            result.put(Integer.valueOf(markTimeDetail[0]), new Pair<Integer, Long>(
+            result.put(Integer.valueOf(markTimeDetail[0]), new Util.Pair<Integer, Long>(
                     markTimeDetail.length <= 1 || markTimeDetail[1].trim().length() == 0 ? null :
                         Integer.valueOf(markTimeDetail[1]), millisecondsSinceStart));
         }
@@ -791,25 +790,25 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
-    public List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException {
+    public List<Util.Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.CAM, raceID);
         String[] sections = response.getSections();
         assertResponseType(MessageType.CAM, response);
         assertRaceID(raceID, sections[1]);
-        List<Triple<Integer, TimePoint, String>> result = parseClockAtMarkMessage(response);
+        List<Util.Triple<Integer, TimePoint, String>> result = parseClockAtMarkMessage(response);
         return result;
     }
 
-    private List<Triple<Integer, TimePoint, String>> parseClockAtMarkMessage(SailMasterMessage clockAtMarkMessage) throws ParseException {
+    private List<Util.Triple<Integer, TimePoint, String>> parseClockAtMarkMessage(SailMasterMessage clockAtMarkMessage) throws ParseException {
         assertMessageType(MessageType.CAM, clockAtMarkMessage);
-        List<Triple<Integer, TimePoint, String>> result = new ArrayList<Triple<Integer,TimePoint,String>>();
+        List<Util.Triple<Integer, TimePoint, String>> result = new ArrayList<Util.Triple<Integer,TimePoint,String>>();
         int count = Integer.valueOf(clockAtMarkMessage.getSections()[2]);
         for (int i=0; i<count; i++) {
             String[] clockAtMarkDetail = clockAtMarkMessage.getSections()[3+i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
                 new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1], clockAtMarkMessage.getRaceID()));
-            result.add(new Triple<Integer, TimePoint, String>(
+            result.add(new Util.Triple<Integer, TimePoint, String>(
                     markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
         }
         return result;

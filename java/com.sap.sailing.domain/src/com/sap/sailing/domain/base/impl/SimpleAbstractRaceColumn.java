@@ -5,10 +5,9 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Util;
 
 public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -3590156714385187908L;
@@ -32,8 +31,8 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
     
     @Override
-    public Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
-        return new Pair<Competitor, RaceColumn>(competitor, this);
+    public com.sap.sse.common.Util.Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
+        return new com.sap.sse.common.Util.Pair<Competitor, RaceColumn>(competitor, this);
     }
 
     public RaceColumnListeners getRaceColumnListeners() {

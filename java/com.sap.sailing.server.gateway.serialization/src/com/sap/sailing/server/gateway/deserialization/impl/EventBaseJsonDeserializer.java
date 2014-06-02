@@ -10,44 +10,55 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.EventBaseImpl;
+import com.sap.sailing.domain.base.impl.StrippedEventImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 
 public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
-    private JsonDeserializer<Venue> venueDeserializer;
+    private final JsonDeserializer<Venue> venueDeserializer;
+    private final JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer;
 
-    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer) {
+    public EventBaseJsonDeserializer(JsonDeserializer<Venue> venueDeserializer, JsonDeserializer<LeaderboardGroupBase> leaderboardGroupDeserializer) {
         this.venueDeserializer = venueDeserializer;
+        this.leaderboardGroupDeserializer = leaderboardGroupDeserializer;
     }
 
     public EventBase deserialize(JSONObject object) throws JsonDeserializationException {
-        UUID id = UUID.fromString((String) object.get(EventJsonSerializer.FIELD_ID));
-        String name = object.get(EventJsonSerializer.FIELD_NAME).toString();
-        Number startDate = (Number) object.get(EventJsonSerializer.FIELD_START_DATE);
-        Number endDate = (Number) object.get(EventJsonSerializer.FIELD_END_DATE);
+        UUID id = UUID.fromString((String) object.get(EventBaseJsonSerializer.FIELD_ID));
+        String name = object.get(EventBaseJsonSerializer.FIELD_NAME).toString();
+        Number startDate = (Number) object.get(EventBaseJsonSerializer.FIELD_START_DATE);
+        Number endDate = (Number) object.get(EventBaseJsonSerializer.FIELD_END_DATE);
         final Venue venue;
-        if (object.get(EventJsonSerializer.FIELD_VENUE) != null) {
-            JSONObject venueObject = Helpers.getNestedObjectSafe(object, EventJsonSerializer.FIELD_VENUE);
+        if (object.get(EventBaseJsonSerializer.FIELD_VENUE) != null) {
+            JSONObject venueObject = Helpers.getNestedObjectSafe(object, EventBaseJsonSerializer.FIELD_VENUE);
             venue = venueDeserializer.deserialize(venueObject);
         } else {
             venue = null;
         }
-        EventBaseImpl result = new EventBaseImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
-                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, true, id);
-        if (object.get(EventJsonSerializer.FIELD_IMAGE_URLS) != null) {
+        JSONArray leaderboardGroupsJson = (JSONArray) object.get(EventBaseJsonSerializer.FIELDS_LEADERBOARD_GROUPS);
+        List<LeaderboardGroupBase> leaderboardGroups = new ArrayList<LeaderboardGroupBase>();
+        if (leaderboardGroupsJson != null) {
+            for (Object lgJson : leaderboardGroupsJson) {
+                leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) lgJson));
+            }
+        }
+        EventBaseImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
+                endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups);
+        if (object.get(EventBaseJsonSerializer.FIELD_IMAGE_URLS) != null) {
             try {
-                result.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventJsonSerializer.FIELD_IMAGE_URLS)));
+                result.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_IMAGE_URLS)));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing image URLs for event "+name, e);
             }
         }
-        if (object.get(EventJsonSerializer.FIELD_VIDEO_URLS) != null) {
+        if (object.get(EventBaseJsonSerializer.FIELD_VIDEO_URLS) != null) {
             try {
-                result.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventJsonSerializer.FIELD_VIDEO_URLS)));
+                result.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_VIDEO_URLS)));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing video URLs for event "+name, e);
             }

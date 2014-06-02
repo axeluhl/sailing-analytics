@@ -11,6 +11,7 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
- com.sap.sailing.resultimport
+ com.sap.sailing.resultimport,
+ com.sap.sse.common
 Export-Package: com.sap.sailing.velum.resultimport,
  com.sap.sailing.velum.resultimport.impl

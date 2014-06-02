@@ -38,7 +38,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -48,6 +47,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util;
 
 /**
  * Exports all data from a leaderboard into XML format. Format is as follows:
@@ -97,7 +97,7 @@ public class LeaderboardData extends ExportAction {
         super(req, res, service);
     }
 
-    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
+    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
         addNamedElementWithValue(leaderboardElement, "display_name", leaderboard.getDisplayName());
@@ -177,7 +177,7 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
-    private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
@@ -400,7 +400,7 @@ public class LeaderboardData extends ExportAction {
         return raceElement;
     }
     
-    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
@@ -477,7 +477,7 @@ public class LeaderboardData extends ExportAction {
         return competitorElement;
     }
     
-    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
@@ -506,7 +506,7 @@ public class LeaderboardData extends ExportAction {
             
             TimePoint legFinishTime = competitorLeg.getFinishTime();
             competitorLegDataElement.addContent(createTimedXML("leg_started_time_", competitorLeg.getStartTime()));
-            Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
+            Util.Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
             if (maximumSpeed == null) {
                 legConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +" has not finished this leg! His maximum speed for this leg is not comparable to others!");
@@ -566,7 +566,7 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
-    private Element createDataConfidenceXML(Pair<Double, Vector<String>> confidenceAndMessages) {
+    private Element createDataConfidenceXML(Util.Pair<Double, Vector<String>> confidenceAndMessages) {
         Element confidenceDataElement = new Element("confidence");
         addNamedElementWithValue(confidenceDataElement, "simple_confidence_value", confidenceAndMessages.getA().doubleValue());
         Element messagesElement = new Element("messages");
@@ -577,7 +577,7 @@ public class LeaderboardData extends ExportAction {
         return confidenceDataElement;
     }
     
-    private Pair<Double, Vector<String>> checkData(TrackedLeg leg) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(TrackedLeg leg) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         TimePoint now = MillisecondsTimePoint.now();
         for (TrackedLegOfCompetitor competitorLeg : leg.getTrackedLegsOfCompetitors()) {
@@ -622,10 +622,10 @@ public class LeaderboardData extends ExportAction {
                 }
             }
         }
-        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+        return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
-    private Pair<Double, Vector<String>> checkData(TrackedRace race) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(TrackedRace race) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         TimePoint dateAtYear2000 = new MillisecondsTimePoint(946681200000l);
         if (race.getStartOfRace() == null || race.getStartOfRace().before(dateAtYear2000)) {
@@ -647,10 +647,10 @@ public class LeaderboardData extends ExportAction {
         if (race.isLive(MillisecondsTimePoint.now())) {
             messages.add("This race is live - data for this race will not be available until the race has been finished!");
         }
-        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+        return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
-    private Pair<Double, Vector<String>> checkData(Competitor competitor) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(Competitor competitor) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         if (competitor.getName() == null || competitor.getName().equals("")) {
             messages.add("Competitor " + competitor.getId() + " has no name!");
@@ -664,10 +664,10 @@ public class LeaderboardData extends ExportAction {
             messages.add("Either team for "+ competitor.getId() + " is null or nationality could not be determined");
             simpleConfidence -= 0.2;
         }
-        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+        return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
-    private Pair<Double, Vector<String>> checkData(Leaderboard leaderboard) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(Leaderboard leaderboard) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         int raceColumnCount = 0; int attachedRaceToColumnCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -698,7 +698,7 @@ public class LeaderboardData extends ExportAction {
             messages.add("The time point of the last modification for this leaderboard is very old.");
             simpleConfidence -= 0.4;
         }
-        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+        return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
     private int getSameDayGroupIndex(TrackedRace currentRace, TrackedRace raceBefore) {
@@ -726,13 +726,13 @@ public class LeaderboardData extends ExportAction {
         final Leaderboard leaderboard = getLeaderboard();
         TimePoint timeSpent = MillisecondsTimePoint.now();
         log.info("Starting XML export of " + leaderboard.getName());
-        Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
+        Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
         
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
         
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
+            Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
         
@@ -743,11 +743,11 @@ public class LeaderboardData extends ExportAction {
                 if (trackedRace != null && trackedRace.hasGPSData()) {
                     sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                     TimePoint timeSpentForRace = MillisecondsTimePoint.now();
-                    Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
+                    Util.Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
-                        Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
+                        Util.Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
                         legs.add(createLegXML(leg, leaderboard, ++legCounter, raceConfidenceAndErrorMessages, legConfidenceAndErrorMessages));
                     }
                     Element raceElement = createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages);

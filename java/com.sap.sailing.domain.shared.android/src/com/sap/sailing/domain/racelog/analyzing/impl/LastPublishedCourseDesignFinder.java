@@ -4,7 +4,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 
 public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer<CourseBase> {
 

@@ -6,13 +6,14 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.data.IPosition;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
@@ -73,7 +74,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     }
 
     @Override
-    protected void handleEvent(Triple<IControl, IPosition, Integer> event) {
+    protected void handleEvent(Util.Triple<IControl, IPosition, Integer> event) {
         if (received++ % 1000 == 0) {
             System.out.print("M");
             if ((received / 1000 + 1) % 80 == 0) {

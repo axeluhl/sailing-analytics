@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.mongodb.AlreadyRegisteredException;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -19,13 +18,13 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<Util.Pair<String, Integer>, Mongo> mongos;
+    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, Mongo> mongos;
     
-    private final Map<Util.Pair<String, Integer>, DB> dbs;
+    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, DB> dbs;
     
     public MongoDBServiceImpl() {
-        mongos = new HashMap<Util.Pair<String, Integer>, Mongo>();
-        dbs = new HashMap<Util.Pair<String,Integer>, DB>();
+        mongos = new HashMap<com.sap.sse.common.Util.Pair<String, Integer>, Mongo>();
+        dbs = new HashMap<com.sap.sse.common.Util.Pair<String,Integer>, DB>();
     }
 
     public MongoDBServiceImpl(MongoDBConfiguration configuration) {
@@ -55,7 +54,7 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
     
     private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
-        Util.Pair<String, Integer> key = new Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+        com.sap.sse.common.Util.Pair<String, Integer> key = new com.sap.sse.common.Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
         DB db = dbs.get(key);
         if (db == null) {
             Mongo mongo = mongos.get(key);

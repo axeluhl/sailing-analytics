@@ -18,7 +18,8 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 @Path("/v1/events")
@@ -31,7 +32,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents() {
-        JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
+        JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
             if (event.isPublic()) {
@@ -57,8 +58,8 @@ public class EventsResource extends AbstractSailingServerResource {
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(
-                    new CourseAreaJsonSerializer()));
+            JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(
+                    new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
             JSONObject eventJson = eventSerializer.serialize(event);
 
             String json = eventJson.toJSONString();

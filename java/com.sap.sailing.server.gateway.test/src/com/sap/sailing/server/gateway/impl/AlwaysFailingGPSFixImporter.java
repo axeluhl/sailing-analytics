@@ -9,7 +9,7 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 public class AlwaysFailingGPSFixImporter implements GPSFixImporter {
 
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
+    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
             throws FormatNotSupportedException, IOException {
         while (inputStream.read() != -1) {
             

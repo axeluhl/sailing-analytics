@@ -1,6 +1,7 @@
-package com.sap.sailing.gwt.ui.client.shared.panels;
+package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -11,8 +12,8 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to
@@ -110,7 +111,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     public void filter() {
         filtered.getList().clear();
-        filtered.getList().addAll(filterer.applyFilter(getTextBox().getText(), all));
+        Util.addAll(filterer.applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all), filtered.getList());
         filtered.refresh();
         sort();
     }

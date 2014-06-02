@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
+import static junit.framework.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -18,6 +20,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -29,7 +32,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
+public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {    
     @Test
     @Ignore
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
@@ -64,5 +67,19 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testLength(trackedRace.getTrack(comp2), 1);
         testLength(trackedRace.getOrCreateTrack(mark), 1);
         testLength(trackedRace.getOrCreateTrack(mark2), 1);
+    }
+    
+    @Test
+    public void metadataStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException {        
+        assertEquals(0, store.getNumberOfFixes(device));
+        assertEquals(null, store.getTimeRangeCoveredByFixes(device));
+
+        map(comp, device, 0, 600);
+
+        store.storeFix(device, createFix(100, 10, 20, 30, 40));
+        store.storeFix(device, createFix(200, 10, 20, 30, 40));
+        
+        assertEquals(2, store.getNumberOfFixes(device));
+        assertEquals(TimeRangeImpl.create(100, 200), store.getTimeRangeCoveredByFixes(device));
     }
 }

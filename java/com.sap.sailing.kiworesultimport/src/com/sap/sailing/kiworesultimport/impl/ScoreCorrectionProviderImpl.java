@@ -15,13 +15,13 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
 import com.sap.sailing.kiworesultimport.ZipFileParser;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {
     private static final long serialVersionUID = -4596215011753860781L;
@@ -38,17 +38,17 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
     }
 
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
             String eventName = regattaSummary.getEventName();
-            Set<Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
+            Set<Util.Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
             if (resultTimesForBoatClassNames == null) {
-                resultTimesForBoatClassNames = new HashSet<Pair<String, TimePoint>>();
+                resultTimesForBoatClassNames = new HashSet<Util.Pair<String, TimePoint>>();
                 result.put(eventName, resultTimesForBoatClassNames);
             }
-            resultTimesForBoatClassNames.add(new Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
+            resultTimesForBoatClassNames.add(new Util.Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
                     regattaSummary.getTimePointPublished()));
         }
         return result;

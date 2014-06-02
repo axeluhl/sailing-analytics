@@ -12,3 +12,4 @@ Import-Package: com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  org.osgi.framework;version="1.5.0"
+Require-Bundle: com.sap.sse.common

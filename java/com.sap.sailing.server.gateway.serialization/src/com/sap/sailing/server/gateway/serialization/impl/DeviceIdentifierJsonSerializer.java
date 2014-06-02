@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.SingleTypeBasedServiceFinderImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -15,6 +14,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonD
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
+import com.sap.sse.common.Util;
 
 public class DeviceIdentifierJsonSerializer implements JsonSerializer<DeviceIdentifier> {
     private static final Logger logger = Logger.getLogger(DeviceIdentifierJsonSerializer.class.getName());
@@ -38,7 +38,7 @@ public class DeviceIdentifierJsonSerializer implements JsonSerializer<DeviceIden
     public JSONObject serialize(DeviceIdentifier object) {
         JSONObject result = new JSONObject();
         DeviceIdentifierJsonHandler handler = serviceFinder.findService(object.getIdentifierType());
-        Pair<String, ? extends Object> pair;
+        Util.Pair<String, ? extends Object> pair;
         try {
             pair = handler.serialize(object);
             result.put(DeviceIdentifierJsonDeserializer.FIELD_DEVICE_TYPE, pair.getA());

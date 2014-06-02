@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
-public class EventBaseImpl implements EventBase {
+public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
 
     private String name;
@@ -24,14 +24,14 @@ public class EventBaseImpl implements EventBase {
     private ConcurrentLinkedQueue<URL> imageURLs;
     private ConcurrentLinkedQueue<URL> videoURLs;
 
-    public EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
+    protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
     }
 
     /**
      * @param venue must not be <code>null</code>
      */
-    public EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
+    protected EventBaseImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         assert venue != null;
         this.id = id;
         this.name = name;

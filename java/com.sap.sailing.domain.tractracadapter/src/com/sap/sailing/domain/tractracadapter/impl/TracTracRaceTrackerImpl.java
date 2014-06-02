@@ -27,8 +27,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -49,6 +47,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.model.lib.api.ModelLocator;
+import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -192,12 +191,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
-    private HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>> lastProgressPerID;
+    private HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>> lastProgressPerID;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
      */
-    private final Triple<URL, URI, URI> urls;
+    private final Util.Triple<URL, URI, URI> urls;
 
     /**
      * Tells if this tracker was created with a valid live URI. If not, the tracker will stop and unregister itself
@@ -302,7 +301,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.races = new HashSet<RaceDefinition>();
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
-        this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
+        this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
@@ -423,12 +422,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return trackedRegatta;
     }
 
-    static Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
-        return new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+    static Util.Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
+        return new Util.Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
     }
     
     @Override
-    public Triple<URL, URI, URI> getID() {
+    public Util.Triple<URL, URI, URI> getID() {
         return urls;
     }
 
@@ -524,7 +523,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             return;
         }
         Integer counter = 0;
-        final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
+        final Util.Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
         if (lastProgressPair != null) {
             Float lastProgress = lastProgressPair.getB();
             counter = lastProgressPair.getA();
@@ -547,7 +546,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
-        lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
+        lastProgressPerID.put(getID(), new Util.Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
 

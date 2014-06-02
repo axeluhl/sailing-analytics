@@ -2,8 +2,9 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 
 /**
  * Gives clients a way to refer to a specific set of races even though the {@link RaceDefinition} objects may not have

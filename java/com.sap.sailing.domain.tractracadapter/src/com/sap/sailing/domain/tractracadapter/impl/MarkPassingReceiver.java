@@ -12,13 +12,14 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.data.IControlPassing;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
@@ -53,7 +54,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
         getRaceSubscriber().unsubscribeControlPassings(listener);
     }
 
-    protected void handleEvent(Triple<IRaceCompetitor, IControlPassings, Void> event) {
+    protected void handleEvent(Util.Triple<IRaceCompetitor, IControlPassings, Void> event) {
         System.out.print("L"); // as in "Leg"
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
         if (trackedRace != null) {
