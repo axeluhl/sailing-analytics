@@ -12,7 +12,6 @@ import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
@@ -36,7 +35,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
-                Arrays.asList(DetailType.RACE_TIME_TRAVELED_UPWIND, DetailType.RACE_TIME_TRAVELED_DOWNWIND, DetailType.RACE_TIME_TRAVELED_REACHING));
+                Arrays.asList(DetailType.RACE_TIME_TRAVELED_UPWIND, DetailType.RACE_TIME_TRAVELED_DOWNWIND, DetailType.RACE_TIME_TRAVELED_REACHING), leaderboardPanel);
         setHorizontalAlignment(ALIGN_CENTER);
         this.raceNameProvider = raceNameProvider;
         this.stringMessages = stringMessages;
@@ -88,13 +87,13 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
         result.put(DetailType.RACE_TIME_TRAVELED_UPWIND,
                 new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_UPWIND, new RaceTimeTraveledUpwindInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RACE_TIME_TRAVELED_DOWNWIND,
                 new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_DOWNWIND, new RaceTimeTraveledDownwindInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RACE_TIME_TRAVELED_REACHING,
                 new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_REACHING, new RaceTimeTraveledReachingInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
         return result;
     }
@@ -172,8 +171,8 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     }
 
     @Override
-    protected void updateMinMax(LeaderboardDTO leaderboard) {
-        minmaxRenderer.updateMinMax(leaderboard.rows.values());
+    protected void updateMinMax() {
+        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
     }
 
     /**

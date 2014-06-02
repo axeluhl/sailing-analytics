@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -34,7 +33,7 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
             String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
-                Arrays.asList(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS));
+                Arrays.asList(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS), leaderboardPanel);
         setHorizontalAlignment(ALIGN_CENTER);
         this.stringMessages = stringMessages;
         this.columnStyle = columnStyle;
@@ -55,13 +54,13 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
 
         result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeSailedUpwindInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeSailedDownwindInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
                 new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeSailedReachingInSeconds(),
-                        detailHeaderStyle, detailColumnStyle));
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
         return result;
     }
@@ -141,8 +140,8 @@ public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> 
     }
 
     @Override
-    protected void updateMinMax(LeaderboardDTO leaderboard) {
-        minmaxRenderer.updateMinMax(leaderboard.rows.values());
+    protected void updateMinMax() {
+        minmaxRenderer.updateMinMax(getDisplayedLeaderboardRowsProvider());
     }
 
     /**
