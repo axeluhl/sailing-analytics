@@ -38,7 +38,7 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
@@ -95,7 +95,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         
-        for (Util.Pair<String, InputStream> file : files) {
+        for (Pair<String, InputStream> file : files) {
             final String fileName = file.getA();
             String fileExt = null;
             if (fileName.contains(".")) {
@@ -170,7 +170,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             return;
         }
 
-        Set<Util.Pair<String, InputStream>> files = new HashSet<>();
+        Set<Pair<String, InputStream>> files = new HashSet<>();
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items;
@@ -183,7 +183,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         String prefImporterType = null;
         for (FileItem item : items) {
             if (!item.isFormField())
-                files.add(new Util.Pair<String, InputStream>(item.getName(), item.getInputStream()));
+                files.add(new Pair<String, InputStream>(item.getName(), item.getInputStream()));
             else {
                 if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
                     prefImporterType = item.getString();
