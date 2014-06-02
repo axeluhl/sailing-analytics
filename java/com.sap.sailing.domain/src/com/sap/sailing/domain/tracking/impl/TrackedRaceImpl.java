@@ -75,6 +75,8 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -2475,15 +2477,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     try {
                         logger.info("Started loading competitor tracks for " + getRace().getName());
                         for (Competitor competitor : race.getCompetitors()) {
-                            gpsFixStore.loadCompetitorTrack(
-                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
-                                    competitor);
+                            try {
+                                gpsFixStore.loadCompetitorTrack(
+                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
+                                        competitor);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load track for " + competitor);
+                            }
                         }
                         logger.info("Finished loading competitor tracks for " + getRace().getName());
                         logger.info("Started loading mark tracks for " + getRace().getName());
                         for (Mark mark : getMarks()) {
-                            gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
-                                    mark);
+                            try {
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
+                                        mark);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load track for " + mark);
+                            }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
 

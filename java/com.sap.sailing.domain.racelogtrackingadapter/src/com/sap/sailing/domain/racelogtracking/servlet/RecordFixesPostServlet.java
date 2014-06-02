@@ -3,11 +3,14 @@ package com.sap.sailing.domain.racelogtracking.servlet;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -55,7 +58,11 @@ public class RecordFixesPostServlet extends
         List<GPSFix> fixes = domainObject.getC();
 
         for (GPSFix fix : fixes) {
-            getService().getGPSFixStore().storeFix(device, fix);
+            try {
+                getService().getGPSFixStore().storeFix(device, fix);
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Could not load store fix from device " + device);
+            }
         }
 
         return null;

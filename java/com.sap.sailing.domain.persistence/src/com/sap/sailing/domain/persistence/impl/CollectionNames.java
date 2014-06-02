@@ -79,4 +79,9 @@ public enum CollectionNames {
      * Stores {@link GPSFix}es
      */
     GPS_FIXES,
+    
+    /**
+     * Metadata for the GPSFixes, grouped by Device Identifier.
+     */
+    GPS_FIXES_METADATA,
 }

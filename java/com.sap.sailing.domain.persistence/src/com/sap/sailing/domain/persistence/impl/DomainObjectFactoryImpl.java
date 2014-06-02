@@ -71,6 +71,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
@@ -79,6 +80,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -224,7 +226,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public static TimePoint loadTimePoint(DBObject object, FieldNames field) {
         return loadTimePoint(object, field.name());
     }
-
+    
+    public static TimeRange loadTimeRange(DBObject object, FieldNames field) {
+        DBObject timeRangeObj = (DBObject) object.get(field.name());
+        if (timeRangeObj == null) {
+            return null;
+        }
+        TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
+        TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
+        return new TimeRangeImpl(from, to);
+    }
     /**
      * Loads a {@link TimePoint} on the given object at {@link FieldNames#TIME_AS_MILLIS}.
      */

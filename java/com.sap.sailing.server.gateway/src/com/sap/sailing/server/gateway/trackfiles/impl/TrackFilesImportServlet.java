@@ -24,30 +24,25 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.json.simple.JSONArray;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.DeviceWithTimeRange;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.DeviceWithTimeRangeJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 /**
  * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
- * Returns a JSON array of generated device identifiers.<p>
+ * Returns a newline-separated list of the device identifiers genearted by the import.<p>
  * 
  * The available importers are tried one by one in the following order, until the first
  * one is found that does not fail with an {@link FormatNotSupportedException}:
@@ -68,7 +63,11 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
 
     public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
-        getService().getGPSFixStore().storeFix(deviceIdentifier, fix);
+        try {
+            getService().getGPSFixStore().storeFix(deviceIdentifier, fix);
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
+        }
     }
     
     public Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
@@ -90,9 +89,9 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return result;
     }
     
-    public Iterable<DeviceWithTimeRange> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
+    public Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
-        final Set<DeviceIdentifier> deviceIds = new HashSet<>();
+        final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         
@@ -134,7 +133,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 try {
                     importer.importFixes(in, new Callback() {
                         @Override
-                        public void addFix(GPSFix fix, DeviceIdentifier device) {
+                        public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                             deviceIds.add(device);
                             
                             storeFix(fix, device);
@@ -160,11 +159,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 }
             }
         }
-        List<DeviceWithTimeRange> result = new ArrayList<>();
-        for (DeviceIdentifier deviceId : deviceIds) {
-            result.add(new DeviceWithTimeRangeImpl(deviceId, new TimeRangeImpl(from.get(deviceId), to.get(deviceId))));
-        }
-        return result;
+        return deviceIds;
     }
 
     @SuppressWarnings("unchecked")
@@ -201,20 +196,16 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                     findService(prefImporterType);
         }
         
-        final Iterable<DeviceWithTimeRange> mappingList = importFiles(files, preferredImporter);
+        final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files, preferredImporter);
         
         //setJsonResponseHeader(resp);
         //DO NOT set a JSON response header. This causes the browser to wrap the response in a
         //<pre> tag when uploading from GWT, as this is an AJAX-request inside an iFrame.
         resp.setContentType("text/html");
         
-        TypeBasedServiceFinder<DeviceIdentifierJsonHandler> serviceFinder =
-                getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class);
-        JsonSerializer<DeviceWithTimeRange> serializer = new DeviceWithTimeRangeJsonSerializer(new DeviceIdentifierJsonSerializer(serviceFinder));
-        JSONArray array = new JSONArray();
-        for (DeviceWithTimeRange mapping : mappingList) {
-            array.add(serializer.serialize(mapping));
+        for (TrackFileImportDeviceIdentifier mapping : mappingList) {
+            String stringRep = mapping.getId().toString();
+            resp.getWriter().println(stringRep);
         }
-        array.writeJSONString(resp.getWriter());
     }
 }

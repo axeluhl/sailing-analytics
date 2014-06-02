@@ -32,9 +32,11 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
@@ -258,7 +260,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                     if (oldMappings != null) {
                         for (DeviceMapping<Mark> newMapping : newMappings.get(mark)) {
                             if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                                gpsFixStore.loadMarkTrack(track, newMapping);
+                                try {
+                                    gpsFixStore.loadMarkTrack(track, newMapping);
+                                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                    logger.log(Level.WARNING, "Could not load mark track " + newMapping.getMappedTo());
+                                }
                             }
                         }
                     }
@@ -297,7 +303,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
                     for (DeviceMapping<Competitor> newMapping : newMappings.get(competitor)) {
                         if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                            gpsFixStore.loadCompetitorTrack(track, newMapping);
+                            try {
+                                gpsFixStore.loadCompetitorTrack(track, newMapping);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load competitor track " + newMapping.getMappedTo());
+                            }
                         }
                     }
                 }
