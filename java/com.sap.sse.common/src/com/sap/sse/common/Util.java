@@ -316,4 +316,16 @@ public class Util {
         }
         return result.toString();
     }
+
+    public static String join(String separator, Iterable<? extends Named> nameds) {
+        return join(separator, toArray(nameds, new Named[size(nameds)]));
+    }
+
+    public static String join(String separator, Named... nameds) {
+        String[] strings = new String[nameds.length];
+        for (int i=0; i<nameds.length; i++) {
+            strings[i] = nameds[i].getName();
+        }
+        return join(separator, strings);
+    }
 }
