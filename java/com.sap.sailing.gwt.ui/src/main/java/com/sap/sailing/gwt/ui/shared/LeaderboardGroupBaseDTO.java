@@ -10,6 +10,8 @@ public class LeaderboardGroupBaseDTO extends NamedDTO {
     public String description;
     private boolean hasOverallLeaderboard;
 
+    LeaderboardGroupBaseDTO() {} // for deserialization
+    
     public LeaderboardGroupBaseDTO(UUID id, String name) {
         super(name);
         this.id = id;
