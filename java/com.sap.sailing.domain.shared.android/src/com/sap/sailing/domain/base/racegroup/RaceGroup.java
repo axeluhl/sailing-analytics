@@ -4,8 +4,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sse.common.Named;
 
 /**
  * A {@link RaceGroup} is an abstract representation of a set of races managed in fleets and series.

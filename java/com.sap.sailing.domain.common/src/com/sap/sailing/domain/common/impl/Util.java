@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 public class Util extends com.sap.sse.common.Util {
     public static String join(String separator, Iterable<? extends Named> nameds) {

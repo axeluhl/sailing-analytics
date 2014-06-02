@@ -28,7 +28,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.CompetitorResults;
@@ -42,6 +41,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sse.common.Named;
 
 public class PositioningFragment extends RaceDialogFragment {
     

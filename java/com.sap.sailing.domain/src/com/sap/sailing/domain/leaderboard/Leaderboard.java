@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 
 /**

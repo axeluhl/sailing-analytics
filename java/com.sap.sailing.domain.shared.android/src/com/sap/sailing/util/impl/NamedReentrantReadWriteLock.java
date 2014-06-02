@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implements Named {
     private static final long serialVersionUID = 2906084982209339774L;
