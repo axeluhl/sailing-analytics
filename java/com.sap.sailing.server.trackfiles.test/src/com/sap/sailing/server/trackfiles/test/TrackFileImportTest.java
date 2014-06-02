@@ -39,7 +39,7 @@ public class TrackFileImportTest {
     
     @Test
     public void testKmlOnlyLatLong() throws IOException, FormatNotSupportedException {
-        InputStream in = getClass().getResourceAsStream("/sam002903 - COMPETITORS.kml");
+        InputStream in = getClass().getResourceAsStream("/Cardiff Race22 - COMPETITORS.kml");
         new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
             public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
