@@ -2948,26 +2948,53 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<EventDTO> getEvents() {
+    public List<EventDTO> getEvents() throws MalformedURLException {
+        String requestBaseURL = getRequestBaseURL().toString();
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
             EventDTO eventDTO = convertToEventDTO(event);
+            eventDTO.setBaseURL(requestBaseURL);
             result.add(eventDTO);
         }
         return result;
     }
 
     @Override
-    public List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers() {
-        List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
+    public List<EventDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
+        List<EventDTO> result = new ArrayList<>();
+        for (EventDTO localEvent : getEvents()) {
+            result.add(localEvent);
+        }
         for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
                         getService().getPublicEventsOfAllSailingServers().entrySet()) {
             final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
             final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final RemoteSailingServerReferenceDTO sailingServerDTO = createRemoteSailingServerReferenceDTO(serverRef, eventsOrException);
-            result.add(sailingServerDTO);
+            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
+            String baseURL = getBaseURL(serverRef.getURL()).toString();
+            if (remoteEvents != null) {
+                for (EventBase remoteEvent : remoteEvents) {
+                    EventDTO remoteEventDTO = convertToEventDTO(remoteEvent);
+                    remoteEventDTO.setBaseURL(baseURL);
+                    result.add(remoteEventDTO);
+                }
+            }
         }
         return result;
+    }
+
+    /**
+     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
+     * to <code>http://sapsailing.com</code>.
+     * @throws MalformedURLException 
+     */
+    private URL getRequestBaseURL() throws MalformedURLException {
+        final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
+        final URL baseURL = getBaseURL(url);
+        return baseURL;
+    }
+
+    private URL getBaseURL(URL url) throws MalformedURLException {
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ null);
     }
 
     private RemoteSailingServerReferenceDTO createRemoteSailingServerReferenceDTO(

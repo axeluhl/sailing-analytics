@@ -870,7 +870,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own stuff here... Is it enough to pass on the remote reference URL to the client for leaderboard group URL construction?
     }
 
     @Override

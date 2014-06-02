@@ -91,9 +91,9 @@ public interface SailingService extends RemoteService {
     
     List<RegattaDTO> getRegattas();
 
-    List<EventDTO> getEvents();
+    List<EventDTO> getEvents() throws Exception;
 
-    List<RemoteSailingServerReferenceDTO> getPublicEventsOfAllSailingServers();
+    List<EventDTO> getPublicEventsOfAllSailingServers() throws Exception;
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws Exception;
 
