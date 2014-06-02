@@ -13,7 +13,7 @@ import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.ParserResult;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -74,7 +74,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         for (BaseRoute route : routes) {
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
             String routeName = route.getName();
-            DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, routeName);
+            TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, routeName);
             for (BaseNavigationPosition p : positions) {
                 try {
                     addFixAndInfer(callback, inferSpeedAndBearing, convertToGPSFix(p), device);

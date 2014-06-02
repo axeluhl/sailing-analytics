@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.gpx.binding11.WptType;
 
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.impl.BaseRouteConverterGPSFixImporterImpl;
 import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
@@ -49,7 +49,7 @@ public class RouteConverterGpx11ExtensionsTest {
 
         importer.importFixes(in, new com.sap.sailing.domain.trackimport.GPSFixImporter.Callback() {
             @Override
-            public void addFix(GPSFix fix, DeviceIdentifier device) {
+            public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
             }
         }, false, "source");
         
