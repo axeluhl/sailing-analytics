@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -323,7 +324,7 @@ public interface SailingServiceAsync {
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
-	void getPublicEventsOfAllSailingServers(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
+    void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
      * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the

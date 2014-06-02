@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 public class RemoteSailingServerReferenceDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -4209262742778693873L;
     private String url;
-    private Iterable<EventDTO> events;
+    private Iterable<EventBaseDTO> events;
     
     /**
      * The error message is usually filled in case {@link #events} is <code>null</code> and gives a hint about the
@@ -22,14 +22,14 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO implements IsSeria
     }
 
     public RemoteSailingServerReferenceDTO(String name, String url) {
-        this(name, url, Collections. <EventDTO> emptyList());
+        this(name, url, Collections. <EventBaseDTO> emptyList());
     }
     
-    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventDTO> events) {
+    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventBaseDTO> events) {
         this(name, url, events, /* error message */ null);
     }
     
-    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventDTO> events, String lastErrorMessage) {
+    public RemoteSailingServerReferenceDTO(String name, String url, Iterable<EventBaseDTO> events, String lastErrorMessage) {
         super(name);
         this.url = url;
         this.events = events;
@@ -44,7 +44,7 @@ public class RemoteSailingServerReferenceDTO extends NamedDTO implements IsSeria
         return url;
     }
 
-    public Iterable<EventDTO> getEvents() {
+    public Iterable<EventBaseDTO> getEvents() {
         return events;
     }
 
