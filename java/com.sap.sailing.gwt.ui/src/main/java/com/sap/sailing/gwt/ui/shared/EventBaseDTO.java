@@ -29,15 +29,12 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      */
     private String baseURL;
 
-
+    EventBaseDTO() {} // for serialization only
+    
     public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         this.leaderboardGroups = leaderboardGroups;
     }
     
-    public EventBaseDTO(String name) {
-        this(name, new ArrayList<LeaderboardGroupBaseDTO>());
-    }
-
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
         this.leaderboardGroups = leaderboardGroups;

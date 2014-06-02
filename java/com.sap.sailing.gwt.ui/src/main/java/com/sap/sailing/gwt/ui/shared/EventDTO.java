@@ -10,7 +10,7 @@ public class EventDTO extends EventBaseDTO {
 
     private Date currentServerTime;
     
-    private final List<LeaderboardGroupDTO> leaderboardGroups; // keeps the more specific type accessible in a type-safe way
+    private List<LeaderboardGroupDTO> leaderboardGroups; // keeps the more specific type accessible in a type-safe way
     
     public EventDTO() {
         this(new ArrayList<LeaderboardGroupDTO>());
