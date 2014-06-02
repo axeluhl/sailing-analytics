@@ -6,6 +6,6 @@ package com.sap.sse.common.search;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Searchable {
-    Result query(Query query);
+public interface Searchable<H extends Hit> {
+    Result<H> query(Query query);
 }
