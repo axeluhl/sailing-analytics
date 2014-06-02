@@ -29,6 +29,8 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      */
     private Date currentServerTime;
     
+    LeaderboardGroupDTO() {}
+    
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
      * the leaderboards. The {@link #currentServerTime} will be set to the creation time on the system that creates this
@@ -36,10 +38,6 @@ public class LeaderboardGroupDTO extends LeaderboardGroupBaseDTO {
      * <p>
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    public LeaderboardGroupDTO() {
-        this(UUID.randomUUID());
-    }
-    
     public LeaderboardGroupDTO(UUID id) {
         this(id, "");
     }
