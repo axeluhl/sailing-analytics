@@ -2,43 +2,16 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-    <ui:style>
-.sitefooter {
-  font-size: 16px;
-  font-size: 1rem;
-  background: #333;
-  border-top: 5px solid #fff;
-  color: #fff;
-  height: 4.6875em;
-  line-height: 4.375em;
-  width: 100%;
-}
-.sitefooter_copyright {
-  font-weight: 600;
-}
-.sitefooter_links {
-  text-align: right;
-  font-size: 0.9375em;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-.sitefooter_links_link {
-  display: inline-block;
-  color: #fff;
-  text-decoration: none;
-  margin-right: 3.75em;
-}
-.sitefooter_links_link:last-child {
-  margin-right: 0;
-}
-</ui:style>
-        <g:HTMLPanel>
-<footer class="{style.sitefooter}">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
+    <g:HTMLPanel>
+<!-- Website footer-->
+<footer class="{local_res.css.sitefooter}">
   <div class="{res.mainCss.grid}">
-    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
-    <div class="{res.mainCss.small6} {res.mainCss.columns} {style.sitefooter_links}"><a href="" class="{style.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{style.sitefooter_links_link}">Privacy</a></div>
+    <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
+    <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.sitefooter_links}"><a href="" class="{local_res.css.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{local_res.css.sitefooter_links_link}">Privacy</a></div>
   </div>
 </footer>
-        </g:HTMLPanel>
+    </g:HTMLPanel>
 </ui:UiBinder>

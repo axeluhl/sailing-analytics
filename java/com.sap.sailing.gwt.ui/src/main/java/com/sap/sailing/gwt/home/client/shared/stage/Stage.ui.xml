@@ -14,7 +14,7 @@
 			</header>
 			<div class="{local_res.css.stage_band}">
 				<div class="{res.mainCss.grid}">
-					<div class="{res.mainCss.small12} {res.mainCss.columns}">
+					<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 						<div class="{local_res.css.stage_band_message}"><g:Label ui:field='message2' />&nbsp;-
 						</div>
 						<div class="{local_res.css.stage_band_name}"><g:Label ui:field='name' /></div>

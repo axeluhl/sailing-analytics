@@ -6,6 +6,10 @@
  
    	<g:HTMLPanel>
    	    <s:stage.Stage ui:field='stage'/>
-   	</g:HTMLPanel>
+   	    <s:mainsponsors.MainSponsors ui:field='mainSponsors'/>
+   	    <s:mainevents.MainEvents ui:field='mainEvents'/>
+   	    <s:mainmedia.MainMedia ui:field='mainMedia'/>
+   	    <s:socialfooter.SocialFooter ui:field='socialFooter'/>
+	</g:HTMLPanel>
    		
 </ui:UiBinder>    

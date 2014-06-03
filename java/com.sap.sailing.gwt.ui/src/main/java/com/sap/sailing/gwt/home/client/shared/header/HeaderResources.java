@@ -20,6 +20,9 @@ public interface HeaderResources extends ClientBundle {
         String sitenavigation_linksearch();
     }
     
-    @Source("com/sap/sailing/gwt/ui/client/images/logo.png")
+    @Source("com/sap/sailing/gwt/home/images/logo.png")
     ImageResource logo();
+
+    @Source("com/sap/sailing/gwt/home/images/search-icon.png")
+    ImageResource searchIcon();
 }

@@ -12,7 +12,7 @@ public class Footer extends Composite {
     }
 
     public Footer() {
-        super();
+        FooterResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
 }

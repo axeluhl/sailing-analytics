@@ -70,78 +70,72 @@
 .smalloffset11 {
   margin-left: 91.6666666666667% !important;
 }
+.showonsmall {
+  display: inherit !important;
+}
+.hideonsmall {
+  display: none !important;
+}
+.showonmedium {
+  display: none !important;
+}
+.hideonmedium {
+  display: inherit !important;
+}
+.showonlarge {
+  display: none !important;
+}
+.hideonlarge {
+  display: inherit !important;
+}
 
 .medium1 {
-  width: 8.3333333333333%;
 }
 .medium2 {
-  width: 16.6666666666667%;
 }
 .medium3 {
-  width: 25%;
 }
 .medium4 {
-  width: 33.3333333333333%;
 }
 .medium5 {
-  width: 41.6666666666667%;
 }
 .medium6 {
-  width: 50%;
 }
 .medium7 {
-  width: 58.3333333333333%;
 }
 .medium8 {
-  width: 66.6666666666667%;
 }
 .medium9 {
-  width: 75%;
 }
 .medium10 {
-  width: 83.3333333333333%;
 }
 .medium11 {
-  width: 91.6666666666667%;
 }
 .medium12 {
-  width: 100%;
 }
 .mediumoffset0 {
-  margin-left: 0% !important;
 }
 .mediumoffset1 {
-  margin-left: 8.3333333333333% !important;
 }
 .mediumoffset2 {
-  margin-left: 16.6666666666667% !important;
 }
 .mediumoffset3 {
-  margin-left: 25% !important;
 }
 .mediumoffset4 {
-  margin-left: 33.3333333333333% !important;
 }
 .mediumoffset5 {
-  margin-left: 41.6666666666667% !important;
 }
 .mediumoffset6 {
-  margin-left: 50% !important;
 }
 .mediumoffset7 {
-  margin-left: 58.3333333333333% !important;
 }
 .mediumoffset8 {
-  margin-left: 66.6666666666667% !important;
 }
 .mediumoffset9 {
-  margin-left: 75% !important;
 }
 .mediumoffset10 {
-  margin-left: 83.3333333333333% !important;
 }
 .mediumoffset11 {
-  margin-left: 91.6666666666667% !important;
 }
 
 .large1 {
@@ -193,43 +187,38 @@
 .largeoffset11 {
 }
 
-.showonsmall {
-  display: none !important;
+.column,
+.columns {
+  float: left;
+  padding: 0 0.9375rem;
+  position: relative;
+  width: 100%;
 }
-.hideonsmall {
-  display: inherit !important;
-}
-.showonmedium {
-  display: inherit !important;
-}
-.hideonmedium {
-  display: none !important;
-}
-.showonlarge {
-  display: none !important;
-}
-.hideonlarge {
-  display: inherit !important;
+.column img,
+.columns img {
+  max-width: 100%;
+  height: auto;
+  ms-interpolation-mode: bicubic;
 }
 
 .column.smallcentered,
 .columns.smallcentered {
-}
-.column.smalluncentered,
-.columns.smalluncentered {
-}
-
-.column.mediumcentered,
-.columns.mediumcentered {
   margin-left: auto;
   margin-right: auto;
   float: none;
 }
-.column.mediumuncentered,
-.columns.mediumuncentered {
+.column.smalluncentered,
+.columns.smalluncentered {
   margin-left: 0;
   margin-right: 0;
   float: left !important;
+}
+
+.column.mediumcentered,
+.columns.mediumcentered {
+}
+.column.mediumuncentered,
+.columns.mediumuncentered {
 }
 
 .column.largecentered,

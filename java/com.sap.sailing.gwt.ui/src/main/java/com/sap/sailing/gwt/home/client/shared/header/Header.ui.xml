@@ -9,10 +9,10 @@
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
 			<div class="{res.mainCss.grid}">
-				<div class="{res.mainCss.small4} {res.mainCss.columns}">
+				<div class="{res.mediaCss.small4} {res.mediaCss.columns}">
 					<g:Image resource="{local_res.logo}" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
 				</div>
-				<div class="{res.mainCss.small8} {res.mainCss.columns}">
+				<div class="{res.mediaCss.small8} {res.mediaCss.columns}">
 					<nav class="{local_res.css.sitenavigation}">
 						<g:Anchor ui:field="startPageLink"
 							styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" href="javascript:;"/>

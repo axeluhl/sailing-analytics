@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainsponsors.MainSponsorsResources" />
+    <g:HTMLPanel>
+<!-- A box with a sponsoring and solution teaser-->
+<div class="{res.mainCss.mainsection} {local_res.css.mainsponsors}">
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
+      <h3>Solutions</h3>
+      <figure><g:Image resource="{local_res.solutionTeaserImage}" altText="Solution" />
+        <figcaption>{solution.imageCaption} <a href="#">Read more</a></figcaption>
+      </figure>
+    </div>
+    <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
+      <h3>Sponsored Teams</h3>
+      <figure><g:Image resource="{local_res.sponsorTeaserImage}" altText="Sponsor" />
+        <figcaption>{sponsor.imageCaption} <a href="#">Read more</a></figcaption>
+      </figure>
+    </div>
+  </div>
+</div>
+    </g:HTMLPanel>
+</ui:UiBinder>
