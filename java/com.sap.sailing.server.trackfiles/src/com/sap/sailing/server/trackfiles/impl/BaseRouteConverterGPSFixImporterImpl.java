@@ -56,7 +56,6 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
     @Override
     public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
             throws IOException, FormatNotSupportedException {
-        //TODO dirty hack, because no public read method for inputstream and custom list of formats
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;
         try {
