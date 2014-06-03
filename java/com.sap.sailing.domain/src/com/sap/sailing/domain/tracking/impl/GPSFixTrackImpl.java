@@ -671,7 +671,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 0.9, relativeTo);
         speeds.add(speedWithConfidence);
         double bearingConfidence = 0.9;
-        if (speed.getKnots() < 0.01) {
+        if (speed.getKnots() < 0.001) {
             bearingConfidence = 0;
         }
         bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
