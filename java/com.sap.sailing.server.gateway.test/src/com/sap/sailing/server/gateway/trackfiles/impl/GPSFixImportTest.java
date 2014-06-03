@@ -2,20 +2,15 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
@@ -66,14 +61,19 @@ public class GPSFixImportTest {
     
     @Test
     public void testReusingImportStream() throws IOException {
-        TrackFilesImportServlet servlet = spy(new TrackFilesImportServlet());
-        when(servlet.getGPSFixImporters(anyString())).thenReturn(Arrays.asList((GPSFixImporter) RouteConverterGPSFixImporterFactory.INSTANCE.createRouteConverterGPSFixImporter()));
-        doAnswer(new Answer<Void>() {
+        TrackFilesImportServlet servlet = new TrackFilesImportServlet() {
+            private static final long serialVersionUID = -7636477441858728847L;
+
             @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                return null;
+            public Collection<GPSFixImporter> getGPSFixImporters(String type) {
+                return Arrays.asList((GPSFixImporter) RouteConverterGPSFixImporterFactory.INSTANCE
+                        .createRouteConverterGPSFixImporter());
             }
-        }).when(servlet).storeFix(any(GPSFix.class), any(DeviceIdentifier.class));
+
+            @Override
+            public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
+            }
+        };
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
         servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", in)), new AlwaysFailingGPSFixImporter(-1));
         // getting to here without errors is good enough
