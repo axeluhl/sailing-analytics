@@ -98,7 +98,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         Collections.sort(ccs, new Comparator<CountryCode>() {
             @Override
             public int compare(CountryCode o1, CountryCode o2) {
-                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode());
+                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode(), /* nullIsLess */ true);
             }
         });
         for (CountryCode cc : ccs) {

@@ -270,17 +270,22 @@ public class Util {
         return result;
     }
 
-    public static <T> int compareToWithNull(Comparable<T> o1, T o2) {
+    /**
+     * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
+     * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
+     * @param nullIsLess TODO
+     */
+    public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
         final int result;
         if (o1 == null) {
             if (o2 == null) {
                 result = 0;
             } else {
-                result = -1;
+                result = nullIsLess ? -1 : 1;
             }
         } else {
             if (o2 == null) {
-                result = 1;
+                result = nullIsLess ? 1 : -1;
             } else {
                 result = o1.compareTo(o2);
             }

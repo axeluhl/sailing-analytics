@@ -31,7 +31,7 @@ import com.sap.sse.common.search.ResultImpl;
  */
 public class RegattaByKeywordSearchService {
     Result<RegattaSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
-        ResultImpl<RegattaSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker());
+        ResultImpl<RegattaSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
         AbstractListFilter<Regatta> regattaFilter = new AbstractListFilter<Regatta>() {
             @Override
             public Iterable<String> getStrings(Regatta regatta) {
