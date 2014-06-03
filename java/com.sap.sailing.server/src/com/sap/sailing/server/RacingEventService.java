@@ -67,6 +67,8 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -552,4 +554,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * or, if fetching the event list from the remote server did fail, the exception for which it failed.
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
+
+    Result<RegattaSearchResult> search(KeywordQuery query);
 }

@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -22,7 +23,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
  * @author Axel Uhl (d043530)
  *
  */
-public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
+public class CreateTrackedRace extends AbstractRaceOperation<DynamicTrackedRace> {
     private static final long serialVersionUID = 5084401060896514911L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
@@ -73,7 +74,7 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     }
 
     @Override
-    public TrackedRace internalApplyTo(RacingEventService toState) {
+    public DynamicTrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore, 
         		gpsFixStore == null ? EmptyGPSFixStore.INSTANCE : gpsFixStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);

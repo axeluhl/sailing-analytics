@@ -11,4 +11,6 @@ public interface Result<H extends Hit> {
      * The query for which this is the result. Useful when multiple queries have been fired concurrently.
      */
     Query getQuery();
+    
+    Iterable<H> getHits();
 }

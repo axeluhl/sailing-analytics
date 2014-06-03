@@ -93,7 +93,7 @@ public abstract class TrackBasedTest {
      *            tracked race returned by this method) is important because otherwise confidences of wind readouts may
      *            be ridiculously low.
      */
-    protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
+    public static DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, regattaName, boatClass, /* trackedRegattaRegistry */ null,
