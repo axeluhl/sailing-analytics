@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import slash.common.type.CompactCalendar;
@@ -67,7 +68,11 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
             if (result == null) {
                 throw new FormatNotSupportedException();
             }
-            routes = result.getAllRoutes();
+            if (result.isSuccessful()) {
+                routes = result.getAllRoutes();
+            } else {
+                routes = Collections.emptyList();
+            }
         } catch (Exception e) {
             throw new IOException(e);
         }
