@@ -63,8 +63,8 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
             Method m = NavigationFormatParser.class.getDeclaredMethod("read", InputStream.class, Integer.TYPE,
                     CompactCalendar.class, List.class);
             m.setAccessible(true);
-            ParserResult result = (ParserResult) m.invoke(parser, inputStream, /* read buffer size; 1MB should be
-            sufficient to tell whether the format is understood or not */ 10 * 1024 * 1024, null, supportedReadFormats);
+            ParserResult result = parser.read(inputStream, /* read buffer size; 1GB max size as
+            RouteConverter currently buffers all streams, also the successful ones... */ 1024 * 1024 * 1024, null, supportedReadFormats);
             if (result == null) {
                 throw new FormatNotSupportedException();
             }
