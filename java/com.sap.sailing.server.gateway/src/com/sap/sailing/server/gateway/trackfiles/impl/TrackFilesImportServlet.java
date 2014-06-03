@@ -41,19 +41,21 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
- * Returns a newline-separated list of the device identifiers genearted by the import.<p>
+ * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore. Returns a newline-separated
+ * list of the device identifiers genearted by the import.
+ * <p>
  * 
- * The available importers are tried one by one in the following order, until the first
- * one is found that does not fail with an {@link FormatNotSupportedException}:
+ * The available importers are tried one by one in the following order, until the first one is found that does not fail
+ * with an {@link FormatNotSupportedException}:
  * <ul>
- * <li>If the type of a {@link #PREFERRED_IMPORTER preferred importer} is transmitted,
- * this is the first that is used.</li>
- * <li>Then the importers registered for a matching {@link GPSFixImporter#FILE_EXTENSION_PROPERTY
- * file extension} are used.</li>
- * <li>If all this fails, all other available importers are used.</li></ul>
+ * <li>If the type of a {@link #PREFERRED_IMPORTER preferred importer} is transmitted, this is the first that is used.</li>
+ * <li>Then the importers registered for a matching {@link GPSFixImporter#FILE_EXTENSION_PROPERTY file extension} are
+ * used.</li>
+ * <li>If all this fails, all other available importers are used.</li>
+ * </ul>
+ * 
  * @author Fredrik Teschke
- *
+ * 
  */
 public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     public static final String PREFERRED_IMPORTER = "preferredImporter";
@@ -70,7 +72,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         }
     }
     
-    public Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
+    Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
         List<GPSFixImporter> result = new ArrayList<>();
         Collection<ServiceReference<GPSFixImporter>> refs;
         try {
@@ -89,7 +91,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return result;
     }
     
-    public Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
+    Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
@@ -106,10 +108,8 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             if (preferredImporter != null) {
                 importersToTry.add(preferredImporter);
             }
-
             importersToTry.addAll(getGPSFixImporters(fileExt));
             importersToTry.addAll(getGPSFixImporters(null));
-            
             BufferedInputStream in = new BufferedInputStream(file.getB()) {
                 @Override
                 public void close() throws IOException {
@@ -127,15 +127,12 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 }
                 boolean failed = false;
                 GPSFixImporter importer = iter.next();
-                
-
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try {
                     importer.importFixes(in, new Callback() {
                         @Override
                         public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                             deviceIds.add(device);
-                            
                             storeFix(fix, device);
                             TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
                             if (earliestFixSoFarFromCurrentDevice == null || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
