@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
