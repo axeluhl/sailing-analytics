@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
@@ -39,6 +40,7 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
@@ -68,6 +70,9 @@ public class SearchServiceTest {
     @Before
     public void setUp() {
         server = new RacingEventServiceImpl();
+        server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
+        server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));
+        server.apply(new RemoveRegatta(new RegattaName("Aalregatta (ORC)")));
         final Calendar cal = new GregorianCalendar();
         cal.set(2014, 5, 6, 10, 00);
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
