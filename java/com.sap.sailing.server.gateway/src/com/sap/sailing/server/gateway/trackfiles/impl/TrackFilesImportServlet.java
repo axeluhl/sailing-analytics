@@ -62,7 +62,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(TrackFilesImportServlet.class.getName());
     
-    private static final int READ_BUFFER_SIZE = 10 * 1024 * 1024; // FIXME 10MB for now; see bug 1985
+    private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
 
     public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         try {
@@ -72,7 +72,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         }
     }
     
-    public Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
+    Collection<GPSFixImporter> getGPSFixImporters(String fileExtension) {
         List<GPSFixImporter> result = new ArrayList<>();
         Collection<ServiceReference<GPSFixImporter>> refs;
         try {
@@ -91,7 +91,7 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
         return result;
     }
     
-    public Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
+    Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files, GPSFixImporter preferredImporter)
         throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
@@ -108,10 +108,8 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
             if (preferredImporter != null) {
                 importersToTry.add(preferredImporter);
             }
-
             importersToTry.addAll(getGPSFixImporters(fileExt));
             importersToTry.addAll(getGPSFixImporters(null));
-            
             BufferedInputStream in = new BufferedInputStream(file.getB()) {
                 @Override
                 public void close() throws IOException {
@@ -129,15 +127,12 @@ public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
                 }
                 boolean failed = false;
                 GPSFixImporter importer = iter.next();
-                
-
                 logger.log(Level.INFO, "Trying to import file " + fileName + " with importer " + importer.getType());
                 try {
                     importer.importFixes(in, new Callback() {
                         @Override
                         public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                             deviceIds.add(device);
-                            
                             storeFix(fix, device);
                             TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
                             if (earliestFixSoFarFromCurrentDevice == null || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
