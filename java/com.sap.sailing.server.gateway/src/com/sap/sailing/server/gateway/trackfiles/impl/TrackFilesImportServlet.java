@@ -41,26 +41,28 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore.
- * Returns a newline-separated list of the device identifiers genearted by the import.<p>
+ * Servlet that processes uploaded track files by adding their fixes to the GPSFixStore. Returns a newline-separated
+ * list of the device identifiers genearted by the import.
+ * <p>
  * 
- * The available importers are tried one by one in the following order, until the first
- * one is found that does not fail with an {@link FormatNotSupportedException}:
+ * The available importers are tried one by one in the following order, until the first one is found that does not fail
+ * with an {@link FormatNotSupportedException}:
  * <ul>
- * <li>If the type of a {@link #PREFERRED_IMPORTER preferred importer} is transmitted,
- * this is the first that is used.</li>
- * <li>Then the importers registered for a matching {@link GPSFixImporter#FILE_EXTENSION_PROPERTY
- * file extension} are used.</li>
- * <li>If all this fails, all other available importers are used.</li></ul>
+ * <li>If the type of a {@link #PREFERRED_IMPORTER preferred importer} is transmitted, this is the first that is used.</li>
+ * <li>Then the importers registered for a matching {@link GPSFixImporter#FILE_EXTENSION_PROPERTY file extension} are
+ * used.</li>
+ * <li>If all this fails, all other available importers are used.</li>
+ * </ul>
+ * 
  * @author Fredrik Teschke
- *
+ * 
  */
 public class TrackFilesImportServlet extends AbstractJsonHttpServlet {
     public static final String PREFERRED_IMPORTER = "preferredImporter";
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(TrackFilesImportServlet.class.getName());
     
-    private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
+    private static final int READ_BUFFER_SIZE = 10 * 1024 * 1024; // FIXME 10MB for now; see bug 1985
 
     public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         try {
