@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.domain.base.impl;
 
 import java.util.Collections;
 import java.util.Set;
