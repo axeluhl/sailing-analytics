@@ -133,6 +133,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -171,6 +172,8 @@ import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -2587,5 +2590,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
         dataImportLock.setDeleteFromMapTimer(importOperationId);
+    }
+    
+    @Override
+    public Result<LeaderboardSearchResult> search(KeywordQuery query) {
+        return new RegattaByKeywordSearchService().search(this, query);
     }
 }

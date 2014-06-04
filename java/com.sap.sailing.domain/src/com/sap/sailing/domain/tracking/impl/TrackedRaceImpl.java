@@ -240,6 +240,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @see #loadingFromWindStoreState but for GPSFixStore
      */
     private LoadingFromStoresState loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
+    private Object loadingFromGPSFixStoreStateMonitor = ""; // String, not Object, to keep it serializable
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
@@ -436,8 +437,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
-        while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
-            wait();
+        synchronized (loadingFromGPSFixStoreStateMonitor) {
+            while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
+                loadingFromGPSFixStoreStateMonitor.wait();
+            }
         }
     }
 
@@ -2500,8 +2503,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             loadingFromGPSFixStoreState = LoadingFromStoresState.FINISHED;
                             TrackedRaceImpl.this.notifyAll();
                         }
-                        synchronized (loadingFromGPSFixStoreState) {
-                            loadingFromGPSFixStoreState.notifyAll();
+                        synchronized (loadingFromGPSFixStoreStateMonitor) {
+                            loadingFromGPSFixStoreStateMonitor.notifyAll();
                         }
                         LockUtil.unlockAfterWrite(getLoadingFromGPSFixStoreLock());
                         LockUtil.unlockAfterRead(getSerializationLock());

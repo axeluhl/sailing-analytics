@@ -76,14 +76,14 @@ public class ReachingLegTest extends TrackBasedTest {
         schomaeker = createCompetitor("Meike Schom�ker");
         competitors.add(schomaeker);
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
+        setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
         List<MarkPassing> hungersMarkPassings = createMarkPassings(hunger, start);
         getTrackedRace().updateMarkPassings(hunger, hungersMarkPassings);
         List<MarkPassing> plattnersMarkPassings = createMarkPassings(plattner, start);
         getTrackedRace().updateMarkPassings(plattner, plattnersMarkPassings);
     }
     
-    protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
+    protected DynamicTrackedRace createTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, regattaName, boatClass, /* trackedRegattaRegistry */ null,

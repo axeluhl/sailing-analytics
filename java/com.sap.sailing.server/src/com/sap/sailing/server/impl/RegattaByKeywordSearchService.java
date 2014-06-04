@@ -7,12 +7,10 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RegattaSearchResult;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.search.KeywordQuery;
@@ -30,53 +28,46 @@ import com.sap.sse.common.search.ResultImpl;
  *
  */
 public class RegattaByKeywordSearchService {
-    Result<RegattaSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
-        ResultImpl<RegattaSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker());
-        AbstractListFilter<Regatta> regattaFilter = new AbstractListFilter<Regatta>() {
+    Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
+        ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
+        AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
-            public Iterable<String> getStrings(Regatta regatta) {
-                List<String> regattaStrings = new ArrayList<>();
-                regattaStrings.add(regatta.getBaseName());
-                regattaStrings.add(regatta.getBoatClass().getName());
-                for (Competitor competitor : regatta.getCompetitors()) {
-                    regattaStrings.add(competitor.getName());
-                    regattaStrings.add(competitor.getBoat().getSailID());
-                }
-                final Iterable<LeaderboardGroup> leaderboardGroupsHostingRegatta = getLeaderboardGroupsHostingRegatta(regatta, racingEventService);
-                for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingRegatta) {
-                    regattaStrings.add(leaderboardGroup.getName());
-                    regattaStrings.add(leaderboardGroup.getDescription());
-                    for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                        if (leaderboard instanceof RegattaLeaderboard && ((RegattaLeaderboard) leaderboard).getRegatta() == regatta) {
-                            regattaStrings.add(leaderboard.getName());
-                            regattaStrings.add(leaderboard.getDisplayName());
-                            for (Competitor competitor : leaderboard.getCompetitors()) {
-                                String competitorDisplayName = leaderboard.getDisplayName(competitor);
-                                if (competitorDisplayName != null) {
-                                    regattaStrings.add(competitorDisplayName);
-                                }
-                            }
-                        }
+            public Iterable<String> getStrings(Leaderboard leaderboard) {
+                List<String> leaderboardStrings = new ArrayList<>();
+                leaderboardStrings.add(leaderboard.getName());
+                leaderboardStrings.add(leaderboard.getDisplayName());
+                for (Competitor competitor : leaderboard.getCompetitors()) {
+                    leaderboardStrings.add(competitor.getName());
+                    leaderboardStrings.add(competitor.getBoat().getSailID());
+                    String competitorDisplayName = leaderboard.getDisplayName(competitor);
+                    if (competitorDisplayName != null) {
+                        leaderboardStrings.add(competitorDisplayName);
                     }
                 }
-                for (Event event : getEventsHostingRegatta(regatta, racingEventService, leaderboardGroupsHostingRegatta)) {
-                    regattaStrings.add(event.getName());
-                    regattaStrings.add(event.getVenue().getName());
+                final Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard = getLeaderboardGroupsHostingLeaderboard(
+                        leaderboard, racingEventService);
+                for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
+                    leaderboardStrings.add(leaderboardGroup.getName());
+                    leaderboardStrings.add(leaderboardGroup.getDescription());
                 }
-                return regattaStrings;
+                for (Event event : getEventsHostingLeaderboard(leaderboard, racingEventService, leaderboardGroupsHostingLeaderboard)) {
+                    leaderboardStrings.add(event.getName());
+                    leaderboardStrings.add(event.getVenue().getName());
+                }
+                return leaderboardStrings;
             }
         };
-        for (Regatta matchingRegatta : regattaFilter.applyFilter(query.getKeywords(), racingEventService.getAllRegattas())) {
-            result.addHit(new RegattaSearchResultImpl(matchingRegatta));
+        for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
+            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard));
         }
         return result;
     }
 
-    private Iterable<LeaderboardGroup> getLeaderboardGroupsHostingRegatta(Regatta regatta, RacingEventService racingEventService) {
+    private Iterable<LeaderboardGroup> getLeaderboardGroupsHostingLeaderboard(Leaderboard leaderboard, RacingEventService racingEventService) {
         Set<LeaderboardGroup> result = new LinkedHashSet<>();
         for (LeaderboardGroup leaderboardGroup : racingEventService.getLeaderboardGroups().values()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard instanceof RegattaLeaderboard && ((RegattaLeaderboard) leaderboard).getRegatta() == regatta) {
+            for (Leaderboard lgLeaderboard : leaderboardGroup.getLeaderboards()) {
+                if (lgLeaderboard == leaderboard) {
                     result.add(leaderboardGroup);
                 }
             }
@@ -84,14 +75,14 @@ public class RegattaByKeywordSearchService {
         return result;
     }
 
-    private Iterable<Event> getEventsHostingRegatta(Regatta regatta, RacingEventService racingEventService,
-            Iterable<LeaderboardGroup> leaderboardGroupsHostingRegatta) {
+    private Iterable<Event> getEventsHostingLeaderboard(Leaderboard leaderboard, RacingEventService racingEventService,
+            Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard) {
         Set<Event> result = new LinkedHashSet<>();
         for (Event event : racingEventService.getAllEvents()) {
-            if (Util.contains(event.getVenue().getCourseAreas(), regatta.getDefaultCourseArea())) {
+            if (Util.contains(event.getVenue().getCourseAreas(), leaderboard.getDefaultCourseArea())) {
                 result.add(event);
             } else {
-                for (LeaderboardGroup leaderboardGroupHostingRegatta : leaderboardGroupsHostingRegatta) {
+                for (LeaderboardGroup leaderboardGroupHostingRegatta : leaderboardGroupsHostingLeaderboard) {
                     if (Util.contains(event.getLeaderboardGroups(), leaderboardGroupHostingRegatta)) {
                         result.add(event);
                         break;
