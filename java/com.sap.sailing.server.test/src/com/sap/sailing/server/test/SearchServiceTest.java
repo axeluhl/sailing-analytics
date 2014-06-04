@@ -10,9 +10,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -26,24 +28,31 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RegattaSearchResult;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
@@ -79,6 +88,10 @@ public class SearchServiceTest {
         for (Event e : allEvents) {
             server.apply(new RemoveEvent(e.getId()));
         }
+        Map<String, Leaderboard> allLeaderboards = new HashMap<>(server.getLeaderboards());
+        for (String leaderboardName : allLeaderboards.keySet()) {
+            server.apply(new RemoveLeaderboard(leaderboardName));
+        }
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));
         server.apply(new RemoveRegatta(new RegattaName("Aalregatta (ORC)")));
@@ -94,12 +107,27 @@ public class SearchServiceTest {
         kiel.addCourseArea(kielAlpha);
         final CourseAreaImpl kielBravo = new CourseAreaImpl("Bravo", UUID.randomUUID());
         kiel.addCourseArea(kielBravo);
+        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
+        seriesCreationParams.put("Default",
+                new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
+                /* medal */false, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
+                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
         pfingstbusch29er = server.apply(new AddSpecificRegatta("Pfingstbusch", "29er", UUID.randomUUID(),
-                new RegattaCreationParametersDTO(new LinkedHashMap<String, SeriesCreationParametersDTO>()), /* persistent */
+                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielAlpha.getId()));
+        server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
+        server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
+        server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
+        RegattaLeaderboard pfingstbusch29erLeaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch29er.getRegattaIdentifier(),
+                /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         pfingstbusch470 = server.apply(new AddSpecificRegatta("Pfingstbusch", "470", UUID.randomUUID(),
-                new RegattaCreationParametersDTO(new LinkedHashMap<String, SeriesCreationParametersDTO>()), /* persistent */
+                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielBravo.getId()));
+        server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
+        server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
+        server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
+        RegattaLeaderboard pfingstbusch470Leaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch470.getRegattaIdentifier(),
+                /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         cal.set(2014, 5, 7, 10, 00);
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
@@ -110,8 +138,12 @@ public class SearchServiceTest {
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta("Aalregatta", "ORC", UUID.randomUUID(),
-                new RegattaCreationParametersDTO(new LinkedHashMap<String, SeriesCreationParametersDTO>()), /* persistent */
+                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), flensburgStandard.getId()));
+        server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
+        server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
+        RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
+                /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         hassoPlattner = AbstractTracTracLiveTest.createCompetitor("Hasso Plattner");
         alexanderRies = AbstractTracTracLiveTest.createCompetitor("Alexander Ries");
         antonKoch = AbstractTracTracLiveTest.createCompetitor("Anton Koch");
@@ -131,8 +163,10 @@ public class SearchServiceTest {
         pfingstbusch29erTrackedR1 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR1), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
         pfingstbusch29erTrackedR1.setStartOfTrackingReceived(pfingstbuschStartDate.plus(1));
+        pfingstbusch29erLeaderboard.getRaceColumnByName("R1").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R1").getFleetByName("Default"), pfingstbusch29erTrackedR1);
         pfingstbusch29erTrackedR3 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR3), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+        pfingstbusch29erLeaderboard.getRaceColumnByName("R3").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R3").getFleetByName("Default"), pfingstbusch29erTrackedR3);
 
         final RaceDefinitionImpl pfingstbush470R1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
                 Arrays.asList(new Competitor[] { philippBuhl, antonKoch }));
@@ -144,8 +178,10 @@ public class SearchServiceTest {
         pfingstbusch470TrackedR1 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R1), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
         pfingstbusch470TrackedR1.setStartOfTrackingReceived(pfingstbuschStartDate.plus(2)); // starts later than 29er
+        pfingstbusch470Leaderboard.getRaceColumnByName("R1").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R1").getFleetByName("Default"), pfingstbusch470TrackedR1);
         pfingstbusch470TrackedR2 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R2), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+        pfingstbusch470Leaderboard.getRaceColumnByName("R2").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R2").getFleetByName("Default"), pfingstbusch470TrackedR2);
 
         final RaceDefinitionImpl aalOrcR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
                 Arrays.asList(new Competitor[] { hassoPlattner, dennisGehrlein, philippBuhl }));
@@ -157,8 +193,10 @@ public class SearchServiceTest {
         aalOrcTrackedR1 = server.apply(new CreateTrackedRace(aalRegatta.getRaceIdentifier(aalOrcR1), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
         aalOrcTrackedR1.setStartOfTrackingReceived(aalStartDate);
+        aalRegattaLeaderboard.getRaceColumnByName("R1").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R1").getFleetByName("Default"), aalOrcTrackedR1);
         aalOrcTrackedR2 = server.apply(new CreateTrackedRace(aalRegatta.getRaceIdentifier(aalOrcR2), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000));
+        aalRegattaLeaderboard.getRaceColumnByName("R2").setTrackedRace(aalRegattaLeaderboard.getRaceColumnByName("R2").getFleetByName("Default"), aalOrcTrackedR2);
     }
     
     @Test
@@ -176,7 +214,7 @@ public class SearchServiceTest {
     
     @Test
     public void testSimpleSearchByCompetitorName() {
-        Result<RegattaSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(pfingstbusch29er, foundRegatta);
@@ -184,7 +222,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByCompetitorName2() {
-        Result<RegattaSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -192,7 +230,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName() {
-        Result<RegattaSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -200,9 +238,9 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName2() {
-        Result<RegattaSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
-        final Iterator<RegattaSearchResult> iterator = searchResults.getHits().iterator();
+        final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
         Regatta firstFoundRegatta = iterator.next().getRegatta();
         assertSame(pfingstbusch29er, firstFoundRegatta);
         Regatta secondFoundRegatta = iterator.next().getRegatta();
@@ -211,9 +249,9 @@ public class SearchServiceTest {
 
     @Test
     public void testMultipleMatchesSortedCorrectly() {
-        Result<RegattaSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
-        final Iterator<RegattaSearchResult> iter = searchResults.getHits().iterator();
+        final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
         Regatta earlierStartRegatta = iter.next().getRegatta();
         assertSame(pfingstbusch470, earlierStartRegatta);
         Regatta laterStartRegatta = iter.next().getRegatta();

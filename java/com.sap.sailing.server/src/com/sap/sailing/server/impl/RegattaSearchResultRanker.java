@@ -11,10 +11,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RegattaSearchResult;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sse.common.Util;
 
-public class RegattaSearchResultRanker implements Comparator<RegattaSearchResult> {
+public class RegattaSearchResultRanker implements Comparator<LeaderboardSearchResult> {
     private final TrackedRegattaRegistry trackedRegattaRegistry;
     
     protected RegattaSearchResultRanker(RacingEventService racingEventService) {
@@ -22,15 +22,15 @@ public class RegattaSearchResultRanker implements Comparator<RegattaSearchResult
     }
 
     @Override
-    public int compare(RegattaSearchResult o1, RegattaSearchResult o2) {
+    public int compare(LeaderboardSearchResult o1, LeaderboardSearchResult o2) {
         Regatta r1 = o1.getRegatta();
         Regatta r2 = o2.getRegatta();
-        TrackedRegatta trackedR1 = trackedRegattaRegistry.getTrackedRegatta(r1);
-        TrackedRegatta trackedR2 = trackedRegattaRegistry.getTrackedRegatta(r2);
+        TrackedRegatta trackedR1 = r1 == null ? null : trackedRegattaRegistry.getTrackedRegatta(r1);
+        TrackedRegatta trackedR2 = r2 == null ? null : trackedRegattaRegistry.getTrackedRegatta(r2);
         final int result;
         if (trackedR1 == null) {
             if (trackedR2 == null) {
-                result = r1.getName().compareTo(r2.getName());
+                result = o1.getLeaderboard().getName().compareTo(o2.getLeaderboard().getName());
             } else {
                 result = -1; // a non-tracked regatta is greater (shown further down) than a tracked regatta
             }

@@ -133,7 +133,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.RegattaSearchResult;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -2593,7 +2593,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
     
     @Override
-    public Result<RegattaSearchResult> search(KeywordQuery query) {
+    public Result<LeaderboardSearchResult> search(KeywordQuery query) {
         return new RegattaByKeywordSearchService().search(this, query);
     }
 }

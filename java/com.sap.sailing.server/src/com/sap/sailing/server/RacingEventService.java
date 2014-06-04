@@ -555,5 +555,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
 
-    Result<RegattaSearchResult> search(KeywordQuery query);
+    Result<LeaderboardSearchResult> search(KeywordQuery query);
 }
