@@ -4,6 +4,16 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
+/**
+ * This is what you get when you search a <code>RacingEventService</code> with its <code>search(...)</code> method. It
+ * delivers the "real things," meaning that the leaderboards and events etc. are those objects currently living in the
+ * server instance. This is richer than the de-serialized {@link LeaderboardSearchResultBase} objects you get when
+ * fetching search results from remote instances, such as those described by a {@link RemoteSailingServerReference}.
+ * However, for putting them into a DTO to transfer them to a web client, both are fine.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
 public interface LeaderboardSearchResult extends LeaderboardSearchResultBase {
     /**
      * The leaderboard that matches the search query.
