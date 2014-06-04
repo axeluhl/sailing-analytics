@@ -40,7 +40,6 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
@@ -120,7 +119,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
             @Override
-            public void stopped(IEvent event) {}
+            public void stopped(Object o) {}
             
             @Override
             public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
@@ -134,6 +133,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             
             @Override
             public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {}
+
         });
         addListenersForStoredDataAndStartController(receivers);
         IRace tractracRace = getTracTracRace();

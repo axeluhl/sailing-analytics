@@ -1,4 +1,4 @@
-package com.tractrac.subscription.app.eventtest;
+package com.tractrac.subscription.app.tracapi;
 
 /*
  * To change this template, choose Tools | Templates
@@ -49,6 +49,7 @@ public class Main {
 		eventSubscriber.subscribeEventMessages(eventListener);
 		
 		IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(race);
+		raceSubscriber.subscribeConnectionStatus(eventListener);
 		raceSubscriber.subscribeControlPositions(eventListener);
 		raceSubscriber.subscribePositions(eventListener);
 		raceSubscriber.subscribePositionsSnapped(eventListener);
@@ -57,15 +58,14 @@ public class Main {
 		raceSubscriber.subscribeRaceMessages(eventListener);
 		raceSubscriber.subscribeRaceTimesChanges(eventListener);
 		raceSubscriber.subscribeRouteChanges(eventListener);
-		raceSubscriber.start();
-		
-		eventSubscriber.start();		
-		raceSubscriber.start();
+		raceSubscriber.start();		
+		eventSubscriber.start();			
 		
 		// Go ahead with GUI or other stuff in main thread
 		System.out.println("Press key to cancel live data stream");
 		System.in.read();
 		System.out.println("Cancelling data stream");
+	
 		// Stop data streams
 		eventSubscriber.stop();		
 		raceSubscriber.stop();	
@@ -73,7 +73,7 @@ public class Main {
 
 	private static URI parseArguments(String[] args) {
 		if (args.length != 1) {
-			System.out.println("Usage: java -jar TestTTCM.jar parametersfile");
+			System.out.println("Usage: java -jar TracAPI.jar parametersfile");
 			System.exit(0);
 		}
 		try {

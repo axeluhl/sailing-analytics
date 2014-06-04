@@ -587,8 +587,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public void stopped(IEvent event) {
-        assert event == tractracEvent;
+    public void stopped(Object o) {
         logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();

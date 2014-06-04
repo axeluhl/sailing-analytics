@@ -5,7 +5,7 @@
  *
  * $Id$
  */
-package com.tractrac.subscription.app.eventtest;
+package com.tractrac.subscription.app.tracapi;
 
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.data.IMessageData;
@@ -90,12 +90,12 @@ public class EventListener implements IEventMessageListener,
 
 	@Override
 	public void gotRaceStartStopTime(IRace race, IStartStopData startStopData) {
-		show("New race start/stoip times " + startStopData.toString());										
+		show("New race start/stop times " + startStopData.toString());										
 	}
 
 	@Override
 	public void gotTrackingStartStopTime(IRace race, IStartStopData startStopData) {
-		show("New tracking race start/stoip times " + startStopData.toString());				
+		show("New tracking race start/stop times " + startStopData.toString());				
 	}
 
 	@Override
@@ -104,8 +104,8 @@ public class EventListener implements IEventMessageListener,
 	}
 
 	@Override
-	public void stopped(IEvent event) {
-		show("Stopping the connection");		
+	public void stopped(Object object) {
+		show("Stopping the connection with " + object.toString());		
 	}
 
 	@Override
