@@ -1,15 +1,17 @@
 package com.sap.sailing.server.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
@@ -30,9 +32,11 @@ import com.sap.sse.common.search.ResultImpl;
 public class RegattaByKeywordSearchService {
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
+        final Map<Leaderboard, Event> eventForLeaderboard = new HashMap<>();
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
             public Iterable<String> getStrings(Leaderboard leaderboard) {
+                // TODO allow recording which part of the leaderboard was matched by the keywords by returning "annotated strings" that the matcher can understand
                 List<String> leaderboardStrings = new ArrayList<>();
                 leaderboardStrings.add(leaderboard.getName());
                 leaderboardStrings.add(leaderboard.getDisplayName());
@@ -53,12 +57,13 @@ public class RegattaByKeywordSearchService {
                 for (Event event : getEventsHostingLeaderboard(leaderboard, racingEventService, leaderboardGroupsHostingLeaderboard)) {
                     leaderboardStrings.add(event.getName());
                     leaderboardStrings.add(event.getVenue().getName());
+                    eventForLeaderboard.put(leaderboard, event);
                 }
                 return leaderboardStrings;
             }
         };
         for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
-            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard));
+            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard, eventForLeaderboard.get(matchingLeaderboard)));
         }
         return result;
     }

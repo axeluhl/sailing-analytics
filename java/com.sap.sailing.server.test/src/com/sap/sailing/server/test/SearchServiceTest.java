@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
@@ -42,7 +43,6 @@ import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -241,10 +241,14 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
-        Regatta firstFoundRegatta = iterator.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iterator.next();
+        Regatta firstFoundRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch29er, firstFoundRegatta);
-        Regatta secondFoundRegatta = iterator.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iterator.next();
+        Regatta secondFoundRegatta = secondMatch.getRegatta();
         assertSame(pfingstbusch470, secondFoundRegatta);
+        assertSame(pfingstbusch, secondMatch.getEvent());
     }
 
     @Test
@@ -252,9 +256,13 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
-        Regatta earlierStartRegatta = iter.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iter.next();
+        Regatta earlierStartRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch470, earlierStartRegatta);
-        Regatta laterStartRegatta = iter.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iter.next();
+        Regatta laterStartRegatta = secondMatch.getRegatta();
         assertSame(aalRegatta, laterStartRegatta);
+        assertSame(aalEvent, secondMatch.getEvent());
     }
 }

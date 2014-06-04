@@ -1,0 +1,47 @@
+package com.sap.sailing.server.gateway.jaxrs.api;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.json.simple.JSONArray;
+
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
+
+@Path("/v1/search")
+public class SearchResource extends AbstractSailingServerResource {
+    private final JsonSerializer<LeaderboardSearchResult> serializer;
+    
+    public SearchResource() {
+        serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer()));
+    }
+    
+    private Result<LeaderboardSearchResult> search(KeywordQuery query) {
+        return getService().search(query);
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{q}")
+    public Response search(@PathParam("q") String keywords) {
+        KeywordQuery query = new KeywordQuery(keywords.split(" "));
+        Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
+        JSONArray jsonSearchResults = new JSONArray();
+        for (LeaderboardSearchResult searchResult : searchResults) {
+            jsonSearchResults.add(serializer.serialize(searchResult));
+        }
+        return Response.ok(jsonSearchResults.toString(), MediaType.APPLICATION_JSON).build();
+    }
+}
