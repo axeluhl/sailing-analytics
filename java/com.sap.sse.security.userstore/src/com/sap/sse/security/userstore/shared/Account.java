@@ -1,0 +1,26 @@
+package com.sap.sse.security.userstore.shared;
+
+
+public interface Account {
+
+    public AccountType getAccountType();
+    
+    public enum AccountType {
+        USERNAME_PASSWORD("Username and Password"), SOCIAL_FACEBOOK("Facebook");
+        
+        private String name;
+
+        private AccountType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+    }
+}

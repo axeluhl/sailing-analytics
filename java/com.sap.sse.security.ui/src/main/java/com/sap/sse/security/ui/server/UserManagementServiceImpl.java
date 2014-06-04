@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -15,10 +18,12 @@ import org.osgi.framework.ServiceReference;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.ui.Activator;
+import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
-import com.sap.sse.security.userstore.shared.SimpleUser;
+import com.sap.sse.security.userstore.shared.Account;
+import com.sap.sse.security.userstore.shared.Account.AccountType;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
@@ -46,8 +51,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getUserList() {
         List<UserDTO> users = new ArrayList<>();
         for (User u : securityService.getUserList()) {
-            UserDTO userDTO = new UserDTO(u.getName(), u.getAccountType().getName());
-            userDTO.addRoles(u.getRoles());
+            UserDTO userDTO = createUserDTOFromUser(u);
             users.add(userDTO);
         }
         return users;
@@ -63,7 +67,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         UserDTO userDTO;
         if (principal != null) {
             User u = securityService.getUserByName(principal.toString());
-            userDTO = new UserDTO(u.getName(), u.getAccountType().getName());
+            userDTO = createUserDTOFromUser(u);
         } else {
             userDTO = null;
         }
@@ -86,17 +90,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String password) {
-        SimpleUser su = null;
+    public UserDTO createSimpleUser(String name, String email, String password) {
+        User u = null;
         try {
-            su = securityService.createSimpleUser(name, password);
+            u = securityService.createSimpleUser(name, email, password);
         } catch (UserManagementException e) {
             e.printStackTrace();
         }
-        if (su == null) {
+        if (u == null) {
             return null;
         }
-        return new UserDTO(su.getName(), su.getAccountType().getName());
+        return createUserDTOFromUser(u);
     }
 
     @Override
@@ -105,14 +109,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         for (User u : securityService.getUserList()) {
             if (filter != null && !"".equals(filter)) {
                 if (u.getName().contains(filter)) {
-                    UserDTO userDTO = new UserDTO(u.getName(), u.getAccountType().getName());
-                    userDTO.addRoles(u.getRoles());
-                    users.add(userDTO);
+                    users.add(createUserDTOFromUser(u));
                 }
             } else {
-                UserDTO userDTO = new UserDTO(u.getName(), u.getAccountType().getName());
-                userDTO.addRoles(u.getRoles());
-                users.add(userDTO);
+                users.add(createUserDTOFromUser(u));
             }
         }
 
@@ -156,4 +156,50 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
+    private UserDTO createUserDTOFromUser(User user){
+        UserDTO userDTO;
+        Map<AccountType, Account> accounts = user.getAllAccounts();
+        AccountDTO[] accountDTOs = new AccountDTO[accounts.size()];
+        int i = 0;
+        for (Account a : accounts.values()){
+            // TODO [D056866] Create specific AccountDTOs, not from abstract class
+            accountDTOs[i] = new AccountDTO(a.getAccountType().getName()) {
+            };
+            i++;
+        }
+        userDTO = new UserDTO(user.getName(), accountDTOs);
+        userDTO.addRoles(user.getRoles());
+        return userDTO;
+    }
+
+    @Override
+    public Map<String, String> getSettings() {
+        Map<String, String> settings = new HashMap<String, String>();
+        for (Entry<String, Object> e : securityService.getAllSettings().entrySet()){
+            settings.put(e.getKey(), e.getValue().toString());
+        }
+        return settings;
+    }
+
+    @Override
+    public void setSetting(String key, String clazz, String setting) {
+        if (clazz.equals(Boolean.class.getName())){
+            securityService.setSettings(key, Boolean.parseBoolean(setting));
+        }
+        else if (clazz.equals(Integer.class.getName())){
+            securityService.setSettings(key, Integer.parseInt(setting));
+        }
+        else {
+            securityService.setSettings(key, setting);
+        }
+    }
+
+    @Override
+    public Map<String, String> getSettingTypes() {
+        Map<String, String> settingTypes = new HashMap<String, String>();
+        for (Entry<String, Class<?>> e : securityService.getAllSettingTypes().entrySet()){
+            settingTypes.put(e.getKey(), e.getValue().getName());
+        }
+        return settingTypes;
+    }
 }

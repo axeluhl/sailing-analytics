@@ -2,36 +2,50 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
-import com.sap.sse.security.userstore.shared.SimpleUser;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 
 public class UserStoreImpl implements UserStore {
+    private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
     
-    private ConcurrentHashMap<String, SimpleUser> users;
+    private ConcurrentHashMap<String, User> users;
+    private ConcurrentHashMap<String, Object> settings;
+    private ConcurrentHashMap<String, Class<?>> settingTypes;
 
     public UserStoreImpl() {
         users = new ConcurrentHashMap<>();
-        try {
-            createSimpleUser("Ben", "ben123");
-            addRoleForUser("Ben", "admin");
-            addRoleForUser("Ben", "moderator");
-            createSimpleUser("Peter", "peter123");
-            addRoleForUser("Peter", "moderator");
-            createSimpleUser("Hans", "hans123");
-            createSimpleUser("Hubert", "hubert123");
-            createSimpleUser("Franz", "franz123");
-        } catch (UserManagementException e) {
-            e.printStackTrace();
+        settings = new ConcurrentHashMap<>();
+        settingTypes = new ConcurrentHashMap<String, Class<?>>();
+        addSetting("email_required", Boolean.class);
+        for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
+            users.put(u.getName(), u);
+        }
+        if (users.isEmpty()){
+            try {
+                logger.info("Could not find any stored users. Creating default users.");
+                createSimpleUser("Ben", "Ben@sapsailing.com", "ben123");
+                addRoleForUser("Ben", "admin");
+                addRoleForUser("Ben", "moderator");
+                createSimpleUser("Peter", "Peter@sapsailing.com", "peter123");
+                addRoleForUser("Peter", "moderator");
+                createSimpleUser("Hans", "Hans@sapsailing.com", "hans123");
+                createSimpleUser("Hubert", "Hubert@sapsailing.com", "hubert123");
+                createSimpleUser("Franz", "Franz@sapsailing.com", "franz123");
+            } catch (UserManagementException e) {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -41,7 +55,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public SimpleUser createSimpleUser(String name, String password)  throws UserManagementException {
+    public User createSimpleUser(String name, String email, String password)  throws UserManagementException {
         if (users.get(name) != null){
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -51,25 +65,11 @@ public class UserStoreImpl implements UserStore {
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         Object salt = rng.nextBytes();
         String hashedPasswordBase64 = new Sha256Hash(password, salt, 1024).toBase64();
-        SimpleUser user = new SimpleUser(name, hashedPasswordBase64, salt);
+        UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
+        User user = new User(name, email, upa);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
         users.put(name, user);
         return user;
-    }
-
-    @Override
-    public Object getSalt(String name)  throws UserManagementException {
-        if (users.get(name) == null){
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(name).getSalt();
-    }
-
-    @Override
-    public String getSaltedPassword(String name)  throws UserManagementException {
-        if (users.get(name) == null){
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-        return users.get(name).getSaltedPassword();
     }
 
     @Override
@@ -96,6 +96,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).addRole(role);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(users.get(name));
     }
 
     @Override
@@ -104,6 +105,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         users.get(name).removeRole(role);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(users.get(name));
     }
 
     @Override
@@ -111,7 +113,44 @@ public class UserStoreImpl implements UserStore {
         if (users.get(name) == null){
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().deleteUser(users.get(name));
         users.remove(name);
+    }
+
+    @Override
+    public <T> T getSetting(String key, Class<T> clazz) {
+        Class<?> settingClazz = settingTypes.get(key);
+        if (settingClazz == null){
+            return null;
+        }
+        if (!settingClazz.equals(clazz)){
+            throw new IllegalArgumentException("Value for \"" + key + "\" is not of type \"" + clazz.getName() + "\"!");
+        }
+        return clazz.cast(settings.get(key));
+    }
+
+    @Override
+    public void addSetting(String key, Class<?> type) {
+        settingTypes.put(key, type);
+    }
+
+    @Override
+    public void setSetting(String key, Object setting) {
+        Class<?> clazz = settingTypes.get(key);
+        if (clazz == null || !clazz.isInstance(setting)){
+            return;
+        }
+        settings.put(key, setting);
+    }
+
+    @Override
+    public Map<String, Object> getAllSettings() {
+        return settings;
+    }
+
+    @Override
+    public Map<String, Class<?>> getAllSettingTypes() {
+        return settingTypes;
     }
 
 }

@@ -7,7 +7,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -20,7 +19,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
+import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -52,8 +53,15 @@ public class UserDetailsView extends FlowPanel {
         fp.add(new HTML(renderer.render(userImageResource)));
         Label name = new Label("Name: " + user.getName());
         fp.add(name);
-        Label type = new Label("Account type: " + user.getAccountType());
-        fp.add(type);
+        
+        for (AccountDTO a : user.getAccounts().values()){
+            DecoratorPanel accountPanelDecorator = new DecoratorPanel();
+            FlowPanel accountPanelContent = new FlowPanel();
+            accountPanelDecorator.setWidget(accountPanelContent);
+            accountPanelContent.add(new Label(a.getAccountType() + "-Account"));
+            fp.add(accountPanelDecorator);
+        }
+        
         decoratorPanel.setWidget(fp);
         this.add(decoratorPanel);
 
@@ -136,10 +144,5 @@ public class UserDetailsView extends FlowPanel {
 
     public void removeUserChangeEventHandler(UserChangeEventHandler handler) {
         this.handlers.remove(handler);
-    }
-
-    public static interface UserChangeEventHandler extends EventHandler {
-
-        void onUserChange(UserDTO user);
     }
 }

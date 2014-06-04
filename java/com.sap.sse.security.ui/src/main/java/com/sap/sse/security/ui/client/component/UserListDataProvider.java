@@ -31,7 +31,6 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -54,6 +53,6 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
         for (HasData<UserDTO> hd : getDataDisplays()){
             onRangeChanged(hd);
         }
-//        //TODO SelectionChangeEvent.fire(singleSelectionModel);
+//        //TODO [D056866] SelectionChangeEvent.fire(singleSelectionModel);
     }
 }

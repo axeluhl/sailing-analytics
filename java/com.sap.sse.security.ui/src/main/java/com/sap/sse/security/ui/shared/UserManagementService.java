@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.shared;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 
@@ -16,11 +17,17 @@ public interface UserManagementService extends RemoteService {
     
     SuccessInfo login(String username, String password);
     
-    UserDTO createSimpleUser(String name, String password);
+    UserDTO createSimpleUser(String name, String email, String password);
     
     SuccessInfo deleteUser(String username);
     
     SuccessInfo logout();
     
     SuccessInfo addRoleForUser(String username, String role);
+    
+    Map<String, String> getSettings();
+    
+    Map<String, String> getSettingTypes();
+    
+    void setSetting(String key, String clazz, String setting);
 }

@@ -270,7 +270,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     @Override
     public void onFailure(Throwable caught) {
-        //TODO setWidgetsVisible((this.user != null));
+        //TODO [D056866] setWidgetsVisible((this.user != null));
         setWidgetsVisible(true);
         errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
     }
@@ -282,7 +282,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         for (MediaTrack mediaTrack : this.mediaTracks) {
             setStatus(mediaTrack);
         }
-        //TODO setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        //TODO [D056866] setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
         setWidgetsVisible(true);
         
         toggleMediaButton.setValue(autoSelectMedia);
@@ -376,7 +376,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
             final VideoPlayer popupPlayer;
 
-            //TODO boolean showSynchControls = this.user != null;
+            //TODO [D056866] boolean showSynchControls = this.user != null;
             boolean showSynchControls = true;
             if (videoTrack.isYoutube()) {
                 // popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
@@ -553,7 +553,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     @Override
     public boolean allowsAddDelete() {
-        //TODO return this.user != null;
+        //TODO [D056866] return this.user != null;
         return true;
     }
 
@@ -574,7 +574,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
         }
 
-        //TODO boolean showAddButton = MediaSelector.this.user != null;
+        //TODO [D056866] boolean showAddButton = MediaSelector.this.user != null;
         boolean showAddButton = true;
         mediaSelectionDialog.show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
                 playingAudioTrack, showAddButton, toggleMediaButton);

@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.shared;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -16,12 +17,18 @@ public interface UserManagementServiceAsync {
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
-    void createSimpleUser(String name, String password, AsyncCallback<UserDTO> callback);
+    void createSimpleUser(String name, String email, String password, AsyncCallback<UserDTO> callback);
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
     void addRoleForUser(String username, String role, AsyncCallback<SuccessInfo> callback);
 
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
+
+    void getSettings(AsyncCallback<Map<String, String>> callback);
+
+    void setSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
+
+    void getSettingTypes(AsyncCallback<Map<String, String>> callback);
 
 }

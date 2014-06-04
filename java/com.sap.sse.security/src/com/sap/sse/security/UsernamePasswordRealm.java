@@ -16,8 +16,11 @@ import org.apache.shiro.util.ByteSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sse.security.userstore.shared.Account.AccountType;
+import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
+import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class UsernamePasswordRealm extends AuthorizingRealm {
     
@@ -59,20 +62,19 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
 
         // read password hash and salt from db
         String saltedPassword = null;
-        try {
-            saltedPassword = store.getSaltedPassword(username);
-        } catch (UserManagementException e) {
-            throw new AuthenticationException(e.getMessage());
-        }
-        if (saltedPassword == null) {
+        ByteSource salt = null;
+        User user = store.getUserByName(username);
+        if (user == null){
             return null;
         }
-
-        ByteSource salt = null;
-        try {
-            salt = (ByteSource) store.getSalt(username);
-        } catch (UserManagementException e) {
-            throw new AuthenticationException(e.getMessage());
+        UsernamePasswordAccount upa = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
+        if (upa == null){
+            return null;
+        }
+        saltedPassword = upa.getSaltedPassword();
+        salt = (ByteSource) upa.getSalt();
+        if (saltedPassword == null) {
+            return null;
         }
         if (salt == null) {
             return null;

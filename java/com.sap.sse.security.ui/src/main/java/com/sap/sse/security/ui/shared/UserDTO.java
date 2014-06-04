@@ -2,7 +2,9 @@ package com.sap.sse.security.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -10,25 +12,16 @@ public class UserDTO implements IsSerializable {
 
     
     private String name;
-    private String accountType;
+    private Map<String , AccountDTO> accounts = new HashMap<String, AccountDTO>();
     
     private List<String> roles = new ArrayList<>();
-    
-    public String getAccountType() {
-        return accountType;
-    }
-
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
-    }
 
     public UserDTO() {
     }
 
-    public UserDTO(String name, String accountType) {
+    public UserDTO(String name, AccountDTO... accounts) {
         super();
         this.name = name;
-        this.accountType = accountType;
     }
 
     public String getName() {
@@ -45,6 +38,10 @@ public class UserDTO implements IsSerializable {
 
     public void addRoles(Collection<String> roles) {
         this.roles.addAll(roles);
+    }
+
+    public Map<String, AccountDTO> getAccounts() {
+        return accounts;
     }
     
     

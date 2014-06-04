@@ -1,6 +1,8 @@
 package com.sap.sse.security.ui.loginpanel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -22,7 +24,9 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -31,6 +35,8 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 public class LoginPanel extends FlowPanel {
 
     private UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    
+    private static List<UserStatusEventHandler> handlers = new ArrayList<>();
 
     private FormPanel loginPanel;
     private FlowPanel userPanel;
@@ -190,6 +196,9 @@ public class LoginPanel extends FlowPanel {
         expanded = false;
         wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
         wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
+        for (UserStatusEventHandler handler : handlers){
+            handler.onUserStatusChange(currentUser);
+        }
     }
 
     private void toggleLoginPanel() {
@@ -212,5 +221,13 @@ public class LoginPanel extends FlowPanel {
     
     public static UserDTO getCurrentUser(){
         return currentUser;
+    }
+    
+    public static void addUserStatusEventHandler(UserStatusEventHandler handler) {
+        handlers.add(handler);
+    }
+
+    public static void removeUserStatusEventHandler(UserStatusEventHandler handler) {
+        handlers.remove(handler);
     }
 }

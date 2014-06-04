@@ -1,17 +1,36 @@
 package com.sap.sse.security.userstore.shared;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class User {
-    
-    protected String name;
-    
-    protected Set<String> roles = new HashSet<>();
+import com.sap.sse.security.userstore.shared.Account.AccountType;
 
-    public User(String name) {
+public class User {
+    
+    private String name;
+    
+    private String email;
+    
+    private Set<String> roles = new HashSet<>();
+    private Map<AccountType, Account> accounts = new ConcurrentHashMap<>();
+
+    public User(String name, String email, Account... accounts) {
         super();
         this.name = name;
+        for (Account a : accounts){
+            this.accounts.put(a.getAccountType(), a);
+        }
+    }
+    
+    public User(String name, String email, Collection<Account> accounts) {
+        super();
+        this.name = name;
+        for (Account a : accounts){
+            this.accounts.put(a.getAccountType(), a);
+        }
     }
 
     public String getName() {
@@ -34,25 +53,31 @@ public abstract class User {
         roles.remove(role);
     }
     
-    public abstract AccountType getAccountType();
+    public Account getAccount(AccountType type){
+        return accounts.get(type);
+    }
     
-    public enum AccountType {
-        SIMPLE("Simple"), SOCIAL_USER("Social User");
-        
-        private String name;
-
-        private AccountType(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-        
+    public void setAccount(AccountType type, Account account){
+        accounts.put(type, account);
+    }
+    
+    public void removeAccount(AccountType type){
+        accounts.remove(type);
     }
 
+    public Map<AccountType, Account> getAllAccounts(){
+        return accounts;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

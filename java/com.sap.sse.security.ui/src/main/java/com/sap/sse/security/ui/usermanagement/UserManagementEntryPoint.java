@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.usermanagement;
 
+import java.util.HashMap;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -16,6 +18,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -24,12 +27,16 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.ui.client.UserChangeEventHandler;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.CreateUserPanel;
 import com.sap.sse.security.ui.client.component.CreateUserPanel.UserCreationEventHandler;
+import com.sap.sse.security.ui.client.component.SettingsPanel;
 import com.sap.sse.security.ui.client.component.UserDetailsView;
-import com.sap.sse.security.ui.client.component.UserDetailsView.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.component.UserList;
 import com.sap.sse.security.ui.client.component.UserListDataProvider;
+import com.sap.sse.security.ui.loginpanel.EntryPointLinkFactory;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -65,28 +72,25 @@ public class UserManagementEntryPoint implements EntryPoint {
         rootPanel.add(dockPanel);
         
         HorizontalPanel hp = new HorizontalPanel();
-        final TextBox textbox = new TextBox();
-        textbox.setText("Not logged in");
-        hp.add(textbox);
-        Button logout = new Button("logout");
-        logout.addClickHandler(new ClickHandler() {
+        LoginPanel.addUserStatusEventHandler(new UserStatusEventHandler() {
             
             @Override
-            public void onClick(ClickEvent event) {
-                userManagementService.logout(new AsyncCallback<SuccessInfo>() {
+            public void onUserStatusChange(UserDTO user) {
+                if (user == null){
+                    userManagementService.logout(new AsyncCallback<SuccessInfo>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
 
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                    }
-                });
-                Window.Location.replace("/security/ui/Login.html?gwt.codesvr=127.0.0.1:9997");
+                        @Override
+                        public void onSuccess(SuccessInfo result) {
+                        }
+                    });
+                    Window.Location.replace(EntryPointLinkFactory.createLoginLink(new HashMap<String, String>()));
+                }
             }
         });
-        hp.add(logout);
         Button createButton = new Button("Create User", new ClickHandler() {
             
             @Override
@@ -106,6 +110,16 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         hp.add(createButton);
+        
+        Button settingsButton = new Button("Settings", new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                center.setWidget(new SettingsPanel(userManagementService));
+            }
+        });
+        hp.add(settingsButton);
+        
         dockPanel.addNorth(hp, 50);
         
         final UserList userList = new UserList(keyProvider);
@@ -144,26 +158,6 @@ public class UserManagementEntryPoint implements EntryPoint {
         vp.add(scrollPanel);
         dockPanel.addWest(vp, 350);
         
-        
-        
-        userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
-            public void onSuccess(UserDTO result) {
-                if (result == null || result.getName() == null){
-                    Window.alert("Error receiving user. Please login!");
-                }
-                else {
-                    textbox.setText("Logged in as: " + result.getName());
-                }
-            }
-        });
         dockPanel.add(center);
         CreateUserPanel createUserPanel = new CreateUserPanel(userManagementService);
         createUserPanel.addUserCreationEventHandler(new UserCreationEventHandler() {
@@ -177,6 +171,7 @@ public class UserManagementEntryPoint implements EntryPoint {
             }
         });
         center.setWidget(createUserPanel);
+        RootPanel.get().add(new LoginPanel());
     }
     
     protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {

@@ -29,6 +29,10 @@ public class CreateUserPanel extends FlowPanel {
         this.add(name);
         final TextBox nameBox = new TextBox();
         this.add(nameBox);
+        Label email = new Label("Email:");
+        this.add(email);
+        final TextBox emailBox = new TextBox();
+        this.add(emailBox);
         Label pw = new Label("Password:");
         this.add(pw);
         final TextBox pwBox = new PasswordTextBox();
@@ -42,10 +46,11 @@ public class CreateUserPanel extends FlowPanel {
             @Override
             public void onClick(ClickEvent event) {
                 String name = nameBox.getText();
+                String email = emailBox.getText();
                 String pw = pwBox.getText();
                 String pwRepeat = pwRepeatBox.getText();
                 if (name.length() >= 3 && pw.equals(pwRepeat) && pw.length() >= 5){
-                    userManagementService.createSimpleUser(name, pw, new AsyncCallback<UserDTO>() {
+                    userManagementService.createSimpleUser(name, email, pw, new AsyncCallback<UserDTO>() {
                         
                         @Override
                         public void onSuccess(UserDTO result) {

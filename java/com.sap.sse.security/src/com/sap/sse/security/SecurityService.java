@@ -1,12 +1,12 @@
 package com.sap.sse.security;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.mgt.SecurityManager;
 
-import com.sap.sse.security.userstore.shared.SimpleUser;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 
@@ -22,7 +22,7 @@ public interface SecurityService {
     
     void logout();
     
-    SimpleUser createSimpleUser(String name, String password) throws UserManagementException;
+    User createSimpleUser(String name, String email, String password) throws UserManagementException;
     
     void deleteUser(String username) throws UserManagementException;
     
@@ -30,4 +30,10 @@ public interface SecurityService {
     
     void addRoleForUser(String name, String role) throws UserManagementException;
     void removeRoleFromUser(String name, String role) throws UserManagementException;
+    
+    void setSettings(String key, Object setting);
+    <T> T getSetting(String key, Class<T> clazz);
+    
+    Map<String, Object> getAllSettings();
+    Map<String, Class<?>> getAllSettingTypes();
 }

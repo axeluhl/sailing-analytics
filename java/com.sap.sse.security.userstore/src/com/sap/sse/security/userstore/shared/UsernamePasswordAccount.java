@@ -1,12 +1,14 @@
 package com.sap.sse.security.userstore.shared;
 
-public class SimpleUser extends User {
 
+public class UsernamePasswordAccount implements Account {
+
+    private String name;
     private String saltedPassword;
     private Object salt;
     
-    public SimpleUser(String name, String saltedPassword, Object salt) {
-        super(name);
+    public UsernamePasswordAccount(String name, String saltedPassword, Object salt) {
+        this.name = name;
         this.saltedPassword = saltedPassword;
         this.salt = salt;
     }
@@ -27,9 +29,16 @@ public class SimpleUser extends User {
         this.salt = salt;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public AccountType getAccountType() {
-        return AccountType.SIMPLE;
+        return AccountType.USERNAME_PASSWORD;
     }
-    
 }

@@ -27,5 +27,6 @@ Export-Package: com.sap.sse.security,
  org.apache.shiro.crypto,
  org.apache.shiro.crypto.hash,
  org.apache.shiro.subject,
+ org.apache.shiro.util,
  org.apache.shiro.web.env,
  org.apache.shiro.web.servlet

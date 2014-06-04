@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -19,7 +20,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sse.security.userstore.shared.SimpleUser;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
@@ -88,8 +88,8 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
 
     @Override
-    public SimpleUser createSimpleUser(String name, String password) throws UserManagementException {
-        return store.createSimpleUser(name, password);
+    public User createSimpleUser(String name, String email, String password) throws UserManagementException {
+        return store.createSimpleUser(name, email, password);
     }
 
     @Override
@@ -110,6 +110,26 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     @Override
     public void deleteUser(String username) throws UserManagementException {
         store.deleteUser(username);
+    }
+
+    @Override
+    public void setSettings(String key, Object setting) {
+        store.setSetting(key, setting);
+    }
+
+    @Override
+    public <T> T getSetting(String key, Class<T> clazz) {
+        return store.getSetting("", clazz);
+    }
+
+    @Override
+    public Map<String, Object> getAllSettings() {
+        return store.getAllSettings();
+    }
+
+    @Override
+    public Map<String, Class<?>> getAllSettingTypes() {
+        return store.getAllSettingTypes();
     }
 
 }

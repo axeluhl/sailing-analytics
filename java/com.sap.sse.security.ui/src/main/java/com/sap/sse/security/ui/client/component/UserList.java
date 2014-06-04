@@ -33,9 +33,6 @@ public class UserList extends CellList<UserDTO> {
             sb.appendHtmlConstant("<div>");
             sb.appendEscaped(value.getName());
             sb.appendHtmlConstant("</div>");
-            sb.appendHtmlConstant("<div>");
-            sb.appendEscaped("Account type: "+value.getAccountType());
-            sb.appendHtmlConstant("</div>");
             sb.appendHtmlConstant("</td>");
             sb.appendHtmlConstant("</tr>");
             sb.appendHtmlConstant("</table>");
