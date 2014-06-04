@@ -1,13 +1,10 @@
 package com.sap.sailing.domain.base;
 
-import java.util.Set;
-
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sse.common.search.Hit;
 
-public interface LeaderboardSearchResult extends Hit {
+public interface LeaderboardSearchResult extends LeaderboardSearchResultBase {
     /**
      * The leaderboard that matches the search query.
      */
@@ -23,7 +20,7 @@ public interface LeaderboardSearchResult extends Hit {
      * If the leaderboard is part of one or more leaderboard groups, the leaderboard groups; an empty but
      * valid (non-<code>null</code>) collection otherwise.
      */
-    Set<LeaderboardGroup> getLeaderboardGroups();
+    Iterable<LeaderboardGroup> getLeaderboardGroups();
     
     /**
      * If there is a connection between an {@link Event} and the {@link #getLeaderboard() leaderboard}, e.g., because
@@ -31,5 +28,5 @@ public interface LeaderboardSearchResult extends Hit {
      * the event has a course area attached to its {@link Event#getVenue() venue} that is referenced by the leaderboard as
      * its {@link Leaderboard#getDefaultCourseArea() default course area}, the event is returned; <code>null</code> otherwise.
      */
-    EventBase getEvent();
+    Event getEvent();
 }

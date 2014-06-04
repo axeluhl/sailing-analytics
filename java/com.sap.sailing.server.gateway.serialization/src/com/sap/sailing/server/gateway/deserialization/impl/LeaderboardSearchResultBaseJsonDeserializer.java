@@ -8,17 +8,19 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.common.dto.LeaderboardSearchResultDTO;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
+import com.sap.sailing.domain.base.impl.LeaderboardBaseImpl;
+import com.sap.sailing.domain.base.impl.LeaderboardSearchResultBaseImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
 
-public class LeaderboardSearchResultDTOJsonDeserializer implements JsonDeserializer<StrippedLeaderboardSearchResult> {
+public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserializer<LeaderboardSearchResultBase> {
     private final EventBaseJsonDeserializer eventDeserializer;
     
     private final LeaderboardGroupBaseJsonDeserializer leaderboardGroupDeserializer;
 
-    public LeaderboardSearchResultDTOJsonDeserializer(EventBaseJsonDeserializer eventDeserializer,
+    public LeaderboardSearchResultBaseJsonDeserializer(EventBaseJsonDeserializer eventDeserializer,
             LeaderboardGroupBaseJsonDeserializer leaderboardGroupDeserializer) {
         super();
         this.eventDeserializer = eventDeserializer;
@@ -26,7 +28,7 @@ public class LeaderboardSearchResultDTOJsonDeserializer implements JsonDeseriali
     }
 
     @Override
-    public StrippedLeaderboardSearchResult deserialize(JSONObject object) throws JsonDeserializationException {
+    public LeaderboardSearchResultBase deserialize(JSONObject object) throws JsonDeserializationException {
         EventBase event = eventDeserializer.deserialize(Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_EVENT));
         JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
         String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
@@ -38,7 +40,8 @@ public class LeaderboardSearchResultDTOJsonDeserializer implements JsonDeseriali
         for (Object leaderboardGroupJson : leaderboardGroupsJson) {
             leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) leaderboardGroupJson));
         }
-        return new StrippedLeaderboardSearchResult(event, leaderboardName, leaderboardDisplayName, boatClassName, regattaName, leaderboardGroups);
+        return new LeaderboardSearchResultBaseImpl(new LeaderboardBaseImpl(leaderboardName, leaderboardDisplayName),
+                regattaName, boatClassName, leaderboardGroups, event);
     }
 
 }

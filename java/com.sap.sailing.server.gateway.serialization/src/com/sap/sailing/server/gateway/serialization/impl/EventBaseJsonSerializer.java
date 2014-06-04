@@ -21,10 +21,10 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELDS_LEADERBOARD_GROUPS = "leaderboardGroups";
 
     private final JsonSerializer<Venue> venueSerializer;
-    private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupSerializer;
+    private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer;
 
-    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer, JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupSerializer) {
-        this.leaderboardGroupSerializer = leaderboardGroupSerializer;
+    public EventBaseJsonSerializer(JsonSerializer<Venue> venueSerializer, JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer) {
+        this.leaderboardGroupBaseSerializer = leaderboardGroupBaseSerializer;
         this.venueSerializer = venueSerializer;
     }
 
@@ -40,7 +40,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         JSONArray leaderboardGroups = new JSONArray();
         result.put(FIELDS_LEADERBOARD_GROUPS, leaderboardGroups);
         for (LeaderboardGroupBase lg : event.getLeaderboardGroups()) {
-            leaderboardGroups.add(leaderboardGroupSerializer.serialize(lg));
+            leaderboardGroups.add(leaderboardGroupBaseSerializer.serialize(lg));
         }
         return result;
     }

@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
@@ -11,7 +10,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<LeaderboardSearchResult> {
@@ -44,16 +42,16 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
         Leaderboard leaderboard = leaderboardSearchResult.getLeaderboard();
         leaderboardJson.put(FIELD_LEADERBOARD_NAME, leaderboard.getName());
         leaderboardJson.put(FIELD_LEADERBOARD_DISPLAY_NAME, leaderboard.getDisplayName());
-        final BoatClass boatClass;
+        final String boatClassName;
         final Regatta regatta;
         if (leaderboard instanceof RegattaLeaderboard) {
             regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            boatClass = regatta.getBoatClass();
+            boatClassName = regatta.getBoatClass().getName();
         } else {
             regatta = null;
-            boatClass = getBoatClassFromTrackedRaces(leaderboard);
+            boatClassName = leaderboardSearchResult.getBoatClassName();
         }
-        leaderboardJson.put(FIELD_LEADERBOARD_BOAT_CLASS_NAME, boatClass == null ? null : boatClass.getName());
+        leaderboardJson.put(FIELD_LEADERBOARD_BOAT_CLASS_NAME, boatClassName);
         leaderboardJson.put(FIELD_LEADERBOARD_REGATTA_NAME, regatta == null ? null : regatta.getName());
         JSONArray leaderboardGroupsJson = new JSONArray();
         leaderboardJson.put(FIELD_LEADERBOARD_IN_LEADERBOARD_GROUPS, leaderboardGroupsJson);
@@ -61,12 +59,5 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
             leaderboardGroupsJson.add(leaderboardGroupBaseJsonSerializer.serialize(lg));
         }
         return result;
-    }
-
-    private BoatClass getBoatClassFromTrackedRaces(Leaderboard leaderboard) {
-        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            return trackedRace.getRace().getBoatClass();
-        }
-        return null;
     }
 }
