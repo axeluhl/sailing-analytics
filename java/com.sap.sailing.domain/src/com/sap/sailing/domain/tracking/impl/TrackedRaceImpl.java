@@ -240,7 +240,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @see #loadingFromWindStoreState but for GPSFixStore
      */
     private LoadingFromStoresState loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
-    private Object loadingFromGPSFixStoreStateMonitor = new Object();
+    private Object loadingFromGPSFixStoreStateMonitor = ""; // String, not Object, to keep it serializable
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
