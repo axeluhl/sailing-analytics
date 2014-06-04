@@ -9,8 +9,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<NauticalSide, String> {
     private final StringMessages stringMessages;
     
-    public SideToWhichMarkAtLegStartWasRoundedColumn(String title, LegDetailField<NauticalSide> field, String headerStyle, String columnStyle, StringMessages stringMessages) {
-        super(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle);
+    public SideToWhichMarkAtLegStartWasRoundedColumn(String title, LegDetailField<NauticalSide> field,
+            String headerStyle, String columnStyle, StringMessages stringMessages,
+            DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, field, new TextCell(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
         this.stringMessages = stringMessages;
     }
 

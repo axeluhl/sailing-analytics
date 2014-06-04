@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.BaseChart;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -41,7 +42,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -97,7 +98,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
-                .setZoomType(Chart.ZoomType.X)
+                .setZoomType(BaseChart.ZoomType.X)
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setWidth100()

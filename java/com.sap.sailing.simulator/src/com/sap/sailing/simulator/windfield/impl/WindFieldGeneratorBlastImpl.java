@@ -11,13 +11,13 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Util;
 
 public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
@@ -182,7 +182,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {
         Position p = timedPosition.getPosition();
-        Pair<Integer, Integer> positionIndex = getPositionIndex(p);
+        Util.Pair<Integer, Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
             int rowIndex = positionIndex.getA() + this.boundary.getBorderY();
             int colIndex = positionIndex.getB() + this.boundary.getBorderX();

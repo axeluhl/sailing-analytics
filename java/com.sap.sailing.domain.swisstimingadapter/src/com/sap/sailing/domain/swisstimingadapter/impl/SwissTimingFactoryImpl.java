@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -26,11 +25,12 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sse.common.Util;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
     private static final Logger logger = Logger.getLogger(SwissTimingFactoryImpl.class.getName());
     
-    private final Map<Triple<String, Integer, String>, SailMasterConnector> connectors;
+    private final Map<Util.Triple<String, Integer, String>, SailMasterConnector> connectors;
 
     public SwissTimingFactoryImpl() {
         connectors = new HashMap<>();
@@ -47,7 +47,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
             return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass);
         } else {
-            Triple<String, Integer, String> key = new Triple<String, Integer, String>(host, port, raceId);
+            Util.Triple<String, Integer, String> key = new Util.Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
             if (result == null || result.isStopped()) {
                 if (result == null) {
@@ -68,7 +68,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
             String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
-        Triple<String, Integer, String> key = new Triple<>(host, port, raceId);
+        Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
             result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);

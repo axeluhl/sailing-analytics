@@ -1,73 +1,63 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Date;
-
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.adminconsole.TrackFileImportDeviceIdentifierTableWrapper.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 
-public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<TrackFileImportDeviceIdentifier, SingleSelectionModel<TrackFileImportDeviceIdentifier>> {
-    public static class TrackFileImportDeviceIdentifier {
-        public String uuid;
-        public String fileName;
-        public String trackName;
-        public Date from;
-        public Date to;
-        public long numberOfFixes;
-        
-        public TrackFileImportDeviceIdentifier(String uuid, String fileName, String trackName, Date from, Date to, long numberOfFixes) {
-            this.fileName = fileName;
-            this.trackName = trackName;
-            this.from = from;
-            this.to = to;
-            this.numberOfFixes = numberOfFixes;
-            this.uuid = uuid;
-        }
-    }
+public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<TrackFileImportDeviceIdentifierDTO,
+SingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
     
     public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<TrackFileImportDeviceIdentifier>());
+        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<TrackFileImportDeviceIdentifierDTO>());
         
-        TextColumn<TrackFileImportDeviceIdentifier> fileNameColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+        TextColumn<TrackFileImportDeviceIdentifierDTO> uuidColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
+                return object.uuidAsString;
+            }
+        };
+        
+        TextColumn<TrackFileImportDeviceIdentifierDTO> fileNameColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
+            @Override
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
                 return object.fileName;
             }
         };
         
-        TextColumn<TrackFileImportDeviceIdentifier> trackNameColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+        TextColumn<TrackFileImportDeviceIdentifierDTO> trackNameColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
                 return object.trackName;
             }
         };
         
-        TextColumn<TrackFileImportDeviceIdentifier> fromColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+        TextColumn<TrackFileImportDeviceIdentifierDTO> fromColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
                 return DateAndTimeFormatterUtil.formatDateAndTime(object.from);
             }
         };
         
-        TextColumn<TrackFileImportDeviceIdentifier> toColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+        TextColumn<TrackFileImportDeviceIdentifierDTO> toColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
                 return DateAndTimeFormatterUtil.formatDateAndTime(object.to);
             }
         };
         
-        TextColumn<TrackFileImportDeviceIdentifier> numberOfFixesColumn = new TextColumn<TrackFileImportDeviceIdentifier>() {
+        TextColumn<TrackFileImportDeviceIdentifierDTO> numberOfFixesColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
-            public String getValue(TrackFileImportDeviceIdentifier object) {
-                return "" + object.numberOfFixes;
+            public String getValue(TrackFileImportDeviceIdentifierDTO object) {
+                return "" + object.numFixes;
             }
         };
-        
+
+        table.addColumn(uuidColumn, "UUID");
         table.addColumn(fileNameColumn, "Filename");
         table.addColumn(trackNameColumn, "Trackname");
         table.addColumn(fromColumn, stringMessages.from());

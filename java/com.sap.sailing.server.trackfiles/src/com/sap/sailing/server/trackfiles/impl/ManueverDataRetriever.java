@@ -9,9 +9,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class ManueverDataRetriever extends AbstractDataRetriever {
 

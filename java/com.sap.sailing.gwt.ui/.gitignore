@@ -3,5 +3,5 @@
 /.generated
 /gwt-unitCache
 /extras
-/com.sap.sailing.gwt.ui.*
+/com.sap.sailing.gwt.*
 /com.sap.sse.security.ui.*

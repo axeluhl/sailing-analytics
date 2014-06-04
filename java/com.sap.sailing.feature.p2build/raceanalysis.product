@@ -32,6 +32,7 @@
 
    <configurations>
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.deckmanadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="false" startLevel="4" />

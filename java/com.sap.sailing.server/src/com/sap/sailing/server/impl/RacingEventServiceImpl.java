@@ -71,9 +71,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -136,6 +133,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -159,7 +157,6 @@ import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
-import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
@@ -174,6 +171,9 @@ import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -246,8 +246,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * {@link #renameLeaderboard(String, String)}.
      */
     private final NamedReentrantReadWriteLock leaderboardsByNameLock;
-
+    
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
     
     /**
      * See {@link #leaderboardsByNameLock}
@@ -407,6 +409,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
+        leaderboardGroupsByID = new ConcurrentHashMap<>();
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for "+this, /* fair */ false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for "+this, /* fair */ false);
@@ -436,6 +439,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
+        loadLinksFromEventsToLeaderboardGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
@@ -507,6 +511,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
     
+    private void loadLinksFromEventsToLeaderboardGroups() {
+        domainObjectFactory.loadLeaderboardGroupLinksForEvents(/* eventResolver */ this, /* leaderboardGroupResolver */ this);
+    }
+    
     private void loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh() {
         for (RemoteSailingServerReference sailingServer : domainObjectFactory.loadAllRemoteSailingServerReferences()) {
             remoteSailingServerSet.add(sailingServer);
@@ -560,6 +568,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+                leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -861,8 +870,8 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Map<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
-        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers();
+    public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
+        return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own stuff here... Is it enough to pass on the remote reference URL to the client for leaderboard group URL construction?
     }
 
     @Override
@@ -874,7 +883,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+    public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
         return remoteSailingServerSet.getEventsOrException(ref);
     }
 
@@ -942,7 +951,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public Regatta createRegatta(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
-        Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
+        com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
                 boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -952,7 +961,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
+    public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
@@ -990,7 +999,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        return new Pair<Regatta, Boolean>(regatta, wasCreated);
+        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
     }
 
     @Override
@@ -1676,14 +1685,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
-        List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
+    public Iterable<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
+        List<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>> result = new ArrayList<com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
                 for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
                     WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
                     if (windTracker != null) {
-                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                        result.add(new com.sap.sse.common.Util.Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
                     }
                 }
             }
@@ -1794,11 +1803,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         return leaderboardGroupsByName.get(groupName);
     }
+    
+    @Override
+    public LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID) {
+        return leaderboardGroupsByID.get(leaderboardGroupID);
+    }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(String groupName, String description,
-            boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+    public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName,
+            String description, boolean displayGroupsInReverseOrder,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         for (String leaderboardName : leaderboardNames) {
             Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
@@ -1808,7 +1822,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, displayGroupsInReverseOrder,
+        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayGroupsInReverseOrder,
                 leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings
@@ -1822,6 +1836,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
             }
             leaderboardGroupsByName.put(groupName, result);
+            leaderboardGroupsByID.put(result.getId(), result);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -1835,6 +1850,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
         try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
+            if (leaderboardGroup != null) {
+                leaderboardGroupsByID.remove(leaderboardGroup.getId());
+            }
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
@@ -2065,6 +2083,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             LockUtil.lockForWrite(leaderboardGroupsByNameLock);
             try {
                 leaderboardGroupsByName.clear();
+                leaderboardGroupsByID.clear();
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
             }
@@ -2110,6 +2129,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
             for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+                leaderboardGroupsByID.put(lg.getId(), lg);
                 logoutput.append(String.format("%3s\n", lg.toString()));
             }
 
@@ -2163,16 +2183,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
     }
 
+    // Used for TESTING only
     @Override
     public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
-        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
-        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
+        Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id,
+                /* imageURLs */ Collections.<URL>emptyList(), /* videoURLs */ Collections.<URL>emptyList());
+        replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id, /* imageURLs */
+                Collections.<URL> emptyList(), /* videoURLs */Collections.<URL> emptyList()));
         return result;
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
+            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
+        result.setImageURLs(imageURLs);
+        result.setVideoURLs(videoURLs);
         if (eventsById.containsKey(result.getId())) {
             throw new IllegalArgumentException("Event with ID " + result.getId()
                     + " already exists which is pretty surprising...");
@@ -2184,7 +2210,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, List<String> regattaNames) {
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2194,9 +2220,20 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         event.setEndDate(endDate);
         event.setPublic(isPublic);
         event.getVenue().setName(venueName);
-        // TODO need to update regattas if they are once linked to event objects
+        List<LeaderboardGroup> leaderboardGroups = new ArrayList<>();
+        for (UUID lgid : leaderboardGroupIds) {
+            LeaderboardGroup lg = getLeaderboardGroupByID(lgid);
+            if (lg != null) {
+                leaderboardGroups.add(lg);
+            } else {
+                logger.info("Couldn't find leaderboard group with ID "+lgid+" while updating event "+event.getName());
+            }
+        }
+        event.setLeaderboardGroups(leaderboardGroups);
+        event.setImageURLs(imageURLs);
+        event.setVideoURLs(videoURLs);
+        // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
-        replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
     }
 
     @Override
@@ -2444,11 +2481,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
+    public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
+            return new com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
         }
         return null;
     }
@@ -2553,5 +2590,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
         dataImportLock.setDeleteFromMapTimer(importOperationId);
+    }
+    
+    @Override
+    public Result<LeaderboardSearchResult> search(KeywordQuery query) {
+        return new RegattaByKeywordSearchService().search(this, query);
     }
 }

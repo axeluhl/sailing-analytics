@@ -6,7 +6,7 @@
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
 <listEntry value="com.sap.sailing.gwt.ui.RegattaOverview"/>
 </listAttribute>
-<stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/AdminConsole.html"/>
+<stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/Home.html"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.sap.sailing.gwt.ui"/>
 </listAttribute>
@@ -46,7 +46,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="com.google.gwt.eclipse.core.moduleClasspathProvider"/>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-war &quot;${project_loc:com.sap.sailing.gwt.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 -startupUrl /gwt/AdminConsole.html com.sap.sailing.gwt.ui.AdminConsole -startupUrl /gwt/LeaderboardEditing.html com.sap.sailing.gwt.ui.LeaderboardEditing -startupUrl /gwt/UserManagement.html com.sap.sailing.gwt.ui.UserManagement -startupUrl /gwt/Leaderboard.html com.sap.sailing.gwt.ui.Leaderboard -startupUrl /gwt/Spectator.html com.sap.sailing.gwt.ui.Spectator -startupUrl /gwt/RaceBoard.html com.sap.sailing.gwt.ui.RaceBoard -startupUrl /gwt/PolarSheets.html com.sap.sailing.gwt.ui.PolarSheets -startupUrl /gwt/RegattaOverview.html com.sap.sailing.gwt.ui.RegattaOverview"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-war &quot;${project_loc:com.sap.sailing.gwt.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 -startupUrl /gwt/Home.html com.sap.sailing.gwt.ui.AdminConsole -startupUrl /gwt/LeaderboardEditing.html com.sap.sailing.gwt.ui.LeaderboardEditing -startupUrl /gwt/UserManagement.html com.sap.sailing.gwt.ui.UserManagement -startupUrl /gwt/Leaderboard.html com.sap.sailing.gwt.ui.Leaderboard -startupUrl /gwt/Spectator.html com.sap.sailing.gwt.ui.Spectator -startupUrl /gwt/RaceBoard.html com.sap.sailing.gwt.ui.RaceBoard -startupUrl /gwt/PolarSheets.html com.sap.sailing.gwt.ui.PolarSheets -startupUrl /gwt/RegattaOverview.html com.sap.sailing.gwt.ui.RegattaOverview"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.gwt.ui"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Xdebug -Xrunjdwp:transport=dt_socket,address=7999,server=y"/>
 </launchConfiguration>

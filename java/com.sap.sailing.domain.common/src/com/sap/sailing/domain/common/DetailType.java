@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.common;
 
+import static com.sap.sailing.domain.common.SortingOrder.ASCENDING;
+import static com.sap.sailing.domain.common.SortingOrder.DESCENDING;
+import static com.sap.sailing.domain.common.SortingOrder.NONE;
+
 import java.io.Serializable;
-import static com.sap.sailing.domain.common.SortingOrder.*;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision
@@ -13,7 +16,7 @@ import static com.sap.sailing.domain.common.SortingOrder.*;
  */
 public enum DetailType implements Serializable {
     DISTANCE_TRAVELED(0, ASCENDING), AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING), RACE_RANK(0, ASCENDING), REGATTA_RANK(0, ASCENDING), OVERALL_RANK(0, ASCENDING),
-    RANK_GAIN(0, DESCENDING), NUMBER_OF_MANEUVERS(0, ASCENDING), CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING),
+    RANK_GAIN(0, ASCENDING), NUMBER_OF_MANEUVERS(0, ASCENDING), CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING),
     ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS(1, ASCENDING), VELOCITY_MADE_GOOD_IN_KNOTS(2, DESCENDING),
     GAP_TO_LEADER_IN_SECONDS(0, ASCENDING), GAP_CHANGE_SINCE_LEG_START_IN_SECONDS(0, ASCENDING),
     SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED(0, ASCENDING), WINDWARD_DISTANCE_TO_GO_IN_METERS(0, ASCENDING),

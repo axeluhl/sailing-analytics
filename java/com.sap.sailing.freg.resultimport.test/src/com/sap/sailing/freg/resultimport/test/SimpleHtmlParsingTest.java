@@ -16,10 +16,10 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.resultimport.CompetitorRow;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
+import com.sap.sse.common.Util;
 
 public class SimpleHtmlParsingTest {
     @Test

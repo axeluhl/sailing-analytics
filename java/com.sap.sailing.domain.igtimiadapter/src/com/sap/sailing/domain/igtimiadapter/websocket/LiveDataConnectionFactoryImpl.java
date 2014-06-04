@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
+import com.sap.sse.common.Util;
 
 public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory {
     private static final Logger logger = Logger.getLogger(LiveDataConnectionFactoryImpl.class.getName());

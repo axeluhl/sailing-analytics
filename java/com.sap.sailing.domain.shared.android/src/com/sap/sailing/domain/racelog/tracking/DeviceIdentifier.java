@@ -2,6 +2,8 @@ package com.sap.sailing.domain.racelog.tracking;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.racelog.RaceLog;
+
 /**
  * Identifies any kind of tracking device. Should be implemented accordingly for different tracking
  * adapters, e.g. for smartphones, Igtimi trackers etc.<p>

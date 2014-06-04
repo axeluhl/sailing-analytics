@@ -72,34 +72,9 @@
     </web-resource-collection>
     <auth-constraint>
       <role-name>administrator</role-name>
+      <role-name>eventmanager</role-name>
     </auth-constraint>
   </security-constraint>
-
-<!-- Preparation of security constraints for the leaderboard and raceboard pages  
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Raceboard pages</web-resource-name>
-      <url-pattern>/RaceBoard.html</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>administrator</role-name>
-      <role-name>spectator</role-name>
-      <role-name>moderator</role-name>
-    </auth-constraint>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Leaderboard pages</web-resource-name>
-      <url-pattern>/Leaderboard.html</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>administrator</role-name>
-      <role-name>spectator</role-name>
-      <role-name>moderator</role-name>
-    </auth-constraint>
-  </security-constraint>
- -->
 
   <security-constraint>
     <web-resource-collection>
@@ -108,7 +83,7 @@
     </web-resource-collection>
     <auth-constraint>
       <role-name>administrator</role-name>
-      <role-name>moderator</role-name>
+      <role-name>eventmanager</role-name>
     </auth-constraint>
   </security-constraint>
 

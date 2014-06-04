@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaSelector;
@@ -80,7 +80,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, RaceSelectionChangeListener {
+public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
@@ -132,7 +132,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -165,7 +165,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         toolbarPanel.add(viewControlsPanel);
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
@@ -203,9 +203,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
+        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages, showMapControls);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();

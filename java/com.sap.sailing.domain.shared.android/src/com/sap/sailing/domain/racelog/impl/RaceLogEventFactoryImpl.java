@@ -32,20 +32,20 @@ import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
-import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.events.CloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DefineMarkEventImpl;
-import com.sap.sailing.domain.racelog.tracking.events.RegisterCompetitorEventImpl;
-import com.sap.sailing.domain.racelog.tracking.events.StartTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DenoteForTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.RegisterCompetitorEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.RevokeEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.StartTrackingEventImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceLogEventFactoryImpl implements RaceLogEventFactory {

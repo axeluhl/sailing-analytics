@@ -16,11 +16,11 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Util;
 
 /**
  * The standard implementation of {@link AbstractCandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -67,7 +67,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     @Override
-    public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
+    public void calculateMarkPassDeltas(Competitor c, Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
         if (race.getStartOfRace() != null && (raceStartTime == null || !race.getStartOfRace().minus(2000).equals(raceStartTime))) {
             raceStartTime = race.getStartOfRace().minus(2000);
             for (Competitor com : allEdges.keySet()) {
@@ -116,23 +116,23 @@ public class CandidateChooser implements AbstractCandidateChooser {
         for (Edge e : allEdges.get(co)) {
             all.add(e);
         }
-        LinkedHashMap<Candidate, Pair<Candidate, Double>> candidateWithParent = new LinkedHashMap<>();
-        candidateWithParent.put(start, new Pair<Candidate, Double>(null, 0.0));
-        Pair<Edge, Double> currentMostLikelyEdge = null;
+        LinkedHashMap<Candidate, Util.Pair<Candidate, Double>> candidateWithParent = new LinkedHashMap<>();
+        candidateWithParent.put(start, new Util.Pair<Candidate, Double>(null, 0.0));
+        Util.Pair<Edge, Double> currentMostLikelyEdge = null;
         while (!candidateWithParent.containsKey(end)) {
             currentMostLikelyEdge = null;
             for (Edge e : all) {
                 if (candidateWithParent.containsKey(e.getStart())) {
                     Double cost = candidateWithParent.get(e.getStart()).getB() + e.getProbability();
                     if (currentMostLikelyEdge == null) {
-                        currentMostLikelyEdge = new Pair<Edge, Double>(e, cost);
+                        currentMostLikelyEdge = new Util.Pair<Edge, Double>(e, cost);
                     } else if (cost < currentMostLikelyEdge.getB()) {
-                        currentMostLikelyEdge = new Pair<Edge, Double>(e, cost);
+                        currentMostLikelyEdge = new Util.Pair<Edge, Double>(e, cost);
                     }
                 }
             }
             if (!candidateWithParent.containsKey(currentMostLikelyEdge.getA().getEnd())) {
-                candidateWithParent.put(currentMostLikelyEdge.getA().getEnd(), new Pair<Candidate, Double>(currentMostLikelyEdge.getA().getStart(), currentMostLikelyEdge.getB()));
+                candidateWithParent.put(currentMostLikelyEdge.getA().getEnd(), new Util.Pair<Candidate, Double>(currentMostLikelyEdge.getA().getStart(), currentMostLikelyEdge.getB()));
             }
             all.remove(currentMostLikelyEdge.getA());
         }

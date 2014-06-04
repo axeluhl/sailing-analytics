@@ -55,8 +55,8 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -76,7 +76,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower, RaceSelectionChangeListener {
+public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower, RaceSelectionChangeListener {
 
     private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
 

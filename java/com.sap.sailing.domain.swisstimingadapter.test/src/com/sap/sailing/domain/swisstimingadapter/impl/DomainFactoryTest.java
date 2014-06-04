@@ -1,16 +1,15 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
-
-import static org.junit.Assert.*;
-
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
 
 public class DomainFactoryTest {
     

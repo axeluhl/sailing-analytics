@@ -7,9 +7,9 @@ import slash.navigation.gpx.GpxRoute;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class BouyDataRetriever extends AbstractDataRetriever {
 

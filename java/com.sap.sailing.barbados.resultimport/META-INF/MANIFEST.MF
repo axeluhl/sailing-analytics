@@ -15,7 +15,8 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  jcl.over.slf4j;bundle-version="1.6.4",
  com.sap.sailing.resultimport,
- slf4j.api;bundle-version="1.6.4"
+ slf4j.api;bundle-version="1.6.4",
+ com.sap.sse.common
 Bundle-ClassPath: lib/com.springsource.org.apache.commons.beanutils-1.8.0.jar,
  lib/com.springsource.org.apache.commons.collections-3.2.1.jar,
  lib/com.springsource.org.apache.commons.digester-1.8.0.jar,

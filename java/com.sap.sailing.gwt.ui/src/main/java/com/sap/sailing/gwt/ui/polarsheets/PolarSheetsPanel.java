@@ -30,7 +30,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -45,7 +45,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
  * @author d054528 Frederik Petersen
  *
  */
-public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer, Component<PolarSheetGenerationSettings> {
+public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattasDisplayer, Component<PolarSheetGenerationSettings> {
 
     public static final String POLARSHEETS_STYLE = "polarSheets";
 

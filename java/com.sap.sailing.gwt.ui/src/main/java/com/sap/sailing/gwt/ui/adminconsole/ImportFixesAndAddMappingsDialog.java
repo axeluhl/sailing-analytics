@@ -15,13 +15,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.adminconsole.TrackFileImportDeviceIdentifierTableWrapper.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
@@ -31,9 +31,9 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
     private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
-    private final Map<TrackFileImportDeviceIdentifier, Serializable> mappings = new HashMap<>();
+    private final Map<TrackFileImportDeviceIdentifierDTO, Serializable> mappings = new HashMap<>();
     
-    private TrackFileImportDeviceIdentifier deviceToSelect;
+    private TrackFileImportDeviceIdentifierDTO deviceToSelect;
     private CompetitorDTO compToSelect;
     private MarkDTO markToSelect;
     private boolean inInstableTransitionState = false;
@@ -52,7 +52,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         this.stringMessages = stringMessages;
 
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
-        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages);
+        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages, sailingService, errorReporter);
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -132,7 +132,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
     
     private void mappedToSelectionChanged(Serializable mappedTo) {
         if (! inInstableTransitionState) {
-            TrackFileImportDeviceIdentifier device = deviceIdTable.getSelectionModel().getSelectedObject();
+            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
             if (device != null) {
                 mappings.put(device, mappedTo);
             }
@@ -148,7 +148,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         select();
     }
     
-    private void deviceSelectionChanged(TrackFileImportDeviceIdentifier deviceId) {
+    private void deviceSelectionChanged(TrackFileImportDeviceIdentifierDTO deviceId) {
         if (! inInstableTransitionState) {
             deviceToSelect = deviceId;
             compToSelect = null;
@@ -190,8 +190,8 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
     @Override
     protected Collection<DeviceMappingDTO> getResult() {
         List<DeviceMappingDTO> result = new ArrayList<>();
-        for (TrackFileImportDeviceIdentifier device : mappings.keySet()) {
-            DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuid);
+        for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
+            DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
             Serializable mappedTo = mappings.get(device);
             DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to,
                     mappedTo, null);

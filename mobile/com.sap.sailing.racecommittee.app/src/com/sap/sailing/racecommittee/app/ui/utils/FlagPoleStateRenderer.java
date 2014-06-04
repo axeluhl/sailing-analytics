@@ -8,12 +8,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sse.common.Util;
 
 public class FlagPoleStateRenderer {
     
@@ -76,8 +76,8 @@ public class FlagPoleStateRenderer {
     }
     
     private int getFleetColorId() {
-        Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor() == null ? 
-                new Triple<Integer, Integer, Integer>(0, 0, 0) : race.getFleet().getColor().getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor() == null ? 
+                new Util.Triple<Integer, Integer, Integer>(0, 0, 0) : race.getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
     }
     
