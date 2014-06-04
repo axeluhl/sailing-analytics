@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class Stage extends Composite {
@@ -16,8 +18,8 @@ public class Stage extends Composite {
     @UiField Label subtitle;
     @UiField Label title;
     @UiField Label message;
-    @UiField Label message2;
-    @UiField Label name;
+    @UiField SpanElement regattaState;
+    @UiField SpanElement actionMessage;
 
     interface StageUiBinder extends UiBinder<Widget, Stage> {
     }
@@ -32,11 +34,12 @@ public class Stage extends Composite {
     public void setFeaturedEvent(EventDTO featuredEvent) {
         this.featuredEvent = featuredEvent;
         
-        name.setText(featuredEvent.getName());
         title.setText(featuredEvent.getName());
         subtitle.setText(featuredEvent.venue.getName());
-        message.setText(featuredEvent.endDate.toString());
-        message2.setText(featuredEvent.endDate.toString());
-    }
 
+        message.setText(EventDatesFormatterUtil.formatDateRange(featuredEvent.startDate, featuredEvent.endDate));
+        actionMessage.setInnerText("[Race 6]");
+        regattaState.setInnerText("Next Race");
+    }
+    
 }

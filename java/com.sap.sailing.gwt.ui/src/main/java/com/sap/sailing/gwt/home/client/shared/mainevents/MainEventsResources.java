@@ -11,11 +11,6 @@ public interface MainEventsResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String eventteaser();
-        String eventteaser_name();
-        String eventteaser_image();
-        String eventteaser_series();
-        String eventteaser_location();
         String mainevents();    
     }
 }

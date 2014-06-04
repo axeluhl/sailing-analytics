@@ -16,16 +16,9 @@
     </div>
   </div>
   <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-        <figure class="{local_res.css.eventteaser_image}"><g:Image ui:field="eventImage" />
-          <div class="{local_res.css.eventteaser_series} {res.mainCss.label}">XYZ</div>
-        </figure>
-        <div class="{local_res.css.eventteaser_name}"><g:Label ui:field="eventName" /></div>
-        <div class="{local_res.css.eventteaser_location}"><g:Label ui:field="venueName" />,&nbsp;<g:Label ui:field="eventStartDate" />
-        </div>
-        <g:Anchor ui:field="linkToEventOverview" styleName="{local_res.css.eventteaser}" href="javascript:;">
-        </g:Anchor>
-    </div>
+      <s:mainevents.RecentEvent ui:field='event1'/>
+      <s:mainevents.RecentEvent ui:field='event2'/>
+      <s:mainevents.RecentEvent ui:field='event3'/>
   </div>
   <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}">Show All Events</a></div>

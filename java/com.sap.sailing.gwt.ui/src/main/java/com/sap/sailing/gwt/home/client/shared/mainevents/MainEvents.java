@@ -6,10 +6,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
@@ -17,11 +14,9 @@ public class MainEvents extends Composite {
 
     private List<EventDTO> recentEvents;
     
-    @UiField Label eventName;
-    @UiField Label venueName;
-    @UiField Label eventStartDate;
-    @UiField Anchor linkToEventOverview;
-    @UiField Image eventImage;
+    @UiField RecentEvent event1;
+    @UiField RecentEvent event2;
+    @UiField RecentEvent event3;
 
     interface MainEventsUiBinder extends UiBinder<Widget, MainEvents> {
     }
@@ -39,13 +34,15 @@ public class MainEvents extends Composite {
         recentEvents.clear();
         recentEvents.addAll(theRecentEvents);
         
-        if(recentEvents.size() > 0) {
-            EventDTO firstRecentEvent = recentEvents.get(0);
-            eventName.setText(firstRecentEvent.getName());
-            venueName.setText(firstRecentEvent.venue.getName());
-            eventStartDate.setText(firstRecentEvent.startDate.toString());
-            eventImage.setUrl("http://www.sapsailing.com/icon.png");
-            
+        int size = recentEvents.size();
+        if(size > 0) {
+            event1.setEvent(recentEvents.get(0));
+        }
+        if(size > 1) {
+            event2.setEvent(recentEvents.get(1));
+        }
+        if(size > 2) {
+            event3.setEvent(recentEvents.get(2));
         }
     }
 }
