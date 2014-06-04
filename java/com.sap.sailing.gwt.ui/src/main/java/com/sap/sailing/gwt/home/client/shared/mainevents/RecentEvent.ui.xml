@@ -7,13 +7,13 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainevents.RecentEventResources" />
     <g:HTMLPanel>
     <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-        <figure class="{local_res.css.eventteaser_image}"><g:Image ui:field="eventImage" />
-          <div class="{local_res.css.eventteaser_series} {res.mainCss.label}"></div>
-        </figure>
-        <div class="{local_res.css.eventteaser_name}"><span ui:field="eventName" /></div>
-        <div class="{local_res.css.eventteaser_location}"><span ui:field="venueName" />,&nbsp;<span ui:field="eventStartDate" />
-        </div>
         <g:Anchor ui:field="linkToEventOverview" styleName="{local_res.css.eventteaser}" href="javascript:;">
+	        <figure class="{local_res.css.eventteaser_image}"><img ui:field='eventImage' />
+	          <div class="{local_res.css.eventteaser_series} {res.mainCss.label}"></div>
+	        </figure>
+	        <div class="{local_res.css.eventteaser_name}"><span ui:field="eventName" /></div>
+	        <div class="{local_res.css.eventteaser_location}"><span ui:field="venueName" />,&nbsp;<span ui:field="eventStartDate" />
+	        </div>
         </g:Anchor>
     </div>
     </g:HTMLPanel>

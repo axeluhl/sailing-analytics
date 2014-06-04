@@ -16,12 +16,24 @@ public class EventDatesFormatterUtil {
     private final static DateTimeFormat yearFormat = DateTimeFormat.getFormat("yyyy");
 
     @SuppressWarnings("deprecation")
-    public static String formatDateRange(Date from, Date to) {
+    public static String formatDateRangeWithYear(Date from, Date to) {
         String result = "";
         if(from.getMonth() == to.getMonth()) {
-            result = dayFormat.format(from) + " - " + dayFormat.format(to) + " " + monthFormat.format(from) + " " + yearFormat.format(from);
+            result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + " " + yearFormat.format(from);
         } else {
             result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + " " + yearFormat.format(from);
+        }
+                
+        return result;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static String formatDateRangeWithoutYear(Date from, Date to) {
+        String result = "";
+        if(from.getMonth() == to.getMonth()) {
+            result =  monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to);
+        } else {
+            result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to);
         }
                 
         return result;

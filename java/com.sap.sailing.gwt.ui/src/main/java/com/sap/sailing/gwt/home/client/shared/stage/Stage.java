@@ -37,7 +37,7 @@ public class Stage extends Composite {
         title.setText(featuredEvent.getName());
         subtitle.setText(featuredEvent.venue.getName());
 
-        message.setText(EventDatesFormatterUtil.formatDateRange(featuredEvent.startDate, featuredEvent.endDate));
+        message.setText(EventDatesFormatterUtil.formatDateRangeWithYear(featuredEvent.startDate, featuredEvent.endDate));
         actionMessage.setInnerText("[Race 6]");
         regattaState.setInnerText("Next Race");
     }

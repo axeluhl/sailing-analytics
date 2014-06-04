@@ -45,7 +45,7 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         leaderboardGroups.add(leaderboardGroup);
     }
     
-    public Iterable<LeaderboardGroupDTO> getLeaderboardGroups() {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
         return leaderboardGroups;
     }
     
@@ -57,11 +57,11 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         videoURLs.add(videoURL);
     }
 
-    public Iterable<String> getImageURLs() {
+    public List<String> getImageURLs() {
         return imageURLs;
     }
 
-    public Iterable<String> getVideoURLs() {
+    public List<String> getVideoURLs() {
         return videoURLs;
     }
 }
