@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -14,16 +15,19 @@ public class MainEvents extends Composite {
 
     private List<EventDTO> recentEvents;
     
-    @UiField RecentEvent event1;
-    @UiField RecentEvent event2;
-    @UiField RecentEvent event3;
+    @UiField(provided=true) RecentEvent event1;
+    @UiField(provided=true) RecentEvent event2;
+    @UiField(provided=true) RecentEvent event3;
 
     interface MainEventsUiBinder extends UiBinder<Widget, MainEvents> {
     }
     
     private static MainEventsUiBinder uiBinder = GWT.create(MainEventsUiBinder.class);
 
-    public MainEvents() {
+    public MainEvents(PlaceController placeController) {
+        event1 = new RecentEvent(placeController);
+        event2 = new RecentEvent(placeController);
+        event3 = new RecentEvent(placeController);
         MainEventsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         

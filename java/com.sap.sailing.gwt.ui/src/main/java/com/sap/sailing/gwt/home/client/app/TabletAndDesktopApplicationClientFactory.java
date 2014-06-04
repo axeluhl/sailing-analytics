@@ -38,6 +38,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public StartView createStartView() {
-        return new TabletAndDesktopStartView();
+        return new TabletAndDesktopStartView(getPlaceController());
     }
 }
