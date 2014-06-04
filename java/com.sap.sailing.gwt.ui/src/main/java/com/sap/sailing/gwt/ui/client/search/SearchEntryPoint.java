@@ -36,6 +36,7 @@ public class SearchEntryPoint extends AbstractEntryPoint {
         super.doOnModuleLoad();
         registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         VerticalPanel searchAndResults = new VerticalPanel();
+        searchAndResults.setSize("100%", "30em");
         RootPanel.get().add(searchAndResults);
         HorizontalPanel searchPanel = new HorizontalPanel();
         searchAndResults.add(searchPanel);
@@ -45,6 +46,7 @@ public class SearchEntryPoint extends AbstractEntryPoint {
         Button searchButton = new Button("Search");
         searchPanel.add(searchButton);
         final TextArea resultsLabel = new TextArea();
+        resultsLabel.setSize("90%", "70%");
         resultsLabel.setEnabled(false);
         searchAndResults.add(resultsLabel);
         searchButton.addClickHandler(new ClickHandler() {
