@@ -99,7 +99,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
+                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), showMapControls);
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -110,7 +110,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), showMapControls);
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -127,7 +127,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RootPanel.get().add(new LoginPanel());
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, UserDTO user, boolean showMapControls) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;

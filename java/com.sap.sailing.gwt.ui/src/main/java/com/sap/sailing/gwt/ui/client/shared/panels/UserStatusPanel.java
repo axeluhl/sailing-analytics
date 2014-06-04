@@ -7,16 +7,14 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class UserStatusPanel extends FlowPanel {
 
-    private final UserDTO user;
     private final Label userNameLabel;
 
     private final Label userNameText;
 
     private final Label userRolesText;
     
-    public UserStatusPanel(UserDTO user) {
+    public UserStatusPanel() {
         super();
-        this.user = user;
         userNameLabel = new Label("User:");
         userNameText = new Label("");
         userRolesText = new Label("");
@@ -43,4 +41,5 @@ public class UserStatusPanel extends FlowPanel {
 //            userRolesText.setText("Unknown");
 //        }
 //    }
+}
 }
