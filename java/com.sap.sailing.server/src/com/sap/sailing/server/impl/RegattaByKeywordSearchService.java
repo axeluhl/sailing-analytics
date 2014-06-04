@@ -2,6 +2,7 @@ package com.sap.sailing.server.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class RegattaByKeywordSearchService {
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
         final Map<Leaderboard, Event> eventForLeaderboard = new HashMap<>();
+        final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
             public Iterable<String> getStrings(Leaderboard leaderboard) {
@@ -53,6 +55,12 @@ public class RegattaByKeywordSearchService {
                 for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
                     leaderboardStrings.add(leaderboardGroup.getName());
                     leaderboardStrings.add(leaderboardGroup.getDescription());
+                    Set<LeaderboardGroup> leaderboardGroups = leaderboardGroupsForLeaderboard.get(leaderboard);
+                    if (leaderboardGroups == null) {
+                        leaderboardGroups = new HashSet<>();
+                        leaderboardGroupsForLeaderboard.put(leaderboard, leaderboardGroups);
+                    }
+                    leaderboardGroups.add(leaderboardGroup);
                 }
                 for (Event event : getEventsHostingLeaderboard(leaderboard, racingEventService, leaderboardGroupsHostingLeaderboard)) {
                     leaderboardStrings.add(event.getName());
@@ -63,7 +71,7 @@ public class RegattaByKeywordSearchService {
             }
         };
         for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
-            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard, eventForLeaderboard.get(matchingLeaderboard)));
+            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard, eventForLeaderboard.get(matchingLeaderboard), leaderboardGroupsForLeaderboard.get(matchingLeaderboard)));
         }
         return result;
     }

@@ -25,7 +25,9 @@ public class SearchResource extends AbstractSailingServerResource {
     private final JsonSerializer<LeaderboardSearchResult> serializer;
     
     public SearchResource() {
-        serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer()));
+        final LeaderboardGroupBaseJsonSerializer leaderboardGroupSerializer = new LeaderboardGroupBaseJsonSerializer();
+        serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(
+                new CourseAreaJsonSerializer()), leaderboardGroupSerializer), leaderboardGroupSerializer);
     }
     
     private Result<LeaderboardSearchResult> search(KeywordQuery query) {
