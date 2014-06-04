@@ -38,6 +38,6 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
 
     @Override
     public StartView createStartView() {
-        return new SmartphoneStartView();
+        return new SmartphoneStartView(getPlaceController());
     }
 }
