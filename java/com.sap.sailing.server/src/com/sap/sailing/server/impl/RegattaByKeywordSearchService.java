@@ -33,7 +33,7 @@ import com.sap.sse.common.search.ResultImpl;
  */
 public class RegattaByKeywordSearchService {
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
-        ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new RegattaSearchResultRanker(racingEventService));
+        ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
         final Map<Leaderboard, Event> eventForLeaderboard = new HashMap<>();
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
