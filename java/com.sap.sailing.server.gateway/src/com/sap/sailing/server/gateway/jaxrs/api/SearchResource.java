@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,14 +34,13 @@ public class SearchResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{q}")
-    public Response search(@PathParam("q") String keywords) {
+    public Response search(@QueryParam("q") String keywords) {
         KeywordQuery query = new KeywordQuery(keywords.split(" "));
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {
             jsonSearchResults.add(serializer.serialize(searchResult));
         }
-        return Response.ok(jsonSearchResults.toString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(jsonSearchResults.toJSONString(), MediaType.APPLICATION_JSON).build();
     }
 }
