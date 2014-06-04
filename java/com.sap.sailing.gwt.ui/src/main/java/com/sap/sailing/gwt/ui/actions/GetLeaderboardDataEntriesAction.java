@@ -6,11 +6,11 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetLeaderboardDataEntriesAction implements AsyncAction<List<Triple<String, List<CompetitorDTO>, List<Double>>>> {
+public class GetLeaderboardDataEntriesAction implements AsyncAction<List<Util.Triple<String, List<CompetitorDTO>, List<Double>>>> {
     private final SailingServiceAsync sailingService;
     private final DetailType detailType;
     private final String leaderboardName;
@@ -24,7 +24,7 @@ public class GetLeaderboardDataEntriesAction implements AsyncAction<List<Triple<
     }
 
     @Override
-    public void execute(AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback) {
+    public void execute(AsyncCallback<List<Util.Triple<String, List<CompetitorDTO>, List<Double>>>> callback) {
         sailingService.getLeaderboardDataEntriesForAllRaceColumns(leaderboardName, date, detailType, callback);
     }
 }

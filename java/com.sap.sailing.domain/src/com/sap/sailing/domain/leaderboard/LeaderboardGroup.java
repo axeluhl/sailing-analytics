@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Collection;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.Renamable;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.common.WithID;
 
 /**
@@ -24,15 +24,10 @@ import com.sap.sailing.domain.common.WithID;
  * 
  * @author Frank Mittag (c5163874)
  */
-public interface LeaderboardGroup extends Renamable {
+public interface LeaderboardGroup extends LeaderboardGroupBase {
     void addLeaderboardGroupListener(LeaderboardGroupListener listener);
     void removeLeaderboardGroupListener(LeaderboardGroupListener listener);
-    
-    String getDescription();
-    void setDescriptiom(String description);
-
     boolean isDisplayGroupsInReverseOrder();
-    
     Iterable<Leaderboard> getLeaderboards();
     int getIndexOf(Leaderboard leaderboard);
     void addLeaderboard(Leaderboard leaderboard);

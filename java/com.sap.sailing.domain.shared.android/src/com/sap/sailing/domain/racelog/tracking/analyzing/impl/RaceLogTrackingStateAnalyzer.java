@@ -4,8 +4,8 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
-import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 
 public class RaceLogTrackingStateAnalyzer extends RaceLogAnalyzer<RaceLogTrackingState> {
 

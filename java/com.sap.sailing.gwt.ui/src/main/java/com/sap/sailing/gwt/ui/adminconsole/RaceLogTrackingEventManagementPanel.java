@@ -23,7 +23,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -33,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -166,7 +166,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
                                 @Override
                                 public void ok(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> editedObject) {
-                                    Set<Triple<String, String, String>> toRaceLogs = new HashSet<>();
+                                    Set<Util.Triple<String, String, String>> toRaceLogs = new HashSet<>();
                                     for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : editedObject) {
                                         toRaceLogs.add(toTriple(leaderboardName, race));
                                     }
@@ -200,9 +200,9 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         racesTable.setWidth("600px");
     }
     
-    private Triple<String, String, String> toTriple(String leaderboardName,
+    private Util.Triple<String, String, String> toTriple(String leaderboardName,
             RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
-        return new Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
+        return new Util.Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
     }
 
     @Override

@@ -66,9 +66,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
@@ -102,6 +99,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -426,7 +424,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
-                    final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
+                    final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
@@ -503,7 +501,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
                         @Override
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
-                            List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
+                            List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
@@ -511,7 +509,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                         case EXPEDITION:
                                             // we filter out measured wind sources with a very little confidence
                                             if (windTrackInfoDTO.minWindConfidence > 0.01) {
-                                                windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
+                                                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
                                             break;
                                         case COMBINED:
@@ -631,10 +629,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showWindSensorsOnMap(List<Pair<WindSource, WindTrackInfoDTO>> windSensorsList) {
+    protected void showWindSensorsOnMap(List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSensorsList) {
         if (map != null) {
             Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorOverlays.keySet());
-            for (Pair<WindSource, WindTrackInfoDTO> windSourcePair : windSensorsList) {
+            for (com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO> windSourcePair : windSensorsList) {
                 WindSource windSource = windSourcePair.getA(); 
                 WindTrackInfoDTO windTrackInfoDTO = windSourcePair.getB();
 
@@ -765,7 +763,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
     
-    private Pair<Integer, CompetitorDTO> getLeadingVisibleCompetitorInfo(Iterable<CompetitorDTO> competitorsToShow) {
+    private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getLeadingVisibleCompetitorInfo(Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
@@ -773,7 +771,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (Util.contains(competitorsToShow, quickRank.competitor)) {
                 leadingCompetitorDTO = quickRank.competitor;
                 legOfLeaderCompetitor = quickRank.legNumber;
-                return new Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
+                return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }
         return null;
@@ -785,7 +783,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
-                Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
+                com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
                 // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
                 // don't show anything
                 GPSFixDTO lastBoatFix = null;
@@ -899,7 +897,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
-            Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
+            com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
             int legOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
             // draw the start line
@@ -1431,7 +1429,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
-                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
+                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
                         MarkerOptions options = MarkerOptions.newInstance();
                         options.setTitle(maneuver.toString(stringMessages));
                         options.setIcon(maneuverMarker.getIcon_MarkerImage());

@@ -17,11 +17,11 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
+import com.sap.sse.common.Util;
 
 public class EventReplicationTest extends AbstractServerReplicationTest {
 

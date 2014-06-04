@@ -17,9 +17,8 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -99,7 +98,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         Collections.sort(ccs, new Comparator<CountryCode>() {
             @Override
             public int compare(CountryCode o1, CountryCode o2) {
-                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode());
+                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode(), /* nullIsLess */ true);
             }
         });
         for (CountryCode cc : ccs) {
@@ -141,12 +140,12 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
 
         @Override
-        public Triple<Integer, Integer, Integer> getAsRGB() {
+        public com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB() {
             return null;
         }
 
         @Override
-        public Triple<Float, Float, Float> getAsHSV() {
+        public com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV() {
             return null;
         }
 

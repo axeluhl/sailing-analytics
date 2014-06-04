@@ -47,7 +47,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -57,6 +56,7 @@ import com.sap.sailing.domain.tracking.impl.WindComparator;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.nmeaconnector.NmeaFactory;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
+import com.sap.sse.common.Util;
 
 public class ReadWindVaneDataTest {
     @Test

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * A map that is concurrency-safe as provided by the {@link ConcurrentHashMap} implementation, and referencing

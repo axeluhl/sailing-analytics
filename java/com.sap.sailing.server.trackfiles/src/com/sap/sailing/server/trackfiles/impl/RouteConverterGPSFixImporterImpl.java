@@ -1,20 +1,13 @@
 package com.sap.sailing.server.trackfiles.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
-import slash.navigation.base.BaseRoute;
 import slash.navigation.base.NavigationFormat;
-import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.NavigationFormats;
-import slash.navigation.base.ParserResult;
 import slash.navigation.base.Wgs84Position;
 import slash.navigation.bcr.MTP0607Format;
 import slash.navigation.bcr.MTP0809Format;
@@ -97,10 +90,9 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 /**
  * Only supports such navigation formats for which RouteConverter implements own parser.
@@ -113,11 +105,7 @@ import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
  * @author Fredrik Teschke
  *
  */
-public class RouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {
-    /**
-     * A list of the track file formats that RouteConverter can parse out of the box.
-     * @see NavigationFormats#SUPPORTED_FORMATS
-     */
+public class RouteConverterGPSFixImporterImpl extends BaseRouteConverterGPSFixImporterImpl {    
     private final static List<Class<? extends NavigationFormat<?>>> SUPPORTED_FORMATS =
             Arrays.<Class<? extends NavigationFormat<?>>>asList(
                     // self-implemented formats
@@ -198,80 +186,35 @@ public class RouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {
                     BrokenNavilinkFormat.class
                     );
     
-    /**
-     * Copied from {@link NavigationFormatParser#getFormatInstances}.
-     * @param restrictToWritableFormats
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private static List<NavigationFormat> getFormatInstances(boolean restrictToWritableFormats) {
-        List<NavigationFormat> formats = new ArrayList<NavigationFormat>();
-        for (Class<? extends NavigationFormat> formatClass : SUPPORTED_FORMATS) {
-            try {
-                NavigationFormat format = formatClass.newInstance();
-                if (restrictToWritableFormats && format.isSupportsWriting() ||
-                        !restrictToWritableFormats && format.isSupportsReading())
-                    formats.add(format);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot instantiate " + formatClass, e);
-            }
-        }
-        return formats;
+    public RouteConverterGPSFixImporterImpl() {
+        super(SUPPORTED_FORMATS);
     }
     
-    @SuppressWarnings("rawtypes")
-    private static List<NavigationFormat> SUPPORTED_READ_FORMATS = getFormatInstances(false);
-    
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
-            throws IOException, FormatNotSupportedException {
-        //TODO dirty hack, because no public read method for inputstream and custom list of formats
-        NavigationFormatParser parser = new NavigationFormatParser();
-        List<BaseRoute> routes;
-        try {
-            Method m = NavigationFormatParser.class.getDeclaredMethod("read", InputStream.class, Integer.TYPE,
-                    CompactCalendar.class, List.class);
-            m.setAccessible(true);
-            ParserResult result = (ParserResult) m.invoke(parser, inputStream, 1024 * 1024, null, SUPPORTED_READ_FORMATS);
-            if (result == null) {
-                throw new FormatNotSupportedException();
-            }
-            routes = result.getAllRoutes();
-        } catch (Exception e) {
-            throw new IOException(e);
+    public GPSFix convertToGPSFix(BaseNavigationPosition position) throws Exception {
+        final CompactCalendar time = position.getTime();
+        final Date t;
+        if (time == null) {
+            t = new Date(); // use "now" as the time for the fix which otherwise would be lacking a time stamp
+        } else {
+            t = time.getTime();
         }
-        
-        for (BaseRoute route : routes) {
-            List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
-            String routeName = route.getName();
-            route.ensureIncreasingTime();
-            callback.startTrack(routeName, null);
-            for (BaseNavigationPosition p : positions) {
-                try {
-                    Date t = p.getTime().getTime();
-                    Double heading = null;
-                    if (p instanceof Wgs84Position) {
-                        heading = ((Wgs84Position) p).getHeading();
-                    }
-                    Double speed = p.getSpeed();
+        Double heading = null;
+        if (position instanceof Wgs84Position) {
+            heading = ((Wgs84Position) position).getHeading();
+        }
+        Double speed = position.getSpeed();
 
-                    Position pos = new DegreePosition(p.getLatitude(), p.getLongitude());
-                    TimePoint timePoint = new MillisecondsTimePoint(t);
-                    
-                    if (speed != null && heading != null) {
-                        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(
-                                speed, new DegreeBearingImpl(heading));
-                        addFixAndInfer(callback, inferSpeedAndBearing, new GPSFixMovingImpl(pos, timePoint, speedWithBearing));
-                    } else {
-                        addFixAndInfer(callback, inferSpeedAndBearing, new GPSFixImpl(pos, timePoint));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        TimePoint timePoint = new MillisecondsTimePoint(t);
+        
+        if (speed != null && heading != null) {
+            SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(
+                    speed, new DegreeBearingImpl(heading));
+            return new GPSFixMovingImpl(pos, timePoint, speedWithBearing);
+        } else {
+            return new GPSFixImpl(pos, timePoint);
         }
-    }
+    };
 
     @Override
     public Iterable<String> getSupportedFileExtensions() {

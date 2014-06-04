@@ -12,10 +12,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sse.common.Util;
 
 public class EventLeaderboardGroupLinkTest {
     @Test

@@ -48,8 +48,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
 
     public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
             SortingOrder preferredSortingOrder, StringMessages stringConstants, String detailHeaderStyle, String detailColumnStyle,
-            List<DetailType> detailSelection) {
-        super(cell, preferredSortingOrder);
+            List<DetailType> detailSelection, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(cell, preferredSortingOrder, displayedLeaderboardRowsProvider);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
         this.detailSelection = detailSelection;
@@ -171,7 +171,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                         if (insertIndex != -1) {
                             insertIndex++;
                             for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
-                                column.updateMinMax(getLeaderboardPanel().getLeaderboard());
+                                column.updateMinMax();
                                 getLeaderboardPanel().insertColumn(insertIndex++, column);
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();

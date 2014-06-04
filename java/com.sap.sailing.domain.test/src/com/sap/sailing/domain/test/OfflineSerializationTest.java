@@ -31,8 +31,6 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -40,6 +38,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sse.common.Util;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
     /**
@@ -53,16 +52,16 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         final Throwable s1 = new Throwable();
         final Throwable s2 = new Throwable();
-        Pair<Throwable, Throwable> p =
-                new Pair<Throwable, Throwable>(
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> p =
+                new com.sap.sse.common.Util.Pair<Throwable, Throwable>(
                         s1, s2);
-        HashSet<Pair<Throwable, Throwable>> s =
-                new HashSet<Pair<Throwable, Throwable>>();
+        HashSet<com.sap.sse.common.Util.Pair<Throwable, Throwable>> s =
+                new HashSet<com.sap.sse.common.Util.Pair<Throwable, Throwable>>();
         s.add(p);
-        Set<Pair<Throwable, Throwable>> ss =
+        Set<com.sap.sse.common.Util.Pair<Throwable, Throwable>> ss =
                 cloneBySerialization(s, /* resolveAgainst */ receiverDomainFactory);
         
-        Pair<Throwable, Throwable> ps = ss.iterator().next();
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> ps = ss.iterator().next();
         Throwable s1Des = ps.getA();
         Throwable s2Des = ps.getB();
         assertNotSame(s, ss);
@@ -70,8 +69,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertNotSame(s1, s1Des);
         assertNotSame(s2, s2Des);
         assertEquals(1, ss.size());
-        Pair<Throwable, Throwable> pNew =
-                new Pair<Throwable, Throwable>(s1Des, s2Des);
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> pNew =
+                new com.sap.sse.common.Util.Pair<Throwable, Throwable>(s1Des, s2Des);
         assertEquals(ps.hashCode(), pNew.hashCode());
         assertTrue(ss.contains(pNew));
     }

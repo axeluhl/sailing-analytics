@@ -16,8 +16,6 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -32,6 +30,7 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
+import com.sap.sse.common.Util;
 
 public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
@@ -55,7 +54,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
-        positioningList.add(new Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
+        positioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
                 MaxPointsReason.NONE));
         event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);

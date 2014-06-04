@@ -25,8 +25,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 
 /**
@@ -96,7 +94,7 @@ public class ClientParamsPHP {
     }
     
     private final static Pattern defaultPropertyNamePattern = Pattern.compile("([^0-9]*)(([0-9][0-9]*)(.*))?");
-    private static Util.Pair<String, Integer> getPropertyNamePrefixAndNumber(UUID uuid, String idPropertyName) {
+    private static com.sap.sse.common.Util.Pair<String, Integer> getPropertyNamePrefixAndNumber(UUID uuid, String idPropertyName) {
         Matcher m = defaultPropertyNamePattern.matcher(idPropertyName);
         if (m.matches()) {
             final String propertyNamePrefix;
@@ -107,7 +105,7 @@ public class ClientParamsPHP {
             } else {
                 number = null;
             }
-            return new Util.Pair<String, Integer>(propertyNamePrefix, number);
+            return new com.sap.sse.common.Util.Pair<String, Integer>(propertyNamePrefix, number);
         } else {
             throw new RuntimeException("Unexpected ID property name "+idPropertyName+" that cannot be analyzed");
         }
@@ -128,7 +126,7 @@ public class ClientParamsPHP {
             this(uuid, getPropertyNamePrefixAndNumber(uuid, propertiesByID.get(uuid)));
         }
         
-        protected ObjectWithUUID(UUID uuid, Util.Pair<String, Integer> propertyNamePrefixAndNumber) {
+        protected ObjectWithUUID(UUID uuid, com.sap.sse.common.Util.Pair<String, Integer> propertyNamePrefixAndNumber) {
             this.uuid = uuid;
             propertyNamePrefix = propertyNamePrefixAndNumber.getA();
             number = propertyNamePrefixAndNumber.getB();
@@ -171,7 +169,7 @@ public class ClientParamsPHP {
         public Event(UUID uuid) {
             // there is only one event in a document, and the race is not numbered; the property name
             // therefore doesn't follow the usual convention but simply has "Event" as its prefix
-            super(uuid, new Pair<String, Integer>("Event", null));
+            super(uuid, new com.sap.sse.common.Util.Pair<String, Integer>("Event", null));
         }
 
         public String getName() {
@@ -209,7 +207,7 @@ public class ClientParamsPHP {
         public Race(UUID uuid) {
             // there is only one race in a document, and the race is not numbered; the property name
             // therefore doesn't follow the usual convention but simply has "Race" as its prefix
-            super(uuid, new Pair<String, Integer>("Race", null));
+            super(uuid, new com.sap.sse.common.Util.Pair<String, Integer>("Race", null));
         }
 
         public String getName() {

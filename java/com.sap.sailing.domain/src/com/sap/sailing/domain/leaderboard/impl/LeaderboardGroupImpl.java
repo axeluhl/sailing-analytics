@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,17 +7,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.base.impl.LeaderboardGroupBaseImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
 
-public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
+public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements LeaderboardGroup {
     
     private static final long serialVersionUID = 2035927369446736934L;
-    private UUID id;
-    private String name;
-    private String description;
     private boolean displayGroupsInReverseOrder;
     private final List<Leaderboard> leaderboards;
     private final Set<LeaderboardGroupListener> listeners;
@@ -42,26 +37,12 @@ public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
      * Use this constructor when loading or deserializing a leaderboard group and the ID is known and is provided to the constructor.
      */
     public LeaderboardGroupImpl(UUID id, String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
+        super(id, name, description);
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();
     }
     
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        if (id == null) {
-            id = UUID.randomUUID();
-        }
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
     @Override
     public void addLeaderboardGroupListener(LeaderboardGroupListener listener) {
         synchronized (listeners) {
@@ -94,32 +75,19 @@ public class LeaderboardGroupImpl implements WithID, LeaderboardGroup {
         }
     }
 
+    @Override
     public Leaderboard getOverallLeaderboard() {
         return overallLeaderboard;
     }
 
+    @Override
+    public boolean hasOverallLeaderboard() {
+        return getOverallLeaderboard() != null;
+    }
+
+    @Override
     public void setOverallLeaderboard(Leaderboard overallLeaderboard) {
         this.overallLeaderboard = overallLeaderboard;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescriptiom(String description) {
-        this.description = description;
     }
 
     @Override

@@ -8,7 +8,6 @@ import java.net.URL;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -68,7 +67,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     }
 
     @Override
-    public Util.Triple<URL, URI, URI> getTrackerID() {
+    public com.sap.sse.common.Util.Triple<URL, URI, URI> getTrackerID() {
         return TracTracRaceTrackerImpl.createID(paramURL, liveURI, storedURI);
     }
 

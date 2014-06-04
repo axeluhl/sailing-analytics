@@ -14,13 +14,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -145,9 +145,9 @@ public class ReplicationPanel extends FlowPanel {
     
     private void addReplication() {
         AddReplicationDialog dialog = new AddReplicationDialog(null,
-                new DialogCallback<Triple<Triple<String, String, String>, Integer, Integer>>() {
+                new DialogCallback<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>>() {
                     @Override
-                    public void ok(final Triple<Triple<String, String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
+                    public void ok(final Util.Triple<Util.Triple<String, String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
                         registeredMasters.removeRow(0);
                         registeredMasters.insertRow(0);
                         registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
@@ -275,15 +275,15 @@ public class ReplicationPanel extends FlowPanel {
      * @author Axel Uhl (d043530)
      *
      */
-    private class AddReplicationDialog extends DataEntryDialog<Triple<Triple<String, String, String>, Integer, Integer>> {
+    private class AddReplicationDialog extends DataEntryDialog<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> {
         private final TextBox hostnameEntryField;
         private final TextBox exchangeHostnameEntryField;
         private final TextBox exchangenameEntryField;
         private final IntegerBox messagingPortField;
         private final IntegerBox servletPortField;
         
-        public AddReplicationDialog(final Validator<Triple<Triple<String, String, String>, Integer, Integer>> validator,
-                final DialogCallback<Triple<Triple<String, String, String>, Integer, Integer>> callback) {
+        public AddReplicationDialog(final Validator<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> validator,
+                final DialogCallback<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> callback) {
             super(stringMessages.connect(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
             hostnameEntryField = createTextBox("localhost");
@@ -329,9 +329,9 @@ public class ReplicationPanel extends FlowPanel {
         }
 
         @Override
-        protected Triple<Triple<String, String, String>, Integer, Integer> getResult() {
-            return new Triple<Triple<String, String, String>, Integer, Integer>(
-                    new Triple<String, String, String>(exchangeHostnameEntryField.getText(), hostnameEntryField.getText(), exchangenameEntryField.getText()),
+        protected Util.Triple<Util.Triple<String, String, String>, Integer, Integer> getResult() {
+            return new Util.Triple<Util.Triple<String, String, String>, Integer, Integer>(
+                    new Util.Triple<String, String, String>(exchangeHostnameEntryField.getText(), hostnameEntryField.getText(), exchangenameEntryField.getText()),
                     messagingPortField.getValue(), servletPortField.getValue());
         }
     }

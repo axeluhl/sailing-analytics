@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.impl;
 
 import java.net.URLEncoder;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
@@ -18,7 +18,7 @@ public class QRCodeUtils {
         return apkUrl + "#" + fragmentKey + "=" + encodedIdentifier;
     }
 
-    public static Pair<String, String> splitQRContent(String qrCodeContent) {
+    public static Util.Pair<String, String> splitQRContent(String qrCodeContent) {
         int fragmentIndex = qrCodeContent.lastIndexOf('#');
         if (fragmentIndex == -1 || fragmentIndex == 0 || qrCodeContent.length() == fragmentIndex + 1) {
             throw new IllegalArgumentException("There is no server or identifier.");
@@ -31,7 +31,7 @@ public class QRCodeUtils {
         deviceIdentifier = deviceIdentifier.replaceAll("%20", " ");
 
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
-        return new Pair<String, String>(deviceIdentifier, apkUrl);
+        return new Util.Pair<String, String>(deviceIdentifier, apkUrl);
     }
 
 }

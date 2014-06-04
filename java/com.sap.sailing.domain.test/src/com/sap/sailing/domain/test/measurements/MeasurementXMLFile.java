@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * A utility for generating output files that contain an artificial test result with a &lt;system-out&gt; tag that has

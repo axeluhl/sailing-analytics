@@ -31,13 +31,13 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
@@ -50,7 +50,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private final RegattaScoreCorrectionDTO regattaScoreCorrection;
     private final Map<CompetitorDTO, CheckBox> competitorCheckboxes;
     private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
-    private final Map<Pair<CompetitorDTO, RaceColumnDTO>, CheckBox> cellCheckboxes;
+    private final Map<Util.Pair<CompetitorDTO, RaceColumnDTO>, CheckBox> cellCheckboxes;
     private final Grid grid;
     private final Map<RaceColumnDTO, ListBox> raceNameOrNumberChoosers;
     private final Map<CompetitorDTO, ListBox> officialSailIDChoosers;
@@ -74,7 +74,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     for (RaceColumnDTO raceColumn : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.getRaceList()) {
-                        cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
             });
@@ -87,16 +87,16 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     for (CompetitorDTO competitor : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.competitors) {
-                        cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
             });
             raceColumnCheckboxes.put(raceColumn, checkbox);
         }
-        cellCheckboxes = new HashMap<Pair<CompetitorDTO, RaceColumnDTO>, CheckBox>();
+        cellCheckboxes = new HashMap<Util.Pair<CompetitorDTO, RaceColumnDTO>, CheckBox>();
         for (final CompetitorDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                cellCheckboxes.put(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn), createCheckbox(stringMessages.apply()));
+                cellCheckboxes.put(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn), createCheckbox(stringMessages.apply()));
             }
         }
         allAllCheckbox = createCheckbox(stringMessages.selectAll());
@@ -106,7 +106,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 for (CompetitorDTO competitor : leaderboard.competitors) {
                     competitorCheckboxes.get(competitor).setValue(event.getValue());
                     for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                        cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                        cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
                     }
                 }
                 for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
@@ -244,7 +244,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO(leaderboard.name);
         for (CompetitorDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                Pair<CompetitorDTO, RaceColumnDTO> key = new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn);
+                Util.Pair<CompetitorDTO, RaceColumnDTO> key = new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn);
                 CheckBox cellCheckbox = cellCheckboxes.get(key);
                 if (cellCheckbox.getValue()) {
                     // apply the score correction of the cell:
@@ -357,7 +357,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     }
                     cell.add(new HTML(sb.toSafeHtml()));
                 }
-                cell.add(cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
+                cell.add(cellCheckboxes.get(new Util.Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
                 grid.setWidget(row, column++, cell);
             }
             row++;

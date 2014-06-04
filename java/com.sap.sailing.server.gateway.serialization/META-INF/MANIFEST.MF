@@ -9,7 +9,8 @@ Import-Package: org.json.simple
 Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
  com.sap.sailing.domain;bundle-version="1.0.0",
- net.sf.marineapi;bundle-version="0.5.0"
+ net.sf.marineapi;bundle-version="0.5.0",
+ com.sap.sse.common
 Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.coursedata.impl,
  com.sap.sailing.server.gateway.deserialization.impl,

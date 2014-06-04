@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -157,10 +156,10 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     }
 
     private void refreshCurrentStartTime() {
-        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Util.Triple<Date,Integer, RacingProcedureType>>() {
+        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<com.sap.sse.common.Util.Triple<Date,Integer, RacingProcedureType>>() {
             
             @Override
-            public void onSuccess(Util.Triple<Date, Integer, RacingProcedureType> result) {
+            public void onSuccess(com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType> result) {
                 if (result == null) {
                     currentStartTimeLabel.setText(stringMessages.notAvailable());
                     currentPassIdBox.setText(stringMessages.notAvailable());

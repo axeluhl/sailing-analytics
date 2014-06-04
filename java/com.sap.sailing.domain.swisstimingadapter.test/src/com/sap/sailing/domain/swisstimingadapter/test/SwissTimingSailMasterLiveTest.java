@@ -21,9 +21,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -34,6 +31,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sse.common.Util;
 
 @Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
@@ -96,7 +94,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     @Test
     public void testGetClockAtMark() throws UnknownHostException, IOException, InterruptedException, ParseException {
         Race race = connector.getRace();
-        List<Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
+        List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
         assertFalse(clockAtMark.isEmpty());
     }
     
@@ -150,9 +148,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         int numberOfMarks = Util.size(course.getMarks());
         Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();
         for (Competitor competitor : competitors) {
-            Map<Integer, Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
+            Map<Integer, com.sap.sse.common.Util.Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
             for (Integer markIndex : markPassingTimes.keySet()) {
-                Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
+                com.sap.sse.common.Util.Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
                 for (int i=0; i<numberOfMarks; i++) {
                     if (i != markIndex && markPassingTimes.containsKey(numberOfMarks)) {
                         if (markPassingTimes.get(i).getB() != null && rankAndTime.getB() != null) {
@@ -175,12 +173,12 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
     }
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
     }
 
     @Override

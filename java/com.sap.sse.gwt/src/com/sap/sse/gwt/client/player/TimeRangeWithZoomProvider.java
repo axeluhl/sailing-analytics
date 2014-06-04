@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.player;
 
 import java.util.Date;
 
-import com.sap.sse.common.Pair;
+import com.sap.sse.common.Util;
 
 public interface TimeRangeWithZoomProvider extends TimeRangeProvider {
 
@@ -14,7 +14,7 @@ public interface TimeRangeWithZoomProvider extends TimeRangeProvider {
 
     public void resetTimeZoom(TimeZoomChangeListener... listenersNotToNotify);
     
-    public Pair<Date, Date> getTimeZoom();
+    public Util.Pair<Date, Date> getTimeZoom();
     
     public boolean isZoomed();
 }

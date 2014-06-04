@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,9 +9,131 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Named;
 
 public class Util {
+
+    public static class Pair<A, B> implements Serializable {
+        private static final long serialVersionUID = -7631774746419135931L;
+    
+        private A a;
+    
+        private B b;
+    
+        private transient int hashCode;
+    
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Pair() {}
+        
+        public Pair( A a, B b ) {
+            this.a = a;
+            this.b = b;
+            hashCode = 0;
+        }
+    
+        public A getA( ) {
+            return a;
+        }
+    
+        public B getB( ) {
+            return b;
+        }
+    
+        @Override
+        public int hashCode( ) {
+            if ( hashCode == 0 ) {
+                hashCode = 17;
+                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
+                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
+            }
+            return hashCode;
+        }
+    
+        @Override
+        public boolean equals( Object obj ) {
+            boolean result;
+            if ( this == obj ) {
+                result = true;
+            } else if ( obj instanceof Pair<?, ?> ) {
+                Pair<?, ?> pair = (Pair<?, ?>) obj;
+                result = ( this.a != null && this.a.equals( pair.a ) || this.a == null && pair.a == null ) && ( this.b != null && this.b.equals( pair.b ) || this.b == null && pair.b == null );
+            } else {
+                result = false;
+            }
+            return result;
+        }
+    
+        @Override
+        public String toString( ) {
+            return "[" + (a==null?"null":a.toString( )) + ", " +
+                (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+    }
+
+    public static class Triple<A, B, C> implements Serializable {
+        private static final long serialVersionUID = 6806146864367514601L;
+    
+        private A a;
+    
+        private B b;
+    
+        private C c;
+    
+        private transient int hashCode;
+    
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Triple() {}
+    
+        public Triple( A a, B b, C c ) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            hashCode = 0;
+        }
+    
+        public A getA( ) {
+            return a;
+        }
+    
+        public B getB( ) {
+            return b;
+        }
+    
+        public C getC( ) {
+            return c;
+        }
+    
+        @Override
+        public int hashCode( ) {
+            if ( hashCode == 0 ) {
+                hashCode = 17;
+                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
+                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
+                hashCode = 37 * hashCode + ( c != null ? c.hashCode( ) : 0 );
+            }
+            return hashCode;
+        }
+    
+        @Override
+        public boolean equals( Object obj ) {
+            boolean result;
+            if ( this == obj ) {
+                result = true;
+            } else if ( obj instanceof Triple<?, ?, ?> ) {
+                Triple<?, ?, ?> thrice = (Triple<?, ?, ?>) obj;
+                result = ( this.a != null && this.a.equals( thrice.a ) || this.a == null && thrice.a == null ) && ( this.b != null && this.b.equals( thrice.b ) || this.b == null && thrice.b == null ) && ( this.c != null && this.c.equals( thrice.c ) || this.c == null && thrice.c == null );
+            } else {
+                result = false;
+            }
+            return result;
+        }
+    
+        @Override
+        public String toString( ) {
+            return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        }
+    }
+    
+
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      * If <code>what</code> is <code>null</code>, this operation does nothing, not even fail with an exception, but
@@ -25,7 +147,7 @@ public class Util {
         }
         return addTo;
     }
-    
+
     /**
      * Removes all elements in <code>what</code> from <code>removeFrom</code> and returns <code>removeFrom</code> for chained use.
      * If <code>what</code> is <code>null</code>, this operation does nothing, not even fail with an exception, but
@@ -45,7 +167,7 @@ public class Util {
         addAll(what, list);
         return list.toArray(arr);
     }
-    
+
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
@@ -59,7 +181,7 @@ public class Util {
             return result;
         }
     }
-    
+
     public static <T> int indexOf(Iterable<? extends T> i, T t) {
         int result;
         if (i instanceof List<?>) {
@@ -85,7 +207,7 @@ public class Util {
         }
         return result;
     }
-    
+
     public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
         Iterator<? extends T> aIter = a.iterator();
         Iterator<? extends T> bIter = b.iterator();
@@ -98,7 +220,7 @@ public class Util {
         }
         return !aIter.hasNext() && !bIter.hasNext();
     }
-    
+
     public static <T> T get(Iterable<T> iterable, int i) {
         if (iterable instanceof List<?>) {
             List<T> l = (List<T>) iterable;
@@ -133,128 +255,6 @@ public class Util {
             return !ts.iterator().hasNext();
         }
     }
-    
-    public static class Pair<A, B> implements Serializable {
-        private static final long serialVersionUID = -7631774746419135931L;
-
-        private A a;
-
-        private B b;
-
-        private transient int hashCode;
-
-        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
-        private Pair() {}
-        
-        public Pair( A a, B b ) {
-            this.a = a;
-            this.b = b;
-            hashCode = 0;
-        }
-
-        public A getA( ) {
-            return a;
-        }
-
-        public B getB( ) {
-            return b;
-        }
-
-        @Override
-        public int hashCode( ) {
-            if ( hashCode == 0 ) {
-                hashCode = 17;
-                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
-            }
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals( Object obj ) {
-            boolean result;
-            if ( this == obj ) {
-                result = true;
-            } else if ( obj instanceof Pair<?, ?> ) {
-                Pair<?, ?> pair = (Pair<?, ?>) obj;
-                result = ( this.a != null && this.a.equals( pair.a ) || this.a == null && pair.a == null ) && ( this.b != null && this.b.equals( pair.b ) || this.b == null && pair.b == null );
-            } else {
-                result = false;
-            }
-            return result;
-        }
-
-        @Override
-        public String toString( ) {
-            return "[" + (a==null?"null":a.toString( )) + ", " +
-                (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
-    }
-
-    public static class Triple<A, B, C> implements Serializable {
-        private static final long serialVersionUID = 6806146864367514601L;
-
-        private A a;
-
-        private B b;
-
-        private C c;
-
-        private transient int hashCode;
-
-        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
-        private Triple() {}
-
-        public Triple( A a, B b, C c ) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            hashCode = 0;
-        }
-
-        public A getA( ) {
-            return a;
-        }
-
-        public B getB( ) {
-            return b;
-        }
-
-        public C getC( ) {
-            return c;
-        }
-
-        @Override
-        public int hashCode( ) {
-            if ( hashCode == 0 ) {
-                hashCode = 17;
-                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( c != null ? c.hashCode( ) : 0 );
-            }
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals( Object obj ) {
-            boolean result;
-            if ( this == obj ) {
-                result = true;
-            } else if ( obj instanceof Triple<?, ?, ?> ) {
-                Triple<?, ?, ?> thrice = (Triple<?, ?, ?>) obj;
-                result = ( this.a != null && this.a.equals( thrice.a ) || this.a == null && thrice.a == null ) && ( this.b != null && this.b.equals( thrice.b ) || this.b == null && thrice.b == null ) && ( this.c != null && this.c.equals( thrice.c ) || this.c == null && thrice.c == null );
-            } else {
-                result = false;
-            }
-            return result;
-        }
-
-        @Override
-        public String toString( ) {
-            return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        }
-    }
-    
 
     public static boolean equalsWithNull(Object o1, Object o2) {
         final boolean result;
@@ -269,25 +269,30 @@ public class Util {
         }
         return result;
     }
-    
-    public static <T> int compareToWithNull(Comparable<T> o1, T o2) {
+
+    /**
+     * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
+     * is considered less than a non-null value if <code>nullIsLess</code> is <code>true</code>, greater otherwise.
+     * @param nullIsLess TODO
+     */
+    public static <T> int compareToWithNull(Comparable<T> o1, T o2, boolean nullIsLess) {
         final int result;
         if (o1 == null) {
             if (o2 == null) {
                 result = 0;
             } else {
-                result = -1;
+                result = nullIsLess ? -1 : 1;
             }
         } else {
             if (o2 == null) {
-                result = 1;
+                result = nullIsLess ? 1 : -1;
             } else {
                 result = o1.compareTo(o2);
             }
         }
         return result;
     }
-    
+
     /**
      * Return the default value instead of null, if the map does not contain the key.
      */
@@ -297,26 +302,14 @@ public class Util {
         }
         return defaultVal;
     }
-    
+
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
         if (! map.containsKey(key)) {
             map.put(key, new HashSet<V>());
         }
         map.get(key).add(value);
     }
-    
-    public static String join(String separator, Iterable<? extends Named> nameds) {
-        return join(separator, toArray(nameds, new Named[size(nameds)]));
-    }
 
-    public static String join(String separator, Named... nameds) {
-        String[] strings = new String[nameds.length];
-        for (int i=0; i<nameds.length; i++) {
-            strings[i] = nameds[i].getName();
-        }
-        return join(separator, strings);
-    }
-    
     public static String join(String separator, String...strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
@@ -329,5 +322,17 @@ public class Util {
             result.append(string);
         }
         return result.toString();
+    }
+
+    public static String join(String separator, Iterable<? extends Named> nameds) {
+        return join(separator, toArray(nameds, new Named[size(nameds)]));
+    }
+
+    public static String join(String separator, Named... nameds) {
+        String[] strings = new String[nameds.length];
+        for (int i=0; i<nameds.length; i++) {
+            strings[i] = nameds[i].getName();
+        }
+        return join(separator, strings);
     }
 }

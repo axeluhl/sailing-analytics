@@ -9,6 +9,8 @@ import java.util.Iterator;
 
 import com.sap.sailing.domain.deckmanadapter.DeckmanAdapter;
 import com.sap.sailing.domain.deckmanadapter.Record;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -16,14 +18,15 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 public class DeckmanGPSFixImporter implements GPSFixImporter {
 
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing)
+    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
             throws FormatNotSupportedException, IOException {
         DeckmanAdapter deckmanAdapter = DeckmanAdapterFactoryImpl.INSTANCE.createDeckmanAdapter();
-        callback.startTrack(getType() + "@" + new Date(), /* properties */null);
+        TrackFileImportDeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         try {
             for (Iterator<Record> i = deckmanAdapter.parseLogFile(new InputStreamReader(inputStream)); i.hasNext();) {
                 Record record = i.next();
-                callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed()));
+                callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed()),
+                        device);
             }
         } catch (RuntimeException e) {
             if (e.getCause() != null) {
