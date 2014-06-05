@@ -5,28 +5,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 
-public class RegattaSearchResultRanker implements Comparator<LeaderboardSearchResult> {
-    private final TrackedRegattaRegistry trackedRegattaRegistry;
-    
-    protected RegattaSearchResultRanker(RacingEventService racingEventService) {
-        this.trackedRegattaRegistry = racingEventService;
-    }
-
+public class LeaderboardSearchResultBaseRanker<T extends LeaderboardSearchResultBase> implements Comparator<T> {
     @Override
-    public int compare(LeaderboardSearchResult o1, LeaderboardSearchResult o2) {
-        Regatta r1 = o1.getRegatta();
-        Regatta r2 = o2.getRegatta();
-        TrackedRegatta trackedR1 = r1 == null ? null : trackedRegattaRegistry.getTrackedRegatta(r1);
-        TrackedRegatta trackedR2 = r2 == null ? null : trackedRegattaRegistry.getTrackedRegatta(r2);
+    public int compare(T o1, T o2) {
+        TrackedRegatta trackedR1 = getTrackedRegatta(o1);
+        TrackedRegatta trackedR2 = getTrackedRegatta(o2);
         final int result;
         if (trackedR1 == null) {
             if (trackedR2 == null) {
@@ -44,16 +34,8 @@ public class RegattaSearchResultRanker implements Comparator<LeaderboardSearchRe
         }
         return result;
     }
-
-    private int compareByEarliestStartOfATrackedRace(TrackedRegatta trackedR1, TrackedRegatta trackedR2) {
-        assert trackedR1 != null;
-        assert trackedR2 != null;
-        TimePoint earliestTrackedRaceInR1 = getEarliestTrackedRace(trackedR1);
-        TimePoint earliestTrackedRaceInR2 = getEarliestTrackedRace(trackedR2);
-        return Util.compareToWithNull(earliestTrackedRaceInR1, earliestTrackedRaceInR2, /* nullIsLess */ false);
-    }
-
-    private TimePoint getEarliestTrackedRace(TrackedRegatta trackedRegatta) {
+    
+    protected TimePoint getEarliestTrackedRace(TrackedRegatta trackedRegatta) {
         List<TimePoint> startOfTrackingTimes = new ArrayList<>();
         for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
             if (trackedRace.getStartOfTracking() != null) {
@@ -67,5 +49,21 @@ public class RegattaSearchResultRanker implements Comparator<LeaderboardSearchRe
             result = Collections.min(startOfTrackingTimes);
         }
         return result;
+    }
+
+    protected int compareByEarliestStartOfATrackedRace(TrackedRegatta trackedR1, TrackedRegatta trackedR2) {
+        assert trackedR1 != null;
+        assert trackedR2 != null;
+        TimePoint earliestTrackedRaceInR1 = getEarliestTrackedRace(trackedR1);
+        TimePoint earliestTrackedRaceInR2 = getEarliestTrackedRace(trackedR2);
+        return Util.compareToWithNull(earliestTrackedRaceInR1, earliestTrackedRaceInR2, /* nullIsLess */ false);
+    }
+
+    /**
+     * Can't know a tracked regatta if we only have a {@link LeaderboardSearchResultBase} which doesn't reference a
+     * real {@link Regatta} object.
+     */
+    protected TrackedRegatta getTrackedRegatta(T o1) {
+        return null;
     }
 }
