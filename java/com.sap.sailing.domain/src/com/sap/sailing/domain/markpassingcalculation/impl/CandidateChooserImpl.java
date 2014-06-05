@@ -20,13 +20,13 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Util;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -221,26 +221,26 @@ public class CandidateChooserImpl implements CandidateChooser {
             if (oneBasedIndexOfSuppressedWaypoint >= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
                 endOfFixedInterval = end;
             }
-            NavigableSet<Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Pair<Edge, Double>>() {
+            NavigableSet<Util.Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
                 @Override
-                public int compare(Pair<Edge, Double> o1, Pair<Edge, Double> o2) {
+                public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
                     int result = o1.getB().compareTo(o2.getB());
                     return result != 0 ? result : o1.getA().compareTo(o2.getA());
                 }
             });
-            Map<Candidate, Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
+            Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
             int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
 
             boolean endFound = false;
-            currentEdgesCheapestFirst.add(new Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval, 0,
+            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval, 0,
                     race.getRace().getCourse()), 0.0));
             while (!endFound) {
-                Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
+                Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
                 Double currentCheapestCost = cheapestEdgeWithCost.getB();
                 // If the shortest path to this candidate is already known the new edge is not added.
                 if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
-                    candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Pair<Candidate, Double>(
+                    candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
                             currentCheapestEdge.getStart(), currentCheapestCost));
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
@@ -249,7 +249,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                             int oneBasedIndexOFEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
                             if (oneBasedIndexOFEndOfEdge <= indexOfEndOfFixedInterval
                                     && (oneBasedIndexOFEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                currentEdgesCheapestFirst.add(new Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                                currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
                             }
                         }
                     }

@@ -18,8 +18,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
@@ -30,6 +28,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sse.common.Util;
 
 /**
  * Tests tricky situation that can fail easily. Created with help of http://itouchmap.com/latlong.html
@@ -54,7 +53,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         fixes.add(fix1);
         fixes.add(fix2);
-        Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(ron, fixes);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(ron, fixes);
         assertEquals(0, Util.size(candidateDeltas.getA()));
 
         race.recordFix(ron, fix3);
@@ -86,7 +85,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         List<GPSFix> fixes = new ArrayList<>();
         fixes.add(fix1);
         fixes.add(fix3);
-        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getA()), 0);
         assertEquals(Util.size(cans.getB()), 0);
 
@@ -116,7 +115,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         race.recordFix(tom, fix2);
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2));
-        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         Double inFront = cans.getA().iterator().next().getProbability();
         assertTrue(Util.size(cans.getA()) == 1);
         // Passing of one mark, close but wrong side and direction
@@ -184,7 +183,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         race.recordFix(ben, fix3);
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2, fix3));
-        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(ben, fixes);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(ben, fixes);
         Candidate inFront = Util.get(cans.getA(), 0);
         race.recordFix(ben, fix4);
         race.recordFix(ben, fix5);
@@ -261,33 +260,33 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         Course course = race.getRace().getCourse();
 
         // Before adding
-        Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesBefore = finder.getAllCandidates(ron);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesBefore = finder.getAllCandidates(ron);
         assertEquals(Util.size(allCandidatesBefore.getB()), 0);
         assertEquals(Util.size(allCandidatesBefore.getA()), 0);
 
         // The process of adding
         course.addWaypoint(4, newWaypoint);
-        Pair<List<Candidate>, List<Candidate>> addedCans = finder.updateWaypoints(Arrays.asList(newWaypoint), new ArrayList<Waypoint>(), 4).get(ron);
+        Util.Pair<List<Candidate>, List<Candidate>> addedCans = finder.updateWaypoints(Arrays.asList(newWaypoint), new ArrayList<Waypoint>(), 4).get(ron);
         assertEquals(Util.size(addedCans.getA()), 1);
         for (Candidate c : addedCans.getA()) {
             assertEquals(c.getWaypoint(), newWaypoint);
         }
 
         // Before removing
-        Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesInBetween = finder.getAllCandidates(ron);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidatesInBetween = finder.getAllCandidates(ron);
         assertEquals(Util.size(allCandidatesInBetween.getA()), 1);
         assertEquals(Util.size(allCandidatesInBetween.getB()), 0);
 
         // The Process of removing
         course.removeWaypoint(4);
-        Pair<List<Candidate>, List<Candidate>> removedCans = finder.updateWaypoints(new ArrayList<Waypoint>(), Arrays.asList(newWaypoint), 4).get(ron);
+        Util.Pair<List<Candidate>, List<Candidate>> removedCans = finder.updateWaypoints(new ArrayList<Waypoint>(), Arrays.asList(newWaypoint), 4).get(ron);
         assertEquals(Util.size(removedCans.getB()), 1);
         for (Candidate c : removedCans.getB()) {
             assertEquals(c.getWaypoint(), newWaypoint);
         }
 
         // After removing
-        Pair<Iterable<Candidate>, Iterable<Candidate>> allCansAfterRemoving = finder.getAllCandidates(ron);
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCansAfterRemoving = finder.getAllCandidates(ron);
         assertEquals(Util.size(allCansAfterRemoving.getB()), 0);
         assertEquals(Util.size(allCansAfterRemoving.getA()), 0);
     }

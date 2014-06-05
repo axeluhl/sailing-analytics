@@ -15,7 +15,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sse.common.Util;
 
 /**
  * Listens for changes that might affect the MarkPassingCalculator: new Fixes of a Competitor or a Mark and when the

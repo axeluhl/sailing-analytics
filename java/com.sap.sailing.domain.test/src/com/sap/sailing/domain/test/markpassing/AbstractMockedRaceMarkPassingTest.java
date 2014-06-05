@@ -68,8 +68,8 @@ public class AbstractMockedRaceMarkPassingTest {
         race = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), EmptyGPSFixStore.INSTANCE, 0, 10000, 10000);
         race.setStartTimeReceived(new MillisecondsTimePoint(10000));
         TimePoint t = new MillisecondsTimePoint(30000);
-        List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)),
-                new Pair<Mark, Position>(gate1, new DegreePosition(-0.001, -0.00005)), new Pair<Mark, Position>(gate2, new DegreePosition(-0.001, 0.00005)), new Pair<Mark, Position>(reaching, new DegreePosition(-0.0005, -0.0005)));
+        List<Util.Pair<Mark, Position>> pos = Arrays.asList(new Util.Pair<Mark, Position>(m, new DegreePosition(0, 0)),
+                new Util.Pair<Mark, Position>(gate1, new DegreePosition(-0.001, -0.00005)), new Util.Pair<Mark, Position>(gate2, new DegreePosition(-0.001, 0.00005)), new Util.Pair<Mark, Position>(reaching, new DegreePosition(-0.0005, -0.0005)));
         for (Util.Pair<Mark, Position> pair : pos) {
             race.recordFix(pair.getA(), new GPSFixImpl(pair.getB(), t));
         }

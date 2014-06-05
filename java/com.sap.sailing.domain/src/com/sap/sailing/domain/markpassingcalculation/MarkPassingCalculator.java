@@ -67,7 +67,7 @@ public class MarkPassingCalculator {
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
-            Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+            Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
@@ -115,12 +115,12 @@ public class MarkPassingCalculator {
                 if (!suspended) {
                     // TODO Interplay between changing waypoints and setting fixed passes?
                     if (smallestChangedWaypointIndex != null) {
-                        Map<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
+                        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
                                 .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
                         chooser.removeWaypoints(removedWaypoints);
-                        for (Entry<Competitor, Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
+                        for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
                                 .entrySet()) {
-                            Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                            Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
                             chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
                         }
                     }
@@ -209,7 +209,7 @@ public class MarkPassingCalculator {
             @Override
             public void run() {
                 logger.finest("Calculating MarkPassings for " + c);
-                Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
                 chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
             }
         }
@@ -261,7 +261,7 @@ public class MarkPassingCalculator {
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
-            Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+            Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
     }

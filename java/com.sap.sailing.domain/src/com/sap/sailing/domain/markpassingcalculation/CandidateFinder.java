@@ -27,14 +27,14 @@ public interface CandidateFinder {
      *            fixes.
      * @return new {@link Candidate}s and those that should be removed.
      */
-    Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
+    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
     /**
      * When initializing or refreshing the calculator, the whole race until now is evaluated. For that purpose all of the
      * {@link Candidate}s are needed instead of just the deltas.
      */
-    Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
+    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
     
-    Map<Competitor, Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex);
+    Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex);
 
 }

@@ -19,7 +19,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
@@ -31,6 +30,7 @@ import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sse.common.Util;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
@@ -97,7 +97,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
         return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)),
-                0.5 + 0.5 * rnd.nextDouble(), Util.get(race.getRace().getCourse().getWaypoints(), id));
+                0.5 + 0.5 * rnd.nextDouble(),  Util.get(race.getRace().getCourse().getWaypoints(), id));
     }
 
     private GPSFixMoving rndFix() {
