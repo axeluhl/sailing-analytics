@@ -61,11 +61,11 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         videoURLs.add(videoURL);
     }
 
-    public Iterable<String> getImageURLs() {
+    public List<String> getImageURLs() {
         return imageURLs;
     }
 
-    public Iterable<String> getVideoURLs() {
+    public List<String> getVideoURLs() {
         return videoURLs;
     }
     

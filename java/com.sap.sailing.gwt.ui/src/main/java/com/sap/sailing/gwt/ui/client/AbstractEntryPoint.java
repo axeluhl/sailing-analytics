@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -27,21 +26,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     protected UserAgentDetails userAgent;
     protected Label persistentAlertLabel;
     
-//    /**
-//     * Creates a remote service proxy to talk to the server-side SailingService.
-//     */
-//    protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-//
-//    /**
-//     * Creates a remote service proxy to talk to the server-side MediaService.
-//     */
-//    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-//
-//    /**
-//     * Creates a remote service proxy to talk to the server-side UsermanagementService.
-//     */
-//    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
-
     /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
@@ -71,13 +55,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
-    }
-
-    protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
-        String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        
-        serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
     }
 
     @Override

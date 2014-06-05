@@ -32,13 +32,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.server.GwtHttpRequestUtils;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -87,7 +88,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
         final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_RACE_DETAILS, false /* default*/);
         final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(PARAM_EMBEDDED, false /* default*/); 
