@@ -41,12 +41,18 @@ public class MainEvents extends Composite {
         int size = recentEvents.size();
         if(size > 0) {
             event1.setEvent(recentEvents.get(0));
+        } else {
+            event1.setVisible(false);
         }
         if(size > 1) {
             event2.setEvent(recentEvents.get(1));
+        } else {
+            event2.setVisible(false);
         }
         if(size > 2) {
             event3.setEvent(recentEvents.get(2));
+        } else {
+            event3.setVisible(false);
         }
     }
 }

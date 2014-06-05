@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.mainevents;
+package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
@@ -14,29 +14,27 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
-import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class RecentEvent extends Composite {
+public class RecentEventVideo extends Composite {
     
+    @UiField SpanElement eventVideoLength;
     @UiField SpanElement eventName;
-    @UiField SpanElement venueName;
-    @UiField SpanElement eventStartDate;
-    @UiField Anchor eventOverviewLink;
-    @UiField ImageElement eventImage;
+    @UiField ImageElement eventVideoPreviewImage;
+    @UiField Anchor eventMediaPageLink;
+
+    private final String defaultVideoImageUrl = "http://static.sapsailing.com/newhome/default_video_preview.jpg";
 
     private EventDTO event;
 
-    private final String defaultImageUrl = "http://static.sapsailing.com/newhome/default_event_photo.jpg";
-
-    interface RecentEventUiBinder extends UiBinder<Widget, RecentEvent> {
+    interface RecentEventVideoUiBinder extends UiBinder<Widget, RecentEventVideo> {
     }
     
-    private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
+    private static RecentEventVideoUiBinder uiBinder = GWT.create(RecentEventVideoUiBinder.class);
 
     private final PlaceNavigator navigator;
     
-    public RecentEvent(PlaceNavigator navigator) {
+    public RecentEventVideo(PlaceNavigator navigator) {
         this.navigator = navigator;
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -46,8 +44,8 @@ public class RecentEvent extends Composite {
         updateUI();
     }
 
-    @UiHandler("eventOverviewLink")
-    public void goToEventPlace(ClickEvent e) {
+    @UiHandler("eventMediaPageLink")
+    public void goToEventMediaPage(ClickEvent e) {
         if(event.getBaseURL().contains("localhost") || event.getBaseURL().contains("127.0.0.1")) {
             navigator.goToEvent(event.id.toString());
         } else {
@@ -60,13 +58,11 @@ public class RecentEvent extends Composite {
 
     private void updateUI() {
         eventName.setInnerText(event.getName());
-        venueName.setInnerText(event.venue.getName());
-        eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
         
-        if(event.getImageURLs().size() == 0) {
-            eventImage.setSrc(defaultImageUrl);
+        if(event.getVideoURLs().size() == 0) {
+            eventVideoPreviewImage.setSrc(defaultVideoImageUrl);
         } else {
-            eventImage.setSrc(event.getImageURLs().get(0));
+            eventVideoPreviewImage.setSrc(event.getVideoURLs().get(0));
         }
     }
 }

@@ -4,7 +4,7 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainevents.RecentEventResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainevents.MainEventsResources" />
     <g:HTMLPanel>
     <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
         <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.eventteaser}" href="javascript:;">
