@@ -28,7 +28,6 @@ import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 
@@ -40,7 +39,7 @@ public class TestFunctionProvider {
     
     @Before
     public void initializeFunctionRegistry() {
-        functionRegistry = new SimpleFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
+        functionRegistry = new SimpleFunctionRegistry();
         
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(SimpleClassWithMarkedMethods.class);

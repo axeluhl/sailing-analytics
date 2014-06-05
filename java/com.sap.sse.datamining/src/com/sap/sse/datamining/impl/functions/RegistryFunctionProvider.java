@@ -65,7 +65,8 @@ public class RegistryFunctionProvider implements FunctionProvider {
         Collection<Function<?>> dimensions = new HashSet<>();
         for (FunctionRegistry functionRegistry : functionRegistries) {
             for (Class<?> typeToRetrieve : typesToRetrieve) {
-                dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
+//                dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
+                //TODO after the registry works transitive
             }   
         }
         return dimensions;
@@ -82,7 +83,8 @@ public class RegistryFunctionProvider implements FunctionProvider {
         Collection<Function<?>> dimensions = new HashSet<>();
         for (FunctionRegistry functionRegistry : functionRegistries) {
             for (Class<?> typeToRetrieve : typesToRetrieve) {
-                dimensions.addAll(functionRegistry.getFunctionsOf(typeToRetrieve));
+//                dimensions.addAll(functionRegistry.getStatisticsOf(typeToRetrieve));
+                //TODO after the registry works transitive
             }
         }
         return dimensions;
@@ -144,7 +146,7 @@ public class RegistryFunctionProvider implements FunctionProvider {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
         FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriteria(functionDTO);
         for (FunctionRegistry functionRegistry : functionRegistries) {
-            for (Function<?> function : functionRegistry.getAllFunctions()) {
+            for (Function<?> function : functionRegistry.getAllStatistics()) {
                 if (functionDTOFilterCriteria.matches(function)) {
                     functionsMatchingDTO.add(function);
                 }

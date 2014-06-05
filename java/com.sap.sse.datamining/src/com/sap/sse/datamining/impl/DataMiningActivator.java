@@ -79,7 +79,7 @@ public class DataMiningActivator implements BundleActivator {
     }
 
     private FunctionRegistry createAndBuildFunctionRegistry() {
-        FunctionRegistry functionRegistry = new SimpleFunctionRegistry(getExecutor());
+        FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
 
         Set<Class<?>> internalClassesWithMarkedMethods = new HashSet<>();
         Set<Class<?>> externalLibraryClasses = new HashSet<>();

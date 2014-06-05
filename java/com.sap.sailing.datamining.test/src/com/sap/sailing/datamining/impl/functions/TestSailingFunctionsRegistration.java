@@ -45,7 +45,7 @@ public class TestSailingFunctionsRegistration {
     public void testImportantRegisteredFunctions() {
         // This tests for the methods marked as SideEffectFreeValue, that will be used for the data extraction
         Function<?>[] expectedFunctions = createExpectedImportantRegisteredFunctions();
-        assertThat(functionRegistry.getAllFunctions(), hasItems(expectedFunctions));
+        assertThat(functionRegistry.getAllStatistics(), hasItems(expectedFunctions));
     }
 
     private Function<?>[] createExpectedImportantRegisteredFunctions() {
