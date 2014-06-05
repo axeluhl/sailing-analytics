@@ -54,6 +54,7 @@ public class AbstractMockedRaceMarkPassingTest {
 
     public AbstractMockedRaceMarkPassingTest() {
         ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(gate1, gate2, "cp");
+
         Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
         Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);
         Waypoint w3 = new WaypointImpl(cp, PassingInstruction.Gate);

@@ -66,13 +66,12 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
-        super.setUp(
-                new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
-                /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS,
-                        ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RAWPOSITIONS });
+        super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
+        /* liveUri */null, /* storedUri */storedUri, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE,
+                ReceiverType.MARKPOSITIONS, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
+                new WindSourceImpl(WindSourceType.WEB));
 
         for (Waypoint w : getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
@@ -89,12 +88,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException,
-            ParseException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
         setUp(raceNumber);
         testWholeRace();
         testMiddleOfRace(0);
-        //testMiddleOfRace(2);
+        testMiddleOfRace(2);
     }
 
     private void testWholeRace() {
@@ -187,8 +185,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
 
         double totalMarkPasses = numberOfCompetitors * waypoints.size();
-        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed
-                + wronglyComputed, 0);
+        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed + wronglyComputed, 0);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
         if (printResult) {
             System.out.println("Total theoretical Passes: " + totalMarkPasses);
@@ -218,15 +215,13 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         for (Competitor c : getRace().getCompetitors()) {
             MarkPassing markPassingAfter = givenPasses.get(c).get(wayPointAfterwards);
             if (markPassingAfter != null) {
-                if (givenPasses.get(c).get(lastWaypointToBePassed) != null
-                        && givenPasses.get(c).get(wayPointAfterwards) != null) {
-                    TimePoint passAfter = markPassingAfter.getTimePoint();
-                    TimePoint firstPassingOfNext = passAfter.minus(20000);
+                if (givenPasses.get(c).get(lastWaypointToBePassed) != null && givenPasses.get(c).get(wayPointAfterwards) != null) {
+                    TimePoint beforeNextPassing = markPassingAfter.getTimePoint().minus(20000);
                     List<GPSFix> fixes = new ArrayList<GPSFix>();
                     try {
                         getTrackedRace().getTrack(c).lockForRead();
                         for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                            if (fix.getTimePoint().before(firstPassingOfNext)) {
+                            if (fix.getTimePoint().before(beforeNextPassing)) {
                                 fixes.add(fix);
                             }
                         }
@@ -257,8 +252,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                     }
                 }
             }
-            Assert.assertTrue(mistakes == 0);
         }
+        Assert.assertTrue(mistakes == 0);
+
     }
 
     @AfterClass
@@ -272,8 +268,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         System.out.println(different);
         System.out.println(allSkipped);
         System.out.println(allExtra);
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName,
-                className);
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName, className);
         MeasurementCase performanceReportCase = performanceReport.addCase(simpleName);
         performanceReportCase.addMeasurement(new Measurement("Accurate", accuracy));
         performanceReportCase.addMeasurement(new Measurement("Different", different));

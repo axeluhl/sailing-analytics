@@ -74,7 +74,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
-        assertTrue(time < 800);
+        assertTrue(time < 1000);
     }
 
     private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {
@@ -86,7 +86,6 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
                 for (int k = 0; k < numberToAddEachTime; k++) {
                     newCandidates.add(randomCan());
                 }
-
                 time = System.currentTimeMillis();
                 c.calculateMarkPassDeltas(ron, newCandidates, new ArrayList<Candidate>());
                 totalTime += System.currentTimeMillis() - time;

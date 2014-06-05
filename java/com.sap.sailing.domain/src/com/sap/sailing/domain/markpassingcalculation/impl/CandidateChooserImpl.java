@@ -57,13 +57,14 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final Candidate end;
     private final DynamicTrackedRace race;
 
-    // TODO Locking
+    // TODO Locking?
 
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
-        end = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
+        end = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */
+        null,
         /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
@@ -143,6 +144,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         findShortestPath(c);
     }
 
+    @Override
+    public void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint) {
+        suppressedPassings.put(c, firstSuppressedWaypoint);
+    }
+
+    @Override
+    public void stopSuppressingMarkPassings(Competitor c) {
+        suppressedPassings.remove(c);
+
+    }
+
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
@@ -197,14 +209,18 @@ public class CandidateChooserImpl implements CandidateChooser {
      * {@link DynamicTrackedRace#updateMarkPassings(Competitor, Iterable) notified}.
      */
     private void findShortestPath(Competitor c) {
-
         Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
         SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
-
         NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
         Candidate startOfFixedInterval = fixedPasses.first();
         Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
+        Waypoint suppressedWaypoint = suppressedPassings.get(c);
+        Integer oneBasedIndexOfSuppressedWaypoint = suppressedWaypoint != null ? race.getRace().getCourse()
+                .getIndexOfWaypoint(suppressedWaypoint) + 1 : end.getOneBasedIndexOfWaypoint();
         while (endOfFixedInterval != null) {
+            if (oneBasedIndexOfSuppressedWaypoint >= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
+                endOfFixedInterval = end;
+            }
             NavigableSet<Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Pair<Edge, Double>>() {
                 @Override
                 public int compare(Pair<Edge, Double> o1, Pair<Edge, Double> o2) {
@@ -213,26 +229,35 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             });
             Map<Candidate, Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
-            candidateWithParentAndSmallestTotalCost.put(startOfFixedInterval, new Pair<Candidate, Double>(null, 0.0));
-            insertSuccessors(0, currentEdgesCheapestFirst, allCompetitorEdges.get(startOfFixedInterval), endOfFixedInterval);
+            int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
+
             boolean endFound = false;
+            currentEdgesCheapestFirst.add(new Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval, 0,
+                    race.getRace().getCourse()), 0.0));
             while (!endFound) {
                 Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
                 Double currentCheapestCost = cheapestEdgeWithCost.getB();
                 // If the shortest path to this candidate is already known the new edge is not added.
                 if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
-                    candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Pair<Candidate, Double>(currentCheapestEdge.getStart(), currentCheapestCost));
-                    Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
+                    candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Pair<Candidate, Double>(
+                            currentCheapestEdge.getStart(), currentCheapestCost));
                     endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
                     if (!endFound) {
-                        insertSuccessors(currentCheapestCost, currentEdgesCheapestFirst, edgesForNewCandidate, endOfFixedInterval);
+                        Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
+                        for (Edge e : edgesForNewCandidate) {
+                            int oneBasedIndexOFEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                            if (oneBasedIndexOFEndOfEdge <= indexOfEndOfFixedInterval
+                                    && (oneBasedIndexOFEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                                currentEdgesCheapestFirst.add(new Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                            }
+                        }
                     }
                 }
             }
 
             Candidate marker = endOfFixedInterval;
-            while (marker != null) {
+            while (marker != startOfFixedInterval) {
                 mostLikelyCandidates.add(marker);
                 marker = candidateWithParentAndSmallestTotalCost.get(marker).getA();
             }
@@ -260,16 +285,6 @@ public class CandidateChooserImpl implements CandidateChooser {
             }
             logger.fine("Updating MarkPasses for " + c);
             race.updateMarkPassings(c, newMarkPassings);
-        }
-    }
-
-    private void insertSuccessors(double costToReachStartOfSuccessors, SortedSet<Pair<Edge, Double>> currentEdgesCheapestFirst, Set<Edge> successors, Candidate endOfFixedInterval) {
-        int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
-        for (Edge e : successors) {
-            Candidate endOfEdge = e.getEnd();
-            if (endOfEdge.getOneBasedIndexOfWaypoint() < indexOfEndOfFixedInterval || endOfEdge == endOfFixedInterval) {
-                currentEdgesCheapestFirst.add(new Pair<Edge, Double>(e, costToReachStartOfSuccessors + e.getCost()));
-            }
         }
     }
 
@@ -352,17 +367,5 @@ public class CandidateChooserImpl implements CandidateChooser {
         public void setTimePoint(TimePoint t) {
             p = t;
         }
-    }
-
-    @Override
-    public void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void stopSuppressingMarkPassings(Competitor c) {
-        // TODO Auto-generated method stub
-        
     }
 }
