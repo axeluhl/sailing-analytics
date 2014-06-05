@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -12,6 +11,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
@@ -34,10 +34,10 @@ public class RecentEvent extends Composite {
     
     private static RecentEventUiBinder uiBinder = GWT.create(RecentEventUiBinder.class);
 
-    private final PlaceController placeController;
+    private final PlaceNavigator navigator;
     
-    public RecentEvent(PlaceController placeController) {
-        this.placeController = placeController;
+    public RecentEvent(PlaceNavigator navigator) {
+        this.navigator = navigator;
         RecentEventResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -49,10 +49,10 @@ public class RecentEvent extends Composite {
 
     @UiHandler("eventOverviewLink")
     public void goToHome(ClickEvent e) {
-        EventPlace eventPlace = new EventPlace(event.id.toString());
         if(event.getBaseURL().contains("localhost") || event.getBaseURL().contains("127.0.0.1")) {
-            placeController.goTo(eventPlace);
+            navigator.goToEvent(event.id.toString());
         } else {
+            EventPlace eventPlace = new EventPlace(event.id.toString());
             EventPlace.Tokenizer t = new Tokenizer();
             String remoteEventUrl = event.getBaseURL() + "/gwt/Home.html#" + EventPlace.class.getSimpleName() + ":" + t.getToken(eventPlace);
             Window.Location.replace(remoteEventUrl);

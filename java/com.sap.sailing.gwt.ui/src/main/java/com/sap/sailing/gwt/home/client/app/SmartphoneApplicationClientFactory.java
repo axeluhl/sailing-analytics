@@ -6,6 +6,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
+import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
+import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivity;
+import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.SmartphoneStartView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -21,7 +25,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     private SmartphoneApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new SmartphoneApplicationView(new MainMenuNavigatorImpl(placeController)), eventBus, placeController);
+        super(new SmartphoneApplicationView(new PlaceNavigatorImpl(placeController)), eventBus, placeController);
     }
 
     @Override
@@ -38,6 +42,18 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
 
     @Override
     public StartView createStartView() {
-        return new SmartphoneStartView();
+        return new SmartphoneStartView(getPlaceNavigator());
+    }
+
+    @Override
+    public TabletAndDesktopSponsoringView createSponsoringView(SponsoringActivity activity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TabletAndDesktopSolutionsView createSolutionsView(SolutionsActivity activity) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

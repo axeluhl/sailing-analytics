@@ -1,9 +1,11 @@
-package com.sap.sailing.gwt.home.client.shared.header;
+package com.sap.sailing.gwt.home.client.app;
 
-public interface MainMenuNavigator {
+public interface PlaceNavigator {
     void goToHome();
     void goToEvent(String eventUuidAsString);
     void goToEvents();
     void goToAboutUs();
     void goToContact();
+    void goToSolutions();
+    void goToSponsoring();
 }

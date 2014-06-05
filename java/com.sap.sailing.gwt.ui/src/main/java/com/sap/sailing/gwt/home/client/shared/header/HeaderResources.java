@@ -15,12 +15,13 @@ public interface HeaderResources extends ClientBundle {
         String siteheader();
         String logo();
         String sitenavigation();
-        String sitenavigation_active();
         String sitenavigation_link();
-        String sitenavigation_linksearch();
+        String sitenavigation_linkactive();
+        String search_textfield();
+        String search_button();
     }
     
-    @Source("com/sap/sailing/gwt/home/images/logo.png")
+    @Source("com/sap/sailing/gwt/home/images/logo@2x.png")
     ImageResource logo();
 
     @Source("com/sap/sailing/gwt/home/images/search-icon.png")

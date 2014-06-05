@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.client.place.start;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.client.shared.mainsponsors.MainSponsors;
@@ -22,14 +22,14 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     }
 
     @UiField Stage stage;
-    @UiField MainSponsors mainSponsors;
-    
+    @UiField(provided=true) MainSponsors mainSponsors;
     @UiField(provided=true) MainEvents mainEvents;
     @UiField MainMedia mainMedia;
     @UiField SocialFooter socialFooter;
 
-    public TabletAndDesktopStartView(PlaceController placeController) {
-        mainEvents = new MainEvents(placeController);
+    public TabletAndDesktopStartView(PlaceNavigator navigator) {
+        mainSponsors = new MainSponsors(navigator);
+        mainEvents = new MainEvents(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

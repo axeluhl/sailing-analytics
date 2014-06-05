@@ -5,13 +5,14 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.shared.header.MainMenuNavigator;
 
-public class MainMenuNavigatorImpl implements MainMenuNavigator {
+public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
     
-    protected MainMenuNavigatorImpl(PlaceController placeController) {
+    protected PlaceNavigatorImpl(PlaceController placeController) {
         super();
         this.placeController = placeController;
     }
@@ -39,6 +40,16 @@ public class MainMenuNavigatorImpl implements MainMenuNavigator {
     @Override
     public void goToContact() {
         placeController.goTo(new ContactPlace());
+    }
+
+    @Override
+    public void goToSolutions() {
+        placeController.goTo(new SolutionsPlace());
+    }
+
+    @Override
+    public void goToSponsoring() {
+        placeController.goTo(new SponsoringPlace());
     }
 
 }

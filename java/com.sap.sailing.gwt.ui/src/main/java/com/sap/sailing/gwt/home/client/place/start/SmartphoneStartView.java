@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.client.shared.mainsponsors.MainSponsors;
@@ -21,14 +22,14 @@ public class SmartphoneStartView extends Composite implements StartView {
     }
 
     @UiField Stage stage;
-    @UiField MainSponsors mainSponsors;
-    @UiField MainEvents mainEvents;
+    @UiField(provided=true) MainSponsors mainSponsors;
+    @UiField(provided=true)  MainEvents mainEvents;
     @UiField MainMedia mainMedia;
     @UiField SocialFooter socialFooter;
 
-    public SmartphoneStartView() {
-        super();
-
+    public SmartphoneStartView(PlaceNavigator navigator) {
+        mainSponsors = new MainSponsors(navigator);
+        mainEvents = new MainEvents(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
 
