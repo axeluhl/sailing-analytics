@@ -3,10 +3,10 @@ package com.sap.sailing.datamining.factories;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.datamining.DeprecatedToFunctionConverter;
+import com.sap.sailing.datamining.QueryDefinitionConverter;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.DeprecatedToFunctionConverter;
-import com.sap.sailing.datamining.impl.QueryDefinitionConverter;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sse.datamining.Query;
@@ -23,7 +23,7 @@ public final class DataMiningFactory {
     }
     
     // TODO Delete, after the deprecated components have been removed
-    public <DataSourceType, ElementType> Query<Double> createQuery(QueryDefinitionDeprecated queryDefinition, DataSourceType dataSource) {
+    public static <DataSourceType, ElementType> Query<Double> createQuery(QueryDefinitionDeprecated queryDefinition, DataSourceType dataSource) {
         return createQuery(QueryDefinitionConverter.convertDeprecatedQueryDefinition(queryDefinition), dataSource);
     }
 

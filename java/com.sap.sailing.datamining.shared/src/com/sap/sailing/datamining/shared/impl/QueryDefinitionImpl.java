@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining.shared.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dev.util.collect.HashMap;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;

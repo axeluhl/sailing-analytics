@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

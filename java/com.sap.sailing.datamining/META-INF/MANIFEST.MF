@@ -7,7 +7,8 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.sap.sailing.server,
  org.osgi.framework;version="1.7.0"
-Export-Package: com.sap.sailing.datamining.data,
+Export-Package: com.sap.sailing.datamining,
+ com.sap.sailing.datamining.data,
  com.sap.sailing.datamining.factories
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common,
@@ -15,4 +16,4 @@ Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sse.datamining;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0"
 Bundle-ClassPath: .
-Bundle-Activator: com.sap.sailing.datamining.impl.Activator
+Bundle-Activator: com.sap.sailing.datamining.Activator

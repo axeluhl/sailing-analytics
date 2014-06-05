@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
