@@ -17,6 +17,8 @@ public interface HeaderResources extends ClientBundle {
         String sitenavigation();
         String sitenavigation_link();
         String sitenavigation_linkactive();
+        String sitenavigation_linksearch();
+        String search();
         String search_textfield();
         String search_button();
     }

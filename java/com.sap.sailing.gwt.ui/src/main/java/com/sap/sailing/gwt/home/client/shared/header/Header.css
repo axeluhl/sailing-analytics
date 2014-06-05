@@ -36,15 +36,25 @@
 .sitenavigation_link:focus {
   color: #f0ab00;
 }
+.sitenavigation_linksearch {
+  padding: 0 0 0 2.1875em;
+  font-weight: inherit;
+}
+.search {
+  font-size: 16px;
+  font-size: 1rem;
+  display: inline-block;
+  width: 14.875em;
+}
 .search_textfield {
   background: #222;
   border: 1px solid #666;
   padding: 0.9375em 2.8125em 0.9375em 0.9375em;
   color: #fff;
-  width: 14.375em;
+  width: 14.6875em;
 }
 .search_button {
   position: absolute;
-  margin-left: -2em;
-  margin-top: 1.1875em;
+  margin-left: 12.4375em;
+  margin-top: 1.125em;
 }
