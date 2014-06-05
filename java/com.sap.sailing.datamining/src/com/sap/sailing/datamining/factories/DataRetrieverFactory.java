@@ -16,14 +16,9 @@ import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProce
 import com.sap.sailing.datamining.impl.components.RegattaLeaderboardFilteringRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegFilteringRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorFilteringRetrievalProcessor;
-import com.sap.sailing.datamining.impl.components.deprecated.GroupDividingParallelDataRetriever;
-import com.sap.sailing.datamining.impl.workers.builders.deprecated.DataRetrieverWorkerBuilder;
-import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.components.ParallelDataRetriever;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningActivator;
@@ -32,8 +27,6 @@ import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriteria;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
-import com.sap.sse.datamining.workers.DataRetrievalWorker;
-import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataRetrieverFactory {
 
@@ -101,15 +94,6 @@ public final class DataRetrieverFactory {
             }
         }
         return criteria != null ? criteria : new NonFilteringFilterCriteria<BaseDataType>();
-    }
-
-    /**
-     * Creates a retriever for the given data type. Throws an exception, if the used <code>DataType</code> doesn't match
-     * the <code>DataType</code> of the returning retriever.
-     */
-    public static <DataType> ParallelDataRetriever<DataType> createDataRetriever(DataTypes dataType, RacingEventService racingService, ThreadPoolExecutor executor) {
-        WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> workerBuilder = new DataRetrieverWorkerBuilder<DataType>(dataType);
-        return new GroupDividingParallelDataRetriever<DataType>(racingService, workerBuilder, executor);
     }
 
 }
