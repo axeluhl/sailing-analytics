@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
@@ -186,7 +187,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             // don't measure speed with separate confidence; return confidence obtained from averaging bearings
             ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
                     .createWindAverager(new PositionAndTimePointWeigher(
-                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
+                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10, new MeterDistance(1000)));
             DummyWind atTimed = new DummyWind(at);
             Util.Pair<Position, TimePoint> relativeTo = new Util.Pair<Position, TimePoint>(p, at);
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
