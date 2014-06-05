@@ -37,9 +37,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
         for (Method method : internalClass.getMethods()) {
-            Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
             
             if (isValidDimension(method) || isValidStatistic(method)) {
+                Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
                 if (!previousFunctions.isEmpty()) {
                     function = FunctionFactory.createCompoundFunction(null, previousFunctions, function);
                 }
@@ -48,9 +48,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
             
             if (isConnector(method)) {
+                Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
                 Class<?> returnType = method.getReturnType();
                 List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
-                previousFunctions.add(function);
+                previousFunctionsClone.add(function);
                 scanInternalClass(returnType, previousFunctionsClone);
                 continue;
             }

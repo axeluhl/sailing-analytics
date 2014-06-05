@@ -93,7 +93,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         Function<?> getDistanceTraveled = FunctionFactory.createMethodWrappingFunction(getDistanceTraveledMethod);
         
         Collection<Function<?>> statistics = new HashSet<>();
-        statistics.add(FunctionFactory.createCompoundFunction("getDistanceTraveled", Arrays.asList(getLeg, getDistanceTraveled)));
+        statistics.add(FunctionFactory.createCompoundFunction(null, Arrays.asList(getLeg, getDistanceTraveled)));
         return statistics;
     }
 
