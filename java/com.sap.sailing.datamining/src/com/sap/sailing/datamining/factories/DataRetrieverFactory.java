@@ -1,12 +1,16 @@
 package com.sap.sailing.datamining.factories;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.impl.DeprecatedToFunctionConverter;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.RegattaLeaderboardFilteringRetrievalProcessor;
@@ -21,7 +25,12 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelDataRetriever;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningActivator;
+import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.NonFilteringFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.NullaryFunctionValuesFilterCriteria;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
@@ -76,8 +85,22 @@ public final class DataRetrieverFactory {
 
     private static <BaseDataType> FilterCriteria<BaseDataType> getFilterCriteriaForBaseDataType(Class<BaseDataType> baseDataType,
             Map<FunctionDTO, Iterable<?>> filterSelection) {
-        // TODO Auto-generated method stub
-        return null;
+        CompoundFilterCriteria<BaseDataType> criteria = null;
+        for (Entry<FunctionDTO, Iterable<?>> filterSelectionEntry : filterSelection.entrySet()) {
+            Function<?> function = DeprecatedToFunctionConverter.getFunctionFor(filterSelectionEntry.getKey());
+            if (baseDataType.equals(function.getDeclaringType())) {
+                if (criteria == null) {
+                    criteria = new AndCompoundFilterCriteria<>();
+                }
+                
+                Collection<Object> filterValues = new ArrayList<>();
+                for (Object filterValue : filterSelectionEntry.getValue()) {
+                    filterValues.add(filterValue);
+                }
+                criteria.addCriteria(new NullaryFunctionValuesFilterCriteria<BaseDataType>(function, filterValues));
+            }
+        }
+        return criteria != null ? criteria : new NonFilteringFilterCriteria<BaseDataType>();
     }
 
     /**
