@@ -10,7 +10,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.OrCompoundFilterCriteria;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectSideEffectFreeValueFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectStatisticFilterCriteria;
 
 public class InternalFunctionRetrievalProcessor extends FilteringFunctionRetrievalProcessor {
 
@@ -22,7 +22,7 @@ public class InternalFunctionRetrievalProcessor extends FilteringFunctionRetriev
     private static FilterCriteria<Method> createFilterCriteria() {
         CompoundFilterCriteria<Method> compoundFilterCriteria = new OrCompoundFilterCriteria<>();
         compoundFilterCriteria.addCriteria(new MethodIsCorrectDimensionFilterCriteria());
-        compoundFilterCriteria.addCriteria(new MethodIsCorrectSideEffectFreeValueFilterCriteria());
+        compoundFilterCriteria.addCriteria(new MethodIsCorrectStatisticFilterCriteria());
         return compoundFilterCriteria;
     }
 

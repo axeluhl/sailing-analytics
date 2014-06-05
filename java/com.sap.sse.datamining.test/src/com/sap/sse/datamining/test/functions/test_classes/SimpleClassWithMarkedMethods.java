@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.test.functions.test_classes;
 
 import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Statistic;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!
@@ -21,7 +21,7 @@ public class SimpleClassWithMarkedMethods {
         
     }
     
-    @SideEffectFreeValue(messageKey="value")
+    @Statistic(messageKey="value")
     public int sideEffectFreeValue() {
         return 1;
     }

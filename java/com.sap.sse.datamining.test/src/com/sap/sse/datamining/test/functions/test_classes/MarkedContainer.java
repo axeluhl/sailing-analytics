@@ -1,10 +1,10 @@
 package com.sap.sse.datamining.test.functions.test_classes;
 
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface MarkedContainer {
     
-    @SideEffectFreeValue(messageKey="containerElement")
+    @Connector
     public ContainerElement getContainerElement();
 
 }

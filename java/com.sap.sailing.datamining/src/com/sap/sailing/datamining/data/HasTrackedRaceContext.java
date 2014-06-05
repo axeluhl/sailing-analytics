@@ -8,28 +8,28 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface HasTrackedRaceContext {
     
     public TrackedRace getTrackedRace();
     
-    @SideEffectFreeValue(messageKey="Event")
+    @Connector
     public Event getEvent();
     
-    @SideEffectFreeValue(messageKey="Regatta")
+    @Connector
     public Regatta getRegatta();
     
-    @SideEffectFreeValue(messageKey="CourseArea")
+    @Connector
     public CourseArea getCourseArea();
     
-    @SideEffectFreeValue(messageKey="BoatClass")
+    @Connector
     public BoatClass getBoatClass();
     
-    @SideEffectFreeValue(messageKey="Fleet")
+    @Connector
     public Fleet getFleet();
     
-    @SideEffectFreeValue(messageKey="Race")
+    @Connector
     public RaceDefinition getRace();
     
     @Dimension(messageKey="Year")

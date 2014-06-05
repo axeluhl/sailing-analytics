@@ -3,7 +3,7 @@ package com.sap.sailing.domain.common;
 import java.io.Serializable;
 
 import com.sap.sse.datamining.shared.Unit;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Statistic;
 
 /**
  * A speed, convertable in various units of measure. Can be negative.
@@ -51,7 +51,7 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
     };
     
-    @SideEffectFreeValue(messageKey="InKnots", resultDecimals=2, resultUnit=Unit.Knots)
+    @Statistic(messageKey="InKnots", resultDecimals=2, resultUnit=Unit.Knots)
     double getKnots();
 
     double getMetersPerSecond();

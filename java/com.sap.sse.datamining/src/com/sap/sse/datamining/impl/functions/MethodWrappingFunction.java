@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
@@ -44,10 +44,10 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     private void initializeAdditionalData() {
         if (method.getAnnotation(Dimension.class) != null) {
             Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalFunctionData(dimensionData.messageKey(), dimensionData.resultUnit(), dimensionData.resultDecimals());
+            additionalData = new AdditionalFunctionData(dimensionData.messageKey(), Unit.None, 0);
         }
-        if (method.getAnnotation(SideEffectFreeValue.class) != null) {
-            SideEffectFreeValue valueData = method.getAnnotation(SideEffectFreeValue.class);
+        if (method.getAnnotation(Statistic.class) != null) {
+            Statistic valueData = method.getAnnotation(Statistic.class);
             additionalData = new AdditionalFunctionData(valueData.messageKey(), valueData.resultUnit(), valueData.resultDecimals());
         }
     }

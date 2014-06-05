@@ -1,11 +1,11 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sse.datamining.shared.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface HasGPSFixContext extends HasTrackedLegOfCompetitorContext {
     
-    @SideEffectFreeValue(messageKey="GPSFix")
+    @Connector
     public GPSFixMoving getGPSFix();
 
 }

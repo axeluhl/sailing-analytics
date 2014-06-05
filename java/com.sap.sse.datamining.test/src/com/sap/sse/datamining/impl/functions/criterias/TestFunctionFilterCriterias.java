@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectDimensionFilterCriteria;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectExternalFunctionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectSideEffectFreeValueFilterCriteria;
+import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectStatisticFilterCriteria;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {
@@ -31,7 +31,7 @@ public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectSideEffectFreeValueFilterCriteria() {
-        FilterCriteria<Method> filterCriteria = new MethodIsCorrectSideEffectFreeValueFilterCriteria();
+        FilterCriteria<Method> filterCriteria = new MethodIsCorrectStatisticFilterCriteria();
         
         Method sideEffectFreeValue = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         assertThat(filterCriteria.matches(sideEffectFreeValue), is(true));
