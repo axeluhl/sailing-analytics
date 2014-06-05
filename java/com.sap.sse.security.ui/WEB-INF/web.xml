@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
-	
-	
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+
 	<!-- Apache Shiro -->
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener
@@ -27,15 +27,38 @@
 		<dispatcher>INCLUDE</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
-	
-	
+
+
 	<servlet>
 		<display-name>User Management Service</display-name>
-	    <servlet-name>UserManagementService</servlet-name>
-    	<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
+		<servlet-name>UserManagementService</servlet-name>
+		<servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl
+		</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<display-name>OAuth Login Service</display-name>
+		<servlet-name>OAuthLogintService</servlet-name>
+		<servlet-class>com.sap.sse.security.ui.oauth.server.OAuthLoginServiceImpl
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OAuthLogintService</servlet-name>
+		<url-pattern>/service/oauthlogin</url-pattern>
+	</servlet-mapping>
+
+	<!-- remote logging -->
+	<servlet>
+		<servlet-name>remoteLogging</servlet-name>
+		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>remoteLogging</servlet-name>
+		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging</url-pattern>
 	</servlet-mapping>
 </web-app>

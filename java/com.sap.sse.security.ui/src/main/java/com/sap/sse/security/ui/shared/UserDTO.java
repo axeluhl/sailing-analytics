@@ -20,8 +20,10 @@ public class UserDTO implements IsSerializable {
     }
 
     public UserDTO(String name, AccountDTO... accounts) {
-        super();
         this.name = name;
+//        for (AccountDTO account : accounts){
+//            this.accounts.put(account.getAccountType(), account);
+//        }
     }
 
     public String getName() {
@@ -42,6 +44,10 @@ public class UserDTO implements IsSerializable {
 
     public Map<String, AccountDTO> getAccounts() {
         return accounts;
+    }
+
+    public void setAccounts(Map<String, AccountDTO> accounts) {
+        this.accounts = accounts;
     }
     
     

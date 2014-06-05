@@ -18,15 +18,25 @@ Bundle-ClassPath: lib/shiro-core-1.2.2.jar,
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.security.userstore;bundle-version="1.0.0",
  com.google.gwt.osgi,
- slf4j.api;bundle-version="1.6.4"
+ slf4j.api;bundle-version="1.6.4",
+ org.json.simple
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
  org.apache.shiro,
  org.apache.shiro.authc,
+ org.apache.shiro.authz,
  org.apache.shiro.authz.annotation,
  org.apache.shiro.crypto,
  org.apache.shiro.crypto.hash,
+ org.apache.shiro.realm,
+ org.apache.shiro.session,
  org.apache.shiro.subject,
  org.apache.shiro.util,
  org.apache.shiro.web.env,
- org.apache.shiro.web.servlet
+ org.apache.shiro.web.servlet,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.utils

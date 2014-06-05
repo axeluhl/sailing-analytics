@@ -51,6 +51,7 @@ fieldset legend {
 
 .settingsPanel-grid {
 	border: 1px solid black;
+	height: 95%;
 }
 
 /** Set ids using widget.getElement().setId("idOfElement") */

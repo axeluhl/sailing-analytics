@@ -119,7 +119,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
     @Override
     public <T> T getSetting(String key, Class<T> clazz) {
-        return store.getSetting("", clazz);
+        return store.getSetting(key, clazz);
     }
 
     @Override

@@ -9,10 +9,15 @@ import org.osgi.framework.ServiceRegistration;
 public class Activator implements BundleActivator {
 
     private static BundleContext context;
+    private static SecurityService securityService;
     private ServiceRegistration<?> registration;
 
     static BundleContext getContext() {
         return context;
+    }
+    
+    static SecurityService getSecurityService(){
+        return securityService;
     }
 
     /*
@@ -23,8 +28,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         
+        securityService = new SecurityServiceImpl();
         registration = context.registerService(SecurityService.class.getName(),
-                new SecurityServiceImpl(), null);
+                securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
 

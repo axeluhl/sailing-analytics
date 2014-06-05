@@ -11,6 +11,7 @@ import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
+import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
@@ -28,6 +29,7 @@ public class UserStoreImpl implements UserStore {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
+        initSocialSettingsIfEmpty();
         addSetting("email_required", Boolean.class);
         for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
             users.put(u.getName(), u);
@@ -49,6 +51,15 @@ public class UserStoreImpl implements UserStore {
         }
     }
     
+    private void initSocialSettingsIfEmpty() {
+        for (SocialSettingsKeys ssk : SocialSettingsKeys.values()){
+            if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null){
+                addSetting(ssk.name(), String.class);
+                setSetting(ssk.name(), ssk.getValue());
+            }
+        }
+    }
+
     @Override
     public String getName() {
         return "MongoDB user store";

@@ -1,0 +1,27 @@
+package com.sap.sse.security;
+
+import org.apache.shiro.authc.AuthenticationToken;
+
+public class OAuthToken implements AuthenticationToken {
+	
+	private Credential credential;
+	private String principal;
+	
+	public OAuthToken(Credential credential, String principal) {
+		this.credential = credential;
+		this.principal = principal;
+	}
+
+	@Override
+	public Object getCredentials() {
+		// TODO Auto-generated method stub
+		return credential;
+	}
+
+	@Override
+	public Object getPrincipal() {
+		// TODO Auto-generated method stub
+		return principal;
+	}
+
+}

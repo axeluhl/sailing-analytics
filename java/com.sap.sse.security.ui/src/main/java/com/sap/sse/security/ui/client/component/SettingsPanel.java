@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
@@ -62,8 +63,9 @@ public class SettingsPanel extends FlowPanel {
         if (settings == null || settingTypes == null){
             return;
         }
-        Grid grid = new Grid(settings.size(), 2);
-        grid.addStyleName("settingsPanel-grid");
+        Grid grid = new Grid(settingTypes.size(), 2);
+        ScrollPanel scrollPanel = new ScrollPanel(grid);
+        scrollPanel.addStyleName("settingsPanel-grid");
         int row = 0;
         for (Entry<String, String> e : settingTypes.entrySet()){
             final String key = e.getKey();
@@ -114,7 +116,7 @@ public class SettingsPanel extends FlowPanel {
             }
             else {
                 final TextBox value = new TextBox();
-                value.setText(settings.get(key).toString());
+                value.setText(settings.get(key));
                 value.addChangeHandler(new ChangeHandler() {
                     
                     @Override
@@ -135,6 +137,6 @@ public class SettingsPanel extends FlowPanel {
             }
             row++;
         }
-        add(grid);
+        add(scrollPanel);
     }
 }

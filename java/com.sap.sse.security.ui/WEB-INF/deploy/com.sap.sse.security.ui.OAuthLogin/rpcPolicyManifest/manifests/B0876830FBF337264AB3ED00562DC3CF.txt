@@ -1,0 +1,2 @@
+serviceClass: com.sap.sse.security.ui.oauth.shared.OAuthLoginService
+path: EEC5843F25ABA077B61E75156C653DD9.gwt.rpc

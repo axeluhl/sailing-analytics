@@ -34,6 +34,15 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
         store = (UserStore) context.
                 getService(serviceReference);
     }
+    
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        if (token == null)
+            return false;
+        if (! (token instanceof UsernamePasswordToken))
+            return false;
+        return true;
+    }
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {

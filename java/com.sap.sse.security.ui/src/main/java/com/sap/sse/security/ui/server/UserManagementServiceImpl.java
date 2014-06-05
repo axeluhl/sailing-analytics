@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -174,7 +175,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Map<String, String> getSettings() {
-        Map<String, String> settings = new HashMap<String, String>();
+        Map<String, String> settings = new TreeMap<String, String>();
         for (Entry<String, Object> e : securityService.getAllSettings().entrySet()){
             settings.put(e.getKey(), e.getValue().toString());
         }
@@ -196,7 +197,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Map<String, String> getSettingTypes() {
-        Map<String, String> settingTypes = new HashMap<String, String>();
+        Map<String, String> settingTypes = new TreeMap<String, String>();
         for (Entry<String, Class<?>> e : securityService.getAllSettingTypes().entrySet()){
             settingTypes.put(e.getKey(), e.getValue().getName());
         }
