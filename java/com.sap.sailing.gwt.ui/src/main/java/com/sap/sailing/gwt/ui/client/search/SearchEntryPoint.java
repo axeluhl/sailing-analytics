@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 /**
  * Sample entry point demonstrating the search capabilites of
@@ -34,7 +35,7 @@ public class SearchEntryPoint extends AbstractEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         VerticalPanel searchAndResults = new VerticalPanel();
         searchAndResults.setSize("100%", "30em");
         RootPanel.get().add(searchAndResults);
