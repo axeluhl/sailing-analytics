@@ -2,12 +2,12 @@ package com.sap.sailing.gwt.ui.client.shared.components;
 
 import java.util.ArrayList;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
-    private static class ComponentAndValidator<SettingsType> extends Pair<Component<SettingsType>, Validator<SettingsType>> {
+    private static class ComponentAndValidator<SettingsType> extends Util.Pair<Component<SettingsType>, Validator<SettingsType>> {
         private static final long serialVersionUID = -4190322565836849861L;
 
         public ComponentAndValidator(Component<SettingsType> a, Validator<SettingsType> b) {

@@ -49,8 +49,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -65,6 +63,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -339,7 +338,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(),
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
-                                    getLeaderboardDisplayDate(), new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                                    getLeaderboardDisplayDate(), new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
@@ -350,7 +349,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                             getBusyIndicator().setBusy(false);
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                     || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
@@ -465,7 +464,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                             value == null || value.trim().length() == 0 ? null : value.trim().equals("n/a") ? null
                                     : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
-                            new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                            new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
@@ -476,7 +475,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                             getBusyIndicator().setBusy(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                             leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
@@ -537,13 +536,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     new EditScoreDialog(stringMessages, row.competitor.getName(), raceColumnName,
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints,
-                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Pair<MaxPointsReason, Double>>() {
+                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Util.Pair<MaxPointsReason, Double>>() {
                         @Override
-                        public void ok(final Pair<MaxPointsReason, Double> editedObject) {
+                        public void ok(final Util.Pair<MaxPointsReason, Double> editedObject) {
                             getBusyIndicator().setBusy(true);
                             getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                     editedObject.getB(), getLeaderboardDisplayDate(),
-                                            new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                                            new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     getBusyIndicator().setBusy(false);
@@ -554,10 +553,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                             editedObject.getA(), getLeaderboardDisplayDate(),
-                                                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                                                    new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                         @Override
                                         public void onFailure(Throwable t) {
                                             getBusyIndicator().setBusy(false);
@@ -568,7 +567,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         }
 
                                         @Override
-                                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                                             getBusyIndicator().setBusy(false);
                                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                                             leaderboardEntryDTO.reasonForMaxPoints = editedObject.getA();

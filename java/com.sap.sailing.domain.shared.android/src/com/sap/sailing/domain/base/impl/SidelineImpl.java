@@ -7,7 +7,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class SidelineImpl extends NamedImpl implements Sideline {
     private static final long serialVersionUID = -8145721464971358691L;

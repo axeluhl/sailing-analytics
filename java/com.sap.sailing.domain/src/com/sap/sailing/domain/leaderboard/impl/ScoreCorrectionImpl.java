@@ -13,8 +13,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
@@ -22,6 +20,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 
 /**
  * Implements the basic logic of assigning a maximum score to a competitor in a race if that competitor was
@@ -38,12 +37,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final Map<Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final Map<Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -65,8 +64,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     public ScoreCorrectionImpl(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
-        this.maxPointsReasons = new HashMap<Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
-        this.correctedScores = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
+        this.maxPointsReasons = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
+        this.correctedScores = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
 
@@ -124,7 +123,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason) {
-        Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         MaxPointsReason oldMaxPointsReason;
         if (reason == null) {
             oldMaxPointsReason = maxPointsReasons.remove(key);
@@ -142,7 +141,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        com.sap.sse.common.Util.Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         return (correctedScores.containsKey(key) && !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor))
                 || (maxPointsReasons.containsKey(key) && isMaxPointsReasonApplicable(maxPointsReasons.get(key), timePoint, raceColumn, competitor));
     }
@@ -454,12 +453,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public boolean hasCorrectionFor(RaceColumn raceInLeaderboard) {
-        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             if (correctedScoresKey.getB() == raceInLeaderboard) {
                 return true;
             }
         }
-        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             if (maxPointsReasonsKey.getB() == raceInLeaderboard) {
                 return true;
             }
@@ -494,10 +493,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public Iterable<RaceColumn> getRaceColumnsThatHaveCorrections() {
         Set<RaceColumn> result = new HashSet<>();
-        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             result.add(correctedScoresKey.getB());
         }
-        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             result.add(maxPointsReasonsKey.getB());
         }
         return result;
@@ -506,12 +505,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public Iterable<Competitor> getCompetitorsThatHaveCorrectionsIn(RaceColumn raceColumn) {
         Set<Competitor> result = new HashSet<>();
-        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
             if (raceColumn == correctedScoresKey.getB()) {
                 result.add(correctedScoresKey.getA());
             }
         }
-        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+        for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
             if (raceColumn == maxPointsReasonsKey.getB()) {
                 result.add(maxPointsReasonsKey.getA());
             }

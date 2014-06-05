@@ -2,9 +2,9 @@ package com.sap.sailing.domain.racelog.tracking;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sse.common.Util;
 
 public class SmartphoneUUIDSerializationHandler {
     private SmartphoneUUIDIdentifier castIdentifier(DeviceIdentifier identifier) throws TransformationException {
@@ -13,8 +13,8 @@ public class SmartphoneUUIDSerializationHandler {
         return (SmartphoneUUIDIdentifier) identifier;
     }
 
-    public Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
-        return new Pair<String, String>(castIdentifier(deviceIdentifier).getUUID().toString(), SmartphoneUUIDIdentifier.TYPE);
+    public Util.Pair<String, String> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+        return new Util.Pair<String, String>(castIdentifier(deviceIdentifier).getUUID().toString(), SmartphoneUUIDIdentifier.TYPE);
     }
 
     public DeviceIdentifier deserialize(String input, String type, String stringRep) throws TransformationException {

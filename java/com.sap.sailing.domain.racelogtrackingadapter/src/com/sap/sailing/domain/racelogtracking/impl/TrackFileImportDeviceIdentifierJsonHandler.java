@@ -6,12 +6,12 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.common.Util;
 
 public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentifierJsonHandler {
     private static enum Fields {UUID, FILE_NAME, TRACK_NAME, UPLOADED_MILLIS};
@@ -45,14 +45,14 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
     }
 
     @Override
-    public Pair<String, JSONObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
+    public Util.Pair<String, JSONObject> serialize(DeviceIdentifier deviceIdentifier) throws TransformationException {
         TrackFileImportDeviceIdentifier id = TrackFileImportDeviceIdentifierImpl.cast(deviceIdentifier);
         JSONObject result = new JSONObject();
         result.put(Fields.UUID.name(), id.getId().toString());
         result.put(Fields.FILE_NAME.name(), id.getFileName());
         result.put(Fields.TRACK_NAME.name(), id.getTrackName());
         result.put(Fields.UPLOADED_MILLIS.name(), storeTimePoint(id.getUploadedAt()));
-        return new Pair<String ,JSONObject>(TrackFileImportDeviceIdentifier.TYPE, result);
+        return new Util.Pair<String ,JSONObject>(TrackFileImportDeviceIdentifier.TYPE, result);
     }
 
 }

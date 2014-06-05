@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.components.AbstractLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.impl.data.HasGPSFixContextImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sse.common.Util;
 
 public class GPSFixLeaderboardGroupDataRetrievalWorker extends AbstractLeaderboardGroupDataRetrievalWorker<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> doWork() {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        Collection<Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
-        for (Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext> baseDataEntry : baseData) {
+        Collection<Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
+        for (Util.Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext> baseDataEntry : baseData) {
             HasGPSFixContext context = new HasGPSFixContextImpl(baseDataEntry.getB());
             data.addAll(retrieveDataFor(context));
         }

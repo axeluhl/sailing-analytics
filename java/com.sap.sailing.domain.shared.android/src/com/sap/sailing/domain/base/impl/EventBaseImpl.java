@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;

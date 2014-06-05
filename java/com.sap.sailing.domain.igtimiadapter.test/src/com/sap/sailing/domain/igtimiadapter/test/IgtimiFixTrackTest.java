@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.Util;
 
 /**
  * Igtimi fixes come as isolated single fixes from separate sensors, and even if they are attached to the same device,

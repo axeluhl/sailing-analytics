@@ -32,8 +32,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -65,6 +63,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -77,7 +76,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final String raceDescription;
     private final BoatClass boatClass;
     private final DomainFactory domainFactory;
-    private final Triple<String, String, Integer> id;
+    private final com.sap.sse.common.Util.Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
@@ -143,8 +142,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         return trackedRegatta;
     }
 
-    static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
-        return new Triple<String, String, Integer>(raceID, hostname, port);
+    static com.sap.sse.common.Util.Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
+        return new com.sap.sse.common.Util.Triple<String, String, Integer>(raceID, hostname, port);
     }
 
     @Override
@@ -239,7 +238,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public Triple<String, String, Integer> getID() {
+    public com.sap.sse.common.Util.Triple<String, String, Integer> getID() {
         return id; 
     }
 
@@ -324,7 +323,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
             Competitor competitor = getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass);
@@ -348,7 +347,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     trackedRace.unlockAfterRead(markPassings);
                 }
                 // ...and then overwrite those for which we received "new evidence"
-                for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
+                for (com.sap.sse.common.Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                     Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                             markIndexRankAndTimeSinceStartInMilliseconds.getA());
                     // If the rank and time information is empty, we interpret this by clearing the mark rounding if any
@@ -409,7 +408,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
         // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
         // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur fuer unsere TV-Grafik wichtig, da damit die Rueckstandsuhr gestartet wird."
     }

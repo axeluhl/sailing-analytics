@@ -10,10 +10,10 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.ControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Mark;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
+import com.sap.sse.common.Util;
 
 public class ClientParamsPHPLahaina3Test extends AbstractClientParamsPHPTest {
     

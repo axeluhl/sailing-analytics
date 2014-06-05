@@ -8,7 +8,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.BoatChangeListener;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class BoatImpl extends NamedImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;

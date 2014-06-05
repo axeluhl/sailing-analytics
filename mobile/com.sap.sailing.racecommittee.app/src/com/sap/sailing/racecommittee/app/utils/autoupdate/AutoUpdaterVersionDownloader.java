@@ -6,18 +6,18 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.racecommittee.app.data.http.HttpGetRequest;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
+import com.sap.sse.common.Util;
 
-public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Pair<Integer, String>> {
+public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
 
     public AutoUpdaterVersionDownloader(AutoUpdaterState state) {
         super(state);
     }
 
     @Override
-    protected Pair<Integer, String> downloadInBackground(URL url) {
+    protected Util.Pair<Integer, String> downloadInBackground(URL url) {
         HttpGetRequest request = new HttpGetRequest(url);
         InputStream stream = null;
         try {
@@ -39,14 +39,14 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Pair<Int
         return null;
     }
 
-    private Pair<Integer, String> parseVersionFile(String contents) {
+    private Util.Pair<Integer, String> parseVersionFile(String contents) {
         String[] map = contents.split("=");
         if (map.length == 2) {
             String apkFileName = map[0];
             String versionCode = map[1];
             try {
                 Integer code = Integer.parseInt(versionCode);
-                return new Pair<Integer, String>(code, apkFileName);
+                return new Util.Pair<Integer, String>(code, apkFileName);
             } catch (NumberFormatException e) {
             }
         }
@@ -59,7 +59,7 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Pair<Int
     }
 
     @Override
-    protected void onSuccess(Pair<Integer, String> result) {
+    protected void onSuccess(Util.Pair<Integer, String> result) {
         state.updateToVersion(result.getA(), result.getB());
     }
 

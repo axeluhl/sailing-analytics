@@ -3,6 +3,10 @@ package com.sap.sailing.domain.racelog;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 
 /**
  * This interfaces serves as a template for the actual RaceLogIdentifier that is compound as follows:

@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.UserManagementService;
 import com.sap.sailing.gwt.ui.client.UserManagementServiceAsync;
+import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public class UserManagementPage extends AbstractEntryPoint {
@@ -27,7 +28,7 @@ public class UserManagementPage extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementService, RemoteServiceMappingConstants.userManagementServiceRemotePath);
 
         VerticalPanel vp = new VerticalPanel();
         RootPanel.get().add(vp);

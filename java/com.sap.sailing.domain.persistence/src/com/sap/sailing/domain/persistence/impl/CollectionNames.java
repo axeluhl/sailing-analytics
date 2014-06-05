@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.GPSFix;
+
 /**
  * Defines literals providing the names for MongoDB collections. The literal documentation described the semantics
  * of the collection identified by that literal.
@@ -79,4 +82,9 @@ public enum CollectionNames {
      * Stores {@link GPSFix}es
      */
     GPS_FIXES,
+    
+    /**
+     * Metadata for the GPSFixes, grouped by Device Identifier.
+     */
+    GPS_FIXES_METADATA,
 }

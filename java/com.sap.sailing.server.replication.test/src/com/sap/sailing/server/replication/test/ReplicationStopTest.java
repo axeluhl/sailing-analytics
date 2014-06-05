@@ -15,7 +15,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class ReplicationStopTest extends AbstractServerReplicationTest {
     @Test

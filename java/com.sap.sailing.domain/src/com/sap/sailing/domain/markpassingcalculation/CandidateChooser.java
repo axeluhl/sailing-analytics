@@ -8,6 +8,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public interface CandidateChooser {
+import com.sap.sse.common.Util;
 
     /**
      * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace}.

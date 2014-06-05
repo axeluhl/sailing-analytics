@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
@@ -16,17 +17,16 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.Util;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -43,7 +43,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard extends Named {
+public interface Leaderboard extends LeaderboardBase {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."
@@ -256,7 +256,7 @@ public interface Leaderboard extends Named {
      * Note that in order to get the {@link #getTotalPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
-    Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
+    Map<Util.Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
 
     /**
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
@@ -299,12 +299,6 @@ public interface Leaderboard extends Named {
     Competitor getCompetitorByName(String competitorName);
     
     void setDisplayName(Competitor competitor, String displayName);
-
-    /**
-     * If a display name for the leaderboard has been defined,
-     * this method returns it; otherwise, <code>null</code> is returned.
-     */
-    String getDisplayName();
 
     void setDisplayName(String displayName);
 
@@ -372,7 +366,7 @@ public interface Leaderboard extends Named {
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
      */
-    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
     
     /**
      * @return <code>null</code> if no tracked race is available in this leaderboard, the competitor hasn't started

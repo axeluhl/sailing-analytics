@@ -3,11 +3,13 @@ package com.sap.sailing.domain.racelogtracking.servlet;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -19,9 +21,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonD
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
+import com.sap.sse.common.Util;
 
 public class RecordFixesPostServlet extends
-        AbstractJsonPostServlet<Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {
+        AbstractJsonPostServlet<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {
     private static final long serialVersionUID = 2778739335260621119L;
     private DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer;
 
@@ -37,7 +40,7 @@ public class RecordFixesPostServlet extends
     }
 
     @Override
-    public JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>> getRequestDeserializer() {
+    public JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> getRequestDeserializer() {
         return deserializer;
     }
 
@@ -48,14 +51,18 @@ public class RecordFixesPostServlet extends
 
     @Override
     public Void process(Map<String, String> parameterValues,
-            Triple<DeviceIdentifier, Serializable, List<GPSFix>> domainObject) throws HttpExceptionWithMessage {
+            Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>> domainObject) throws HttpExceptionWithMessage {
         DeviceIdentifier device = domainObject.getA();
         // might use the session id in the future
         // Serializable sessionId = domainObject.getB();
         List<GPSFix> fixes = domainObject.getC();
 
         for (GPSFix fix : fixes) {
-            getService().getGPSFixStore().storeFix(device, fix);
+            try {
+                getService().getGPSFixStore().storeFix(device, fix);
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Could not load store fix from device " + device);
+            }
         }
 
         return null;

@@ -27,7 +27,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.SerializableComparator;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -42,6 +41,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 /**
  * A virtual wind track that computes and caches the wind bearing based on the boat tracks recorded in the tracked race
@@ -682,7 +682,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated mark position. Ask it:
-        Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+        Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
@@ -697,7 +697,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * result type suggests it.
      */
     @Override
-    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         lockForRead();
         try {
             TimePoint floorTimePoint = virtualInternalRawFixes.floorToResolution(at);
@@ -712,10 +712,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(p, timePoint);
             // reduce confidence depending on how far *at* is away from the time point of the fix obtained
             double confidenceMultiplier = weigher.getConfidence(timePoint, at);
-            WindWithConfidenceImpl<Pair<Position, TimePoint>> result = preResult == null ? null
-                    : new WindWithConfidenceImpl<Pair<Position, TimePoint>>(preResult.getObject(), confidenceMultiplier
+            WindWithConfidenceImpl<Util.Pair<Position, TimePoint>> result = preResult == null ? null
+                    : new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(preResult.getObject(), confidenceMultiplier
                             * preResult.getConfidence(),
-                    /* relativeTo */new Pair<Position, TimePoint>(p, at), preResult.useSpeed());
+                    /* relativeTo */new Util.Pair<Position, TimePoint>(p, at), preResult.useSpeed());
             return result;
         } finally {
             unlockAfterRead();

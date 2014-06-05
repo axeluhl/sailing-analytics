@@ -47,12 +47,10 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
@@ -102,6 +100,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sse.common.Util;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -150,6 +149,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public static void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
         storeTimePoint(timePoint, result, field.name());
     }
+    
+    public static void storeTimeRange(TimeRange timeRange, DBObject result, FieldNames field) {
+        if (timeRange != null) {
+            DBObject timeRangeObj = new BasicDBObject();
+            storeTimePoint(timeRange.from(), timeRangeObj, FieldNames.FROM_MILLIS);
+            storeTimePoint(timeRange.to(), timeRangeObj, FieldNames.TO_MILLIS);
+            result.put(field.name(), timeRangeObj);
+        }
+    }
 
     public void storeTimed(Timed timed, DBObject result) {
         if (timed.getTimePoint() != null) {
@@ -195,7 +203,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject index = new BasicDBObject();
         index.put(FieldNames.DEVICE_ID.name(), null);
         index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        gpsFixCollection.ensureIndex(index);
         return gpsFixCollection;
+    }
+
+    public DBCollection getGPSFixMetadataCollection() {
+        DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES_METADATA.name());
+        DBObject index = new BasicDBObject();
+        index.put(FieldNames.DEVICE_ID.name(), null);
+        collection.ensureIndex(index);
+        return collection;
     }
     
     /**
@@ -627,7 +644,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (fleet instanceof FleetImpl) {
             dbFleet.put(FieldNames.FLEET_ORDERING.name(), ((FleetImpl) fleet).getOrdering());
             if(fleet.getColor() != null) {
-                Triple<Integer, Integer, Integer> colorAsRGB = fleet.getColor().getAsRGB();
+                com.sap.sse.common.Util.Triple<Integer, Integer, Integer> colorAsRGB = fleet.getColor().getAsRGB();
                 // we save the color as a integer value representing the RGB values
                 int colorAsInt = (256 * 256 * colorAsRGB.getC()) + colorAsRGB.getB() * 256 + colorAsRGB.getA(); 
                 dbFleet.put(FieldNames.FLEET_COLOR.name(), colorAsInt);
@@ -1031,17 +1048,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private BasicDBList storePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+    private BasicDBList storePositionedCompetitors(List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         BasicDBList dbList = new BasicDBList();
         if (positionedCompetitors != null) {
-            for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
+            for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
                 dbList.add(storePositionedCompetitor(competitorPair));
             }
         }
         return dbList;
     }
     
-    private DBObject storePositionedCompetitor(Triple<Serializable, String, MaxPointsReason> competitorTriple) {
+    private DBObject storePositionedCompetitor(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> competitorTriple) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.COMPETITOR_ID.name(), competitorTriple.getA());
         result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorTriple.getB());
@@ -1181,7 +1198,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     				throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = device.getIdentifierType();
         DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-        Pair<String, ? extends Object> pair = handler.serialize(device);
+        com.sap.sse.common.Util.Pair<String, ? extends Object> pair = handler.serialize(device);
         type = pair.getA();
     	Object deviceTypeSpecificId = pair.getB();
     	return new BasicDBObjectBuilder()

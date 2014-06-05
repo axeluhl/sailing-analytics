@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.Util;
 
 public class AllowCompetitorResetToDefaults extends AbstractRacingEventServiceOperation<Void> {
     private static final long serialVersionUID = 5133140671156755328L;

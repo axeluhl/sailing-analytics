@@ -11,4 +11,5 @@ Import-Package: com.sap.sailing.resultimport,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.common,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ com.sap.sse.common

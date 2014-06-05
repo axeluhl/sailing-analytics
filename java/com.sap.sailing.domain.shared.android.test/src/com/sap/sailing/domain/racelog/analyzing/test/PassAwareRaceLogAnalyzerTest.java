@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -19,7 +18,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<ResultType>, ResultType>
         extends RaceLogAnalyzerTest<AnalyzerType> {
     
-    protected class TargetPair extends Util.Pair<Collection<? extends RaceLogEvent>, ResultType> {
+    protected class TargetPair extends com.sap.sse.common.Util.Pair<Collection<? extends RaceLogEvent>, ResultType> {
         private static final long serialVersionUID = 7961879340006633439L;
 
         public TargetPair(Collection<? extends RaceLogEvent> a, ResultType b) {

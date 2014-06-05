@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.simulator.windpattern;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 
 public interface WindPatternSetting<SettingsType> extends Named {

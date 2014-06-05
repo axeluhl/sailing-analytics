@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -20,6 +19,7 @@ import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.leaderboardedit.LeaderboardEditingPage;
 import com.sap.sailing.selenium.pages.leaderboardedit.LeaderboardTable;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util;
 
 public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String LEADERBOARD = "BMW Cup - J80";

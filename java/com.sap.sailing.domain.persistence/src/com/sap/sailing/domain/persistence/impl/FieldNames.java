@@ -98,4 +98,10 @@ public enum FieldNames {
     
     // GPSFixes
     DEVICE_TYPE_SPECIFIC_ID, DEVICE_ID, DEVICE_TYPE, GPSFIX_TYPE, GPSFIX, DEVICE_STRING_REPRESENTATION,
+    
+    // GPSFixes metadata
+    TIMERANGE, NUM_FIXES,
+    
+    // Timespan
+    FROM_MILLIS, TO_MILLIS,
 }
