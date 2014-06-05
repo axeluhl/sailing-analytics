@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.confidence;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.impl.ConfidenceBasedAveragerFactoryImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -41,4 +43,11 @@ public interface ConfidenceFactory {
     Weigher<TimePoint> createHyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
 
     Weigher<TimePoint> createHyperbolicSquaredTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
+
+    /**
+     * Constructs a weigher that determines a confidence based on a distance. A {@link Distance#NULL zero distance}
+     * will yield a confidence of 1; a distance of <code>halfConfidence</code> will return a confidence of .5, and the
+     * confidence will decrease hyperbolically with increasing distance.
+     */
+    Weigher<Position> createHyperbolicDistanceWeigher(Distance halfConfidence);
 }

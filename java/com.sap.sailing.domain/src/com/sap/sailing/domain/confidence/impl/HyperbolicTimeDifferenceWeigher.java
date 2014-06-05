@@ -16,7 +16,7 @@ public class HyperbolicTimeDifferenceWeigher implements Weigher<TimePoint> {
      * <pre>
      *   |fix-request|=halfConfidenceAfterMilliseconds ==&gt; result==0.5
      *   0 &lt;= result &lt;= 1
-     *   fix=request ==&gt; result==1
+     *   fix==request ==&gt; result==1
      * </pre>
      * 
      * This implies the following formula for result := f(x):

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.confidence.impl;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
@@ -32,6 +34,11 @@ public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     @Override
     public Weigher<TimePoint> createHyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
         return new HyperbolicTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
+    }
+    
+    @Override
+    public Weigher<Position> createHyperbolicDistanceWeigher(Distance halfConfidence) {
+        return new HyperbolicDistanceWeigher(halfConfidence);
     }
     
     @Override

@@ -21,7 +21,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -338,6 +340,20 @@ public class ConfidenceTest {
         HasConfidence<ScalablePosition, Position, TimePoint> average = averager.getAverage(list, null);
         assertEquals(0, average.getObject().getLatDeg(), 0.1);
         assertEquals(0, average.getObject().getLngDeg(), 0.1);
+    }
+    
+    @Test
+    public void testPositionBasedConfidence() {
+        // at 1000 meter distance, confidence should be .5; at distance 0, confidence shall be 1.
+        Weigher<Position> weigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(new MeterDistance(1000));
+        Position p = new DegreePosition(12, 13);
+        assertEquals(1., weigher.getConfidence(p, p), 0.00000001);
+        Position p2 = p.translateGreatCircle(new DegreeBearingImpl(123), new MeterDistance(1000));
+        assertEquals(.5, weigher.getConfidence(p, p2), 0.00000001);
+        Position p3 = p.translateGreatCircle(new DegreeBearingImpl(123), new NauticalMileDistance(1000));
+        final double threshold = 0.001;
+        assertTrue("Expected confidence in 1000nm distance to be less than "+threshold+" but was "+weigher.getConfidence(p, p3),
+                weigher.getConfidence(p, p3) < threshold);
     }
     
     @Test
