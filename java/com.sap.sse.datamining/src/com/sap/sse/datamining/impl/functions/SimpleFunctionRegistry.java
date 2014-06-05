@@ -37,25 +37,36 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
         for (Method method : internalClass.getMethods()) {
-            
             if (isValidDimension(method) || isValidStatistic(method)) {
-                Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
-                if (!previousFunctions.isEmpty()) {
-                    function = FunctionFactory.createCompoundFunction(null, previousFunctions, function);
-                }
-                registerInternalFunction(function);
+                registerFunction(previousFunctions, method);
                 continue;
             }
             
             if (isConnector(method)) {
-                Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
-                Class<?> returnType = method.getReturnType();
-                List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
-                previousFunctionsClone.add(function);
-                scanInternalClass(returnType, previousFunctionsClone);
-                continue;
+                handleConnectorMethod(method, previousFunctions);
             }
         }
+    }
+
+    private void registerFunction(List<Function<?>> previousFunctions, Method method) {
+        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        if (!previousFunctions.isEmpty()) {
+            function = FunctionFactory.createCompoundFunction(null, previousFunctions, function);
+        }
+        
+        if (function.isDimension()) {
+            dimensions.add(function);
+        } else {
+            statistics.add(function);
+        }
+    }
+
+    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
+        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        Class<?> returnType = method.getReturnType();
+        List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
+        previousFunctionsClone.add(function);
+        scanInternalClass(returnType, previousFunctionsClone);
     }
 
     private boolean isValidDimension(Method method) {
@@ -74,14 +85,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         return method.getAnnotation(Connector.class) != null;
     }
 
-    private void registerInternalFunction(Function<?> function) {
-        if (function.isDimension()) {
-            dimensions.add(function);
-        } else {
-            statistics.add(function);
-        }
-    }
-    
     @Override
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
         // TODO Not yet implemented
