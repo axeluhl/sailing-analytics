@@ -29,7 +29,13 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
 
     @Override
     public LeaderboardSearchResultBase deserialize(JSONObject object) throws JsonDeserializationException {
-        EventBase event = eventDeserializer.deserialize(Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_EVENT));
+        final JSONObject eventJson = (JSONObject) object.get(LeaderboardSearchResultJsonSerializer.FIELD_EVENT);
+        final EventBase event;
+        if (eventJson != null) {
+            event = eventDeserializer.deserialize(eventJson);
+        } else {
+            event = null;
+        }
         JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
         String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
         String leaderboardDisplayName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_DISPLAY_NAME);

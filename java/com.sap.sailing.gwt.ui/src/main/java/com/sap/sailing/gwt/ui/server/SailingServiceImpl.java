@@ -65,6 +65,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -270,6 +272,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -378,6 +381,8 @@ import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
 
 /**
  * The server side implementation of the RPC service.
@@ -3112,15 +3117,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private EventBaseDTO convertToEventDTO(EventBase event) {
-        List<LeaderboardGroupBaseDTO> lgDTOs = new ArrayList<>();
-        if (event.getLeaderboardGroups() != null) {
-            for (LeaderboardGroupBase lgBase : event.getLeaderboardGroups()) {
-                lgDTOs.add(new LeaderboardGroupBaseDTO(lgBase.getId(), lgBase.getName(), lgBase.getDescription(), lgBase.hasOverallLeaderboard()));
+        final EventBaseDTO eventDTO;
+        if (event == null) {
+            eventDTO = null;
+        } else {
+            List<LeaderboardGroupBaseDTO> lgDTOs = new ArrayList<>();
+            if (event.getLeaderboardGroups() != null) {
+                for (LeaderboardGroupBase lgBase : event.getLeaderboardGroups()) {
+                    lgDTOs.add(convertToLeaderboardGroupBaseDTO(lgBase));
+                }
             }
+            eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
+            copyEventBaseFieldToDTO(event, eventDTO);
         }
-        EventBaseDTO eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
-        copyEventBaseFieldToDTO(event, eventDTO);
         return eventDTO;
+    }
+
+    private LeaderboardGroupBaseDTO convertToLeaderboardGroupBaseDTO(LeaderboardGroupBase leaderboardGroupBase) {
+        return new LeaderboardGroupBaseDTO(leaderboardGroupBase.getId(), leaderboardGroupBase.getName(),
+                leaderboardGroupBase.getDescription(), leaderboardGroupBase.hasOverallLeaderboard());
     }
     
     private void copyEventBaseFieldToDTO(EventBase event, EventBaseDTO eventDTO) {
@@ -4624,5 +4639,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     numFixes, from, to));
         }
         return result;
+    }
+
+    @Override
+    public Iterable<String> getSearchServerNames() {
+        List<String> result = new ArrayList<>();
+        for (RemoteSailingServerReference remoteServerRef : getService().getLiveRemoteServerReferences()) {
+            result.add(remoteServerRef.getName());
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<LeaderboardSearchResultDTO> search(String serverNameOrNullForMain, KeywordQuery query) throws MalformedURLException {
+        final List<LeaderboardSearchResultDTO> result = new ArrayList<>();
+        if (serverNameOrNullForMain == null) {
+            Result<LeaderboardSearchResult> searchResult = getService().search(query);
+            for (LeaderboardSearchResult hit : searchResult.getHits()) {
+                result.add(createLeaderboardSearchResultDTO(hit, getRequestBaseURL()));
+            }
+        } else {
+            RemoteSailingServerReference remoteRef = getService().getRemoteServerReferenceByName(serverNameOrNullForMain);
+            for (LeaderboardSearchResultBase hit : getService().searchRemotely(serverNameOrNullForMain, query).getHits()) {
+                result.add(createLeaderboardSearchResultDTO(hit, remoteRef.getURL()));
+            }
+        }
+        return result;
+    }
+
+    private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL) {
+        ArrayList<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
+        for (LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
+            LeaderboardGroupBaseDTO leaderboardGroupDTO = convertToLeaderboardGroupBaseDTO(lgb);
+            leaderboardGroups.add(leaderboardGroupDTO);
+        }
+        return new LeaderboardSearchResultDTO(baseURL.toString(), leaderboardSearchResult.getLeaderboard().getName(),
+                leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
+                leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
+                leaderboardGroups);
     }
 }

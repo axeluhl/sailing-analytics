@@ -1,14 +1,19 @@
 package com.sap.sse.common.search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.sap.sse.common.Util;
 
-public class KeywordQuery implements Query {
-    private final Iterable<String> keywords;
+public class KeywordQuery implements Query, Serializable {
+    private static final long serialVersionUID = -4214703751947494064L;
+    
+    private Iterable<String> keywords;
 
+    KeywordQuery() {} // for GWT RPC serialization
+    
     public KeywordQuery(String... keywords) {
         this.keywords = trim(Arrays.asList(keywords));
     }
@@ -32,6 +37,16 @@ public class KeywordQuery implements Query {
     
     @Override
     public String toString() {
-        return ""+keywords;
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String keyword : keywords) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(' ');
+            }
+            sb.append(keyword);
+        }
+        return sb.toString();
     }
 }
