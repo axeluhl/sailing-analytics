@@ -326,5 +326,28 @@ public class WindTest {
         final Bearing averageAtP2Bearing = averageAtP2.getObject().getBearing();
         assertTrue(Math.abs(averageAtP2Bearing.getDifferenceTo(w2.getObject().getBearing()).getDegrees()) <
                 Math.abs(averageAtP2Bearing.getDifferenceTo(w1.getObject().getBearing()).getDegrees()));
+        // expect the arithmetic average at the point which is in the middle between the two positions
+        Position middleBetweenP1AndP2 = p1.translateGreatCircle(p1.getBearingGreatCircle(p2), p1.getDistance(p2).scale(.5));
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtMiddleBetweenP1AndP2 = averager.getAverage(fixes,
+                new Pair<Position, TimePoint>(middleBetweenP1AndP2, now));
+        assertEquals(15, averageAtMiddleBetweenP1AndP2.getObject().getKnots(), 0.00001);
+        assertEquals(45, averageAtMiddleBetweenP1AndP2.getObject().getBearing().getDegrees(), 0.00001);
+        
+        // now try again with distance 2km and demand the difference between the position-dependent readings to be greater
+        final Position p3 = p1.translateGreatCircle(new DegreeBearingImpl(0), new MeterDistance(2000));
+        WindWithConfidence<Pair<Position, TimePoint>> w3 = new WindWithConfidenceImpl<>(
+                new WindImpl(p3, now, new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0))),
+                /* confidence */ 1.0, new Pair<Position, TimePoint>(p3, now), /* useSpeed */ true);
+        List<WindWithConfidence<Pair<Position, TimePoint>>> fixesFurtherApart = new ArrayList<>();
+        fixesFurtherApart.add(w1);
+        fixesFurtherApart.add(w3);
+        WindWithConfidence<Pair<Position, TimePoint>> averageFurtherApartAtP1 = averager.getAverage(fixesFurtherApart, new Pair<Position, TimePoint>(p1, now));
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtP3 = averager.getAverage(fixesFurtherApart, new Pair<Position, TimePoint>(p3, now));
+        assertTrue(averageFurtherApartAtP1.getObject().getKnots() < averageAtP1.getObject().getKnots());
+        assertTrue(averageAtP3.getObject().getKnots() > averageAtP2.getObject().getKnots());
+        assertTrue(Math.abs(averageFurtherApartAtP1.getObject().getBearing().getDifferenceTo(w1.getObject().getBearing()).getDegrees())
+                < Math.abs(averageAtP1.getObject().getBearing().getDifferenceTo(w1.getObject().getBearing()).getDegrees()));
+        assertTrue(Math.abs(averageAtP3.getObject().getBearing().getDifferenceTo(w3.getObject().getBearing()).getDegrees())
+                < Math.abs(averageAtP2.getObject().getBearing().getDifferenceTo(w3.getObject().getBearing()).getDegrees()));
     }
 }
