@@ -9,8 +9,9 @@ import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
-import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
+import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivity;
+import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
@@ -46,12 +47,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public TabletAndDesktopSponsoringView createSponsoringView(SponsoringActivity activity) {
+    public SponsoringView createSponsoringView(SponsoringActivity activity) {
         return new TabletAndDesktopSponsoringView();
     }
 
     @Override
-    public TabletAndDesktopSolutionsView createSolutionsView(SolutionsActivity activity) {
+    public SolutionsView createSolutionsView(SolutionsActivity activity) {
         // TODO Auto-generated method stub
         return null;
     }

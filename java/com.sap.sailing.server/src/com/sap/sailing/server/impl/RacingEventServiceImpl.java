@@ -1,12 +1,16 @@
 package com.sap.sailing.server.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +32,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -39,6 +47,8 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -133,8 +143,12 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -174,6 +188,7 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.common.search.ResultImpl;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -880,6 +895,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     	remoteSailingServerSet.add(result);
     	mongoObjectFactory.storeSailingServer(result);
     	return result;
+    }
+    
+    @Override
+    public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
+        return remoteSailingServerSet.getLiveRemoteServerReferences();
+    }
+
+    @Override
+    public RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName) {
+        return remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
     }
 
     @Override
@@ -2594,6 +2619,53 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     @Override
     public Result<LeaderboardSearchResult> search(KeywordQuery query) {
-        return new RegattaByKeywordSearchService().search(this, query);
+        long start = System.currentTimeMillis();
+        logger.info("Searching local server for "+query);
+        Result<LeaderboardSearchResult> result = new RegattaByKeywordSearchService().search(this, query);
+        logger.fine("Search for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
+        return result;
+    }
+    
+    @Override
+    public Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query) {
+        long start = System.currentTimeMillis();
+        ResultImpl<LeaderboardSearchResultBase> result = null;
+        RemoteSailingServerReference remoteRef = remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
+        if (remoteRef == null) {
+            result = null;
+        } else {
+            BufferedReader bufferedReader = null;
+            try {
+                try {
+                    final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="+URLEncoder.encode(query.toString(), "UTF-8"));
+                    logger.info("Searching remote server "+remoteRef+" for "+query);
+                    URLConnection urlConnection = eventsURL.openConnection();
+                    urlConnection.connect();
+                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    JSONParser parser = new JSONParser();
+                    Object eventsAsObject = parser.parse(bufferedReader);
+                    final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+                    LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
+                            new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(
+                                    DomainFactory.INSTANCE)), leaderboardGroupBaseJsonDeserializer),
+                            leaderboardGroupBaseJsonDeserializer);
+                    result = new ResultImpl<LeaderboardSearchResultBase>(query, new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());
+                    JSONArray hitsAsJsonArray = (JSONArray) eventsAsObject;
+                    for (Object hitAsObject : hitsAsJsonArray) {
+                        JSONObject hitAsJson = (JSONObject) hitAsObject;
+                        LeaderboardSearchResultBase hit = deserializer.deserialize(hitAsJson);
+                        result.addHit(hit);
+                    }
+                } finally {
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                }
+            } catch (IOException | ParseException e) {
+                logger.log(Level.INFO, "Exception trying to fetch events from remote server "+remoteRef+": "+e.getMessage(), e);
+            }
+        }
+        logger.fine("Remote search on "+remoteRef+" for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
+        return result;
     }
 }

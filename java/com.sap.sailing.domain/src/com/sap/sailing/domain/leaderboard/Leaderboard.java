@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
@@ -25,7 +26,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 
 /**
@@ -43,7 +43,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard extends Named {
+public interface Leaderboard extends LeaderboardBase {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."
@@ -299,12 +299,6 @@ public interface Leaderboard extends Named {
     Competitor getCompetitorByName(String competitorName);
     
     void setDisplayName(Competitor competitor, String displayName);
-
-    /**
-     * If a display name for the leaderboard has been defined,
-     * this method returns it; otherwise, <code>null</code> is returned.
-     */
-    String getDisplayName();
 
     void setDisplayName(String displayName);
 
