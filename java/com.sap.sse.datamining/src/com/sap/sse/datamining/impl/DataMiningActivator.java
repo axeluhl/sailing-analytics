@@ -121,5 +121,9 @@ public class DataMiningActivator implements BundleActivator {
     public static DataMiningStringMessages getStringMessages() {
         return stringMessages;
     }
+    
+    public static BundleContext getContext() {
+        return context;
+    }
 
 }
