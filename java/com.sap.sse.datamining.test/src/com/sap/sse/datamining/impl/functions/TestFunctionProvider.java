@@ -76,7 +76,7 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionForDTO() throws NoSuchMethodException, SecurityException {
-        Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
+        Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
         Function<?> getRegatta = FunctionFactory.createMethodWrappingFunction(getRegattaMethod);
         Method getNameMethod = Test_Named.class.getMethod("getName", new Class<?>[0]);
         Function<?> getName = FunctionFactory.createMethodWrappingFunction(getNameMethod);
