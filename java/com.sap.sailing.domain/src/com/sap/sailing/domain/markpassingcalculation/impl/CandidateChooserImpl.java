@@ -147,12 +147,13 @@ public class CandidateChooserImpl implements CandidateChooser {
     @Override
     public void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint) {
         suppressedPassings.put(c, firstSuppressedWaypoint);
+        findShortestPath(c);
     }
 
     @Override
     public void stopSuppressingMarkPassings(Competitor c) {
         suppressedPassings.remove(c);
-
+        findShortestPath(c);
     }
 
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
@@ -218,7 +219,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         Integer oneBasedIndexOfSuppressedWaypoint = suppressedWaypoint != null ? race.getRace().getCourse()
                 .getIndexOfWaypoint(suppressedWaypoint) + 1 : end.getOneBasedIndexOfWaypoint();
         while (endOfFixedInterval != null) {
-            if (oneBasedIndexOfSuppressedWaypoint >= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
+            if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
                 endOfFixedInterval = end;
             }
             NavigableSet<Util.Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {

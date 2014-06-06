@@ -37,7 +37,7 @@ import com.sap.sse.common.Util;
 public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
     @Test
-    public void testNormalPassing() {
+    public void testNormalPassingAndSuppressingPassings() {
         // Normal Passing of Single mark
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(
                 40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
@@ -49,24 +49,36 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
                 50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(190)));
         race.recordFix(ron, fix1);
         race.recordFix(ron, fix2);
-        CandidateFinderImpl finder = new CandidateFinderImpl(race);
+        CandidateFinder finder = new CandidateFinderImpl(race);
+        CandidateChooser chooser = new CandidateChooserImpl(race);
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         fixes.add(fix1);
         fixes.add(fix2);
         Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(ron, fixes);
         assertEquals(0, Util.size(candidateDeltas.getA()));
+        chooser.calculateMarkPassDeltas(ron, candidateDeltas.getA(), candidateDeltas.getB());
 
         race.recordFix(ron, fix3);
         fixes.clear();
         fixes.add(fix3);
         candidateDeltas = finder.getCandidateDeltas(ron, fixes);
         assertEquals(2, Util.size(candidateDeltas.getA())); // CTE candidate
+        chooser.calculateMarkPassDeltas(ron, candidateDeltas.getA(), candidateDeltas.getB());
+
 
         race.recordFix(ron, fix4);
         fixes.clear();
         fixes.add(fix4);
         candidateDeltas = finder.getCandidateDeltas(ron, fixes);
         assertEquals(2, Util.size(candidateDeltas.getA())); // Distance Candidate
+        chooser.calculateMarkPassDeltas(ron, candidateDeltas.getA(), candidateDeltas.getB());
+        
+        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(ron);
+        assertEquals(1, markPassings.size());
+        chooser.suppressMarkPassings(ron, markPassings.first().getWaypoint());
+        NavigableSet<MarkPassing> markPassingsAfterSupressing = race.getMarkPassings(ron);
+        assertEquals(0, markPassingsAfterSupressing.size());
+
     }
 
     @Test
@@ -290,4 +302,5 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         assertEquals(Util.size(allCansAfterRemoving.getB()), 0);
         assertEquals(Util.size(allCansAfterRemoving.getA()), 0);
     }
+    
 }
