@@ -54,7 +54,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     private Thread ioThread;
     private DataController controller;
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    //@Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();
