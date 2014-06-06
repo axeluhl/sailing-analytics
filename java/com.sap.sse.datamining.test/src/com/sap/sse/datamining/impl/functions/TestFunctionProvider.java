@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -19,13 +20,14 @@ import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
-import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
-import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
-import com.sap.sse.datamining.test.functions.test_classes.MarkedContainer;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContextImpl;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
+import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContextImpl;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 
@@ -33,14 +35,17 @@ public class TestFunctionProvider {
     
     private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
+    private ExpectedFunctionRegistryUtil functionRegistryUtil;
     private FunctionRegistry functionRegistry;
     
     @Before
-    public void initializeFunctionRegistry() {
+    public void initializeFunctionRegistry() throws NoSuchMethodException, SecurityException {
+        functionRegistryUtil = new ExpectedFunctionRegistryUtil();
         functionRegistry = new SimpleFunctionRegistry();
         
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(Test_HasLegContext.class);
+        internalClassesToScan.add(Test_HasRaceContext.class);
         functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Class<?>> externalClassesToScan = new HashSet<>();
@@ -52,31 +57,31 @@ public class TestFunctionProvider {
     public void testGetDimensionsForType() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         
-        Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
-        Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContext.class));
-        assertThat(providedDimensions, is(expectedDimensions));
-        
-        providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContextImpl.class));
-        assertThat(providedDimensions, is(expectedDimensions));
+        Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
+        assertThat(functionProvider.getDimensionsFor(Test_HasRaceContext.class), is(expectedDimensions));
+        assertThat(functionProvider.getDimensionsFor(Test_HasRaceContextImpl.class), is(expectedDimensions));
+
+        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
+        assertThat(functionProvider.getDimensionsFor(Test_HasLegContext.class), is(expectedDimensions));
+        assertThat(functionProvider.getDimensionsFor(Test_HasLegContextImpl.class), is(expectedDimensions));
     }
     
     @Test
-    public void testGetFunctionsForType() {
+    public void testGetStatisticsForType() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        
-        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        Collection<Function<?>> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
-        assertThat(providedFunctions, is(expectedFunctions));
-        
-        expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
-        providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
-        assertThat(providedFunctions, is(expectedFunctions));
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegContext.class);
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegContext.class), is(expectedFunctions));
+        assertThat(functionProvider.getStatisticsFor(Test_HasLegContextImpl.class), is(expectedFunctions));
     }
     
     @Test
-    public void testGetFunctionForDTO() {
-        Method getRegattaNameMethod = FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName");
-        Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
+    public void testGetFunctionForDTO() throws NoSuchMethodException, SecurityException {
+        Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
+        Function<?> getRegatta = FunctionFactory.createMethodWrappingFunction(getRegattaMethod);
+        Method getNameMethod = Test_Named.class.getMethod("getName", new Class<?>[0]);
+        Function<?> getName = FunctionFactory.createMethodWrappingFunction(getNameMethod);
+        Function<Object> getRegattaName = FunctionFactory.createCompoundFunction(Arrays.asList(getRegatta, getName));
+        
         FunctionDTO getRegattaNameDTO = FunctionDTOFactory.createFunctionDTO(getRegattaName, Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
@@ -99,16 +104,6 @@ public class TestFunctionProvider {
     public void testGetFunctionForNullDTO() {
         FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
         assertThat(functionProvider.getFunctionForDTO(null), is(nullValue()));
-    }
-    
-    @Test
-    public void testGetTransitiveDimension() throws ClassCastException, NoSuchMethodException, SecurityException {
-        FunctionProvider functionProvider = new RegistryFunctionProvider(functionRegistry);
-        
-        Collection<Function<?>> expectedDimensions = new HashSet<>();
-        expectedDimensions.add(FunctionFactory.createMethodWrappingFunction(ContainerElement.class.getMethod("getName",
-                new Class<?>[0])));
-        assertThat(functionProvider.getTransitiveDimensionsFor(MarkedContainer.class, 1), is(expectedDimensions));
     }
 
 }

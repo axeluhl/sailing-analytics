@@ -40,6 +40,10 @@ public class FunctionFactory {
     public static <ReturnType> MethodWrappingFunction<ReturnType> createMethodWrappingFunction(Method method) throws ClassCastException {
         return new MethodWrappingFunction<ReturnType>(method, (Class<ReturnType>) method.getReturnType());
     }
+    
+    public static <ReturnType> Function<ReturnType> createCompoundFunction(List<Function<?>> functions) {
+        return createCompoundFunction(null, functions);
+    }
 
     /**
      * Creates a {@link CompoundFunction} for the given functions.<br>

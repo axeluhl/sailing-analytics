@@ -80,8 +80,8 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
         }
         
         if (bestMessage == null) {
-            throw new MissingResourceException("Can't find resource for bundle " + this.getClass().getName() + ", key "
-                    + messageKey, this.getClass().getName(), messageKey);
+            throw new MissingResourceException("Can't find message for bundle " + this.getClass().getName() + ", key '"
+                    + messageKey + "'", this.getClass().getName(), messageKey);
         }
         return bestMessage;
     }

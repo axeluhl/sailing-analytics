@@ -3,8 +3,11 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.datamining.factories.FunctionFactory;
@@ -16,14 +19,14 @@ import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
     
-    private final Set<Function<?>> statistics;
-    private final Set<Function<?>> dimensions;
-    private final Set<Function<?>> externalFunctions;
+    private final Map<Class<?>, Set<Function<?>>> statistics;
+    private final Map<Class<?>, Set<Function<?>>> dimensions;
+    private final Map<Class<?>, Set<Function<?>>> externalFunctions;
 
     public SimpleFunctionRegistry() {
-        statistics = new HashSet<>();
-        dimensions = new HashSet<>();
-        externalFunctions = new HashSet<>();
+        statistics = new HashMap<>();
+        dimensions = new HashMap<>();
+        externalFunctions = new HashMap<>();
     }
     
     @Override
@@ -57,10 +60,26 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         }
         
         if (function.isDimension()) {
-            dimensions.add(function);
+            addDimension(function);
         } else {
-            statistics.add(function);
+            addStatistic(function);
         }
+    }
+
+    private void addDimension(Function<?> dimension) {
+        Class<?> declaringType = dimension.getDeclaringType();
+        if (!dimensions.containsKey(declaringType)) {
+            dimensions.put(declaringType, new HashSet<Function<?>>());
+        }
+        dimensions.get(declaringType).add(dimension);
+    }
+
+    private void addStatistic(Function<?> statistic) {
+        Class<?> declaringType = statistic.getDeclaringType();
+        if (!statistics.containsKey(declaringType)) {
+            statistics.put(declaringType, new HashSet<Function<?>>());
+        }
+        statistics.get(declaringType).add(statistic);
     }
 
     private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
@@ -93,12 +112,20 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             for (Method method : externalClass.getMethods()) {
                 if (isValidExternalFunction(method)) {
                     Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
-                    externalFunctions.add(function);
+                    addExternalFunction(function);
                 }
             }
         }
     }
     
+    private void addExternalFunction(Function<?> function) {
+        Class<?> declaringType = function.getDeclaringType();
+        if (!externalFunctions.containsKey(declaringType)) {
+            externalFunctions.put(declaringType, new HashSet<Function<?>>());
+        }
+        externalFunctions.get(declaringType).add(function);
+    }
+
     private boolean isValidExternalFunction(Method method) {
         return !method.getReturnType().equals(Void.TYPE) && !method.getDeclaringClass().equals(Object.class);
     }
@@ -106,25 +133,57 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     @Override
     public Collection<Function<?>> getAllFunctions() {
         Collection<Function<?>> allFunctions = new HashSet<>();
-        allFunctions.addAll(statistics);
-        allFunctions.addAll(dimensions);
-        allFunctions.addAll(externalFunctions);
+        allFunctions.addAll(getStatistics());
+        allFunctions.addAll(getDimensions());
+        allFunctions.addAll(getExternalFunctions());
+        return allFunctions;
+    }
+
+    @Override
+    public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
+        Collection<Function<?>> allFunctions = new HashSet<>();
+        allFunctions.addAll(getStatisticsOf(declaringType));
+        allFunctions.addAll(getDimensionsOf(declaringType));
+        allFunctions.addAll(getExternalFunctionsOf(declaringType));
         return allFunctions;
     }
 
     @Override
     public Collection<Function<?>> getStatistics() {
-        return statistics;
+        return asSet(statistics);
+    }
+    
+    @Override
+    public Collection<Function<?>> getStatisticsOf(Class<?> declaringType) {
+        return statistics.get(declaringType);
     }
     
     @Override
     public Collection<Function<?>> getDimensions() {
-        return dimensions;
+        return asSet(dimensions);
+    }
+    
+    @Override
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringType) {
+        return dimensions.get(declaringType);
     }
     
     @Override
     public Collection<Function<?>> getExternalFunctions() {
-        return externalFunctions;
+        return asSet(externalFunctions);
+    }
+
+    @Override
+    public Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType) {
+        return externalFunctions.get(declaringType);
+    }
+    
+    private Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
+        Collection<Function<?>> set = new HashSet<>();
+        for (Entry<?, Set<Function<?>>> entry : map.entrySet()) {
+            set.addAll(entry.getValue());
+        }
+        return set;
     }
 
 }
