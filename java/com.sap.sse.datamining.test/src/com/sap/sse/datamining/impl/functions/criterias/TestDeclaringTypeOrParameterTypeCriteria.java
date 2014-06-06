@@ -14,7 +14,7 @@ import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
-import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestDeclaringTypeOrParameterTypeCriteria {
@@ -31,7 +31,7 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
         getRaceNameLengthValue = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
         getRegattaNameDimension = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         
-        libraryFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo"));
+        libraryFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Test_ExternalLibraryClass.class, "foo"));
     }
 
     @Test

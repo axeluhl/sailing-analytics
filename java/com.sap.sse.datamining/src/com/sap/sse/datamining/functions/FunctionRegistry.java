@@ -10,5 +10,6 @@ public interface FunctionRegistry {
     public Collection<Function<?>> getAllFunctions();
     public Collection<Function<?>> getStatistics();
     public Collection<Function<?>> getDimensions();
+    public Collection<Function<?>> getExternalFunctions();
 
 }

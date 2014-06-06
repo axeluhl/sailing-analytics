@@ -5,7 +5,7 @@ package com.sap.sse.datamining.test.functions.test_classes;
  * The tests will fail, because they are reflected via constant strings.
  */
 
-public class ExternalLibraryClass {
+public class Test_ExternalLibraryClass {
     
     //This method shouldn't be retrieved, because it has no return type
     public void fooVoid() {

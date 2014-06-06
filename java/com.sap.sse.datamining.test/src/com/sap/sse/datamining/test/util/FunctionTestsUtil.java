@@ -13,7 +13,7 @@ import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.functions.test_classes.ExtendingInterface;
-import com.sap.sse.datamining.test.functions.test_classes.ExternalLibraryClass;
+import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
 
 public class FunctionTestsUtil extends ConcurrencyTestsUtil {
@@ -36,7 +36,7 @@ public class FunctionTestsUtil extends ConcurrencyTestsUtil {
     }
 
     public static Method getMethodFromExternalLibraryClass(String name) {
-        return getMethodFromClass(ExternalLibraryClass.class, name);
+        return getMethodFromClass(Test_ExternalLibraryClass.class, name);
     }
 
     public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {

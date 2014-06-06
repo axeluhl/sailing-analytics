@@ -18,10 +18,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     
     private final Set<Function<?>> statistics;
     private final Set<Function<?>> dimensions;
+    private final Set<Function<?>> externalFunctions;
 
     public SimpleFunctionRegistry() {
         statistics = new HashSet<>();
         dimensions = new HashSet<>();
+        externalFunctions = new HashSet<>();
     }
     
     @Override
@@ -87,14 +89,26 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     @Override
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
-        // TODO Not yet implemented
+        for (Class<?> externalClass : externalClassesToScan) {
+            for (Method method : externalClass.getMethods()) {
+                if (isValidExternalFunction(method)) {
+                    Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+                    externalFunctions.add(function);
+                }
+            }
+        }
     }
     
+    private boolean isValidExternalFunction(Method method) {
+        return !method.getReturnType().equals(Void.TYPE) && !method.getDeclaringClass().equals(Object.class);
+    }
+
     @Override
     public Collection<Function<?>> getAllFunctions() {
         Collection<Function<?>> allFunctions = new HashSet<>();
         allFunctions.addAll(statistics);
         allFunctions.addAll(dimensions);
+        allFunctions.addAll(externalFunctions);
         return allFunctions;
     }
 
@@ -106,6 +120,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     @Override
     public Collection<Function<?>> getDimensions() {
         return dimensions;
+    }
+    
+    @Override
+    public Collection<Function<?>> getExternalFunctions() {
+        return externalFunctions;
     }
 
 }

@@ -21,29 +21,38 @@ import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
 import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegContext;
 import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
+import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
 
 
 public class TestSimpleFunctionRegistryRegistrations {
     
     private Set<Class<?>> internalClassesToScan;
+    private HashSet<Class<?>> externalClassesToScan;
     
     @Before
     public void initializeClassesToScan() {
         internalClassesToScan = new HashSet<>();
         internalClassesToScan.add(Test_HasLegContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
+        
+        externalClassesToScan = new HashSet<>();
+        externalClassesToScan.add(Test_ExternalLibraryClass.class);
     }
     
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = createExpectedDimensions();
         assertThat(registry.getDimensions(), is(expectedDimensions));
         
         Collection<Function<?>> expectedStatistics = createExpectedStatistics();
         assertThat(registry.getStatistics(), is(expectedStatistics));
+        
+        Collection<Function<?>> expectedExternalFunctions = createExpectedExternalFunctions();
+        assertThat(registry.getExternalFunctions(), is(expectedExternalFunctions));
     }
 
     private Collection<Function<?>> createExpectedDimensions() throws NoSuchMethodException, SecurityException {
@@ -95,6 +104,15 @@ public class TestSimpleFunctionRegistryRegistrations {
         Collection<Function<?>> statistics = new HashSet<>();
         statistics.add(FunctionFactory.createCompoundFunction(null, Arrays.asList(getLeg, getDistanceTraveled)));
         return statistics;
+    }
+
+    private Collection<Function<?>> createExpectedExternalFunctions() throws NoSuchMethodException, SecurityException {
+        Method fooMethod = Test_ExternalLibraryClass.class.getMethod("foo", new Class<?>[0]);
+        Function<?> foo = FunctionFactory.createMethodWrappingFunction(fooMethod);
+        
+        Collection<Function<?>> externalFunctions = new HashSet<>();
+        externalFunctions.add(foo);
+        return externalFunctions;
     }
 
 }
