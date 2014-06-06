@@ -41,14 +41,14 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<display-name>OAuth Login Service</display-name>
-		<servlet-name>OAuthLogintService</servlet-name>
-		<servlet-class>com.sap.sse.security.ui.oauth.server.OAuthLoginServiceImpl
+		<display-name>Redirect Servlet</display-name>
+		<servlet-name>RedirectServlet</servlet-name>
+		<servlet-class>com.sap.sse.security.ui.servlet.RedirectServlet
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>OAuthLogintService</servlet-name>
-		<url-pattern>/service/oauthlogin</url-pattern>
+		<servlet-name>RedirectServlet</servlet-name>
+		<url-pattern>/redirect</url-pattern>
 	</servlet-mapping>
 
 	<!-- remote logging -->

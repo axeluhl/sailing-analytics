@@ -6,7 +6,7 @@ public interface Account {
     public AccountType getAccountType();
     
     public enum AccountType {
-        USERNAME_PASSWORD("Username and Password"), SOCIAL_FACEBOOK("Facebook");
+        USERNAME_PASSWORD("Username and Password"), SOCIAL_USER("Social User");
         
         private String name;
 

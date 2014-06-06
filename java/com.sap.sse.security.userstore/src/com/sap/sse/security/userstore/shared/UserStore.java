@@ -13,7 +13,7 @@ public interface UserStore {
     
     User getUserByName(String name);
     
-    User createSimpleUser(String name, String email, String password) throws UserManagementException;
+    User createUser(String name, String email, Account... accounts);
     
     Set<String> getRolesFromUser(String name) throws UserManagementException;
     

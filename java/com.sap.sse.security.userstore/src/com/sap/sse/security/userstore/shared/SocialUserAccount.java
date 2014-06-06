@@ -1,6 +1,5 @@
-package com.sap.sse.security;
+package com.sap.sse.security.userstore.shared;
 
-import java.io.Serializable;
 
 /**
  * The object we send back and forth between client and server.
@@ -8,9 +7,8 @@ import java.io.Serializable;
  * object.
  * @author muquit@muquit.com
  */
-public class SocialUser implements Serializable
+public class SocialUserAccount implements Account
 {
-    private static final long serialVersionUID=1011L;
     private String sessionId;
     
     private String email;
@@ -275,6 +273,10 @@ public class SocialUser implements Serializable
     {
         this.headline=headline;
     }
-    /* linkedin */ 
+    
+    @Override
+    public AccountType getAccountType() {
+        return AccountType.SOCIAL_USER;
+    } 
 }
 

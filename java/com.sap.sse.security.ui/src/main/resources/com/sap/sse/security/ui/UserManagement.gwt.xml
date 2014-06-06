@@ -42,4 +42,5 @@
   <source path='client'/>
   <source path='usermanagement'/>
   <source path='shared'/>
+  <source path='oauth'/>
 </module>

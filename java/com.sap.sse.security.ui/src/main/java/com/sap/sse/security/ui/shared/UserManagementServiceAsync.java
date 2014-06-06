@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 
 public interface UserManagementServiceAsync {
 
@@ -30,5 +31,13 @@ public interface UserManagementServiceAsync {
     void setSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
 
     void getSettingTypes(AsyncCallback<Map<String, String>> callback);
+    
+  //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
+
+    void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
+
+    void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
+
+    void getAccessToken(String sessionId, AsyncCallback<String> callback);
 
 }

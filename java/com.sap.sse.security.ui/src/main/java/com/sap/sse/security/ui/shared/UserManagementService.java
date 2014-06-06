@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.oauth.shared.OAuthException;
 
 public interface UserManagementService extends RemoteService {
 
@@ -30,4 +32,11 @@ public interface UserManagementService extends RemoteService {
     Map<String, String> getSettingTypes();
     
     void setSetting(String key, String clazz, String setting);
+    
+    
+    //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
+    
+    public String     getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
+    public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
+    public String     getAccessToken(String sessionId) throws OAuthException;
 }

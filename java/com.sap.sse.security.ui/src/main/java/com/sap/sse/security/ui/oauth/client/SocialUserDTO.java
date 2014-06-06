@@ -1,8 +1,7 @@
-package com.sap.sse.security.ui.oauth.client.model;
+package com.sap.sse.security.ui.oauth.client;
 
-import java.io.Serializable;
-
-import com.sap.sse.security.SocialUser;
+import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.security.ui.shared.AccountDTO;
 
 /**
  * The object we send back and forth between client and server.
@@ -10,9 +9,8 @@ import com.sap.sse.security.SocialUser;
  * object.
  * @author muquit@muquit.com
  */
-public class SocialUserDTO implements Serializable
+public class SocialUserDTO extends AccountDTO implements IsSerializable
 {
-    private static final long serialVersionUID=1011L;
     private String sessionId;
     
     private String email;

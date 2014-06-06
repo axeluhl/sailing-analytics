@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.mgt.SecurityManager;
 
+import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 
@@ -23,6 +24,7 @@ public interface SecurityService {
     void logout();
     
     User createSimpleUser(String name, String email, String password) throws UserManagementException;
+    User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException;
     
     void deleteUser(String username) throws UserManagementException;
     

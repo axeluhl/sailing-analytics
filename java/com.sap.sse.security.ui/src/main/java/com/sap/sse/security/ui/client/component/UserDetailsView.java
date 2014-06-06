@@ -54,7 +54,7 @@ public class UserDetailsView extends FlowPanel {
         Label name = new Label("Name: " + user.getName());
         fp.add(name);
         
-        for (AccountDTO a : user.getAccounts().values()){
+        for (AccountDTO a : user.getAccounts()){
             DecoratorPanel accountPanelDecorator = new DecoratorPanel();
             FlowPanel accountPanelContent = new FlowPanel();
             accountPanelDecorator.setWidget(accountPanelContent);

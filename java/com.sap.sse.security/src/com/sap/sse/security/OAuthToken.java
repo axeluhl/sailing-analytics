@@ -4,7 +4,8 @@ import org.apache.shiro.authc.AuthenticationToken;
 
 public class OAuthToken implements AuthenticationToken {
 	
-	private Credential credential;
+    private static final long serialVersionUID = -1156345860394792503L;
+    private Credential credential;
 	private String principal;
 	
 	public OAuthToken(Credential credential, String principal) {

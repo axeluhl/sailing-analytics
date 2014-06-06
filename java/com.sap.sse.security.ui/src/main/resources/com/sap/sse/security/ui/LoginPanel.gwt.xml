@@ -39,4 +39,5 @@
   <source path='loginpanel'/>
   <source path='shared'/>
   <source path='client'/>
+  <source path='oauth'/>
 </module>

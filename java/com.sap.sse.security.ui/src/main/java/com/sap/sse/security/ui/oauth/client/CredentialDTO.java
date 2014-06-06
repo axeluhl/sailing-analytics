@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.oauth.client.model;
+package com.sap.sse.security.ui.oauth.client;
 
 import java.io.Serializable;
 

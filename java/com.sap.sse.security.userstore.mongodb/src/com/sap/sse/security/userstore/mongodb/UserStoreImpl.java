@@ -11,6 +11,7 @@ import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
+import com.sap.sse.security.userstore.shared.Account;
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
@@ -34,21 +35,6 @@ public class UserStoreImpl implements UserStore {
         for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
             users.put(u.getName(), u);
         }
-        if (users.isEmpty()){
-            try {
-                logger.info("Could not find any stored users. Creating default users.");
-                createSimpleUser("Ben", "Ben@sapsailing.com", "ben123");
-                addRoleForUser("Ben", "admin");
-                addRoleForUser("Ben", "moderator");
-                createSimpleUser("Peter", "Peter@sapsailing.com", "peter123");
-                addRoleForUser("Peter", "moderator");
-                createSimpleUser("Hans", "Hans@sapsailing.com", "hans123");
-                createSimpleUser("Hubert", "Hubert@sapsailing.com", "hubert123");
-                createSimpleUser("Franz", "Franz@sapsailing.com", "franz123");
-            } catch (UserManagementException e) {
-                e.printStackTrace();
-            }
-        }
     }
     
     private void initSocialSettingsIfEmpty() {
@@ -66,18 +52,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User createSimpleUser(String name, String email, String password)  throws UserManagementException {
-        if (users.get(name) != null){
-            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-        }
-        if (name == null || password == null || name.length() < 3 || password.length() < 5){
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-        }
-        RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        Object salt = rng.nextBytes();
-        String hashedPasswordBase64 = new Sha256Hash(password, salt, 1024).toBase64();
-        UsernamePasswordAccount upa = new UsernamePasswordAccount(name, hashedPasswordBase64, salt);
-        User user = new User(name, email, upa);
+    public User createUser(String name, String email, Account... accounts) {
+        User user = new User(name, email, accounts);
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
         users.put(name, user);
         return user;

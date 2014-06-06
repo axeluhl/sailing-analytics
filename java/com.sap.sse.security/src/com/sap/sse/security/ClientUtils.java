@@ -20,7 +20,7 @@ public class ClientUtils
     // Callback URL is registered with each OAuth Provider
     //private static final String APP_CALLBACK_URL              = "http://oauthdemo2012.com:8888/GWTOAuthLoginDemo.html";
     //http://127.0.0.1:8888/GWTOAuthLoginDemo.html?gwt.codesvr=127.0.0.1:9997&
-    private static final String APP_CALLBACK_URL                = "http://localhost:8888/security/ui/OAuthLogin.html?gwt.codesvr=127.0.0.1:9997";
+    private static final String APP_CALLBACK_URL                = "http://local.sapsailing.com:8888/security/ui/redirect?redirectTo=oauthlogin";
     
     
     private static final String FACEBOOK_PROTECTED_RESOURCE_URL  = "https://graph.facebook.com/me";

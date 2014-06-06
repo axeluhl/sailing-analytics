@@ -7,73 +7,89 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.security.ui.oauth.client.component.LoginScreen;
-import com.sap.sse.security.ui.oauth.client.model.CredentialDTO;
-import com.sap.sse.security.ui.oauth.client.model.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
-import com.sap.sse.security.ui.oauth.shared.OAuthLoginService;
-import com.sap.sse.security.ui.oauth.shared.OAuthLoginServiceAsync;
+import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserManagementService;
+import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class OAuthLoginEntryPoint implements EntryPoint {
 
 //    private static final Logger logger = Logger.getLogger(OAuthLoginEntryPoint.class.getName());
 
-    private final OAuthLoginServiceAsync oauthLoginService = GWT.create(OAuthLoginService.class);
+    private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
-    LoginScreen loginScreen = new LoginScreen();
+    private LoginScreen loginScreen = new LoginScreen();
+    private TextBox status = new TextBox();
 
     public void onModuleLoad() {
-        registerASyncService((ServiceDefTarget) oauthLoginService, "service/oauthlogin");
+        registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
         GWT.log("Loading app..");
         setupLoginScreenHandlers();
-        RootPanel.get().add(loginScreen);
+        FlowPanel fp = new FlowPanel();
+        fp.add(loginScreen);
+        fp.add(status);
+        RootPanel.get().add(fp);
         try {
             handleRedirect();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        updateLoginStatus();
-    }
-
-    public void updateLoginStatus() {
-        // if there is a client side session show, Logout link
-        // if (ClientUtils.alreadyLoggedIn())
-        // {
-        // //log("Already logged in..showing Logout anchor");
-        // showLogoutAnchor();
-        // }
-        // else
-        // {
-        // //log("Showing Login anchor..");
-        // showLoginAchor();
-        // }
-        updateLoginLabel();
-    }
-
-    private void updateLoginLabel() {
-        String name = ClientUtils.getUsernameFromCookie();
-        // String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
-        if (name != null) {
-            // String labelStr = "Welcome " + "<font color=\"#006600\">"+ authProviderName + "</font>" + " user " +
-            // "<font color=\"#006600\">" + name + "</font>";
-            // updateWelcomeLabel(labelStr);
-
-        } else {
-            // updateWelcomeLabel(WELCOME_STRING);
-        }
+        
     }
 
     private void handleRedirect() throws Exception {
         if (ClientUtils.redirected()) {
             if (!ClientUtils.alreadyLoggedIn()) {
+                status.setText("Trying to verify social user...");
                 verifySocialUser();
             }
+            else {
+                status.setText("Fetching user information...");
+                userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Could not get user information!");
+                        status.setText("Could not get user information!" + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(UserDTO result) {
+                        if (result == null){
+                            status.setText("Not logged in!");
+                        }
+                        else {
+                            status.setText("Logged in as:" + result.getName());
+                        }
+                    }
+                });
+            }
         } else {
-            // Window.alert("No redirection..");
+            userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Could not get user information!");
+                    status.setText("Could not get user information!" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(UserDTO result) {
+                    if (result == null){
+                        status.setText("Not logged in!");
+                    }
+                    else {
+                        status.setText("Logged in as:" + result.getName());
+                    }
+                }
+            });
         }
-        updateLoginStatus();
     }
 
     private void verifySocialUser() throws Exception {
@@ -81,7 +97,7 @@ public class OAuthLoginEntryPoint implements EntryPoint {
         final int authProvider = ClientUtils.getAuthProviderFromCookieAsInt();
         log("Verifying " + authProviderName + " user ...");
 
-        oauthLoginService.verifySocialUser(ClientUtils.getCredential(), new AsyncCallback<SocialUserDTO>() {
+        userManagementService.verifySocialUser(ClientUtils.getCredential(), new AsyncCallback<UserDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -89,27 +105,33 @@ public class OAuthLoginEntryPoint implements EntryPoint {
             }
 
             @Override
-            public void onSuccess(SocialUserDTO result) {
-                ClientUtils.saveSessionId(result.getSessionId());
+            public void onSuccess(UserDTO result) {
+                SocialUserDTO sua = null;
+                for (AccountDTO a : result.getAccounts()){
+                    if (a instanceof SocialUserDTO){
+                        sua = (SocialUserDTO) a;
+                    }
+                }
+//                ClientUtils.saveSessionId(sua.getSessionId());
 
                 String name = "";
                 if (result.getName() != null) {
-                    name = result.getName();
-                } else if (result.getNickname() != null) // yahoo
+                    name = sua.getName();
+                } else if (sua.getNickname() != null) // yahoo
                 {
-                    name = result.getNickname();
-                } else if (result.getFirstName() != null) // linkedin
+                    name = sua.getNickname();
+                } else if (sua.getFirstName() != null) // linkedin
                 {
-                    name = result.getFirstName();
-                    String lastName = result.getLastName();
+                    name = sua.getFirstName();
+                    String lastName = sua.getLastName();
                     if (lastName != null) {
                         name = name + " " + lastName;
                     }
                 }
 
-                log(authProviderName + " user '" + name + "' is verified!\n" + result.getJson());
+                log(authProviderName + " user '" + name + "' is verified!\n" + sua.getJson());
                 ClientUtils.saveUsername(name);
-                updateLoginStatus();
+                status.setText("Logged in as:" + sua.getName());
             }
         });
     }
@@ -234,7 +256,7 @@ public class OAuthLoginEntryPoint implements EntryPoint {
     }
 
     private void getAuthorizationUrl(final int authProvider) {
-        String authProviderName = ClientUtils.getAuthProviderName(authProvider);
+//        String authProviderName = ClientUtils.getAuthProviderName(authProvider);
         final String callbackUrl = ClientUtils.getCallbackUrl();
         GWT.log("Getting authorization url");
 
@@ -242,7 +264,7 @@ public class OAuthLoginEntryPoint implements EntryPoint {
         credential.setRedirectUrl(callbackUrl);
         credential.setAuthProvider(authProvider);
         
-        oauthLoginService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
+        userManagementService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {

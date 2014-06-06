@@ -14,6 +14,14 @@ public class EntryPointLinkFactory {
     public static String createLoginLink(Map<String, String> parameters) {
         return createEntryPointLink("/security/ui/Login.html", parameters);
     }
+    
+    public static String createOAuthLink(Map<String, String> parameters) {
+        return createEntryPointLink("/security/ui/OAuthLogin.html", parameters);
+    }
+    
+    public static String createUserManagementLink(Map<String, String> parameters) {
+        return createEntryPointLink("/security/ui/UserManagement.html", parameters);
+    }
 
     private static String createEntryPointLink(String baseLink, Map<String, String> parameters) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");

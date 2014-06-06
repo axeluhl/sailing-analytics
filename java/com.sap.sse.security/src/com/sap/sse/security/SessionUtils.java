@@ -105,25 +105,20 @@ public class SessionUtils {
         return (Integer) session.getAttribute(SESSION_AUTH_PROVIDER);
     }
     
-    public static void safeSocialUser(SocialUser user) {
+    public static void saveUsername(String username) {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
             return;
         }
-        session.setAttribute(SOCIAL_USER, user);
+        session.setAttribute(SOCIAL_USER, username);
     }
 
-    public static SocialUser loadSocialUser() {
+    public static String loadUsername() {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
             return null;
         }
-        SocialUser user = (SocialUser) session.getAttribute(SOCIAL_USER);
-        if (user == null) {
-            user = new SocialUser();
-            safeSocialUser(user);
-        }
-        return user;
+        return (String) session.getAttribute(SOCIAL_USER);
     }
     
     public static void saveSessionIdToSession(String sessionId) throws AuthenticationException

@@ -38,8 +38,14 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+
+
+
 // GWT has similar class. 
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
+import com.sap.sse.security.userstore.shared.SocialUserAccount;
+import com.sap.sse.security.userstore.shared.User;
+import com.sap.sse.security.userstore.shared.UserManagementException;
 
 public class OAuthRealm extends AuthorizingRealm {
 
@@ -197,37 +203,44 @@ public class OAuthRealm extends AuthorizingRealm {
         // must save authProvider to session
         SessionUtils.saveAuthProviderToSession(authProvider);
 
-        SocialUser socialUser = null;
-        if (authProvider != ClientUtils.DEFAULT) {
-            // must save acess token to session
-            SessionUtils.saveAccessTokenToSession(accessToken);
+        SocialUserAccount socialUser = null;
+        
+        // must save acess token to session
+        SessionUtils.saveAccessTokenToSession(accessToken);
 
-            // must save the protected resource url to session
-            SessionUtils.saveProtectedResourceUrlToSession(protectedResourceUrl);
+        // must save the protected resource url to session
+        SessionUtils.saveProtectedResourceUrlToSession(protectedResourceUrl);
 
-            // now request protected resource
-            logger.info("Getting protected resource");
-            logger.info("Protected resource url: " + protectedResourceUrl);
-            try {
-                OAuthRequest request = new OAuthRequest(Verb.GET, protectedResourceUrl);
-                service.signRequest(accessToken, request);
+        // now request protected resource
+        logger.info("Getting protected resource");
+        logger.info("Protected resource url: " + protectedResourceUrl);
+        try {
+            OAuthRequest request = new OAuthRequest(Verb.GET, protectedResourceUrl);
+            service.signRequest(accessToken, request);
 
-                Response response = request.send();
-                logger.info("Status code: " + response.getCode());
-                logger.info("Body: " + response.getBody());
+            Response response = request.send();
+            logger.info("Status code: " + response.getCode());
+            logger.info("Body: " + response.getBody());
 
-                String json = response.getBody();
-                socialUser = getSocialUserFromJson(json, authProvider);
-            } catch (Exception e) {
-                logger.error("Could not retrieve protected resource: " + e);
-                throw new RuntimeException("Could not retrieve protected resource: " + e);
-            }
-        } else {
-            throw new AuthenticationException("Not a valid SocialUser!");
+            String json = response.getBody();
+            socialUser = getSocialUserFromJson(json, authProvider);
+        } catch (Exception e) {
+            logger.error("Could not retrieve protected resource: " + e);
+            throw new RuntimeException("Could not retrieve protected resource: " + e);
         }
+        
         socialUser.setSessionId(sessionId);
-        SessionUtils.safeSocialUser(socialUser);
 
+        User user = securityService.getUserByName(credential.getAuthProviderName() + "_" + socialUser.getName());
+        if (user == null){
+            try {
+                user = securityService.createSocialUser(credential.getAuthProviderName() + "_" + socialUser.getName(), socialUser);
+            } catch (UserManagementException e) {
+                throw new AuthenticationException(e.getMessage());
+            }
+        }
+        SessionUtils.saveUsername(user.getName());
+        
         SimpleAuthenticationInfo sai = new SimpleAuthenticationInfo();
         SimplePrincipalCollection spc = new SimplePrincipalCollection();
         spc.add(otoken.getPrincipal(), otoken.getPrincipal().toString());
@@ -359,11 +372,11 @@ public class OAuthRealm extends AuthorizingRealm {
         return map;
     }
 
-    private SocialUser getSocialUserFromJson(String json, int authProvider) throws AuthenticationException {
+    private SocialUserAccount getSocialUserFromJson(String json, int authProvider) throws AuthenticationException {
         String authProviderName = ClientUtils.getAuthProviderName(authProvider);
         Object obj = null;
         JSONParser jsonParser = new JSONParser();
-        SocialUser socialUser = new SocialUser();
+        SocialUserAccount socialUser = new SocialUserAccount();
         switch (authProvider) {
         case ClientUtils.FACEBOOK: {
             /*

@@ -4,12 +4,12 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.security.Credential;
-import com.sap.sse.security.ui.oauth.client.model.CredentialDTO;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class ClientUtils
 {
-    private final static String SESSION_ID_COOKIE         = "gwtgoogleoauthtest_session_id";
     private final static String AUTH_PROVIDER_COOKIE      = "gwtgoogleoauthtest_provider";
     private final static String AUTH_PROVIDER_NAME_COOKIE = "gwtgoogleoauthtest_provider_name";
     private final static String USERNAME_COOKIE           = "gwtgoogleoauthtest_user";
@@ -22,7 +22,7 @@ public class ClientUtils
     // Callback URL is registered with each OAuth Provider
     //private static final String APP_CALLBACK_URL              = "http://oauthdemo2012.com:8888/GWTOAuthLoginDemo.html";
     //http://127.0.0.1:8888/GWTOAuthLoginDemo.html?gwt.codesvr=127.0.0.1:9997&
-    private static final String APP_CALLBACK_URL                = "http://localhost:8888/security/ui/OAuthLogin.html?gwt.codesvr=127.0.0.1:9997";
+    private static final String APP_CALLBACK_URL                = "http://local.sapsailing.com:8888/security/ui/redirect?redirectTo=oauthlogin";
     
     
     private static final String FACEBOOK_PROTECTED_RESOURCE_URL  = "https://graph.facebook.com/me";
@@ -243,16 +243,10 @@ public class ClientUtils
     
     public static void clearCookies()
     {
-        Cookies.removeCookie(SESSION_ID_COOKIE);
         Cookies.removeCookie(AUTH_PROVIDER_COOKIE);
         Cookies.removeCookie(AUTH_PROVIDER_NAME_COOKIE);
         Cookies.removeCookie(USERNAME_COOKIE);
         Cookies.removeCookie(REDIRECT_URL_COOKIE);
-    }
-    
-    public static String getSessionIdFromCookie()
-    {
-        return Cookies.getCookie(SESSION_ID_COOKIE);
     }
     
     public static String getAuthProviderFromCookie()
@@ -292,14 +286,9 @@ public class ClientUtils
     
     public static boolean alreadyLoggedIn()
     {
-        if (getSessionIdFromCookie() != null)
-            return true;
+//        if (getSessionIdFromCookie() != null)
+//            return true;
         return false;
-    }
-    
-    public static void saveSessionId(String sessionId)
-    {
-        Cookies.setCookie(SESSION_ID_COOKIE,sessionId);
     }
     
     public static void saveAuthProvider(int authProvider)
@@ -366,7 +355,7 @@ public class ClientUtils
     public static void reload()
     {
         String appUrl = getRedirectUrlFromCookie();
-        int savedAuthProvider = getAuthProviderFromCookieAsInt();
+//        int savedAuthProvider = getAuthProviderFromCookieAsInt();
         
         clearCookies();
         
@@ -473,33 +462,22 @@ public class ClientUtils
         //message += "Stack Trace:\n" + st;
         Window.alert(message);
     }
-    public static void logout()
+    public static void logout(UserManagementServiceAsync userManagementService)
     {
-        final String sessionId = ClientUtils.getSessionIdFromCookie();
         
-        new AsyncCallback<Void>()
-        {
+        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
 
             @Override
-            public void onFailure(Throwable caught)
-            {
-                ClientUtils.reload(); // reload anyway otherwise we're toast! we will never be able to log out
-            }
-
-            @Override
-            public void onSuccess(Void result)
-            {
-//                GWTOAuthLoginDemo.get().log("Logged out.. clearing cookies");
-//                GWTOAuthLoginDemo.get().log("Redirecting to site url");
+            public void onFailure(Throwable caught) {
+                Window.alert("Could not log out! " + caught);
                 ClientUtils.reload();
             }
 
-//            @Override
-//            protected void callService(AsyncCallback<Void> cb)
-//            {
-//                OAuthLoginService.Util.getInstance().logout(sessionId,cb);
-//            }
-        };
+            @Override
+            public void onSuccess(SuccessInfo result) {
+                ClientUtils.reload();
+            }
+        });
     }    
 }
 
