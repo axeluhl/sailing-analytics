@@ -32,6 +32,8 @@ public class DataMiningServerImpl implements DataMiningServer {
         
         this.functionRegistry = functionRegistry;
         this.functionProvider = functionProvider;
+        
+        updateRegistryIfNecessary();
     }
 
     @Override
