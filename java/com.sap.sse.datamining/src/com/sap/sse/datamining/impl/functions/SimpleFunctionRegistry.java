@@ -89,14 +89,22 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
         // TODO Not yet implemented
     }
+    
+    @Override
+    public Collection<Function<?>> getAllFunctions() {
+        Collection<Function<?>> allFunctions = new HashSet<>();
+        allFunctions.addAll(statistics);
+        allFunctions.addAll(dimensions);
+        return allFunctions;
+    }
 
     @Override
-    public Collection<Function<?>> getAllStatistics() {
+    public Collection<Function<?>> getStatistics() {
         return statistics;
     }
     
     @Override
-    public Collection<Function<?>> getAllDimensions() {
+    public Collection<Function<?>> getDimensions() {
         return dimensions;
     }
 

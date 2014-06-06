@@ -146,7 +146,7 @@ public class RegistryFunctionProvider implements FunctionProvider {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
         FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriteria(functionDTO);
         for (FunctionRegistry functionRegistry : functionRegistries) {
-            for (Function<?> function : functionRegistry.getAllStatistics()) {
+            for (Function<?> function : functionRegistry.getStatistics()) {
                 if (functionDTOFilterCriteria.matches(function)) {
                     functionsMatchingDTO.add(function);
                 }

@@ -33,7 +33,7 @@ public class TestSailingFunctionsRegistration {
     @Test
     public void testRegisteredDimensionsWithoutTheTransitiveOnes() {
         Collection<Function<?>> expectedDimensions = createExpectedRegisteredDimensionsWithoutTheTransitiveOnes();
-        assertThat(functionRegistry.getAllDimensions(), is(expectedDimensions));
+        assertThat(functionRegistry.getDimensions(), is(expectedDimensions));
     }
 
     private Collection<Function<?>> createExpectedRegisteredDimensionsWithoutTheTransitiveOnes() {
@@ -45,7 +45,7 @@ public class TestSailingFunctionsRegistration {
     public void testImportantRegisteredFunctions() {
         // This tests for the methods marked as SideEffectFreeValue, that will be used for the data extraction
         Function<?>[] expectedFunctions = createExpectedImportantRegisteredFunctions();
-        assertThat(functionRegistry.getAllStatistics(), hasItems(expectedFunctions));
+        assertThat(functionRegistry.getStatistics(), hasItems(expectedFunctions));
     }
 
     private Function<?>[] createExpectedImportantRegisteredFunctions() {

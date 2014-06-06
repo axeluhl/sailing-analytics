@@ -40,10 +40,10 @@ public class TestSimpleFunctionRegistryRegistrations {
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = createExpectedDimensions();
-        assertThat(registry.getAllDimensions(), is(expectedDimensions));
+        assertThat(registry.getDimensions(), is(expectedDimensions));
         
         Collection<Function<?>> expectedStatistics = createExpectedStatistics();
-        assertThat(registry.getAllStatistics(), is(expectedStatistics));
+        assertThat(registry.getStatistics(), is(expectedStatistics));
     }
 
     private Collection<Function<?>> createExpectedDimensions() throws NoSuchMethodException, SecurityException {

@@ -7,7 +7,8 @@ public interface FunctionRegistry {
     public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> classesToScan);
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan);
 
-    public Collection<Function<?>> getAllStatistics();
-    public Collection<Function<?>> getAllDimensions();
+    public Collection<Function<?>> getAllFunctions();
+    public Collection<Function<?>> getStatistics();
+    public Collection<Function<?>> getDimensions();
 
 }
