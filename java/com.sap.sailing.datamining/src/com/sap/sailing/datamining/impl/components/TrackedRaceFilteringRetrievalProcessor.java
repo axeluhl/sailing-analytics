@@ -15,7 +15,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
+import com.sap.sse.datamining.shared.annotations.DataRetriever;
 
+@DataRetriever(dataType=HasTrackedRaceContext.class,
+               groupName="Sailing",
+               level=2)
 public class TrackedRaceFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<Leaderboard, HasTrackedRaceContext> {
 

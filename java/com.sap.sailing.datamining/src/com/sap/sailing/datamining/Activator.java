@@ -8,6 +8,8 @@ import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunction
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 
 public class Activator implements BundleActivator {
+    
+    public static final String dataRetrieverGroupName = "Sailing";
 
     private static BundleContext context;
 

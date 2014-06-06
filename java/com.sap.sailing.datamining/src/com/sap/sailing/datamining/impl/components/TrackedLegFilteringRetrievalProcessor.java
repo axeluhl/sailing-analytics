@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegWithContext;
@@ -11,7 +12,11 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
+import com.sap.sse.datamining.shared.annotations.DataRetriever;
 
+@DataRetriever(dataType=HasTrackedLegContext.class,
+               groupName=Activator.dataRetrieverGroupName,
+               level=3)
 public class TrackedLegFilteringRetrievalProcessor extends
         AbstractSimpleFilteringRetrievalProcessor<HasTrackedRaceContext, HasTrackedLegContext> {
 
