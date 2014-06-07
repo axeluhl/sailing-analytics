@@ -3,9 +3,9 @@ package com.sap.sailing.datamining;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
-import com.sap.sailing.datamining.shared.impl.QueryDefinitionImpl;
+import com.sap.sse.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.impl.QueryDefinitionImpl;
 
 public class QueryDefinitionConverter {
 

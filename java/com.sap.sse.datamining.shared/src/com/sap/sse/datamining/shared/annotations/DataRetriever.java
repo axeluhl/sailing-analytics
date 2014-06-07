@@ -1,5 +1,11 @@
 package com.sap.sse.datamining.shared.annotations;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Annotation to mark the concrete data retrievers for a specific domain.<br />
  * This is necessary to link the base data types with the data retrievers, to be able
@@ -18,6 +24,9 @@ package com.sap.sse.datamining.shared.annotations;
  * 
  * @author Lennart Hensler (D054527)
  */
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface DataRetriever {
     
     public static final String DEFAULT_GROUP = "Default";

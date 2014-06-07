@@ -38,14 +38,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
             BundleContext context) {
-        ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer> result = 
-                new ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer>(
-                context, com.sap.sse.datamining.DataMiningServer.class.getName(), null);
+        ServiceTracker<DataMiningServer, DataMiningServer> result = new ServiceTracker<DataMiningServer, DataMiningServer>(
+                context, DataMiningServer.class.getName(), null);
         result.open();
         return result;
     }
     
-    private com.sap.sse.datamining.DataMiningServer getDataMiningServer() {
+    private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
     }
 
@@ -88,7 +87,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
+        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(queryDefinition, getRacingEventService(), getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     

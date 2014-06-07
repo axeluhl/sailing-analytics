@@ -1,11 +1,11 @@
-package com.sap.sailing.datamining.shared.impl;
+package com.sap.sse.datamining.shared.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
@@ -19,8 +19,8 @@ public class QueryDefinitionImpl implements QueryDefinition {
 
     public QueryDefinitionImpl(String localeInfoName, FunctionDTO extractionFunction, AggregatorType aggregatorType) {
         this.localeInfoName = localeInfoName;
-        this.filterSelection = new HashMap<>();
-        this.dimensionsToGroupBy = new ArrayList<>();
+        this.filterSelection = new HashMap<FunctionDTO, Iterable<?>>();
+        this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
         this.extractionFunction = extractionFunction;
         this.aggregatorType = aggregatorType;
     }
