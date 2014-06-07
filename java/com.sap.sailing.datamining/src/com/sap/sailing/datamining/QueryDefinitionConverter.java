@@ -11,18 +11,18 @@ public class QueryDefinitionConverter {
 
     public static QueryDefinition convertDeprecatedQueryDefinition(QueryDefinitionDeprecated queryDefinitionDeprecated) {
         QueryDefinitionImpl queryDefinition = new QueryDefinitionImpl(queryDefinitionDeprecated.getLocaleInfoName(),
-                DeprecatedToFunctionConverter.getFunctionDTOFor(queryDefinitionDeprecated.getStatisticType()),
+                DeprecatedEnumsToFunctionDTOConverter.getFunctionDTOFor(queryDefinitionDeprecated.getStatisticType()),
                 queryDefinitionDeprecated.getAggregatorType());
 
         for (Entry<DimensionIdentifier, Iterable<?>> filterSelectionEntry : queryDefinitionDeprecated.getSelection()
                 .entrySet()) {
             queryDefinition.setFilterSelectionFor(
-                    DeprecatedToFunctionConverter.getFunctionDTOFor(filterSelectionEntry.getKey()),
+                    DeprecatedEnumsToFunctionDTOConverter.getFunctionDTOFor(filterSelectionEntry.getKey()),
                     filterSelectionEntry.getValue());
         }
 
         for (DimensionIdentifier dimensionIdentifier : queryDefinitionDeprecated.getDimensionsToGroupBy()) {
-            queryDefinition.appendDimensionToGroupBy(DeprecatedToFunctionConverter
+            queryDefinition.appendDimensionToGroupBy(DeprecatedEnumsToFunctionDTOConverter
                     .getFunctionDTOFor(dimensionIdentifier));
         }
 
