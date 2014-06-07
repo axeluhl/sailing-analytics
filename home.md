@@ -14,6 +14,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
   * [[TracTrac|wiki/tractrac-lifecycle]]
+  * [[Analytics on a stick|wiki/analytics-on-a-stick]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
