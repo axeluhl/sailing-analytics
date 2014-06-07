@@ -1192,7 +1192,7 @@ public class MasterDataImportTest {
 
         RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboardOnTarget;
         Regatta regattaInLeaderboard = regattaLeaderboard.getRegatta();
-        Assert.assertEquals(regattaOnTarget, regattaInLeaderboard);
+        Assert.assertSame(regattaOnTarget, regattaInLeaderboard);
 
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
 
