@@ -19,7 +19,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
  * the first leg are all equally ranked last. Competitors in different legs are ranked by inverse leg index: the higher
  * the number of the leg the lesser (better) the rank. Competitors in the same leg are ranked by their windward distance
- * to go in that leg, requiring wind data or estimates to be available for the given time point.
+ * to go in that leg, requiring wind data or estimates to be available for the given time point. The wind is estimated at
+ * the middle of the leg for consistent ordering, so the same wind data will be used for comparing all competitors in the
+ * same leg at a given point in time.
  * <p>
  * 
  * Two different competitors may end up being ranked equal by this comparator. So take care and don't use this
