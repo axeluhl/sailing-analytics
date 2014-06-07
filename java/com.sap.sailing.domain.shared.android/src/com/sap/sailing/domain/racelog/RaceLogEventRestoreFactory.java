@@ -90,4 +90,4 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     
     CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint createdAt, RaceLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable pId, int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint);
-}
+   }

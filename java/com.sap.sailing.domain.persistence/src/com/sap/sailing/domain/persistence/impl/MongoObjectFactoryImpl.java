@@ -89,6 +89,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -835,6 +836,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, FixedMarkPassingEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFixedMarkPassingEvent(event));
+        return result;
+    }
+
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
@@ -948,6 +956,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), CloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
         storeTimePoint(event.getClosingTimePoint(), result, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
+        return result;
+    }
+
+    private Object storeRaceLogFixedMarkPassingEvent(FixedMarkPassingEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), FixedMarkPassingEvent.class.getSimpleName());
+        result.put(FieldNames.INDEX_OF_WAYPOINT_OF_FIXED_MARKPASSING.name(), event.getZeroBasedIndexOfWaypointOfFixedPassing());
+        result.put(FieldNames.TIMEPOINT_OF_FIXED_MARKPASSING.name(), event.getTimePointOfFixedPassing().asMillis());
         return result;
     }
 
@@ -1114,7 +1131,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.MARK_TYPE.name(), mark.getType().name());
         return result;
     }
-
+    
     private String getPassingInstructions(PassingInstruction passingInstructions) {
         final String passing;
         if (passingInstructions != null) {

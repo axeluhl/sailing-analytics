@@ -41,9 +41,11 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> registerCompetitorEventSerializer;
     private JsonSerializer<RaceLogEvent> defineMarkEventSerializer;
     private JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer;
+    private JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
 
     private RaceLogEventFactory factory;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+
 
     @SuppressWarnings("unchecked")
     @Before
@@ -69,6 +71,7 @@ public class RaceLogEventSerializerTest {
         registerCompetitorEventSerializer = mock(JsonSerializer.class);
         defineMarkEventSerializer = mock(JsonSerializer.class);
         closeOpenEndedDeviceMappingEventSerializer = mock(JsonSerializer.class);
+        fixedMarkPassingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
@@ -77,7 +80,7 @@ public class RaceLogEventSerializerTest {
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 deviceCompetitorMappingEventSerializer, deviceMarkMappingEventSerializer, denoteForTrackingEventSerializer,
                 startTrackingEventSerializer, revokeEventSerializer, registerCompetitorEventSerializer, defineMarkEventSerializer,
-                closeOpenEndedDeviceMappingEventSerializer);
+                closeOpenEndedDeviceMappingEventSerializer, fixedMarkPassingEventSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -249,6 +252,11 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = factory.createCloseOpenEndedDeviceMappingEvent(null, author, 0, null, null);
         serializer.serialize(event);
         verify(closeOpenEndedDeviceMappingEventSerializer).serialize(event);
+    }
+    
+    @Test
+    public void testFixedMarkPassingEventSetializer() {
+        // TODO
     }
 
 }

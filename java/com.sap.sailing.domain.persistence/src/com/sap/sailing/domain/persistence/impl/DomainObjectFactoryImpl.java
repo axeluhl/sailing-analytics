@@ -142,6 +142,7 @@ import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
@@ -1323,6 +1324,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(CloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(FixedMarkPassingEvent.class.getSimpleName())){
+            return loadRaceLogFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1474,6 +1477,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createCourseAreaChangedEvent(createdAt, author, logicalTimePoint, id, competitors, passId, courseAreaId);
     }
     
+    private RaceLogEvent loadRaceLogFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        TimePoint ofFixedPassing = loadTimePoint(dbObject, FieldNames.TIMEPOINT_OF_FIXED_MARKPASSING);
+        Integer zeroBasedIndexOfWaypoint = (Integer) dbObject.get(FieldNames.INDEX_OF_WAYPOINT_OF_FIXED_MARKPASSING.name());
+        return raceLogEventFactory.createFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing, zeroBasedIndexOfWaypoint);
+    }
+
     private CompetitorResults loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
         CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
         for (Object object : dbPositionedCompetitorList) {

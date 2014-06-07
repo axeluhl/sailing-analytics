@@ -28,6 +28,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceCo
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceMarkMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningListChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFixedMarkPassingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLineOpeningTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
@@ -80,7 +81,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogRevokeEventDeserializer(competitorDeserializer),
                 new RaceLogRegisterCompetitorEventDeserializer(competitorDeserializer),
                 new RaceLogDefineMarkEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory)),
-                new RaceLogCloseOpenEndedDeviceMappingEventDeserializer(competitorDeserializer));
+                new RaceLogCloseOpenEndedDeviceMappingEventDeserializer(competitorDeserializer),
+                new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -104,6 +106,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -125,7 +128,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> revokeEventDeserializer,
             JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer,
             JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer,
-            JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer,
+            JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
@@ -147,6 +151,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.registerCompetitorEventDeserializer = registerCompetitorEventDeserializer;
         this.defineMarkEventDeserializer = defineMarkEventDeserializer;
         this.closeOpenEndedDeviceMappingEventDeserializer = closeOpenEndedDeviceMappingEventDeserializer;
+        this.fixedMarkPassingEventDeserializer = fixedMarkPassingEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -194,6 +199,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return defineMarkEventDeserializer;
         } else if (type.equals(RaceLogCloseOpenEndedDeviceMappingEventSerializer.VALUE_CLASS)) {
             return closeOpenEndedDeviceMappingEventDeserializer;
+        } else if (type.equals(RaceLogFixedMarkPassingEventSerializer.VALUE_CLASS)) {
+            return fixedMarkPassingEventDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",

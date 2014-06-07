@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.racelog.tracking.events.DefineMarkEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DenoteForTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.FixedMarkPassingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.RegisterCompetitorEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.StartTrackingEventImpl;
@@ -267,5 +269,11 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
             RaceLogEventAuthor author, int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
         return new CloseOpenEndedDeviceMappingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint,
                 UUID.randomUUID(), passId, deviceMappingEventId, closingTimePoint);
+    }
+    
+    @Override
+    public RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
+        return new FixedMarkPassingEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing, zeroBasedIndexOfWaypoint);
     }
 }

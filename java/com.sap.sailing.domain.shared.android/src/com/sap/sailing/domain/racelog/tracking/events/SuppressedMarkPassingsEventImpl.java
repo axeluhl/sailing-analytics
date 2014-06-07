@@ -28,7 +28,7 @@ public class SuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements
 
     @Override
     public void accept(RaceLogEventVisitor visitor) {
-        // TODO
+        //visitor.visit(this);
     }
 
     @Override

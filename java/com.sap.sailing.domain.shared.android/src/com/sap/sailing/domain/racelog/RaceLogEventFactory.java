@@ -117,4 +117,8 @@ public interface RaceLogEventFactory {
     
     CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
             Serializable deviceMappingEventId, TimePoint closingTimePoint);
+    
+    RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint);
+
 }
