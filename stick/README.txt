@@ -5,17 +5,23 @@ This is a package to enable running the SAP Sailing Analytics from a stick.
 It is provided as-is without warranty. If you need support then contact
 axel.uhl@sap.com or simon.marcel.pamies@sap.com.
 
+The most common usecase is to have a laptop running in a loung that replicates data
+from a master server that runs in the cloud.
+
 ## Configuration
 
 - (Windows) Copy templates/env.bat.template to the root of the USB stick and rename it to
 env.bat. Now open it with your favourite text editor and adapt the values to your needs.
 As Windows does not handle data writes on a stick well it is recommended that you also
-edit mongodb-windows.cfg and set the dbpath to an existing  directory on your hard disk.
+edit mongodb-windows.cfg and set the dbpath to an existing directory on your hard disk.
 
 - (Linux) Copy templates/env.sh.template to the root of your USB stick and rename it to
 env.sh. Fire up a vi and adapt the values. It can be wise to also have a look at the conf
 for the database that is located in mongodb.cfg. You can specify a separate directory
 on your harddisk or a ramdisk for better database performance.
+
+If you have configured the server to replicate then you absolutely need to make sure
+that the server version on the stick corresponds to the one that is running in the cloud.
 
 ## Starting
 
