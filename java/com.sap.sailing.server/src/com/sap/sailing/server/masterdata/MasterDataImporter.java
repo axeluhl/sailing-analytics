@@ -75,7 +75,7 @@ public class MasterDataImporter {
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
-                creationCount, baseDomainFactory);
+                creationCount);
         creationCount = racingEventService.apply(op);
         racingEventService.mediaTracksImported(topLevelMasterData.getAllMediaTracks(), override);
         return creationCount;

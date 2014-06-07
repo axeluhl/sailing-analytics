@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -53,8 +52,6 @@ public class ImportMasterDataOperation extends
 
     private final MasterDataImportObjectCreationCountImpl creationCount;
 
-    private final DomainFactory baseDomainFactory;
-
     private final boolean override;
 
     private final UUID importOperationId;
@@ -62,10 +59,9 @@ public class ImportMasterDataOperation extends
     private DataImportProgress progress;
 
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
-        this.baseDomainFactory = baseDomainFactory;
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
