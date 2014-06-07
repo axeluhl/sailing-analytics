@@ -32,4 +32,4 @@ Internally the services will submit a JSON document that contains the relevant i
 
 - TracTracCourseDesignUpdateHandler: `http://URL/update_course?eventid=%s&raceid=%s&username=%s&password=%s`
 - TracTracStartTimeResetHandler: `http://URL/resetStartTime?eventid=%s&raceid=%s&username=%s&password=%s`
-- TracTracStartTimeUpdateHandler:  `http://URL/update_race_start_time?eventid=%s&raceid=%s&username=%s&password=%s`
+- TracTracStartTimeUpdateHandler:  `http://URL/update_race_start_time?race_start_time=%s&eventid=%s&raceid=%s&username=%s&password=%s`
