@@ -92,6 +92,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
+                        objectOutputStream.writeObject(getService().getAllRegattas());
                         objectOutputStream.writeObject(competitorIds);
                         objectOutputStream.writeObject(masterData);
                     } finally {

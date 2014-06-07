@@ -578,4 +578,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences();
 
     RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
+
+    void addRegattaWithoutReplication(Regatta regatta);
+
+    void addEventWithoutReplication(Event event);
 }

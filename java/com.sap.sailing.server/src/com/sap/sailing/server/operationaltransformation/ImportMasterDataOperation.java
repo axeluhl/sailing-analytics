@@ -1,7 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,12 +18,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -394,18 +391,7 @@ public class ImportMasterDataOperation extends
                         continue;
                     }
                 }
-                Serializable id = regatta.getId();
-                Iterable<? extends Series> series = regatta.getSeries();
-                String baseName = regatta.getBaseName();
-                String boatClassName = regatta.getBoatClass().getName();
-                CourseArea defaultCourseArea = regatta.getDefaultCourseArea();
-                Serializable defaultCourseAreaId = (defaultCourseArea != null) ? defaultCourseArea.getId() : null;
-                ScoringSchemeType scoringSchemeType = regatta.getScoringScheme().getType();
-                boolean isPersistent = regatta.isPersistent();
-                Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, id,
-                        series, isPersistent, baseDomainFactory.createScoringScheme(scoringSchemeType),
-                        defaultCourseAreaId).getA();
-                createdRegatta.setRegattaConfiguration(regatta.getRegattaConfiguration());
+                toState.addRegattaWithoutReplication(regatta);
                 Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta.getRegattaIdentifier());
                 if (raceIdStrings != null) {
                     for (String raceIdAsString : raceIdStrings) {
@@ -414,11 +400,11 @@ public class ImportMasterDataOperation extends
                                     .format("Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
                                             raceIdAsString));
                         } else {
-                            toState.setRegattaForRace(createdRegatta, raceIdAsString);
+                            toState.setRegattaForRace(regatta, raceIdAsString);
                         }
                     }
                 }
-                creationCount.addOneRegatta(createdRegatta.getId().toString());
+                creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
 
@@ -436,14 +422,8 @@ public class ImportMasterDataOperation extends
                 existingEvent = null;
             }
             if (existingEvent == null) {
-                String name = event.getName();
-                TimePoint startDate = event.getStartDate();
-                TimePoint endDate = event.getEndDate();
-                String venueName = event.getVenue().getName();
-                boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id,
-                        event.getImageURLs(), event.getVideoURLs());
-                creationCount.addOneEvent(newEvent.getId().toString());
+                toState.addEventWithoutReplication(event);
+                creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
