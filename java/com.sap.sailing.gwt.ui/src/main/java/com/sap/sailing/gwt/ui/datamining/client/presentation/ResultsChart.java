@@ -36,7 +36,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     private StringMessages stringMessages;
     private SimplePanel mainPanel;
 
-    private Chart chart;
+//    private Chart chart;
     private Map<GroupKey, Series> series;
 
     private Map<GroupKey, Integer> mainKeyToValueMap;
@@ -50,16 +50,16 @@ public class ResultsChart implements ResultsPresenter<Number> {
         mainPanel = new ResizingSimplePanel() {
             @Override
             public void onResize() {
-                chart.setSizeToMatchContainer();
-                chart.redraw();
+//                chart.setSizeToMatchContainer();
+//                chart.redraw();
             }
         };
         series = new HashMap<GroupKey, Series>();
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
 
-        createChart();
-        mainPanel.setWidget(chart);
+//        createChart();
+//        mainPanel.setWidget(chart);
     }
     
     @Override
@@ -80,30 +80,30 @@ public class ResultsChart implements ResultsPresenter<Number> {
 
     @Override
     public void showResult(QueryResult<Number> result) {
-        if (!result.isEmpty()) {
-            resetChart();
-            
-            updateYAxisLabels(result);
-            updateChartSubtitleAndSetChartAsWidget(result);
-            
-            List<GroupKey> sortedKeys = getSortedKeysFrom(result);
-            buildGroupKeyValueMaps(sortedKeys);
-            if (resultHasComplexKeys(result)) {
-                displayComplexResult(result, sortedKeys);
-            } else {
-                displaySimpleResult(result, sortedKeys);
-            }
-            
-            chart.redraw();
-        } else {
-            showError(stringMessages.noDataFound() + ".");
-        }
+//        if (!result.isEmpty()) {
+//            resetChart();
+//            
+//            updateYAxisLabels(result);
+//            updateChartSubtitleAndSetChartAsWidget(result);
+//            
+//            List<GroupKey> sortedKeys = getSortedKeysFrom(result);
+//            buildGroupKeyValueMaps(sortedKeys);
+//            if (resultHasComplexKeys(result)) {
+//                displayComplexResult(result, sortedKeys);
+//            } else {
+//                displaySimpleResult(result, sortedKeys);
+//            }
+//            
+//            chart.redraw();
+//        } else {
+//            showError(stringMessages.noDataFound() + ".");
+//        }
     }
 
     private void updateYAxisLabels(QueryResult<? extends Number> result) {
-        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
-        chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
-                UnitFormatter.format(result.getUnit())));
+//        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
+//        chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
+//                UnitFormatter.format(result.getUnit())));
     }
 
     private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
@@ -116,34 +116,34 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     private void displayComplexResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
-        Map<Series, Boolean> isInChart = new HashMap<Series, Boolean>();
-        for (GroupKey key : sortedKeys) {
-            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
-            point.setName(key.getMainKey().asString());
-            Series series = getOrCreateSeries(key).addPoint(point, false, false, false);
-            if (isInChart.get(series) == null || !isInChart.get(series)) {
-                chart.addSeries(series, false, false);
-                isInChart.put(series, true);
-            }
-        }
+//        Map<Series, Boolean> isInChart = new HashMap<Series, Boolean>();
+//        for (GroupKey key : sortedKeys) {
+//            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
+//            point.setName(key.getMainKey().asString());
+//            Series series = getOrCreateSeries(key).addPoint(point, false, false, false);
+//            if (isInChart.get(series) == null || !isInChart.get(series)) {
+//                chart.addSeries(series, false, false);
+//                isInChart.put(series, true);
+//            }
+//        }
     }
 
     private void displaySimpleResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
-        Series series = chart.createSeries().setName("Results");
-        for (GroupKey key : sortedKeys) {
-            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
-            point.setName(key.getMainKey().asString());
-            series.addPoint(point, false, false, false);
-        }
-        chart.addSeries(series, false, false);
+//        Series series = chart.createSeries().setName("Results");
+//        for (GroupKey key : sortedKeys) {
+//            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
+//            point.setName(key.getMainKey().asString());
+//            series.addPoint(point, false, false, false);
+//        }
+//        chart.addSeries(series, false, false);
     }
 
     private void updateChartSubtitleAndSetChartAsWidget(QueryResult<? extends Number> result) {
-        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
-                result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
-        // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
-        mainPanel.setWidget(null);
-        mainPanel.setWidget(chart);
+//        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
+//                result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
+//        // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
+//        mainPanel.setWidget(null);
+//        mainPanel.setWidget(chart);
 
     }
 
@@ -171,54 +171,54 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }
     }
 
-    private Series getOrCreateSeries(GroupKey groupKey) {
-        GroupKey key = groupKey.hasSubKey() ? groupKey.getSubKey() : groupKey;
-
-        if (!series.containsKey(key)) {
-            series.put(key, chart.createSeries().setName(key.asString()));
-        }
-        return series.get(key);
-    }
+//    private Series getOrCreateSeries(GroupKey groupKey) {
+//        GroupKey key = groupKey.hasSubKey() ? groupKey.getSubKey() : groupKey;
+//
+//        if (!series.containsKey(key)) {
+//            series.put(key, chart.createSeries().setName(key.asString()));
+//        }
+//        return series.get(key);
+//    }
 
     private void resetChart() {
-        chart.removeAllSeries(false);
-        series = new HashMap<GroupKey, Series>();
+//        chart.removeAllSeries(false);
+//        series = new HashMap<GroupKey, Series>();
     }
 
     private void createChart() {
-        chart = new Chart()
-                .setType(Series.Type.COLUMN)
-                .setMarginLeft(100)
-                .setMarginRight(45)
-                .setWidth100()
-                .setHeight100()
-                .setBorderColor(new Color("#F0AB00"))
-                .setPlotBorderWidth(0)
-                .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
-
-        chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                try {
-                    Integer value = (int) axisLabelsData.getValueAsDouble();
-                    return valueToGroupKeyMap.get(value).asString();
-                } catch (Exception e) {
-                    return "error formatting label";
-                }
-            }
-        }));
-
-        chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                try {
-                    return axisLabelsData.getValueAsDouble() + "";
-                } catch (Exception e) {
-                    return "";
-                }
-            }
-        }));
+//        chart = new Chart()
+//                .setType(Series.Type.COLUMN)
+//                .setMarginLeft(100)
+//                .setMarginRight(45)
+//                .setWidth100()
+//                .setHeight100()
+//                .setBorderColor(new Color("#F0AB00"))
+//                .setPlotBorderWidth(0)
+//                .setCredits(new Credits().setEnabled(false))
+//                .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
+//
+//        chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+//            @Override
+//            public String format(AxisLabelsData axisLabelsData) {
+//                try {
+//                    Integer value = (int) axisLabelsData.getValueAsDouble();
+//                    return valueToGroupKeyMap.get(value).asString();
+//                } catch (Exception e) {
+//                    return "error formatting label";
+//                }
+//            }
+//        }));
+//
+//        chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+//            @Override
+//            public String format(AxisLabelsData axisLabelsData) {
+//                try {
+//                    return axisLabelsData.getValueAsDouble() + "";
+//                } catch (Exception e) {
+//                    return "";
+//                }
+//            }
+//        }));
     }
     
     @Override

@@ -75,10 +75,12 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
     @Override
     public ReturnType tryToInvoke(Object instance, Object... parameters) {
-        try {
-            return (ReturnType) method.invoke(instance, parameters);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
+        if (instance != null) {
+            try {
+                return (ReturnType) method.invoke(instance, parameters);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
+            }
         }
         return null;
     }
