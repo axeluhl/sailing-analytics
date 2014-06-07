@@ -2,6 +2,7 @@ package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -37,7 +38,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -67,7 +67,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -90,6 +89,7 @@ import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -102,6 +102,7 @@ import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sse.common.Util;
 
 public class MasterDataImportTest {
 
@@ -184,8 +185,9 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
+        event.addLeaderboardGroup(group);
 
         // Set tracked Race with competitors
         List<Competitor> competitors = new ArrayList<Competitor>();
@@ -193,7 +195,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -204,7 +206,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -288,6 +290,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(eventOnTarget);
         LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
         Assert.assertNotNull(leaderboardGroupOnTarget);
+        assertSame(leaderboardGroupOnTarget, eventOnTarget.getLeaderboardGroups().iterator().next());
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
@@ -393,8 +396,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -402,7 +405,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -412,7 +415,7 @@ public class MasterDataImportTest {
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
-        Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
+        DynamicPerson coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
         CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", Color.RED, team2, boat2);
@@ -547,8 +550,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -638,7 +641,7 @@ public class MasterDataImportTest {
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
-                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE);
+                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         Event event = sourceService.addEvent(TEST_EVENT_NAME, eventStartDate, eventEndDate, "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
@@ -669,8 +672,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -678,7 +681,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -689,7 +692,7 @@ public class MasterDataImportTest {
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
-        Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
+        DynamicPerson coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
         Competitor competitor2 = sourceDomainFactory.getCompetitorStore().getOrCreateCompetitor(competitor2UUID,
@@ -710,9 +713,9 @@ public class MasterDataImportTest {
         // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
         TimePoint logTimePoint2 = logTimePoint.plus(10);
         CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
-        positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor
+        positionedCompetitors.add(new Util.Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor
                 .getName(), MaxPointsReason.DNS));
-        positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor2.getId(), competitor2
+        positionedCompetitors.add(new Util.Triple<Serializable, String, MaxPointsReason>(competitor2.getId(), competitor2
                 .getName(), MaxPointsReason.NONE));
         RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory
                 .createFinishPositioningConfirmedEvent(logTimePoint2, author, 1, positionedCompetitors);
@@ -824,8 +827,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -833,7 +836,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -844,7 +847,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -935,8 +938,8 @@ public class MasterDataImportTest {
                     regattaNotToOverride.getRegattaIdentifier(), "testDisplayNameNotToOverride", discardRule);
             List<String> leaderboardNamesNotToOverride = new ArrayList<String>();
             leaderboardNamesNotToOverride.add(leaderboardNotToOverride.getName());
-            groupNotToOverride = destService.addLeaderboardGroup(TEST_GROUP_NAME,
-                    "testGroupDescNotToOverride", false, leaderboardNamesNotToOverride, null, null);
+            groupNotToOverride = destService.addLeaderboardGroup(UUID.randomUUID(),
+                    TEST_GROUP_NAME, "testGroupDescNotToOverride", false, leaderboardNamesNotToOverride, null, null);
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
@@ -1020,8 +1023,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1029,7 +1032,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -1040,7 +1043,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -1127,7 +1130,7 @@ public class MasterDataImportTest {
             Set<DynamicPerson> sailorsToOverride = new HashSet<DynamicPerson>();
             sailorsToOverride.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(
                     645487200000L), "Oberhoschy"));
-            Person coachToOverride = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(
+            DynamicPerson coachToOverride = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(
                     645487200000L), "Der Lennart halt");
             DynamicTeam teamToOverride = new TeamImpl("Pros", sailorsToOverride, coachToOverride);
             BoatClass boatClassToOverride = new BoatClassImpl("H16", true);
@@ -1145,8 +1148,8 @@ public class MasterDataImportTest {
             identifierOfRegattaTrackedRace = regattaToOverride
                     .getRaceIdentifier(columnToOverride.getRaceDefinition(testFleet1ToOverride));
 
-            destService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDescToOverride", false, new ArrayList<String>(),
-                    null, null);
+            destService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDescToOverride", false,
+                    new ArrayList<String>(), null, null);
             destService.getLeaderboardGroupByName(TEST_GROUP_NAME).addLeaderboard(leaderboardToOverride);
             destService.addLeaderboard(leaderboardToOverride);
             inputStream = new ByteArrayInputStream(os.toByteArray());
@@ -1219,8 +1222,8 @@ public class MasterDataImportTest {
                 "testDisplayName", new int[] { 1, 2, 3, 4 });
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
@@ -1289,8 +1292,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1298,7 +1301,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -1309,7 +1312,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -1422,8 +1425,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1431,7 +1434,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -1442,7 +1445,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -1627,10 +1630,10 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        LeaderboardGroup group1 = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, null, null);
-        LeaderboardGroup group2 = sourceService.addLeaderboardGroup(TEST_GROUP_NAME2, "testGroupDesc2", false,
-                leaderboardNames, null, null);
+        LeaderboardGroup group1 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
+        LeaderboardGroup group2 = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME2, "testGroupDesc2",
+                false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1638,7 +1641,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
@@ -1649,7 +1652,7 @@ public class MasterDataImportTest {
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
-        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
@@ -1723,8 +1726,8 @@ public class MasterDataImportTest {
         int[] discardRule = { 1, 2, 3, 4 };
         ScoringScheme scheme = new LowPoint();
         List<String> leaderboardNames = new ArrayList<String>();
-        LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
-                leaderboardNames, discardRule, scheme.getType());
+        LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, discardRule, scheme.getType());
         FlexibleLeaderboard sourceLeaderboard1 = new FlexibleLeaderboardImpl("Leaderboard1", null, scheme, null);
         sourceService.addLeaderboard(sourceLeaderboard1);
         sourceGroup.addLeaderboard(sourceLeaderboard1);

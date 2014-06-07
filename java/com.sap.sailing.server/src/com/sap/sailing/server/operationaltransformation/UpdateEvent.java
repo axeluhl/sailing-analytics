@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.util.List;
+import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -13,17 +13,22 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final TimePoint startDate;
     private final TimePoint endDate;
     private final boolean isPublic;
-    private final List<String> regattaNames;
+    private final Iterable<UUID> leaderboardGroupIds;
     private final String eventName;
+    private final Iterable<URL> imageURLs;
+    private final Iterable<URL> videoURLs;
 
-    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames) {
+    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
+            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         super(id);
         this.eventName = eventName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.venueName = venueName;
         this.isPublic = isPublic;
-        this.regattaNames = regattaNames;
+        this.leaderboardGroupIds = leaderboardGroupIds;
+        this.imageURLs = imageURLs;
+        this.videoURLs = videoURLs;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, regattaNames);
+        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, leaderboardGroupIds, imageURLs, videoURLs);
         return null;
     }
 }

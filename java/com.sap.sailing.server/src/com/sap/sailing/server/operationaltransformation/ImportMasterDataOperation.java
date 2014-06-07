@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -48,6 +48,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
+import com.sap.sse.common.Util;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
@@ -93,6 +94,17 @@ public class ImportMasterDataOperation extends
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
+            progress.setNameOfCurrentSubProgress("Updating Event-LeaderboardGroup links");
+            progress.setOverAllProgressPct(0.4);
+            progress.setCurrentSubProgressPct(0);
+            final Iterable<Event> allEvents = masterData.getAllEvents();
+            int numOfEventsToHandle = Util.size(allEvents);
+            int eventCounter = 0;
+            for (Event e : allEvents) {
+                updateLinksToLeaderboardGroups(toState, e);
+                eventCounter++;
+                progress.setCurrentSubProgressPct((double) eventCounter / numOfEventsToHandle);
+            }
             progress.setNameOfCurrentSubProgress("Importing wind tracks");
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
@@ -101,6 +113,59 @@ public class ImportMasterDataOperation extends
             return creationCount;
         } finally {
             toState.getDataImportLock().unlock();
+        }
+    }
+
+    /**
+     * Ensures that all links from <code>eventReceived</code> to its leaderboard groups are established also on the
+     * local event after import as long as those leaderboard groups are part of the actual import. For this subset of
+     * leaderboard groups, equality of ordering is established between the <code>eventReceived</code>'s leaderboard
+     * group sequence and the local event's leaderboard group sequence. This may require temporarily removing
+     * leaderboard groups from the local event and re-adding them at the end which may change the ordering with respect
+     * to other, non-imported leaderboard groups.
+     * <p>
+     * 
+     * Loops over the imported event's leaderboard groups and for those part of the import tries to find by ID each of
+     * them in the local event's leaderboard group sequence. If not found, it is appended at the end. If found after the
+     * position of the previous leaderboard group handled, it is left in place. Otherwise, it is removed and added again
+     * at the end.
+     */
+    private void updateLinksToLeaderboardGroups(RacingEventService racingEventService, Event eventReceived) {
+        boolean changed = false;
+        int positionOfLastLeaderboardGroupFoundInLocalEvent = -1;
+        Event eventAfterImport = racingEventService.getEvent(eventReceived.getId());
+        Collection<LeaderboardGroup> leaderboardGroupsReceived = masterData.getLeaderboardGroups();
+        for (LeaderboardGroup lgInEventReceived : eventReceived.getLeaderboardGroups()) {
+            if (leaderboardGroupsReceived.contains(lgInEventReceived)) {
+                // it shall also be referenced by eventAfterImport, with a position that shall be greater than
+                // positionOfLastLeaderboardGroupFoundInLocalEvent.
+                int pos = 0;
+                boolean found = false;
+                for (LeaderboardGroup importedLg : eventAfterImport.getLeaderboardGroups()) {
+                    if (importedLg.getId().equals(lgInEventReceived.getId())) {
+                        found = true;
+                        if (pos < positionOfLastLeaderboardGroupFoundInLocalEvent) {
+                            // need to move lgInEventReceived; move to end
+                            eventAfterImport.removeLeaderboardGroup(importedLg);
+                            eventAfterImport.addLeaderboardGroup(importedLg);
+                            positionOfLastLeaderboardGroupFoundInLocalEvent = Util.size(eventAfterImport.getLeaderboardGroups())-1;
+                            changed = true;
+                        } else {
+                            positionOfLastLeaderboardGroupFoundInLocalEvent = pos;
+                        }
+                        break;
+                    }
+                    pos++;
+                }
+                if (!found) {
+                    eventAfterImport.addLeaderboardGroup(racingEventService.getLeaderboardGroupByID(lgInEventReceived.getId()));
+                    positionOfLastLeaderboardGroupFoundInLocalEvent = Util.size(eventAfterImport.getLeaderboardGroups())-1;
+                    changed = true;
+                }
+            }
+        }
+        if (changed) {
+            racingEventService.getMongoObjectFactory().storeEvent(eventAfterImport);
         }
     }
 
@@ -144,6 +209,7 @@ public class ImportMasterDataOperation extends
             }
 
         }
+        // TODO bug 1975: as an aftermath of bug 1970, with LeaderboardGroup now implementing WithID, match making could happen by ID
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(leaderboardGroup.getName());
         if (existingLeaderboardGroup != null && override) {
             logger.info(String.format("Leaderboard Group with name %1$s already existed and will be overridden.",
@@ -163,10 +229,10 @@ public class ImportMasterDataOperation extends
                 overallLeaderboardDiscardThresholds = rule.getDiscardIndexResultsStartingWithHowManyRaces();
                 overallLeaderboardScoringSchemeType = metaLeaderboard.getScoringScheme().getType();
             }
-            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getName(),
-                    leaderboardGroup.getDescription(), leaderboardGroup.isDisplayGroupsInReverseOrder(),
-                    leaderboardNames, overallLeaderboardDiscardThresholds,
-                    overallLeaderboardScoringSchemeType);
+            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getId(),
+                    leaderboardGroup.getName(), leaderboardGroup.getDescription(),
+                    leaderboardGroup.isDisplayGroupsInReverseOrder(), leaderboardNames,
+                    overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
         } else {
             leaderboardGroup = existingLeaderboardGroup;
@@ -236,7 +302,7 @@ public class ImportMasterDataOperation extends
      * @param leaderboard
      * @return the race column and fleet the dummy was attached to
      */
-    public Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
+    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
             Regatta regatta) {
         RaceColumn raceColumn = null;
         Fleet fleet = null;
@@ -252,7 +318,7 @@ public class ImportMasterDataOperation extends
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
-        return new Pair<RaceColumn, Fleet>(raceColumn, fleet);
+        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
     }
 
     private void createWindTracks(RacingEventService toState) {
@@ -375,7 +441,8 @@ public class ImportMasterDataOperation extends
                 TimePoint endDate = event.getEndDate();
                 String venueName = event.getVenue().getName();
                 boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id);
+                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id,
+                        event.getImageURLs(), event.getVideoURLs());
                 creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
@@ -400,10 +467,7 @@ public class ImportMasterDataOperation extends
     }
 
     /**
-     * 
-     * @param iterable
-     * @param uuid
-     * @return true if course with given id exists in iterable
+     * @return true if course with given id exists in <code>iterable</code>
      */
     private boolean existsInSet(Iterable<CourseArea> iterable, UUID uuid) {
         for (CourseArea area : iterable) {

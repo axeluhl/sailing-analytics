@@ -147,7 +147,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer, raceSelectionModel, leaderboardName,
-                null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
+                null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false);
         return raceBoardPanel;
     }
     

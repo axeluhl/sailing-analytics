@@ -30,13 +30,13 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -179,10 +179,10 @@ public class CourseTest {
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
         assertWaypointIndexes(course);
-        List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
-        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(wp2.getMarks().iterator().next(), wp2.getPassingInstructions()));
-        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(wp3.getMarks().iterator().next(), wp3.getPassingInstructions()));
-        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(wp1.getMarks().iterator().next(), wp1.getPassingInstructions()));
+        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
+        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp2.getMarks().iterator().next(), wp2.getPassingInstructions()));
+        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp3.getMarks().iterator().next(), wp3.getPassingInstructions()));
+        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp1.getMarks().iterator().next(), wp1.getPassingInstructions()));
         course.update(courseToUpdate, DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
     }
@@ -252,7 +252,7 @@ public class CourseTest {
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new TrackedRegattaImpl(
                 new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
                 /* millisecondsOverWhichToAverageSpeed */8000);
         assertLegStructure(course, trackedRace);
@@ -283,7 +283,7 @@ public class CourseTest {
                 new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
                         hasso), Collections.<Sideline> emptyList(),
-                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                        EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000);
         assertLegStructure(course, trackedRace);

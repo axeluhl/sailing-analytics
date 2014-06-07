@@ -101,6 +101,11 @@
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
+								<bundle>
+                                    <id>com.sap.sailing.gwt.home</id>
+                                    <level>5</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
                                 <bundle>
                                     <id>com.sap.sailing.gwt.ui</id>
                                     <level>4</level>
@@ -150,6 +155,11 @@
                                 </bundle>
                                 <bundle>
                                     <id>com.sap.sailing.datamining</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.domain.deckmanadapter</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>

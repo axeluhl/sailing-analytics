@@ -16,12 +16,12 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.BoatResultInRace;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
+import com.sap.sse.common.Util;
 
 public class ZipStreamTest {
     private final static String ZIP_EXAMPLE_FILE = "resources/Kieler_Woche_2011_Export.zip";

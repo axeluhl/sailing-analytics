@@ -68,7 +68,11 @@ public class SailMasterMessageImpl implements SailMasterMessage {
         } else {
             typeAsString = typeAsStringWithOptionalSuffix.substring(0, typeAsStringWithOptionalSuffix.length()-1);
         }
-        return MessageType.valueOf(typeAsString);
+        try {
+            return MessageType.valueOf(typeAsString);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     @Override

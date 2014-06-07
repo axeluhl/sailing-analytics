@@ -7,8 +7,9 @@ import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 
 public class TotalTimeColumn extends FormattedDoubleDetailTypeColumn {
 
-    protected TotalTimeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
-        super(detailType, field, headerStyle, columnStyle);
+    protected TotalTimeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle,
+            String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(detailType, field, headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     @Override

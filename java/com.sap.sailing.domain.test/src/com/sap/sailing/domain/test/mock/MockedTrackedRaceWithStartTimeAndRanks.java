@@ -24,8 +24,8 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -44,6 +44,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Util;
 
 /**
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
@@ -97,7 +98,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
+    public Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -352,7 +353,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded) {
         // TODO Auto-generated method stub
         
     }
@@ -377,7 +379,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -389,7 +391,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
@@ -438,7 +440,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void waitUntilWindLoadingComplete() {
+    public void waitUntilLoadingFromWindStoreComplete() {
         // TODO Auto-generated method stub
 
     }
@@ -607,6 +609,18 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
             boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+	@Override
+	public GPSFixStore getGPSFixStore() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    @Override
+    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

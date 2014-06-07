@@ -13,11 +13,11 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final long serialVersionUID = 5853404150107387702L;
@@ -35,8 +35,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
     
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         FregHtmlParser parser = new FregHtmlParser();
         for (URL url : getUrls()) {
             URLConnection conn;
@@ -45,7 +45,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                 TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
                 RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
                 final String boatClassName = getBoatClassName(regattaResult);
-                result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
+                result.put(boatClassName, Collections.singleton(new Util.Pair<String, TimePoint>(boatClassName, lastModified)));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

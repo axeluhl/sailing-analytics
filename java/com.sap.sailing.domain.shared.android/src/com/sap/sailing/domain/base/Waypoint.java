@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sse.common.Named;
 
 /**
  * Waypoints constitute {@link Course}s and demarcate their {@link Leg}s. A waypoint's position is defined by a

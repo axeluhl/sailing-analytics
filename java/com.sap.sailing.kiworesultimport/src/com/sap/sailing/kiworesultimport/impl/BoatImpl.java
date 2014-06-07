@@ -8,8 +8,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sap.sailing.kiworesultimport.Boat;
-import com.sap.sailing.kiworesultimport.Crew;
 import com.sap.sailing.kiworesultimport.BoatResultInRace;
+import com.sap.sailing.kiworesultimport.Crew;
 
 public class BoatImpl extends NamedImpl implements Boat {
 

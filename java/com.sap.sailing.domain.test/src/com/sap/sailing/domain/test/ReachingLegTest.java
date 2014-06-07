@@ -23,8 +23,8 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -43,6 +43,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -75,14 +76,14 @@ public class ReachingLegTest extends TrackBasedTest {
         schomaeker = createCompetitor("Meike Schom�ker");
         competitors.add(schomaeker);
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
+        setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
         List<MarkPassing> hungersMarkPassings = createMarkPassings(hunger, start);
         getTrackedRace().updateMarkPassings(hunger, hungersMarkPassings);
         List<MarkPassing> plattnersMarkPassings = createMarkPassings(plattner, start);
         getTrackedRace().updateMarkPassings(plattner, plattnersMarkPassings);
     }
     
-    protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
+    protected DynamicTrackedRace createTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, regattaName, boatClass, /* trackedRegattaRegistry */ null,
@@ -102,7 +103,7 @@ public class ReachingLegTest extends TrackBasedTest {
         Course course = new CourseImpl(raceName, waypoints);
         RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
-                /* delayToLiveInMillis */ 0,
+        		EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate, the offset

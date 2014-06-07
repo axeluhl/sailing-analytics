@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.Permission;
@@ -32,6 +31,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sse.common.Util;
 
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test

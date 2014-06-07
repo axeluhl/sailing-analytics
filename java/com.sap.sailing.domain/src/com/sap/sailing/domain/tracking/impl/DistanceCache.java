@@ -6,11 +6,11 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 /**
  * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the
@@ -68,20 +68,20 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  * @author Axel Uhl (D043530)
  */
 public class DistanceCache {
-    private final NavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> distanceCache;
+    private final NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> distanceCache;
     
     private final NamedReentrantReadWriteLock lock;
     
-    private static final Comparator<Pair<TimePoint, ?>> timePointInPairComparator = new Comparator<Pair<TimePoint, ?>>() {
+    private static final Comparator<Util.Pair<TimePoint, ?>> timePointInPairComparator = new Comparator<Util.Pair<TimePoint, ?>>() {
         @Override
-        public int compare(Pair<TimePoint, ?> o1, Pair<TimePoint, ?> o2) {
+        public int compare(Util.Pair<TimePoint, ?> o1, Util.Pair<TimePoint, ?> o2) {
             return o1.getA().compareTo(o2.getA());
         }
     };
 
     public DistanceCache(String nameForLockLogging) {
         lock = new NamedReentrantReadWriteLock("lock for DistanceCache for "+nameForLockLogging, /* fair */ true);
-        this.distanceCache = new ArrayListNavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>(timePointInPairComparator);
+        this.distanceCache = new ArrayListNavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>>(timePointInPairComparator);
     }
     
     /**
@@ -90,15 +90,15 @@ public class DistanceCache {
      * the <code>to</code> value of the entry. If there is no entry that is at or after <code>from</code>,
      * <code>null</code> is returned.
      */
-    public Pair<TimePoint, Pair<TimePoint, Distance>> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
+    public Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
         LockUtil.lockForRead(lock);
         try {
-            Pair<TimePoint, Pair<TimePoint, Distance>> result = null;
-            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(createDummy(to));
+            Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> result = null;
+            Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(createDummy(to));
             if (entryForTo != null) {
-                final Pair<TimePoint, Distance> fromCeiling = entryForTo.getB().ceiling(new Pair<TimePoint, Distance>(from, null));
+                final Util.Pair<TimePoint, Distance> fromCeiling = entryForTo.getB().ceiling(new Util.Pair<TimePoint, Distance>(from, null));
                 if (fromCeiling != null) {
-                    result = new Pair<TimePoint, Pair<TimePoint, Distance>>(entryForTo.getA(), fromCeiling);
+                    result = new Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>>(entryForTo.getA(), fromCeiling);
                 }
             }
             return result;
@@ -113,10 +113,10 @@ public class DistanceCache {
     public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
         LockUtil.lockForWrite(lock);
         try {
-            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> dummy = createDummy(timePoint);
-            NavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> toRemove = distanceCache.tailSet(dummy, /* inclusive */ true);
-            for (Iterator<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> i=toRemove.iterator(); i.hasNext(); ) {
-                Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryToRemove = i.next();
+            Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> dummy = createDummy(timePoint);
+            NavigableSet<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> toRemove = distanceCache.tailSet(dummy, /* inclusive */ true);
+            for (Iterator<Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>> i=toRemove.iterator(); i.hasNext(); ) {
+                Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> entryToRemove = i.next();
                 assert entryToRemove.getA().compareTo(timePoint) >= 0;
                 i.remove();
             }
@@ -125,10 +125,10 @@ public class DistanceCache {
         }
     }
     
-    private NavigableSet<Pair<TimePoint, Distance>> getEntryForTo(TimePoint to) {
-        NavigableSet<Pair<TimePoint, Distance>> result = null;
-        Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> dummyForTo = createDummy(to);
-        Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(dummyForTo);
+    private NavigableSet<Util.Pair<TimePoint, Distance>> getEntryForTo(TimePoint to) {
+        NavigableSet<Util.Pair<TimePoint, Distance>> result = null;
+        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> dummyForTo = createDummy(to);
+        Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(dummyForTo);
         if (entryForTo != null && entryForTo.getA().equals(to)) {
             result = entryForTo.getB();
         }
@@ -138,20 +138,20 @@ public class DistanceCache {
     public void cache(TimePoint from, TimePoint to, Distance distance) {
         LockUtil.lockForWrite(lock);
         try {
-            NavigableSet<Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
+            NavigableSet<Util.Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
             if (entryForTo == null) {
-                entryForTo = new ArrayListNavigableSet<Pair<TimePoint, Distance>>(timePointInPairComparator);
-                Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> pairForTo = new Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>(
+                entryForTo = new ArrayListNavigableSet<Util.Pair<TimePoint, Distance>>(timePointInPairComparator);
+                Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> pairForTo = new Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>(
                         to, entryForTo);
                 distanceCache.add(pairForTo);
             }
-            entryForTo.add(new Pair<TimePoint, Distance>(from, distance));
+            entryForTo.add(new Util.Pair<TimePoint, Distance>(from, distance));
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
     }
     
-    private Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> createDummy(TimePoint to) {
-        return new Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>(to, null);
+    private Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> createDummy(TimePoint to) {
+        return new Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>(to, null);
     }
 }

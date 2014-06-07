@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.ui.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
 
 public class AbstractListFilterTest {
 
@@ -33,12 +35,14 @@ public class AbstractListFilterTest {
 
     @Test
     public void test() {
-        assertTrue(als.applyFilter("Race 2", all).size() == 2);
-        assertTrue(als.applyFilter("3", all).size() == 1 && als.applyFilter("3", all).get(0).getName() == "Race 3");
-        assertTrue(als.applyFilter("1 Wannsee", all).size() == 1 && als.applyFilter("1 Wannsee", all).get(0).getName() == "Race 1");
-        assertTrue(als.applyFilter("Wannsee 3", all).size() == 0);
-        assertTrue(als.applyFilter("Race Race", all).size() == 5);
-        assertTrue(als.applyFilter("R", all).size() == 5);
-        assertTrue(als.applyFilter("i", all).size() == 4);
+        assertEquals(2, Util.size(als.applyFilter(Arrays.asList(new String[] { "Race", "2" }), all)));
+        assertEquals(1, Util.size(als.applyFilter(Collections.singleton("3"), all)));
+        assertEquals("Race 3", als.applyFilter(Collections.singleton("3"), all).iterator().next().getName());
+        assertEquals(1, Util.size(als.applyFilter(Arrays.asList(new String[] { "1", "Wannsee" }), all)));
+        assertEquals("Race 1", als.applyFilter(Arrays.asList(new String[] { "1", "Wannsee" }), all).iterator().next().getName());
+        assertEquals(0, Util.size(als.applyFilter(Arrays.asList(new String[] { "Wannsee", "3" }), all)));
+        assertEquals(5, Util.size(als.applyFilter(Arrays.asList(new String[] { "Race", "Race" }), all)));
+        assertEquals(5, Util.size(als.applyFilter(Collections.singleton("R"), all)));
+        assertEquals(4, Util.size(als.applyFilter(Collections.singleton("i"), all)));
     }
 }

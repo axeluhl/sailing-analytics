@@ -17,16 +17,16 @@ public class KW470MarkPassingTest extends AbstractMarkPassingTest {
     public void testRace4() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("4");
     }
-    
-    @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
-        testRace("5");
-    }
-    
-    @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException {
-        testRace("6");
-    }
+
+    /*
+     * Ignored on master branch
+     * 
+     * @Test public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
+     * testRace("5"); }
+     * 
+     * @Test public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException {
+     * testRace("6"); }
+     */
 
     @Override
     protected String getFileName() {

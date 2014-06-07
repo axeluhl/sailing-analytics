@@ -26,10 +26,10 @@ import org.junit.rules.Timeout;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
@@ -42,6 +42,7 @@ import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
 import com.sap.sailing.server.replication.impl.Replicator;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractServerReplicationTest {
     protected static final int SERVLET_PORT = 9990;
@@ -61,7 +62,7 @@ public abstract class AbstractServerReplicationTest {
     @Before
     public void setUp() throws Exception {
         try {
-            Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
+            Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
                     true, /* master=null means create a new one */ null,
             /* replica=null means create a new one */null);
             result.getA().startToReplicateFrom(result.getB());
@@ -81,7 +82,7 @@ public abstract class AbstractServerReplicationTest {
      *            if not <code>null</code>, the value will be used for {@link #replica}; otherwise, a new racing event
      *            service will be created as replica
      */
-    protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
+    protected Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         String exchangeName = "test-sapsailinganalytics-exchange";
         String exchangeHost = "localhost";
@@ -106,7 +107,7 @@ public abstract class AbstractServerReplicationTest {
         } else {
             this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -117,7 +118,7 @@ public abstract class AbstractServerReplicationTest {
         masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, "localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
-        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        Util.Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Util.Pair<>(replicaReplicator, masterDescriptor);
         replicaReplicator.startInitialLoadTransmissionServlet();
         this.replicaReplicator = replicaReplicator; 
         return result;
@@ -127,7 +128,7 @@ public abstract class AbstractServerReplicationTest {
             final MongoObjectFactory mongoObjectFactory) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                 DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
-                EmptyWindStore.INSTANCE);
+                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
     }
 
     @After

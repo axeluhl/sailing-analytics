@@ -14,8 +14,10 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.quadtree,
  com.sap.sailing.domain.common.quadtree.impl;x-friends:="com.sap.sailing.domain.test",
  com.sap.sailing.domain.common.racelog,
+ com.sap.sailing.domain.common.racelog.tracking,
  com.sap.sailing.domain.common.racelog.utils,
  com.sap.sailing.domain.common.scalablevalue,
  com.sap.sailing.domain.common.scalablevalue.impl,
  com.sap.sailing.domain.common.trackfiles
-Require-Bundle: com.sap.sse.datamining.shared
+Require-Bundle: com.sap.sse.datamining.shared,
+ com.sap.sse.common

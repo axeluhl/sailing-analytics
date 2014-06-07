@@ -71,11 +71,14 @@ public class TimeSlider extends SliderBar {
             tick.getStyle().setVisibility(Visibility.HIDDEN);
             tick.getStyle().setProperty("display", "");
             int tickWidth = tick.getOffsetWidth();
-            long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
-            int tickLeftOffset = lineLeftOffset + (int) pos - (tickWidth / 2);
-            tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
-            tick.getStyle().setLeft(tickLeftOffset, Unit.PX);
-            tick.getStyle().setVisibility(Visibility.VISIBLE);
+            if (!maxValue.equals(minValue)) {
+                long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth
+                        / (maxValue.longValue() - minValue.longValue());
+                int tickLeftOffset = lineLeftOffset + (int) pos - (tickWidth / 2);
+                tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
+                tick.getStyle().setLeft(tickLeftOffset, Unit.PX);
+                tick.getStyle().setVisibility(Visibility.VISIBLE);
+            }
         }
 
         // Hide unused ticks
@@ -125,13 +128,15 @@ public class TimeSlider extends SliderBar {
 
                 // Position the label and make it visible
                 int labelWidth = label.getOffsetWidth();
-                long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
-                int labelLeftOffset = lineLeftOffset + (int) pos - (labelWidth / 2);
-                labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
-                labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
-                label.getStyle().setLeft(labelLeftOffset, Unit.PX);
-                label.getStyle().setVisibility(Visibility.VISIBLE);
-                
+                if (!maxValue.equals(minValue)) {
+                    long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth
+                            / (maxValue.longValue() - minValue.longValue());
+                    int labelLeftOffset = lineLeftOffset + (int) pos - (labelWidth / 2);
+                    labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
+                    labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
+                    label.getStyle().setLeft(labelLeftOffset, Unit.PX);
+                    label.getStyle().setVisibility(Visibility.VISIBLE);
+                }
                 previousValue = value;
             }
 

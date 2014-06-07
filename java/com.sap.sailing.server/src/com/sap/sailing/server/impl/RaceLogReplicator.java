@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
@@ -16,6 +17,16 @@ import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnRegatta;
 
+/**
+ * Being a {@link RaceColumnListener}, this replicator must be added to all {@link RaceColumn}s managing a
+ * {@link RaceLog} so as to be notified about changes to the race log. This largely happens by callbacks to the
+ * {@link #raceLogEventAdded(RaceColumn, RaceLogIdentifier, RaceLogEvent)} method. This object will then use the
+ * {@link Replicator} passed to this object's constructor and send a {@link RecordRaceLogEventOnLeaderboard} or a
+ * {@link RecordRaceLogEventOnRegatta} operation to all replicas.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
 public class RaceLogReplicator implements RaceColumnListener {
     private static final long serialVersionUID = 7190510926643574068L;
     

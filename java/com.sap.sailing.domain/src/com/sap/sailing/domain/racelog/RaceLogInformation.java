@@ -2,6 +2,8 @@ package com.sap.sailing.domain.racelog;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 
 /**
  * This interface holds the information for a {@link RaceColumn} needed to have access to its {@link RaceLog}s. 

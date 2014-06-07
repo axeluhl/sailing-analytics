@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.BaseChart;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -41,7 +42,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -97,7 +98,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
-                .setZoomType(Chart.ZoomType.X)
+                .setZoomType(BaseChart.ZoomType.X)
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setWidth100()
@@ -163,7 +164,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }));
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
-        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
+        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
@@ -171,10 +172,8 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                         return new Long(value < 0 ? value + 360 : value).toString();
                     }
                 }));
-        
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
-            .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
-        
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)
+            .setMaxPadding(0.05).setStartOnTick(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
@@ -200,7 +199,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         List<Series> currentSeries = Arrays.asList(chart.getSeries());
         Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
         
-        if(settings.isShowWindDirectionsSeries()) {
+        if (settings.isShowWindDirectionsSeries()) {
             for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
                 Series series = e.getValue();
                 if (settings.getWindDirectionSourcesToDisplay().contains(e.getKey().getType())) {
@@ -245,7 +244,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 }
             }
         }
-        
         chart.redraw();
     }
 
@@ -338,7 +336,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     newMaxTimepoint = wind.requestTimepoint;
                 }
      
-                if((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                if ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {

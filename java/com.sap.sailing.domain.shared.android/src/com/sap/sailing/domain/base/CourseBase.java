@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 /**
  * Base interface for courses consisting of all static information, which might be shared

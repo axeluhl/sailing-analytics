@@ -28,8 +28,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -42,6 +40,7 @@ import com.sap.sailing.server.gateway.ParseHttpParameterException;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.common.Util;
 
 /**
  * Exports a leaderboard to the JSON format. Uses a {@link SmartFutureCache}.
@@ -76,7 +75,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
      * computing cache updates, new values are appended "at the end" and therefore tend to survive longer than any value appended
      * earlier.
      */
-    private final SmartFutureCache<Leaderboard, LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> cache;
+    private final SmartFutureCache<Leaderboard, LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> cache;
     
     /**
      * Used to observe the leaderboards cached so far and triggering {@link #cache} updates.
@@ -84,15 +83,15 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     private final LeaderboardCacheManager cacheManager;
     
     private static class LeaderboardJsonCacheUpdateInterval implements UpdateInterval<LeaderboardJsonCacheUpdateInterval> {
-        private final LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates;
+        private final LinkedHashSet<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates;
         
-        public LeaderboardJsonCacheUpdateInterval(Iterable<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates) {
+        public LeaderboardJsonCacheUpdateInterval(Iterable<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates) {
             assert timePointsAndResultStates != null;
             this.timePointsAndResultStates = new LinkedHashSet<>();
             Util.addAll(timePointsAndResultStates, this.timePointsAndResultStates);
         }
 
-        public LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> getTimePointsAndResultStates() {
+        public LinkedHashSet<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>> getTimePointsAndResultStates() {
             return timePointsAndResultStates;
         }
 
@@ -104,7 +103,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
          */
         @Override
         public LeaderboardJsonCacheUpdateInterval join(LeaderboardJsonCacheUpdateInterval otherUpdateInterval) {
-            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> newTimePointsAndResultStates = new LinkedHashSet<>();
+            LinkedHashSet<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>> newTimePointsAndResultStates = new LinkedHashSet<>();
             newTimePointsAndResultStates.addAll(getTimePointsAndResultStates());
             newTimePointsAndResultStates.addAll(otherUpdateInterval.getTimePointsAndResultStates());
             return new LeaderboardJsonCacheUpdateInterval(newTimePointsAndResultStates);
@@ -114,17 +113,17 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     
     private class LeaderboardJsonCacheUpdater
             implements
-            CacheUpdater<Leaderboard, LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> {
+            CacheUpdater<Leaderboard, LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> {
         @Override
-        public LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> computeCacheUpdate(Leaderboard key,
+        public LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> computeCacheUpdate(Leaderboard key,
                 LeaderboardJsonCacheUpdateInterval updateInterval) throws Exception {
-            final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
+            final LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
             if (updateInterval == null) {
                 result = null;
             } else {
                 // no removeEldestEntry override required here; map is merged into another LinkedHashMap created in provideNewCacheValue
                 result = new LinkedHashMap<>();
-                for (Triple<TimePoint, ResultStates, Integer> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
+                for (com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
                     StringWriter sw = new StringWriter();
                     computeLeaderboardJson(key, timePointAndResultState).writeJSONString(sw);
                     result.put(timePointAndResultState, sw.getBuffer());
@@ -134,11 +133,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         }
 
         @Override
-        public LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> provideNewCacheValue(Leaderboard leaderboard,
-                LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> oldCacheValue,
-                LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> computedCacheUpdate,
+        public LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> provideNewCacheValue(Leaderboard leaderboard,
+                LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> oldCacheValue,
+                LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> computedCacheUpdate,
                 LeaderboardJsonCacheUpdateInterval updateInterval) {
-            final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
+            final LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
             if (computedCacheUpdate == null) {
                 result = null;
                 if (oldCacheValue != null) {
@@ -146,10 +145,10 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 }
             } else {
                 // Note: don't use access-based ordering as it turns the get(...) call into a "write" access
-                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f) {
+                result = new LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f) {
                     private static final long serialVersionUID = -6197983565575024084L;
                     @Override
-                    protected boolean removeEldestEntry(Entry<Triple<TimePoint, ResultStates, Integer>, StringBuffer> eldest) {
+                    protected boolean removeEldestEntry(Entry<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> eldest) {
                         final boolean result;
                         if (totalNumberOfCacheEntries > MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES) {
                             totalNumberOfCacheEntries--;
@@ -191,7 +190,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         } catch (ParseHttpParameterException e1) {
         }
         boolean useCache = true; // default
-        if(useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
+        if (useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
             useCache = false;
         }
         if (leaderboardName == null) {
@@ -207,8 +206,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                     StringBuffer jsonLeaderboardAsString;
                     if (resultTimePoint != null) {
-                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePointAndMaxCompetitorsCount =
-                                new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
+                        com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer> resultStateAndTimePointAndMaxCompetitorsCount =
+                                new com.sap.sse.common.Util.Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
                         if (useCache) {
                             jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount);
                         } else {
@@ -241,12 +240,12 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private StringBuffer getLeaderboardJsonFromCacheOrCompute(Leaderboard leaderboard,
-            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
+            com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
         final StringBuffer result;
-        Map<Triple<TimePoint, ResultStates, Integer>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
+        Map<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultStateAndMaxCompetitorsCount)) {
             cacheMisses++;
-            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStatesAndMaxCompetitorsCount = new LinkedHashSet<>();
+            LinkedHashSet<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStatesAndMaxCompetitorsCount = new LinkedHashSet<>();
             timePointsAndResultStatesAndMaxCompetitorsCount.add(timePointAndResultStateAndMaxCompetitorsCount);
             cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStatesAndMaxCompetitorsCount));
             // now wait for this entry to be computed
@@ -262,7 +261,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private JSONObject computeLeaderboardJson(Leaderboard leaderboard,
-            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
+            com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
         TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
         ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
         Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();
@@ -477,7 +476,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
      */
     @Override
     public void invalidate(Leaderboard leaderboard) {
-        final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> currentCachedValueForLeaderboard =
+        final LinkedHashMap<com.sap.sse.common.Util.Triple<TimePoint, ResultStates, Integer>, StringBuffer> currentCachedValueForLeaderboard =
                 cache.get(leaderboard, /* waitForLatest */ false);
         cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(currentCachedValueForLeaderboard.keySet()));
     }

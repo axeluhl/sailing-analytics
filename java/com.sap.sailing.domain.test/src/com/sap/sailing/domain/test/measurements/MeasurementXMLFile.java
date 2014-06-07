@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * A utility for generating output files that contain an artificial test result with a &lt;system-out&gt; tag that has
@@ -26,6 +26,10 @@ public class MeasurementXMLFile {
     private final String testSuiteName;
     private final Set<MeasurementCase> cases;
     private final String testClassName;
+    
+    public MeasurementXMLFile(Class<?> testClass) {
+        this("TEST-"+testClass.getSimpleName()+".xml", testClass.getSimpleName(), testClass.getName());
+    }
     
     public MeasurementXMLFile(String reportFileName, String testSuiteName, String testClassName) {
         this.reportFileName = reportFileName;

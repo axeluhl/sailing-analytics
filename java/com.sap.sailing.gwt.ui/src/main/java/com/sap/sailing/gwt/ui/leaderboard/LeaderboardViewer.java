@@ -15,8 +15,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardCha
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -31,13 +29,12 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
     private LeaderboardPanel overallLeaderboardPanel;
     
     public LeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace, final String leaderboardGroupName,
-            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
-            boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
+            final Timer timer, final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace,
+            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, 
+            boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                // perform the first request as live request but don't auto-play
-                new Timer(PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ 3000l), stringMessages, hideToolbar);
+                timer, stringMessages, hideToolbar);
 
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);

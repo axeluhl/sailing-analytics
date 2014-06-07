@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -28,6 +27,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sse.common.Named;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>,
         DialogListenerHost {

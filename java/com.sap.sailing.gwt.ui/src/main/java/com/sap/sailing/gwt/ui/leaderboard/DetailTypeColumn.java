@@ -25,8 +25,9 @@ public abstract class DetailTypeColumn<FieldType extends Comparable<?>, Renderin
         T get(LeaderboardRowDTO row);
     }
 
-    protected DetailTypeColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell, String headerStyle, String columnStyle) {
-        super(cell, detailType.getDefaultSortingOrder());
+    protected DetailTypeColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell,
+            String headerStyle, String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(cell, detailType.getDefaultSortingOrder(), displayedLeaderboardRowsProvider);
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = DetailTypeFormatter.format(detailType);
         this.unit = DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]";

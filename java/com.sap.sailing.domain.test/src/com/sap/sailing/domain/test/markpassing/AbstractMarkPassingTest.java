@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
@@ -217,7 +217,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 } finally {
                     getTrackedRace().getTrack(c).unlockAfterRead();
                 }
-                Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
                 chooser.calculateMarkPassDeltas(c, f);
                 boolean gotPassed = true;
                 boolean gotOther = false;

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing regatta for a
@@ -42,7 +43,7 @@ public interface TrackedRegatta extends Serializable {
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+    		GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**

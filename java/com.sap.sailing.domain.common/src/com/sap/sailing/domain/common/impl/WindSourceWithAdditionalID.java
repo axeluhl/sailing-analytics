@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 
 /**

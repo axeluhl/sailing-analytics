@@ -21,14 +21,13 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
+import com.sap.sse.common.Util;
 
 public class WebSocketConnectionManager extends WebSocketAdapter implements LiveDataConnection {
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
@@ -144,8 +143,8 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         }
     }
     
-    public Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
-        return new Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
+    public com.sap.sse.common.Util.Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
+        return new com.sap.sse.common.Util.Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
     
     @Override

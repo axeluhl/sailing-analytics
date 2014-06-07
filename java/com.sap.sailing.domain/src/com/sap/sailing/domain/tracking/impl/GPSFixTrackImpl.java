@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -45,6 +44,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sse.common.Util;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
@@ -54,6 +54,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
+    
     private final GPSTrackListeners<ItemType, FixType> listeners;
     
 
@@ -259,12 +260,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return millisecondsOverWhichToAverage;
     }
 
-    private Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
+    private Util.Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
         lockForRead();
         try {
             FixType lastFixBefore = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
             FixType firstFixAfter = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
-            return new Pair<FixType, FixType>(lastFixBefore, firstFixAfter);
+            return new Util.Pair<FixType, FixType>(lastFixBefore, firstFixAfter);
         } finally {
             unlockAfterRead();
         }
@@ -321,7 +322,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         lockForRead();
         try {
-            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
+            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
             return getEstimatedPosition(timePoint, extrapolate, fixesForPositionEstimation.getA(), fixesForPositionEstimation.getB());
         } finally {
             unlockAfterRead();
@@ -329,13 +330,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+    public Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
         if (fix == null) {
             throw new IllegalArgumentException("fix must not be null");
         }
         lockForRead();
         try {
-            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
+            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
             final TimePoint start;
             if (fix.equals(fixesForPositionEstimation.getA())) {
                 if (getLastFixBefore(fix.getTimePoint()) == null) {
@@ -366,7 +367,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     end = fixesForPositionEstimation.getB().getTimePoint();
                 }
             }
-            return new Pair<TimePoint, TimePoint>(start, end);
+            return new Util.Pair<TimePoint, TimePoint>(start, end);
         } finally {
             unlockAfterRead();
         }
@@ -423,7 +424,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+    public Util.Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
         return maxSpeedCache.getMaxSpeed(from, to);
     }
 
@@ -477,7 +478,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } else {
             lockForRead();
             try {
-                Pair<TimePoint, Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
+                Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
                         .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
                 if (bestCacheEntry != null) {
                     // compute the missing stretches between best cache entry's "from" and our "from" and the cache
@@ -670,7 +671,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 0.9, relativeTo);
         speeds.add(speedWithConfidence);
         double bearingConfidence = 0.9;
-        if (speed.getKnots() < 0.01) {
+        if (speed.getKnots() < 0.001) {
             bearingConfidence = 0;
         }
         bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
@@ -690,7 +691,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * then the next fix is added to the result interval. This is because for that next fix, <code>fix</code> in that case will be relevant
      * for speed estimation because it's the closest fix.
      */
-    protected Pair<TimePoint, TimePoint> getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(FixType fix) {
+    protected Util.Pair<TimePoint, TimePoint> getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(FixType fix) {
         TimePoint intervalStart = null;
         TimePoint intervalEnd = null;
         lockForRead();
@@ -750,7 +751,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
-        return new Pair<TimePoint, TimePoint>(intervalStart, intervalEnd);
+        return new Util.Pair<TimePoint, TimePoint>(intervalStart, intervalEnd);
     }
     
     protected FixType createDummyGPSFix(TimePoint at) {
@@ -1009,7 +1010,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         final boolean result;
         lockForWrite();
         try {
-            result = super.add(fix);
+            result = addWithoutLocking(fix);
             invalidateValidityAndDistanceCaches(fix);
         } finally {
             unlockAfterWrite();

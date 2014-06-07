@@ -12,8 +12,8 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[General Project Information|wiki/general-information]]
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
-  * [[Production Environment|wiki/production-environment]]
-  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+  * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
+  * [[TracTrac|wiki/tractrac-lifecycle]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
@@ -24,6 +24,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
+  * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
 * Information for Webdesigners

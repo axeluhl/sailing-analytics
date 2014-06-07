@@ -21,14 +21,39 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
 
     private final double scoreForRaceWinner;
     
+    private final double minimumScoreFromRank;
+    
     public HighPointFirstGetsFixedScore(double scoreForRaceWinner) {
+        this(scoreForRaceWinner, /* minimumScoreFromRank */ 1.0);
+    }
+    
+    protected HighPointFirstGetsFixedScore(double scoreForRaceWinner, double minimumScoreFromRank) {
         this.scoreForRaceWinner = scoreForRaceWinner;
+        this.minimumScoreFromRank = minimumScoreFromRank;
+    }
+    
+    protected double getScoreForRaceWinner() {
+        return scoreForRaceWinner;
+    }
+    
+    private double getMinimumScoreFromRank() {
+        return minimumScoreFromRank;
     }
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        final int effectiveRank;
+        final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
         final Double result;
+        if (effectiveRank == 0) {
+            result = null;
+        } else {
+            result = Math.max(getMinimumScoreFromRank(), (double) (getScoreForRaceWinner() - effectiveRank + 1));
+        }
+        return result;
+    }
+
+    protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+        final int effectiveRank;
         int competitorFleetOrdering;
         if (rank == 0) {
             effectiveRank = 0;
@@ -41,11 +66,6 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
                 effectiveRank = rank;
             }
         }
-        if (effectiveRank == 0) {
-            result = null;
-        } else {
-            result = Math.max(1.0, (double) (scoreForRaceWinner - effectiveRank + 1));
-        }
-        return result;
+        return effectiveRank;
     }
 }

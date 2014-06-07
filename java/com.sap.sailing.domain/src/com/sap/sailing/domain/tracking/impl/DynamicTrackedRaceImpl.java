@@ -33,16 +33,16 @@ import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -55,6 +55,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
@@ -74,9 +75,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
-        super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
         this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
@@ -117,13 +118,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.<p>
      * 
      * Loading wind tracks from the <code>windStore</code> happens asynchronously which means that when the constructor returns,
-     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilWindLoadingComplete()}
+     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromWindStoreComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, long delayToLiveInMillis,
+            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind/2);
     }
 
@@ -131,6 +132,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         if (track != null) {
+            if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                logger.finest(""+competitor.getName() + ": " + fix);
+            }
             track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         }
     }
@@ -248,16 +252,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
-    /**
-     * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
-     * of the {@link #getWindLoadingLock() wind loading lock}, locking against the wind loading thread which uses the
-     * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
-     * hasn't started yet.
-     */
     @Override
-    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
+    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded,
+            final boolean notifyAboutGPSFixesAlreadyLoaded) {
         if (notifyAboutWindFixesAlreadyLoaded) {
-            LockUtil.lockForRead(getWindLoadingLock());
+            LockUtil.lockForRead(getLoadingFromWindStoreLock());
+        }
+        if (notifyAboutGPSFixesAlreadyLoaded) {
+            LockUtil.lockForRead(getLoadingFromGPSFixStoreLock());
         }
         try {
             addListener(listener);
@@ -281,9 +283,37 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     }
                 }
             }
+            if (notifyAboutGPSFixesAlreadyLoaded) {
+                for (Mark mark : getMarks()) {
+                    GPSFixTrack<Mark, GPSFix> markTrack = getOrCreateTrack(mark);
+                    markTrack.lockForRead();
+                    try {
+                        for (GPSFix fix : markTrack.getRawFixes()) {
+                            listener.markPositionChanged(fix, mark);
+                        }
+                    } finally {
+                        markTrack.unlockAfterRead();
+                    }
+                }
+                
+                for (Competitor competitor : getRace().getCompetitors()) {
+                    GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
+                    competitorTrack.lockForRead();
+                    try {
+                        for (GPSFixMoving fix : competitorTrack.getRawFixes()) {
+                            listener.competitorPositionChanged(fix, competitor);
+                        }
+                    } finally {
+                        competitorTrack.unlockAfterRead();
+                    }
+                }
+            }
         } finally {
             if (notifyAboutWindFixesAlreadyLoaded) {
-                LockUtil.unlockAfterRead(getWindLoadingLock());
+                LockUtil.unlockAfterRead(getLoadingFromWindStoreLock());
+            }
+            if (notifyAboutGPSFixesAlreadyLoaded) {
+                LockUtil.unlockAfterRead(getLoadingFromGPSFixStoreLock());
             }
         }
     }
@@ -820,7 +850,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 result = before.middle(after.reverse());
             }
         } else if (instruction == PassingInstruction.Line) {
-            Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
+            com.sap.sse.common.Util.Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
             if (pos.getA() != null && pos.getB() != null) {
                 Position portPosition = getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
                 Position starboardPosition = getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
@@ -833,15 +863,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
         return result;
     }
-
     @Override
-    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
+    public com.sap.sse.common.Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark lineMark : w.getMarks()) {
             final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
             false);
             if (estimatedMarkPosition == null) {
-                return new Pair<Mark, Mark>(null,null);
+                return new com.sap.sse.common.Util.Pair<Mark, Mark>(null,null);
             }
             markPositions.add(estimatedMarkPosition);
         }
@@ -850,7 +879,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final boolean isStartLine = indexOfWaypoint == 0;
         final Bearing legDeterminingDirectionBearing = getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
         if (legDeterminingDirectionBearing == null) {
-            return new Pair<Mark, Mark>(null, null);
+            return new com.sap.sse.common.Util.Pair<Mark, Mark>(null, null);
         }
         Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1), legDeterminingDirectionBearing);
         final Mark starboardMarkWhileApproachingLine;
@@ -862,6 +891,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             portMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
         }
-        return new Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+        return new com.sap.sse.common.Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
     }
 }

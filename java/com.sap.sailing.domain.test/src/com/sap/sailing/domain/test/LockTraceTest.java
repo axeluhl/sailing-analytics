@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.test.measurements.Measurement;
+import com.sap.sailing.domain.test.measurements.MeasurementCase;
+import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
@@ -44,25 +48,58 @@ public class LockTraceTest {
         NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantReadLocking-Lock", /* fair */ true);
         LockUtil.lockForRead(lock);
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(1, lock.getReaders().size());
         LockUtil.lockForRead(lock);
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(2, lock.getReaders().size());
         LockUtil.unlockAfterRead(lock);
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(1, lock.getReaders().size());
+        LockUtil.unlockAfterRead(lock);
+        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(0, lock.getReadHoldCount());
+        assertEquals(0, lock.getReaders().size());
+    }
+    
+    @Test
+    public void testReentrantWriteLockingWithInBetweenReadLocking() {
+        NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantWriteLockingWithInBetweenReadLocking-Lock", /* fair */ false);
+        LockUtil.lockForWrite(lock);
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        LockUtil.lockForRead(lock); // reentrant read while holding write
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.lockForWrite(lock); // reentrant write
+        assertTrue(lock.getWriter() == Thread.currentThread());
         assertTrue(lock.getReaders().contains(Thread.currentThread()));
         LockUtil.unlockAfterRead(lock);
         assertFalse(lock.getReaders().contains(Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(0, lock.getReadHoldCount());
+        LockUtil.unlockAfterWrite(lock);
+        assertTrue(lock.getWriter() == Thread.currentThread());
+        LockUtil.unlockAfterWrite(lock);
+        assertFalse(lock.getWriter() == Thread.currentThread());
     }
 
     @Test
-    public void testLockingPerformance() {
+    public void testLockingPerformance() throws IOException {
         NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("Lock", /* fair */ true);
         long start = System.currentTimeMillis();
-        for (int i=0; i<100000; i++) {
+        final int count = 100000;
+        for (int i=0; i<count; i++) {
             LockUtil.lockForRead(lock);
             LockUtil.unlockAfterRead(lock);
             LockUtil.lockForWrite(lock);
             LockUtil.unlockAfterWrite(lock);
         }
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile(this.getClass());
+        MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+        performanceReportCase.addMeasurement(new Measurement("Obtaining and releasing "+count+" read and write locks in ms",
+                System.currentTimeMillis()-start));
+        performanceReport.write();
+
         System.out.println("Took "+(System.currentTimeMillis()-start)+"ms");
     }
     

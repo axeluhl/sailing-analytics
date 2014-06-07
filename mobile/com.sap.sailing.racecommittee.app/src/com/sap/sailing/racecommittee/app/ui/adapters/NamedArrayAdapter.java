@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sse.common.Named;
 
 /**
  * @author D053502

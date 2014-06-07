@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class UtilTest {
     private List<Integer> l;
