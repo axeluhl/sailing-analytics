@@ -25,7 +25,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     
     public MediaServiceImpl() {
         super();
-        BundleContext context = Activator.getContext();
+        BundleContext context = Activator.getDefault();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();

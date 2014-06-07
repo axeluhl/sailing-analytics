@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.datamining.client.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.client.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
@@ -46,8 +47,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-        registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         SplitLayoutPanel splitPanel = new SplitLayoutPanel();

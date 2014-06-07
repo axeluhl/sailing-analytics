@@ -31,7 +31,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     public DataMiningServiceImpl() {
-        context = Activator.getContext();
+        context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
     }

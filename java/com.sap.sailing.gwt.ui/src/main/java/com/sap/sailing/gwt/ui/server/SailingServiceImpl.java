@@ -447,7 +447,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final BundleContext context;
 
     public SailingServiceImpl() {
-        context = Activator.getContext();
+        context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
