@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -20,14 +19,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -213,43 +209,12 @@ public class ImportMasterDataOperation extends
             toState.removeLeaderboardGroup(leaderboardGroup.getName());
             existingLeaderboardGroup = null;
         }
-        Leaderboard overallLeaderboardData = null;
         if (existingLeaderboardGroup == null) {
-            overallLeaderboardData = leaderboardGroup.getOverallLeaderboard();
-            int[] overallLeaderboardDiscardThresholds = null;
-            ScoringSchemeType overallLeaderboardScoringSchemeType = null;
-            if (overallLeaderboardData != null) {
-                LeaderboardGroupMetaLeaderboard metaLeaderboard = (LeaderboardGroupMetaLeaderboard) overallLeaderboardData;
-                ThresholdBasedResultDiscardingRule rule = (ThresholdBasedResultDiscardingRule) metaLeaderboard
-                        .getResultDiscardingRule();
-                overallLeaderboardDiscardThresholds = rule.getDiscardIndexResultsStartingWithHowManyRaces();
-                overallLeaderboardScoringSchemeType = metaLeaderboard.getScoringScheme().getType();
-            }
-            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getId(),
-                    leaderboardGroup.getName(), leaderboardGroup.getDescription(),
-                    leaderboardGroup.isDisplayGroupsInReverseOrder(), leaderboardNames,
-                    overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+            toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
         } else {
-            leaderboardGroup = existingLeaderboardGroup;
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
-        }
-        if (leaderboardGroup.getOverallLeaderboard() != null && (override || existingLeaderboardGroup == null)) {
-            if (existingLeaderboardGroup != null && existingLeaderboardGroup.getOverallLeaderboard() != null) {
-                // remove old overall leaderboard if it existed
-                toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
-            }
-            Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-            for (Competitor suppressedCompetitor : overallLeaderboardData.getSuppressedCompetitors()) {
-                overallLeaderboard.setSuppressed(suppressedCompetitor, true);
-            }
-            for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
-                Double explicitFactor = overallLeaderboardData.getRaceColumnByName(column.getName())
-                        .getExplicitFactor();
-                toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
-            }
-            toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
     }
 

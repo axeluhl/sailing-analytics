@@ -582,4 +582,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void addRegattaWithoutReplication(Regatta regatta);
 
     void addEventWithoutReplication(Event event);
+
+    void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 }

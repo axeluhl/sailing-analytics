@@ -1885,6 +1885,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
+            String groupName = leaderboardGroup.getName();
+            if (leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            }
+            leaderboardGroupsByName.put(groupName, leaderboardGroup);
+            leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+        }
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+    }
+
+    @Override
     public void removeLeaderboardGroup(String groupName) {
         final LeaderboardGroup leaderboardGroup;
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
@@ -2692,4 +2708,5 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.fine("Remote search on "+remoteRef+" for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
         return result;
     }
+
 }
