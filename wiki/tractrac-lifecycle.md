@@ -24,7 +24,7 @@ Our system is capable of sending course and time updates related to races direct
 
 The information is as follows:
 
-- Whenever you're working with the local setup (e.g. Extreme) then use http://<local-url>:81/ and the user `trac@sapsailing.com` with password `sap0912`.
+- Whenever you're working with the local setup (e.g. Extreme) then use http://&lt;local-ip&gt;:81/ and the user `trac@sapsailing.com` with password `sap0912`.
 
 - For most use cases you can use the url http://secondary.traclive.dk:82/ (note the different port!) with the same auth as for the local case.
 
