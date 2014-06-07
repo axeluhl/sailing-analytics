@@ -40,15 +40,17 @@ public class MasterDataImporter {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
-        // Deserialize Regattas to make sure that Regattas are deserialized before Series
-        objectInputStream.readObject();
 
         @SuppressWarnings("unchecked")
         final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
 
+
+
         if (override) {
             setAllowCompetitorsDataToBeReset(competitorIds);
         }
+        // Deserialize Regattas to make sure that Regattas are deserialized before Series
+        objectInputStream.readObject();
         TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
 
         RegattaImpl.setOngoingMasterDataImport(null);

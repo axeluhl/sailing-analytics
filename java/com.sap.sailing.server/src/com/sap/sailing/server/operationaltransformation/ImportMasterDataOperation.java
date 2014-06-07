@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -428,34 +427,7 @@ public class ImportMasterDataOperation extends
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
             }
-            Iterable<CourseArea> courseAreas = event.getVenue().getCourseAreas();
-            for (CourseArea courseArea : courseAreas) {
-                boolean alreadyExists = false;
-                if (existingEvent != null && existsInSet(existingEvent.getVenue().getCourseAreas(), courseArea.getId())) {
-                    alreadyExists = true;
-                }
-                if (!alreadyExists) {
-                    toState.addCourseAreaWithoutReplication(id, courseArea.getId(), courseArea.getName());
-                } else {
-                    logger.info(String
-                            .format("Course area with id %1$s for event with id %2$s already exists and hasn't been overridden.",
-                                    courseArea.getId(), id));
-                }
-
-            }
         }
-    }
-
-    /**
-     * @return true if course with given id exists in <code>iterable</code>
-     */
-    private boolean existsInSet(Iterable<CourseArea> iterable, UUID uuid) {
-        for (CourseArea area : iterable) {
-            if (area.getId() == uuid) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

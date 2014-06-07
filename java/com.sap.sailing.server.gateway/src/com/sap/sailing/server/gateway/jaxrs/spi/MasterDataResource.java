@@ -92,9 +92,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
-                        objectOutputStream.writeObject(getService().getAllRegattas());
-                        objectOutputStream.writeObject(competitorIds);
-                        objectOutputStream.writeObject(masterData);
+                        writeObjects(competitorIds, masterData, objectOutputStream);
                     } finally {
                         objectOutputStream.close();
                         masterData.setMasterDataExportFlagOnRaceColumns(false);
@@ -115,9 +113,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                         objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
 
-                        // Actual start of streaming
-                        objectOutputStream.writeObject(competitorIds);
-                        objectOutputStream.writeObject(masterData);
+                        writeObjects(competitorIds, masterData, objectOutputStream);
                     } finally {
                         objectOutputStream.close();
                         masterData.setMasterDataExportFlagOnRaceColumns(false);
@@ -133,6 +129,13 @@ public class MasterDataResource extends AbstractSailingServerResource {
         long timeToExport = System.currentTimeMillis() - startTime;
         logger.info(String.format("Took %s ms to start masterdataexport-streaming.", timeToExport));
         return builtResponse;
+    }
+
+    private void writeObjects(final List<Serializable> competitorIds, final TopLevelMasterData masterData,
+            ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(competitorIds);
+        objectOutputStream.writeObject(getService().getAllRegattas());
+        objectOutputStream.writeObject(masterData);
     }
 
     private class ByteCountOutputStreamDecorator extends FilterOutputStream {
