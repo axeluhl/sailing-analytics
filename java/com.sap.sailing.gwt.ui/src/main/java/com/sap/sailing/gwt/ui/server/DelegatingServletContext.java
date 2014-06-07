@@ -317,9 +317,4 @@ public class DelegatingServletContext implements ServletContext {
     public void declareRoles(String... roleNames) {
         delegate.declareRoles(roleNames);
     }
-
-    @Override
-    public String getVirtualServerName() {
-        return delegate.getVirtualServerName();
-    }
 }
