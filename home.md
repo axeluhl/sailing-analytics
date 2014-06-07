@@ -13,7 +13,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
-  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+  * [[TracTrac|wiki/tractrac-lifecycle]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
