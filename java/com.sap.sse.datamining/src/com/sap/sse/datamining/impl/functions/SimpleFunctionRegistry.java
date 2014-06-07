@@ -22,11 +22,18 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     private final Map<Class<?>, Set<Function<?>>> statistics;
     private final Map<Class<?>, Set<Function<?>>> dimensions;
     private final Map<Class<?>, Set<Function<?>>> externalFunctions;
+    
+    private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
     public SimpleFunctionRegistry() {
         statistics = new HashMap<>();
         dimensions = new HashMap<>();
         externalFunctions = new HashMap<>();
+        
+        functionMaps = new ArrayList<>();
+        functionMaps.add(statistics);
+        functionMaps.add(dimensions);
+        functionMaps.add(externalFunctions);
     }
     
     @Override
@@ -131,20 +138,33 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     @Override
+    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister) {
+        for (Class<?> classToUnregister : classesToUnregister) {
+            unregisterAllFunctionsOf(classToUnregister);
+        }
+    }
+
+    private void unregisterAllFunctionsOf(Class<?> classToUnregister) {
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            functionMap.remove(classToUnregister);
+        }
+    }
+
+    @Override
     public Collection<Function<?>> getAllFunctions() {
         Collection<Function<?>> allFunctions = new HashSet<>();
-        allFunctions.addAll(getStatistics());
-        allFunctions.addAll(getDimensions());
-        allFunctions.addAll(getExternalFunctions());
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            allFunctions.addAll(asSet(functionMap));
+        }
         return allFunctions;
     }
 
     @Override
     public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
         Collection<Function<?>> allFunctions = new HashSet<>();
-        allFunctions.addAll(getStatisticsOf(declaringType));
-        allFunctions.addAll(getDimensionsOf(declaringType));
-        allFunctions.addAll(getExternalFunctionsOf(declaringType));
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            allFunctions.addAll(functionMap.get(declaringType));
+        }
         return allFunctions;
     }
 

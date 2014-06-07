@@ -19,7 +19,7 @@ import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryCl
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 
 
-public class TestSimpleFunctionRegistryRegistrations {
+public class TestSimpleFunctionRegistry {
     
     private static ExpectedFunctionRegistryUtil functionRegistryUtil;
     
@@ -57,6 +57,32 @@ public class TestSimpleFunctionRegistryRegistrations {
         
         Collection<Function<?>> expectedExternalFunctions = functionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
         assertThat(registry.getExternalFunctions(), is(expectedExternalFunctions));
+    }
+    
+    @Test
+    public void testUnregistration() {
+        FunctionRegistry registry = new SimpleFunctionRegistry();
+        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        
+        Collection<Function<?>> expectedDimensions = new HashSet<>();
+        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
+        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
+        assertThat(registry.getDimensions(), is(expectedDimensions));
+        
+        Set<Class<?>> classesToUnregister = new HashSet<>();
+        classesToUnregister.add(Test_HasLegContext.class);
+        registry.unregisterAllFunctionsOf(classesToUnregister);
+        
+        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
+        assertThat(registry.getDimensions(), is(expectedDimensions));
+
+        registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
+        classesToUnregister = new HashSet<>();
+        classesToUnregister.add(Test_HasRaceContext.class);
+        registry.unregisterAllFunctionsOf(classesToUnregister);
+        
+        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class);
+        assertThat(registry.getDimensions(), is(expectedDimensions));
     }
 
 }
