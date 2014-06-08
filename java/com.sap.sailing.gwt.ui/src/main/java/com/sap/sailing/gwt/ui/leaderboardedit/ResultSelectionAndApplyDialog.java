@@ -12,7 +12,9 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,6 +37,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final ListBox scoreCorrectionListBox;
     private final ListBox scoreCorrectionProviderListBox;
     private final BusyIndicator busyIndicator;
+    private final HTML manage2SailFinalNotice;
     
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -59,9 +62,13 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         scoreCorrectionListBox.setVisible(false);
         busyIndicator = new SimpleBusyIndicator();
         
+        manage2SailFinalNotice = new HTML(new SafeHtmlBuilder().appendEscapedLines(
+                stringMessages.manage2SailFinalNotice()).toSafeHtml());
+
         scoreCorrectionProviderListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                manage2SailFinalNotice.setVisible(false);
                 int selectedIndex = scoreCorrectionProviderListBox.getSelectedIndex();
                 if (selectedIndex > 0) {
                     String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedIndex);
@@ -230,6 +237,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         vPanel.add(busyIndicator);
         vPanel.add(scoreCorrectionProviderListBox);
         vPanel.add(scoreCorrectionListBox);
+        vPanel.add(manage2SailFinalNotice);
         return vPanel;
     }
 
