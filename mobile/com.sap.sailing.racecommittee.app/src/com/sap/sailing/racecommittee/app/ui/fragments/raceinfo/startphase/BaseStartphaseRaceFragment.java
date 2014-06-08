@@ -76,7 +76,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         raceStartIn4Minutes = (Button) getView().findViewById(R.id.raceStartIn4Minutes);
         raceStartIn4Minutes.setVisibility(View.INVISIBLE);
         
-        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn2Minutes);
+        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn1Minute);
         raceStartIn2Minutes.setVisibility(View.INVISIBLE);
         
         raceResetCourse = (Button) getView().findViewById(R.id.raceResetCourse);
