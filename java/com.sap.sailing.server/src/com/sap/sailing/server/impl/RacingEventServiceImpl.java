@@ -987,7 +987,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void addRegattaWithoutReplication(Regatta regatta) {
-        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), regatta.getDefaultCourseArea().getId(), regatta);
+        UUID defaultCourseAreaId = null;
+        if (regatta.getDefaultCourseArea() != null) {
+            defaultCourseAreaId = regatta.getDefaultCourseArea().getId();
+        }
+        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), defaultCourseAreaId, regatta);
         if (!wasAdded) {
             logger.info("Regatta with name " + regatta.getName() + " already existed, so it hasn't been added.");
         }
