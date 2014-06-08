@@ -50,7 +50,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public TrackedRace getTrackedRace() {
-        return getTrackedRace();
+        return trackedRace;
     }
 
     @Override
