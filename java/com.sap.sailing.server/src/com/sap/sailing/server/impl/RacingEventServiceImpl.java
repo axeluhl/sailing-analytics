@@ -986,6 +986,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addRegattaWithoutReplication(Regatta regatta) {
+        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), regatta.getDefaultCourseArea().getId(), regatta);
+        if (!wasAdded) {
+            logger.info("Regatta with name " + regatta.getName() + " already existed, so it hasn't been added.");
+        }
+    }
+
+    @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
@@ -994,6 +1002,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), series, persistent, scoringScheme, id, courseArea);
+        boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
+        if (wasCreated) {
+            logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
+        }
+        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
+    }
+
+    private boolean addAndConnectRegatta(boolean persistent, Serializable defaultCourseAreaId, Regatta regatta) {
         boolean wasCreated = false;
         // try a quick read protected by the concurrent hash map implementation
         if (!regattasByName.containsKey(regatta.getName())) {
@@ -1013,7 +1029,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 LockUtil.unlockAfterWrite(regattasByNameLock);
             }
         }
-        logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         if (persistent) {
             updateStoredRegatta(regatta);
         }
@@ -1024,7 +1039,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
+        return wasCreated;
     }
 
     @Override
@@ -1870,6 +1885,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
+            String groupName = leaderboardGroup.getName();
+            if (leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            }
+            leaderboardGroupsByName.put(groupName, leaderboardGroup);
+            leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+        }
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+    }
+
+    @Override
     public void removeLeaderboardGroup(String groupName) {
         final LeaderboardGroup leaderboardGroup;
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
@@ -2219,18 +2250,27 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addEventWithoutReplication(Event event) {
+        addEvent(event);
+    }
+
+    @Override
     public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
             boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
+        addEvent(result);
         result.setImageURLs(imageURLs);
         result.setVideoURLs(videoURLs);
+        return result;
+    }
+
+    private void addEvent(Event result) {
         if (eventsById.containsKey(result.getId())) {
             throw new IllegalArgumentException("Event with ID " + result.getId()
                     + " already exists which is pretty surprising...");
         }
         eventsById.put(result.getId(), result);
         mongoObjectFactory.storeEvent(result);
-        return result;
     }
 
     @Override
@@ -2668,4 +2708,5 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.fine("Remote search on "+remoteRef+" for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
         return result;
     }
+
 }
