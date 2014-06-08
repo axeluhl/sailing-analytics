@@ -24,6 +24,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 
@@ -134,6 +135,11 @@ public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(FixedMarkPassingEvent event) {
+        listener.eventAdded(event);
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
         listener.eventAdded(event);
     }
 }

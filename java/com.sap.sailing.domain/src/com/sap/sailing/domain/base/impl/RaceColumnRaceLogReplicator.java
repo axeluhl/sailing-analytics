@@ -28,6 +28,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Serializable {
     private static final long serialVersionUID = 4752330236765192592L;
@@ -154,6 +155,11 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
 
     @Override
     public void visit(FixedMarkPassingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
         notifyOnAdd(event);
     }
 }

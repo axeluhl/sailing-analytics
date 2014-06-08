@@ -8,6 +8,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 
 public interface RaceLogEventVisitor {
@@ -54,4 +55,6 @@ public interface RaceLogEventVisitor {
     public void visit(CloseOpenEndedDeviceMappingEvent event);
 
     public void visit(FixedMarkPassingEvent event);
+
+    public void visit(SuppressedMarkPassingsEvent event);
 }

@@ -48,6 +48,7 @@ import com.sap.sailing.domain.racelog.tracking.events.FixedMarkPassingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.RegisterCompetitorEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.StartTrackingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.SuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
@@ -275,5 +276,12 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     public RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
         return new FixedMarkPassingEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing, zeroBasedIndexOfWaypoint);
+    }
+
+    @Override
+    public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint) {
+        return new SuppressedMarkPassingsEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId,
+                zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 }

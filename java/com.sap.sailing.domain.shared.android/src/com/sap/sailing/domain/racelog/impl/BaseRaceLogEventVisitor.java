@@ -23,6 +23,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 /**
  * Base class implementing {@link RaceLogEventVisitor}. Every method is implemented as a no-op.
@@ -136,6 +137,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     
     @Override
     public void visit(FixedMarkPassingEvent event){
+        
+    }
+    
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
         
     }
 }

@@ -29,6 +29,7 @@ import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -77,7 +78,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogRegisterCompetitorEventSerializer(competitorSerializer),
                 new RaceLogDefineMarkEventSerializer(competitorSerializer, new MarkJsonSerializer()),
                 new RaceLogCloseOpenEndedDeviceMappingEventSerializer(competitorSerializer),
-                new RaceLogFixedMarkPassingEventSerializer(competitorSerializer));
+                new RaceLogFixedMarkPassingEventSerializer(competitorSerializer),
+                new RaceLogSuppressedMarkPassingsEventSerializer(competitorSerializer));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -102,6 +104,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> defineMarkSerializer;
     private final JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer;
     private final JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
+    private final JsonSerializer<RaceLogEvent> suppressedMarkPassingsEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -127,7 +130,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> registerCompetitorSerializer,
             JsonSerializer<RaceLogEvent> defineMarkSerializer,
             JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer,
-            JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer) {
+            JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer,
+            JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -150,6 +154,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.defineMarkSerializer = defineMarkSerializer;
         this.closeOpenEndedDeviceMappingEventSerializer = closeOpenEndedDeviceMappingEventSerializer;
         this.fixedMarkPassingEventSerializer = fixedMarkPassingEventSerializer;
+        this.suppressedMarkPassingsEventSerializer = suppressedMarkPassingsSerializer;
         
         this.chosenSerializer = null;
     }
@@ -276,5 +281,10 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     public void visit(FixedMarkPassingEvent event) {
         chosenSerializer = fixedMarkPassingEventSerializer;
         
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
+        chosenSerializer = suppressedMarkPassingsEventSerializer;        
     }
 }

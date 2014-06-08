@@ -42,9 +42,11 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> defineMarkEventSerializer;
     private JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer;
     private JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
+    private JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer;
 
     private RaceLogEventFactory factory;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+
 
 
     @SuppressWarnings("unchecked")
@@ -72,6 +74,7 @@ public class RaceLogEventSerializerTest {
         defineMarkEventSerializer = mock(JsonSerializer.class);
         closeOpenEndedDeviceMappingEventSerializer = mock(JsonSerializer.class);
         fixedMarkPassingEventSerializer = mock(JsonSerializer.class);
+        suppressedMarkPassingsSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
@@ -80,7 +83,7 @@ public class RaceLogEventSerializerTest {
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 deviceCompetitorMappingEventSerializer, deviceMarkMappingEventSerializer, denoteForTrackingEventSerializer,
                 startTrackingEventSerializer, revokeEventSerializer, registerCompetitorEventSerializer, defineMarkEventSerializer,
-                closeOpenEndedDeviceMappingEventSerializer, fixedMarkPassingEventSerializer);
+                closeOpenEndedDeviceMappingEventSerializer, fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -253,10 +256,4 @@ public class RaceLogEventSerializerTest {
         serializer.serialize(event);
         verify(closeOpenEndedDeviceMappingEventSerializer).serialize(event);
     }
-    
-    @Test
-    public void testFixedMarkPassingEventSetializer() {
-        // TODO
-    }
-
 }

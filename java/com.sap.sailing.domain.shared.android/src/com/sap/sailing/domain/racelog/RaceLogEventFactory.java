@@ -121,4 +121,6 @@ public interface RaceLogEventFactory {
     RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
             List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint);
 
+    RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint);
 }

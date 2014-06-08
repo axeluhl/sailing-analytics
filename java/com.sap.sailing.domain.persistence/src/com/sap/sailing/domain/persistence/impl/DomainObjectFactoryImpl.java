@@ -145,6 +145,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.racelog.tracking.impl.PlaceHolderDeviceIdentifierSerializationHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -1326,6 +1327,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(FixedMarkPassingEvent.class.getSimpleName())){
             return loadRaceLogFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(SuppressedMarkPassingsEvent.class.getSimpleName())){
+            return loadRaceLogSuppressedMarkPassingsEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1482,6 +1485,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         TimePoint ofFixedPassing = loadTimePoint(dbObject, FieldNames.TIMEPOINT_OF_FIXED_MARKPASSING);
         Integer zeroBasedIndexOfWaypoint = (Integer) dbObject.get(FieldNames.INDEX_OF_PASSED_WAYPOINT.name());
         return raceLogEventFactory.createFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing, zeroBasedIndexOfWaypoint);
+    }
+
+    private RaceLogEvent loadRaceLogSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Integer zeroBasedIndexOfFirstSuppressedWaypoint = (Integer) dbObject.get(FieldNames.INDEX_OF_FIRST_SUPPRESSED_WAYPOINT.name());
+        return raceLogEventFactory.createSuppressedMarkPassingsEvent(createdAt, author, logicalTimePoint, id, competitors, passId, zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 
     private CompetitorResults loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
