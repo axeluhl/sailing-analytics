@@ -1038,4 +1038,5 @@ public interface StringMessages extends Messages {
     String imageURLs();
     String videoURLs();
     String manage2SailFinalNotice();
+    String advancePassId();
 }

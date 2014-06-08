@@ -2530,6 +2530,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            if (passId > raceLog.getCurrentPassId()) {
+                state.setAdvancePass(logicalTimePoint);
+            }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
             return state.getStartTime();
