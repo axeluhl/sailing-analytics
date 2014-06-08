@@ -32,7 +32,7 @@ public class FixedMarkPassingEventImpl extends RaceLogEventImpl implements Fixed
     }
 
     @Override
-    public Integer getZeroBasedIndexOfWaypointOfFixedPassing() {
+    public Integer getZeroBasedIndexOfPassedWaypoint() {
         return zeroBasedIndexOfWaypointOfPassing;
     }
 

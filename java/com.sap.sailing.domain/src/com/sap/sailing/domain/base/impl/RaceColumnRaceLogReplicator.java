@@ -155,6 +155,5 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     @Override
     public void visit(FixedMarkPassingEvent event) {
         notifyOnAdd(event);
-        
     }
 }

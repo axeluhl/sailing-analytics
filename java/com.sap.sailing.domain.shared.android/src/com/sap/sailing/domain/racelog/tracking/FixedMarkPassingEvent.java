@@ -8,6 +8,6 @@ public interface FixedMarkPassingEvent extends RaceLogEvent, Revokable {
     
     public TimePoint getTimePointOfFixedPassing();
 
-    Integer getZeroBasedIndexOfWaypointOfFixedPassing();
+    Integer getZeroBasedIndexOfPassedWaypoint();
 
 }

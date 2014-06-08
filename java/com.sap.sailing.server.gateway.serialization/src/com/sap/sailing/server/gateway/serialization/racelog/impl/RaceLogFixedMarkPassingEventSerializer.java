@@ -28,7 +28,7 @@ public class RaceLogFixedMarkPassingEventSerializer extends BaseRaceLogEventSeri
         FixedMarkPassingEvent event = (FixedMarkPassingEvent) object;
         
         JSONObject result = super.serialize(event);
-        result.put(FIELD_INDEX_OF_PASSED_WAYPOINT, event.getZeroBasedIndexOfWaypointOfFixedPassing());
+        result.put(FIELD_INDEX_OF_PASSED_WAYPOINT, event.getZeroBasedIndexOfPassedWaypoint());
         result.put(FIELD_TIMEPOINT_OF_MARKPASSING, event.getTimePointOfFixedPassing().asMillis());
         return result;
     }

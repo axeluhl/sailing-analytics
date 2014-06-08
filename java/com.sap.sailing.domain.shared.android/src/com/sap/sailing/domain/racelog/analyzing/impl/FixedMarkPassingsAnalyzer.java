@@ -25,7 +25,7 @@ public class FixedMarkPassingsAnalyzer extends RaceLogAnalyzer<Set<Triple<Compet
 
                 FixedMarkPassingEvent castedEvent = (FixedMarkPassingEvent) event;
                 result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent
-                        .getZeroBasedIndexOfWaypointOfFixedPassing(), castedEvent.getTimePoint()));
+                        .getZeroBasedIndexOfPassedWaypoint(), castedEvent.getTimePoint()));
             }
         }
         return result;
