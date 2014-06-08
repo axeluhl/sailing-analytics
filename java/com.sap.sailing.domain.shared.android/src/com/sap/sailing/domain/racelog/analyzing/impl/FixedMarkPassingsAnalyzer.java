@@ -19,10 +19,8 @@ public class FixedMarkPassingsAnalyzer extends RaceLogAnalyzer<Set<Triple<Compet
     @Override
     protected Set<Triple<Competitor, Integer, TimePoint>> performAnalysis() {
         Set<Triple<Competitor, Integer, TimePoint>> result = new HashSet<Triple<Competitor, Integer, TimePoint>>();
-
         for (RaceLogEvent event : getRaceLog().getUnrevokedEvents()) {
             if (event instanceof FixedMarkPassingEvent) {
-
                 FixedMarkPassingEvent castedEvent = (FixedMarkPassingEvent) event;
                 result.add(new Triple<Competitor, Integer, TimePoint>(castedEvent.getInvolvedBoats().get(0), castedEvent
                         .getZeroBasedIndexOfPassedWaypoint(), castedEvent.getTimePoint()));

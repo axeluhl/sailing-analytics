@@ -47,8 +47,6 @@ public class RaceLogEventSerializerTest {
     private RaceLogEventFactory factory;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
-
-
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
