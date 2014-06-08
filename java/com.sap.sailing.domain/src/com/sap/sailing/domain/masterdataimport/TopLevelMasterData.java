@@ -176,4 +176,17 @@ public class TopLevelMasterData implements Serializable {
         }
         return allEventsInMasterData.values();
     }
+
+    public Iterable<Regatta> getAllRegattas() {
+        Set<Regatta> regattas = new HashSet<>();
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    regattas.add(regattaLeaderboard.getRegatta());
+                }
+            }
+        }
+        return regattas;
+    }
 }
