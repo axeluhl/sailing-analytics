@@ -249,6 +249,7 @@
 
 	<string name="race_start_in_4_minutes">4 Minutes</string>
 	<string name="race_start_in_2_minutes">2 Minutes</string>
+	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Reset course</string>
 	
 	<string name="no_course_active">No course active</string>

@@ -134,7 +134,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     private void writeObjects(final List<Serializable> competitorIds, final TopLevelMasterData masterData,
             ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(competitorIds);
-        objectOutputStream.writeObject(getService().getAllRegattas());
+        objectOutputStream.writeObject(masterData.getAllRegattas());
         objectOutputStream.writeObject(masterData);
     }
 
