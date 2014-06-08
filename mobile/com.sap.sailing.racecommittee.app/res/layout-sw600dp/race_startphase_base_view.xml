@@ -96,7 +96,7 @@
 				    android:id="@+id/raceStartIn1Minute"
 				    android:layout_width="wrap_content"
 				    android:layout_height="90dp"
-				    android:text="@string/race_start_in_2_minutes" />
+				    android:text="@string/race_start_in_1_minute" />
 
                 </RelativeLayout>
 
