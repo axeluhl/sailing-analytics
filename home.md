@@ -13,7 +13,8 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
-  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+  * [[TracTrac|wiki/tractrac-lifecycle]]
+  * [[Analytics on a stick|wiki/analytics-on-a-stick]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
@@ -21,12 +22,14 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+  * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]

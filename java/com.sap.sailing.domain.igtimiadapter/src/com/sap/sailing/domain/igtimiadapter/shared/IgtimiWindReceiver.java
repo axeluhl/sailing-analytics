@@ -109,9 +109,9 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public IgtimiWindReceiver(Iterable<String> deviceSerialNumbers) {
+    public IgtimiWindReceiver(Iterable<String> deviceSerialNumbers, DeclinationService declinationService) {
         receiver = new FixReceiver();
-        declinationService = DeclinationService.INSTANCE;
+        this.declinationService = declinationService;
         listeners = new ConcurrentHashMap<>();
         awaTrack = new HashMap<>();
         awsTrack = new HashMap<>();
@@ -375,8 +375,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         } else {
             Bearing hdgm = getHDGM(timePoint, hdgmPair);
             if (hdgm != null) {
-                Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
-                trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                if (declinationService == null) {
+                    trueHeading = hdgm;
+                } else {
+                    Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
+                    trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                }
             } else {
                 trueHeading = null;
             }

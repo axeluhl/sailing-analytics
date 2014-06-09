@@ -109,8 +109,8 @@
 		      <localWorkers>3</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
 		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
-		      <compileReport>true</compileReport>
-		      <detailedSoyc>true</detailedSoyc>
+              <!--<compileReport>true</compileReport>
+              <detailedSoyc>true</detailedSoyc>-->
 	        </configuration>
             <goals>
               <goal>compile</goal>

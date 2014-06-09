@@ -32,7 +32,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final TrackableRaceDescriptor TRACKABLE_RACE = new TrackableRaceDescriptor(
             BMW_CUP_REGATTA, BMW_CUP_RACE_8, BMW_CUP_BOAT_CLASS);
     private static final TrackedRaceDescriptor TRACKED_RACE = new TrackedRaceDescriptor(
-            BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
+            BMW_CUP_RACE_8 + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
     @Before
@@ -71,7 +71,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         tracTracEvents.startTrackingForRace(trackableRace);
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(trackedRace, Status.TRACKING);
+        trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(trackedRace);
     }
     
