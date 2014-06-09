@@ -30,7 +30,7 @@ public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSer
         JSONObject result = super.serialize(event);
         result.put(FIELD_RACE_NAME, event.getRaceName());
         result.put(FIELD_BOAT_CLASS, event.getBoatClass().getName());
-        result.put(FIELD_RACE_ID, event.getRaceId());
+        result.put(FIELD_RACE_ID, event.getRaceId().toString());
 
         return result;
     }
