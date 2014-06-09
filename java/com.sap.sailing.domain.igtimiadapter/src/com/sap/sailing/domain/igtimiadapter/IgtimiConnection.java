@@ -152,7 +152,7 @@ public interface IgtimiConnection {
      * @return the number of wind fixes imported per tracked race; contains an entry for all elements in
      *         <code>trackedRaces</code>
      */
-    Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException,
+    Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces, boolean correctByDeclination) throws IllegalStateException,
             ClientProtocolException, IOException, ParseException;
     
     /**

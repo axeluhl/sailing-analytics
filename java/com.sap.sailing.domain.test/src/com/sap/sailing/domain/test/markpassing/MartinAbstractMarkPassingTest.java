@@ -43,6 +43,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * Tests the mark passing algorithm by using the data provided by an {@link OnlineTracTracBasedTest}. Subclasses may
@@ -66,7 +68,7 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
         super();
     }
 
-    public void setUp() throws IOException, InterruptedException, URISyntaxException, ParseException {
+    public void setUp() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
         if (!loadData(raceID) && !forceReload) {

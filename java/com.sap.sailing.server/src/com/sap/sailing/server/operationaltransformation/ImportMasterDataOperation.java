@@ -1,7 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -11,27 +10,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -61,8 +52,6 @@ public class ImportMasterDataOperation extends
 
     private final MasterDataImportObjectCreationCountImpl creationCount;
 
-    private final DomainFactory baseDomainFactory;
-
     private final boolean override;
 
     private final UUID importOperationId;
@@ -70,10 +59,9 @@ public class ImportMasterDataOperation extends
     private DataImportProgress progress;
 
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
-        this.baseDomainFactory = baseDomainFactory;
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
@@ -217,43 +205,12 @@ public class ImportMasterDataOperation extends
             toState.removeLeaderboardGroup(leaderboardGroup.getName());
             existingLeaderboardGroup = null;
         }
-        Leaderboard overallLeaderboardData = null;
         if (existingLeaderboardGroup == null) {
-            overallLeaderboardData = leaderboardGroup.getOverallLeaderboard();
-            int[] overallLeaderboardDiscardThresholds = null;
-            ScoringSchemeType overallLeaderboardScoringSchemeType = null;
-            if (overallLeaderboardData != null) {
-                LeaderboardGroupMetaLeaderboard metaLeaderboard = (LeaderboardGroupMetaLeaderboard) overallLeaderboardData;
-                ThresholdBasedResultDiscardingRule rule = (ThresholdBasedResultDiscardingRule) metaLeaderboard
-                        .getResultDiscardingRule();
-                overallLeaderboardDiscardThresholds = rule.getDiscardIndexResultsStartingWithHowManyRaces();
-                overallLeaderboardScoringSchemeType = metaLeaderboard.getScoringScheme().getType();
-            }
-            leaderboardGroup = toState.addLeaderboardGroup(leaderboardGroup.getId(),
-                    leaderboardGroup.getName(), leaderboardGroup.getDescription(),
-                    leaderboardGroup.isDisplayGroupsInReverseOrder(), leaderboardNames,
-                    overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+            toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
         } else {
-            leaderboardGroup = existingLeaderboardGroup;
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
-        }
-        if (leaderboardGroup.getOverallLeaderboard() != null && (override || existingLeaderboardGroup == null)) {
-            if (existingLeaderboardGroup != null && existingLeaderboardGroup.getOverallLeaderboard() != null) {
-                // remove old overall leaderboard if it existed
-                toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
-            }
-            Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-            for (Competitor suppressedCompetitor : overallLeaderboardData.getSuppressedCompetitors()) {
-                overallLeaderboard.setSuppressed(suppressedCompetitor, true);
-            }
-            for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
-                Double explicitFactor = overallLeaderboardData.getRaceColumnByName(column.getName())
-                        .getExplicitFactor();
-                toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
-            }
-            toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
     }
 
@@ -394,18 +351,7 @@ public class ImportMasterDataOperation extends
                         continue;
                     }
                 }
-                Serializable id = regatta.getId();
-                Iterable<? extends Series> series = regatta.getSeries();
-                String baseName = regatta.getBaseName();
-                String boatClassName = regatta.getBoatClass().getName();
-                CourseArea defaultCourseArea = regatta.getDefaultCourseArea();
-                Serializable defaultCourseAreaId = (defaultCourseArea != null) ? defaultCourseArea.getId() : null;
-                ScoringSchemeType scoringSchemeType = regatta.getScoringScheme().getType();
-                boolean isPersistent = regatta.isPersistent();
-                Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, id,
-                        series, isPersistent, baseDomainFactory.createScoringScheme(scoringSchemeType),
-                        defaultCourseAreaId).getA();
-                createdRegatta.setRegattaConfiguration(regatta.getRegattaConfiguration());
+                toState.addRegattaWithoutReplication(regatta);
                 Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta.getRegattaIdentifier());
                 if (raceIdStrings != null) {
                     for (String raceIdAsString : raceIdStrings) {
@@ -414,11 +360,11 @@ public class ImportMasterDataOperation extends
                                     .format("Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
                                             raceIdAsString));
                         } else {
-                            toState.setRegattaForRace(createdRegatta, raceIdAsString);
+                            toState.setRegattaForRace(regatta, raceIdAsString);
                         }
                     }
                 }
-                creationCount.addOneRegatta(createdRegatta.getId().toString());
+                creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
 
@@ -436,46 +382,13 @@ public class ImportMasterDataOperation extends
                 existingEvent = null;
             }
             if (existingEvent == null) {
-                String name = event.getName();
-                TimePoint startDate = event.getStartDate();
-                TimePoint endDate = event.getEndDate();
-                String venueName = event.getVenue().getName();
-                boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id,
-                        event.getImageURLs(), event.getVideoURLs());
-                creationCount.addOneEvent(newEvent.getId().toString());
+                toState.addEventWithoutReplication(event);
+                creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
             }
-            Iterable<CourseArea> courseAreas = event.getVenue().getCourseAreas();
-            for (CourseArea courseArea : courseAreas) {
-                boolean alreadyExists = false;
-                if (existingEvent != null && existsInSet(existingEvent.getVenue().getCourseAreas(), courseArea.getId())) {
-                    alreadyExists = true;
-                }
-                if (!alreadyExists) {
-                    toState.addCourseAreaWithoutReplication(id, courseArea.getId(), courseArea.getName());
-                } else {
-                    logger.info(String
-                            .format("Course area with id %1$s for event with id %2$s already exists and hasn't been overridden.",
-                                    courseArea.getId(), id));
-                }
-
-            }
         }
-    }
-
-    /**
-     * @return true if course with given id exists in <code>iterable</code>
-     */
-    private boolean existsInSet(Iterable<CourseArea> iterable, UUID uuid) {
-        for (CourseArea area : iterable) {
-            if (area.getId() == uuid) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

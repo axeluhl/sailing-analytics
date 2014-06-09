@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -32,7 +33,7 @@ public class WindReceiverTest {
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber), DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {
@@ -70,7 +71,7 @@ public class WindReceiverTest {
     public void trueWindCalculationTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber), DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {
@@ -112,7 +113,7 @@ public class WindReceiverTest {
         final Map<String, Wind> windReceived = new HashMap<>();
         final String deviceSerialNumber1 = "Non-Existing Test Device #1";
         final String deviceSerialNumber2 = "Non-Existing Test Device #2";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Arrays.asList(new String[] { deviceSerialNumber1, deviceSerialNumber2 }));
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Arrays.asList(new String[] { deviceSerialNumber1, deviceSerialNumber2 }), DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
             public void windDataReceived(Wind wind, String deviceSerialNumber) {

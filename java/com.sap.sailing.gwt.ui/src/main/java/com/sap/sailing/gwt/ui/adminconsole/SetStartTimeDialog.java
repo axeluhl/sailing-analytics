@@ -13,6 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -42,12 +43,14 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     private final String fleetName;
     private final StringMessages stringMessages;
     
+    private int currentPassId = -1;
     private Label currentStartTimeLabel;
     private Label currentPassIdBox;
     private BetterDateTimeBox timeBox;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     private ListBox racingProcedureSelection;
+    private CheckBox advancePassIdCheckbox;
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 
@@ -99,7 +102,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     }
     
     private Widget createInputPanel() {
-        Grid content = new Grid(4, 2);
+        Grid content = new Grid(5, 2);
         timeBox = new BetterDateTimeBox();
         timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
@@ -137,6 +140,10 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
         }
         content.setWidget(3, 0, createLabel(stringMessages.racingProcedure()));
         content.setWidget(3, 1, racingProcedureSelection);
+        
+        advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
+        advancePassIdCheckbox.setValue(false);
+        content.setWidget(4, 1, advancePassIdCheckbox);
         return content;
     }
 
@@ -150,7 +157,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
         dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = new Date();
         dto.startTime = timeBox.getValue();
-        dto.passId = -1;
+        dto.passId = advancePassIdCheckbox.getValue() ? currentPassId+1 : currentPassId;
         dto.racingProcedure = RacingProcedureType.values()[racingProcedureSelection.getSelectedIndex()];
         return dto;
     }
@@ -171,6 +178,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
                         currentStartTimeLabel.setText(DateTimeFormat.getFormat(
                                 DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));                    
                     }
+                    currentPassId = result.getB().intValue();
                     currentPassIdBox.setText(result.getB().toString());
                     int racingProcedureIndex = 0;
                     for (RacingProcedureType racingProcedureSelect : RacingProcedureType.values()) {

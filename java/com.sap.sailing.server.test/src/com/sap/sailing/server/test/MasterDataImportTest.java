@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1189,6 +1190,10 @@ public class MasterDataImportTest {
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_REGATTA_NAME + " (" + TEST_BOAT_CLASS_NAME + ")");
         Assert.assertNotNull(regattaOnTarget);
 
+        RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboardOnTarget;
+        Regatta regattaInLeaderboard = regattaLeaderboard.getRegatta();
+        Assert.assertSame(regattaOnTarget, regattaInLeaderboard);
+
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
 
         RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
@@ -1211,8 +1216,15 @@ public class MasterDataImportTest {
     public void testMasterDataImportForRegattaDefaultProcedureAndDesigner() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {
         RacingEventService sourceService = new RacingEventServiceImpl();
+
+        Iterable<URL> imageURLs = new HashSet<>();
+        Iterable<URL> videoURLs = new HashSet<>();
+        Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
+                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+        CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
+
         Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, UUID.randomUUID(),
-                new ArrayList<Series>(), true, new LowPoint(), null);
+                new ArrayList<Series>(), true, new LowPoint(), defaultCourseArea.getId());
         // Let's use the setters directly because we are not testing replication
         RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
         configuration.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MAP);
@@ -1269,6 +1281,12 @@ public class MasterDataImportTest {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
 
+        Iterable<URL> imageURLs = new HashSet<>();
+        Iterable<URL> videoURLs = new HashSet<>();
+        Event event = sourceService.createEventWithoutReplication("Test Event", new MillisecondsTimePoint(0),
+                new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), imageURLs, videoURLs);
+        CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
+
         List<String> raceColumnNames = new ArrayList<String>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
@@ -1282,8 +1300,9 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
+
         Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series,
-                true, new LowPoint(), null);
+                true, new LowPoint(), defaultCourseArea.getId());
         for (String name : raceColumnNames) {
             series.get(0).addRaceColumn(name, sourceService);
         }
