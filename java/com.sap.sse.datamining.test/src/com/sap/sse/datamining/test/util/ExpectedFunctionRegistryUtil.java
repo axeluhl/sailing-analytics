@@ -1,10 +1,12 @@
 package com.sap.sse.datamining.test.util;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -111,15 +113,26 @@ public class ExpectedFunctionRegistryUtil {
     }
     
     public Collection<Function<?>> getExpectedDimensionsFor(Class<?> declaringType) {
-        return expectedDimensions.get(declaringType);
+        Collection<Function<?>> expectedDimensions = this.expectedDimensions.get(declaringType);
+        return expectedDimensions != null ? expectedDimensions : new ArrayList<Function<?>>();
     }
     
     public Collection<Function<?>> getExpectedStatisticsFor(Class<?> declaringType) {
-        return expectedStatistics.get(declaringType);
+        Collection<Function<?>> expectedStatistics = this.expectedStatistics.get(declaringType);
+        return expectedStatistics != null ? expectedStatistics : new ArrayList<Function<?>>();
     }
     
     public Collection<Function<?>> getExpectedExternalFunctionsFor(Class<?> declaringType) {
-        return expectedExternalFunctions.get(declaringType);
+        Collection<Function<?>> expectedExternalFunctions = this.expectedExternalFunctions.get(declaringType);
+        return expectedExternalFunctions != null ? expectedExternalFunctions : new ArrayList<Function<?>>();
+    }
+
+    public Set<Function<?>> getExpectedFunctionsFor(Class<?> declaringType) {
+        Set<Function<?>> expectedFunctions = new HashSet<>();
+        expectedFunctions.addAll(getExpectedDimensionsFor(declaringType));
+        expectedFunctions.addAll(getExpectedStatisticsFor(declaringType));
+        expectedFunctions.addAll(getExpectedExternalFunctionsFor(declaringType));
+        return expectedFunctions;
     }
 
 }

@@ -21,14 +21,14 @@ import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 
 public class TestSimpleFunctionRegistry {
     
-    private static ExpectedFunctionRegistryUtil functionRegistryUtil;
+    private static ExpectedFunctionRegistryUtil expectedFunctionRegistryUtil;
     
     private Set<Class<?>> internalClassesToScan;
     private HashSet<Class<?>> externalClassesToScan;
 
     @BeforeClass
     public static void intializeExpectedFunctions() throws NoSuchMethodException, SecurityException {
-        functionRegistryUtil = new ExpectedFunctionRegistryUtil();
+        expectedFunctionRegistryUtil = new ExpectedFunctionRegistryUtil();
     }
     
     @Before
@@ -48,14 +48,14 @@ public class TestSimpleFunctionRegistry {
         registry.registerAllWithExternalFunctionPolicy(externalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
+        expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
+        expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
         assertThat(registry.getDimensions(), is(expectedDimensions));
         
-        Collection<Function<?>> expectedStatistics = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegContext.class);
+        Collection<Function<?>> expectedStatistics = expectedFunctionRegistryUtil.getExpectedStatisticsFor(Test_HasLegContext.class);
         assertThat(registry.getStatistics(), is(expectedStatistics));
         
-        Collection<Function<?>> expectedExternalFunctions = functionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
+        Collection<Function<?>> expectedExternalFunctions = expectedFunctionRegistryUtil.getExpectedExternalFunctionsFor(Test_ExternalLibraryClass.class);
         assertThat(registry.getExternalFunctions(), is(expectedExternalFunctions));
     }
     
@@ -65,15 +65,15 @@ public class TestSimpleFunctionRegistry {
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
         
         Collection<Function<?>> expectedDimensions = new HashSet<>();
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
+        expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class));
+        expectedDimensions.addAll(expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class));
         assertThat(registry.getDimensions(), is(expectedDimensions));
         
         Set<Class<?>> classesToUnregister = new HashSet<>();
         classesToUnregister.add(Test_HasLegContext.class);
         registry.unregisterAllFunctionsOf(classesToUnregister);
         
-        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
+        expectedDimensions = expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         assertThat(registry.getDimensions(), is(expectedDimensions));
 
         registry.registerAllWithInternalFunctionPolicy(internalClassesToScan);
@@ -81,7 +81,7 @@ public class TestSimpleFunctionRegistry {
         classesToUnregister.add(Test_HasRaceContext.class);
         registry.unregisterAllFunctionsOf(classesToUnregister);
         
-        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class);
+        expectedDimensions = expectedFunctionRegistryUtil.getExpectedDimensionsFor(Test_HasLegContext.class);
         assertThat(registry.getDimensions(), is(expectedDimensions));
     }
 

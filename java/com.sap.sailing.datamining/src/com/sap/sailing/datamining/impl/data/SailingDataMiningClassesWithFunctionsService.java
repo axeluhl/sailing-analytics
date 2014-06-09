@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
-import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
+import com.sap.sse.datamining.ClassesWithFunctionsService;
 
 public class SailingDataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
 

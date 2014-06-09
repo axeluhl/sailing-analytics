@@ -5,7 +5,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunctionsService;
-import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
+import com.sap.sse.datamining.ClassesWithFunctionsService;
 
 public class Activator implements BundleActivator {
     
