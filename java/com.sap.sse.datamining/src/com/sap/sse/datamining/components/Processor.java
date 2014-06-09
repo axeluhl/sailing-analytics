@@ -4,6 +4,10 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
 public interface Processor<InputType> {
 
+    /**
+     * Processes the given element and forwards the result.
+     * @param element The element to process.
+     */
     public void processElement(InputType element);
 
     /**
@@ -12,7 +16,7 @@ public interface Processor<InputType> {
      * The standard implementation is forwarding them to the last processor,
      * that collects the failures, until the processing is finished. Than the failures will be
      * handled.
-     * @param failure
+     * @param failure The thrown failure.
      */
     void onFailure(Throwable failure);
 
@@ -24,6 +28,10 @@ public interface Processor<InputType> {
      */
     public void finish() throws InterruptedException;
 
+    /**
+     * Aborts the processing immediately. The result will be <code>null</code>, incomplete or undefined.<br />
+     * To shut down the process cleanly use {@link #finish()}.
+     */
     public void abort();
 
     /**
