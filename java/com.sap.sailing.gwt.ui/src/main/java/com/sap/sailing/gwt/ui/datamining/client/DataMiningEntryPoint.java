@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.client.execution.SimpleQueryRunner;
-import com.sap.sailing.gwt.ui.datamining.client.presentation.ResultsChart;
+import com.sap.sailing.gwt.ui.datamining.client.presentation.PlainResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.client.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.client.settings.RefreshingSelectionTablesSettings;
@@ -61,7 +61,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         queryDefinitionProvider.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProvider.getEntryWidget());
         
-        ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
+        ResultsPresenter<Number> resultsPresenter = new PlainResultsPresenter(stringMessages);
         splitPanel.addSouth(resultsPresenter.getWidget(), 400);
         
         splitPanel.add(dockPanel);
