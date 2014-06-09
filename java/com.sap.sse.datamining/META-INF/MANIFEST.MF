@@ -18,7 +18,6 @@ Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.impl.criterias,
  com.sap.sse.datamining.impl.data,
  com.sap.sse.datamining.impl.functions,
- com.sap.sse.datamining.impl.functions.components,
  com.sap.sse.datamining.impl.functions.criterias,
  com.sap.sse.datamining.impl.i18n
 Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"
