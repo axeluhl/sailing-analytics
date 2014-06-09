@@ -31,7 +31,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -44,7 +44,7 @@ import com.sap.sse.common.Util;
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
-    private RacesHandle racesHandle;
+    private RaceHandle racesHandle;
     private final boolean[] notifier = new boolean[1];
     private RaceTrackingConnectivityParameters trackingParams;
 
@@ -127,8 +127,12 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);
+        // set the race identifier in the column; the tracked race
+        // doesn't exist yet, but the race identifier is recorded already
+        // anyway. When the tracked race then is loaded it is expected
+        // to automatically be linked to the leaderboard column.
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
-                new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
+                new RegattaNameAndRaceName("weym470may122011 (STG)", "weym470may122011")));
         startTracking();
         assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);

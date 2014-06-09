@@ -54,7 +54,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -162,8 +162,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
-        return new RacesHandle() {
+    public RaceHandle getRacesHandle() {
+        return new RaceHandle() {
             @Override
             public Regatta getRegatta() {
                 return SwissTimingRaceTrackerImpl.this.getRegatta();

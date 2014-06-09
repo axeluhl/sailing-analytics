@@ -10,7 +10,7 @@ import javax.xml.bind.JAXBException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
@@ -26,7 +26,7 @@ public interface SwissTimingAdapter {
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      * @param raceDescription TODO
      */
-    RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
+    RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore, long timeoutInMilliseconds)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 

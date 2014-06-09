@@ -27,7 +27,9 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.sap.sse.common.Util;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
@@ -39,7 +41,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException {
+    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
         leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }),
                 new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
@@ -68,18 +70,17 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     private void loadRace(String paramsFile, String storedDataFile) throws MalformedURLException, IOException, InterruptedException,
-            URISyntaxException {
-        final String raceName = "505 Race 2 from Kieler Woche 2011";
-        logger.info("Loading race "+raceName);
+            URISyntaxException, SubscriberInitializationException, CreateModelException {
+        logger.info("Loading race from params file "+paramsFile);
         URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/"+paramsFile).getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS });
-        logger.info("Recording wind for " + raceName);
+        logger.info("Recording wind for race loaded from params file " + paramsFile);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), new WindSourceImpl(WindSourceType.WEB));
-        logger.info("Fixing mark positions for " + raceName);
+        logger.info("Fixing mark positions for race loaded from params file " + paramsFile);
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        logger.info("Loaded race " + raceName);
+        logger.info("Loaded race from params file " + paramsFile);
     }
 }
