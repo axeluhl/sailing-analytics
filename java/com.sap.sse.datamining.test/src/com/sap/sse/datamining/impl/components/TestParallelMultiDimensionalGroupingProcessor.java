@@ -33,7 +33,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     public void intializeProcessor() throws IllegalArgumentException, NoSuchMethodException, SecurityException {
         Processor<GroupedDataEntry<Number>> receiver = new Processor<GroupedDataEntry<Number>>() {
             @Override
-            public void onElement(GroupedDataEntry<Number> element) {
+            public void processElement(GroupedDataEntry<Number> element) {
                 groupedElement = element;
             }
             @Override
@@ -80,7 +80,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     @Test
     public void testGroupKeyGeneration() {
         Number number = new Number(1111);
-        processor.onElement(number);
+        processor.processElement(number);
         ConcurrencyTestsUtil.sleepFor(200); //Giving the processor time to finish the instruction
         verifyGroupedElement(number);
     }

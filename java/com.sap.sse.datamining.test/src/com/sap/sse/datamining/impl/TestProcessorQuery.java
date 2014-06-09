@@ -158,7 +158,7 @@ public class TestProcessorQuery {
                 ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
         Processor<Double> resultReceiver = new Processor<Double>() {
             @Override
-            public void onElement(Double element) {
+            public void processElement(Double element) {
                 receivedElementOrFinished = true;
             }
             @Override

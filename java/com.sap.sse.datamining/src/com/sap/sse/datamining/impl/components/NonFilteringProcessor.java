@@ -12,7 +12,7 @@ public class NonFilteringProcessor<InputType> extends AbstractProcessor<InputTyp
     }
 
     @Override
-    protected InputType processElement(InputType element) {
+    protected InputType handleElement(InputType element) {
         return element;
     }
     

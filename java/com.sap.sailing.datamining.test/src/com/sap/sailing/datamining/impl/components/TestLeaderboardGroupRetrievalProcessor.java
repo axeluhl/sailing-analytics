@@ -39,7 +39,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
         retrievedGroups = new HashSet<>();
         Processor<LeaderboardGroup> receiver = new Processor<LeaderboardGroup>() {
             @Override
-            public void onElement(LeaderboardGroup element) {
+            public void processElement(LeaderboardGroup element) {
                 retrievedGroups.add(element);
             }
             @Override
@@ -73,7 +73,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
     @Ignore
     @Test
     public void testFilteringRetrieval() throws InterruptedException {
-        retriever.onElement(service);
+        retriever.processElement(service);
         retriever.finish();
         
         Collection<LeaderboardGroup> expectedGroups = getExpectedRetrievedGroups();

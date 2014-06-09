@@ -63,7 +63,7 @@ public class TestFilteringProcessors {
 
     private void processElements(Processor<Integer> processor, Collection<Integer> elements) {
         for (Integer element : elements) {
-            processor.onElement(element);
+            processor.processElement(element);
         }
     }
 
@@ -88,7 +88,7 @@ public class TestFilteringProcessors {
         
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 if (!receivedElements.containsKey(element)) {
                     receivedElements.put(element, 0);
                 }

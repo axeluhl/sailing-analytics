@@ -24,7 +24,7 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testFiltration() throws InterruptedException {
-        filteringRetrievalProcessor.onElement(dataSource);
+        filteringRetrievalProcessor.processElement(dataSource);
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
@@ -34,7 +34,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     
     @Test
     public void testProvidedAdditionalData() throws InterruptedException {
-        filteringRetrievalProcessor.onElement(dataSource);
+        filteringRetrievalProcessor.processElement(dataSource);
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
@@ -51,7 +51,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     public void setUpResultReceiverAndProcessor() {
         Processor<Integer> resultReceiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 synchronized (receivedResults) {
                     receivedResults.add(element);
                 }

@@ -58,7 +58,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             return run(0, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             // This code shouldn't be reached, because the timeout is deactivated (by the value 0 as timeout)
-            LOGGER.log(Level.WARNING, "Got a TimeoutException that should never happen: ", e);
+            LOGGER.log(Level.SEVERE, "Got a TimeoutException that should never happen: ", e);
         }
         
         return null;
@@ -82,7 +82,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             @Override
             public void run() {
                 try {
-                    firstProcessor.onElement(dataSource);
+                    firstProcessor.processElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
                     if (processorTimedOut) {
@@ -157,7 +157,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         }
 
         @Override
-        public void onElement(Map<GroupKey, AggregatedType> groupedAggregations) {
+        public void processElement(Map<GroupKey, AggregatedType> groupedAggregations) {
             resultsLock.lock();
             try {
                 results.putAll(groupedAggregations);

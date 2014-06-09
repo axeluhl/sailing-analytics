@@ -32,7 +32,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     }
 
     @Override
-    public void onElement(InputType element) {
+    public void processElement(InputType element) {
         for (WorkingType partialElement : partitionElement(element)) {
             final Callable<ResultType> instruction = createInstruction(partialElement);
             if (isInstructionValid(instruction)) {
@@ -76,7 +76,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     
     protected void forwardResultToReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.onElement(result);
+            resultReceiver.processElement(result);
         }
     }
 
