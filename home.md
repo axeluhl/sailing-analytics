@@ -22,6 +22,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
