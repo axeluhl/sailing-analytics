@@ -1512,7 +1512,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
             boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
         LegEntryDTO result;
-        if (trackedLeg == null) {
+        if (trackedLeg == null || trackedLeg.getTime(timePoint) == null) {
             result = null;
         } else {
             result = new LegEntryDTO();

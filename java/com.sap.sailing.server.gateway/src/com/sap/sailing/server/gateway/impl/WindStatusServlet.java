@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -119,10 +120,10 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             if (account.getUser() != null) {
-                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
+                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account, /* correctByDeclination */ true);
                 try {
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
-                    igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices());
+                    igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices(), DeclinationService.INSTANCE);
                     igtimiWindReceiver.addListener(this);
                     liveDataConnection.addListener(igtimiWindReceiver);
                     liveDataConnection.addListener(this);

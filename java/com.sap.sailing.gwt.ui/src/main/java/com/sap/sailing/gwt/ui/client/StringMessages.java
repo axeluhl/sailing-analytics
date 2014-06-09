@@ -1037,4 +1037,6 @@ public interface StringMessages extends Messages {
     String pleaseSelectASeriesFirst();
     String imageURLs();
     String videoURLs();
+    String manage2SailFinalNotice();
+    String advancePassId();
 }

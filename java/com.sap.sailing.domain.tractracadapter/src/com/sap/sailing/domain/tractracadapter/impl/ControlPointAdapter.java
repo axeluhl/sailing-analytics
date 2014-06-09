@@ -5,12 +5,12 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
-import com.tractrac.clientmodule.ControlPoint;
+import com.tractrac.model.lib.api.route.IControl;
 
 public class ControlPointAdapter extends AbstractWithID implements TracTracControlPoint {
-    private final ControlPoint controlPoint;
+    private final IControl controlPoint;
 
-    public ControlPointAdapter(ControlPoint controlPoint) {
+    public ControlPointAdapter(IControl controlPoint) {
         super();
         this.controlPoint = controlPoint;
     }
@@ -37,7 +37,7 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
     }
 
     /**
-     * Short name is not offered through the regular TTCM ControlPoint API.
+     * Short name is not offered through the regular TTCM IControl API.
      * 
      * @return <code>null</code>
      */
@@ -48,19 +48,19 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
 
     @Override
     public boolean getHasTwoPoints() {
-        return controlPoint.getHasTwoPoints();
+        return controlPoint.isMultiple();
     }
 
     @Override
     public Position getMark1Position() {
-        return new DegreePosition(controlPoint.getLat1(), controlPoint.getLon1());
+        return new DegreePosition(controlPoint.getControlPoints().get(0).getPosition().getLatitude(), controlPoint.getControlPoints().get(0).getPosition().getLongitude());
     }
 
     @Override
     public Position getMark2Position() {
         Position result;
         if (getHasTwoPoints()) {
-            result = new DegreePosition(controlPoint.getLat2(), controlPoint.getLon2());
+            result = new DegreePosition(controlPoint.getControlPoints().get(1).getPosition().getLatitude(), controlPoint.getControlPoints().get(1).getPosition().getLongitude());
         } else {
             result = null;
         }

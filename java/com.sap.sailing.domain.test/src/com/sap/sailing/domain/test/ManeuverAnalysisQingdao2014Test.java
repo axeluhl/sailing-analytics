@@ -28,6 +28,8 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTestCase {
     public ManeuverAnalysisQingdao2014Test() throws MalformedURLException, URISyntaxException {
@@ -41,7 +43,7 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
 
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140429_ESSQingdao-Race_4.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(
