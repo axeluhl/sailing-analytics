@@ -124,7 +124,7 @@ public class EventsTable extends Composite {
         nameColumn.setFieldUpdater(new FieldUpdater<EventDTO, SafeHtml>() {
             @Override
             public void update(int index, EventDTO object, SafeHtml value) {
-                activity.goTo(new EventPlace(object.id.toString()));
+                // activity.goTo(new EventPlace(object.id.toString()));
             }
         });
         nameColumn.setSortable(true);

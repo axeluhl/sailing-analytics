@@ -1,0 +1,42 @@
+/**
+ * Events on the main page
+ */
+.eventteaser {
+  font-size: 16px;
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 2.8125em;
+}
+.eventteaser:hover {
+  text-decoration: none;
+}
+.eventteaser:hover .eventteaser_name {
+  text-decoration: underline;
+}
+.eventteaser:hover .eventteaser_image {
+  opacity: 0.9;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+  filter: literal("alpha(opacity=90)");
+}
+.eventteaser_image {
+  position: relative;
+}
+.eventteaser_series {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.eventteaser_name {
+  font-size: 1.375em;
+  font-weight: bold;
+  color: #008fcc;
+  margin-top: 0.3125em;
+}
+.eventteaser_location {
+  color: #222;
+}
+
+.eventsoverviewrecent {
+  font-size: 16px;
+  font-size: 1rem;
+}

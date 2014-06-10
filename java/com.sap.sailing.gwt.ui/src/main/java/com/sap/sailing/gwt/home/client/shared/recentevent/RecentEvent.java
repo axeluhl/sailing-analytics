@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.mainevents;
+package com.sap.sailing.gwt.home.client.shared.recentevent;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class RecentEvent extends Composite {
     
@@ -25,7 +25,7 @@ public class RecentEvent extends Composite {
     @UiField Anchor eventOverviewLink;
     @UiField ImageElement eventImage;
 
-    private EventDTO event;
+    private EventBaseDTO event;
 
     private final String defaultImageUrl = "http://static.sapsailing.com/newhome/default_event_photo.jpg";
 
@@ -38,10 +38,12 @@ public class RecentEvent extends Composite {
     
     public RecentEvent(PlaceNavigator navigator) {
         this.navigator = navigator;
+        RecentEventResources.INSTANCE.css().ensureInjected();
+
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void setEvent(EventDTO event) {
+    public void setEvent(EventBaseDTO event) {
         this.event = event;
         updateUI();
     }

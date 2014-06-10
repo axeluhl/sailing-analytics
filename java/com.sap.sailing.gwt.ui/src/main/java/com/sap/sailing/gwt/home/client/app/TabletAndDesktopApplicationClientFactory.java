@@ -38,7 +38,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public EventsView createEventsView(EventsActivity activity) {
-        return new TabletAndDesktopEventsView(activity);
+        return new TabletAndDesktopEventsView(getPlaceNavigator());
     }
 
     @Override

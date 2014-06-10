@@ -4,11 +4,10 @@ import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class EventsActivity extends AbstractActivity {
 
@@ -22,9 +21,9 @@ public class EventsActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         final EventsView eventsView = clientFactory.createEventsView(EventsActivity.this);
         panel.setWidget(eventsView.asWidget());
-        clientFactory.getSailingService().getEvents(new AsyncCallback<List<EventDTO>>() {
+        clientFactory.getSailingService().getPublicEventsOfAllSailingServers(new AsyncCallback<List<EventBaseDTO>>() {
             @Override
-            public void onSuccess(List<EventDTO> events) {
+            public void onSuccess(List<EventBaseDTO> events) {
                 eventsView.setEvents(events);
             }
 
@@ -33,9 +32,5 @@ public class EventsActivity extends AbstractActivity {
                 Window.alert("Shit happens");
             }
         });
-    }
-    
-    void goTo(Place place) {
-        clientFactory.getPlaceController().goTo(place);
     }
 }

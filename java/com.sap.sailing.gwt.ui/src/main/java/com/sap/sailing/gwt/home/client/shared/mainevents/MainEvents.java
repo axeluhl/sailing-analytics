@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class MainEvents extends Composite {

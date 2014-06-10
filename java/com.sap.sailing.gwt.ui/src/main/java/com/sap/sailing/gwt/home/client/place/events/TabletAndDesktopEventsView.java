@@ -2,60 +2,52 @@ package com.sap.sailing.gwt.home.client.place.events;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecent;
+import com.sap.sailing.gwt.home.client.place.events.upcoming.EventsOverviewUpcoming;
 
-public class TabletAndDesktopEventsView extends Composite implements EventsView {
+public class TabletAndDesktopEventsView extends AbstractEventsView {
     private static EventsPageViewUiBinder uiBinder = GWT.create(EventsPageViewUiBinder.class);
 
     interface EventsPageViewUiBinder extends UiBinder<Widget, TabletAndDesktopEventsView> {
     }
     
-    private final EventsActivity activity;
-
-    @UiField
-    TextBox queryInput;
-    @UiField
-    Button searchButton;
-    @UiField
-    FlowPanel eventListPanel;
-    @UiField(provided=true)
-    EventsTable eventsTable;
-
-    public TabletAndDesktopEventsView(EventsActivity activity) {
+    @UiField(provided=true) EventsOverviewRecent recentEventsWidget;
+    @UiField(provided=true) EventsOverviewUpcoming upcomingEventsWidget;
+    @UiField Hyperlink recentEventsLink;
+    @UiField Hyperlink upcomingEventsLink;
+    
+    public TabletAndDesktopEventsView(PlaceNavigator navigator) {
         super();
-        this.activity = activity;
-        eventsTable = new EventsTable(activity);
+        recentEventsWidget = new EventsOverviewRecent(navigator);
+        upcomingEventsWidget = new EventsOverviewUpcoming(navigator);
+        
         initWidget(uiBinder.createAndBindUi(this));
-        queryInput.getElement().setId("queryInput");
     }
     
-    public void setEvents(Iterable<EventDTO> events) {
-        eventListPanel.clear();
-        for (final EventDTO event : events) {
-            Anchor request = new Anchor(event.getName());
-            request.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent e) {
-                    TabletAndDesktopEventsView.this.activity.goTo(new EventPlace(event.id.toString()));
-                }
-            });
-            eventListPanel.add(request);
-        }
-        eventsTable.setEvents(events);
+    @UiHandler("recentEventsLink")
+    void recentsEventsClicked(ClickEvent event) {
+        recentEventsWidget.setVisible(true);
+        
+        // set style buttoninactive
+        
+        upcomingEventsWidget.setVisible(false);
     }
-
-    @UiHandler("searchButton")
-    void buttonClick(ClickEvent event) {
+    
+    @UiHandler("upcomingEventsLink")
+    void upcomingEventsClicked(ClickEvent event) {
+        recentEventsWidget.setVisible(false);
+        upcomingEventsWidget.setVisible(true);
+    }
+    
+    @Override 
+    protected void updateEventsUI() {
+        recentEventsWidget.updateEvents(getRecentEventsOrderedByYear());
+        upcomingEventsWidget.updateEvents(getUpcomingEvents());
     }
 }
