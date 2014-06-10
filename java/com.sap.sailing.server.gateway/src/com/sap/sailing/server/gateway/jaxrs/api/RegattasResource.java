@@ -609,7 +609,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             TimePoint startTime = trackedLegOfCompetitor.getStartTime();
                             TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
                             TimePoint startOfRace = trackedRace.getStartOfRace();
-                            // between the start of the race and the start of the first leg will be no 'timeSinceGun' for the competitor
+                            // between the start of the race and the start of the first leg we have no 'timeSinceGun' for the competitor
                             if(startOfRace != null && startTime != null) {
                                 long timeSinceGun = -1;
                                 if(finishTime != null) {
