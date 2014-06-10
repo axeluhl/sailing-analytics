@@ -247,6 +247,7 @@
 	<string name="preference_there_are_no_regattas">There are no regattas loaded.</string>
 	<string name="configure_regatta">Configure regatta %1$s</string>
 
+	<string name="race_start_in_5_minutes">5 Minutes</string>
 	<string name="race_start_in_4_minutes">4 Minutes</string>
 	<string name="race_start_in_2_minutes">2 Minutes</string>
 	<string name="race_start_in_1_minute">1 Minute</string>
