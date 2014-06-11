@@ -116,8 +116,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
         scoreCorrectionListBox.clear();
 
         if(scp != null) {
-            scoreCorrectionListBox.addItem("Please select a scoring result...");
-            
+            scoreCorrectionListBox.addItem(stringMessages.pleaseSelectAScoringResult());
             List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameAndLastModified = new ArrayList<Util.Pair<String, Util.Pair<String, Date>>>();
             for (Entry<String, Set<Util.Pair<String, Date>>> entry : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
                 for (Util.Pair<String, Date> se : entry.getValue()) {
