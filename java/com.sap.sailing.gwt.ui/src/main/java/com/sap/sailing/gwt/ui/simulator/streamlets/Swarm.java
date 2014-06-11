@@ -66,7 +66,7 @@ public class Swarm {
         this.swarmContinue = false;
     }
 
-    public Particle createParticle() {
+    private Particle createParticle() {
         Particle particle = new Particle();
         boolean done = false;
         while (!done) {
@@ -109,7 +109,7 @@ public class Swarm {
         return visFull;
     }
 
-    public Particle[] createParticles() {
+    private Particle[] createParticles() {
         Particle[] newParticles = new Particle[nParticles];
         for (int idx = 0; idx < newParticles.length; idx++) {
             newParticles[idx] = this.createParticle();
@@ -122,7 +122,7 @@ public class Swarm {
         swarmPause = 5;
     }
 
-    public void updateBounds() {
+    private void updateBounds() {
         Position mapNE = new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds()
                 .getNorthEast().getLongitude());
         Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds()
@@ -182,7 +182,7 @@ public class Swarm {
         this.visSW = visSW;
     }
 
-    public Vector isVisible(Position pos) {
+    private Vector isVisible(Position pos) {
         // test for visibility of swarm
         Vector proj = this.projection.latlng2pixel(pos);
         Vector result = new Vector();
@@ -191,7 +191,7 @@ public class Swarm {
         return result;
     }
 
-    public void startLoop(final int millis) {
+    private void startLoop(final int millis) {
         // Create animation-loop based on timer timeout
         loopTimer = new com.google.gwt.user.client.Timer() {
             public void run() {
@@ -221,7 +221,7 @@ public class Swarm {
         loopTimer.schedule(millis);
     }
 
-    public void drawSwarm() {
+    private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
         ctxt.setGlobalAlpha(0.08);
         ctxt.setGlobalCompositeOperation("destination-out");
@@ -245,7 +245,7 @@ public class Swarm {
         }
     }
 
-    public boolean execute() {
+    private boolean execute() {
         double speed = 0.01 * field.motionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];

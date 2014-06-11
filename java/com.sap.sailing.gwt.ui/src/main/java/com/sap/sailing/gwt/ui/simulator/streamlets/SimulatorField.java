@@ -175,12 +175,8 @@ public class SimulatorField implements VectorField {
         final double latOffset = p.getLatDeg() - this.rcStart.getLatDeg();
         final double lngOffset = (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
         // closest grid point
-        long yIdx = Math.round(latOffset * this.nvY.getLatDeg() + lngOffset * this.nvY.getLngDeg())
-                + this.borderY;
-        long xIdx = Math.round(latOffset * this.nvX.getLatDeg() + lngOffset * this.nvX.getLngDeg()
-                + (this.resX - 1) / 2.)
-                + this.borderX;
-
+        long yIdx = Math.round(latOffset * this.nvY.getLatDeg() + lngOffset * this.nvY.getLngDeg()) + this.borderY;
+        long xIdx = Math.round(latOffset * this.nvX.getLatDeg() + lngOffset * this.nvX.getLngDeg() + (this.resX - 1) / 2.) + this.borderX;
         if (visFull) {
             if (yIdx >= (this.resY + 2 * this.borderY)) {
                 yIdx = this.resY + 2 * this.borderY - 1;
