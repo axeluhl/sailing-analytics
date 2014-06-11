@@ -43,6 +43,11 @@ public class DataMiningServerImpl implements DataMiningServer {
     }
 
     private void updateRegistryIfNecessary() {
+        updateInternalClassesWithMarkedMethods();
+        updateExternalLibraryClasses();
+    }
+
+    private void updateInternalClassesWithMarkedMethods() {
         Collection<Class<?>> availableInternalClassesWithMarkedMethods = classesWithFunctionsProvider.getInternalClassesWithMarkedMethods();
         Collection<Class<?>> internalClassesWithMarkedMethodsToRegister = getMissingElements(/*from*/ availableInternalClassesWithMarkedMethods, /*in*/ registeredInternalClassesWithMarkedMethods);
         Collection<Class<?>> internalClassesWithMarkedMethodsToUnregister = getMissingElements(/*from*/ registeredInternalClassesWithMarkedMethods, /*in*/ availableInternalClassesWithMarkedMethods);
@@ -51,7 +56,9 @@ public class DataMiningServerImpl implements DataMiningServer {
         registeredInternalClassesWithMarkedMethods.removeAll(internalClassesWithMarkedMethodsToUnregister);
         functionRegistry.registerAllWithInternalFunctionPolicy(internalClassesWithMarkedMethodsToRegister);
         registeredInternalClassesWithMarkedMethods.addAll(internalClassesWithMarkedMethodsToRegister);
+    }
 
+    private void updateExternalLibraryClasses() {
         Collection<Class<?>> availableExternalLibraryClasses = classesWithFunctionsProvider.getExternalLibraryClasses();
         Collection<Class<?>> externalLibraryClassesToRegister = getMissingElements(/*from*/ availableExternalLibraryClasses, /*in*/ registeredExternalLibraryClasses);
         Collection<Class<?>> externalLibraryClassesToUnregister = getMissingElements(/*from*/ registeredExternalLibraryClasses, /*in*/ availableExternalLibraryClasses);
@@ -66,15 +73,12 @@ public class DataMiningServerImpl implements DataMiningServer {
         if (from == null) {
             return new ArrayList<>();
         }
-        
-        Collection<Class<?>> missingElements = new HashSet<>();
-        
-        for (Class<?> element : from) {
-            if (!in.contains(element)) {
-                missingElements.add(element);
-            }
+        if (in == null) {
+            return from;
         }
         
+        Collection<Class<?>> missingElements = new HashSet<>(from);
+        missingElements.removeAll(in);
         return missingElements;
     }
     
