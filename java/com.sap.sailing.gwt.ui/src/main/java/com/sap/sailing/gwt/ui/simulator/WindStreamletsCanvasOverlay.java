@@ -136,8 +136,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     @Override
     public void timeChanged(final Date newDate, Date oldDate) {
-        int step = (int) ((newDate.getTime() - this.windParams.getStartTime().getTime()) / this.windParams
-                .getTimeStep().getTime());
+        int step = (int) ((newDate.getTime() - this.windParams.getStartTime().getTime()) / this.windParams.getTimeStep().asMillis());
         this.setStreamletsStep(step);
     }
 

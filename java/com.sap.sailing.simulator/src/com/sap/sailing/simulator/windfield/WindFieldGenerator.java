@@ -4,6 +4,7 @@ package com.sap.sailing.simulator.windfield;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.Boundary;
@@ -16,7 +17,7 @@ public interface WindFieldGenerator extends WindField, Serializable {
 
     public void setPositionGrid(Position[][] positions);
     
-    public void generate(TimePoint start, TimePoint end, TimePoint step);
+    public void generate(TimePoint start, TimePoint end, Duration step);
 
     public Position[][] getPositionGrid();
     

@@ -15,30 +15,34 @@ public class SimulatorField implements VectorField {
     private Position rcStart;
     private Position rcEnd;
 
-    private int resY;
-    private int resX;
+    private final int resY;
+    private final int resX;
 
-    private int borderY;
-    private int borderX;
+    private final int borderY;
+    private final int borderX;
 
-    private double bdXi;
-    private double bdPhi;
+    private final double bdXi;
+    private final double bdPhi;
 
-    private Position bdA;
-    private Position bdB;
-    private Position bdC;
+    private final Position bdA;
+    private final Position bdB;
+    private final Position bdC;
 
-    private double xScale;
-    private double maxLength;
-    private double particleFactor;
+    private final double xScale;
+    private final double maxLength;
+    private final double particleFactor;
 
-    private double lngScale;
+    /**
+     * The cosine of the field's average latitude (arithmetic average of NW's latitude and SE's latitude) which represents
+     * the average ratio of pixels used per longitude and latitude angle in the Mercator projection. At the equator, this
+     * ration is 1; towards the poles it gets less.
+     */
+    private final double lngScale;
 
-    private Position nvY;
-    private Position nvX;
-    private Position gvX;
+    private final Position nvY;
+    private final Position nvX;
 
-    private double[][][] data;
+    private final double[][][] data;
     private final String[] colorsForSpeeds;
     private int step;
 
@@ -65,7 +69,8 @@ public class SimulatorField implements VectorField {
         int steps = gridData.size() / (imax * jmax);
         this.data = new double[steps][imax][2 * jmax];
         double maxWindSpeed = 0;
-        double minWindSpeed = 100;
+        double minWindSpeed = Double.MAX_VALUE;
+        // copy the wind data from WindFieldDTO.getMatrix() to the data array, determining min/max wind speed
         for (int s = 0; s < steps; s++) {
             for (int i = 0; i < imax; i++) {
                 for (int j = 0; j < jmax; j++) {
@@ -86,20 +91,20 @@ public class SimulatorField implements VectorField {
         }
         this.maxLength = maxWindSpeed;
         this.particleFactor = 2.0;
-        double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
+        final double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
         this.lngScale = Math.cos(latAvg * Math.PI / 180.0);
-        double difLat = this.rcEnd.getLatDeg() - this.rcStart.getLatDeg();
-        double difLng = (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
-        double difLen = Math.sqrt(difLat * difLat + difLng * difLng);
+        final double difLat = this.rcEnd.getLatDeg() - this.rcStart.getLatDeg();
+        final double difLng = (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
+        final double difLen = Math.sqrt(difLat * difLat + difLng * difLng);
         this.nvY = new DegreePosition(difLat / difLen / difLen * (this.resY - 1), difLng / difLen / difLen
                 * (this.resY - 1));
         double nrmLat = -difLng / difLen;
         double nrmLng = difLat / difLen;
         this.nvX = new DegreePosition(nrmLat / this.xScale / difLen * (this.resX - 1), nrmLng / this.xScale / difLen
                 * (this.resX - 1));
-        this.gvX = new DegreePosition(nrmLat * this.xScale * difLen, nrmLng / this.lngScale * this.xScale * difLen);
-        this.bdC = new DegreePosition(this.gvX.getLatDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1),
-                this.gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
+        final Position gvX = new DegreePosition(nrmLat * this.xScale * difLen, nrmLng / this.lngScale * this.xScale * difLen);
+        this.bdC = new DegreePosition(gvX.getLatDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1),
+                gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
     }
 
     private Position getInnerPosition(double factX, double factY, boolean visFull) {
@@ -126,14 +131,15 @@ public class SimulatorField implements VectorField {
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
             GWT.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
         }
-        double avgX = this.data[this.step][idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
-                + this.data[this.step][idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
-                + this.data[this.step][idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
-                + this.data[this.step][idx.yTop][2 * idx.xTop] * idx.yMod * idx.xMod;
-        double avgY = this.data[this.step][idx.yBot][2 * idx.xBot + 1] * (1 - idx.yMod) * (1 - idx.xMod)
-                + this.data[this.step][idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
-                + this.data[this.step][idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
-                + this.data[this.step][idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
+        final double[][] dataAtStep = this.data[this.step];
+        double avgX = dataAtStep[idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
+                + dataAtStep[idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
+                + dataAtStep[idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
+                + dataAtStep[idx.yTop][2 * idx.xTop] * idx.yMod * idx.xMod;
+        double avgY = dataAtStep[idx.yBot][2 * idx.xBot + 1] * (1 - idx.yMod) * (1 - idx.xMod)
+                + dataAtStep[idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
+                + dataAtStep[idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
+                + dataAtStep[idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
         return new Vector(avgX / this.lngScale, avgY);
     }
 
