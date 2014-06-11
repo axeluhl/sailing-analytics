@@ -8,9 +8,6 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectExternalFunctionFilterCriteria;
-import com.sap.sse.datamining.impl.functions.criterias.MethodIsCorrectStatisticFilterCriteria;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {

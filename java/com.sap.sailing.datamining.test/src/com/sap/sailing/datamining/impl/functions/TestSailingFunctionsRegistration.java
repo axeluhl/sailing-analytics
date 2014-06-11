@@ -15,7 +15,6 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.data.SailingDataMiningClassesWithFunctionsService;
-import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Moving;
 import com.sap.sailing.domain.base.Nationality;
@@ -25,6 +24,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class TestSailingFunctionsRegistration {
     
@@ -34,7 +34,7 @@ public class TestSailingFunctionsRegistration {
     public static void setUpFunctionRegistryAndProvider() {
         SailingDataMiningClassesWithFunctionsService classesWithFunctionsService = new SailingDataMiningClassesWithFunctionsService();
         
-        functionRegistry = FunctionFactory.createFunctionRegistry(ConcurrencyTestsUtil.getExecutor());
+        functionRegistry = new SimpleFunctionRegistry();
         functionRegistry.registerAllWithInternalFunctionPolicy(classesWithFunctionsService.getInternalClassesWithMarkedMethods());
     }
     

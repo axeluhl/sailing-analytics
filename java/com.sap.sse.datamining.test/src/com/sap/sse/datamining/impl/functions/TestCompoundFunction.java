@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.CompoundFunction;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElement;
 import com.sap.sse.datamining.test.functions.test_classes.ContainerElementImpl;

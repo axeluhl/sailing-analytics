@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.criterias.IsDeclaringTypeFilterCriteria;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeInterface;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.functions.test_classes.DataTypeWithContextImpl;
