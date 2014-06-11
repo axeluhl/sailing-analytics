@@ -112,20 +112,20 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }-*/;
 
     public native void setSwarmData(JavaScriptObject swarmData) /*-{
-		$wnd.swarmData = swarmData;
+        $wnd.swarmData = swarmData;
     }-*/;
 
     private native void getJSNIWind(WindStreamletsCanvasOverlay wsc) /*-{
-		$wnd.getWindfromSimulator = function(idx) {
-			return wsc.@com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay::getWind(I)(idx);
-		};
+        $wnd.getWindfromSimulator = function(idx) {
+            return wsc.@com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay::getWind(I)(idx);
+        };
     }-*/;
 
     private native JavaScriptObject getWindInst(double x, double y) /*-{
-		return {
-			x : x,
-			y : y
-		};
+        return {
+            x : x,
+            y : y
+        };
     }-*/;
 
     public JavaScriptObject getWind(int idx) {
@@ -136,7 +136,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public native void setWindDataJSON(String jsonField) /*-{
-	eval(jsonField);
+        eval(jsonField);
     }-*/;
 
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
@@ -144,11 +144,11 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public native void setMapInstance(Object mapInstance) /*-{
-	$wnd.swarmMap = mapInstance;
+        $wnd.swarmMap = mapInstance;
     }-*/;
 
     public native void setCanvasProjectionInstance(Object instance) /*-{
-	$wnd.swarmCanvasProjection = instance;
+        $wnd.swarmCanvasProjection = instance;
     }-*/;
 
     public void startStreamlets() {
