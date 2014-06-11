@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sse.common.Named;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide

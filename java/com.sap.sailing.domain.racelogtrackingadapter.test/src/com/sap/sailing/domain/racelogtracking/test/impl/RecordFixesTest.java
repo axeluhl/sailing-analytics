@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static com.sap.sailing.domain.common.impl.Util.size;
+import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
+import com.sap.sse.common.Util;
 
 public class RecordFixesTest extends AbstractGPSFixStoreTest {
     private RecordFixesPostServlet servlet;
@@ -50,7 +50,7 @@ public class RecordFixesTest extends AbstractGPSFixStoreTest {
         List<GPSFix> fixes = new ArrayList<>();
         fixes.add(createFix(timepoint, 0, 0, 0, 0));
         fixes.add(createFix(timepoint+1, 0, 0, 0, 0));
-        Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new Triple<>(device, null, fixes);
+        Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new Util.Triple<>(device, null, fixes);
         servlet.process(null, data);
 
         DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<>(comp, 0);

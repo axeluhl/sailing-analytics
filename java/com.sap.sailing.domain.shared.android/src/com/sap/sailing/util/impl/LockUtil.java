@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of
@@ -69,7 +69,9 @@ public class LockUtil {
     /**
      * Counts the "virtual" locks. A "virtual" lock is obtained if and only if at the time of calling
      * {@link #lockForRead(NamedReentrantReadWriteLock)} or {@link #lockForWrite(NamedReentrantReadWriteLock)} the
-     * respective lock has a positive {@link #propagationCounts propagation count} for the current thread.
+     * respective lock has a positive {@link #propagationCounts propagation count} for the current thread. Entries
+     * always have a positive integer value. {@link #decrement(Lock, Map)} removes entries whose integer count would
+     * go to 0.
      */
     private static final Map<Thread, Map<Lock, Integer>> virtualLockCounts = new ConcurrentWeakHashMap<Thread, Map<Lock, Integer>>();
     
@@ -141,10 +143,7 @@ public class LockUtil {
     }
     
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
-        Map<Lock, Integer> currentThreadPropagationCounts = getCurrentThreadsPropagationCounts();
-        synchronized (currentThreadPropagationCounts) {
-            unlockVirtuallyOrActually(lock, lock.writeLock());
-        }
+        unlockVirtuallyOrActually(lock, lock.writeLock());
         final TimePoint timePointWriteLockWasObtained;
         timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
         if (timePointWriteLockWasObtained == null) {

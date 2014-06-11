@@ -22,7 +22,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -263,10 +262,10 @@ public abstract class CourseManagementWidget implements IsWidget {
         updateWaypointButtons();
     }
     
-    protected List<Util.Pair<ControlPointDTO, PassingInstruction>> createWaypointPairs() {
-        List<Util.Pair<ControlPointDTO, PassingInstruction>> result = new ArrayList<>();
+    protected List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> createWaypointPairs() {
+        List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> result = new ArrayList<>();
         for (WaypointDTO waypoint : waypoints.getDataProvider().getList()) {
-            result.add(new Util.Pair<>(waypoint.controlPoint, waypoint.passingInstructions));
+            result.add(new com.sap.sse.common.Util.Pair<>(waypoint.controlPoint, waypoint.passingInstructions));
         }
         return result;
     }

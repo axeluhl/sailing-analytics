@@ -7,6 +7,10 @@ import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 
 public class TimeFormatUtil {
     
+    static final int MILLISECONDS_PER_MINUTE = 60 * 1000;
+
+    static final int MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
+
     public static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);
     
     private static NumberFormat zeroPaddingNumberFormat_Min = NumberFormatterFactory.getDecimalFormat(2, 0);
@@ -21,12 +25,12 @@ public class TimeFormatUtil {
             String hoursText = segements[0].trim();
             int hours = Integer.valueOf(hoursText);
             isNegative = Integer.signum(hours) < 0;
-            milliseconds = Math.abs(hours) * 60 * 60 * 1000;
+            milliseconds = Math.abs(hours) * MILLISECONDS_PER_HOUR;
         case 2:
             String minutesText = segements[segements.length - 2].trim();
             int minutes = Integer.valueOf(minutesText);
             isNegative = isNegative || Integer.signum(minutes) < 0;
-            milliseconds = milliseconds + Math.abs(minutes) * 60 * 1000;
+            milliseconds = milliseconds + Math.abs(minutes) * MILLISECONDS_PER_MINUTE;
         case 1:
             String secondsText = segements[segements.length - 1].trim();
             float seconds = Float.valueOf(secondsText);
@@ -46,19 +50,19 @@ public class TimeFormatUtil {
         
         StringBuilder result = new StringBuilder();
         
-        long hours = (milliseconds / (60 * 60 * 1000));
+        long hours = (milliseconds / MILLISECONDS_PER_HOUR);
         if (hours > 0) {
             result.append(String.valueOf(signum * hours) + ':');
             signum = 1;
         }
         milliseconds = Math.abs(milliseconds);
-        long rest = (milliseconds % (60 * 60 * 1000));
-        long minutes = (rest / (60 * 1000));
-        if (minutes > 0) {
+        long rest = (milliseconds % MILLISECONDS_PER_HOUR);
+        long minutes = (rest / MILLISECONDS_PER_MINUTE);
+        if (minutes > 0 || result.length() > 0) {
             result.append(zeroPaddingNumberFormat_Min.format(signum * minutes) + ':');
             signum = 1;
         }
-        rest = (rest % (60 * 1000));
+        rest = (rest % MILLISECONDS_PER_MINUTE);
         double seconds = rest / 1000d;
         result.append(zeroPaddingNumberFormat_Sec.format(signum * seconds));
         return result.toString();

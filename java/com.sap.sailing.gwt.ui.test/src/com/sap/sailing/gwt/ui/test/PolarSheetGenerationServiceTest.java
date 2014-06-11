@@ -37,8 +37,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -140,14 +138,14 @@ public class PolarSheetGenerationServiceTest {
         }
         
         @Override
-        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
-            return new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(new WindImpl(p, at,
+        public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+            return new WindWithConfidenceImpl<com.sap.sse.common.Util.Pair<Position, TimePoint>>(new WindImpl(p, at,
                     new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(180.0))), 0.9,
-                    new Pair<Position, TimePoint>(p, at), true);
+                    new com.sap.sse.common.Util.Pair<Position, TimePoint>(p, at), true);
         }
         
         @Override
-        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+        public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
                 Iterable<WindSource> windSourcesToExclude) {
             return getWindWithConfidence(p, at);
         }

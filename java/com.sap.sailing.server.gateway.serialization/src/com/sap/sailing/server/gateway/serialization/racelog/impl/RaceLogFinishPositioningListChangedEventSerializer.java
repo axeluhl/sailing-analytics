@@ -8,10 +8,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Util;
 
 public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRaceLogEventSerializer {
 
@@ -41,10 +41,10 @@ public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRace
         return result;
     }
 
-    private JSONArray serializePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+    private JSONArray serializePositionedCompetitors(List<Util.Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         JSONArray jsonPositionedCompetitors = new JSONArray();
         
-        for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+        for (Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
             JSONObject jsonPositionedCompetitor = new JSONObject();
             
             jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());

@@ -25,12 +25,13 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -52,9 +53,10 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetit
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private static final Logger logger = Logger.getLogger(RaceLogTrackingAdapterImpl.class.getName());
@@ -72,17 +74,19 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-        assert raceLogTrackingState.isForTracking() : new NotDenotedForRaceLogTrackingException();
-        RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
-
-        if (! isRaceLogRaceTrackerAttached(service, raceLog)) {
-            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+        if (! raceLogTrackingState.isForTracking()) {
+            throw new NotDenotedForRaceLogTrackingException();
         }
+        RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
 
         if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
                     service.getServerAuthor(), raceLog.getCurrentPassId());
             raceLog.add(event);
+        }
+
+        if (! isRaceLogRaceTrackerAttached(service, raceLog)) {
+            addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
         }
     }  
 
@@ -92,7 +96,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
      * Otherwise, the {@code RaceLogRaceTracker} waits until a {@code StartTrackingEvent} is added to perform these actions.
      * The race first has to be denoted for racelog tracking.
      */
-    private RacesHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
+    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds) throws RaceLogRaceTrackerExistsException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert ! isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
@@ -248,7 +252,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         RaceLogEvent mapping = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time,
                 service.getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
         raceLog.add(mapping);
-        service.getGPSFixStore().storeFix(device, gpsFix);
+        try {
+            service.getGPSFixStore().storeFix(device, gpsFix);
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not pint mark " + mark);
+        }
     }
 
     @Override

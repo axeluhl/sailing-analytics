@@ -11,9 +11,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -22,6 +21,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sse.common.Util;
 
 public class TracTracAdapterImpl implements TracTracAdapter {
     private final static Logger logger = Logger.getLogger(TracTracAdapter.class.getName());
@@ -46,7 +46,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
     
     @Override
-    public RacesHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
+    public RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds,
             String tracTracUsername, String tracTracPassword, String raceStatus) throws Exception {
         return trackerManager.addRace(
@@ -59,7 +59,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
 
     @Override
-    public RacesHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
+    public RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
             URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, RaceLogStore raceLogStore,
             long timeoutInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, 
@@ -73,12 +73,12 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
 
     @Override
-    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
+    public Util.Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
             throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         logger.info("Retrieving TracTrac race records from " + jsonURL);
         JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, loadClientParams);
         logger.info("OK retrieving TracTrac race records from " + jsonURL);
-        return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
+        return new Util.Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
 
     @Override

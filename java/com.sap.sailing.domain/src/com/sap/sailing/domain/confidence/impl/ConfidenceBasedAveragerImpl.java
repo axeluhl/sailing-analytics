@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.confidence.impl;
 
 import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sse.common.Util;
 
 
 /**

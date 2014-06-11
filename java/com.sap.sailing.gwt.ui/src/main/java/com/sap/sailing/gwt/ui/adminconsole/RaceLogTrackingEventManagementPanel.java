@@ -9,9 +9,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -19,9 +16,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -29,72 +23,42 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
+public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
     private Button startTrackingButton;
-    private DeviceIdentifierTableWrapper deviceIdentifierTable;
+    private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     
-    public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            RegattaRefresher regattaRefresher,
+    public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        super(sailingService, adminConsole, errorReporter, stringMessages,
-                new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
+        super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
+                stringMessages, new MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>());
         
         //add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
         VerticalPanel importContent = new VerticalPanel();
         mainPanel.add(importPanel);
+        deviceIdentifierTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        TrackFileImportWidget importWidget = new TrackFileImportWidget(deviceIdentifierTable, stringMessages,
+                sailingService, errorReporter);
         importPanel.add(importContent);
-        final FormPanel formPanel = new FormPanel();
-        importContent.add(formPanel);
-        deviceIdentifierTable = new DeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
-        
-        HorizontalPanel inFormPanel = new HorizontalPanel();
-        formPanel.add(inFormPanel);
-        formPanel.setAction("/sailingserver/trackfiles/import");
-        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        formPanel.setMethod(FormPanel.METHOD_POST);
-        formPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent arg0) {
-                JSONArray json = JSONParser.parseLenient(arg0.getResults()).isArray();
-                deviceIdentifierTable.getDataProvider().getList().clear();
-                for (int i=0; i<json.size(); i++) {
-                    JSONObject obj = json.get(i).isObject();
-                    String type = obj.get("type").isString().stringValue();
-                    String stringRepresentation = obj.get("stringRepresentation").isString().stringValue();
-                    DeviceIdentifierDTO dto = new DeviceIdentifierDTO(type, stringRepresentation);
-                    deviceIdentifierTable.getDataProvider().getList().add(dto);
-                }
-            }
-        });
-        FileUpload fileUpload = new FileUpload();
-        fileUpload.setName("file");
-        inFormPanel.add(fileUpload);
-
-        Button btnUpload = new Button(stringMessages.importFixes());
-        inFormPanel.add(btnUpload);
-        btnUpload.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent arg0) {
-                formPanel.submit();
-            }
-        });
     }
     
     @Override
@@ -202,7 +166,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             new DialogCallback<Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>() {
                                 @Override
                                 public void ok(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> editedObject) {
-                                    Set<Triple<String, String, String>> toRaceLogs = new HashSet<>();
+                                    Set<Util.Triple<String, String, String>> toRaceLogs = new HashSet<>();
                                     for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : editedObject) {
                                         toRaceLogs.add(toTriple(leaderboardName, race));
                                     }
@@ -236,9 +200,9 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         racesTable.setWidth("600px");
     }
     
-    private Triple<String, String, String> toTriple(String leaderboardName,
+    private Util.Triple<String, String, String> toTriple(String leaderboardName,
             RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
-        return new Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
+        return new Util.Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
     }
 
     @Override

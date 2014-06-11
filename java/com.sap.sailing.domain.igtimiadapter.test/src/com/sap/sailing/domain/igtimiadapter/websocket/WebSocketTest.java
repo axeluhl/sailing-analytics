@@ -30,7 +30,6 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Client;
@@ -43,6 +42,7 @@ import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.common.Util;
 
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
@@ -159,7 +159,7 @@ public class WebSocketTest {
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
         // the data from baur@stg-academy.org, particularly containing the Berlin test data
         Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
-        IgtimiConnection conn = igtimiConnectionFactory.connect(account);
+        IgtimiConnection conn = igtimiConnectionFactory.connect(account, /* correctByDeclination */ true);
         LiveDataConnection liveDataConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
         LiveDataConnection redundantSecondSharedConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
         assertTrue(liveDataConnection instanceof LiveDataConnectionWrapper);

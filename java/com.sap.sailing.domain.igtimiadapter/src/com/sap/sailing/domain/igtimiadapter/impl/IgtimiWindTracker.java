@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -20,17 +20,18 @@ import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.tracking.AbstractWindTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sse.common.Util;
 
 public class IgtimiWindTracker extends AbstractWindTracker implements WindTracker {
     private static final Logger logger = Logger.getLogger(IgtimiWindTracker.class.getName());
     private static final int TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS = 10*60*1000; // 10 minutes
     private static final long TIME_INTERVAL_TO_TRACK_AFTER_END_OF_RACE_MILLIS = 60*60*1000; // 60 minutes
-    private final Map<LiveDataConnection, Pair<Iterable<String>, Account>> liveConnectionsAndDeviceSerialNumber;
+    private final Map<LiveDataConnection, Util.Pair<Iterable<String>, Account>> liveConnectionsAndDeviceSerialNumber;
     private final IgtimiWindTrackerFactory windTrackerFactory;
     private boolean stopping;
 
     protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnectionFactory connectionFactory,
-            final IgtimiWindTrackerFactory windTrackerFactory) throws Exception {
+            final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
@@ -43,14 +44,15 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                     for (Account account : accounts) {
                         try {
                             if (!stopping) {
-                                IgtimiConnection connection = connectionFactory.connect(account);
+                                IgtimiConnection connection = connectionFactory.connect(account, correctByDeclination);
                                 Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                 if (!stopping) {
                                     LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
-                                    IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(devicesWeShouldListenTo);
+                                    IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(devicesWeShouldListenTo,
+                                            correctByDeclination ? DeclinationService.INSTANCE : null);
                                     liveConnection.addListener(windReceiver);
                                     windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Pair<Iterable<String>, Account>(devicesWeShouldListenTo, account));
+                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<Iterable<String>, Account>(devicesWeShouldListenTo, account));
                                 }
                             }
                         } catch (Exception e) {
@@ -114,7 +116,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                     logger.info("Stopping Igtimi live connection "+ldc);
                     ldc.stop();
                 } catch (Exception e) {
-                    final Pair<Iterable<String>, Account> deviceSerialNumberAndAccount = liveConnectionsAndDeviceSerialNumber.get(ldc);
+                    final Util.Pair<Iterable<String>, Account> deviceSerialNumberAndAccount = liveConnectionsAndDeviceSerialNumber.get(ldc);
                     logger.log(Level.INFO,
                             "Exception trying to stop Igtimi live connection for wind receiver for race "
                                     + getTrackedRace().getRace() + " and device " + deviceSerialNumberAndAccount.getA()

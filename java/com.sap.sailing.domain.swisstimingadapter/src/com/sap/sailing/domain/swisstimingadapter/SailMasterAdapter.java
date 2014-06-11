@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sse.common.Util;
 
 public abstract class SailMasterAdapter implements SailMasterListener {
 
@@ -17,12 +17,12 @@ public abstract class SailMasterAdapter implements SailMasterListener {
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
     }
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
     }
 
     @Override

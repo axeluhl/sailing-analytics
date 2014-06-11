@@ -34,8 +34,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -54,6 +52,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -233,7 +232,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    currentRaceID, null /* boat class */);
+                    currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();
@@ -290,9 +289,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 Course course = race.getCourse();
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
-                    List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
+                    List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
                     for (ControlPoint cp : currentCourseDefinition) {
-                        courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, null));
+                        courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {
@@ -306,7 +305,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE,
-                currentRaceID, null /* boat class */, trackedRegattaRegistry);
+                currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass(), trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);

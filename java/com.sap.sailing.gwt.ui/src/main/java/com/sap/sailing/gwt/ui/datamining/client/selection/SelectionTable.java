@@ -13,7 +13,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
     

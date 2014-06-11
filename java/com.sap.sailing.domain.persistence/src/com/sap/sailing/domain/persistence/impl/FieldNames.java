@@ -14,6 +14,8 @@ public enum FieldNames {
     EVENT_IS_PUBLIC,
     EVENT_START_DATE,
     EVENT_END_DATE,
+    EVENT_IMAGE_URLS,
+    EVENT_VIDEO_URLS,
     
     REGATTA_NAME,
     REGATTA_ID,
@@ -39,7 +41,7 @@ public enum FieldNames {
     
     VENUE,
     VENUE_NAME,
-    
+
     COURSE_AREAS,
     COURSE_AREA_NAME,
     COURSE_AREA_ID,
@@ -64,7 +66,7 @@ public enum FieldNames {
     LEADERBOARD_SCORE_CORRECTION_COMMENT, LEADERBOARD_COLUMN_FACTORS,
 
     // leaderboard group
-    LEADERBOARD_GROUP_NAME, LEADERBOARD_GROUP_DESCRIPTION, LEADERBOARD_GROUP_LEADERBOARDS, LEADERBOARD_GROUP_OVERALL_LEADERBOARD,
+    LEADERBOARD_GROUP_UUID, LEADERBOARD_GROUP_NAME, LEADERBOARD_GROUP_DESCRIPTION, LEADERBOARD_GROUP_LEADERBOARDS, LEADERBOARD_GROUP_OVERALL_LEADERBOARD,
     LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER,
     
     // race ID to regatta name
@@ -84,7 +86,10 @@ public enum FieldNames {
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_NAME, still used to migrate old races*/ @Deprecated GATE_NAME,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_LEFT, still used to migrate old races*/ @Deprecated GATE_LEFT,
     /** @deprecated Replaced by CONTROLPOINTWITHTWOMARKS_RIGHT, still used to migrate old races*/ @Deprecated GATE_RIGHT,
-    
+
+    // sailing server
+    SERVER_NAME,
+    SERVER_URL,
     
     // configurations
     CONFIGURATION_MATCHER, CONFIGURATION_CONFIG, CONFIGURATION_MATCHER_ID, CONFIGURATION_MATCHER_TYPE, CONFIGURATION_MATCHER_CLIENTS, 
@@ -93,4 +98,10 @@ public enum FieldNames {
     
     // GPSFixes
     DEVICE_TYPE_SPECIFIC_ID, DEVICE_ID, DEVICE_TYPE, GPSFIX_TYPE, GPSFIX, DEVICE_STRING_REPRESENTATION,
+    
+    // GPSFixes metadata
+    TIMERANGE, NUM_FIXES,
+    
+    // Timespan
+    FROM_MILLIS, TO_MILLIS,
 }

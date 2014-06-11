@@ -27,9 +27,9 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.Util;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -87,7 +87,7 @@ public interface TrackedRace extends Serializable {
      * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over
      * the result must <code>synchronize</code> on the result.
      */
-    Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
+    Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
@@ -398,7 +398,8 @@ public interface TrackedRace extends Serializable {
     /**
      * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
      * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>.
+     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
+     * the competitor's {@link GPSFixTrack track}.
      */
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
@@ -464,7 +465,7 @@ public interface TrackedRace extends Serializable {
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.
      */
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
 
     /**
      * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
@@ -478,7 +479,7 @@ public interface TrackedRace extends Serializable {
      * by each wind source are used during computing the averaged result across the wind sources. The result has the
      * averaged confidence attached.
      */
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude);
 
     /**

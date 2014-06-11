@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class SimulatorEntryPoint extends AbstractEntryPoint {
 
@@ -34,6 +35,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private boolean showArrows = false; // show the wind arrows in wind display and replay modes.    
     private boolean showGrid = true;   // show the "heat map" in the wind display and replay modes.
     private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
+    private boolean showMapControls = true; // show the map controls such as zoom and pan
     private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
     private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
     private boolean showStreamlets2 = false; // show animated wind streamlets in the wind display and replay modes.
@@ -46,7 +48,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         
     	super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
         
     	checkUrlParameters();
 
@@ -88,6 +90,12 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             logger.config("Using default auto update " + autoUpdate);
         } else {
             autoUpdate = Boolean.parseBoolean(autoUpdateStr);
+        }
+        String showMapControlsStr = Window.Location.getParameter("showMapControls");
+        if (showMapControlsStr == null || showMapControlsStr.isEmpty()) {
+            logger.config("Using default showMapControls " + showMapControls);
+        } else {
+            showMapControls = Boolean.parseBoolean(showMapControlsStr);
         }
         String modeStr = Window.Location.getParameter("mode");
         if (modeStr == null || modeStr.isEmpty()) {
@@ -172,7 +180,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
     private void createSimulatorPanel() {
         SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, particles,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets, showStreamlets2, injectWindDataJS);
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets, showStreamlets2, injectWindDataJS, showMapControls);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);

@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -70,10 +71,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -107,6 +107,7 @@ import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -162,7 +163,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * The first and last passing times of all course waypoints
      */
-    private transient List<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes;
+    private transient List<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes;
 
     /**
      * The latest time point contained by any of the events received and processed
@@ -205,7 +206,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute
      * them.
      */
-    private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
+    private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
 
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
@@ -239,6 +240,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @see #loadingFromWindStoreState but for GPSFixStore
      */
     private LoadingFromStoresState loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
+    private Object loadingFromGPSFixStoreStateMonitor = ""; // String, not Object, to keep it serializable
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
@@ -324,7 +326,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
         }
-        markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
+        markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
         // When this tracked race is to be serialized, wait for the loading from stores to complete.
         new Thread("Mongo wind loader for tracked race " + getRace().getName()) {
@@ -342,7 +344,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks.values());
-                    logger.info("Finished loading wind tracks for " + getRace().getName() + "! Found " + windTracks.size() + " wind tracks for this race!");
+                    logger.info("Finished loading wind tracks for " + getRace().getName() + ". Found " + windTracks.size() + " wind tracks for this race.");
                     
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
@@ -415,7 +417,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         attachedRaceLogs = new HashMap<>();
-        markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
+        markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
@@ -435,16 +437,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
-        while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
-            wait();
+        synchronized (loadingFromGPSFixStoreStateMonitor) {
+            while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
+                loadingFromGPSFixStoreStateMonitor.wait();
+            }
         }
     }
 
-    private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
-        return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
-                new AbstractCacheUpdater<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {
+    private SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
+        return new SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
+                new AbstractCacheUpdater<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {
                     @Override
-                    public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
+                    public com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
                         return computeManeuvers(competitor);
                     }
@@ -743,7 +747,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
+    public Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
         getRace().getCourse().lockForRead(); // ensure the list of waypoints doesn't change while we're updating the
                                              // markPassingTimes structure
         try {
@@ -778,9 +782,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                 unlockAfterRead(markPassings);
                             }
                         }
-                        Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime,
+                        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = new com.sap.sse.common.Util.Pair<TimePoint, TimePoint>(firstPassingTime,
                                 lastPassingTime);
-                        markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
+                        markPassingsTimes.add(new com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>(waypoint, timesPair));
                     }
                 }
                 return markPassingsTimes;
@@ -1236,13 +1240,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at,
+        final WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at,
                 windSourcesToExclude);
         return windWithConfidence == null ? null : windWithConfidence.getObject();
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
         return getWindWithConfidence(p, at, getWindSourcesToExclude());
     }
 
@@ -1274,19 +1278,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
-        Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
+        Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
         /* halfConfidenceAfterMilliseconds */10000l);
-        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
+        ConfidenceBasedWindAverager<com.sap.sse.common.Util.Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
-        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
+        List<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
             // TODO consider parallelizing and consider caching
             if (!Util.contains(windSourcesToExclude, windSource)) {
                 WindTrack track = getOrCreateWindTrack(windSource);
-                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);
                     canUseSpeedOfAtLeastOneWindSource = canUseSpeedOfAtLeastOneWindSource
@@ -1294,11 +1298,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             }
         }
-        HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
-                windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
-        WindWithConfidence<Pair<Position, TimePoint>> result = average == null ? null
-                : new WindWithConfidenceImpl<Pair<Position, TimePoint>>(average.getObject(), average.getConfidence(),
-                        new Pair<Position, TimePoint>(p, at), canUseSpeedOfAtLeastOneWindSource);
+        HasConfidence<ScalableWind, Wind, com.sap.sse.common.Util.Pair<Position, TimePoint>> average = averager.getAverage(
+                windFixesWithConfidences, new com.sap.sse.common.Util.Pair<Position, TimePoint>(p, at));
+        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> result = average == null ? null
+                : new WindWithConfidenceImpl<com.sap.sse.common.Util.Pair<Position, TimePoint>>(average.getObject(), average.getConfidence(),
+                        new com.sap.sse.common.Util.Pair<Position, TimePoint>(p, at), canUseSpeedOfAtLeastOneWindSource);
         return result;
     }
 
@@ -1891,11 +1895,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
     }
 
-    private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
+    private com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
         logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
-        Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
+        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         boolean markPassingsNotEmpty;
         TimePoint extendedFrom = null;
@@ -1927,12 +1931,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (extendedTo != null) {
                 try {
-                    List<Maneuver> extendedResultForCache = detectManeuvers(
-                            competitor,
-                            approximate(competitor,
-                                    getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), extendedFrom,
-                                    extendedTo));
-                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
+                    List<Maneuver> extendedResultForCache = detectManeuvers(competitor, extendedFrom, extendedTo, /* ignoreMarkPassings */ false);
+                    result = new com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
                             extendedResultForCache);
                 } catch (NoWindException ex) {
                     // Catching the NoWindException here without letting it propagate thru other handlers.
@@ -1951,11 +1951,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
+    
+    /**
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @return a valid but possibly empty list
+     * @see #detectManeuvers(Competitor, List, boolean, TimePoint, TimePoint)
+     */
+    private List<Maneuver> detectManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean ignoreMarkPassings) throws NoWindException {
+        return detectManeuvers(
+                competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
+                from, to), ignoreMarkPassings, from, to);
+    }
 
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.<p>
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * <p>
      * 
      * The time period assumed for a maneuver duration is taken from the
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
@@ -1966,14 +1983,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
      * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
      * 
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @param earliestManeuverStart
+     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
+     *            after this time point, no matter how close it is, its start regarding speed and course into the
+     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
+     *            maneuver duration before the maneuver time point were before this time point.
+     * @param latestManeuverEnd
+     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
+     *            before this time point, no matter how close it is, its end regarding speed and course out of the
+     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
+     *            maneuver duration after the maneuver time point were after this time point.
+     * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze)
+    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze,
+            boolean ignoreMarkPassings, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd)
             throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (approximatingFixesToAnalyze.size() > 2) {
-            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
+            List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection = new ArrayList<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>>();
             Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
             GPSFixMoving previous = approximationPointsIter.next();
             GPSFixMoving current = approximationPointsIter.next();
@@ -1989,7 +2024,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // compute course change on "approximation track"
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
-                Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new Pair<GPSFixMoving, CourseChange>(current,
+                com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>(current,
                         courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty()
                         && Math.signum(courseChangeSequenceInSameDirection.get(0).getB().getCourseChangeInDegrees()) != Math
@@ -1998,7 +2033,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // start new list
                     List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
                             speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                            courseChangeSequenceInSameDirection);
+                            courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
                     speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
@@ -2011,7 +2046,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
                 result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor,
                         speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
-                        courseChangeSequenceInSameDirection));
+                        courseChangeSequenceInSameDirection, ignoreMarkPassings, earliestManeuverStart, latestManeuverEnd));
             }
         }
         return result;
@@ -2032,7 +2067,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
             throws NoWindException {
-        Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
+        com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
         List<Maneuver> result;
         if (allManeuvers == null) {
             result = Collections.emptyList();
@@ -2062,20 +2097,36 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
      * the average time point of the course changes that went into the maneuver construction is used.
      * <p>
-     * 
      * @param speedWithBearingOnApproximationAtBeginning
      *            the speed/bearing before the first approximating fix passed in
      *            <code>courseChangeSequenceInSameDirection</code>
      * @param courseChangeSequenceInSameDirection
      *            all expected to have equal {@link CourseChange#to()} values
+     * @param ignoreMarkPassings
+     *            When <code>true</code>, no {@link ManeuverType#MARK_PASSING} maneuvers will be identified, and the
+     *            fact that a mark passing would split up what else may be a penalty circle is ignored. This is helpful
+     *            for recursive calls, e.g., after identifying a tack and a jibe around a mark passing and trying to
+     *            identify for the time before and after the mark passing which maneuvers exist on which side of the
+     *            passing.
+     * @param earliestManeuverStart
+     *            maneuver start will not be before this time point; if a maneuver is found whose time point is at or
+     *            after this time point, no matter how close it is, its start regarding speed and course into the
+     *            maneuver and the leg before the maneuver is not taken from an earlier time point, even if half the
+     *            maneuver duration before the maneuver time point were before this time point.
+     * @param latestManeuverEnd
+     *            maneuver end will not be after this time point; if a maneuver is found whose time point is at or
+     *            before this time point, no matter how close it is, its end regarding speed and course out of the
+     *            maneuver and the leg after the maneuver is not taken from a later time point, even if half the
+     *            maneuver duration after the maneuver time point were after this time point.
      * 
      * @return a non-<code>null</code> list
      */
     private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
             SpeedWithBearing speedWithBearingOnApproximationAtBeginning,
-            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection) throws NoWindException {
+            List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection, boolean ignoreMarkPassings,
+            TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
-        List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
+        List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> group = new ArrayList<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
             SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing
@@ -2083,13 +2134,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing
                                                                                                     // before current
                                                                                                     // course change
-            Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
+            Iterator<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
             SpeedWithBearing afterCurrentCourseChange = null; // sure to be set because iter's collection is not empty
             // and the first use requires group not to be empty which can only happen after the first group.add
             do {
-                Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
+                com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
                         // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
                         // group contains complete maneuver if the next fix is too late or too far away to belong to the
@@ -2104,7 +2155,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     // if next is more then approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
                     Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
-                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
+                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds, earliestManeuverStart, latestManeuverEnd), result);
                     group.clear();
                     totalCourseChangeInDegrees = 0.0;
                     totalMilliseconds = 0l;
@@ -2120,28 +2171,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } while (iter.hasNext());
             if (!group.isEmpty()) {
                 Util.addAll(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation, group,
-                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds), result);
+                        afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds, earliestManeuverStart, latestManeuverEnd), result);
             }
         }
         return result;
     }
 
     private Iterable<Maneuver> createManeuverFromGroupOfCourseChanges(Competitor competitor,
-            SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<Pair<GPSFixMoving, CourseChange>> group,
+            SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> group,
             SpeedWithBearing speedWithBearingOnApproximationAtEnd, double totalCourseChangeInDegrees,
-            long totalMilliseconds) throws NoWindException {
+            long totalMilliseconds, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) throws NoWindException {
         List<Maneuver> result = new ArrayList<>();
-        MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
-                .asMillis()
-                - getApproximateManeuverDurationInMilliseconds() / 2);
-        MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
-                .getTimePoint().asMillis()
-                + getApproximateManeuverDurationInMilliseconds() / 2);
-        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver,
-                timePointAfterManeuver);
+        TimePoint timePointBeforeManeuver = Collections.max(Arrays.asList(new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
+                .asMillis() - getApproximateManeuverDurationInMilliseconds() / 2), earliestManeuverStart));
+        TimePoint timePointAfterManeuver = Collections.min(Arrays.asList(new MillisecondsTimePoint(group.get(group.size() - 1).getA()
+                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds() / 2), latestManeuverEnd));
+        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, timePointAfterManeuver);
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
-        Position maneuverPosition = competitorTrack
-                .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
+        Position maneuverPosition = competitorTrack.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
                 speedWithBearingOnApproximationAtEnd.getBearing());
         ManeuverType maneuverType;
@@ -2154,18 +2201,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final NauticalSide courseChangedTo = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
         // detected as a penalty circle
+        final TimePoint markPassingTimePoint;
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
-            maneuverType = ManeuverType.MARK_PASSING;
             waypointPassed = legAfterManeuver.getLeg().getFrom();
+            MarkPassing markPassing = getMarkPassing(competitor, waypointPassed);
+            markPassingTimePoint = markPassing != null ? markPassing.getTimePoint() : maneuverTimePoint;
+            Position markPassingPosition = markPassing != null ? competitorTrack.getEstimatedPosition(markPassingTimePoint, /* extrapolate */false) : maneuverPosition;
             sideToWhichWaypointWasPassed = courseChangedTo;
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
-            result.add(new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+            result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
+                    markPassingTimePoint, speedWithBearingOnApproximationAtBeginning,
                     speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
                     sideToWhichWaypointWasPassed));
+        } else {
+            markPassingTimePoint = null;
         }
         final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
         final SpeedWithBearing estimatedSpeedBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver);
@@ -2178,36 +2230,51 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     courseAfterManeuver, wind.getBearing());
             boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees,
                     courseAfterManeuver, wind.getFrom());
-            if (tacked && jibed) {
-                maneuverType = ManeuverType.PENALTY_CIRCLE;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
-            } else if (tacked) {
-                maneuverType = ManeuverType.TACK;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
-            } else if (jibed) {
-                maneuverType = ManeuverType.JIBE;
-                if (legBeforeManeuver != null) {
-                    maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
-                            timePointAfterManeuver);
-                }
+            if (markPassingTimePoint != null && (tacked || jibed)) {
+                // In case of a mark passing we need to split the maneuver analysis into the phase before and after
+                // the mark passing. First of all, this is important to identify the correct maneuver time point for
+                // each tack and jibe, second it is essential to call a penalty which is only the case if the tack and
+                // the jibe are on the same side of the mark passing; otherwise this may have been a jibe set or a
+                // kiwi drop.
+                // Therefore, we recursively detect the maneuvers for the segment before and the segment after the
+                // mark passing and add the results to our result.
+                result.addAll(detectManeuvers(competitor, timePointBeforeManeuver, markPassingTimePoint.minus(1), /* ignoreMarkPassings */ true));
+                result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
-                // heading up or bearing away
-                Bearing windBearing = wind.getBearing();
-                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
-                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
-                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ? ManeuverType.HEAD_UP
-                        : ManeuverType.BEAR_AWAY;
+                // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe
+                if (tacked && jibed && markPassingTimePoint == null) {
+                    maneuverType = ManeuverType.PENALTY_CIRCLE;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else if (tacked) {
+                    maneuverType = ManeuverType.TACK;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else if (jibed) {
+                    maneuverType = ManeuverType.JIBE;
+                    if (legBeforeManeuver != null) {
+                        maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                                timePointAfterManeuver);
+                    }
+                } else {
+                    // heading up or bearing away
+                    Bearing windBearing = wind.getBearing();
+                    Bearing toWindBeforeManeuver = windBearing
+                            .getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                    Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd
+                            .getBearing());
+                    maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver
+                            .getDegrees()) ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                }
+                final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                        maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                        speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+                result.add(maneuver);
             }
-            final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
-                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
-                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
-            result.add(maneuver);
         }
         return result;
     }
@@ -2216,8 +2283,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's
      * track has greatest change in course.
      */
-    private TimePoint computeManeuverTimepoint(Competitor competitor, MillisecondsTimePoint timePointBeforeManeuver,
-            MillisecondsTimePoint timePointAfterManeuver) {
+    private TimePoint computeManeuverTimepoint(Competitor competitor, TimePoint timePointBeforeManeuver,
+            TimePoint timePointAfterManeuver) {
         TimePoint result = timePointBeforeManeuver;
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         GPSFixMoving lastFix = null;
@@ -2411,15 +2478,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     try {
                         logger.info("Started loading competitor tracks for " + getRace().getName());
                         for (Competitor competitor : race.getCompetitors()) {
-                            gpsFixStore.loadCompetitorTrack(
-                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
-                                    competitor);
+                            try {
+                                gpsFixStore.loadCompetitorTrack(
+                                        (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog,
+                                        competitor);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load track for " + competitor);
+                            }
                         }
                         logger.info("Finished loading competitor tracks for " + getRace().getName());
                         logger.info("Started loading mark tracks for " + getRace().getName());
                         for (Mark mark : getMarks()) {
-                            gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
-                                    mark);
+                            try {
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog,
+                                        mark);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load track for " + mark);
+                            }
                         }
                         logger.info("Finished loading mark tracks for " + getRace().getName());
 
@@ -2428,8 +2503,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             loadingFromGPSFixStoreState = LoadingFromStoresState.FINISHED;
                             TrackedRaceImpl.this.notifyAll();
                         }
-                        synchronized (loadingFromGPSFixStoreState) {
-                            loadingFromGPSFixStoreState.notifyAll();
+                        synchronized (loadingFromGPSFixStoreStateMonitor) {
+                            loadingFromGPSFixStoreStateMonitor.notifyAll();
                         }
                         LockUtil.unlockAfterWrite(getLoadingFromGPSFixStoreLock());
                         LockUtil.unlockAfterRead(getSerializationLock());
@@ -2734,7 +2809,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             WindTrack windTrack = getOrCreateWindTrack(windSource);
             TimePoint timePoint = fromTimePoint;
             for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
                         .getAveragedWindWithConfidence(null, timePoint);
                 if (averagedWindWithConfidence != null) {
                     double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();

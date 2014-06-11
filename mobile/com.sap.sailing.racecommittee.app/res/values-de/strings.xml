@@ -33,7 +33,7 @@
     <string name="flag_november">November</string>
     <string name="flag_jury">Jury</string>
     <string name="label_login_events">Event auswählen:</string>
-    <string name="label_login_course_area">Rennbahn auswählen:</string>
+    <string name="label_login_course_area">Bahn auswählen:</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
     <string name="racelist_unscheduled">Noch nicht geplant</string>
     <string name="racelist_scheduled">Geplant für %s</string>
@@ -43,7 +43,7 @@
     <string name="racelist_finished">Beendet</string>
     <string name="racelist_unknown">Unknown</string>
     <string name="currentlyLoading">Lädt &#8230;</string>
-    <string name="racingview_header">Rennbahn %s Rennen</string>
+    <string name="racingview_header">Wettfahrten auf Bahn \'%s\'</string>
     <string name="running_on_unknown">(Kurs setzen)</string>
     <string name="empty"></string>
     <string name="updateIndicator">Update Icon</string>
@@ -126,7 +126,7 @@
     
     <!-- SETTINGS -->
     <string name="settings_category_general">Weitere Einstellungen</string>
-    <string name="settings_general_manageareas_header">Verwaltete Rennbahnen</string>
+    <string name="settings_general_manageareas_header">Verwaltete Bahnen</string>
     <string name="settings_general_language_header">Sprache auswählen</string>
     <string name="settings_general_language_description">Sprache auswählen. Eventuell muss die App neugestartet werden.</string>
     
@@ -150,7 +150,7 @@
     <string name="compass_view_compass">Kompass</string>
     <string name="compass_view_needle">Nadel</string>
     
-    <string name="racing_course_area_missing">Rennbahn konnte nicht geladen werden. Bitte neu anmelden.</string>
+    <string name="racing_course_area_missing">Die Bahn konnte nicht geladen werden. Bitte neu anmelden.</string>
     <string name="racing_load_success">%d Rennen erfolgreich geladen.</string>
     <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\"%s\"\nErneut versuchen?</string>
     <string name="set_course_layout">Kurs setzen</string>
@@ -159,7 +159,6 @@
 	<string name="wind_unknown">(Wind setzen)</string>
 	<string name="wind_info">(%1$s kn, %2$s)</string>
 	<string name="login">Anmelden</string>
-	<string name="login_onto_course_area">Auf Rennbahn anmelden</string>
 	<string name="please_select_a_login_type">Bitte Login-Typ angeben.</string>
 	
 	<string name="race_list_filter_show_all">Alle Rennen</string>
@@ -189,9 +188,9 @@
 	
 	<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
 	<string name="choose_xray_flag_down">Einzelrückruf entfernen</string>
-    <string name="login_type_officer_on_start_vessel">Als Startschiff-Wettfahrleiter einloggen</string>
-    <string name="login_type_officer_on_finish_vessel">Als Zielschiff-Wettfahrleiter einloggen</string>
-    <string name="login_type_shore_control">Als Shore-Control einloggen</string>
+    <string name="login_type_officer_on_start_vessel">Als Startschiff-Wettfahrtleiter anmelden</string>
+    <string name="login_type_officer_on_finish_vessel">Als Zielschiff-Wettfahrtleiter anmelden</string>
+    <string name="login_type_shore_control">Als Regattaleitung an Land anmelden</string>
     <string name="generic_error">Fehler</string>
     <string name="gate_launch_stops_after">Gate Launch stoppt nach %dmin</string>
     <string name="override_default_course_designer_type_select_header">Kursdesigner</string>
@@ -237,8 +236,10 @@
 	<string name="preference_there_are_no_regattas">Bisher keine Regatta geladen.</string>
 	<string name="configure_regatta">Konfiguriere Regatta %1$s</string>
 
+	<string name="race_start_in_5_minutes">5 Minuten</string>
 	<string name="race_start_in_4_minutes">4 Minuten</string>
 	<string name="race_start_in_2_minutes">2 Minuten</string>
+	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Kurs ändern</string>
 	<string name="no_course_active">Kein Kurs gesetzt</string>
 </resources>

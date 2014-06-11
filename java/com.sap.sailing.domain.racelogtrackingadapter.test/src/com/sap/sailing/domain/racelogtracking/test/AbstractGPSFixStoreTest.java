@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test;
 
-import static com.sap.sailing.domain.common.impl.Util.size;
+import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
 
 import org.junit.After;
@@ -62,6 +62,7 @@ public class AbstractGPSFixStoreTest {
     public void after() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
         mongoOF.getGPSFixCollection().drop();
+        mongoOF.getGPSFixMetadataCollection().drop();
     }
 
     protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {

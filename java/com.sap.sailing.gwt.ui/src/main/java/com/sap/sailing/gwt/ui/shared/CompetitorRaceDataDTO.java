@@ -10,8 +10,9 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 public class CompetitorRaceDataDTO implements IsSerializable {
     
@@ -21,21 +22,21 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     /**
      * A: mark name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B
      */
-    private List<Triple<String, Date, Double>> markPassingsData;
+    private List<Util.Triple<String, Date, Double>> markPassingsData;
     /**
      * A: time for B; B: data as defined by {@link #detailType} for {@link #competitor} for time point A
      */
-    private List<Pair<Date, Double>> raceData;
+    private List<Util.Pair<Date, Double>> raceData;
     
     CompetitorRaceDataDTO() {}
     
     public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, 
-            Collection<Triple<String, Date, Double>> markPassingsData, Collection<Pair<Date, Double>> raceData) {
+            Collection<Util.Triple<String, Date, Double>> markPassingsData, Collection<Util.Pair<Date, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
-        this.markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+        this.markPassingsData = new ArrayList<Util.Triple<String, Date, Double>>();
         addAllMarkPassingsData(markPassingsData);
-        this.raceData = new ArrayList<Pair<Date, Double>>();
+        this.raceData = new ArrayList<Util.Pair<Date, Double>>();
         addAllRaceData(raceData);
     }
 
@@ -59,15 +60,15 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * Clears the old {@link #markPassingsData} and {@link #addAllMarkPassingsData(Collection) adds} the data in <code>markPassingsData</code> afterwards.
      * @param markPassingsData
      */
-    public void setMarkPassingsData(List<Triple<String, Date, Double>> markPassingsData) {
-        this.markPassingsData = new ArrayList<Triple<String,Date,Double>>();
+    public void setMarkPassingsData(List<Util.Triple<String, Date, Double>> markPassingsData) {
+        this.markPassingsData = new ArrayList<Util.Triple<String,Date,Double>>();
         addAllMarkPassingsData(markPassingsData);
     }
 
     /**
      * @return An unmodifiable list of the {@link #markPassingsData}.
      */
-    public List<Triple<String, Date, Double>> getMarkPassingsData() {
+    public List<Util.Triple<String, Date, Double>> getMarkPassingsData() {
         return Collections.unmodifiableList(markPassingsData);
     }
     
@@ -77,8 +78,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * 
      * @param markPassingsDataToAdd
      */
-    public void addAllMarkPassingsData(Collection<Triple<String, Date, Double>> markPassingsDataToAdd) {
-        for (Triple<String, Date, Double> data : markPassingsDataToAdd) {
+    public void addAllMarkPassingsData(Collection<Util.Triple<String, Date, Double>> markPassingsDataToAdd) {
+        for (Util.Triple<String, Date, Double> data : markPassingsDataToAdd) {
             addMarkPassingsData(data);
         }
     }
@@ -89,7 +90,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * 
      * @param markPassingsDataToAdd
      */
-    public void addMarkPassingsData(Triple<String, Date, Double> markPassingsDataToAdd) {
+    public void addMarkPassingsData(Util.Triple<String, Date, Double> markPassingsDataToAdd) {
         int index = Collections.binarySearch(markPassingsData, markPassingsDataToAdd, new MarkPassingsByTime());
         //binarySearch returns a value smaller then 0 if the key isn't contained
         if (index < 0) {
@@ -100,7 +101,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     /**
      * @return An unmodifiable list of the {@link #raceData}
      */
-    public List<Pair<Date, Double>> getRaceData() {
+    public List<Util.Pair<Date, Double>> getRaceData() {
         return Collections.unmodifiableList(raceData);
     }
     
@@ -110,8 +111,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * 
      * @param raceDataToAdd
      */
-    public void addAllRaceData(Collection<Pair<Date, Double>> raceDataToAdd) {
-        for (Pair<Date, Double> data : raceDataToAdd) {
+    public void addAllRaceData(Collection<Util.Pair<Date, Double>> raceDataToAdd) {
+        for (Util.Pair<Date, Double> data : raceDataToAdd) {
             addRaceData(data);
         }
     }
@@ -122,7 +123,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * 
      * @param raceDataToAdd
      */
-    public void addRaceData(Pair<Date, Double> raceDataToAdd) {
+    public void addRaceData(Util.Pair<Date, Double> raceDataToAdd) {
         int index = Collections.binarySearch(raceData, raceDataToAdd, new RaceDataByTime());
         //binarySearch returns a value smaller then 0 if the key isn't contained
         if (index < 0) {
@@ -147,21 +148,21 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * @param after The date, exclusive, from where the data should be returned
      * @return An unmodifiable sublist of {@link #raceData}
      */
-    public List<Pair<Date, Double>> getRaceDataAfterDate(Date after) {
-        int from = Collections.binarySearch(raceData, new Pair<Date, Double>(after, 0.0), new RaceDataByTime());
+    public List<Util.Pair<Date, Double>> getRaceDataAfterDate(Date after) {
+        int from = Collections.binarySearch(raceData, new Util.Pair<Date, Double>(after, 0.0), new RaceDataByTime());
         return Collections.unmodifiableList(raceData.subList(from + 1, raceData.size()));
     }
     
-    public class RaceDataByTime implements Comparator<Pair<Date, Double>> {
+    public class RaceDataByTime implements Comparator<Util.Pair<Date, Double>> {
         @Override
-        public int compare(Pair<Date, Double> d1, Pair<Date, Double> d2) {
+        public int compare(Util.Pair<Date, Double> d1, Util.Pair<Date, Double> d2) {
             return d1.getA().compareTo(d2.getA());
         }
     }
     
-    public class MarkPassingsByTime implements Comparator<Triple<String, Date, Double>> {
+    public class MarkPassingsByTime implements Comparator<Util.Triple<String, Date, Double>> {
         @Override
-        public int compare(Triple<String, Date, Double> m1, Triple<String, Date, Double> m2) {
+        public int compare(Util.Triple<String, Date, Double> m1, Util.Triple<String, Date, Double> m2) {
             return m1.getB().compareTo(m2.getB());
         }
     }

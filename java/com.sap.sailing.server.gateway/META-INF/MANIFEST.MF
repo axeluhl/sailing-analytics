@@ -39,10 +39,10 @@ Require-Bundle: com.sap.sailing.domain,
  com.sun.jersey;bundle-version="1.17.0",
  org.objectweb.asm;bundle-version="3.3.1",
  org.apache.commons.fileupload;bundle-version="1.2.2",
- com.sap.sailing.domain.igtimiadapter;bundle-version="1.0.0"
+ com.sap.sailing.domain.igtimiadapter;bundle-version="1.0.0",
+ com.sap.sse.common
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,
  com.sap.sailing.server.gateway.jaxrs,
- com.sap.sailing.server.gateway.jaxrs.spi,
- com.sap.sailing.server.gateway.trackfiles
+ com.sap.sailing.server.gateway.jaxrs.spi

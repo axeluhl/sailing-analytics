@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +34,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -56,6 +56,7 @@ import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sse.common.Util;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
     private MongoObjectFactory mongoObjectFactory = null;
@@ -104,6 +105,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
                 /* leaderboardRegistry */ null);
         assertNotNull(loadedLeaderboardGroup.getOverallLeaderboard());
+        assertEquals(leaderboardGroup.getId(), loadedLeaderboardGroup.getId());
         assertNotSame(leaderboardGroup.getOverallLeaderboard(), loadedLeaderboardGroup.getOverallLeaderboard());
         assertSame(ScoringSchemeType.HIGH_POINT_ESS_OVERALL, loadedLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
     }
@@ -145,8 +147,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new LowPoint(), null);
         racingEventService.addLeaderboard(leaderboard);
 
-        LeaderboardGroup leaderboardGroup = racingEventService.addLeaderboardGroup(groupName, groupDescription, false, Arrays.asList(leaderboardNames), new int[0],
-                ScoringSchemeType.HIGH_POINT_ESS_OVERALL);
+        LeaderboardGroup leaderboardGroup = racingEventService.addLeaderboardGroup(UUID.randomUUID(), groupName, groupDescription, false, Arrays.asList(leaderboardNames),
+                new int[0], ScoringSchemeType.HIGH_POINT_ESS_OVERALL);
         final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
         racingEventService.apply(new UpdateLeaderboardScoreCorrection(overallLeaderboard.getName(), "Leaderboard 3",

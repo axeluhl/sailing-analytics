@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
@@ -18,6 +17,7 @@ import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionPro
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 import com.sap.sailing.velum.resultimport.CsvParser;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;
@@ -39,15 +39,15 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (CsvParser parser : getAllRegattaResults()) {
             try {
                 parser.parseResults();
                 String boatClass = parser.getBoatClass();
                 
                 result.put(/* use document name as "event" name */ parser.getFilename(),
-                        Collections.singleton(new Pair<String, TimePoint>(boatClass, parser.getLastModified())));
+                        Collections.singleton(new Util.Pair<String, TimePoint>(boatClass, parser.getLastModified())));
 
             } catch (Exception e) {
                 logger.info("Parse error during CSV import. Ignoring document " + parser.toString());

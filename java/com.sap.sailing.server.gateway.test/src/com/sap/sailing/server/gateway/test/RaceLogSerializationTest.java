@@ -31,6 +31,7 @@ import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
@@ -41,7 +42,6 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSer
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
 
 public class RaceLogSerializationTest {
     private JsonSerializer<RaceLogEvent> serializer;
@@ -112,7 +112,7 @@ public class RaceLogSerializationTest {
         setup(DeviceIdentifierJsonDeserializer.create(new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE),
                 new DeviceIdentifierJsonSerializer(onlyFallback));
         //track file device id can't be restored from string rep
-        DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl("file", "track", null, 1);
+        DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl("file", "track");
         DeviceCompetitorMappingEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
                 t(), author, device, competitor, 0, t(), t());
         

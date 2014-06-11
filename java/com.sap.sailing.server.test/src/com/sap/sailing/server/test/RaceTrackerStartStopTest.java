@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class RaceTrackerStartStopTest {
     private RacingEventServiceImplMock racingEventService;
     private Regatta regatta;
     private BoatClass boatClass;
-    private Set<RaceTracker> raceTrackerSet = new HashSet<RaceTracker>();
+    private Set<RaceTracker> raceTrackerSet = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
 
     private RaceDefinition raceDef1;
     private RaceDefinition raceDef2;
@@ -66,10 +67,10 @@ public class RaceTrackerStartStopTest {
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EVENTNAME, boatClass, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
-        racingEventService.getEventsByName().put(EVENTNAME, regatta);
+        racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
-        racingEventService.getEventsByNameMap().put(EVENTNAME, regatta);
-        raceTrackerSet = new HashSet<RaceTracker>();
+        racingEventService.getRegattasByName().put(EVENTNAME, regatta);
+        raceTrackerSet = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
         raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
@@ -100,7 +101,7 @@ public class RaceTrackerStartStopTest {
         raceTrackerSet.add(raceTracker1);
         raceTrackerSet.add(raceTracker2);
         raceTrackerSet.add(raceTracker3);
-        racingEventService.getRaceTrackersByEventMap().put(regatta, raceTrackerSet);
+        racingEventService.getRaceTrackersByRegattaMap().put(regatta, raceTrackerSet);
         racingEventService.getRaceTrackersByIDMap().put(trackerID1, raceTracker1);
         racingEventService.getRaceTrackersByIDMap().put(trackerID2, raceTracker2);
         racingEventService.getRaceTrackersByIDMap().put(trackerID3, raceTracker3);
@@ -136,8 +137,8 @@ public class RaceTrackerStartStopTest {
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
         // The RaceTrakcersByEvent map should contain a tracker with a set of RaceDefinitions, containing the
         // raceDefinition1
-        assertEquals(1, racingEventService.getRaceTrackersByEventMap().size());
-        Iterator<RaceTracker> raceTrackerIter = racingEventService.getRaceTrackersByEventMap().get(regatta).iterator();
+        assertEquals(1, racingEventService.getRaceTrackersByRegattaMap().size());
+        Iterator<RaceTracker> raceTrackerIter = racingEventService.getRaceTrackersByRegattaMap().get(regatta).iterator();
         while (raceTrackerIter.hasNext()) {
             RaceTracker currentTracker = raceTrackerIter.next();
             assertSame(raceTracker1, currentTracker);
@@ -165,9 +166,9 @@ public class RaceTrackerStartStopTest {
         }
         assertFalse(foundTrackedRaceForRaceDef2);
         // The trackers map should still contain the raceTrackers
-        assertTrue(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker1));
-        assertTrue(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker2));
-        assertTrue(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker3));
+        assertTrue(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker1));
+        assertTrue(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker2));
+        assertTrue(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker3));
         // The raceTrackerMap should still contain the raceTrackers. These raceTracker should not contain the raceDefinition raceDef2 anymore
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker1));
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
@@ -193,9 +194,9 @@ public class RaceTrackerStartStopTest {
         racingEventService.removeRace(regatta, raceDef1);
         racingEventService.removeRace(regatta, raceDef2);
         // The event map should still contain the raceTrackers except of raceTracker1 and raceTracker2
-        assertFalse(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker1));
-        assertFalse(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker2));
-        assertTrue(racingEventService.getRaceTrackersByEventMap().get(regatta).contains(raceTracker3));
+        assertFalse(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker1));
+        assertFalse(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker2));
+        assertTrue(racingEventService.getRaceTrackersByRegattaMap().get(regatta).contains(raceTracker3));
         // The RaceTrackerByID map should still contain raceTracker3, but not raceTracker1 and raceTracker2 anymore
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker1));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));

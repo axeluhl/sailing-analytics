@@ -126,7 +126,7 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * 
      * @param author The author for the {@code RevokeEvent}.
      */
-    void revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException;
+    RevokeEvent revokeEvent(RaceLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException;
 
     /**
      * Merges all events from the <code>other</code> race log into this.

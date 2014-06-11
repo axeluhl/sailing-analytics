@@ -2,7 +2,7 @@ package com.sap.sailing.domain.swisstimingreplayadapter;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 public interface SwissTimingReplayRace extends Named {
 

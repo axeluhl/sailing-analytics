@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
@@ -53,6 +56,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -67,6 +71,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
@@ -75,8 +80,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -88,9 +92,11 @@ import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -150,6 +156,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sse.common.Util;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -161,7 +168,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
-
+    
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
      * using this instance of a {@link DomainObjectFactory}.
@@ -214,11 +221,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     public static TimePoint loadTimePoint(DBObject object, FieldNames field) {
         return loadTimePoint(object, field.name());
     }
-
+    
+    public static TimeRange loadTimeRange(DBObject object, FieldNames field) {
+        DBObject timeRangeObj = (DBObject) object.get(field.name());
+        if (timeRangeObj == null) {
+            return null;
+        }
+        TimePoint from = loadTimePoint(timeRangeObj, FieldNames.FROM_MILLIS);
+        TimePoint to = loadTimePoint(timeRangeObj, FieldNames.TO_MILLIS);
+        return new TimeRangeImpl(from, to);
+    }
     /**
      * Loads a {@link TimePoint} on the given object at {@link FieldNames#TIME_AS_MILLIS}.
      */
@@ -679,7 +695,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
+                boolean hasUUID = o.containsField(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                final LeaderboardGroup leaderboardGroup = loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry);
+                leaderboardGroups.add(leaderboardGroup);
+                if (!hasUUID) {
+                    // in an effort to migrate leaderboard groups without ID to such that have a UUID as their ID, we need
+                    // to write a leaderboard group to the database again after it just received a UUID for the first time:
+                    logger.info("Existing LeaderboardGroup " + leaderboardGroup.getName()
+                            + " received a UUID during migration; updating the leaderboard group in the database");
+                    new MongoObjectFactoryImpl(database).storeLeaderboardGroup(leaderboardGroup);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
@@ -692,6 +717,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        UUID uuid = (UUID) o.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+            logger.info("Leaderboard group "+name+" receives UUID "+uuid+" in a migration effort");
+            // migration: leaderboard groups that don't yet have a UUID receive a random one
+        }
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
         boolean displayGroupsInReverseOrder = false; // default value 
         Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
@@ -714,7 +745,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, displayGroupsInReverseOrder, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(uuid, name, description, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;
@@ -823,7 +854,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (windFixesFoundByName.hasNext()) {
                 List<DBObject> windFixesToMigrate = new ArrayList<DBObject>();
                 for (DBObject dbWind : windFixesFoundByName) {
-                    Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
+                    Util.Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
                     // write the wind fix with the new ID-based key and remove the legacy wind fix from the DB
                     windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
@@ -843,7 +874,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Pair<Wind, WindSource> loadWindFix(Map<WindSource, WindTrack> result, DBObject dbWind, long millisecondsOverWhichToAverageWind) {
+    private Util.Pair<Wind, WindSource> loadWindFix(Map<WindSource, WindTrack> result, DBObject dbWind, long millisecondsOverWhichToAverageWind) {
         Wind wind = loadWind((DBObject) dbWind.get(FieldNames.WIND.name()));
         WindSourceType windSourceType = WindSourceType.valueOf((String) dbWind.get(FieldNames.WIND_SOURCE_NAME.name()));
         WindSource windSource;
@@ -860,7 +891,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.put(windSource, track);
         }
         track.add(wind);
-        return new Pair<Wind, WindSource>(wind, windSource);
+        return new Util.Pair<Wind, WindSource>(wind, windSource);
+    }
+
+    @Override
+    public void loadLeaderboardGroupLinksForEvents(EventResolver eventResolver,
+            LeaderboardGroupResolver leaderboardGroupResolver) {
+        DBCollection links = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
+        for (Object o : links.find()) {
+            DBObject dbLink = (DBObject) o;
+            UUID eventId = (UUID) dbLink.get(FieldNames.EVENT_ID.name());
+            Event event = eventResolver.getEvent(eventId);
+            if (event == null) {
+                logger.info("Found leaderboard group IDs for event with ID "+eventId+" but couldn't find that event.");
+            } else {
+                @SuppressWarnings("unchecked")
+                List<UUID> leaderboardGroupIDs = (List<UUID>) dbLink.get(FieldNames.LEADERBOARD_GROUP_UUID.name());
+                for (UUID leaderboardGroupID : leaderboardGroupIDs) {
+                    LeaderboardGroup leaderboardGroup = leaderboardGroupResolver.getLeaderboardGroupByID(leaderboardGroupID);
+                    if (leaderboardGroup != null) {
+                        event.addLeaderboardGroup(leaderboardGroup);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -889,9 +943,40 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
-            logger.log(Level.SEVERE, "loadEvents", e);
+            logger.log(Level.SEVERE, "loadAllEvents", e);
         }
 
+        return result;
+    }
+
+
+    private RemoteSailingServerReference loadSailingSever(DBObject serverDBObject) {
+        RemoteSailingServerReference result = null;
+        String name = (String) serverDBObject.get(FieldNames.SERVER_NAME.name());
+        String urlAsString = (String) serverDBObject.get(FieldNames.SERVER_URL.name());
+        try {
+            URL serverUrl = new URL(urlAsString);
+            result = new RemoteSailingServerReferenceImpl(name, serverUrl);
+        } catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, "Can't load the sailing server with URL " + urlAsString, e);
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<RemoteSailingServerReference> loadAllRemoteSailingServerReferences() {
+        ArrayList<RemoteSailingServerReference> result = new ArrayList<RemoteSailingServerReference>();
+        DBCollection serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        try {
+            for (DBObject o : serverCollection.find()) {
+                if (loadSailingSever(o) != null) {
+                    result.add(loadSailingSever(o));
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load sailing server instances URLs.");
+            logger.log(Level.SEVERE, "loadAllSailingServers", e);
+        }
         return result;
     }
 
@@ -907,6 +992,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
+        BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        if (imageURLs != null) {
+            for (Object imageURL : imageURLs) {
+                try {
+                    result.addImageURL(new URL((String) imageURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing image URL "+imageURL+" for event "+name+". Ignoring this image URL.");
+                }
+            }
+        }
+        BasicDBList videoURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        if (videoURLs != null) {
+            for (Object videoURL : videoURLs) {
+                try {
+                    result.addVideoURL(new URL((String) videoURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
+                }
+            }
+        }
         return result;
     }
 
@@ -1389,7 +1494,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
-            Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
+            Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Util.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         return positionedCompetitors;
@@ -1567,7 +1672,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         
         try {
             for (DBObject dbObject : configurationCollection.find()) {
-                Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
+                Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
                 result.put(entry.getA(), entry.getB());
             }
         } catch (Exception e) {
@@ -1578,10 +1683,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result.entrySet();
     }
 
-    private Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
+    private Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
         DBObject matcherObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_MATCHER.name());
         DBObject configObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
-        return new Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), 
+        return new Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), 
                 loadConfiguration(configObject));
     }
 

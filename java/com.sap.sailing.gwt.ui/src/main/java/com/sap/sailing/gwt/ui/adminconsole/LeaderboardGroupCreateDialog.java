@@ -9,7 +9,7 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
 
     public LeaderboardGroupCreateDialog(Collection<LeaderboardGroupDTO> existingGroups,
             StringMessages stringMessages, DialogCallback<LeaderboardGroupDescriptor> callback) {
-        super(new LeaderboardGroupDTO(), stringMessages,
+        super(new LeaderboardGroupDTO(/* ID */ null), stringMessages,
                 callback, existingGroups);
         nameEntryField = createTextBox(null, 50);
         nameEntryField.ensureDebugId("NameTextBox");

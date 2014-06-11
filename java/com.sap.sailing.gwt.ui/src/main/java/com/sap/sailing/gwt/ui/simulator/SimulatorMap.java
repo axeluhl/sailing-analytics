@@ -297,36 +297,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, Timer timer,
-            WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode,
-            SimulatorMainPanel parent) {
-        this.simulatorService = simulatorSvc;
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.xRes = xRes;
-        this.yRes = yRes;
-        this.border = border;
-        this.timer = timer;
-        this.timePanel = null;
-        timer.addTimeListener(this);
-        this.windParams = windParams;
-        this.busyIndicator = busyIndicator;
-        this.mode = mode;
-        this.colorPalette = new ColorPaletteGenerator();
-        this.dataInitialized = false;
-        this.overlaysInitialized = false;
-        this.windFieldCanvasOverlay = null;
-        this.windLineGuidesCanvasOverlay = null;
-        this.windGridCanvasOverlay = null;
-        this.windLineCanvasOverlay = null;
-        this.replayPathCanvasOverlays = null;
-        this.raceCourseCanvasOverlay = null;
-        this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        this.initializeData();
-        this.parent = parent;    
-    }
-
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, Timer timer,
-            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls) {
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -349,7 +320,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.replayPathCanvasOverlays = null;
         this.raceCourseCanvasOverlay = null;
         this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        this.initializeData();
+        this.initializeData(showMapControls);
         this.parent = parent;
     }
 
@@ -994,7 +965,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     @Override
-    public void initializeData() {
+    public void initializeData(boolean showMapControls) {
         loadMapsAPIV3();
     }
 

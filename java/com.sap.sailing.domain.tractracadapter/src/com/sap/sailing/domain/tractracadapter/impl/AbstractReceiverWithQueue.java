@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -13,8 +12,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
@@ -27,12 +29,14 @@ import com.tractrac.clientmodule.Race;
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private static Logger logger = Logger.getLogger(AbstractReceiverWithQueue.class.getName());
     
-    private final LinkedBlockingQueue<Triple<A, B, C>> queue;
+    private final LinkedBlockingQueue<Util.Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
-    private final com.tractrac.clientmodule.Event tractracEvent;
+    private final IEvent tractracEvent;
+    private final IEventSubscriber eventSubscriber;
+    private final IRaceSubscriber raceSubscriber;
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
-    private Thread thread;
+    private final Thread thread;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -40,18 +44,28 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     private boolean receivedEventDuringTimeout;
     
-    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent,
-            DynamicTrackedRegatta trackedRegatta, Simulator simulator) {
+    public AbstractReceiverWithQueue(DomainFactory domainFactory, IEvent tractracEvent,
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super();
+        this.eventSubscriber = eventSubscriber;
+        this.raceSubscriber = raceSubscriber;
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
         this.simulator = simulator;
-        this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
+        this.queue = new LinkedBlockingQueue<Util.Triple<A, B, C>>();
+        this.thread = new Thread(this, getClass().getName());
     }
     
-    protected synchronized void setAndStartThread(Thread thread) {
-        this.thread = thread;
+    protected IEventSubscriber getEventSubscriber() {
+        return eventSubscriber;
+    }
+
+    protected IRaceSubscriber getRaceSubscriber() {
+        return raceSubscriber;
+    }
+
+    protected synchronized void startThread() {
         thread.start();
     }
     
@@ -59,7 +73,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         return domainFactory;
     }
     
-    protected com.tractrac.clientmodule.Event getTracTracEvent() {
+    protected IEvent getTracTracEvent() {
         return tractracEvent;
     }
     
@@ -75,12 +89,14 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     @Override
     public void stopAfterProcessingQueuedEvents() {
-        queue.add(new Triple<A, B, C>(null, null, null));
+        queue.add(new Util.Triple<A, B, C>(null, null, null));
     }
     
     protected Simulator getSimulator() {
         return simulator;
     }
+    
+    protected abstract void unsubscribe();
     
     @Override
     public void stopAfterNotReceivingEventsForSomeTime(final long timeoutInMilliseconds) {
@@ -102,18 +118,18 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         }, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
-    protected void enqueue(Triple<A, B, C> event) {
+    protected void enqueue(Util.Triple<A, B, C> event) {
         queue.add(event);
         receivedEventDuringTimeout = true;
     }
     
-    private boolean isStopEvent(Triple<A, B, C> event) {
+    private boolean isStopEvent(Util.Triple<A, B, C> event) {
         return event.getA() == null && event.getB() == null && event.getC() == null;
     }
 
     @Override
     public void run() {
-        Triple<A, B, C> event = null;
+        Util.Triple<A, B, C> event = null;
         while (event == null || !isStopEvent(event)) {
             try {
                 event = queue.take();
@@ -127,6 +143,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         if (simulator != null) {
             simulator.stop();
         }
+        unsubscribe();
     }
 
     @Override
@@ -143,7 +160,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         }
     }
 
-    protected abstract void handleEvent(Triple<A, B, C> event);
+    protected abstract void handleEvent(Util.Triple<A, B, C> event);
 
     /**
      * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta}
@@ -154,7 +171,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      * returned. If the {@link TrackedRace} for <code>race</code> isn't found in the {@link TrackedRegatta},
      * <code>null</code> is returned, too.
      */
-    protected DynamicTrackedRace getTrackedRace(Race race) {
+    protected DynamicTrackedRace getTrackedRace(IRace race) {
         DynamicTrackedRace result = null;
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(),
                 RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);

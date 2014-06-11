@@ -7,11 +7,11 @@ import java.net.URL;
 
 import android.os.AsyncTask;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.racecommittee.app.data.http.HttpJsonPostRequest;
 import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
+import com.sap.sse.common.Util;
 
-public class RaceLogPollerTask extends AsyncTask<Pair<Serializable, URL>, PollingResult, Void> {
+public class RaceLogPollerTask extends AsyncTask<Util.Pair<Serializable, URL>, PollingResult, Void> {
     
     public interface PollingResultListener {
         public void onPollingResult(PollingResult result);
@@ -25,8 +25,8 @@ public class RaceLogPollerTask extends AsyncTask<Pair<Serializable, URL>, Pollin
     }
 
     @Override
-    protected Void doInBackground(Pair<Serializable, URL>... queries) {
-        for (Pair<Serializable, URL> query : queries) {
+    protected Void doInBackground(Util.Pair<Serializable, URL>... queries) {
+        for (Util.Pair<Serializable, URL> query : queries) {
             if (isCancelled()) {
                 return null;
             }
@@ -36,7 +36,7 @@ public class RaceLogPollerTask extends AsyncTask<Pair<Serializable, URL>, Pollin
             try {
                 responseStream = request.execute();
                 publishProgress(new PollingResult(true, 
-                        new Pair<Serializable, InputStream>(query.getA(), responseStream)));
+                        new Util.Pair<Serializable, InputStream>(query.getA(), responseStream)));
             } catch (IOException e) {
                 // don't need to close responseStream as it still must
                 // be null because the only call that may throw an

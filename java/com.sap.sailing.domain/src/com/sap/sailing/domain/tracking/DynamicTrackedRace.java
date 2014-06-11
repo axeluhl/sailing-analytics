@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -103,5 +103,5 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     Bearing getCrossingBearing(Waypoint w, TimePoint t);
 
-    Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w);
+    Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w);
 }

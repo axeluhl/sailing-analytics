@@ -14,7 +14,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.AppPreferences.PollingActiveChangedListener;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -22,6 +21,7 @@ import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallba
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollerTask.PollingResultListener;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
+import com.sap.sse.common.Util;
 
 /**
  * <p>
@@ -124,9 +124,9 @@ public class RaceLogPoller implements PollingActiveChangedListener {
                 return;
             }
             
-            List<Pair<Serializable, URL>> queries = getPollingQueries();
+            List<Util.Pair<Serializable, URL>> queries = getPollingQueries();
             task = new RaceLogPollerTask(this);
-            task.execute(queries.toArray(new Pair[0]));
+            task.execute(queries.toArray(new Util.Pair[0]));
         }
 
         @Override
@@ -156,10 +156,10 @@ public class RaceLogPoller implements PollingActiveChangedListener {
             poller.pollingHandler.postDelayed(this, pollingInterval);
         }
 
-        private List<Pair<Serializable, URL>> getPollingQueries() {
-            List<Pair<Serializable, URL>> queries = new ArrayList<Pair<Serializable,URL>>();
+        private List<Util.Pair<Serializable, URL>> getPollingQueries() {
+            List<Util.Pair<Serializable, URL>> queries = new ArrayList<Util.Pair<Serializable,URL>>();
             for (Entry<ManagedRace, URL> entry : poller.races.entrySet()) {
-                queries.add(new Pair<Serializable, URL>(entry.getKey().getId(), entry.getValue()));
+                queries.add(new Util.Pair<Serializable, URL>(entry.getKey().getId(), entry.getValue()));
             }
             return queries;
         }

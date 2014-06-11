@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sse.common.Util;
 
 /**
  * A color defined in the HSV color schema (hue, saturation, brightness) Hue is a degree between 0.0 and 360.0
@@ -35,7 +35,7 @@ public class HSVColor extends AbstractColor {
     }
 
     @Override
-    public Triple<Integer, Integer, Integer> getAsRGB() {
+    public Util.Triple<Integer, Integer, Integer> getAsRGB() {
         float r, b, g;
 
         if (saturation == 0) {
@@ -80,14 +80,14 @@ public class HSVColor extends AbstractColor {
                 b = q;
             }
         }
-        Triple<Integer, Integer, Integer> RGBColor = new Triple<Integer, Integer, Integer>(Math.round(r * 255),
+        Util.Triple<Integer, Integer, Integer> RGBColor = new Util.Triple<Integer, Integer, Integer>(Math.round(r * 255),
                 Math.round(g * 255), Math.round(b * 255));
         return RGBColor;
     }
 
     @Override
-    public Triple<Float, Float, Float> getAsHSV() {
-        return new Triple<Float, Float, Float>(hue, saturation, brightness);
+    public Util.Triple<Float, Float, Float> getAsHSV() {
+        return new Util.Triple<Float, Float, Float>(hue, saturation, brightness);
     }
 
     @Override

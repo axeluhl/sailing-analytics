@@ -34,8 +34,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -61,6 +59,7 @@ import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.util.InvalidDateException;
+import com.sap.sse.common.Util;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -383,18 +382,18 @@ public class RegattasResource extends AbstractSailingServerResource {
                 
                 JSONArray jsonMarkPassingTimes = new JSONArray();
                 List<TimePoint> firstPassingTimepoints = new ArrayList<>();
-                Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
+                Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
                 synchronized (markPassingsTimes) {
                     int numberOfWaypoints = Util.size(markPassingsTimes);
                     int wayPointNumber = 1;
-                    for (Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
+                    for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
                         JSONObject jsonMarkPassing = new JSONObject();
                         String name = "M" + (wayPointNumber - 1);
                         if (wayPointNumber == numberOfWaypoints) {
                             name = "F";
                         }
                         jsonMarkPassing.put("name", name);
-                        Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
+                        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
                         TimePoint firstPassingTime = timesPair.getA();
                         TimePoint lastPassingTime = timesPair.getB();
                         jsonMarkPassing.put("firstPassing-ms", firstPassingTime == null ? null : firstPassingTime.asMillis());
@@ -597,15 +596,32 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
                             }
                             try {
-								Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
-								Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
-								Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint);
+                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
+                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+                                Integer numberOfPenaltyCircles = trackedLegOfCompetitor
+                                        .getNumberOfPenaltyCircles(timePoint);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
-							} catch (NoWindException e) {
-							}
-                            
+                            } catch (NoWindException e) {
+                            }
+
+                            TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                            TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                            TimePoint startOfRace = trackedRace.getStartOfRace();
+                            // between the start of the race and the start of the first leg we have no 'timeSinceGun' for the competitor
+                            if(startOfRace != null && startTime != null) {
+                                long timeSinceGun = -1;
+                                if(finishTime != null) {
+                                    timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
+                                } else {
+                                    timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
+                                }
+                                if(timeSinceGun > 0) {
+                                    jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
+                                }
+                            }
+
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));

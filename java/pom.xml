@@ -28,6 +28,8 @@
 		<module>com.sap.sailing.datamining.shared</module>
 		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
+		<module>com.sap.sailing.domain.deckmanadapter</module>
+		<module>com.sap.sailing.domain.deckmanadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter</module>
@@ -73,7 +75,6 @@
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sse.common.test</module>
-		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
 		<module>com.sap.sailing.operationaltransformation.test</module>

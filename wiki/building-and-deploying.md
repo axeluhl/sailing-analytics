@@ -33,6 +33,14 @@ This will ask you for a comment about the release which goes into the release no
 
 A release can be downloaded and installed to a server by changing to the server's directory, e.g., `~/servers/server` and there executing the `refreshInstance.sh` script with the parameter `install-release <release-name>`. Afterwards, starting the instance works as after a local build.
 
+Instead of building a release yourself you can let the build server to the job. There is a job that looks out for a git tag named `release`. If a new revision is found then an automatic release build is being executed. The result of that is persisted to http://releases.sapsailing.com/. You can create that tag as follows. Make sure that you're on the current master branch before executing the following commands.
+
+<pre>
+$ git tag -f release
+$ git push -f origin release:release
+</pre>
+
+Give the build server some time (20-30 Minutes) until it will have the release ready.
 ## Working with Environments
 
 There exist a number of preconfigured environment configurations at [releases.sapsailing.com/environments](http://releases.sapsailing.com/environments). Such an environment can be automagically applied to your instance by changing to the servers directory and then executing the `refreshInstance.sh` script with the parameter `install-env <environment-name>`. This will update your env.sh. Make sure to afterwards restart your server.

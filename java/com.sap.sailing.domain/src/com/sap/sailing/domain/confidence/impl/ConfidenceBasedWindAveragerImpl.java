@@ -4,7 +4,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.confidence.Weigher;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.ScalableWind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.Util;
 
 /**
  * In order to enable the aggregation of {@link Wind} objects whose {@link WindSource}'s {@link WindSourceType} suggests

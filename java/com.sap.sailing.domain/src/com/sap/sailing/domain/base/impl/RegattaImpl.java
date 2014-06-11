@@ -29,11 +29,11 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
@@ -42,8 +42,24 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Util;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
+
+    /**
+     * Used during master data import to handle connection to correct RaceLogStore
+     */
+    private static transient ThreadLocal<MasterDataImportInformation> ongoingMasterDataImportInformation = new ThreadLocal<MasterDataImportInformation>() {
+        @Override
+        protected MasterDataImportInformation initialValue() {
+            return null;
+        };
+    };
+
+    public static void setOngoingMasterDataImport(MasterDataImportInformation information) {
+        ongoingMasterDataImportInformation.set(information);
+    }
+
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
@@ -159,12 +175,29 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
-     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is assembled
+     * for this empty race log and applied to all columns.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        raceLogStore = EmptyRaceLogStore.INSTANCE;
         regattaListeners = new HashSet<RegattaListener>();
+        MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
+        if (masterDataImportInformation != null) {
+            raceLogStore = masterDataImportInformation.getRaceLogStore();
+        } else {
+            raceLogStore = EmptyRaceLogStore.INSTANCE;
+        }
+        for (Series series : getSeries()) {
+            linkToRegattaAndConnectRaceLogsAndAddListeners(series);
+            if (series.getRaceColumns() != null) {
+                for (RaceColumnInSeries column : series.getRaceColumns()) {
+                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
+                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                }
+            } else {
+                logger.warning("Race Columns were null during deserialization. This should not happen.");
+            }
+        }  
     }
 
     @Override

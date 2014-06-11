@@ -222,15 +222,13 @@ public class TrackedRacesListPO extends PageArea {
             public Object apply(List<TrackedRaceDescriptor> races) {
                 try {
                     refresh();
-                    
-                    for(Status status : getStatus(races)) {
-                        if(status != statusToWaitFor)
+                    for (Status status : getStatus(races)) {
+                        if (status != statusToWaitFor)
                             return Boolean.FALSE;
                     }
-                } catch(TimeoutException exception) {
+                } catch (TimeoutException exception) {
                     return Boolean.FALSE;
                 }
-                
                 return Boolean.TRUE;
             }
         });

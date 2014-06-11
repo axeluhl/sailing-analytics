@@ -31,10 +31,11 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
@@ -49,6 +50,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -58,11 +60,12 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -142,7 +145,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     @Override
-    public RacesHandle getRacesHandle() {
+    public RaceHandle getRacesHandle() {
         return new RaceLogRacesHandle(this);
     }
 
@@ -212,6 +215,9 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
             DeviceMapping<ItemT> newMapping, List<DeviceMapping<ItemT>> oldMappings) {
+        if (oldMappings == null) {
+            return false;
+        }
         for (DeviceMapping<ItemT> oldMapping : oldMappings) {
             if (newMapping.getDevice() == oldMapping.getDevice()
                     && newMapping.getTimeRange().liesWithin(oldMapping.getTimeRange())) {
@@ -254,7 +260,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                     if (oldMappings != null) {
                         for (DeviceMapping<Mark> newMapping : newMappings.get(mark)) {
                             if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                                gpsFixStore.loadMarkTrack(track, newMapping);
+                                try {
+                                    gpsFixStore.loadMarkTrack(track, newMapping);
+                                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                    logger.log(Level.WARNING, "Could not load mark track " + newMapping.getMappedTo());
+                                }
                             }
                         }
                     }
@@ -273,8 +283,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     @Override
     public void visit(DeviceMarkMappingEvent event) {
-        if (trackedRace != null)
+        if (trackedRace != null) {
             updateMarkMappings(true);
+            gpsFixStore.addListener(this, event.getDevice());
+        }
     }
 
     private void updateCompetitorMappings(boolean loadIfNotCovered) {
@@ -291,7 +303,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
                     for (DeviceMapping<Competitor> newMapping : newMappings.get(competitor)) {
                         if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                            gpsFixStore.loadCompetitorTrack(track, newMapping);
+                            try {
+                                gpsFixStore.loadCompetitorTrack(track, newMapping);
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.log(Level.WARNING, "Could not load competitor track " + newMapping.getMappedTo());
+                            }
                         }
                     }
                 }
@@ -309,8 +325,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     @Override
     public void visit(DeviceCompetitorMappingEvent event) {
-        if (trackedRace != null)
+        if (trackedRace != null) {
             updateCompetitorMappings(true);
+            gpsFixStore.addListener(this, event.getDevice());
+        }
     }
 
     @Override
@@ -324,17 +342,16 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         if (trackedRace == null) return;
         
         CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
         
         for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
         }
         
         try {
             trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
         } catch (PatchFailedException e) {
             logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
-            e.printStackTrace();
         }
     }
 
@@ -376,13 +393,17 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null);
 
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
+        
+        //add listeners for devices in mappings
+        for (List<DeviceMapping<WithID>> mappings : new DeviceMappingFinder<WithID>(params.getRaceLog()).analyze().values()) {
+            for (DeviceMapping<WithID> mapping : mappings) {
+                gpsFixStore.addListener(this, mapping.getDevice());
+            }
+        }
 
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         updateCompetitorMappings(false);
         updateMarkMappings(false);
-
-        // add a listener, so new fixes will also be forwarded to the race
-        gpsFixStore.addListener(this);
         
         // add mark passing detection
         new MarkPassingCalculator(trackedRace, true);
@@ -417,9 +438,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                     if (fix instanceof GPSFixMoving) {
                         trackedRace.recordFix(comp, (GPSFixMoving) fix);
                     } else {
-                        logger.log(Level.WARNING, String.format(
-                                "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving", comp,
-                                params.getRaceLog()));
+                        logger.log(
+                                Level.WARNING,
+                                String.format(
+                                        "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving, meaning it is missing COG/SOG values",
+                                        comp, params.getRaceLog()));
                     }
                 }
             }

@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Waypoint;
@@ -24,10 +25,12 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -35,6 +38,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sse.common.Util;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
     /**
@@ -48,16 +52,16 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         final Throwable s1 = new Throwable();
         final Throwable s2 = new Throwable();
-        Pair<Throwable, Throwable> p =
-                new Pair<Throwable, Throwable>(
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> p =
+                new com.sap.sse.common.Util.Pair<Throwable, Throwable>(
                         s1, s2);
-        HashSet<Pair<Throwable, Throwable>> s =
-                new HashSet<Pair<Throwable, Throwable>>();
+        HashSet<com.sap.sse.common.Util.Pair<Throwable, Throwable>> s =
+                new HashSet<com.sap.sse.common.Util.Pair<Throwable, Throwable>>();
         s.add(p);
-        Set<Pair<Throwable, Throwable>> ss =
+        Set<com.sap.sse.common.Util.Pair<Throwable, Throwable>> ss =
                 cloneBySerialization(s, /* resolveAgainst */ receiverDomainFactory);
         
-        Pair<Throwable, Throwable> ps = ss.iterator().next();
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> ps = ss.iterator().next();
         Throwable s1Des = ps.getA();
         Throwable s2Des = ps.getB();
         assertNotSame(s, ss);
@@ -65,8 +69,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertNotSame(s1, s1Des);
         assertNotSame(s2, s2Des);
         assertEquals(1, ss.size());
-        Pair<Throwable, Throwable> pNew =
-                new Pair<Throwable, Throwable>(s1Des, s2Des);
+        com.sap.sse.common.Util.Pair<Throwable, Throwable> pNew =
+                new com.sap.sse.common.Util.Pair<Throwable, Throwable>(s1Des, s2Des);
         assertEquals(ps.hashCode(), pNew.hashCode());
         assertTrue(ss.contains(pNew));
     }
@@ -81,6 +85,20 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         int[] intArray = new int[] { 5, 8 };
         int[] clone = cloneBySerialization(intArray, receiverDomainFactory);
         assertTrue(Arrays.equals(intArray, clone));
+    }
+
+    @Test
+    public void testSerializingEventWithLeaderboardGroups() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Event e = new EventImpl("Event Name", MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(
+                Duration.ONE_DAY.times(10)), "At Home", /* is public */true, UUID.randomUUID());
+        LeaderboardGroup lg1 = new LeaderboardGroupImpl("LG1", "LG1 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        e.addLeaderboardGroup(lg1);
+        LeaderboardGroup lg2 = new LeaderboardGroupImpl("LG2", "LG2 Description", /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
+        e.addLeaderboardGroup(lg2);
+        Event deserialized = cloneBySerialization(e, receiverDomainFactory);
+        assertEquals(Util.size(e.getLeaderboardGroups()), Util.size(deserialized.getLeaderboardGroups()));
+        assertEquals(e.getLeaderboardGroups().iterator().next().getName(), deserialized.getLeaderboardGroups().iterator().next().getName());
     }
     
     /**
