@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -160,46 +159,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         if (swarm != null) {
             this.swarm.stop();
         }
-    }
-
-    public void extendWindDataJSON() {
-        List<SimulatorWindDTO> data = this.windFieldDTO.getMatrix();
-        String jsonData = "data:[";
-        int p = 0;
-        int imax = this.windParams.getyRes() + 2 * this.windParams.getBorderY();
-        int jmax = this.windParams.getxRes() + 2 * this.windParams.getBorderX();
-        int steps = data.size() / (imax * jmax);
-        double maxWindSpeed = 0;
-        for (int s = 0; s < steps; s++) {
-            jsonData += "[";
-            for (int i = 0; i < imax; i++) {
-                jsonData += "[";
-                for (int j = 0; j < jmax; j++) {
-                    SimulatorWindDTO wind = data.get(p);
-                    p++;
-                    if (wind.trueWindSpeedInKnots > maxWindSpeed) {
-                        maxWindSpeed = wind.trueWindSpeedInKnots;
-                    }
-                    double y = wind.trueWindSpeedInKnots * Math.cos(wind.trueWindBearingDeg * Math.PI / 180.0);
-                    double x = wind.trueWindSpeedInKnots * Math.sin(wind.trueWindBearingDeg * Math.PI / 180.0);
-                    jsonData += x + "," + y;
-                    if (j < (jmax - 1)) {
-                        jsonData += ",";
-                    }
-                }
-                if (i < (imax - 1)) {
-                    jsonData += "],";
-                } else {
-                    jsonData += "]";
-                }
-            }
-            if (s < (steps - 1)) {
-                jsonData += "],";
-            } else {
-                jsonData += "]";
-            }
-        }
-        this.windFieldDTO.windDataJSON += jsonData + "],maxLength:" + maxWindSpeed + "};";
     }
 
     public void setEndDate(Date endDate) {
