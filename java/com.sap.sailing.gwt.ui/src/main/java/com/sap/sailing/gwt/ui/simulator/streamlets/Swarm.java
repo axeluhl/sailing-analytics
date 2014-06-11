@@ -28,7 +28,6 @@ public class Swarm {
     private int swarmPause = 0;
     private boolean swarmContinue = true;
     private Position visNE;
-    private boolean visFull;
     private Position visSW;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
@@ -74,12 +73,12 @@ public class Swarm {
             Vector v = field.getVector(particle.currentPosition);
             double weight = field.particleWeight(particle.currentPosition, v);
             if (weight >= Math.random()) {
-                if (v.length() == 0) {
+                if (v == null || v.length() == 0) {
                     particle.stepsToLive = 0;
                 } else {
                     particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                 }
-                particle.previousPosition = projection.latlng2pixel(particle.currentPosition);
+                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.v = v;
                 done = true;
             }
@@ -89,23 +88,12 @@ public class Swarm {
     
     private Position getRandomPosition() {
         final Position result;
-        if (isVisFull()) {
-            double rndY = Math.random();
-            double rndX = Math.random();
-            double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-            double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
-            result = new DegreePosition(latDeg, lngDeg);
-        } else {
-            double rndY = Math.random();
-            double rndX = Math.random() - 0.5;
-            result = field.getInnerPosition(rndX, rndY, isVisFull());
-        }
+        double rndY = Math.random();
+        double rndX = Math.random();
+        double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
+        double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
+        result = new DegreePosition(latDeg, lngDeg);
         return result;
-    }
-
-
-    private boolean isVisFull() {
-        return visFull;
     }
 
     private Particle[] createParticles() {
@@ -126,7 +114,7 @@ public class Swarm {
                 .getNorthEast().getLongitude());
         Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds()
                 .getSouthWest().getLongitude());
-        Position[] fieldCorners = this.field.getFieldCorners(visFull);
+        Position[] fieldCorners = this.field.getFieldCorners();
         Position fieldNE = fieldCorners[1];
         Position fieldSW = fieldCorners[0];
         Pair<Boolean, Boolean> visibleNE = this.isVisible(fieldNE);
@@ -163,17 +151,12 @@ public class Swarm {
         }
         this.setVisSW(boundsSW);
         this.setVisNE(boundsNE);
-        this.setVisFullCanvas((!useBoundsNorth) && (!useBoundsEast) && (!useBoundsSouth) && (!useBoundsWest));
         Vector boundsSWpx = this.projection.latlng2pixel(boundsSW);
         Vector boundsNEpx = this.projection.latlng2pixel(boundsNE);
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
     };
-
-    private void setVisFullCanvas(boolean visFull) {
-        this.visFull = visFull;
-    }
 
     private void setVisNE(Position visNE) {
         this.visNE = visNE;
@@ -240,9 +223,8 @@ public class Swarm {
             ctxt.setLineWidth(field.lineWidth(particleSpeed));
             ctxt.setStrokeStyle(field.getColor(particleSpeed));
             ctxt.beginPath();
-            ctxt.moveTo(particle.previousPosition.x, particle.previousPosition.y);
-            particle.previousPosition = projection.latlng2pixel(particle.currentPosition);
-            ctxt.lineTo(particle.previousPosition.x, particle.previousPosition.y);
+            ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
+            ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
             ctxt.stroke();
         }
     }
@@ -256,11 +238,16 @@ public class Swarm {
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
             if ((particle.stepsToLive > 0) && (particle.v != null)) {
+                // move the particle one step in the direction and with the speed indicated by particle.v and
+                // update its currentPosition, currentPixelCoordinate and previousPixelCoordinate fields;
+                // also, its particle.v field is updated based on its new position from the vector field
+                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
                 double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x;
                 particle.currentPosition = new DegreePosition(latDeg, lngDeg);
+                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
-                if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition, isVisFull()))) {
+                if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition);
                 } else {
                     particle.v = null;

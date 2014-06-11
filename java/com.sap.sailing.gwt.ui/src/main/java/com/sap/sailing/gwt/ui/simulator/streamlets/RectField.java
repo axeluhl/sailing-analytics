@@ -92,7 +92,7 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public boolean inBounds(Position p, boolean visFull) {
+    public boolean inBounds(Position p) {
         return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
                 && p.getLatDeg() < this.y1;
     }
@@ -140,7 +140,7 @@ public class RectField implements VectorField {
 
     @Override
     public double particleWeight(Position p, Vector v) {
-        return 1.0 - v.length() / this.maxLength;
+        return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
     @Override
@@ -169,7 +169,8 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners(boolean visFull) {
+    public Position[] getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
         DegreePosition[] result = new DegreePosition[2];
         result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
         result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));

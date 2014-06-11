@@ -104,19 +104,19 @@ public class SimulatorField implements VectorField {
                 gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
     }
 
-    private Position getInnerPosition(double factX, double factY, boolean visFull) {
+    private Position getInnerPosition(double factX, double factY) {
         double latDeg = this.bdA.getLatDeg() + factY * this.bdB.getLatDeg() + factX * this.bdC.getLatDeg();
         double lngDeg = this.bdA.getLngDeg() + factY * this.bdB.getLngDeg() + factX * this.bdC.getLngDeg();
         Position result = new DegreePosition(latDeg, lngDeg);
-        if (swarmDebug && (!this.inBounds(result, visFull))) {
+        if (swarmDebug && (!this.inBounds(result))) {
             GWT.log("random-position: out of bounds");
         }
         return result;
     }
 
     @Override
-    public boolean inBounds(Position p, boolean visFull) {
-        Index idx = this.getIndex(p, visFull);
+    public boolean inBounds(Position p) {
+        Index idx = this.getIndex(p);
         boolean inBool = (idx.x >= 0) && (idx.x < (this.resX + 2 * this.borderX)) && (idx.y >= 0)
                 && (idx.y < (this.resY + 2 * this.borderY));
         return inBool;
@@ -170,27 +170,13 @@ public class SimulatorField implements VectorField {
         return this.interpolate(p);
     }
 
-    private Index getIndex(Position p, boolean visFull) {
+    private Index getIndex(Position p) {
         // calculate grid indexes
         final double latOffset = p.getLatDeg() - this.rcStart.getLatDeg();
         final double lngOffset = (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
         // closest grid point
         long yIdx = Math.round(latOffset * this.nvY.getLatDeg() + lngOffset * this.nvY.getLngDeg()) + this.borderY;
         long xIdx = Math.round(latOffset * this.nvX.getLatDeg() + lngOffset * this.nvX.getLngDeg() + (this.resX - 1) / 2.) + this.borderX;
-        if (visFull) {
-            if (yIdx >= (this.resY + 2 * this.borderY)) {
-                yIdx = this.resY + 2 * this.borderY - 1;
-            }
-            if (yIdx < 0) {
-                yIdx = 0;
-            }
-            if (xIdx >= (this.resX + 2 * this.borderX)) {
-                xIdx = this.resX + 2 * this.borderX - 1;
-            }
-            if (xIdx < 0) {
-                xIdx = 0;
-            }
-        }
         return new Index(xIdx, yIdx);
     }
 
@@ -244,7 +230,7 @@ public class SimulatorField implements VectorField {
 
     @Override
     public double particleWeight(Position p, Vector v) {
-        return v.length() / this.maxLength + 0.1;
+        return v == null ? 0 : (v.length() / this.maxLength + 0.1);
     }
 
     private String[] createColorsForSpeeds() {
@@ -289,26 +275,23 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners(boolean visFull) {
-        Position fieldNE = this.getInnerPosition(+0.5, 1.0, visFull);
-        Position fieldSW = this.getInnerPosition(-0.5, 0.0, visFull);
-        Position fieldSE = this.getInnerPosition(+0.5, 0.0, visFull);
-        Position fieldNW = this.getInnerPosition(-0.5, 1.0, visFull);
-
+    public Position[] getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
+        Position fieldNE = this.getInnerPosition(+0.5, 1.0);
+        Position fieldSW = this.getInnerPosition(-0.5, 0.0);
+        Position fieldSE = this.getInnerPosition(+0.5, 0.0);
+        Position fieldNW = this.getInnerPosition(-0.5, 1.0);
         DegreePosition[] result = new DegreePosition[2];
-
         double minLat = Math.min(Math.min(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.min(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double minLng = Math.min(Math.min(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.min(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
         result[0] = new DegreePosition(minLat, minLng);
-
         double maxLat = Math.max(Math.max(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.max(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double maxLng = Math.max(Math.max(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.max(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
         result[1] = new DegreePosition(maxLat, maxLng);
-
         return result;
     }
 
