@@ -21,9 +21,6 @@ public class SimulatorField implements VectorField {
     private final int borderY;
     private final int borderX;
 
-    private final double bdXi;
-    private final double bdPhi;
-
     private final Position bdA;
     private final Position bdB;
     private final Position bdC;
@@ -55,12 +52,12 @@ public class SimulatorField implements VectorField {
         this.resY = windData.windData.resY;
         this.borderX = windData.windData.borderX;
         this.borderY = windData.windData.borderY;
-        this.bdXi = (this.borderY + 0.5) / (this.resY - 1);
-        this.bdPhi = 1.0 + 2 * this.bdXi;
+        final double bdXi = (this.borderY + 0.5) / (this.resY - 1);
+        final double bdPhi = 1.0 + 2 * bdXi;
         this.bdA = new DegreePosition(this.rcEnd.getLatDeg() + (this.rcEnd.getLatDeg() - this.rcStart.getLatDeg())
-                * this.bdXi, this.rcEnd.getLngDeg() + (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.bdXi);
-        this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * this.bdPhi,
-                (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * this.bdPhi);
+                * bdXi, this.rcEnd.getLngDeg() + (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * bdXi);
+        this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * bdPhi,
+                (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
         this.xScale = windData.windData.xScale;
         List<SimulatorWindDTO> gridData = windData.getMatrix();
         int p = 0;
