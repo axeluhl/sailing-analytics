@@ -136,7 +136,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public native void setWindDataJSON(String jsonField) /*-{
-		eval(jsonField);
+	eval(jsonField);
     }-*/;
 
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
@@ -144,11 +144,11 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public native void setMapInstance(Object mapInstance) /*-{
-		$wnd.swarmMap = mapInstance;
+	$wnd.swarmMap = mapInstance;
     }-*/;
 
     public native void setCanvasProjectionInstance(Object instance) /*-{
-		$wnd.swarmCanvasProjection = instance;
+	$wnd.swarmCanvasProjection = instance;
     }-*/;
 
     public void startStreamlets() {
