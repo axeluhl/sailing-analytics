@@ -19,7 +19,6 @@ public class Swarm {
     private final MapWidget map;
 
     private Timer loopTimer;
-    private String[] color;
     private Mercator projection;
     private VectorField field;
     private int nParticles;
@@ -52,7 +51,6 @@ public class Swarm {
             projection.calibrate();
         }
         this.updateBounds();
-        color = field.getColors();
         Context2d ctxt = canvas.getContext2d();
         ctxt.setFillStyle("red");
         particles = this.createParticles();
@@ -201,7 +199,7 @@ public class Swarm {
                 continue;
             }
             ctxt.setLineWidth(field.lineWidth(particle.speed));
-            ctxt.setStrokeStyle(color[field.getIntensity(particle.speed)]);
+            ctxt.setStrokeStyle(field.getColor(particle.speed));
             ctxt.beginPath();
             ctxt.moveTo(particle.pxOld.x, particle.pxOld.y);
             particle.pxOld = projection.latlng2pixel(particle.pos);

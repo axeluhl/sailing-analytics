@@ -46,9 +46,11 @@ public class SimulatorField implements VectorField {
     private Position gvX;
 
     private double[][][] data;
+    private final String[] colorsForSpeeds;
     private int step;
 
     public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams) {
+        this.colorsForSpeeds = createColorsForSpeeds();
         this.step = 0;
         String parseString = windData.windDataJSON.substring(18, windData.windDataJSON.length() - 1) + "}";
         JSONObject baseData = JSONParser.parseLenient(parseString).isObject();
@@ -277,7 +279,7 @@ public class SimulatorField implements VectorField {
         return v.length() / this.maxLength + 0.1;
     }
 
-    public String[] getColors() {
+    private String[] createColorsForSpeeds() {
         String[] colors = new String[256];
         double alphaMin = 0.0;
         double alphaMax = 1.0;
@@ -288,8 +290,13 @@ public class SimulatorField implements VectorField {
         }
         return colors;
     }
+    
+    @Override
+    public String getColor(double speed) {
+        return colorsForSpeeds[getIntensity(speed)];
+    }
 
-    public int getIntensity(double speed) {
+    private int getIntensity(double speed) {
         /*
          * normalized intensity: speed == average wind speed => intensity 0.5 speed <= minimum wind speed => intensity
          * 0.0 speed between 0.0 and 1.0 double s; if (minLength == maxLength) { s = 0.5; } else if (speed <= minLength)

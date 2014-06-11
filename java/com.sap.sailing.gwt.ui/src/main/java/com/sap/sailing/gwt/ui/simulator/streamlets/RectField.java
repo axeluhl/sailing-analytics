@@ -23,8 +23,10 @@ public class RectField implements VectorField {
 
     private final double maxLength;
     private final double particleFactor;
+    private final String[] colorsForSpeeds;
 
     public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
+        colorsForSpeeds = createColorsForSpeeds();
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;
@@ -147,20 +149,23 @@ public class RectField implements VectorField {
     public double particleWeight(Position p, Vector v) {
         return 1.0 - v.length() / this.maxLength;
     }
+    
+    @Override
+    public String getColor(double speed) {
+        return colorsForSpeeds[getIntensity(speed)];
+    }
 
-    public String[] getColors() {
+    private String[] createColorsForSpeeds() {
         String[] colors = new String[256];
         double alpha = 1.0;
         int greyValue = 255;
         for (int i = 0; i < 256; i++) {
             colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alpha * i / 255.0) + ")";
-            // this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) +
-            // ')';
         }
         return colors;
     }
 
-    public int getIntensity(double speed) {
+    private int getIntensity(double speed) {
         double s = speed / maxLength;
         return (int) Math.min(255, 90 + Math.round(350 * s));
     }
