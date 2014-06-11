@@ -86,15 +86,19 @@ public class RectField implements VectorField {
         return result;
     }
 
+    @Override
     public void setStep(int step) {
     }
 
+    @Override
     public void nextStep() {
     }
 
+    @Override
     public void prevStep() {
     }
 
+    @Override
     public Position getRandomPosition() {
         double rndY = Math.random();
         double rndX = Math.random();
@@ -103,6 +107,7 @@ public class RectField implements VectorField {
         return new DegreePosition(latDeg, lngDeg);
     }
 
+    @Override
     public boolean inBounds(Position p) {
         return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
                 && p.getLatDeg() < this.y1;
@@ -123,6 +128,7 @@ public class RectField implements VectorField {
         return result;
     }
 
+    @Override
     public Vector getVector(Position p) {
         double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
         double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
@@ -138,14 +144,17 @@ public class RectField implements VectorField {
         return LatLng.newInstance((y0 + y1) / 2.0, (x0 + x1) / 2.0);
     }
 
+    @Override
     public double getMaxLength() {
         return maxLength;
     }
 
+    @Override
     public double motionScale(int zoomLevel) {
         return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
     }
 
+    @Override
     public double particleWeight(Position p, Vector v) {
         return 1.0 - v.length() / this.maxLength;
     }
@@ -170,24 +179,25 @@ public class RectField implements VectorField {
         return (int) Math.min(255, 90 + Math.round(350 * s));
     }
 
+    @Override
     public double lineWidth(double speed) {
         return 1.0;
     }
 
+    @Override
     public Position[] getFieldCorners() {
-
         DegreePosition[] result = new DegreePosition[2];
-
         result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
         result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-
         return result;
     }
 
+    @Override
     public void setVisNE(Position visNE) {
         this.visNE = visNE;
     }
 
+    @Override
     public void setVisSW(Position visSW) {
         this.visSW = visSW;
     }
@@ -196,6 +206,7 @@ public class RectField implements VectorField {
     public void setVisFullCanvas(boolean full) {
     }
 
+    @Override
     public double getParticleFactor() {
         return this.particleFactor;
     }

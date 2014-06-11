@@ -115,6 +115,7 @@ public class SimulatorField implements VectorField {
                 this.gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
     }
 
+    @Override
     public Position getRandomPosition() {
         final Position result;
         if (this.visFull) {
@@ -131,7 +132,7 @@ public class SimulatorField implements VectorField {
         return result;
     }
 
-    public Position getInnerPosition(double factX, double factY) {
+    private Position getInnerPosition(double factX, double factY) {
         double latDeg = this.bdA.getLatDeg() + factY * this.bdB.getLatDeg() + factX * this.bdC.getLatDeg();
         double lngDeg = this.bdA.getLngDeg() + factY * this.bdB.getLngDeg() + factX * this.bdC.getLngDeg();
         Position result = new DegreePosition(latDeg, lngDeg);
@@ -141,6 +142,7 @@ public class SimulatorField implements VectorField {
         return result;
     }
 
+    @Override
     public boolean inBounds(Position p) {
         Index idx = this.getIndex(p);
         boolean inBool = (idx.x >= 0) && (idx.x < (this.resX + 2 * this.borderX)) && (idx.y >= 0)
@@ -165,6 +167,7 @@ public class SimulatorField implements VectorField {
         return new Vector(avgX / this.lngScale, avgY);
     }
 
+    @Override
     public void setStep(int step) {
         if (step < 0) {
             this.step = 0;
@@ -175,23 +178,26 @@ public class SimulatorField implements VectorField {
         }
     }
 
+    @Override
     public void nextStep() {
         if (this.step < (this.data.length - 1)) {
             this.step++;
         }
     }
 
+    @Override
     public void prevStep() {
         if (this.step > 0) {
             this.step--;
         }
     }
 
+    @Override
     public Vector getVector(Position p) {
         return this.interpolate(p);
     }
 
-    public Index getIndex(Position p) {
+    private Index getIndex(Position p) {
         // calculate grid indexes
         Position posR = new DegreePosition(p.getLatDeg() - this.rcStart.getLatDeg(),
                 (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale);
@@ -220,8 +226,7 @@ public class SimulatorField implements VectorField {
         return new Index(xIdx, yIdx);
     }
 
-    public Neighbors getNeighbors(Position p) {
-
+    private Neighbors getNeighbors(Position p) {
         // calculate grid indexes
         Position posR = new DegreePosition(p.getLatDeg() - this.rcStart.getLatDeg(),
                 (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale);
@@ -234,47 +239,42 @@ public class SimulatorField implements VectorField {
         double xBot = Math.floor(xFlt);
         double yTop = Math.ceil(yFlt);
         double xTop = Math.ceil(xFlt);
-
         if (xBot < 0) {
             xBot = 0;
             xFlt = xBot;
             xTop = 1;
         }
-
         if (yBot < 0) {
             yBot = 0;
             yFlt = yBot;
             yTop = 1;
         }
-
         if (xTop >= (this.resX + 2 * this.borderX)) {
             xTop = this.resX + 2 * this.borderX - 1;
             xFlt = xTop;
             xBot = xTop - 1;
         }
-
         if (yTop >= (this.resY + 2 * this.borderY)) {
             yTop = this.resY + 2 * this.borderY - 1;
             yFlt = yTop;
             yBot = yTop - 1;
         }
-
         double yMod = yFlt - yBot;
         double xMod = xFlt - xBot;
-
-        // System.out.println("neighbors:"+xFlt+","+xBot+","+xTop+","+yFlt+","+yBot+","+yTop);
-
         return new Neighbors((int) xTop, (int) yTop, (int) xBot, (int) yBot, xMod, yMod);
     }
 
+    @Override
     public double getMaxLength() {
         return maxLength;
     }
 
+    @Override
     public double motionScale(int zoomLevel) {
         return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
 
+    @Override
     public double particleWeight(Position p, Vector v) {
         return v.length() / this.maxLength + 0.1;
     }
@@ -311,6 +311,7 @@ public class SimulatorField implements VectorField {
         return (int) Math.max(0, Math.min(255, Math.round(255 * s)));
     }
 
+    @Override
     public double lineWidth(double speed) {
         /*
          * absolute linewidth speed == 12kn => linewidth 1.5 speed == 24kn => linewidth 3.0 speed == 6kn => linewidth
@@ -319,6 +320,7 @@ public class SimulatorField implements VectorField {
         return Math.round(speed / 8.0 * 100.0) / 100.0;
     }
 
+    @Override
     public Position[] getFieldCorners() {
         Position fieldNE = this.getInnerPosition(+0.5, 1.0);
         Position fieldSW = this.getInnerPosition(-0.5, 0.0);
@@ -342,14 +344,17 @@ public class SimulatorField implements VectorField {
         return result;
     }
 
+    @Override
     public void setVisNE(Position visNE) {
         this.visNE = visNE;
     }
 
+    @Override
     public void setVisSW(Position visSW) {
         this.visSW = visSW;
     }
 
+    @Override
     public void setVisFullCanvas(boolean full) {
         if (this.visFull != full) {
             System.out.println("visFull: " + full);
@@ -357,6 +362,7 @@ public class SimulatorField implements VectorField {
         }
     }
 
+    @Override
     public double getParticleFactor() {
         return this.particleFactor;
     }

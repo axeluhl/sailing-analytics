@@ -40,9 +40,10 @@ public class Swarm {
         if (windField == null) {
             SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
             String jsonStr = bundle.windStreamletsDataJS().getText();
-            field = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
+            RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
+            field = f;
             map.setZoom(5);
-            map.panTo(((RectField) field).getCenter());
+            map.panTo(f.getCenter());
             projection.calibrate();
         } else {
             field = new SimulatorField(((WindStreamletsCanvasOverlay) fullcanvas).getWindFieldDTO(),
