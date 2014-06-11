@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.events;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,11 @@ public abstract class AbstractEventsView extends Composite implements EventsView
                 }
             }
         }
+     
+        for(List<EventBaseDTO> eventsPerYear: recentEventsOrderedByYear.values()) {
+            Collections.sort(eventsPerYear, EVENTS_BY_DESCENDING_DATE_COMPARATOR);
+        }
+        Collections.sort(upcomingEvents, EVENTS_BY_DESCENDING_DATE_COMPARATOR);
         updateEventsUI();
     }
 
@@ -49,4 +56,11 @@ public abstract class AbstractEventsView extends Composite implements EventsView
     public List<EventBaseDTO> getUpcomingEvents() {
         return upcomingEvents;
     }
+    
+    public static Comparator<EventBaseDTO> EVENTS_BY_DESCENDING_DATE_COMPARATOR = new Comparator<EventBaseDTO>() {
+        @Override
+        public int compare(EventBaseDTO e1, EventBaseDTO e2) {
+            return e2.endDate.compareTo(e1.endDate);
+        }
+    };
 }

@@ -8,12 +8,11 @@
     <g:HTMLPanel>
 
 <!-- Page displays all upcoming events-->
-<!-- 
-<div class="{local_res.css.eventsoverviewupcoming}">{#each upcomingYear in upcomingYears}
+<div class="{local_res.css.eventsoverviewupcoming}">
   <div class="{local_res.css.eventsoverviewupcoming}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <h2>{upcomingYear.title}</h2>
+        <h2>Coming soon</h2>
       </div>
     </div>
     <div class="{local_res.css.eventslist_header}">
@@ -23,22 +22,16 @@
         <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.eventslist_header_item}">Location</div>
         <div class="{res.mediaCss.small2} {res.mediaCss.columns} {local_res.css.eventslist_header_item} {local_res.css.eventslist_header_itemseries}">Series</div>
       </div>
-    </div>{#each event in upcomingYear.events}
-    <div class="{local_res.css.eventslist_event}"><a href="event-overview.html" class="{res.mainCss.grid} {local_res.css.eventslist_event_link}">
-        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_event_item}">{event.date}</div>
-        <div class="{res.mediaCss.small3} {res.mediaCss.columns} {local_res.css.eventslist_event_item} {local_res.css.eventslist_event_itemname}">{event.name}</div>
-        <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.eventslist_event_item}">{event.venue.name}</div>
-        <div class="{res.mediaCss.small2} {res.mediaCss.columns} {local_res.css.eventslist_event_item} {local_res.css.eventslist_event_itemseries}">
-          <div data-labeltype="{event.series.id}" class="{res.mainCss.label}">{event.series.name}</div>
-        </div></a></div>{/each}
-  </div>{/each}
+    </div>
+    <g:HTMLPanel ui:field='eventsPlaceholder' >
+		<!-- the upcoming event widgets will be inserted here -->
+    </g:HTMLPanel>
+    </div>
   <div class="{local_res.css.eventsoverviewupcoming_teaser}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">More Events To Be Announced Soon!</div>
     </div>
   </div>
 </div>
- -->
-
     </g:HTMLPanel>
 </ui:UiBinder>
