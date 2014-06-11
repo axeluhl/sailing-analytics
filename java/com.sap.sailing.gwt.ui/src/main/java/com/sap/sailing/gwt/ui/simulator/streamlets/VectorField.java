@@ -7,8 +7,6 @@ public interface VectorField {
 
     public boolean inBounds(Position p);
 
-    public Vector interpolate(Position p);
-
     public Vector getVector(Position p);
 
     public double getMaxLength();

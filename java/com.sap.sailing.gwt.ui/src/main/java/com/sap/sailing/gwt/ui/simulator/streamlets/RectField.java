@@ -106,20 +106,18 @@ public class RectField implements VectorField {
                 && p.getLatDeg() < this.y1;
     }
 
-    public Vector interpolate(Position p) {
+    private Vector interpolate(Position p) {
         int na = (int) Math.floor(p.getLngDeg());
         int nb = (int) Math.floor(p.getLatDeg());
         int ma = (int) Math.ceil(p.getLngDeg());
         int mb = (int) Math.ceil(p.getLatDeg());
         double fa = p.getLngDeg() - na;
         double fb = p.getLatDeg() - nb;
-
         Vector result = new Vector();
         result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb)
                 + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
         result.y = this.field[na][nb].y * (1 - fa) * (1 - fb) + this.field[ma][nb].y * fa * (1 - fb)
                 + this.field[na][mb].y * (1 - fa) * fb + this.field[ma][mb].y * fa * fb;
-
         return result;
     }
 

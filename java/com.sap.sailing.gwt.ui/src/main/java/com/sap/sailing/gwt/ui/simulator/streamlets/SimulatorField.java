@@ -146,17 +146,12 @@ public class SimulatorField implements VectorField {
         return inBool;
     }
 
-    public Vector interpolate(Position p) {
-
+    private Vector interpolate(Position p) {
         Neighbors idx = this.getNeighbors(p);
-
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
             GWT.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
         }
-
-        // System.out.println("neighbors:"+idx.xBot+","+idx.xTop+","+idx.yBot+","+idx.yTop);
-
         double avgX = this.data[this.step][idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
                 + this.data[this.step][idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
                 + this.data[this.step][idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
@@ -165,7 +160,6 @@ public class SimulatorField implements VectorField {
                 + this.data[this.step][idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
                 + this.data[this.step][idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
                 + this.data[this.step][idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
-
         return new Vector(avgX / this.lngScale, avgY);
     }
 
