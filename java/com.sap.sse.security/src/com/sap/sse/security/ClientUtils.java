@@ -364,7 +364,7 @@ public class ClientUtils
     public static void reload()
     {
         String appUrl = getRedirectUrlFromCookie();
-        int savedAuthProvider = getAuthProviderFromCookieAsInt();
+//        int savedAuthProvider = getAuthProviderFromCookieAsInt();
         
         clearCookies();
         
@@ -410,7 +410,7 @@ public class ClientUtils
     }
     public static void logout()
     {
-        final String sessionId = ClientUtils.getSessionIdFromCookie();
+//        final String sessionId = ClientUtils.getSessionIdFromCookie();
         
         new AsyncCallback<Void>()
         {

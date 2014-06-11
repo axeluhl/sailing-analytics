@@ -19,6 +19,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
@@ -41,11 +42,14 @@ import org.scribe.oauth.OAuthService;
 
 
 
+
+
 // GWT has similar class. 
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
+import com.sap.sse.security.userstore.shared.FieldNames.Social;
 
 public class OAuthRealm extends AuthorizingRealm {
 
@@ -230,11 +234,14 @@ public class OAuthRealm extends AuthorizingRealm {
         }
         
         socialUser.setSessionId(sessionId);
+        socialUser.setProperty(Social.PROVIDER.name(), authProviderName);
+        
+        String socialname = authProviderName + "*" + socialUser.getProperty(Social.NAME.name());
 
-        User user = securityService.getUserByName(credential.getAuthProviderName() + "_" + socialUser.getName());
+        User user = securityService.getUserByName(socialname);
         if (user == null){
             try {
-                user = securityService.createSocialUser(credential.getAuthProviderName() + "_" + socialUser.getName(), socialUser);
+                user = securityService.createSocialUser(socialname, socialUser);
             } catch (UserManagementException e) {
                 throw new AuthenticationException(e.getMessage());
             }
@@ -388,17 +395,18 @@ public class OAuthRealm extends AuthorizingRealm {
                 obj = jsonParser.parse(json);
                 JSONObject jsonObj = (JSONObject) obj;
 
-                socialUser.setName((String) jsonObj.get("name"));
-                socialUser.setFirstName((String) jsonObj.get("first_name"));
-                socialUser.setLastName((String) jsonObj.get("last_name"));
-                socialUser.setGender((String) jsonObj.get("gender"));
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObj.get("name"));
+                socialUser.setProperty(Social.FIRSTNAME.name(),(String) jsonObj.get("first_name"));
+                socialUser.setProperty(Social.LASTNAME.name(),(String) jsonObj.get("last_name"));
+                socialUser.setProperty(Social.GENDER.name(),(String) jsonObj.get("gender"));
+                socialUser.setProperty(Social.EMAIL.name(),(String) jsonObj.get("email"));
 
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
                 return socialUser;
-            } catch (Exception e) {
+            } catch (ParseException pe) {
                 throw new AuthenticationException("Could not parse JSON data from " + authProviderName + ":"
-                        + e.getMessage());
+                        + pe.getMessage());
             }
         }
 
@@ -419,12 +427,12 @@ public class OAuthRealm extends AuthorizingRealm {
                 // get profile object
                 JSONObject jsonObjPeople = (JSONObject) jsonObj.get("profile");
 
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
-                socialUser.setNickname((String) jsonObjPeople.get("nickname"));
-                socialUser.setGender((String) jsonObjPeople.get("gender"));
-                socialUser.setFirstName((String) jsonObjPeople.get("givenName"));
-                socialUser.setLastName((String) jsonObjPeople.get("familyName"));
+                socialUser.setProperty(Social.NICKNAME.name(),(String) jsonObjPeople.get("nickname"));
+                socialUser.setProperty(Social.GENDER.name(),(String) jsonObjPeople.get("gender"));
+                socialUser.setProperty(Social.FIRSTNAME.name(),(String) jsonObjPeople.get("givenName"));
+                socialUser.setProperty(Social.LASTNAME.name(),(String) jsonObjPeople.get("familyName"));
 
                 return socialUser;
             } catch (Exception e) {
@@ -444,12 +452,12 @@ public class OAuthRealm extends AuthorizingRealm {
                 obj = jsonParser.parse(json);
                 JSONObject jsonObj = (JSONObject) obj;
 
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
-                socialUser.setName((String) jsonObj.get("name"));
-                socialUser.setFirstName((String) jsonObj.get("given_name"));
-                socialUser.setLastName((String) jsonObj.get("family_name"));
-                socialUser.setGender((String) jsonObj.get("gender"));
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObj.get("name"));
+                socialUser.setProperty(Social.FIRSTNAME.name(),(String) jsonObj.get("given_name"));
+                socialUser.setProperty(Social.LASTNAME.name(),(String) jsonObj.get("family_name"));
+                socialUser.setProperty(Social.GENDER.name(),(String) jsonObj.get("gender"));
 
                 return socialUser;
             } catch (Exception e) {
@@ -467,10 +475,10 @@ public class OAuthRealm extends AuthorizingRealm {
                 obj = jsonParser.parse(json);
                 JSONObject jsonObj = (JSONObject) obj;
 
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
-                socialUser.setFirstName((String) jsonObj.get("firstName"));
-                socialUser.setLastName((String) jsonObj.get("lastName"));
+                socialUser.setProperty(Social.FIRSTNAME.name(),(String) jsonObj.get("firstName"));
+                socialUser.setProperty(Social.LASTNAME.name(),(String) jsonObj.get("lastName"));
 
                 return socialUser;
             } catch (Exception e) {
@@ -493,10 +501,10 @@ public class OAuthRealm extends AuthorizingRealm {
                 obj = jsonParser.parse(json);
                 JSONObject jsonObj = (JSONObject) obj;
 
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
-                socialUser.setName((String) jsonObj.get("name"));
-                socialUser.setGender((String) jsonObj.get("gender"));
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObj.get("name"));
+                socialUser.setProperty(Social.GENDER.name(),(String) jsonObj.get("gender"));
 
                 return socialUser;
             } catch (Exception e) {
@@ -519,8 +527,8 @@ public class OAuthRealm extends AuthorizingRealm {
                 // get profile object
                 JSONObject jsonObjData = (JSONObject) jsonObj.get("data");
 
-                socialUser.setJson(json);
-                socialUser.setName((String) jsonObjData.get("username"));
+                socialUser.setProperty(Social.JSON.name(),json);
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObjData.get("username"));
 
                 return socialUser;
 
@@ -554,8 +562,8 @@ public class OAuthRealm extends AuthorizingRealm {
                 obj = jsonParser.parse(json);
                 JSONObject jsonObj = (JSONObject) obj;
 
-                socialUser.setJson(json);
-                socialUser.setName((String) jsonObj.get("login"));
+                socialUser.setProperty(Social.JSON.name(),json);
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObj.get("login"));
 
                 return socialUser;
 
@@ -575,8 +583,8 @@ public class OAuthRealm extends AuthorizingRealm {
                 JSONObject jsonObj = (JSONObject) obj;
                 JSONObject jsonObjUser = (JSONObject) jsonObj.get("user");
                 JSONObject jsonObjUsername = (JSONObject) jsonObjUser.get("username");
-                socialUser.setName((String) jsonObjUsername.get("_content"));
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObjUsername.get("_content"));
+                socialUser.setProperty(Social.JSON.name(),json);
 
                 return socialUser;
             } catch (Exception e) {
@@ -600,13 +608,13 @@ public class OAuthRealm extends AuthorizingRealm {
                 String displayName = (String) jsonObjPerson.get("display_name");
 
                 if (displayName != null) {
-                    socialUser.setName(displayName);
+                    socialUser.setProperty(Social.NAME.name(),displayName);
                 } else if (userName != null) {
-                    socialUser.setName(userName);
+                    socialUser.setProperty(Social.NAME.name(),userName);
                 } else {
-                    socialUser.setName("Unknown");
+                    socialUser.setProperty(Social.NAME.name(),"Unknown");
                 }
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.JSON.name(),json);
 
                 return socialUser;
             } catch (Exception e) {
@@ -632,10 +640,10 @@ public class OAuthRealm extends AuthorizingRealm {
                     String message = (String) jsonErrorObj.get("message");
                     throw new AuthenticationException("Error: " + message);
                 }
-                socialUser.setName((String) jsonObj.get("name"));
-                socialUser.setLastName((String) jsonObj.get("last_name"));
-                socialUser.setFirstName((String) jsonObj.get("first_name"));
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.NAME.name(),(String) jsonObj.get("name"));
+                socialUser.setProperty(Social.LASTNAME.name(),(String) jsonObj.get("last_name"));
+                socialUser.setProperty(Social.FIRSTNAME.name(),(String) jsonObj.get("first_name"));
+                socialUser.setProperty(Social.JSON.name(),json);
 
                 return socialUser;
             } catch (Exception e) {
@@ -659,8 +667,8 @@ public class OAuthRealm extends AuthorizingRealm {
                 JSONObject jsonObjResponse = (JSONObject) jsonObj.get("response");
                 JSONObject jsonObjUser = (JSONObject) jsonObjResponse.get("user");
                 String userName = (String) jsonObjUser.get("name");
-                socialUser.setName(userName);
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.NAME.name(),userName);
+                socialUser.setProperty(Social.JSON.name(),json);
 
                 return socialUser;
             } catch (Exception e) {
@@ -688,11 +696,11 @@ public class OAuthRealm extends AuthorizingRealm {
                 String firstName = (String) jsonObjUser.get("firstName");
                 String lastName = (String) jsonObjUser.get("lastName");
                 if (firstName != null && lastName != null) {
-                    socialUser.setName(firstName + " " + lastName);
+                    socialUser.setProperty(Social.NAME.name(),firstName + " " + lastName);
                 } else {
-                    socialUser.setName("UNKNOWN");
+                    socialUser.setProperty(Social.NAME.name(),"UNKNOWN");
                 }
-                socialUser.setJson(json);
+                socialUser.setProperty(Social.NAME.name(),json);
 
                 return socialUser;
             } catch (Exception e) {

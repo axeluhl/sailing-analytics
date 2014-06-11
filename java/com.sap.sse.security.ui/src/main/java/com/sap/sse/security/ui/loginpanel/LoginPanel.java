@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
@@ -45,7 +46,6 @@ public class LoginPanel extends FlowPanel {
 
     private Label loginTitle1;
     private Anchor loginLink;
-    private Label loginTitle2;
 
     private TextBox name;
 
@@ -61,42 +61,25 @@ public class LoginPanel extends FlowPanel {
         wrapperPanel = new FlowPanel();
         wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanel());
         wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
+        FocusPanel titleFocus = new FocusPanel();
         FlowPanel titlePanel = new FlowPanel();
+        titleFocus.setWidget(titlePanel);
         titlePanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelTitlePanel());
         loginTitle1 = new Label("");
-        loginTitle2 = new Label("");
         loginLink = new Anchor("Login");
-        loginLink.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (currentUser != null){
-                    userManagementService.logout(new AsyncCallback<SuccessInfo>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            currentUser = null;
-                            updateStatus();
-                        }
-                    });
-                }
-                else {
-                    toggleLoginPanel();
-                }
-            }
-        });
         final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userIcon();
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         titlePanel.add(new HTML(renderer.render(userImageResource)));
         titlePanel.add(loginTitle1);
         titlePanel.add(loginLink);
-        titlePanel.add(loginTitle2);
-        wrapperPanel.add(titlePanel);
+        wrapperPanel.add(titleFocus);
+        titleFocus.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                toggleLoginPanel();
+            }
+        });
         infoPanel = new SimplePanel();
         infoPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelInfoPanel());
         initLoginContent();
@@ -157,8 +140,27 @@ public class LoginPanel extends FlowPanel {
     private void updateUserContent() {
         if (currentUser != null) {
             userPanel.clear();
-//            Label name = new Label(currentUser.getName());
-//            userPanel.add(name);
+            Anchor logout = new Anchor("Logout");
+            userPanel.add(logout);
+            logout.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    userManagementService.logout(new AsyncCallback<SuccessInfo>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Could not log out:" + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(SuccessInfo result) {
+                            currentUser = null;
+                            updateStatus();
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -180,16 +182,27 @@ public class LoginPanel extends FlowPanel {
 
     private void updateStatus() {
         if (currentUser != null) {
+            String name = currentUser.getName();
+            if (name == null){
+                loginTitle1.setText("Inavalid username!");
+            }
+            else {
+                if (name.contains("*")){
+                    name = name.split("\\*")[1];
+                }
+                loginTitle1.setTitle(name);
+                if (name.length() > 15){
+                    name = name.substring(0, 12) + "...";
+                }
+                loginTitle1.setText("Welcome, " + name + "! ");
+            }
             infoPanel.setWidget(userPanel);
-            loginTitle1.setText("Welcome, " + currentUser.getName() + "! (");
-            loginLink.setText("Logout");
-            loginTitle2.setText(")");
+            loginLink.setText("");
             updateUserContent();
         } else {
             infoPanel.setWidget(loginPanel);
             loginTitle1.setText("");
             loginLink.setText("Login");
-            loginTitle2.setText("");
         }
         expanded = false;
         wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());

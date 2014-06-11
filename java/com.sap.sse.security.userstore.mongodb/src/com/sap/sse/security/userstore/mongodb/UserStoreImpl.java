@@ -7,16 +7,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import org.apache.shiro.crypto.RandomNumberGenerator;
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.apache.shiro.crypto.hash.Sha256Hash;
-
 import com.sap.sse.security.userstore.shared.Account;
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
 import com.sap.sse.security.userstore.shared.UserStore;
-import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 
 public class UserStoreImpl implements UserStore {
@@ -54,6 +49,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public User createUser(String name, String email, Account... accounts) {
         User user = new User(name, email, accounts);
+        logger.info("Creating user: " + user.toString());
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeUser(user);
         users.put(name, user);
         return user;
@@ -66,6 +62,9 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public User getUserByName(String name) {
+        if (name == null){
+            return null;
+        }
         return users.get(name);
     }
 
@@ -100,6 +99,7 @@ public class UserStoreImpl implements UserStore {
         if (users.get(name) == null){
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        logger.info("Deleting user: " + users.get(name).toString());
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().deleteUser(users.get(name));
         users.remove(name);
     }

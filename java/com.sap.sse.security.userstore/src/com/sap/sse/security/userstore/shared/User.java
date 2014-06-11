@@ -1,6 +1,8 @@
 package com.sap.sse.security.userstore.shared;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -80,4 +82,11 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return "User [name=" + name + ", email=" + email + ", roles=" + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts=" + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
+    }
+    
+    
 }

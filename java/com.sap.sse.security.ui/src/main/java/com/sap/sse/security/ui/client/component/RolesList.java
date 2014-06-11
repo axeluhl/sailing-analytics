@@ -88,8 +88,6 @@ public class RolesList extends DecoratorPanel {
         rolesDataProvider.addDataDisplay(roleList);
         
         fp.add(roleList);
-        
-        fp.setWidth("400px");
         this.setWidget(fp);
     }
 

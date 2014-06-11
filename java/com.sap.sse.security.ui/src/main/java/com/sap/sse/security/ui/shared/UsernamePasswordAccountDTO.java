@@ -2,6 +2,8 @@ package com.sap.sse.security.ui.shared;
 
 public class UsernamePasswordAccountDTO extends AccountDTO {
 
+    private static final String LABEL = "Simple";
+    
     private String name;
     
     private String saltedPassword;
@@ -9,11 +11,11 @@ public class UsernamePasswordAccountDTO extends AccountDTO {
     private byte[] salt;
     
     public UsernamePasswordAccountDTO() {
-        // TODO Auto-generated constructor stub
+        super(LABEL);
     }
 
     public UsernamePasswordAccountDTO(String name, String saltedPassword, byte[] salt) {
-        super();
+        super(LABEL);
         this.name = name;
         this.saltedPassword = saltedPassword;
         this.salt = salt;

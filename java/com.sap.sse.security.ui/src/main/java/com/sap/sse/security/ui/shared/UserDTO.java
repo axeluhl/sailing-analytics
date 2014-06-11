@@ -10,6 +10,7 @@ public class UserDTO implements IsSerializable {
 
     
     private String name;
+    private String email;
     private List<AccountDTO> accounts = new ArrayList<AccountDTO>();
     
     private List<String> roles = new ArrayList<>();
@@ -17,8 +18,9 @@ public class UserDTO implements IsSerializable {
     public UserDTO() {
     }
 
-    public UserDTO(String name, List<AccountDTO> accounts) {
+    public UserDTO(String name, String email, List<AccountDTO> accounts) {
         this.name = name;
+        this.email = email;
         this.accounts = accounts;
     }
 
@@ -44,6 +46,14 @@ public class UserDTO implements IsSerializable {
 
     public void setAccounts(List<AccountDTO> accounts) {
         this.accounts = accounts;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
     
     

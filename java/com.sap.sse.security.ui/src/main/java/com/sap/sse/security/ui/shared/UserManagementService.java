@@ -37,6 +37,6 @@ public interface UserManagementService extends RemoteService {
     //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
     
     public String     getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
+    
     public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
-    public String     getAccessToken(String sessionId) throws OAuthException;
 }

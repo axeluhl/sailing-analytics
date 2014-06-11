@@ -33,10 +33,4 @@ Export-Package: com.sap.sse.security,
  org.apache.shiro.subject,
  org.apache.shiro.util,
  org.apache.shiro.web.env,
- org.apache.shiro.web.servlet,
- org.scribe.builder,
- org.scribe.builder.api,
- org.scribe.extractors,
- org.scribe.model,
- org.scribe.oauth,
- org.scribe.utils
+ org.apache.shiro.web.servlet

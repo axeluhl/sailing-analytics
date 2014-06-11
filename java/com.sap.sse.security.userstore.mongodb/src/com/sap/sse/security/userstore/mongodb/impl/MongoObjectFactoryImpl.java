@@ -12,8 +12,12 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 import com.sap.sse.security.userstore.shared.Account;
+import com.sap.sse.security.userstore.shared.CollectionNames;
+import com.sap.sse.security.userstore.shared.FieldNames;
+import com.sap.sse.security.userstore.shared.SocialUserAccount;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.Account.AccountType;
+import com.sap.sse.security.userstore.shared.FieldNames.Social;
 import com.sap.sse.security.userstore.shared.UsernamePasswordAccount;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -27,13 +31,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        usersCollection.ensureIndex(FieldNames.USER_NAME.name());
+        usersCollection.ensureIndex(FieldNames.User.NAME.name());
         DBObject dbUser = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.USER_NAME.name(), user.getName());
-        dbUser.put(FieldNames.USER_NAME.name(), user.getName());
-        dbUser.put(FieldNames.USER_EMAIL.name(), user.getEmail());
-        dbUser.put(FieldNames.USER_ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
-        dbUser.put(FieldNames.USER_ROLES.name(), user.getRoles());
+        DBObject query = new BasicDBObject(FieldNames.User.NAME.name(), user.getName());
+        dbUser.put(FieldNames.User.NAME.name(), user.getName());
+        dbUser.put(FieldNames.User.EMAIL.name(), user.getEmail());
+        dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
+        dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
 
         usersCollection.update(query, dbUser, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
@@ -42,7 +46,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void deleteUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         DBObject dbUser = new BasicDBObject();
-        dbUser.put(FieldNames.USER_NAME.name(), user.getName());
+        dbUser.put(FieldNames.User.NAME.name(), user.getName());
 
         usersCollection.remove(dbUser);
     }
@@ -59,9 +63,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbAccount = new BasicDBObject();
         if (a instanceof UsernamePasswordAccount){
             UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
-            dbAccount.put(FieldNames.USERNAME_PASSWORD_ACCOUNT_NAME.name(), upa.getName());
-            dbAccount.put(FieldNames.USERNAME_PASSWORD_ACCOUNT_SALTED_PW.name(), upa.getSaltedPassword());
-            dbAccount.put(FieldNames.USERNAME_PASSWORD_ACCOUNT_SALT.name(),((SimpleByteSource) upa.getSalt()).getBytes());
+            dbAccount.put(FieldNames.UsernamePassword.NAME.name(), upa.getName());
+            dbAccount.put(FieldNames.UsernamePassword.SALTED_PW.name(), upa.getSaltedPassword());
+            dbAccount.put(FieldNames.UsernamePassword.SALT.name(),((SimpleByteSource) upa.getSalt()).getBytes());
+        }
+        if (a instanceof SocialUserAccount){
+            SocialUserAccount account = (SocialUserAccount) a;
+            for (Social s : FieldNames.Social.values()){
+                dbAccount.put(s.name(), account.getProperty(s.name()));
+            }
         }
         return dbAccount;
     }

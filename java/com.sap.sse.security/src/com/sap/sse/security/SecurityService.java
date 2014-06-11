@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
@@ -19,7 +18,14 @@ public interface SecurityService {
     
     User getUserByName(String name);
     
-    String login(String username, String password)  throws AuthenticationException;
+    User getCurrentUser();
+    
+    String login(String username, String password)  throws UserManagementException;
+    
+    
+    String getAuthenticationUrl(Credential credential) throws UserManagementException;
+    
+    User verifySocialUser(Credential credential) throws UserManagementException;
     
     void logout();
     

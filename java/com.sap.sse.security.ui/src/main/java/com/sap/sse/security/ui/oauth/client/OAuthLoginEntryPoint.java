@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.security.ui.oauth.client.component.LoginScreen;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
-import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
@@ -94,44 +93,26 @@ public class OAuthLoginEntryPoint implements EntryPoint {
 
     private void verifySocialUser() throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
-        final int authProvider = ClientUtils.getAuthProviderFromCookieAsInt();
         log("Verifying " + authProviderName + " user ...");
 
         userManagementService.verifySocialUser(ClientUtils.getCredential(), new AsyncCallback<UserDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Coult not verify" + authProvider + " user." + caught);
+                status.setText("Could not log in! Reason:" + caught.getMessage());
             }
 
             @Override
             public void onSuccess(UserDTO result) {
-                SocialUserDTO sua = null;
-                for (AccountDTO a : result.getAccounts()){
-                    if (a instanceof SocialUserDTO){
-                        sua = (SocialUserDTO) a;
-                    }
+                if (result == null){
+                    status.setText("Could not log in!");
+                    return;
                 }
-//                ClientUtils.saveSessionId(sua.getSessionId());
+                String name = result.getName();
 
-                String name = "";
-                if (result.getName() != null) {
-                    name = sua.getName();
-                } else if (sua.getNickname() != null) // yahoo
-                {
-                    name = sua.getNickname();
-                } else if (sua.getFirstName() != null) // linkedin
-                {
-                    name = sua.getFirstName();
-                    String lastName = sua.getLastName();
-                    if (lastName != null) {
-                        name = name + " " + lastName;
-                    }
-                }
-
-                log(authProviderName + " user '" + name + "' is verified!\n" + sua.getJson());
+                log(authProviderName + " user '" + name + "' is verified!\n");
                 ClientUtils.saveUsername(name);
-                status.setText("Logged in as:" + sua.getName());
+                status.setText("Logged in as:" + name);
             }
         });
     }

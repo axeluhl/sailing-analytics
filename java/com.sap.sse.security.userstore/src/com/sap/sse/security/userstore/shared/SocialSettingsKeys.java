@@ -3,7 +3,7 @@ package com.sap.sse.security.userstore.shared;
 public enum SocialSettingsKeys {
 
     FACEBOOK_APP_NAME("Sailing"),FACEBOOK_APP_ID("351552528316184"),FACEBOOK_APP_SECRET("d1a0ac61c5fb36cbd6fda3c32a4af227"), 
-    GOOGLE_APP_NAME(null), GOOGLE_APP_ID(null) , GOOGLE_APP_SECRET(null) , GOOGLE_SCOPE("https://www.googleapis.com/auth/userinfo.profile"),
+    GOOGLE_APP_NAME("Sailing"), GOOGLE_APP_ID("223511326134-mfsusd7f8ud6kde14ru737ve9li0rhet.apps.googleusercontent.com") , GOOGLE_APP_SECRET("MeEsfQpCFWHP9mx0PbWMmB4T") , GOOGLE_SCOPE("https://www.googleapis.com/auth/userinfo.profile"),
     TWITTER_APP_NAME(null) , TWITTER_APP_ID(null) , TWITTER_APP_SECRET(null) ,
     YAHOO_APP_NAME(null) , YAHOO_APP_ID(null) , YAHOO_APP_SECRET(null) ,
     INSTAGRAM_APP_NAME(null) , INSTAGRAM_APP_ID(null) , INSTAGRAM_APP_SECRET(null) ,

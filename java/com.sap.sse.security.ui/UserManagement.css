@@ -212,3 +212,11 @@ select {
 .wrap-cols td div {
 	white-space: normal;
 }
+
+.userDetailsView {
+	padding: 5px;
+}
+
+.userDetailsView > table {
+/* 	width: 100%; */
+}

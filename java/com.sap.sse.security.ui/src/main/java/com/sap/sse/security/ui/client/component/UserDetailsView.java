@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -21,10 +23,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
+import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
+import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserDetailsView extends FlowPanel {
     private UserManagementServiceAsync userManagementService;
@@ -33,6 +37,7 @@ public class UserDetailsView extends FlowPanel {
 
     public UserDetailsView(UserManagementServiceAsync userManagementService, UserDTO user) {
         this.userManagementService = userManagementService;
+        addStyleName("userDetailsView");
         updateUser(user);
     }
 
@@ -47,18 +52,36 @@ public class UserDetailsView extends FlowPanel {
 
         DecoratorPanel decoratorPanel = new DecoratorPanel();
         FlowPanel fp = new FlowPanel();
-        fp.setWidth("400px");
+        fp.setWidth("100%");
         ImageResourceRenderer renderer = new ImageResourceRenderer();
         final ImageResource userImageResource = UserManagementImageResources.INSTANCE.userSmall();
         fp.add(new HTML(renderer.render(userImageResource)));
         Label name = new Label("Name: " + user.getName());
         fp.add(name);
+        Label email = new Label("Email: " + user.getEmail());
+        fp.add(email);
         
         for (AccountDTO a : user.getAccounts()){
             DecoratorPanel accountPanelDecorator = new DecoratorPanel();
             FlowPanel accountPanelContent = new FlowPanel();
             accountPanelDecorator.setWidget(accountPanelContent);
             accountPanelContent.add(new Label(a.getAccountType() + "-Account"));
+            if (a instanceof UsernamePasswordAccountDTO){
+                accountPanelContent.add(new Label("Change password:"));
+            }
+            else if (a instanceof SocialUserDTO){
+                SocialUserDTO sua = (SocialUserDTO) a;
+                FlexTable table = new FlexTable();
+                int i = 0;
+                for (Entry<String, String> e : sua.getProperties().entrySet()){
+                    if (e.getValue() != null){
+                        table.setText(i, 0, e.getKey().toLowerCase().replace('_', ' '));
+                        table.setText(i, 1, e.getValue());
+                        i++;
+                    }
+                }
+                accountPanelContent.add(table);
+            }
             fp.add(accountPanelDecorator);
         }
         
