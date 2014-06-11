@@ -114,8 +114,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private void updateScoreCorrections(ScoreCorrectionProviderDTO scp) {
         scoreCorrections.clear();
         scoreCorrectionListBox.clear();
-
-        if(scp != null) {
+        if (scp != null) {
             scoreCorrectionListBox.addItem(stringMessages.pleaseSelectAScoringResult());
             List<Util.Pair<String, Util.Pair<String, Date>>> eventNameBoatClassNameAndLastModified = new ArrayList<Util.Pair<String, Util.Pair<String, Date>>>();
             for (Entry<String, Set<Util.Pair<String, Date>>> entry : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
@@ -124,7 +123,6 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                 }
             }
             sortOfficialResultsByRelevance(eventNameBoatClassNameAndLastModified);
-            
             for (Util.Pair<String, Util.Pair<String, Date>> pair : eventNameBoatClassNameAndLastModified) {
                 String eventName = pair.getA();
                 Util.Pair<String, Date> boatClassAndLastModified = pair.getB();
@@ -146,17 +144,15 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                     @Override
                     public int compare(Util.Pair<String, Util.Pair<String, Date>> o1, Util.Pair<String, Util.Pair<String, Date>> o2) {
                         int result;
-                        // TODO consider looking for longest common substring to handle things like "470 M" vs.
-                        // "470 Men"
-                        if (lowercaseBoatClassNames.contains(o1.getB().getA().toLowerCase())) {
-                            if (lowercaseBoatClassNames.contains(o2.getB().getA().toLowerCase())) {
+                        if (isBoatClassMatch(lowercaseBoatClassNames, o1.getB().getA().toLowerCase())) {
+                            if (isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
                                 // both don't seem to have the right boat class; compare by time stamp; newest first
                                 result = o2.getB().getB().compareTo(o1.getB().getB());
                             } else {
                                 result = -1; // o1 scores "better", comes first, because it has the right boat class name
                             }
                         } else if (o2.getB().getA() != null
-                                && lowercaseBoatClassNames.contains(o2.getB().getA().toLowerCase())) {
+                                && isBoatClassMatch(lowercaseBoatClassNames, o2.getB().getA().toLowerCase())) {
                             result = 1;
                         } else {
                             // both don't seem to have the right boat class; compare by time stamp; newest first
@@ -165,6 +161,21 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                         return result;
                     }
                 });
+    }
+    
+    private boolean isBoatClassMatch(Set<String> lowercaseBoatClassNames, String lowercaseBoatClassName) {
+        // First try a quick match for the lowercase boat class name in the set:
+        boolean result = lowercaseBoatClassNames.contains(lowercaseBoatClassName);
+        if (!result) {
+            // Try for prefix matches the other way around:
+            for (String fromSet : lowercaseBoatClassNames) {
+                if (lowercaseBoatClassName.startsWith(fromSet)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
