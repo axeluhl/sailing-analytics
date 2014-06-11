@@ -8,15 +8,10 @@ import java.util.Map;
 
 import com.sap.sse.datamining.impl.i18n.CompoundDataMiningStringMessages;
 import com.sap.sse.datamining.impl.i18n.DataMiningStringMessagesImpl;
-import com.sap.sse.datamining.shared.Message;
 
 public interface DataMiningStringMessages {
 
     public String getResourceBaseName();
-
-    public String get(Locale locale, Message message);
-    public String get(Locale locale, Message message, String... parameters);
-    public String get(Locale locale, Message message, Message... parameters);
 
     public String get(Locale locale, String messageKey);
     public String get(Locale locale, String messageKey, String... parameters);

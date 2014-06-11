@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.shared.Message;
 
 public class CompoundDataMiningStringMessages implements DataMiningStringMessages {
     
@@ -26,25 +25,6 @@ public class CompoundDataMiningStringMessages implements DataMiningStringMessage
     @Override
     public String get(Locale locale, String messageKey) {
         return get(locale, messageKey, new String[0]);
-    }
-    
-    @Override
-    public String get(Locale locale, Message message) {
-        return get(locale, message.toString(), new String[0]);
-    }
-    
-    @Override
-    public String get(Locale locale, Message message, String... parameters) {
-        return get(locale, message.toString(), parameters);
-    }
-    
-    @Override
-    public String get(Locale locale, Message message, Message... parameters) {
-        String[] parametersAsString = new String[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            parametersAsString[i] = get(locale, parameters[i]);
-        }
-        return get(locale, message, parametersAsString);
     }
     
     @Override

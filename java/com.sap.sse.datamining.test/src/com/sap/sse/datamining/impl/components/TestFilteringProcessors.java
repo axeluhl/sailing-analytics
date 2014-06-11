@@ -55,10 +55,13 @@ public class TestFilteringProcessors {
     }
 
     @Test
-    public void testNonFilteringProcessor() {
+    public void testNonFilteringProcessorFiltration() {
         Processor<Integer> nonFilteringProcessor = new NonFilteringProcessor<Integer>(receivers);
         processElements(nonFilteringProcessor, createElementsToProcess());
         verifyThatExpectedElementsHasBeenReceived(createElementsToProcess());
+
+        AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+        assertThat(nonFilteringProcessor.getAdditionalResultData(additionalDataBuilder).build(0, null, null).getFilteredDataAmount(), is(0));
     }
 
     private void processElements(Processor<Integer> processor, Collection<Integer> elements) {
