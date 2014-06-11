@@ -99,10 +99,6 @@ public class Swarm {
         swarmPause = 5;
     }
 
-    public static native void console(String msg) /*-{
-        console.log(msg);
-    }-*/;
-
     public void updateBounds() {
         Position mapNE = new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds()
                 .getNorthEast().getLongitude());
