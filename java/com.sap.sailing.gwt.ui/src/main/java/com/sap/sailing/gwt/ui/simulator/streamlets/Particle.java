@@ -3,9 +3,8 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.sap.sailing.domain.common.Position;
 
 public class Particle {
-    public Position pos;
-    public Vector pxOld;
-    public double speed;
-    public int age;
+    public Position currentPosition;
+    public Vector previousPosition;
+    public int stepsToLive;
     public Vector v;
 }

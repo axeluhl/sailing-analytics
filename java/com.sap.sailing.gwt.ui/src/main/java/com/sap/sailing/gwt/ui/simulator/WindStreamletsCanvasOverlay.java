@@ -121,7 +121,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
                 this.swarm = new Swarm(this, map);
-                this.swarm.start(40, null);
+                this.swarm.start(/* animationIntervalMillis */ 40, /* windField */ null);
             }
             if (windFieldDTO != null) {
                 // drawing is done by external JavaScript for Streamlets
