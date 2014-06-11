@@ -25,14 +25,13 @@ import com.sap.sse.gwt.client.player.Timer;
  * 
  */
 public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
-
     /** The wind field that is to be displayed in the overlay */
-    protected WindFieldDTO windFieldDTO;
-    protected WindFieldGenParamsDTO windParams = null;
-    protected SimulatorMap simulatorMap;
+    private WindFieldDTO windFieldDTO;
+    private final WindFieldGenParamsDTO windParams;
+    private final SimulatorMap simulatorMap;
 
     private boolean visible = false;
-    private Timer timer;
+    private final Timer timer;
     private Date endDate;
 
     private int nParticles;
@@ -43,17 +42,12 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer,
             final WindFieldGenParamsDTO windParams) {
         super(simulatorMap.getMap(), zIndex);
-
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;
-
         this.nParticles = this.simulatorMap.getMainPanel().particles;
-
         windFieldDTO = null;
-
         getCanvas().getElement().setId("swarm-display");
-
     }
 
     public WindFieldDTO getWindFieldDTO() {
@@ -292,13 +286,5 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         } else {
             return false;
         }
-    }
-
-    public void setTimer(final Timer timer) {
-        this.timer = timer;
-    }
-
-    public Timer getTimer() {
-        return timer;
     }
 }
