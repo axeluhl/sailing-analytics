@@ -14,10 +14,9 @@ import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 public class Swarm {
-
-    protected FullCanvasOverlay fullcanvas;
-    protected Canvas canvas;
-    protected MapWidget map;
+    private final FullCanvasOverlay fullcanvas;
+    private final Canvas canvas;
+    private final MapWidget map;
 
     private Timer loopTimer;
     private String[] color;
