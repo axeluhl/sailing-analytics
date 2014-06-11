@@ -34,5 +34,14 @@ public class TestI18N {
         assertThat(bundleManager.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(bundleManager.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
     }
+    
+    @Test
+    public void testGetLocaleForLocaleInfoName() {
+        assertThat(DataMiningStringMessages.Util.getLocaleFor("default"), is(Locale.ENGLISH));
+        assertThat(DataMiningStringMessages.Util.getLocaleFor("en"), is(Locale.ENGLISH));
+        assertThat(DataMiningStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
+
+        assertThat(DataMiningStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
+    }
 
 }

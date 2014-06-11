@@ -32,7 +32,7 @@ public class ProcessorFactory {
      */
     public static <AggregatedType, DataSourceType> ProcessorQuery<AggregatedType, DataSourceType> createProcessorQuery(DataSourceType dataSource, String localeInfoName) {
         return new ProcessorQuery<AggregatedType, DataSourceType>(DataMiningActivator.getExecutor(), dataSource,
-                DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFrom(localeInfoName));
+                DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(localeInfoName));
     }
     
     /**
