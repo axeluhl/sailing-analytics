@@ -8,192 +8,192 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class RectField implements VectorField {
 
-	private Vector[][] field;
+    private final Vector[][] field;
 
-	public double x0;
-	public double x1;
-	public double y0;
-	public double y1;
+    private final double x0;
+    private final double x1;
+    private final double y0;
+    private final double y1;
 
-	//public double visX0;
-	public double visX1;
-	public double visY0;
-	public double visY1;
-	
-	public Position visSW;
-	public Position visNE;
-	public boolean visFull = false;
-		
-	private int w;
-	private int h;
+    private Position visSW;
+    private Position visNE;
 
-	private double maxLength;
-	public double particleFactor;
+    private final int w;
+    private final int h;
 
-	public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
-		this.x0 = x0;
-		this.x1 = x1;
-		this.y0 = y0;
-		this.y1 = y1;
+    private final double maxLength;
+    private final double particleFactor;
 
-		this.visSW = new DegreePosition(0.0, 0.0);
-		this.visNE = new DegreePosition(0.0, 0.0);
-		
-		this.field = field;
-		this.w = field.length;
-		this.h = field[0].length;
-		this.maxLength = 0;
-		this.particleFactor = 4.5;
+    public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
+        this.x0 = x0;
+        this.x1 = x1;
+        this.y0 = y0;
+        this.y1 = y1;
 
-		double mx = 0;
-		double my = 0;
-		for (int i = 0; i < this.w; i++) {
-			for (int j = 0; j < this.h; j++) {
-				if (field[i][j].length() > this.maxLength) {
-					mx = i;
-					my = j;
-				}
-				this.maxLength = Math.max(this.maxLength, field[i][j].length());
-			}
-		}
-		mx = (mx / this.w) * (x1 - x0) + x0;
-		my = (my / this.h) * (y1 - y0) + y0;
-	}
+        this.visSW = new DegreePosition(0.0, 0.0);
+        this.visNE = new DegreePosition(0.0, 0.0);
 
-	public static RectField read(String jsonData, boolean correctForSphere) {
-		JSONObject data = JSONParser.parseLenient(jsonData).isObject();
-		int w = (int)data.get("gridWidth").isNumber().doubleValue();
-		int h = (int)data.get("gridHeight").isNumber().doubleValue();
-		Vector[][] field = new Vector[w][h];
+        this.field = field;
+        this.w = field.length;
+        this.h = field[0].length;
+        double myMaxLength = 0;
+        this.particleFactor = 4.5;
 
-		int i = 0;
-		for (int x = 0; x < w; x++) {
-			for (int y = 0; y < h; y++) {
-				Vector v = new Vector();
-				v.x = data.get("field").isArray().get(i++).isNumber().doubleValue();
-				v.y = data.get("field").isArray().get(i++).isNumber().doubleValue();
-				if (correctForSphere) {
-					double uy = y / (h - 1);
-					double lat = data.get("y0").isNumber().doubleValue() * (1 - uy) + data.get("y1").isNumber().doubleValue() * uy;
-					double m = Math.PI * lat / 180;
-					double length = v.length();
-					v.x = v.x / Math.cos(m);
-					v.setLength(length);
-				}
-				field[x][y] = v;
-			}
-		}
-		RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber().doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue());
-		return result;
-	}
+        double mx = 0;
+        double my = 0;
+        for (int i = 0; i < this.w; i++) {
+            for (int j = 0; j < this.h; j++) {
+                if (field[i][j].length() > myMaxLength) {
+                    mx = i;
+                    my = j;
+                }
+                myMaxLength = Math.max(myMaxLength, field[i][j].length());
+            }
+        }
+        this.maxLength = myMaxLength;
+        mx = (mx / this.w) * (x1 - x0) + x0;
+        my = (my / this.h) * (y1 - y0) + y0;
+    }
 
-	public void setStep(int step) {
-	}
+    public static RectField read(String jsonData, boolean correctForSphere) {
+        JSONObject data = JSONParser.parseLenient(jsonData).isObject();
+        int w = (int) data.get("gridWidth").isNumber().doubleValue();
+        int h = (int) data.get("gridHeight").isNumber().doubleValue();
+        Vector[][] field = new Vector[w][h];
 
-	public void nextStep() {
-	}
+        int i = 0;
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                Vector v = new Vector();
+                v.x = data.get("field").isArray().get(i++).isNumber().doubleValue();
+                v.y = data.get("field").isArray().get(i++).isNumber().doubleValue();
+                if (correctForSphere) {
+                    double uy = y / (h - 1);
+                    double lat = data.get("y0").isNumber().doubleValue() * (1 - uy)
+                            + data.get("y1").isNumber().doubleValue() * uy;
+                    double m = Math.PI * lat / 180;
+                    double length = v.length();
+                    v.x = v.x / Math.cos(m);
+                    v.setLength(length);
+                }
+                field[x][y] = v;
+            }
+        }
+        RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber()
+                .doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue());
+        return result;
+    }
 
-	public void prevStep() {
-	}
+    public void setStep(int step) {
+    }
 
-	public Position getRandomPosition() {
-		double rndY = Math.random();
-		double rndX = Math.random();
-		double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-		double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
-		return new DegreePosition(latDeg, lngDeg);
-	}
+    public void nextStep() {
+    }
 
-	public boolean inBounds(Position p) {
-		return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0 && p.getLatDeg() < this.y1;
-	}
+    public void prevStep() {
+    }
 
-	public Vector interpolate(Position p) {
-		int na = (int)Math.floor(p.getLngDeg());
-		int nb = (int)Math.floor(p.getLatDeg());
-		int ma = (int)Math.ceil(p.getLngDeg());
-		int mb = (int)Math.ceil(p.getLatDeg());
-		double fa = p.getLngDeg() - na;
-		double fb = p.getLatDeg() - nb;
+    public Position getRandomPosition() {
+        double rndY = Math.random();
+        double rndX = Math.random();
+        double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
+        double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
+        return new DegreePosition(latDeg, lngDeg);
+    }
 
-		Vector result = new Vector();
-		result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb) + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
-		result.y = this.field[na][nb].y * (1 - fa) * (1 - fb) + this.field[ma][nb].y * fa * (1 - fb) + this.field[na][mb].y * (1 - fa) * fb + this.field[ma][mb].y * fa * fb;
+    public boolean inBounds(Position p) {
+        return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
+                && p.getLatDeg() < this.y1;
+    }
 
-		return result;	
-	}
+    public Vector interpolate(Position p) {
+        int na = (int) Math.floor(p.getLngDeg());
+        int nb = (int) Math.floor(p.getLatDeg());
+        int ma = (int) Math.ceil(p.getLngDeg());
+        int mb = (int) Math.ceil(p.getLatDeg());
+        double fa = p.getLngDeg() - na;
+        double fb = p.getLatDeg() - nb;
 
+        Vector result = new Vector();
+        result.x = this.field[na][nb].x * (1 - fa) * (1 - fb) + this.field[ma][nb].x * fa * (1 - fb)
+                + this.field[na][mb].x * (1 - fa) * fb + this.field[ma][mb].x * fa * fb;
+        result.y = this.field[na][nb].y * (1 - fa) * (1 - fb) + this.field[ma][nb].y * fa * (1 - fb)
+                + this.field[na][mb].y * (1 - fa) * fb + this.field[ma][mb].y * fa * fb;
 
-	public Vector getVector(Position p) {
-		double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
-		double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
-		if ((lngDeg < 0)||(lngDeg > (this.w-1))||(latDeg < 0)||(latDeg > (this.h-1))) {
-			return null;
-		} else {
-			Position q = new DegreePosition(latDeg, lngDeg);
-			return this.interpolate(q);
-		}
-	}
+        return result;
+    }
 
-	public LatLng getCenter() {
-		return LatLng.newInstance((y0+y1)/2.0, (x0+x1)/2.0);
-	}
-	
-	public double getMaxLength() {
-		return maxLength;
-	}
+    public Vector getVector(Position p) {
+        double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
+        double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
+        if ((lngDeg < 0) || (lngDeg > (this.w - 1)) || (latDeg < 0) || (latDeg > (this.h - 1))) {
+            return null;
+        } else {
+            Position q = new DegreePosition(latDeg, lngDeg);
+            return this.interpolate(q);
+        }
+    }
 
-	public double motionScale(int zoomLevel) {
-		return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
-	}
+    public LatLng getCenter() {
+        return LatLng.newInstance((y0 + y1) / 2.0, (x0 + x1) / 2.0);
+    }
 
-	public double particleWeight(Position p, Vector v) {
-		return 1.0 - v.length() / this.maxLength;	
-	}
+    public double getMaxLength() {
+        return maxLength;
+    }
 
-	public String[] getColors() {
-		String[] colors = new String[256];
-		double alpha = 1.0;
-		int greyValue = 255;
-		for (int i = 0; i < 256; i++) {
-			colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alpha*i/255.0) + ")";
-			//this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) + ')';
-		}
-		return colors;
-	}
+    public double motionScale(int zoomLevel) {
+        return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
+    }
 
-	public int getIntensity(double speed) {
-		double s = speed / maxLength;
-		return (int)Math.min(255, 90 + Math.round(350 * s));
-	}	
+    public double particleWeight(Position p, Vector v) {
+        return 1.0 - v.length() / this.maxLength;
+    }
 
-	public double lineWidth(double speed) {
-		return 1.0;
-	}
+    public String[] getColors() {
+        String[] colors = new String[256];
+        double alpha = 1.0;
+        int greyValue = 255;
+        for (int i = 0; i < 256; i++) {
+            colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alpha * i / 255.0) + ")";
+            // this.colors[i] = 'hsla(' + 360*(0.55+0.9*(0.5-i/255)) + ',' + (100) + '% ,' + (50) + '%,' + (i/255) +
+            // ')';
+        }
+        return colors;
+    }
 
-	public Position[] getFieldCorners() {
-		
-		DegreePosition[] result = new DegreePosition[2];
+    public int getIntensity(double speed) {
+        double s = speed / maxLength;
+        return (int) Math.min(255, 90 + Math.round(350 * s));
+    }
 
-		result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-		result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-		
-		return result;
-	}
-	
-	public void setVisNE(Position visNE) {
-		this.visNE = visNE;
-	}
-	
-	public void setVisSW(Position visSW) {
-		this.visSW = visSW;
-	}
+    public double lineWidth(double speed) {
+        return 1.0;
+    }
 
-	public void setVisFullCanvas(boolean full) {
-		this.visFull = full;
-	}
+    public Position[] getFieldCorners() {
 
-	public double getParticleFactor() {
-		return this.particleFactor;
-	}
+        DegreePosition[] result = new DegreePosition[2];
+
+        result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+        result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+
+        return result;
+    }
+
+    public void setVisNE(Position visNE) {
+        this.visNE = visNE;
+    }
+
+    public void setVisSW(Position visSW) {
+        this.visSW = visSW;
+    }
+
+    @Override
+    public void setVisFullCanvas(boolean full) {
+    }
+
+    public double getParticleFactor() {
+        return this.particleFactor;
+    }
 }
