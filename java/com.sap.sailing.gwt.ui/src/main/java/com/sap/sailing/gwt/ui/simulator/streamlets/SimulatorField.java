@@ -123,7 +123,7 @@ public class SimulatorField implements VectorField {
     }
 
     private Vector interpolate(Position p) {
-        Neighbors idx = this.getNeighbors(p);
+        Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
             GWT.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
@@ -172,13 +172,12 @@ public class SimulatorField implements VectorField {
 
     private Index getIndex(Position p, boolean visFull) {
         // calculate grid indexes
-        Position posR = new DegreePosition(p.getLatDeg() - this.rcStart.getLatDeg(),
-                (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale);
-
+        final double latOffset = p.getLatDeg() - this.rcStart.getLatDeg();
+        final double lngOffset = (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
         // closest grid point
-        long yIdx = Math.round(posR.getLatDeg() * this.nvY.getLatDeg() + posR.getLngDeg() * this.nvY.getLngDeg())
+        long yIdx = Math.round(latOffset * this.nvY.getLatDeg() + lngOffset * this.nvY.getLngDeg())
                 + this.borderY;
-        long xIdx = Math.round(posR.getLatDeg() * this.nvX.getLatDeg() + posR.getLngDeg() * this.nvX.getLngDeg()
+        long xIdx = Math.round(latOffset * this.nvX.getLatDeg() + lngOffset * this.nvX.getLngDeg()
                 + (this.resX - 1) / 2.)
                 + this.borderX;
 
