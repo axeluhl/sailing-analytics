@@ -28,6 +28,9 @@ public class Swarm {
     private boolean swarmContinue = true;
     private Position boundsNE;
     private Position boundsSW;
+    private Position visNE;
+    private boolean visFull;
+    private Position visSW;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
         this.fullcanvas = fullcanvas;
@@ -67,7 +70,7 @@ public class Swarm {
         Particle particle = new Particle();
         boolean done = false;
         while (!done) {
-            particle.pos = field.getRandomPosition();
+            particle.pos = getRandomPosition();
             Vector v = field.getVector(particle.pos);
             double weight = field.particleWeight(particle.pos, v);
             if (weight >= Math.random()) {
@@ -83,6 +86,27 @@ public class Swarm {
             }
         }
         return particle;
+    }
+    
+    private Position getRandomPosition() {
+        final Position result;
+        if (isVisFull()) {
+            double rndY = Math.random();
+            double rndX = Math.random();
+            double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
+            double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
+            result = new DegreePosition(latDeg, lngDeg);
+        } else {
+            double rndY = Math.random();
+            double rndX = Math.random() - 0.5;
+            result = field.getInnerPosition(rndX, rndY, isVisFull());
+        }
+        return result;
+    }
+
+
+    private boolean isVisFull() {
+        return visFull;
     }
 
     public Particle[] createParticles() {
@@ -103,7 +127,7 @@ public class Swarm {
                 .getNorthEast().getLongitude());
         Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds()
                 .getSouthWest().getLongitude());
-        Position[] fieldCorners = this.field.getFieldCorners();
+        Position[] fieldCorners = this.field.getFieldCorners(visFull);
         Position fieldNE = fieldCorners[1];
         Position fieldSW = fieldCorners[0];
         Vector visibleNE = this.isVisible(fieldNE);
@@ -136,15 +160,27 @@ public class Swarm {
                 this.boundsSW = fieldSW;
             }
         }
-        this.field.setVisSW(this.boundsSW);
-        this.field.setVisNE(this.boundsNE);
-        this.field.setVisFullCanvas((!useBoundsNorth) && (!useBoundsEast) && (!useBoundsSouth) && (!useBoundsWest));
+        this.setVisSW(this.boundsSW);
+        this.setVisNE(this.boundsNE);
+        this.setVisFullCanvas((!useBoundsNorth) && (!useBoundsEast) && (!useBoundsSouth) && (!useBoundsWest));
         Vector boundsSWpx = this.projection.latlng2pixel(this.boundsSW);
         Vector boundsNEpx = this.projection.latlng2pixel(this.boundsNE);
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
     };
+
+    private void setVisFullCanvas(boolean visFull) {
+        this.visFull = visFull;
+    }
+
+    private void setVisNE(Position visNE) {
+        this.visNE = visNE;
+    }
+
+    private void setVisSW(Position visSW) {
+        this.visSW = visSW;
+    }
 
     public Vector isVisible(Position pos) {
         // test for visibility of swarm
@@ -219,7 +255,7 @@ public class Swarm {
                 particle.pos = new DegreePosition(latDeg, lngDeg);
                 particle.speed = particle.v.length();
                 particle.age--;
-                if ((particle.age > 0) && (this.field.inBounds(particle.pos))) {
+                if ((particle.age > 0) && (this.field.inBounds(particle.pos, isVisFull()))) {
                     particle.v = field.getVector(particle.pos);
                 } else {
                     particle.v = null;

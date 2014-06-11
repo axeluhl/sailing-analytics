@@ -3,9 +3,7 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.sap.sailing.domain.common.Position;
 
 public interface VectorField {
-    Position getRandomPosition();
-
-    boolean inBounds(Position p);
+    boolean inBounds(Position p, boolean visFull);
 
     Vector getVector(Position p);
 
@@ -17,13 +15,7 @@ public interface VectorField {
 
     double lineWidth(double speed);
 
-    Position[] getFieldCorners();
-
-    void setVisNE(Position visNE);
-
-    void setVisSW(Position visSW);
-
-    void setVisFullCanvas(boolean full);
+    Position[] getFieldCorners(boolean visFull);
 
     double getParticleFactor();
 

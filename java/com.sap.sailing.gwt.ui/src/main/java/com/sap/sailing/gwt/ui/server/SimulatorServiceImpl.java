@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldDTO.WindData;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
@@ -763,74 +764,20 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         //} else {
         if (params.isShowStreamlets2()) {
-
-        	// generate JSON-vectorfield
-        	String jsonField = "$wnd.windFieldSim={";
-        	//this.rcStart = field.rcStart;
-        	jsonField += "rcStart:{lat:" + params.getNorthWest().latDeg + ",lng:" + params.getNorthWest().lngDeg + "},";
-        	//this.rcEnd = field.rcEnd;
-        	jsonField += "rcEnd:{lat:" + params.getSouthEast().latDeg + ",lng:" + params.getSouthEast().lngDeg + "},";
+            WindData windData = new WindData();
+            windData.rcStart = params.getNorthWest();
+            windData.rcEnd = params.getSouthEast();
         	// SouthWest
         	jsonField += "boundsSW:{lat:" + positionGrid[0][0].getLatDeg() + ",lng:" + positionGrid[0][0].getLngDeg() + "},";
         	// NorthEast
         	jsonField += "boundsNE:{lat:" + positionGrid[params.getyRes()+2*params.getBorderY()-1][params.getxRes()+2*params.getBorderX()-1].getLatDeg() + ",lng:" + positionGrid[params.getyRes()+2*params.getBorderY()-1][params.getxRes()+2*params.getBorderX()-1].getLngDeg() + "},";
         	//this.resY = field.resY;
-        	jsonField += "resY:" + params.getyRes() + ",";
-        	//this.resX = field.resX;
-        	jsonField += "resX:" + params.getxRes() + ",";
-        	// border
-        	jsonField += "borderY:" + params.getBorderY() + ",";
-        	jsonField += "borderX:" + params.getBorderX() + ",";
-        	//this.xScale = field.xScale;
-        	jsonField += "xScale:1.5,";
-
-        	/*String jsonField2 = "data:[";
-        	DecimalFormat df = new DecimalFormat("#.00");
-        	double maxWindSpeed = 0;
-
-        	//List<SimulatorWindDTO> windMat = wfDTO.getMatrix();
-
-        	if (positionGrid != null && positionGrid.length > 0) {
-        		TimePoint t = startTime;
-        		while (t.compareTo(endTime) <= 0) {
-        			jsonField2 += "[";
-        			for (int i = 0; i < positionGrid.length; ++i) {
-        				jsonField2 += "[";
-        				for (int j = 0; j < positionGrid[i].length; ++j) {
-        					Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, positionGrid[i][j], null));
-        					if (localWind.getKnots() > maxWindSpeed) {
-        						maxWindSpeed = localWind.getKnots();
-        					}
-        					double windY = localWind.getKnots() * Math.cos(localWind.getBearing().getRadians());
-        					double windX = localWind.getKnots() * Math.sin(localWind.getBearing().getRadians());
-        					jsonField2 += df.format(windX) + "," + df.format(windY);
-        					if (j<(params.getxRes()-1)) {
-        						jsonField2 += ",";
-        					}
-        				}
-        				if (i<(params.getyRes()-1)) {
-        					jsonField2 += "],";
-        				} else {
-        					jsonField2 += "]";
-        				}
-        			}
-        			t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
-        			if (t.compareTo(endTime) <= 0) {
-        				jsonField2 += "],";
-        			} else {
-        				jsonField2 += "]";
-        			}        
-        		}
-        	}
-        	jsonField += "maxLength:" + maxWindSpeed + "," + jsonField2;
-        	jsonField += "]";
-
-        	// finalize JSON Field
-        	jsonField += "};";*/        
-
-        	//LOGGER.info("JSON Field:\n" + jsonField);
-        	windFieldDTO.windDataJSON = jsonField;
-        	//	windFieldDTO.setMatrix(null);
+            windData.resX = params.getxRes();
+            windData.resY = params.getyRes();
+            windData.borderX = params.getBorderX();
+            windData.borderY = params.getBorderY();
+            windData.xScale = 1.5;
+            windFieldDTO.windData = windData;
         }
 
         return windFieldDTO;
