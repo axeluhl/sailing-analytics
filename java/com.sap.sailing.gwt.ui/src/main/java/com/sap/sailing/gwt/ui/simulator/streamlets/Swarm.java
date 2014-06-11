@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sse.common.Util.Pair;
 
 public class Swarm {
     private final FullCanvasOverlay fullcanvas;
@@ -130,13 +131,13 @@ public class Swarm {
         Position[] fieldCorners = this.field.getFieldCorners(visFull);
         Position fieldNE = fieldCorners[1];
         Position fieldSW = fieldCorners[0];
-        Vector visibleNE = this.isVisible(fieldNE);
-        Vector visibleSW = this.isVisible(fieldSW);
-        boolean useBoundsNorth = (visibleNE.y == 0);
-        boolean useBoundsEast = (visibleNE.x == 0);
-        boolean useBoundsSouth = (visibleSW.y == 0);
-        boolean useBoundsWest = (visibleSW.x == 0);
-        swarmOffScreen = (visibleNE.y > 0) || (visibleSW.y < 0) || (visibleNE.x < 0) || (visibleSW.x > 0);
+        Pair<Boolean, Boolean> visibleNE = this.isVisible(fieldNE);
+        Pair<Boolean, Boolean> visibleSW = this.isVisible(fieldSW);
+        boolean useBoundsNorth = visibleNE.getB();
+        boolean useBoundsEast = visibleNE.getA();
+        boolean useBoundsSouth = visibleSW.getB();
+        boolean useBoundsWest = visibleSW.getA();
+        swarmOffScreen = !visibleNE.getB() || !visibleNE.getA();
         if (swarmOffScreen) {
             this.boundsNE = fieldNE;
             this.boundsSW = fieldSW;
@@ -182,13 +183,15 @@ public class Swarm {
         this.visSW = visSW;
     }
 
-    private Vector isVisible(Position pos) {
+    /**
+     * Tells if <code>pos</code> is within the bounds of {@link #canvas}, for X and Y coordinate.
+     */
+    private Pair<Boolean, Boolean> isVisible(Position pos) {
         // test for visibility of swarm
         Vector proj = this.projection.latlng2pixel(pos);
-        Vector result = new Vector();
-        result.x = (proj.x < 0 ? -1 : 0) + (proj.x > canvas.getOffsetWidth() ? 1 : 0);
-        result.y = (proj.y < 0 ? -1 : 0) + (proj.y > canvas.getOffsetHeight() ? 1 : 0);
-        return result;
+        final boolean xVisible = proj.x >= 0 && proj.x <= canvas.getOffsetWidth();
+        final boolean yVisible = proj.y >= 0 && proj.y <= canvas.getOffsetHeight();
+        return new Pair<Boolean, Boolean>(xVisible, yVisible);
     }
 
     private void startLoop(final int millis) {
@@ -261,6 +264,7 @@ public class Swarm {
                     particle.v = null;
                 }
             } else {
+                // particle timed out (age became 0); create a new one
                 particles[idx] = this.createParticle();
             }
         }

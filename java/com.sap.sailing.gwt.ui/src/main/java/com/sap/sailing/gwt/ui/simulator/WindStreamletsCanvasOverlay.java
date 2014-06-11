@@ -28,8 +28,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private int nParticles;
     private Swarm swarm;
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer,
-            final WindFieldGenParamsDTO windParams) {
+    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
         super(simulatorMap.getMap(), zIndex);
         this.simulatorMap = simulatorMap;
         this.timer = timer;
