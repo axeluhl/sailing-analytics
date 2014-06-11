@@ -49,12 +49,9 @@ public class SimulatorField implements VectorField {
     private int step;
 
     public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams) {
-
         this.step = 0;
-
         String parseString = windData.windDataJSON.substring(18, windData.windDataJSON.length() - 1) + "}";
         JSONObject baseData = JSONParser.parseLenient(parseString).isObject();
-
         this.rcStart = new DegreePosition(baseData.get("rcStart").isObject().get("lat").isNumber().doubleValue(),
                 baseData.get("rcStart").isObject().get("lng").isNumber().doubleValue());
         this.rcEnd = new DegreePosition(baseData.get("rcEnd").isObject().get("lat").isNumber().doubleValue(), baseData
