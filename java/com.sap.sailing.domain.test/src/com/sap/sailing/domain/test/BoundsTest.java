@@ -97,6 +97,17 @@ public class BoundsTest {
     }
 
     @Test
+    public void simpleIntersectTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(5, 5));
+        Bounds i = b1.intersect(b2);
+        assertEquals(2, i.getSouthWest().getLatDeg(), 0.0000001);
+        assertEquals(3, i.getNorthEast().getLatDeg(), 0.0000001);
+        assertEquals(2, i.getSouthWest().getLngDeg(), 0.0000001);
+        assertEquals(3, i.getNorthEast().getLngDeg(), 0.0000001);
+    }
+
+    @Test
     public void simpleNegativeIntersectsTest() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
         Bounds b2 = new BoundsImpl(new DegreePosition(4, 4), new DegreePosition(5, 5));
@@ -151,4 +162,5 @@ public class BoundsTest {
         assertFalse(b1.intersects(b2));
         assertFalse(b2.intersects(b1));
     }
+    
 }
