@@ -22,10 +22,10 @@
 						<g:Anchor ui:field="sponsoringPageLink"
 							styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;">
 						</g:Anchor>
-				          <form action="index.html" name="sitesearch" class="{local_res.css.search}">
-				            <button type="submit" class="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}">Search</button>
-				            <input name="siteSearch" placeholder="Search SAPSailing.com" class="{local_res.css.search_textfield}"></input>
-				          </form>
+				          <div class="{local_res.css.search}">
+				            <g:Button ui:field="searchButton" text="Search" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
+				            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
+				          </div>
 					</nav>
 				</div>
 			</div>

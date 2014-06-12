@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
@@ -25,6 +26,11 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     @Override
     public void goToEvent(String eventUuidAsString) {
         placeController.goTo(new EventPlace(eventUuidAsString));
+    }
+
+    @Override
+    public void goToSearchResult(String searchQuery) {
+        placeController.goTo(new SearchResultPlace(searchQuery));
     }
 
     @Override

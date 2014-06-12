@@ -6,6 +6,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivity;
@@ -50,6 +51,11 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
 
     @Override
     public SolutionsView createSolutionsView(SolutionsActivity activity) {
+        return null;
+    }
+
+    @Override
+    public SearchResultView createSearchResultView() {
         return null;
     }
 }

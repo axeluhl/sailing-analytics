@@ -8,8 +8,11 @@ import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
 import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
+import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
+import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
+import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivity;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
@@ -53,7 +56,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public SolutionsView createSolutionsView(SolutionsActivity activity) {
-        // TODO Auto-generated method stub
-        return null;
+        return new TabletAndDesktopSolutionsView();
+    }
+
+    @Override
+    public SearchResultView createSearchResultView() {
+        return new TabletAndDesktopSearchResultView(getPlaceNavigator());
     }
 }
