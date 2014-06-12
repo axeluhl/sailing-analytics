@@ -6,6 +6,8 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -22,13 +24,29 @@ public class Swarm {
     private Timer loopTimer;
     private Mercator projection;
     private VectorField field;
+    
+    /**
+     * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
+     * {@link #particles} array.
+     */
     private int nParticles;
+    
+    /**
+     * The particles shown in this swarm.
+     */
     private Particle[] particles;
+    
+    /**
+     * Tells if nothing of this swarm is currently visible on the {@link #map}. This is the case when there is no
+     * intersection between the {@link #field vector field's} {@link VectorField#getFieldCorners() bounds} and the
+     * visible map area.
+     */
     private boolean swarmOffScreen = false;
+    
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    private Position visNE;
-    private Position visSW;
+    private Position visiblePartOfFieldNE;
+    private Position visiblePartOfFieldSW;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
         this.fullcanvas = fullcanvas;
@@ -90,8 +108,8 @@ public class Swarm {
         final Position result;
         double rndY = Math.random();
         double rndX = Math.random();
-        double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-        double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
+        double latDeg = rndY * this.visiblePartOfFieldSW.getLatDeg() + (1 - rndY) * this.visiblePartOfFieldNE.getLatDeg();
+        double lngDeg = rndX * this.visiblePartOfFieldSW.getLngDeg() + (1 - rndX) * this.visiblePartOfFieldNE.getLngDeg();
         result = new DegreePosition(latDeg, lngDeg);
         return result;
     }
@@ -117,40 +135,13 @@ public class Swarm {
         Position[] fieldCorners = this.field.getFieldCorners();
         Position fieldNE = fieldCorners[1];
         Position fieldSW = fieldCorners[0];
-        Pair<Boolean, Boolean> visibleNE = this.isVisible(fieldNE);
-        Pair<Boolean, Boolean> visibleSW = this.isVisible(fieldSW);
-        boolean useBoundsNorth = visibleNE.getB();
-        boolean useBoundsEast = visibleNE.getA();
-        boolean useBoundsSouth = visibleSW.getB();
-        boolean useBoundsWest = visibleSW.getA();
-        swarmOffScreen = !visibleNE.getB() || !visibleNE.getA();
-        final Position boundsNE;
-        final Position boundsSW;
-        if (swarmOffScreen) {
-            boundsNE = fieldNE;
-            boundsSW = fieldSW;
-        } else {
-            if ((!useBoundsNorth) && (!useBoundsEast)) {
-                boundsNE = mapNE;
-            } else if (!useBoundsNorth) {
-                boundsNE = new DegreePosition(mapNE.getLatDeg(), fieldNE.getLngDeg());
-            } else if (!useBoundsEast) {
-                boundsNE = new DegreePosition(fieldNE.getLatDeg(), mapNE.getLngDeg());
-            } else {
-                boundsNE = fieldNE;
-            }
-            if ((!useBoundsSouth) && (!useBoundsWest)) {
-                boundsSW = mapSW;
-            } else if (!useBoundsSouth) {
-                boundsSW = new DegreePosition(mapSW.getLatDeg(), fieldSW.getLngDeg());
-            } else if (!useBoundsWest) {
-                boundsSW = new DegreePosition(fieldSW.getLatDeg(), mapSW.getLngDeg());
-            } else {
-                boundsSW = fieldSW;
-            }
-        }
-        this.setVisSW(boundsSW);
-        this.setVisNE(boundsNE);
+        LatLngBounds fieldBounds = LatLngBounds.newInstance(
+                LatLng.newInstance(fieldSW.getLatDeg(), fieldSW.getLngDeg()),
+                LatLng.newInstance(fieldNE.getLatDeg(), fieldNE.getLngDeg()));
+        swarmOffScreen = !map.getBounds().intersects(fieldBounds);
+        LatLngBounds visibleBoundsOfField = intersect(fieldBounds, map.getBounds());
+        this.setVisiblePartOfFieldSW(visibleBoundsOfField.getSouthWest());
+        this.setVisiblePartOfFieldNE(visibleBoundsOfField.getNorthEast());
         Vector boundsSWpx = this.projection.latlng2pixel(boundsSW);
         Vector boundsNEpx = this.projection.latlng2pixel(boundsNE);
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
@@ -158,12 +149,16 @@ public class Swarm {
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
     };
 
-    private void setVisNE(Position visNE) {
-        this.visNE = visNE;
+    private LatLngBounds intersect(LatLngBounds fieldBounds, LatLngBounds mapBounds) {
+        return LatLngBounds.newInstance(fieldBounds.contains(mapBounds.getSouthWest()) ? mapBounds.getSouthWest() : null, ne);
     }
 
-    private void setVisSW(Position visSW) {
-        this.visSW = visSW;
+    private void setVisiblePartOfFieldNE(Position visNE) {
+        this.visiblePartOfFieldNE = visNE;
+    }
+
+    private void setVisiblePartOfFieldSW(Position visSW) {
+        this.visiblePartOfFieldSW = visSW;
     }
 
     /**

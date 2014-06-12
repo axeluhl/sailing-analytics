@@ -59,6 +59,12 @@ public interface VectorField {
      */
     double lineWidth(double speed);
 
+    /**
+     * @return the north-east and the south-west corner of the rectangular area on a Mercator projection that fully
+     *         contains this field's {@link #inBounds(Position) bounds}. Note that the field's
+     *         {@link #inBounds(Position) bounds} are not necessarily defined as a rectangle on a Mercator map. There
+     *         may be a rotation or some other shape in place.
+     */
     Position[] getFieldCorners();
 
     double getParticleFactor();

@@ -1,0 +1,12 @@
+package com.sap.sailing.domain.common;
+
+public interface Bounds {
+    Position getNorthEast();
+    Position getSouthWest();
+    Bounds intersect(Bounds other);
+    Bounds union(Bounds other);
+    boolean intersects(Bounds other);
+    boolean contains(Position other);
+    boolean contains(Bounds other);
+    boolean isCrossesDateLine();
+}
