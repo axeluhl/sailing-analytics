@@ -94,8 +94,8 @@ public class BoundsImpl implements Bounds {
     public boolean intersects(Bounds other) {
         return (containsLatDeg(other.getSouthWest().getLatDeg()) || containsLatDeg(other.getNorthEast().getLatDeg()) ||
                 other.containsLatDeg(getSouthWest().getLatDeg()) || other.containsLatDeg(getNorthEast().getLatDeg()))
-            && (containsLngDeg(other.getSouthWest().getLatDeg()) || containsLngDeg(other.getNorthEast().getLatDeg()) ||
-                other.containsLngDeg(getSouthWest().getLatDeg()) || other.containsLngDeg(getNorthEast().getLatDeg()));
+            && (containsLngDeg(other.getSouthWest().getLngDeg()) || containsLngDeg(other.getNorthEast().getLngDeg()) ||
+                other.containsLngDeg(getSouthWest().getLngDeg()) || other.containsLngDeg(getNorthEast().getLngDeg()));
     }
     
     @Override
@@ -132,5 +132,10 @@ public class BoundsImpl implements Bounds {
     @Override
     public boolean isCrossesDateLine() {
         return crossesDateLine;
+    }
+    
+    @Override
+    public String toString() {
+        return "{SW: "+getSouthWest().toString()+", NE: "+getNorthEast().toString()+"}";
     }
 }

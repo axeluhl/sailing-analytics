@@ -105,10 +105,50 @@ public class BoundsTest {
     }
 
     @Test
+    public void simpleNegativeIntersectsTestNonIntersectingLat() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, 2), new DegreePosition(5, 5));
+        assertFalse(b1.intersects(b2));
+        assertFalse(b2.intersects(b1));
+    }
+
+    @Test
     public void intersectsWithContainsTest() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(4, 4));
         Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(3, 3));
         assertTrue(b1.intersects(b2));
         assertTrue(b2.intersects(b1));
+    }
+
+    @Test
+    public void dateLineIntersectsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -177));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -176));
+        assertTrue(b1.intersects(b2));
+        assertTrue(b2.intersects(b1));
+    }
+
+    @Test
+    public void dateLineNegativeIntersectsTestNonMatchingLat() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -177));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, -178), new DegreePosition(5, -176));
+        assertFalse(b1.intersects(b2));
+        assertFalse(b2.intersects(b1));
+    }
+
+    @Test
+    public void dateLineNegativeIntersectsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, 179));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
+        assertFalse(b1.intersects(b2));
+        assertFalse(b2.intersects(b1));
+    }
+
+    @Test
+    public void dateLineNegativeIntersectsTestBoundsCrossingDateLine() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -179));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
+        assertFalse(b1.intersects(b2));
+        assertFalse(b2.intersects(b1));
     }
 }
