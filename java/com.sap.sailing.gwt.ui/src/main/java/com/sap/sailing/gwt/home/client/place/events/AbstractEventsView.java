@@ -43,7 +43,7 @@ public abstract class AbstractEventsView extends Composite implements EventsView
         for(List<EventBaseDTO> eventsPerYear: recentEventsOrderedByYear.values()) {
             Collections.sort(eventsPerYear, EVENTS_BY_DESCENDING_DATE_COMPARATOR);
         }
-        Collections.sort(upcomingEvents, EVENTS_BY_DESCENDING_DATE_COMPARATOR);
+        Collections.sort(upcomingEvents, EVENTS_BY_ASCENDING_DATE_COMPARATOR);
         updateEventsUI();
     }
 
@@ -56,7 +56,14 @@ public abstract class AbstractEventsView extends Composite implements EventsView
     public List<EventBaseDTO> getUpcomingEvents() {
         return upcomingEvents;
     }
-    
+
+    public static Comparator<EventBaseDTO> EVENTS_BY_ASCENDING_DATE_COMPARATOR = new Comparator<EventBaseDTO>() {
+        @Override
+        public int compare(EventBaseDTO e1, EventBaseDTO e2) {
+            return e1.endDate.compareTo(e2.endDate);
+        }
+    };
+
     public static Comparator<EventBaseDTO> EVENTS_BY_DESCENDING_DATE_COMPARATOR = new Comparator<EventBaseDTO>() {
         @Override
         public int compare(EventBaseDTO e1, EventBaseDTO e2) {
