@@ -96,6 +96,7 @@ public class Swarm {
                     particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                 }
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 particle.v = v;
                 done = true;
             }
@@ -182,7 +183,7 @@ public class Swarm {
             if (particle.stepsToLive == 0) {
                 continue;
             }
-            double particleSpeed = particle.v.length();
+            double particleSpeed = particle.v == null ? 0 : particle.v.length();
             ctxt.setLineWidth(field.lineWidth(particleSpeed));
             ctxt.setStrokeStyle(field.getColor(particleSpeed));
             ctxt.beginPath();
