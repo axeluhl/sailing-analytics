@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
- * A google map overlay based on a HTML5 canvas for drawing a wind field. The overlay covers the whole map and displays
+ * A Google Maps overlay based on an HTML5 canvas for drawing a wind field. The overlay covers the whole map and displays
  * the wind objects inside it.
  * 
  * @author Nidhi Sawhney (D054070)

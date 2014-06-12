@@ -54,6 +54,7 @@ public class Swarm {
 
     public void start(int animationIntervalMillis, WindFieldDTO windField) {
         projection = new Mercator(fullcanvas, map);
+        // TODO make the VectorField a parameter of Swarm
         if (windField == null) {
             SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
             String jsonStr = bundle.windStreamletsDataJS().getText();
