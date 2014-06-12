@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -275,24 +277,23 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners() {
+    public Bounds getFieldCorners() {
         // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
         Position fieldNE = this.getInnerPosition(+0.5, 1.0);
         Position fieldSW = this.getInnerPosition(-0.5, 0.0);
         Position fieldSE = this.getInnerPosition(+0.5, 0.0);
         Position fieldNW = this.getInnerPosition(-0.5, 1.0);
-        DegreePosition[] result = new DegreePosition[2];
         double minLat = Math.min(Math.min(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.min(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double minLng = Math.min(Math.min(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.min(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        result[0] = new DegreePosition(minLat, minLng);
+        Position sw = new DegreePosition(minLat, minLng);
         double maxLat = Math.max(Math.max(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.max(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double maxLng = Math.max(Math.max(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.max(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        result[1] = new DegreePosition(maxLat, maxLng);
-        return result;
+        Position ne = new DegreePosition(maxLat, maxLng);
+        return new BoundsImpl(sw, ne);
     }
 
     @Override

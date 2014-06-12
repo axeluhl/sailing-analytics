@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -36,7 +37,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start,end,step);
         if (positions == null || positions.length < 1) {
             return;

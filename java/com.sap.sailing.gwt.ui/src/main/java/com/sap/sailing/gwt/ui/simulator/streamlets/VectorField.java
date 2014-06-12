@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 
 /**
@@ -65,7 +66,7 @@ public interface VectorField {
      *         {@link #inBounds(Position) bounds} are not necessarily defined as a rectangle on a Mercator map. There
      *         may be a rotation or some other shape in place.
      */
-    Position[] getFieldCorners();
+    Bounds getFieldCorners();
 
     double getParticleFactor();
 

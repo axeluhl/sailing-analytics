@@ -32,7 +32,7 @@ public interface WindFieldGenerator extends WindField, Serializable {
      * from the start time
      * @return
      */
-    public TimePoint getTimeStep();
+    public Duration getTimeStep();
     
     /**
      * The last TimePoint for which the wind field is generated, could be null if no

@@ -6,15 +6,14 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.user.client.Timer;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sse.common.Util.Pair;
 
 public class Swarm {
     private final FullCanvasOverlay fullcanvas;
@@ -45,8 +44,7 @@ public class Swarm {
     
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    private Position visiblePartOfFieldNE;
-    private Position visiblePartOfFieldSW;
+    private Bounds visibleBoundsOfField;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
         this.fullcanvas = fullcanvas;
@@ -108,8 +106,8 @@ public class Swarm {
         final Position result;
         double rndY = Math.random();
         double rndX = Math.random();
-        double latDeg = rndY * this.visiblePartOfFieldSW.getLatDeg() + (1 - rndY) * this.visiblePartOfFieldNE.getLatDeg();
-        double lngDeg = rndX * this.visiblePartOfFieldSW.getLngDeg() + (1 - rndX) * this.visiblePartOfFieldNE.getLngDeg();
+        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatDeg() + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatDeg();
+        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLngDeg() + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLngDeg();
         result = new DegreePosition(latDeg, lngDeg);
         return result;
     }
@@ -128,49 +126,18 @@ public class Swarm {
     }
 
     private void updateBounds() {
-        Position mapNE = new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds()
-                .getNorthEast().getLongitude());
-        Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds()
-                .getSouthWest().getLongitude());
-        Position[] fieldCorners = this.field.getFieldCorners();
-        Position fieldNE = fieldCorners[1];
-        Position fieldSW = fieldCorners[0];
-        LatLngBounds fieldBounds = LatLngBounds.newInstance(
-                LatLng.newInstance(fieldSW.getLatDeg(), fieldSW.getLngDeg()),
-                LatLng.newInstance(fieldNE.getLatDeg(), fieldNE.getLngDeg()));
-        swarmOffScreen = !map.getBounds().intersects(fieldBounds);
-        LatLngBounds visibleBoundsOfField = intersect(fieldBounds, map.getBounds());
-        this.setVisiblePartOfFieldSW(visibleBoundsOfField.getSouthWest());
-        this.setVisiblePartOfFieldNE(visibleBoundsOfField.getNorthEast());
-        Vector boundsSWpx = this.projection.latlng2pixel(boundsSW);
-        Vector boundsNEpx = this.projection.latlng2pixel(boundsNE);
+        Bounds fieldBounds = this.field.getFieldCorners();
+        final BoundsImpl mapBounds = new BoundsImpl(
+                new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds().getSouthWest().getLongitude()),
+                new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds().getNorthEast().getLongitude()));
+        swarmOffScreen = !fieldBounds.intersects(mapBounds);
+        visibleBoundsOfField = fieldBounds.intersect(mapBounds);
+        Vector boundsSWpx = this.projection.latlng2pixel(visibleBoundsOfField.getSouthWest());
+        Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
     };
-
-    private LatLngBounds intersect(LatLngBounds fieldBounds, LatLngBounds mapBounds) {
-        return LatLngBounds.newInstance(fieldBounds.contains(mapBounds.getSouthWest()) ? mapBounds.getSouthWest() : null, ne);
-    }
-
-    private void setVisiblePartOfFieldNE(Position visNE) {
-        this.visiblePartOfFieldNE = visNE;
-    }
-
-    private void setVisiblePartOfFieldSW(Position visSW) {
-        this.visiblePartOfFieldSW = visSW;
-    }
-
-    /**
-     * Tells if <code>pos</code> is within the bounds of {@link #canvas}, for X and Y coordinate.
-     */
-    private Pair<Boolean, Boolean> isVisible(Position pos) {
-        // test for visibility of swarm
-        Vector proj = this.projection.latlng2pixel(pos);
-        final boolean xVisible = proj.x >= 0 && proj.x <= canvas.getOffsetWidth();
-        final boolean yVisible = proj.y >= 0 && proj.y <= canvas.getOffsetHeight();
-        return new Pair<Boolean, Boolean>(xVisible, yVisible);
-    }
 
     private void startLoop(final int animationIntervalMillis) {
         // Create animation-loop based on timer timeout

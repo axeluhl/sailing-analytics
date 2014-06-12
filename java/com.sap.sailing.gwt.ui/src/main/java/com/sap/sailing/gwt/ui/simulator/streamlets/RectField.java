@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class RectField implements VectorField {
@@ -169,12 +171,11 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners() {
+    public Bounds getFieldCorners() {
         // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
-        DegreePosition[] result = new DegreePosition[2];
-        result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-        result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-        return result;
+        Position sw = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+        Position ne = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+        return new BoundsImpl(sw, ne);
     }
 
     @Override
