@@ -11,7 +11,7 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
-        <h3 class="{res.mainCss.mainsection_header_title}">Recommend SAP Sailing Analytics</h3>
+        <h3 class="{local_res.css.mainsection_header_title}">Recommend SAP Sailing Analytics</h3>
       </header>
       <div class="{res.mainCss.mainsection_navigation}">
         <div class="{local_res.css.socialfooter_button} {local_res.css.socialfooter_buttontwitter}">

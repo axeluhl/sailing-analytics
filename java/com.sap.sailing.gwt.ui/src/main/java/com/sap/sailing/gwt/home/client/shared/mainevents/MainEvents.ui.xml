@@ -16,9 +16,9 @@
     </div>
   </div>
   <div class="{res.mainCss.grid}">
-      <s:mainevents.RecentEvent ui:field='event1'/>
-      <s:mainevents.RecentEvent ui:field='event2'/>
-      <s:mainevents.RecentEvent ui:field='event3'/>
+      <s:recentevent.RecentEvent ui:field='event1'/>
+      <s:recentevent.RecentEvent ui:field='event2'/>
+      <s:recentevent.RecentEvent ui:field='event3'/>
   </div>
   <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}">Show All Events</a></div>

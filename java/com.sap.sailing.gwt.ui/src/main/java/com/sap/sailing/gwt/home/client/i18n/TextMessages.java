@@ -12,7 +12,11 @@ public interface TextMessages extends Messages {
     String aboutUs();
 
     String contact();
-    
+
+    String sponsoring();
+
+    String solutions();
+
     String search();
 
     String german();

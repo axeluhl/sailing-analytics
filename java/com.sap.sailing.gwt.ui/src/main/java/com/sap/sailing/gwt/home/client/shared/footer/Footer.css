@@ -13,9 +13,11 @@
 }
 .sitefooter_copyright {
   font-weight: 600;
+  float: left;
+  margin-right: 1.875em;
 }
 .sitefooter_links {
-  text-align: right;
+  text-align: left;
   font-size: 0.9375em;
   font-weight: 600;
   text-transform: uppercase;
@@ -24,8 +26,17 @@
   display: inline-block;
   color: #fff;
   text-decoration: none;
-  margin-right: 3.75em;
+  margin-right: 1.875em;
 }
 .sitefooter_links_link:last-child {
   margin-right: 0;
+}
+.sitefooter_language {
+  text-align: right;
+}
+.sitefooter_language_link {
+  color: #f0ab00;
+  display: inline-block;
+  cursor: pointer;
+  margin-left: 0.625em;
 }
