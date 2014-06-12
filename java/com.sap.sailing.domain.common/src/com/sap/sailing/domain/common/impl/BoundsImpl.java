@@ -154,6 +154,12 @@ public class BoundsImpl implements Bounds {
     }
     
     @Override
+    public boolean isEmpty() {
+        return getSouthWest().getLatDeg() >= getNorthEast().getLatDeg() ||
+               getSouthWest().getLngDeg() == getNorthEast().getLngDeg();
+    }
+
+    @Override
     public String toString() {
         return "{SW: "+getSouthWest().toString()+", NE: "+getNorthEast().toString()+"}";
     }

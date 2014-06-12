@@ -14,4 +14,5 @@ public interface Bounds {
     boolean isCrossesDateLine();
     boolean containsLatDeg(double latDeg);
     boolean containsLngDeg(double lngDeg);
+    boolean isEmpty();
 }
