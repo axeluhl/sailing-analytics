@@ -148,11 +148,33 @@ public class BoundsTest {
     }
 
     @Test
+    public void intersectWithContainsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(4, 4));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(3, 3));
+        Bounds i = b1.intersect(b2);
+        assertEquals(2, i.getSouthWest().getLatDeg(), 0.0000001);
+        assertEquals(3, i.getNorthEast().getLatDeg(), 0.0000001);
+        assertEquals(2, i.getSouthWest().getLngDeg(), 0.0000001);
+        assertEquals(3, i.getNorthEast().getLngDeg(), 0.0000001);
+    }
+
+    @Test
     public void dateLineIntersectsTest() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -177));
         Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -176));
         assertTrue(b1.intersects(b2));
         assertTrue(b2.intersects(b1));
+    }
+
+    @Test
+    public void dateLineIntersectTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -177));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -176));
+        Bounds i = b1.intersect(b2);
+        assertEquals(2, i.getSouthWest().getLatDeg(), 0.0000001);
+        assertEquals(3, i.getNorthEast().getLatDeg(), 0.0000001);
+        assertEquals(-178, i.getSouthWest().getLngDeg(), 0.0000001);
+        assertEquals(-177, i.getNorthEast().getLngDeg(), 0.0000001);
     }
 
     @Test
@@ -164,6 +186,14 @@ public class BoundsTest {
     }
 
     @Test
+    public void dateLineNegativeIntersectTestNonMatchingLat() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -177));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, -178), new DegreePosition(5, -176));
+        Bounds i = b1.intersect(b2);
+        assertTrue(i.isEmpty());
+    }
+
+    @Test
     public void dateLineNegativeIntersectsTest() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, 179));
         Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
@@ -172,11 +202,27 @@ public class BoundsTest {
     }
 
     @Test
+    public void dateLineNegativeIntersectTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, 179));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
+        Bounds i = b1.intersect(b2);
+        assertTrue(i.isEmpty());
+    }
+
+    @Test
     public void dateLineNegativeIntersectsTestBoundsCrossingDateLine() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -179));
         Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
         assertFalse(b1.intersects(b2));
         assertFalse(b2.intersects(b1));
+    }
+    
+    @Test
+    public void dateLineNegativeIntersectTestBoundsCrossingDateLine() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, -179));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, -178), new DegreePosition(5, -177));
+        Bounds i = b1.intersect(b2);
+        assertTrue(i.isEmpty());
     }
     
 }
