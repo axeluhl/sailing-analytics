@@ -67,6 +67,17 @@ public class BoundsTest {
     }
 
     @Test
+    public void testDatelineUnionOneSideAndOtherSide() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 178), new DegreePosition(3, 179));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, -178), new DegreePosition(5, -177));
+        Bounds u = b1.union(b2);
+        assertEquals(1.0, u.getSouthWest().getLatDeg(), 0.00000001);
+        assertEquals(178, u.getSouthWest().getLngDeg(), 0.00000001);
+        assertEquals(5.0, u.getNorthEast().getLatDeg(), 0.00000001);
+        assertEquals(-177, u.getNorthEast().getLngDeg(), 0.00000001);
+    }
+
+    @Test
     public void simpleUnionTestOutside() {
         Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
         Bounds b2 = new BoundsImpl(new DegreePosition(4, 4), new DegreePosition(5, 5));
