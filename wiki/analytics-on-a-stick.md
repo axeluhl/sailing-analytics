@@ -6,10 +6,10 @@ running in a loung that replicates data from a master server that runs in the cl
 
 ## Create a stick
 
+- You need a stick with at least 4GB of free space!
 - Copy the contents of $GIT/stick to the root of your USB stick
-- Create a directory named `server` and in there `logs` and `tmp`
-- Extract the file http://releases.sapsailing.com/stick-binaries-1.0.tar.gz to the root of your USB stick
-- Install a release by executing `scripts/refreshInstance.sh install-release <release>`
+- Extract the file http://releases.sapsailing.com/stick-binaries-1.2.tar.gz to the root of your USB stick. You should get 5 new directories `mongodb`, `java`, `mongodb-data`, `mongodb-logs` and `server`. Check that `server/logs` and `server/tmp` has been created.
+- Install a Sailing Analytics release by executing `scripts/refreshInstance.sh install-release <release>`
 
 ## Configuration
 
