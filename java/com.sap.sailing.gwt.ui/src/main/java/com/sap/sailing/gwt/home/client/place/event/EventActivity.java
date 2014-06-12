@@ -14,7 +14,6 @@ public class EventActivity extends AbstractActivity {
 
     private final EventPlace eventPlace;
 
-
     public EventActivity(EventPlace place, EventClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.eventPlace = place;

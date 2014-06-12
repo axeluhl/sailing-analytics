@@ -9,9 +9,11 @@
 <!-- Website footer-->
 <footer class="{local_res.css.sitefooter}">
   <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
-    <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.sitefooter_links}"><a href="" class="{local_res.css.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{local_res.css.sitefooter_links_link}">Privacy</a></div>
+    <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+      <div class="{local_res.css.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
+      <div class="{local_res.css.sitefooter_links}"><a href="" class="{local_res.css.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{local_res.css.sitefooter_links_link}">Privacy</a></div>
+    </div>
+    <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">SAP Sailing offered in:<a class="{local_res.css.sitefooter_language_link}">Deutsch</a></div>
   </div>
-</footer>
-    </g:HTMLPanel>
+</footer>    </g:HTMLPanel>
 </ui:UiBinder>

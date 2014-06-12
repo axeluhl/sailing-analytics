@@ -9,36 +9,37 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 
 public class Header extends Composite {
-    @UiField
-    Anchor startPageLink;
-
-    @UiField
-    Anchor eventsPageLink;
-
-    @UiField
-    Anchor aboutUsPageLink;
-
-    @UiField
-    Anchor contactPageLink;
-
+    @UiField Anchor startPageLink;
+    @UiField Anchor eventsPageLink;
+    @UiField Anchor solutionsPageLink;
+    @UiField Anchor sponsoringPageLink;
+    
+    @UiField TextBox searchText;
+    @UiField Button searchButton;
+    
     private final List<Anchor> links;
 
-    private final MainMenuNavigator navigator;
+    private final PlaceNavigator navigator;
 
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
-    public Header(MainMenuNavigator navigator) {
+    public Header(PlaceNavigator navigator) {
         this.navigator = navigator;
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, aboutUsPageLink, contactPageLink });
+        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, sponsoringPageLink });
+        
+        searchText.getElement().setAttribute("placeholder", "Search SAPSailing.com");
     }
 
     @UiHandler("startPageLink")
@@ -52,18 +53,23 @@ public class Header extends Composite {
         navigator.goToEvents();
     }
 
-    @UiHandler("aboutUsPageLink")
-    public void goToAboutUs(ClickEvent e) {
-        navigator.goToAboutUs();
+    @UiHandler("solutionsPageLink")
+    public void goToSolutions(ClickEvent e) {
+        navigator.goToSolutions();
     }
 
-    @UiHandler("contactPageLink")
-    public void goToContact(ClickEvent e) {
-        navigator.goToContact();
+    @UiHandler("sponsoringPageLink")
+    public void goToSponsoring(ClickEvent e) {
+        navigator.goToSponsoring();
     }
 
+    @UiHandler("searchButton")
+    void searchButtonClick(ClickEvent event) {
+        navigator.goToSearchResult(searchText.getText());
+    }
+    
     private void setActiveLink(Anchor link) {
-        final String activeStyle = HeaderResources.INSTANCE.css().sitenavigation_active();
+        final String activeStyle = HeaderResources.INSTANCE.css().sitenavigation_linkactive();
         for (Anchor l : links) {
             if (l == link) {
                 l.addStyleName(activeStyle);

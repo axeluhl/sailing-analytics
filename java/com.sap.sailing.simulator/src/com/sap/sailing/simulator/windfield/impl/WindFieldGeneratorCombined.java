@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.windfield.impl;
 
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -33,7 +34,7 @@ public class WindFieldGeneratorCombined extends WindFieldGeneratorImpl implement
     }
  
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start, end, step);
    
         blastGen.setPositionGrid(positions);

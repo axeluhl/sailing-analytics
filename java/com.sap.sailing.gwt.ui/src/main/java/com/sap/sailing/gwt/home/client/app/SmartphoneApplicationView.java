@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.footer.Footer;
 import com.sap.sailing.gwt.home.client.shared.header.Header;
-import com.sap.sailing.gwt.home.client.shared.header.MainMenuNavigator;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
@@ -35,7 +34,7 @@ public class SmartphoneApplicationView extends Composite implements ApplicationT
     @UiField
     Element loadingMessage;
 
-    public SmartphoneApplicationView(MainMenuNavigator navigator) {
+    public SmartphoneApplicationView(PlaceNavigator navigator) {
         initWidget(uiBinder.createAndBindUi(this));
     }
 

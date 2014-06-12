@@ -18,7 +18,7 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.media_slideshow}">
-        <div style="background-image: url('images/xyz.png')" class="{local_res.css.media_photo}"></div>
+        <div ui:field="photoImage" class="{local_res.css.media_photo}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsprev}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsnext}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsfullsize}"></div>
@@ -36,17 +36,9 @@
     </div>
   </div>
   <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-      <figure class="{local_res.css.videopreview}"><img src="images/video.preview" />
-        <figcaption>
-          <p class="{local_res.css.videopreview_title}"><g:Label ui:field="videoTitle" /></p>
-          <div><g:Label ui:field="videoLength" /></div>
-        </figcaption>
-      </figure>
-    </div>
-  </div>
-  <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}">Show More</a></div>
+      <s:mainmedia.RecentEventVideo ui:field='eventVideo1'/>
+      <s:mainmedia.RecentEventVideo ui:field='eventVideo2'/>
+      <s:mainmedia.RecentEventVideo ui:field='eventVideo3'/>
   </div>
 </div>
     </g:HTMLPanel>
