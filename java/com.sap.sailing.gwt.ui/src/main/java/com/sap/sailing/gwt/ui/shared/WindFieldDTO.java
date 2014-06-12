@@ -10,7 +10,7 @@ public class WindFieldDTO implements IsSerializable {
     public double curSpeed;
     public double curBearing;
     
-    public static class WindData {
+    public static class WindData implements IsSerializable {
         public PositionDTO rcStart;
         public PositionDTO rcEnd;
         public int resX;
