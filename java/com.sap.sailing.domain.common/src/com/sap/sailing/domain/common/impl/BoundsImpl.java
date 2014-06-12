@@ -14,6 +14,16 @@ public class BoundsImpl implements Bounds {
         this.ne = ne;
         crossesDateLine = ne.getLngDeg() < sw.getLngDeg();
     }
+    
+    @Override
+    public Position getNorthWest() {
+        return new DegreePosition(getNorthEast().getLatDeg(), getSouthWest().getLngDeg());
+    }
+
+    @Override
+    public Position getSouthEast() {
+        return new DegreePosition(getSouthWest().getLatDeg(), getNorthEast().getLngDeg());
+    }
 
     @Override
     public Position getNorthEast() {
@@ -24,7 +34,7 @@ public class BoundsImpl implements Bounds {
     public Position getSouthWest() {
         return sw;
     }
-
+    
     @Override
     public Bounds intersect(Bounds other) {
         // TODO Auto-generated method stub
@@ -33,8 +43,19 @@ public class BoundsImpl implements Bounds {
 
     @Override
     public Bounds union(Bounds other) {
-        // TODO Auto-generated method stub
-        return null;
+        final Position resultSW;
+        final Position resultNE;
+        if (contains(other.getSouthWest())) {
+            resultSW = getSouthWest();
+        } else {
+            resultSW = other.getSouthWest();
+        }
+        if (contains(other.getNorthEast())) {
+            resultNE = getNorthEast();
+        } else {
+            resultNE = other.getNorthEast();
+        }
+        return new BoundsImpl(resultSW, resultNE);
     }
 
     @Override
