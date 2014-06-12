@@ -11,4 +11,6 @@ public interface Bounds {
     boolean contains(Position other);
     boolean contains(Bounds other);
     boolean isCrossesDateLine();
+    boolean containsLatDeg(double latDeg);
+    boolean containsLngDeg(double lngDeg);
 }

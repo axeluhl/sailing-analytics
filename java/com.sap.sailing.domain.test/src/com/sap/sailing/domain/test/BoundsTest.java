@@ -87,4 +87,28 @@ public class BoundsTest {
         assertEquals(5.0, u.getNorthEast().getLatDeg(), 0.00000001);
         assertEquals(5.0, u.getNorthEast().getLngDeg(), 0.00000001);
     }
+    
+    @Test
+    public void simpleIntersectsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(5, 5));
+        assertTrue(b1.intersects(b2));
+        assertTrue(b2.intersects(b1));
+    }
+
+    @Test
+    public void simpleNegativeIntersectsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(3, 3));
+        Bounds b2 = new BoundsImpl(new DegreePosition(4, 4), new DegreePosition(5, 5));
+        assertFalse(b1.intersects(b2));
+        assertFalse(b2.intersects(b1));
+    }
+
+    @Test
+    public void intersectsWithContainsTest() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(1, 1), new DegreePosition(4, 4));
+        Bounds b2 = new BoundsImpl(new DegreePosition(2, 2), new DegreePosition(3, 3));
+        assertTrue(b1.intersects(b2));
+        assertTrue(b2.intersects(b1));
+    }
 }

@@ -92,10 +92,22 @@ public class BoundsImpl implements Bounds {
 
     @Override
     public boolean intersects(Bounds other) {
-        // TODO Auto-generated method stub
-        return false;
+        return (containsLatDeg(other.getSouthWest().getLatDeg()) || containsLatDeg(other.getNorthEast().getLatDeg()) ||
+                other.containsLatDeg(getSouthWest().getLatDeg()) || other.containsLatDeg(getNorthEast().getLatDeg()))
+            && (containsLngDeg(other.getSouthWest().getLatDeg()) || containsLngDeg(other.getNorthEast().getLatDeg()) ||
+                other.containsLngDeg(getSouthWest().getLatDeg()) || other.containsLngDeg(getNorthEast().getLatDeg()));
+    }
+    
+    @Override
+    public boolean containsLatDeg(double latDeg) {
+        return latDeg >= getSouthWest().getLatDeg() && latDeg <= getNorthEast().getLatDeg();
     }
 
+    @Override
+    public boolean containsLngDeg(double lngDeg) {
+        return spansLngDeg(getSouthWest().getLngDeg(), getNorthEast().getLngDeg(), lngDeg);
+    }
+    
     @Override
     public boolean contains(Position other) {
         return
