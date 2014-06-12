@@ -1,5 +1,7 @@
 # Sailing Analytics on a stick
 
+[[_TOC_]]
+
 This is a package to enable running the SAP Sailing Analytics from a stick.
 It is provided as-is without warranty. The most common usecase is to have a laptop 
 running in a lounge that replicates data from a master server that runs in the cloud.
@@ -38,3 +40,13 @@ reach it by using http://127.0.0.1:8888/.
 
 - (Linux) All you need is to start the whole thing by executing start.sh. This will take care
 of starting up the database and then starting the analytics server.
+
+## Maintain the package
+
+All the binaries packaged into stick-binaries-<version>.tar.gz should normally not need to be updated. Currently they contain the following:
+
+- Java JRE 1.7 for Windows, Mac and Linux
+- MongoDB 2.6.1 for Windows, Mac and Linux
+- Directories `mongodb-data` and `mongodb-logs` for the database files
+
+All the configuration and start scripts can be found in the Sailing Analytics GIT. If you update the binaries make sure to also adapt the start scripts.
