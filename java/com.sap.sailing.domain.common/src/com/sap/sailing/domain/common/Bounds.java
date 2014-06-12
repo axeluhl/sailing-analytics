@@ -5,6 +5,7 @@ public interface Bounds {
     Position getSouthWest();
     Position getNorthWest();
     Position getSouthEast();
+    
     Bounds intersect(Bounds other);
     Bounds union(Bounds other);
     boolean intersects(Bounds other);

@@ -52,8 +52,27 @@ public class BoundsImpl implements Bounds {
     
     @Override
     public Bounds intersect(Bounds other) {
-        // TODO Auto-generated method stub
-        return null;
+        final double maxSouthLatDeg = Math.max(getSouthWest().getLatDeg(), other.getSouthWest().getLatDeg());
+        final double minNorthLatDeg = Math.min(getNorthEast().getLatDeg(), other.getNorthEast().getLatDeg());
+        final double westDeg;
+        if (containsLngDeg(other.getSouthWest().getLngDeg())) {
+            westDeg = other.getSouthWest().getLngDeg();
+        } else if (other.containsLngDeg(getSouthWest().getLngDeg())) {
+            westDeg = getSouthWest().getLngDeg();
+        } else {
+            // no intersection
+            westDeg = getSouthWest().getLngDeg();
+        }
+        final double eastDeg;
+        if (containsLngDeg(other.getNorthEast().getLngDeg())) {
+            eastDeg = other.getNorthEast().getLngDeg();
+        } else if (other.containsLngDeg(getNorthEast().getLngDeg())) {
+            eastDeg = getNorthEast().getLngDeg();
+        } else {
+            // no intersection
+            eastDeg = getSouthWest().getLngDeg();
+        }
+        return new BoundsImpl(new DegreePosition(maxSouthLatDeg, westDeg), new DegreePosition(minNorthLatDeg, eastDeg));
     }
 
     @Override
