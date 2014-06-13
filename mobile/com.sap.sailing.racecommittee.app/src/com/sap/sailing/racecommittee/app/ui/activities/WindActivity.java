@@ -50,7 +50,6 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     SeekBar windSpeedSeekBar;
     Button sendButton;
     TextView waitingForGpsTextView;
-    TextView windInfoHeader;
     
     LocationManager locationManager;
     Location currentLocation;
