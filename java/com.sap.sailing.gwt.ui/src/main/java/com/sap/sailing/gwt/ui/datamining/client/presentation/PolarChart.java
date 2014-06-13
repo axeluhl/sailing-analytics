@@ -37,7 +37,7 @@ public class PolarChart implements ResultsPresenter<Number> {
      */
     private Chart createPolarChartWidget() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
-                .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(1))
                 .setPolar(true).setHeight100().setWidth100();
         polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
