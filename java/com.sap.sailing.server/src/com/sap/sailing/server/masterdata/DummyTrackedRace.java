@@ -560,14 +560,14 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
-	@Override
-	public GPSFixStore getGPSFixStore() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
-    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
         // TODO Auto-generated method stub
         
     }
