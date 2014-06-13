@@ -1,6 +1,13 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -25,7 +32,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
  * 
  */
 public class Activator implements BundleActivator {
-
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
     private static Activator INSTANCE;
     
     private static final String DEFAULT_CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
@@ -34,26 +41,47 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_ID_PROPERTY_NAME = "igtimi.client.id";
     private static final String CLIENT_SECRET_PROPERTY_NAME = "igtimi.client.secret";
     private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
-    private final IgtimiConnectionFactoryImpl connectionFactory;
-    private final IgtimiWindTrackerFactory windTrackerFactory;
+    private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
+    private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
         final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME, DEFAULT_CLIENT_SECRET);
         final String clientRedirectUri = System.getProperty(CLIENT_REDIRECT_URI_PROPERTY_NAME, DEFAULT_CLIENT_REDIRECT_URI);
-        Client client = new ClientImpl(clientId, clientSecret, clientRedirectUri);
-        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        connectionFactory = new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
-        windTrackerFactory = new IgtimiWindTrackerFactory(connectionFactory);
+        final Client client = new ClientImpl(clientId, clientSecret, clientRedirectUri);
+        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+        connectionFactory = executor.submit(new Callable<IgtimiConnectionFactoryImpl>() {
+            @Override
+            public IgtimiConnectionFactoryImpl call() {
+                return new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
+            }
+        });
+        windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {
+            @Override
+            public IgtimiWindTrackerFactory call() throws InterruptedException, ExecutionException {
+                return new IgtimiWindTrackerFactory(connectionFactory.get());
+            }
+        });
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         INSTANCE = this;
-        context.registerService(IgtimiConnectionFactory.class, connectionFactory, /* properties */ null);
-        context.registerService(WindTrackerFactory.class, windTrackerFactory, /* properties */ null);
-        context.registerService(IgtimiWindTrackerFactory.class, windTrackerFactory, /* properties */ null);
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    context.registerService(IgtimiConnectionFactory.class, connectionFactory.get(), /* properties */ null);
+                    context.registerService(WindTrackerFactory.class, windTrackerFactory.get(), /* properties */ null);
+                    context.registerService(IgtimiWindTrackerFactory.class, windTrackerFactory.get(), /* properties */ null);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.log(Level.SEVERE, "Error trying to register Igtimi services with OSGi", e);
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -64,11 +92,21 @@ public class Activator implements BundleActivator {
     }
     
     public IgtimiConnectionFactoryImpl getConnectionFactory() {
-        return connectionFactory;
+        try {
+            return connectionFactory.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.SEVERE, "Error trying to retrieve Igtimi connection factory", e);
+            throw new RuntimeException(e);
+        }
     }
     
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
-        return windTrackerFactory;
+        try {
+            return windTrackerFactory.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.SEVERE, "Error trying to retrieve Igtimi wind tracker factory", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
