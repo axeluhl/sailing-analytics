@@ -27,6 +27,11 @@ public abstract class AbstractProcessor<InputType, ResultType> implements Proces
             resultReceiver.onFailure(failure);
         }
     }
+    
+    @Override
+    public void abort() {
+        // Can't be implemented in a single threaded processor
+    }
 
     private void forwardResultToTheReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {
