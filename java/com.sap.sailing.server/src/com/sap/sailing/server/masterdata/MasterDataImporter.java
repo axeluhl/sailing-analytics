@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
@@ -39,7 +39,7 @@ public class MasterDataImporter {
 
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
-        RegattaImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
+        SeriesImpl.setOngoingMasterDataImport(new MasterDataImportInformation(raceLogStore));
 
         @SuppressWarnings("unchecked")
         final List<Serializable> competitorIds = (List<Serializable>) objectInputStream.readObject();
@@ -53,7 +53,7 @@ public class MasterDataImporter {
         objectInputStream.readObject();
         TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
 
-        RegattaImpl.setOngoingMasterDataImport(null);
+        SeriesImpl.setOngoingMasterDataImport(null);
 
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 "Data-Transfer Complete, Initializing Import Operation", 0.5);

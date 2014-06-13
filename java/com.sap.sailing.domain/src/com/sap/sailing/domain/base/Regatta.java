@@ -131,4 +131,6 @@ public interface Regatta extends Named, WithID {
      * @return the associated event. Can be null.
      */
     Event getEvent();
+
+    void registerRaceLogsOnRaceColumns(Series series);
 }
