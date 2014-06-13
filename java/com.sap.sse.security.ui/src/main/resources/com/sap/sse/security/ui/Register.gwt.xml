@@ -41,4 +41,5 @@
   <source path='client'/>
   <source path='registration'/>
   <source path='shared'/>
+  <source path='oauth'/>
 </module>

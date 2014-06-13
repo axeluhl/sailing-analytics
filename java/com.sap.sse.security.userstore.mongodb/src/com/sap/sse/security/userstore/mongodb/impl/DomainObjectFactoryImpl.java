@@ -70,7 +70,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private User loadUser(DBObject userDBObject) {
         String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
-        Set<String> roles = new HashSet<String>((Collection<String>) userDBObject.get(FieldNames.User.ROLES.name()));
+        Set<String> roles = new HashSet<String>();
+        Object rolesO = userDBObject.get(FieldNames.User.ROLES.name());
+        if (rolesO != null){
+            roles.addAll((Collection<String>) rolesO);
+        }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         User result = new User(name, email, accounts.values());

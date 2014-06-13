@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+
 import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
@@ -44,4 +46,6 @@ public interface SecurityService {
     
     Map<String, Object> getAllSettings();
     Map<String, Class<?>> getAllSettingTypes();
+    
+    Iterable<String> getUrls(ServletContext context);
 }

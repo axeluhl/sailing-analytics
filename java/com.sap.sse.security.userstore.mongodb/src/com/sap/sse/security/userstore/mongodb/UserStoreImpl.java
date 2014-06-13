@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sse.security.userstore.shared.Account;
+import com.sap.sse.security.userstore.shared.DefaultSettings;
 import com.sap.sse.security.userstore.shared.SocialSettingsKeys;
 import com.sap.sse.security.userstore.shared.User;
 import com.sap.sse.security.userstore.shared.UserManagementException;
@@ -25,6 +26,7 @@ public class UserStoreImpl implements UserStore {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
+        initDefaultSettings();
         initSocialSettingsIfEmpty();
         addSetting("email_required", Boolean.class);
         for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
@@ -37,6 +39,15 @@ public class UserStoreImpl implements UserStore {
             if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null){
                 addSetting(ssk.name(), String.class);
                 setSetting(ssk.name(), ssk.getValue());
+            }
+        }
+    }
+    
+    private void initDefaultSettings(){
+        for (DefaultSettings ds : DefaultSettings.values()){
+            if (settingTypes.get(ds.name()) == null || settings.get(ds.name()) == null){
+                addSetting(ds.name(), String.class);
+                setSetting(ds.name(), ds.getValue());
             }
         }
     }

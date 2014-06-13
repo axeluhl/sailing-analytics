@@ -1,12 +1,16 @@
 package com.sap.sse.security;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
@@ -15,6 +19,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
@@ -22,6 +27,10 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
+import org.apache.shiro.web.env.WebEnvironment;
+import org.apache.shiro.web.filter.mgt.FilterChainManager;
+import org.apache.shiro.web.filter.mgt.FilterChainResolver;
+import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.util.SavedRequest;
 import org.apache.shiro.web.util.WebUtils;
 import org.osgi.framework.BundleContext;
@@ -60,13 +69,6 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     private UserStore store;
     
     public SecurityServiceImpl() {
-        Factory<SecurityManager> factory = new IniSecurityManagerFactory("classpath:shiro.ini");
-        logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
-        System.setProperty("java.net.useSystemProxies", "true");
-        SecurityManager securityManager = factory.getInstance();
-        logger.info("Created: " + securityManager);
-        SecurityUtils.setSecurityManager(securityManager);
-        this.securityManager = securityManager;
         
         BundleContext context = Activator.getContext();
         ServiceReference<?> serviceReference = context.
@@ -90,6 +92,40 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                 e.printStackTrace();
             }
         }
+        
+        
+        Ini ini = new Ini();
+        ini.loadFromPath("classpath:shiro.ini");
+        Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
+        for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
+            String[] classifier = e.getKey().split("_");
+            if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
+                String key = store.getSetting(e.getKey(), String.class);
+                String n = classifier[0] + "_AUTH";
+                for (int i = 1; i < classifier.length; i++){
+                    n += "_" + classifier[i];
+                }
+                String value = store.getSetting(n, String.class);
+                if (ini.getSection("urls") == null){
+                    ini.addSection("urls");
+                }
+                ini.getSection("urls").put(key, value);
+            }
+        }
+        for (Entry<String, String> e : ini.getSection("urls").entrySet()){
+            System.out.println(e.getKey() + ": " + e.getValue());
+        }
+//        ini.getSection("urls").put("", "");
+        Factory<SecurityManager> factory = new IniSecurityManagerFactory(ini);
+//        LifecycleUtils.init(ini);
+        
+        
+        logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
+        System.setProperty("java.net.useSystemProxies", "true");
+        SecurityManager securityManager = factory.getInstance();
+        logger.info("Created: " + securityManager);
+        SecurityUtils.setSecurityManager(securityManager);
+        this.securityManager = securityManager;
     }
 
     @Override
@@ -309,84 +345,84 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         OAuthService service = null;
         switch (authProvider) {
         case ClientUtils.FACEBOOK: {
-            service = new ServiceBuilder().provider(FacebookApi.class).apiKey(store.getSetting(SocialSettingsKeys.FACEBOOK_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.FACEBOOK_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FacebookApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GOOGLE: {
-            service = new ServiceBuilder().provider(GoogleApi.class).apiKey(store.getSetting(SocialSettingsKeys.GOOGLE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.GOOGLE_APP_SECRET.name(), String.class)).scope(store.getSetting(SocialSettingsKeys.GOOGLE_SCOPE.name(), String.class))
+            service = new ServiceBuilder().provider(GoogleApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class)).scope(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
 
             break;
         }
 
         case ClientUtils.TWITTER: {
-            service = new ServiceBuilder().provider(TwitterApi.class).apiKey(store.getSetting(SocialSettingsKeys.TWITTER_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.TWITTER_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TwitterApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
         case ClientUtils.YAHOO: {
-            service = new ServiceBuilder().provider(YahooApi.class).apiKey(store.getSetting(SocialSettingsKeys.YAHOO_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.YAHOO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(YahooApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.LINKEDIN: {
-            service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(store.getSetting(SocialSettingsKeys.LINKEDIN_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.LINKEDIN_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.INSTAGRAM: {
-            service = new ServiceBuilder().provider(InstagramApi.class).apiKey(store.getSetting(SocialSettingsKeys.INSTAGRAM_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.INSTAGRAM_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(InstagramApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GITHUB: {
-            service = new ServiceBuilder().provider(GithubApi.class).apiKey(store.getSetting(SocialSettingsKeys.GITHUB_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.GITHUB_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(GithubApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
 
         }
 
         case ClientUtils.IMGUR: {
-            service = new ServiceBuilder().provider(ImgUrApi.class).apiKey(store.getSetting(SocialSettingsKeys.IMGUR_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.IMGUR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(ImgUrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FLICKR: {
-            service = new ServiceBuilder().provider(FlickrApi.class).apiKey(store.getSetting(SocialSettingsKeys.FLICKR_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.FLICKR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FlickrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.VIMEO: {
-            service = new ServiceBuilder().provider(VimeoApi.class).apiKey(store.getSetting(SocialSettingsKeys.VIMEO_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.VIMEO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(VimeoApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.WINDOWS_LIVE: {
             // a Scope must be specified
-            service = new ServiceBuilder().provider(LiveApi.class).apiKey(store.getSetting(SocialSettingsKeys.WINDOWS_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.WINDOWS_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl())
+            service = new ServiceBuilder().provider(LiveApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl())
                     .scope("wl.basic").build();
             break;
         }
 
         case ClientUtils.TUMBLR: {
-            service = new ServiceBuilder().provider(TumblrApi.class).apiKey(store.getSetting(SocialSettingsKeys.TUMBLR_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.TUMBLR_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TumblrApi.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FOURSQUARE: {
-            service = new ServiceBuilder().provider(Foursquare2Api.class).apiKey(store.getSetting(SocialSettingsKeys.FOURSQUARE_APP_ID.name(), String.class))
-                    .apiSecret(store.getSetting(SocialSettingsKeys.FOURSQUARE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(Foursquare2Api.class).apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
@@ -396,5 +432,27 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
         }
         return service;
+    }
+
+    @Override
+    public Iterable<String> getUrls(ServletContext context) {
+        WebEnvironment env = WebUtils.getRequiredWebEnvironment(context);
+        FilterChainResolver resolver = env.getFilterChainResolver();
+        if (resolver instanceof PathMatchingFilterChainResolver){
+            PathMatchingFilterChainResolver pmfcr = (PathMatchingFilterChainResolver) resolver;
+            FilterChainManager filterChainManager = pmfcr.getFilterChainManager();
+            System.out.println("Filters:");
+            for (Entry<String, Filter> e : filterChainManager.getFilters().entrySet()){
+                System.out.println(e.getKey() + ": " + e.getValue().toString());
+            }
+            System.out.println("Chains");
+            filterChainManager.createChain("/Register.html", "authc");
+            for (String s : filterChainManager.getChainNames()){
+                System.out.println(s);
+                System.out.println(Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
+                
+            }
+        }
+        return null;
     }
 }

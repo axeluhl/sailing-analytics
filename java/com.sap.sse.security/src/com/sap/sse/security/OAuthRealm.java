@@ -260,84 +260,84 @@ public class OAuthRealm extends AuthorizingRealm {
         OAuthService service = null;
         switch (authProvider) {
         case ClientUtils.FACEBOOK: {
-            service = new ServiceBuilder().provider(FacebookApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.FACEBOOK_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.FACEBOOK_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FacebookApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GOOGLE: {
-            service = new ServiceBuilder().provider(GoogleApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.GOOGLE_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.GOOGLE_APP_SECRET.name(), String.class)).scope(securityService.getSetting(SocialSettingsKeys.GOOGLE_SCOPE.name(), String.class))
+            service = new ServiceBuilder().provider(GoogleApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class)).scope(securityService.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
 
             break;
         }
 
         case ClientUtils.TWITTER: {
-            service = new ServiceBuilder().provider(TwitterApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.TWITTER_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.TWITTER_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TwitterApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
         case ClientUtils.YAHOO: {
-            service = new ServiceBuilder().provider(YahooApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.YAHOO_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.YAHOO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(YahooApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.LINKEDIN: {
-            service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.LINKEDIN_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.LINKEDIN_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.INSTAGRAM: {
-            service = new ServiceBuilder().provider(InstagramApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.INSTAGRAM_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.INSTAGRAM_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(InstagramApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GITHUB: {
-            service = new ServiceBuilder().provider(GithubApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.GITHUB_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.GITHUB_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(GithubApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
 
         }
 
         case ClientUtils.IMGUR: {
-            service = new ServiceBuilder().provider(ImgUrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.IMGUR_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.IMGUR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(ImgUrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FLICKR: {
-            service = new ServiceBuilder().provider(FlickrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.FLICKR_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.FLICKR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(FlickrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.VIMEO: {
-            service = new ServiceBuilder().provider(VimeoApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.VIMEO_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.VIMEO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(VimeoApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.WINDOWS_LIVE: {
             // a Scope must be specified
-            service = new ServiceBuilder().provider(LiveApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.WINDOWS_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.WINDOWS_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl())
+            service = new ServiceBuilder().provider(LiveApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl())
                     .scope("wl.basic").build();
             break;
         }
 
         case ClientUtils.TUMBLR: {
-            service = new ServiceBuilder().provider(TumblrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.TUMBLR_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.TUMBLR_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(TumblrApi.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FOURSQUARE: {
-            service = new ServiceBuilder().provider(Foursquare2Api.class).apiKey(securityService.getSetting(SocialSettingsKeys.FOURSQUARE_APP_ID.name(), String.class))
-                    .apiSecret(securityService.getSetting(SocialSettingsKeys.FOURSQUARE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
+            service = new ServiceBuilder().provider(Foursquare2Api.class).apiKey(securityService.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
+                    .apiSecret(securityService.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class)).callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 

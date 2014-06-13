@@ -27,6 +27,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+  * [[Security|wiki/security]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]

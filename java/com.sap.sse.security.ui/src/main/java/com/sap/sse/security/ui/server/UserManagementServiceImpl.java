@@ -77,6 +77,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (user == null){
             return null;
         }
+        securityService.getUrls(getServletContext());
         return createUserDTOFromUser(user);
     }
 
