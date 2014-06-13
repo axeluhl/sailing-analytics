@@ -4,21 +4,21 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class SearchResultPlace extends Place {
-    private final String searchQuery;
+    private final String searchText;
     
-    public SearchResultPlace(String searchQuery) {
+    public SearchResultPlace(String searchText) {
         super();
-        this.searchQuery = searchQuery;
+        this.searchText = searchText;
     }
 
-    public String getSearchQuery() {
-        return searchQuery;
+    public String getSearchText() {
+        return searchText;
     }
 
     public static class Tokenizer implements PlaceTokenizer<SearchResultPlace> {
         @Override
         public String getToken(SearchResultPlace place) {
-            return place.getSearchQuery();
+            return place.getSearchText();
         }
 
         @Override
