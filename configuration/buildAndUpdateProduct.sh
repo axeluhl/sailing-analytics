@@ -84,6 +84,7 @@ android=1
 reporting=0
 suppress_confirmation=0
 extra=''
+parallelexecution=0
 
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
@@ -446,6 +447,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
     else
         extra="$extra -DskipTests=false"
+        # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
 	fi
 
 	if [ $offline -eq 1 ]; then
@@ -460,6 +462,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	else
 	    extra="$extra -P no-debug.without-proxy"
 	fi
+
+    if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
+        parallelexecution=1
+        echo "INFO: Running build in parallel with 2.5*CPU threads"
+	    extra="$extra -T 2.5C"
+    fi
 
     if [ $android -eq 1 ]; then
         if [[ $ANDROID_HOME == "" ]]; then
