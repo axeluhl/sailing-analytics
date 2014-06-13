@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
+import java.util.Date;
+
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 
 /**
- * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position)}
+ * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position, Date)}
  * are used to initialize {@link Particle}s. Their "speed" is the {@link Vector#length() length} of the vector.<p>
  * 
  * This field provides color strings for each possible speed which are then used to style the particles as they fly through
@@ -23,16 +25,18 @@ public interface VectorField {
     /**
      * The vector field's value at position <code>p</code>.
      * 
+     * @param at
+     *            the time at which to query the vector field
+     * 
      * @return the speed/direction vector that tells how a particle will fly at this position in the vector field, or
      *         <code>null</code> if there should not be a flying particle, e.g., because the field does not know how a
      *         particle would fly at this position. An implementation that does not cleverly extrapolate outside the
-     *         field's {@link #inBounds(Position) bounds} should return <code>null</code> for out-of-bounds
-     *         positions.
+     *         field's {@link #inBounds(Position) bounds} should return <code>null</code> for out-of-bounds positions.
      */
-    Vector getVector(Position p);
+    Vector getVector(Position p, Date at);
 
     /**
-     * @return the maximum {@link Vector#length() length} of any vector returned by {@link #getVector(Position)} in this field for
+     * @return the maximum {@link Vector#length() length} of any vector returned by {@link #getVector(Position, Date)} in this field for
      * positions that are {@link #inBounds(Position) within bounds}.
      */
     double getMaxLength();
@@ -69,12 +73,6 @@ public interface VectorField {
     Bounds getFieldCorners();
 
     double getParticleFactor();
-
-    void setStep(int step);
-
-    void nextStep();
-
-    void prevStep();
 
     /**
      * Computes a color for a particle flying at a certain speed.

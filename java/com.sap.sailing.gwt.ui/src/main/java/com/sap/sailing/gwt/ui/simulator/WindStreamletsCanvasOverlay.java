@@ -52,13 +52,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            this.swarm = new Swarm(this, map);
+            this.swarm = new Swarm(this, map, timer);
         }
         this.swarm.start(40, windFieldDTO);
-    }
-
-    public void setStreamletsStep(int step) {
-        this.swarm.getField().setStep(step);
     }
 
     public void stopStreamlets() {
@@ -120,7 +116,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         super.draw();
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
-                this.swarm = new Swarm(this, map);
+                this.swarm = new Swarm(this, map, timer);
                 this.swarm.start(/* animationIntervalMillis */ 40, /* windField */ null);
             }
             if (windFieldDTO != null) {
@@ -135,8 +131,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     @Override
     public void timeChanged(final Date newDate, Date oldDate) {
-        int step = (int) ((newDate.getTime() - this.windParams.getStartTime().getTime()) / this.windParams.getTimeStep().asMillis());
-        this.setStreamletsStep(step);
     }
 
     @Override

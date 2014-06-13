@@ -14,8 +14,9 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sse.gwt.client.player.TimeListener;
 
-public class Swarm {
+public class Swarm implements TimeListener {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
@@ -45,11 +46,14 @@ public class Swarm {
     private int swarmPause = 0;
     private boolean swarmContinue = true;
     private Bounds visibleBoundsOfField;
+    private Date timePoint;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer) {
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
         this.map = map;
+        timer.addTimeListener(this);
+        timePoint = timer.getTime();
     }
 
     public void start(int animationIntervalMillis, WindFieldDTO windField) {
@@ -87,7 +91,7 @@ public class Swarm {
         // try to create a particle at a random position until the weight is high enough for it to be displayed
         while (!done) {
             particle.currentPosition = getRandomPosition();
-            Vector v = field.getVector(particle.currentPosition);
+            Vector v = field.getVector(particle.currentPosition, timePoint);
             double weight = field.particleWeight(particle.currentPosition, v);
             if (weight >= Math.random()) {
                 if (v == null || v.length() == 0) {
@@ -212,7 +216,7 @@ public class Swarm {
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
-                    particle.v = field.getVector(particle.currentPosition);
+                    particle.v = field.getVector(particle.currentPosition, timePoint);
                 } else {
                     particle.v = null;
                 }
@@ -227,5 +231,10 @@ public class Swarm {
 
     public VectorField getField() {
         return field;
+    }
+
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        timePoint = newTime;
     }
 }
