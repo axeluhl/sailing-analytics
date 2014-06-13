@@ -42,6 +42,7 @@
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
 	    <g:HTMLPanel ui:field="searchResultItemPanel">
 		</g:HTMLPanel>
+		<!-- paging seems to be old fashioned -> Ubilabs will provide a better approach
         <div class="{res.mainCss.grid} {local_res.css.paging}">
           <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
               <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linkprevious}">previous</a>
@@ -62,6 +63,7 @@
             </div>
           </div>
         </div>
+        -->
       </div>
     </div>
   </div>

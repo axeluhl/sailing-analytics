@@ -93,6 +93,8 @@ public class SearchResult extends Composite {
         searchResultItemComposites.clear();
         
         searchResultFor.setInnerText(searchText);
+        searchText1.setText(searchText);
+        searchText2.setText(searchText);
         
         int resultCounter = 0;
         for(LeaderboardSearchResultDTO singleSearchResult: searchResultItems) {
