@@ -28,6 +28,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     private TextView startCountdownTextView;
     private ImageButton abortButton;
     private Button resetTimeButton;
+    protected Button raceStartIn5Minutes;
     protected Button raceStartIn4Minutes;
     protected Button raceStartIn2Minutes;
     protected Button raceResetCourse;
@@ -72,6 +73,9 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
                 infoListener.onResetTime();
             }
         });
+        
+        raceStartIn5Minutes = (Button) getView().findViewById(R.id.raceStartIn5Minutes);
+        raceStartIn5Minutes.setVisibility(View.INVISIBLE);
         
         raceStartIn4Minutes = (Button) getView().findViewById(R.id.raceStartIn4Minutes);
         raceStartIn4Minutes.setVisibility(View.INVISIBLE);
