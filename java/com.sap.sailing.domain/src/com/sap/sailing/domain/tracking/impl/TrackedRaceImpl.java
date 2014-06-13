@@ -83,6 +83,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -238,10 +239,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private LoadingFromStoresState loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
     
     /**
-     * @see #loadingFromWindStoreState but for GPSFixStore
+     * Describes the current state of loading fixes from the {@link GPSFixStore}, which is caused
+     * by {@link #attachRaceLog attaching race logs}. As none or multiple race logs may be attached,
+     * this only is a boolean flag instead of a {@link LoadingFromStoresState}, as there is no concept
+     * of "not started" or "finished", but simply of a loading thread currently running or not.<p>
+     * Threads loading fixes are forced to do so one after another. To make sure that the thread
+     * for loading fixes for the mappings in race log {@code R} has finished, call
+     * {@link #waitForLoadingFromGPSFixStoreToFinishRunning} with {@code R} as the argument.
      */
-    private LoadingFromStoresState loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
-    private Object loadingFromGPSFixStoreStateMonitor = ""; // String, not Object, to keep it serializable
+    private boolean loadingFromGPSFixStore = false;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
@@ -437,11 +443,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public synchronized void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
-        synchronized (loadingFromGPSFixStoreStateMonitor) {
-            while (loadingFromGPSFixStoreState != LoadingFromStoresState.FINISHED) {
-                loadingFromGPSFixStoreStateMonitor.wait();
-            }
+    public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
+        while (! attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
+            wait();
         }
     }
 
@@ -2459,25 +2463,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
+    /**
+     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
+     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
+     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
+     */
     @Override
     public void attachRaceLog(final RaceLog raceLog) {
         if (raceLog != null) {
-            this.attachedRaceLogs.put(raceLog.getId(), raceLog);
             // Use the new race log, that possibly contains device mappings, to load GPSFix tracks from the DB
-            loadingFromGPSFixStoreState = LoadingFromStoresState.NOT_STARTED;
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName()) {
+            new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", race log "
+                    + raceLog.getId()) {
                 @Override
                 public void run() {
                     LockUtil.lockForRead(getSerializationLock());
                     LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
                     synchronized (TrackedRaceImpl.this) {
-                        loadingFromGPSFixStoreState = LoadingFromStoresState.RUNNING; // indicates that the serialization
-                                                                                     // lock is now safely held
+                        TrackedRaceImpl.this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+                        loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
                         TrackedRaceImpl.this.notifyAll();
                     }
                     try {
-                        logger.info("Started loading competitor tracks for " + getRace().getName());
+                        logger.info("Started loading competitor tracks for " + getRace().getName() + " for race log " + raceLog.getId());
                         for (Competitor competitor : race.getCompetitors()) {
                             try {
                                 gpsFixStore.loadCompetitorTrack(
@@ -2501,11 +2509,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
                     } finally {
                         synchronized (TrackedRaceImpl.this) {
-                            loadingFromGPSFixStoreState = LoadingFromStoresState.FINISHED;
+                            loadingFromGPSFixStore = false;
                             TrackedRaceImpl.this.notifyAll();
-                        }
-                        synchronized (loadingFromGPSFixStoreStateMonitor) {
-                            loadingFromGPSFixStoreStateMonitor.notifyAll();
                         }
                         LockUtil.unlockAfterWrite(getLoadingFromGPSFixStoreLock());
                         LockUtil.unlockAfterRead(getSerializationLock());
@@ -2674,7 +2679,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return loadingFromWindStoreLock;
     }
 
-    protected NamedReentrantReadWriteLock getLoadingFromGPSFixStoreLock() {
+    public NamedReentrantReadWriteLock getLoadingFromGPSFixStoreLock() {
         return loadingFromGPSFixStoreLock;
     }
     

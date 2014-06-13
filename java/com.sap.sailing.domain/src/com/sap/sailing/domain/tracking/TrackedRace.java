@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.Util;
 
@@ -534,9 +535,12 @@ public interface TrackedRace extends Serializable {
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * @see #waitUntilLoadingFromWindStoreComplete(), but for fixes from a {@link GPSFixStore}
+     * Whenever a {@link RaceLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
+     * found in the {@code RaceLog} in a separate thread. This method blocks if there is such a thread loading
+     * fixes, until that thread is finished.
+     * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
      */
-    void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException;
+    void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -558,6 +562,12 @@ public interface TrackedRace extends Serializable {
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
+     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link DeviceMappingEvent}s
+     * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
+     * serialization until it is finished. If multiple race logs are attached, the loading process is
+     * forced to be serialized.
+     * To garuantee that a the fixes for a race log have been fully loaded before continuing,
+     * {@link #waitForLoadingFromGPSFixStoreToFinishRunning} can be used.
      * @param raceLog to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
