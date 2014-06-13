@@ -45,7 +45,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] {new WaypointImpl(mark), new WaypointImpl(mark2)}));
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] {comp, comp2}));
 
-        map(comp, device, 0, 600);
+        map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
         //reuse device for two marks
         map(mark, device3, 0, 600);
@@ -56,14 +56,20 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(device2, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20, 30, 40));
         store.storeFix(device3, createFix(100, 10, 20, 30, 40));
+        
+        for (int i=0; i<10000; i++) {
+            store.storeFix(device, createFix(i+1000, 10, 20, 30, 40));
+        }
 
         TrackedRegatta regatta = new TrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, "regatta", boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         trackedRace.attachRaceLog(raceLog);
+        System.out.println("started waiting... " + System.currentTimeMillis());
         trackedRace.waitUntilLoadingFromGPSFixStoreComplete();
+        System.out.println("done " + System.currentTimeMillis());
 
-        testLength(trackedRace.getTrack(comp), 2);
+        testLength(trackedRace.getTrack(comp), 10002);
         testLength(trackedRace.getTrack(comp2), 1);
         testLength(trackedRace.getOrCreateTrack(mark), 1);
         testLength(trackedRace.getOrCreateTrack(mark2), 1);
