@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.confidence.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.Weigher;
 
 public class HyperbolicSquaredTimeDifferenceWeigher implements Weigher<TimePoint> {
     private static final long serialVersionUID = 4378168079868145134L;

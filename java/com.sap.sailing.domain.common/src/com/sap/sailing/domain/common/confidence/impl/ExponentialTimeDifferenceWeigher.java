@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.confidence.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.Weigher;
 
 /**
  * The weigher computes an exponentially-decreasing weight based on the time difference of two {@link TimePoint}s.

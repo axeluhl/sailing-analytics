@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.confidence.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.Weigher;
 
 public class HyperbolicDistanceWeigher implements Weigher<Position> {
     private static final long serialVersionUID = 5521299690322077224L;
