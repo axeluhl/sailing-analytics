@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.GPSFix;
+
 /**
  * Defines literals providing the names for MongoDB collections. The literal documentation described the semantics
  * of the collection identified by that literal.
@@ -25,10 +28,21 @@ public enum CollectionNames {
     LEADERBOARD_GROUPS,
     
     /**
-     * Top-level event information about events such as Kiel Week 2011, or IDM Travemünde 2011, including name and
+     * Top-level event information about events such as Kieler Woche 2011, or IDM Travemuende 2011, including name and
      * course areas.
      */
     EVENTS,
+    
+    /**
+     * The links that connect events to leaderboard groups; each element stores the ID of an event and a list
+     * of leaderboard group IDs.
+     */
+    LEADERBOARD_GROUP_LINKS_FOR_EVENTS,
+    
+    /** 
+     * Stores the registered sailing servers.
+     */
+    SAILING_SERVERS,
     
     /**
      * Stores regatta definitions including their series layout and fleets and race columns. Regattas can reference
@@ -62,5 +76,15 @@ public enum CollectionNames {
     /**
      * Stores configurations for mobile devices.
      */
-    CONFIGURATIONS;
+    CONFIGURATIONS,
+    
+    /**
+     * Stores {@link GPSFix}es
+     */
+    GPS_FIXES,
+    
+    /**
+     * Metadata for the GPSFixes, grouped by Device Identifier.
+     */
+    GPS_FIXES_METADATA,
 }

@@ -8,10 +8,10 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.aggregation.PolarFixRaceInterval;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarFixCacheRaceInterval implements UpdateInterval<PolarFixCacheRaceInterval>, PolarFixRaceInterval {
 

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -29,6 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sse.common.Util;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -66,20 +67,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Long getTimeInMilliSeconds(TimePoint timePoint) {
-        Long result;
+    public Duration getTime(TimePoint timePoint) {
+        Duration result;
         MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                 getTrackedLeg().getLeg().getFrom());
-        if (passedStartWaypoint != null) {
+        if (passedStartWaypoint != null && !passedStartWaypoint.getTimePoint().after(timePoint)) {
             MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                     getTrackedLeg().getLeg().getTo());
-            if (passedEndWaypoint != null) {
-                result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+            if (passedEndWaypoint != null && timePoint.after(passedEndWaypoint.getTimePoint())) {
+                // the query asks for a time point after the competitor has finished the leg; return the total leg time
+                result = passedStartWaypoint.getTimePoint().until(passedEndWaypoint.getTimePoint());
             } else {
                 if (getTrackedRace().getEndOfTracking() != null && timePoint.after(getTrackedRace().getEndOfTracking())) {
                     result = null;
                 } else {
-                    result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+                    result = passedStartWaypoint.getTimePoint().until(timePoint);
                 }
             }
         } else {
@@ -148,7 +150,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
+    public Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {
@@ -379,7 +381,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         Distance result = null;
         final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
         if (legStartMarkPassing != null) {
@@ -391,7 +393,25 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             } else {
                 to = legEndMarkPassing.getTimePoint();
             }
-            result = getTrackedRace().getAverageCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+            result = getTrackedRace().getAverageAbsoluteCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        Distance result = null;
+        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
+        if (legStartMarkPassing != null) {
+            TimePoint legStart = legStartMarkPassing.getTimePoint();
+            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
+            TimePoint to;
+            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(timePoint) > 0) {
+                to = timePoint;
+            } else {
+                to = legEndMarkPassing.getTimePoint();
+            }
+            result = getTrackedRace().getAverageSignedCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
         }
         return result;
     }

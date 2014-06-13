@@ -15,11 +15,11 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.functions.Function;
@@ -89,7 +89,8 @@ public class PolarDataMiner {
 
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
-        enrichingProcessor.onElement(new Triple<GPSFixMoving, TrackedRace, Competitor>(fix, trackedRace, competitor));
+        enrichingProcessor.processElement(new Triple<GPSFixMoving, TrackedRace, Competitor>(fix, trackedRace,
+                competitor));
     }
 
     public boolean isCurrentlyActiveAndOrHasQueue() {

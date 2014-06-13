@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.components.GrouperType;
 
@@ -42,7 +42,7 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
     }
 
-    public void apply(QueryDefinition queryDefinition) {
+    public void apply(QueryDefinitionDeprecated queryDefinition) {
         grouperTypeListBox.setValue(queryDefinition.getGrouperType(), true);
         
         switch (queryDefinition.getGrouperType()) {
@@ -54,7 +54,7 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
         }
     }
 
-    private void applyDimensionsToGroupBy(QueryDefinition queryDefinition) {
+    private void applyDimensionsToGroupBy(QueryDefinitionDeprecated queryDefinition) {
         int index = 0;
         for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
             dimensionsToGroupByBoxes.get(index).setValue(dimension, true);

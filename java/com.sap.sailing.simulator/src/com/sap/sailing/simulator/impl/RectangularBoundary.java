@@ -7,8 +7,8 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
+import com.sap.sse.common.Util;
 
 public class RectangularBoundary implements Boundary {
 
@@ -20,6 +20,8 @@ public class RectangularBoundary implements Boundary {
     private double[] nvHor; // horizontal normal vector with suitable length
     private int vPoints; // number of vertical steps
     private int hPoints; // number of horizontal steps
+    private int borderY;
+    private int borderX;
 
     private Position northWest;
     //private Position southEast;
@@ -129,11 +131,14 @@ public class RectangularBoundary implements Boundary {
     }
 
     @Override
-    public Position[][] extractGrid(int hPoints, int vPoints) {
+    public Position[][] extractGrid(int hPoints, int vPoints, int borderY, int borderX) {
 
         this.vPoints = vPoints;
         this.hPoints = hPoints;
 
+        this.borderY = borderY;
+        this.borderX = borderX;
+        
         double xscale = 1.5;
 
         double alat = (rcEnd.getLatDeg() + rcStart.getLatDeg()) / 2.;
@@ -166,9 +171,9 @@ public class RectangularBoundary implements Boundary {
         nHor[1] = nscHor[1] / lngScale;
 
         // System.out.println("LngScale:"+lngScale+", Diff.Vrt:"+dVrt);
-        Position[][] grid = new Position[vPoints][hPoints];
+        Position[][] grid = new Position[vPoints+2*borderY][hPoints+2*borderX];
         Position pv;
-        for (int i = 0; i < vPoints; i++) {
+        for (int i = -borderY; i < (vPoints+borderY); i++) {
             // System.out.print("nrow "+i+": ");
 
             if (i == 0) {
@@ -182,25 +187,25 @@ public class RectangularBoundary implements Boundary {
 
             int j = 0;
             // left side
-            while (j < hPoints / 2) {
-                grid[i][j] = new DegreePosition(pv.getLatDeg() - ((hPoints - 1) / 2. - j) / (hPoints - 1) * nHor[0]
-                        * xscale * lscVrt, pv.getLngDeg() - ((hPoints - 1) / 2. - j) / (hPoints - 1) * nHor[1] * xscale
+            while (j < (hPoints+2*borderX) / 2) {
+                grid[i+borderY][j] = new DegreePosition(pv.getLatDeg() - ((hPoints + 2*borderX - 1) / 2. - j) / (hPoints - 1) * nHor[0]
+                        * xscale * lscVrt, pv.getLngDeg() - ((hPoints + 2*borderX - 1) / 2. - j) / (hPoints - 1) * nHor[1] * xscale
                         * lscVrt);
                 // System.out.print(""+grid[i][j]+"("+((hPoints-1)/2.-j)+"), ");
                 j++;
             }
 
             // middle
-            if (hPoints % 2 == 1) {
-                grid[i][j] = pv;
+            if ((hPoints+2*borderX) % 2 == 1) {
+                grid[i+borderY][j] = pv;
                 // System.out.print(""+grid[i][j]+", ");
                 j++;
             }
 
             // right side
-            while (j < hPoints) {
-                grid[i][j] = new DegreePosition(pv.getLatDeg() + (j - (hPoints - 1) / 2.) / (hPoints - 1) * nHor[0]
-                        * xscale * lscVrt, pv.getLngDeg() + (j - (hPoints - 1) / 2.) / (hPoints - 1) * nHor[1] * xscale
+            while (j < (hPoints+2*borderX)) {
+                grid[i+borderY][j] = new DegreePosition(pv.getLatDeg() + (j - (hPoints + 2*borderX - 1) / 2.) / (hPoints - 1) * nHor[0]
+                        * xscale * lscVrt, pv.getLngDeg() + (j - (hPoints + 2*borderX - 1) / 2.) / (hPoints - 1) * nHor[1] * xscale
                         * lscVrt);
                 // System.out.print(""+grid[i][j]+"("+(j-(hPoints-1)/2.)+"), ");
                 j++;
@@ -216,7 +221,7 @@ public class RectangularBoundary implements Boundary {
 
     }
 
-    public Pair<Integer, Integer> getGridIndex(Position x) {
+    public Util.Pair<Integer, Integer> getGridIndex(Position x) {
 
         double[] scX = new double[2];
         scX[0] = x.getLatDeg() - rcStart.getLatDeg();
@@ -224,11 +229,11 @@ public class RectangularBoundary implements Boundary {
 
         double sPrd = scX[0] * nvHor[0] + scX[1] * nvHor[1];
 
-        int vIdx = Math.min(Math.max(0, (int) Math.round(scX[0] * nvVrt[0] + scX[1] * nvVrt[1])), vPoints - 1);
-        int hIdx = Math.min(Math.max(0, (int) Math.round(sPrd + (hPoints - 1) / 2.)), hPoints - 1);
+        int vIdx = Math.min(Math.max(-this.borderY, (int) Math.round(scX[0] * nvVrt[0] + scX[1] * nvVrt[1])), vPoints - 1 + this.borderY);
+        int hIdx = Math.min(Math.max(-this.borderX, (int) Math.round(sPrd + (hPoints - 1) / 2.)), hPoints - 1 + this.borderX);
 
         // System.out.println("getGridIndex: "+vIdx+","+hIdx+"("+vPoints+","+hPoints+")");
-        return new Pair<Integer, Integer>(vIdx, hIdx);
+        return new Util.Pair<Integer, Integer>(vIdx, hIdx);
 
     }
 
@@ -262,6 +267,26 @@ public class RectangularBoundary implements Boundary {
      * return lst; }
      */
 
+    @Override
+    public int getResY() {
+    	return this.vPoints;
+    }
+    
+    @Override
+    public int getResX() {
+    	return this.hPoints;
+    }
+    
+    @Override
+    public int getBorderY() {
+    	return this.borderY;
+    }
+    
+    @Override
+    public int getBorderX() {
+    	return this.borderX;
+    }
+    
     @Override
     public Bearing getNorth() {
         return north;

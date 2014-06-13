@@ -1,6 +1,8 @@
 package com.sap.sse.datamining.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
@@ -56,7 +58,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             return run(0, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             // This code shouldn't be reached, because the timeout is deactivated (by the value 0 as timeout)
-            LOGGER.log(Level.WARNING, "Got a TimeoutException that should never happen: ", e);
+            LOGGER.log(Level.SEVERE, "Got a TimeoutException that should never happen: ", e);
         }
         
         return null;
@@ -80,7 +82,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             @Override
             public void run() {
                 try {
-                    firstProcessor.onElement(dataSource);
+                    firstProcessor.processElement(dataSource);
                     firstProcessor.finish();
                 } catch (InterruptedException e) {
                     if (processorTimedOut) {
@@ -93,12 +95,20 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         });
         waitTillWorkIsDone(timeoutInMillis);
         final long endTime = System.nanoTime();
+        
+        logOccuredFailures();
 
         long calculationTimeInNanos = endTime - startTime;
         AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
         additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
         Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
         return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+    }
+
+    private void logOccuredFailures() {
+        for (Throwable failure : resultReceiver.getOccuredFailures()) {
+            LOGGER.log(Level.SEVERE, "An error occured during the processing of an instruction: ", failure);
+        }
     }
 
     private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
@@ -130,7 +140,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         }
     }
 
-    Processor<Map<GroupKey, AggregatedType>> getResultReceiver() {
+    public Processor<Map<GroupKey, AggregatedType>> getResultReceiver() {
         return resultReceiver;
     }
     
@@ -138,20 +148,27 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         
         private final ReentrantLock resultsLock;
         private Map<GroupKey, AggregatedType> results;
+        private List<Throwable> occuredFailures;
         
         public ProcessResultReceiver() {
             resultsLock = new ReentrantLock();
             results = new HashMap<>();
+            occuredFailures = new ArrayList<>();
         }
 
         @Override
-        public void onElement(Map<GroupKey, AggregatedType> groupedAggregations) {
+        public void processElement(Map<GroupKey, AggregatedType> groupedAggregations) {
             resultsLock.lock();
             try {
                 results.putAll(groupedAggregations);
             } finally {
                 resultsLock.unlock();
             }
+        }
+        
+        @Override
+        public void onFailure(Throwable failure) {
+            occuredFailures.add(failure);
         }
 
         @Override
@@ -164,11 +181,16 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         
         @Override
         public void abort() {
-            results = null;
+            results = new HashMap<>();
+            occuredFailures = new ArrayList<>();
         }
         
         public Map<GroupKey, AggregatedType> getResult() {
             return results;
+        }
+        
+        public List<Throwable> getOccuredFailures() {
+            return occuredFailures;
         }
 
         @Override

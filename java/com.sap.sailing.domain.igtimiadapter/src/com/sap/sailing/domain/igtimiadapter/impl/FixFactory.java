@@ -15,10 +15,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sse.common.Util;
 
 public class FixFactory {
     private static final Logger logger = Logger.getLogger(FixFactory.class.getName());

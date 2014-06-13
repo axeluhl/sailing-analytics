@@ -12,10 +12,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 
 /**
  * When TMD messages about mark passings arrive with their race start time-relative time stamp, and no race start time
@@ -31,10 +31,10 @@ public class TMDMessageQueue {
     private static class TMDMessageContents {
         private final String raceID;
         private final String boatID;
-        private final List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds;
+        private final List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds;
 
         public TMDMessageContents(String raceID, String boatID,
-                List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+                List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
             super();
             this.raceID = raceID;
             this.boatID = boatID;
@@ -49,7 +49,7 @@ public class TMDMessageQueue {
             return boatID;
         }
 
-        public List<Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
+        public List<Util.Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
             return markIndicesRanksAndTimesSinceStartInMilliseconds;
         }
         
@@ -58,7 +58,7 @@ public class TMDMessageQueue {
             StringBuilder result = new StringBuilder("TMD|"+getRaceID()+"|"+getBoatID()+"|");
             result.append(getMarkIndicesRanksAndTimesSinceStartInMilliseconds().size());
             result.append('|');
-            for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
+            for (Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
                 result.append(markIndexRankAndTimeSinceStartInMilliseconds.getA());
                 result.append(';');
                 if (markIndexRankAndTimeSinceStartInMilliseconds.getB() != null) {
@@ -82,7 +82,7 @@ public class TMDMessageQueue {
         queuedMessages = new HashSet<>();
     }
     
-    public synchronized void enqueue(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+    public synchronized void enqueue(String raceID, String boatID, List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         final TMDMessageContents message = new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
         queuedMessages.add(message);
         logger.info("Queued TMD message "+message+" for replay when start time has been received");
@@ -101,39 +101,51 @@ public class TMDMessageQueue {
         // otherwise, this could lead to the "guessed time" to 
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
-            Competitor competitor = raceTracker.getDomainFactory().getCompetitorByBoatIDAndRaceIDOrBoatClass(messageContents.getBoatID(),
+            Competitor competitor = raceTracker.getCompetitorByBoatIDAndRaceIDOrBoatClass(messageContents.getBoatID(),
                     messageContents.getRaceID(), raceTracker.getBoatClass());
-            NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
-            TreeMap<Integer, MarkPassing> cleansedMarkPassingsForCompetitor = cleansedMarkPassings.get(competitor);
-            if (cleansedMarkPassingsForCompetitor == null) {
-                cleansedMarkPassingsForCompetitor = new TreeMap<>();
-                cleansedMarkPassings.put(competitor, cleansedMarkPassingsForCompetitor);
-                Course course = trackedRace.getRace().getCourse();
-                course.lockForRead();
-                try {
-                    trackedRace.lockForRead(oldMarkPassings);
+            if (competitor == null) {
+                logger.info("Received timing data for boat ID " + messageContents.getBoatID() + " in race " + messageContents.getRaceID()
+                        + " but couldn't find a competitor with that boat ID in this race. Ignoring.");
+            } else {
+                NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
+                TreeMap<Integer, MarkPassing> cleansedMarkPassingsForCompetitor = cleansedMarkPassings.get(competitor);
+                if (cleansedMarkPassingsForCompetitor == null) {
+                    cleansedMarkPassingsForCompetitor = new TreeMap<>();
+                    cleansedMarkPassings.put(competitor, cleansedMarkPassingsForCompetitor);
+                    Course course = trackedRace.getRace().getCourse();
+                    course.lockForRead();
                     try {
-                        for (MarkPassing oldMarkPassing : oldMarkPassings) {
-                            int waypointIndex = course.getIndexOfWaypoint(oldMarkPassing.getWaypoint());
-                            cleansedMarkPassingsForCompetitor.put(waypointIndex, oldMarkPassing);
+                        trackedRace.lockForRead(oldMarkPassings);
+                        try {
+                            for (MarkPassing oldMarkPassing : oldMarkPassings) {
+                                int waypointIndex = course.getIndexOfWaypoint(oldMarkPassing.getWaypoint());
+                                cleansedMarkPassingsForCompetitor.put(waypointIndex, oldMarkPassing);
+                            }
+                        } finally {
+                            trackedRace.unlockAfterRead(oldMarkPassings);
                         }
                     } finally {
-                        trackedRace.unlockAfterRead(oldMarkPassings);
+                        course.unlockAfterRead();
                     }
-                } finally {
-                    course.unlockAfterRead();
                 }
-            }
-            // remove those mark passings for which the TMD message has mark passing times; their time points would just have been guessed.
-            // This will avoid that the start time inference
-            // rules consider them and let them take precedence over the start time received
-            for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
-                if (cleansedMarkPassingsForCompetitor.containsKey(markIndexRankAndTimeSinceStartInMilliseconds.getA())) {
-                    logger.info("Removing mark passing for mark #"+markIndexRankAndTimeSinceStartInMilliseconds.getA()+
-                            " for competitor "+competitor.getName()+" because its time point "+
-                            cleansedMarkPassingsForCompetitor.get(markIndexRankAndTimeSinceStartInMilliseconds.getA()).getTimePoint()+
-                            " was guessed; will replace momentarily...");
-                    cleansedMarkPassingsForCompetitor.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                // remove those mark passings for which the TMD message has mark passing times; their time points would
+                // just have been guessed.
+                // This will avoid that the start time inference
+                // rules consider them and let them take precedence over the start time received
+                for (Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents
+                        .getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
+                    if (cleansedMarkPassingsForCompetitor.containsKey(markIndexRankAndTimeSinceStartInMilliseconds
+                            .getA())) {
+                        logger.info("Removing mark passing for mark #"
+                                + markIndexRankAndTimeSinceStartInMilliseconds.getA()
+                                + " for competitor "
+                                + competitor.getName()
+                                + " because its time point "
+                                + cleansedMarkPassingsForCompetitor.get(
+                                        markIndexRankAndTimeSinceStartInMilliseconds.getA()).getTimePoint()
+                                + " was guessed; will replace momentarily...");
+                        cleansedMarkPassingsForCompetitor.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                    }
                 }
             }
         }

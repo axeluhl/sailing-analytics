@@ -229,7 +229,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         final double weight = 1.0;
 
         LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
-        Point canvasPositionInPx = mapProjection.fromLatLngToContainerPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
         final double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         final double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
@@ -263,7 +263,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
     
     @Override
-    protected void setCanvasSettings() {
+    public void setCanvasSettings() {
         if (corners != null && corners.length == 4) {
             final Point corner0 = getPointInDivPixel(corners[0]);
             final Point corner1 = getPointInDivPixel(corners[1]);

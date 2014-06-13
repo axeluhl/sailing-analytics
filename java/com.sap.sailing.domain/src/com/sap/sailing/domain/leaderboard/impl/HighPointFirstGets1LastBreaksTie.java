@@ -6,8 +6,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sse.common.Util;
 
 public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedScore {
     private static final long serialVersionUID = 1L;
@@ -28,7 +28,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
     }
 
     @Override
-    public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         return 0;
     }
 }

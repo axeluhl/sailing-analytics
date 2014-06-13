@@ -20,8 +20,8 @@ public class MaxSpeedOverallColumn extends FormattedDoubleDetailTypeColumn {
         }
     }
 
-    public MaxSpeedOverallColumn(String headerStyle, String columnStyle) {
-        super(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallField(), headerStyle, columnStyle);
+    public MaxSpeedOverallColumn(String headerStyle, String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+        super(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallField(), headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     /**

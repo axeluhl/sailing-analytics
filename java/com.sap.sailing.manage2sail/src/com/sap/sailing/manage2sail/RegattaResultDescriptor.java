@@ -17,6 +17,7 @@ public class RegattaResultDescriptor {
     private URL pdfUrl;
     private URL xrrPreliminaryUrl;
     private URL xrrFinalUrl;
+    private URL xrrEntriesUrl;
     private URL htmlUrl;
     private Date publishedAt;
     private Boolean isFinal;
@@ -106,4 +107,12 @@ public class RegattaResultDescriptor {
     public void setRaceResults(List<RaceResultDescriptor> raceResults) {
         this.raceResults = raceResults;
     }
+
+	public URL getXrrEntriesUrl() {
+		return xrrEntriesUrl;
+	}
+
+	public void setXrrEntriesUrl(URL xrrEntriesUrl) {
+		this.xrrEntriesUrl = xrrEntriesUrl;
+	}
 }

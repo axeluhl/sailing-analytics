@@ -23,7 +23,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String idAsString;
     private BoatClassDTO boatClass;
     
-    CompetitorDTOImpl() {}
+    public CompetitorDTOImpl() {}
     
     public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {

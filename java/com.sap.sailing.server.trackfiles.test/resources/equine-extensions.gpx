@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<gpx  version="1.1"
+creator="TRACONTROL"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:EQUINE="http://sapsailing.com/equine/1/0"
+xmlns:nmea="http://trekbuddy.net/2009/01/gpx/nmea"
+xmlns="http://www.topografix.com/GPX/1/1"
+xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<metadata>
+<name>GPS Receiver track log</name>
+<desc>W:\Projects\Stephan\ELEC\P2013_10_001_GPSTRACKER\Backend\TCPoffloader\GPSTRAC_DATA\20140421_NBG_GVP-kalibrierung\20140421125124-001343095BB2.gtc</desc>
+<author>
+<name>Stephan Daub</name>
+</author>
+<time>2014-04-21T13:07:42Z</time>
+<keywords>BRABANT</keywords>
+<bounds minlat="49" minlon="8" maxlat="49" maxlon="8"/>
+</metadata>
+<trk>
+<trkseg>
+<trkpt lat="49.154846" lon="8.718685">
+<ele>146.026</ele>
+<fix>3d</fix>
+<sat>7</sat>
+<pdop>2.96</pdop>
+<speed>1.854</speed>
+<time>2014-04-21T12:10:24Z</time>
+  <extensions>
+    <EQUINE:heartbeat>115</EQUINE:heartbeat>
+    <EQUINE:gallopStep>1</EQUINE:gallopStep>
+    <EQUINE:plannedMinute>0</EQUINE:plannedMinute>
+    <nmea:speed>2.0</nmea:speed>
+    <nmea:course>256.0</nmea:course>
+  </extensions>
+</trkpt>
+</trkseg>
+</trk>
+</gpx>

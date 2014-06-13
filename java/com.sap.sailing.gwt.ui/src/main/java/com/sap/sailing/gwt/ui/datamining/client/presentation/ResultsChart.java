@@ -59,7 +59,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
         errorLabel.setStyleName("chart-importantMessage");
 
         createChart();
-        mainPanel.setWidget(chart);
+        showError(this.stringMessages.invalidSelection());
     }
     
     @Override
@@ -144,7 +144,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
         // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         mainPanel.setWidget(null);
         mainPanel.setWidget(chart);
-
     }
 
     public List<GroupKey> getSortedKeysFrom(QueryResult<? extends Number> result) {

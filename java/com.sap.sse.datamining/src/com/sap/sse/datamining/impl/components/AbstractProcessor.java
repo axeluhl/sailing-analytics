@@ -16,18 +16,25 @@ public abstract class AbstractProcessor<InputType, ResultType> implements Proces
     }
 
     @Override
-    public void onElement(InputType element) {
-        ResultType result = processElement(element);
+    public void processElement(InputType element) {
+        ResultType result = handleElement(element);
         forwardResultToTheReceivers(result);
+    }
+    
+    @Override
+    public void onFailure(Throwable failure) {
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            resultReceiver.onFailure(failure);
+        }
     }
 
     private void forwardResultToTheReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {
-            resultReceiver.onElement(result);
+            resultReceiver.processElement(result);
         }
     }
 
-    protected abstract ResultType processElement(InputType element);
+    protected abstract ResultType handleElement(InputType element);
 
     @Override
     public void finish() throws InterruptedException {

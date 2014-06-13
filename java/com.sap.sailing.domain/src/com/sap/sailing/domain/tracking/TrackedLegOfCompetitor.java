@@ -7,12 +7,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -26,7 +27,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * competitor to complete the leg is returned. If the competitor didn't finish the leg before the end of tracking,
      * <code>null</code> is returned because this indicates that the tracker stopped sending valid data.
      */
-    Long getTimeInMilliSeconds(TimePoint timePoint);
+    Duration getTime(TimePoint timePoint);
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If
@@ -74,7 +75,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * achieved and the speed value. In case you provide <code>timepoint</code> that is greater than the time point of the
      * end of this leg the provided value will be ignored and replaced by the timepoint of the end of the leg.
      */
-    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
+    Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
     /**
      * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
@@ -176,11 +177,21 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
     /**
-     * Computes the average cross track error for this leg. If you provide this method with a {@link TimePoint} greater
-     * than the time the mark passing of the leg end mark has occurred then the time point of the mark passing 
-     * of the leg end mark will be taken into account.
+     * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a
+     * positive number, thereby ignoring whether the competitor was left or right of the course middle line. If you
+     * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
+     * occurred then the time point of the mark passing of the leg end mark will be taken into account.
      */
-    Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+    Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
+
+    /**
+     * Computes the average signed cross track error for this leg. The cross track error for each fix is taken to be a
+     * positive number in case the competitor was on the right side of the course middle line (looking in the direction
+     * of this leg), and a negative number in case the competitor was on the left side of the course middle line. If you
+     * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
+     * occurred then the time point of the mark passing of the leg end mark will be taken into account.
+     */
+    Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     /**
      * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the

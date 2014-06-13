@@ -161,7 +161,7 @@ public class TestParallelDoubleAggregationProcessors {
 
     private void processElements(Processor<GroupedDataEntry<Double>> processor, Collection<GroupedDataEntry<Double>> elements) {
         for (GroupedDataEntry<Double> element : elements) {
-            processor.onElement(element);
+            processor.processElement(element);
         }
     }
 
@@ -180,8 +180,11 @@ public class TestParallelDoubleAggregationProcessors {
     public void initializeResultReceivers() {
         Processor<Map<GroupKey, Double>> receiver = new Processor<Map<GroupKey,Double>>() {
             @Override
-            public void onElement(Map<GroupKey, Double> element) {
+            public void processElement(Map<GroupKey, Double> element) {
                 receivedAggregations = element;
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {

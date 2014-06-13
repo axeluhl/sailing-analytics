@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -63,9 +64,20 @@ public interface MongoObjectFactory {
     void renameLeaderboardGroup(String oldName, String newName);
 
     /**
-     * Stores the event with its name, venue and the venue's course areas. The regattas obtained by
-     * {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored separately
-     * by calls to {@link #storeRegatta} where a reference to their owning event is stored. 
+     * Stores the event with its name, venue and the venue's course areas, as well as the links to the
+     * {@link Event#getLeaderboardGroups() leaderboard groups associated with the event}. These links are stored
+     * separately and are not loaded by the corresponding {@link DomainObjectFactory#loadEvent(String)} call again. The
+     * rationale behind this is that the events are usually loaded as the first thing in a server. The leaderboard
+     * groups are not yet loaded at that time, so we usually cannot establish the links at the time the event is loaded.
+     * Instead, a separate call, {@link DomainObjectFactory#loadLeaderboardGroupLinksForEvents}, is required after both,
+     * the events and the leaderboard groups have been loaded, to establish the links again.
+     * <p>
+     * 
+     * The regattas obtained by {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored
+     * separately by calls to {@link #storeRegatta} where a reference to their owning event is stored.
+     * <p>
+     * 
+     * 
      */
     void storeEvent(Event event);
 
@@ -78,6 +90,14 @@ public interface MongoObjectFactory {
      * Removes the event named <code>eventName</code> from the database.
      */
     void removeEvent(Serializable id);
+
+    /**
+     * Stores a registered sailing server 
+     * @param serves the servers to store
+     */
+    void storeSailingServer(RemoteSailingServerReference server);
+
+    void removeSailingServer(String name);
 
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
@@ -109,7 +129,6 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
-
     void removeRaceLog(RaceLogIdentifier identifier);
 
 }

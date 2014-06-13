@@ -41,8 +41,11 @@ public class TestParallelExtractionProcessor {
         
         Processor<GroupedDataEntry<Integer>> receiver = new Processor<GroupedDataEntry<Integer>>() {
             @Override
-            public void onElement(GroupedDataEntry<Integer> element) {
+            public void processElement(GroupedDataEntry<Integer> element) {
                 receivedValues.put(element.getKey(), element.getDataEntry());
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {
@@ -106,7 +109,7 @@ public class TestParallelExtractionProcessor {
 
     private void processElements(Processor<GroupedDataEntry<Number>> processor, Collection<GroupedDataEntry<Number>> elements) {
         for (GroupedDataEntry<Number> element : elements) {
-            processor.onElement(element);
+            processor.processElement(element);
         }
     }
 

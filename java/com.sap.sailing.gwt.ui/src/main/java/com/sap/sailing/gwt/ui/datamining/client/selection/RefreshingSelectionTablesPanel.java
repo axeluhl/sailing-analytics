@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -139,7 +139,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     @Override
-    public void applySelection(QueryDefinition queryDefinition) {
+    public void applySelection(QueryDefinitionDeprecated queryDefinition) {
         for (Entry<DimensionIdentifier, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
             SelectionTable<?, ?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
             selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());

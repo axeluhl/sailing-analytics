@@ -30,7 +30,7 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
     }
 
     @Override
-    public void onElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
+    public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
         GroupKey key = element.getKey();
         BoatSpeedEstimator boatSpeedEstimator;
         synchronized (boatSpeedEstimators) {
@@ -96,6 +96,12 @@ public class IncrementalRegressionProcessor implements Processor<GroupedDataEntr
         KnotSpeedImpl speedWithoutConfidence = new KnotSpeedImpl(boatSpeedEstimator.estimateSpeed(windSpeed.getKnots(),
                 angleToTheWind.getDegrees()));
         return new SpeedWithConfidenceImpl<Integer>(speedWithoutConfidence, /* FIXME */1.0, /* FIXME */0);
+    }
+
+    @Override
+    public void onFailure(Throwable failure) {
+        // TODO do something
+
     }
 
 }

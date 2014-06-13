@@ -7,11 +7,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.datamining.client.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
@@ -38,14 +38,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
             BundleContext context) {
-        ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer> result = 
-                new ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer>(
-                context, com.sap.sse.datamining.DataMiningServer.class.getName(), null);
+        ServiceTracker<DataMiningServer, DataMiningServer> result = new ServiceTracker<DataMiningServer, DataMiningServer>(
+                context, DataMiningServer.class.getName(), null);
         result.open();
         return result;
     }
     
-    private com.sap.sse.datamining.DataMiningServer getDataMiningServer() {
+    private DataMiningServer getDataMiningServer() {
         return dataMiningServerTracker.getService();
     }
 
@@ -70,9 +69,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private Class<?> getBaseClassFor(DataTypes dataType) {
         switch (dataType) {
         case GPSFix:
-            return GPSFixWithContext.class;
+            return HasGPSFixContext.class;
         case TrackedLegOfCompetitor:
-            return TrackedLegOfCompetitorWithContext.class;
+            return HasTrackedLegOfCompetitorContext.class;
         }
         throw new IllegalArgumentException("No base class for data type " + dataType);
     }
@@ -86,8 +85,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<ResultType> query = DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {
+        @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
+        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(queryDefinition, getRacingEventService(), getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     

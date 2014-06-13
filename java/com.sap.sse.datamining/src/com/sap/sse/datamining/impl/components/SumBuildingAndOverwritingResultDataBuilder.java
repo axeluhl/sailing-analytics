@@ -49,7 +49,7 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
         
         String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
-        return stringMessages.get(locale, Message.ResultSignifier, extractedStatisticName, aggregationName);
+        return stringMessages.get(locale, Message.ResultSignifier.toString(), extractedStatisticName, aggregationName);
     }
 
     @Override

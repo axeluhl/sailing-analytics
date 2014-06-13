@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
@@ -43,7 +44,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         containerPanel = new DockLayoutPanel(Unit.PX);

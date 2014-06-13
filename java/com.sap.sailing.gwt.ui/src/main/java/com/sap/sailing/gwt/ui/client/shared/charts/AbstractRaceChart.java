@@ -136,7 +136,7 @@ public abstract class AbstractRaceChart extends SimplePanel implements RaceSelec
 
     protected void setSeriesPoints(Series series, Point[] points) {
         if (timeRangeWithZoomProvider.isZoomed()) {
-            com.sap.sse.common.Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
+            com.sap.sse.common.Util.Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
             resetMinMaxAndExtremesInterval(/* redraw */ false);
             series.setPoints(points, false);
             changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);

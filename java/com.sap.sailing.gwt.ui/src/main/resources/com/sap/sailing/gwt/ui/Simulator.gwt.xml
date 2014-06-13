@@ -2,7 +2,8 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
 <module>
 	
-	  <stylesheet src="../reset.css" />
+	<stylesheet src="../reset.css" />
+	
 	<!-- Inherit the core Web Toolkit stuff.                        -->
 	<inherits name='com.google.gwt.user.User'/>
 	
@@ -14,12 +15,7 @@
 	<!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
 	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 	<stylesheet src="../Simulator.css" />						
-	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.Maps' />
 	
-	<!-- Highcharts API -->
-  	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
-  	
 	<!-- Other module inherits                                      -->
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
     <inherits name="com.sap.sse.gwt.SSESharedGWT" />	
@@ -27,14 +23,30 @@
     <inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sailing.simulator.Simulator" />
 	
+	<!-- Highcharts API -->
+  	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+  	
+  	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  	<inherits name='com.google.gwt.maps.Maps' />
+  	
+  	<!--  Bootstrap API -->
+  	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+  	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+  
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint'/>
 	<!-- Specify the paths for translatable code                    -->
-	<extend-property name="locale" values="de"/>
-	<source path='shared'/>
+<extend-property name="locale" values="de"/>
+    <extend-property name="locale" values="ru"/>
+
+  	<source path='common'/> 
+    <source path='shared'/>
 	<source path='client'/>
 	<source path='actions'/>
 	<source path='simulator'/>
+	
+	<script src="../js/wind-streamlets.js" /> 
 	
 	<inherits name='com.google.gwt.logging.Logging'/>
   	<set-property name="gwt.logging.enabled" value="FALSE"/>

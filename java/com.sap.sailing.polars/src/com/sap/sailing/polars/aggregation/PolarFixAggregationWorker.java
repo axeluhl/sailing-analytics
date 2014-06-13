@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -22,6 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.data.impl.PolarFixImpl;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Iterates through the fixes of one competitor in one tracked race and fills the {@link PolarFixAggregator}
@@ -169,7 +169,7 @@ public class PolarFixAggregationWorker implements Runnable {
                     windWithConfidenceList.addAll(addAllWindsOfWindGaugesSplitOneByOne(fix));
                 } else {
                     windWithConfidenceList
-                            .add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
                                     createWindGaugesString(race), race.getWindWithConfidence(
                                             fix.getPosition(), fix.getTimePoint(),
                                             collectWindSourcesToIgnoreForSpeed())));
@@ -195,8 +195,7 @@ public class PolarFixAggregationWorker implements Runnable {
     private Collection<? extends Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> addAllWindsOfWindGaugesSplitOneByOne(
             GPSFixMoving fix) {
         Iterable<WindSource> windGaugeSources = race.getWindSources(WindSourceType.EXPEDITION);
-        List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList 
-                            = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
+        List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
         for (WindSource windGaugeSource : windGaugeSources) {
             Iterable<WindSource> allSources = race.getWindSources();
             List<WindSource> allSourcesButTheSingleWindGaugeSource = new ArrayList<WindSource>();

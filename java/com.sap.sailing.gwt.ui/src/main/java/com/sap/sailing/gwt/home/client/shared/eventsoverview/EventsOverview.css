@@ -1,0 +1,115 @@
+/**
+ * The overview over events
+ */
+.eventteaser {
+  font-size: 16px;
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 2.8125em;
+}
+.eventteaser:hover {
+  text-decoration: none;
+}
+.eventteaser:hover .eventteaser_name {
+  text-decoration: underline;
+}
+.eventteaser:hover .eventteaser_image {
+  opacity: 0.9;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+  filter: alpha(opacity=90);
+}
+.eventteaser_image {
+  position: relative;
+}
+.eventteaser_series {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.eventteaser_name {
+  font-size: 1.375em;
+  font-weight: bold;
+  color: #008fcc;
+  margin-top: 0.3125em;
+}
+.eventteaser_location {
+  color: #222;
+}
+.eventsoverview {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.eventsoverview_navigation {
+  margin: 1.875em 0;
+}
+.eventsoverview_navigation_button {
+  text-transform: uppercase;
+  margin-right: 0.625em;
+}
+.eventsoverview_contenthidden {
+  display: none;
+}
+.eventsoverview_contentrecent {
+  padding-bottom: 1.875em;
+}
+.eventsoverview_contentrecent_year {
+  border-top: 1px solid #ddd;
+  margin-top: 0.625em;
+}
+.eventsoverview_contentupcoming {
+  padding-bottom: 4.6875em;
+}
+.eventsoverview_contentupcoming_teaser {
+  font-size: 1.125em;
+  font-weight: bold;
+  color: #008fcc;
+  margin-top: 1.6875em;
+}
+.eventslist {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.eventslist_header {
+  font-size: 1em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #008fcc;
+  background: #f2f2f2;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+.eventslist_header_item {
+  padding-top: 1.875em;
+  padding-bottom: 1.75em;
+}
+.eventslist_header_itemseries {
+  text-align: right;
+}
+.eventslist_event {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  -webkit-transition: 0.2s background;
+  -moz-transition: 0.2s background;
+  -o-transition: 0.2s background;
+  -ms-transition: 0.2s background;
+  transition: 0.2s background;
+}
+.eventslist_event:hover,
+.eventslist_event:focus {
+  background: #fafafa;
+}
+.eventslist_event:hover .eventslist_event_itemname,
+.eventslist_event:focus .eventslist_event_itemname {
+  text-decoration: underline;
+}
+.eventslist_event_link {
+  color: #333;
+  padding-top: 1.875em;
+  padding-bottom: 1.75em;
+}
+.eventslist_event_item {
+  font-size: 1.125em;
+}
+.eventslist_event_itemseries {
+  text-align: right;
+}

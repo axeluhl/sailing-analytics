@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.client;
 
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.datamining.client.selection.SimpleStatistic;
@@ -16,6 +16,6 @@ public interface StatisticProvider extends Component<Object> {
 
     public void addStatisticChangedListener(StatisticChangedListener listener);
     
-    public void applyQueryDefinition(QueryDefinition queryDefinition);
+    public void applyQueryDefinition(QueryDefinitionDeprecated queryDefinition);
 
 }

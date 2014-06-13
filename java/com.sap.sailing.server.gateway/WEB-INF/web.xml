@@ -205,11 +205,19 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.TrackFilesExportPostServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesExportPostServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
-		<url-pattern>/trackfiles</url-pattern>
+		<url-pattern>/trackfiles/export</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>TrackFilesImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TrackFilesImportServlet</servlet-name>
+		<url-pattern>/trackfiles/import</url-pattern>
 	</servlet-mapping>
    
     <servlet>
@@ -225,11 +233,15 @@
     <servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
-			<init-param>
-         		<param-name>javax.ws.rs.Application</param-name>
-         		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
-     		</init-param>
-    	<load-on-startup>1</load-on-startup>
+		<init-param>
+        		<param-name>javax.ws.rs.Application</param-name>
+        		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
+   		</init-param>
+		<init-param>
+   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+		</init-param>   
+		<load-on-startup>1</load-on-startup>
   	</servlet>
   	<servlet-mapping>
     	<servlet-name>Jersey REST API</servlet-name>
@@ -238,14 +250,19 @@
 	<servlet>
     	<servlet-name>Jersey REST SPI</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
-			<init-param>
-         		<param-name>javax.ws.rs.Application</param-name>
-         		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
-     		</init-param>
-    	<load-on-startup>1</load-on-startup>
+		<init-param>
+       		<param-name>javax.ws.rs.Application</param-name>
+       		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
+   		</init-param>
+		<init-param>
+   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlResponseFilter</param-value>
+		</init-param>   
+		<load-on-startup>1</load-on-startup>
   	</servlet>
   	<servlet-mapping>
     	<servlet-name>Jersey REST SPI</servlet-name>
     	<url-pattern>/spi/*</url-pattern>
   	</servlet-mapping>
  </web-app>
+ 

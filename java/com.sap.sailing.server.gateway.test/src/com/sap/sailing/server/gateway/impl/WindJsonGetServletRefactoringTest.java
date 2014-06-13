@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.server.gateway.impl.WindJsonGetServlet;
 
 /**
  * After refactoring the {@link WindJsonGetServlet} to first copy the relevant fixes to hold the read lock only

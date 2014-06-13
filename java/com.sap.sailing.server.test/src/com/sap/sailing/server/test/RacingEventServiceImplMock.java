@@ -22,11 +22,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         lock.addProgress(dataImportProgressImpl.getOperationId(), dataImportProgressImpl);
     }
 
-    public Map<String, Regatta> getEventsByNameMap() {
-        return regattasByName;
-    }
-
-    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByEventMap() {
+    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByRegattaMap() {
         return raceTrackersByRegatta;
     }
 
@@ -34,7 +30,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         return raceTrackersByID;
     }
 
-    public Map<String, Regatta> getEventsByName() {
+    public Map<String, Regatta> getRegattasByName() {
         return regattasByName;
     }
 

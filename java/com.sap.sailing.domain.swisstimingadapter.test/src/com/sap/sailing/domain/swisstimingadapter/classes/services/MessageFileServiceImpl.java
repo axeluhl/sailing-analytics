@@ -23,9 +23,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
-import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CCGMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.ClockAtMarkElement;
@@ -36,7 +36,7 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
-import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
@@ -218,7 +218,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         int count = Integer.valueOf(message.getSections()[2]);
         for (int i = 0; i < count; i++) {
             String[] competitorDetails = message.getSections()[3 + i].split(";");
-            competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
+            competitors.add(new CompetitorWithoutID(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new STLMessage(raceId, competitors);
     }

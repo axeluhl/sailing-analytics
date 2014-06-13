@@ -28,10 +28,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.racecommittee.app.R;
@@ -43,6 +40,8 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 
 public class PositioningFragment extends RaceDialogFragment {
     
@@ -111,7 +110,7 @@ public class PositioningFragment extends RaceDialogFragment {
             @Override
             public void drop(int from, int to) {
                 if (from != to) {
-                    Triple<Serializable, String, MaxPointsReason> item = positioningAdapter.getItem(from);
+                    com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item = positioningAdapter.getItem(from);
                     setItemToNewPositioning(from, to, item);
                     getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), positionedCompetitors);
                 }
@@ -122,7 +121,7 @@ public class PositioningFragment extends RaceDialogFragment {
 
             @Override
             public void remove(int toBeRemoved) {
-                Triple<Serializable, String, MaxPointsReason> item = positioningAdapter.getItem(toBeRemoved);
+                com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item = positioningAdapter.getItem(toBeRemoved);
                 onCompetitorRemovedFromPositioningList(item);
             }
         });
@@ -213,8 +212,8 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void deleteObsoleteCompetitorsFromPositionedList(Collection<Competitor> validCompetitors) {
-        List<Triple<Serializable, String, MaxPointsReason>> toBeDeleted = new ArrayList<Util.Triple<Serializable, String, MaxPointsReason>>();
-        for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
+        List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> toBeDeleted = new ArrayList<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>>();
+        for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
             if (!validCompetitors.contains(getCompetitorStore().getExistingCompetitorById(positionedItem.getA()))) {
                 toBeDeleted.add(positionedItem);
             }
@@ -223,7 +222,7 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void deletePositionedCompetitorsFromUnpositionedList() {
-        for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
+        for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
             Competitor competitor = getCompetitorStore().getExistingCompetitorById(positionedItem.getA());
             competitors.remove(competitor);
         }
@@ -234,12 +233,12 @@ public class PositioningFragment extends RaceDialogFragment {
         return positionings == null ? new CompetitorResultsImpl() : positionings;
     }
 
-    private void setItemToNewPositioning(int from, int to, Triple<Serializable, String, MaxPointsReason> item) {
+    private void setItemToNewPositioning(int from, int to, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
         positioningAdapter.remove(item);
         positioningAdapter.insert(item, to);
     }
 
-    private void createMaxPointsReasonSelectionDialog(final Triple<Serializable, String, MaxPointsReason> item) {
+    private void createMaxPointsReasonSelectionDialog(final com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         builder.setTitle(R.string.select_penalty_reason).setItems(maxPointsReasons,
@@ -260,10 +259,10 @@ public class PositioningFragment extends RaceDialogFragment {
         return result.toArray(new CharSequence[result.size()]);
     }
 
-    protected void setMaxPointsReasonForItem(Triple<Serializable, String, MaxPointsReason> item,
+    protected void setMaxPointsReasonForItem(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item,
             CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
-        Triple<Serializable, String, MaxPointsReason> newItem = new Triple<Serializable, String, MaxPointsReason>(
+        com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> newItem = new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(
                 item.getA(), item.getB(), maxPointsReason);
         int currentIndexOfItem = positionedCompetitors.indexOf(item);
         replaceItemInPositioningList(currentIndexOfItem, item, newItem);
@@ -275,12 +274,12 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void replaceItemInPositioningList(int currentIndexOfItem,
-            Triple<Serializable, String, MaxPointsReason> item, Triple<Serializable, String, MaxPointsReason> newItem) {
+            com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item, com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> newItem) {
         positioningAdapter.remove(item);
         positioningAdapter.insert(newItem, currentIndexOfItem);
     }
 
-    private void setCompetitorToBottomOfPositioningList(Triple<Serializable, String, MaxPointsReason> item) {
+    private void setCompetitorToBottomOfPositioningList(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
         int currentIndex = positionedCompetitors.indexOf(item);
         int lastIndex = positionedCompetitors.size() - 1;
         setItemToNewPositioning(currentIndex, lastIndex, item);
@@ -300,12 +299,12 @@ public class PositioningFragment extends RaceDialogFragment {
 
     private void addNewCompetitorToPositioningList(Competitor competitor) {
 
-        positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor
+        positionedCompetitors.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor
                 .getName(), MaxPointsReason.NONE));
         positioningAdapter.notifyDataSetChanged();
     }
 
-    protected void onCompetitorRemovedFromPositioningList(Triple<Serializable, String, MaxPointsReason> item) {
+    protected void onCompetitorRemovedFromPositioningList(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getA());
         addNewCompetitorToCompetitorList(competitor);
         removeCompetitorFromPositionings(item);
@@ -318,7 +317,7 @@ public class PositioningFragment extends RaceDialogFragment {
         competitorsAdapter.notifyDataSetChanged();
     }
 
-    protected void removeCompetitorFromPositionings(Triple<Serializable, String, MaxPointsReason> item) {
+    protected void removeCompetitorFromPositionings(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> item) {
         positionedCompetitors.remove(item);
         positioningAdapter.notifyDataSetChanged();
     }

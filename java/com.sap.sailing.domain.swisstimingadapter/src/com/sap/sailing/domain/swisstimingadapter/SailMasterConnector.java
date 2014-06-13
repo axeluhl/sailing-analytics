@@ -9,8 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sse.common.Util;
 
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
@@ -39,7 +38,7 @@ public interface SailMasterConnector {
      *         <code>boatID</code> passed the mark.
      * @throws InterruptedException 
      */
-    Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
+    Map<Integer, Util.Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException, InterruptedException;
     
     /**
@@ -48,7 +47,7 @@ public interface SailMasterConnector {
      */
     void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException;
     
-    void removeSailMasterListener(SailMasterListener listener);
+    void removeSailMasterListener(SailMasterListener listener) throws IOException;
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
     
@@ -69,7 +68,7 @@ public interface SailMasterConnector {
      * @return the list of mark index / mark time / sail number triplets telling when which leader
      * first passed the mark with the respective index
      */
-    List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
+    List<Util.Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
     
     /**
      * Stops this connector's thread that is started upon creation and responsible for receiving spontaneous events
@@ -78,4 +77,11 @@ public interface SailMasterConnector {
     void stop() throws IOException;
 
     boolean isStopped();
+
+    /**
+     * Some messages in the SwissTiming SailMaster protocol lack proper time stamp information. It is therefore
+     * necessary to keep track of time stamps received from other messages and use them as an approximation for
+     * the time point of messages received without explicit time stamp.
+     */
+    TimePoint getLastRPDMessageTimePoint();
 }

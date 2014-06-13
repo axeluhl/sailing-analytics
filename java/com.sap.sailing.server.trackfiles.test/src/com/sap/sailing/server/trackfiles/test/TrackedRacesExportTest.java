@@ -18,10 +18,10 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.impl.ExportImpl;
+import com.sap.sailing.server.trackfiles.impl.TrackFileExporterImpl;
 
 public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 
@@ -47,7 +47,7 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ZipOutputStream zip = new ZipOutputStream(out);
-        ExportImpl.INSTANCE.writeAllData(Collections.singletonList(data), format, Collections.singletonList(race),
+        TrackFileExporterImpl.INSTANCE.writeAllData(Collections.singletonList(data), format, Collections.singletonList(race),
                 true, true, zip);
 
         zip.flush();

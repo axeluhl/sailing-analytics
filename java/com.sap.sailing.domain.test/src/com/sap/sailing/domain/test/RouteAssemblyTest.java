@@ -11,9 +11,9 @@ import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.RouteData;

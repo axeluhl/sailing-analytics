@@ -10,9 +10,34 @@ import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriteria;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class RegistryFunctionProvider implements FunctionProvider {
+    
+    private enum FunctionRetrievalStrategies {
+        All {
+            @Override
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
+                return registry.getAllFunctionsOf(declaringType);
+            }
+        },
+        Dimensions {
+            @Override
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
+                return registry.getDimensionsOf(declaringType);
+            }
+        },
+        Statistics {
+            @Override
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry) {
+                return registry.getStatisticsOf(declaringType);
+            }
+        };
+        
+        public abstract Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionRegistry registry);
+        
+    }
     
     private static final Logger LOGGER = Logger.getLogger(RegistryFunctionProvider.class.getName());
 
@@ -27,64 +52,37 @@ public class RegistryFunctionProvider implements FunctionProvider {
     }
 
     @Override
-    public Collection<Function<?>> getTransitiveDimensionsFor(Class<?> dataType, int depth) {
-        Collection<Function<?>> dimensions = new HashSet<>();
-
-        Collection<Class<?>> typesToCheck = new HashSet<>();
-        Collection<Class<?>> typesToAdd = new HashSet<>();
-        typesToCheck.add(dataType);
-        for (int i = 0; i <= depth; i++) {
-            for (Class<?> type : typesToCheck) {
-                dimensions.addAll(getDimensionsFor(type));
-                typesToAdd.addAll(getReturnTypesOfFunctionsFor(type));
-            }
-            typesToCheck.clear();
-            typesToCheck.addAll(typesToAdd);
-            typesToAdd.clear();
-        }
-        return dimensions;
-    }
-    
-    private Collection<Class<?>> getReturnTypesOfFunctionsFor(Class<?> type) {
-        Collection<Class<?>> returnTypes = new HashSet<>();
-        for (Function<?> function : getFunctionsFor(type)) {
-            returnTypes.add(function.getReturnType());
-        }
-        return returnTypes;
+    public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.All);
     }
 
     @Override
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
-        typesToRetrieve.add(sourceType);
-        return getDimensionsFor(typesToRetrieve);
-    }
-
-    private Collection<Function<?>> getDimensionsFor(Collection<Class<?>> typesToRetrieve) {
-        Collection<Function<?>> dimensions = new HashSet<>();
-        for (FunctionRegistry functionRegistry : functionRegistries) {
-            for (Class<?> typeToRetrieve : typesToRetrieve) {
-                dimensions.addAll(functionRegistry.getDimensionsOf(typeToRetrieve));
-            }   
-        }
-        return dimensions;
-    }
-
-    @Override
-    public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
-        typesToRetrieve.add(sourceType);
-        return getFunctionsFor(typesToRetrieve);
+        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Dimensions);
     }
     
-    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve) {
-        Collection<Function<?>> dimensions = new HashSet<>();
+    @Override
+    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Statistics);
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, FunctionRetrievalStrategies retrievalStrategy) {
+        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
+        typesToRetrieve.add(sourceType);
+        return getFunctionsFor(typesToRetrieve, retrievalStrategy);
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve, FunctionRetrievalStrategies retrievalStrategy) {
+        Collection<Function<?>> functions = new HashSet<>();
         for (FunctionRegistry functionRegistry : functionRegistries) {
             for (Class<?> typeToRetrieve : typesToRetrieve) {
-                dimensions.addAll(functionRegistry.getFunctionsOf(typeToRetrieve));
+                Collection<Function<?>> typeSpecificFunctions = retrievalStrategy.retrieveFunctions(typeToRetrieve, functionRegistry);
+                if (typeSpecificFunctions != null) {
+                    functions.addAll(typeSpecificFunctions);
+                }
             }
         }
-        return dimensions;
+        return functions;
     }
 
     private Collection<Class<?>> getSupertypesOf(Class<?> type) {

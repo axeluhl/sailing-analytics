@@ -24,7 +24,7 @@ public class TestAbstractFilteringRetrievalProcessor {
 
     @Test
     public void testFiltration() throws InterruptedException {
-        filteringRetrievalProcessor.onElement(dataSource);
+        filteringRetrievalProcessor.processElement(dataSource);
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
 
@@ -34,7 +34,7 @@ public class TestAbstractFilteringRetrievalProcessor {
     
     @Test
     public void testProvidedAdditionalData() throws InterruptedException {
-        filteringRetrievalProcessor.onElement(dataSource);
+        filteringRetrievalProcessor.processElement(dataSource);
         filteringRetrievalProcessor.finish();
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor time to finish
         
@@ -51,10 +51,13 @@ public class TestAbstractFilteringRetrievalProcessor {
     public void setUpResultReceiverAndProcessor() {
         Processor<Integer> resultReceiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 synchronized (receivedResults) {
                     receivedResults.add(element);
                 }
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {
@@ -74,14 +77,10 @@ public class TestAbstractFilteringRetrievalProcessor {
                 return element >= 0;
             }
         };
-        filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Integer>, Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
+        filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Integer>, Integer>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), filterCriteria) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;
-            }
-            @Override
-            protected Integer contextifyElement(Integer partialElement) {
-                return partialElement;
             }
         };
     }

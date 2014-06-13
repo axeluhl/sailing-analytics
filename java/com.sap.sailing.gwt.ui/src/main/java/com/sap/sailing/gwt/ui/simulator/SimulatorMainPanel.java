@@ -72,6 +72,8 @@ public class SimulatorMainPanel extends SimplePanel {
         }
     }
 	
+    public int particles;
+    
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
     private ResizableFlowPanel rightPanel;
@@ -122,6 +124,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private CheckBox isPathPolylineFreeMode;
     private Chart chart;
 
+    private boolean injectWindDataJS = false;
     private boolean warningAlreadyShown = false;
     private DialogBox polarDiagramDialogBox;
     private Button polarDiagramDialogCloseButton;
@@ -224,10 +227,12 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
-            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, int particles, boolean autoUpdate,
+            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS, boolean showMapControls) {
         super();
 
+        this.particles = particles;
+        
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -293,26 +298,26 @@ public class SimulatorMainPanel extends SimplePanel {
         windParams.setShowLines(showLines);
         windParams.setSeedLines(seedLines);
         windParams.setShowStreamlets(showStreamlets);
+        windParams.setShowStreamlets2(showStreamlets2);
         this.setDefaultTimeSettings();
-
+        this.injectWindDataJS = injectWindDataJS;
+        
         timer = new Timer(PlayModes.Replay, 1000l);
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
         int secondsTimeStep = (int) windParams.getTimeStep().getTime() / 1000;
         timer.setPlaySpeedFactor(secondsTimeStep);
-        timer.setAutoAdvance(true);
-
         timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode, this);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, timer, timePanel,
+                windParams, busyIndicator, mode, this, showMapControls);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);
-
+        
         createOptionsPanelTop();
         createOptionsPanel();
 
@@ -332,6 +337,23 @@ public class SimulatorMainPanel extends SimplePanel {
 
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
     }
+
+    public native void setMapInstance(Object mapInstance) /*-{
+    	$wnd.swarmMap = mapInstance;
+    }-*/;
+    
+    public native void setCanvasProjectionInstance(Object instance) /*-{
+		$wnd.swarmCanvasProjection = instance;
+	}-*/;
+
+    public native void startStreamlets() /*-{
+   	if ($wnd.swarmAnimator) {
+    		$wnd.swarmUpdData = true;
+    		$wnd.updateStreamlets($wnd.swarmUpdData);
+    	} else {
+			$wnd.initStreamlets($wnd.swarmMap);
+    	}
+	}-*/;
 
     public void setDefaultTimeSettings() {
         Date defaultNow = new Date();
@@ -464,6 +486,10 @@ public class SimulatorMainPanel extends SimplePanel {
         return windControlPanel;
     }
 
+    public WindPatternDisplay getWindPatternDisplay() {
+    	return currentWPDisplay;
+    }
+    
     private Panel getSliderPanel(Panel parentPanel, WindPatternSetting<?> s) {
 
         String labelName = s.getDisplayName();
@@ -823,36 +849,53 @@ public class SimulatorMainPanel extends SimplePanel {
     
     private void update() {
 
-        // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-        // int selectedRaceIndex = raceSelector.getSelectedIndex();
-        // int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-        int selectedLegIndex = legSelector.getSelectedIndex();
+    	if (this.windParams.isShowStreamlets2()) {
 
-        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
-                competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+    		this.setMapInstance(this.simulatorMap.getMap().getJso());
+    		this.setCanvasProjectionInstance(this.simulatorMap.getRegattaAreaCanvasOverlay().getMapProjection());
 
-        if (windDisplayButton.getValue()) {
-            showTimePanel(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, true);
-        } else if (summaryButton.getValue()) {
-            showTimePanel(false);
-            simulatorMap.getRegattaAreaCanvasOverlay().draw();
-            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
-        } else if (replayButton.getValue()) {
-            showTimePanel(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, true);
-        } else {
-            if (mode == SailingSimulatorConstants.ModeMeasured) {
+    		//this.setDefaultTimeSettings();
+    		//this.simulatorMap.generateWindField(this.getWindPatternDisplay(), true);
 
-                if (selectedLegIndex % 2 != 0) {
-                    errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
-                } else {
-                    simulatorMap.removePolyline();
-                    showTimePanel(false);
-                    simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
-                }
-            }
-        }
+    	}
+
+    	if (this.injectWindDataJS) {
+
+    		this.startStreamlets();
+
+    	} else {
+
+    		// int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+    		// int selectedRaceIndex = raceSelector.getSelectedIndex();
+    		// int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+    		int selectedLegIndex = legSelector.getSelectedIndex();
+
+    		SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+    				competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+
+    		if (windDisplayButton.getValue()) {
+    			showTimePanel(true);
+    			simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, true);
+    		} else if (summaryButton.getValue()) {
+    			showTimePanel(false);
+    			simulatorMap.getRegattaAreaCanvasOverlay().draw();
+    			simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
+    		} else if (replayButton.getValue()) {
+    			showTimePanel(true);
+    			simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, true);
+    		} else {
+    			if (mode == SailingSimulatorConstants.ModeMeasured) {
+
+    				if (selectedLegIndex % 2 != 0) {
+    					errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
+    				} else {
+    					simulatorMap.removePolyline();
+    					showTimePanel(false);
+    					simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
+    				}
+    			}
+    		}
+    	}
     }
 
     private void initPolarDiagramButton() {

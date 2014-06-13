@@ -1,15 +1,14 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -126,7 +125,7 @@ public interface RaceColumn extends Named {
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
-    Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+    com.sap.sse.common.Util.Pair<Competitor, RaceColumn> getKey(Competitor competitor);
 
     RaceColumnListeners getRaceColumnListeners();
 

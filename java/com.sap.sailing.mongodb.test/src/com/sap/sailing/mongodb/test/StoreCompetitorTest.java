@@ -11,12 +11,12 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sse.common.Util;
 
 public class StoreCompetitorTest extends AbstractMongoDBTest {
 

@@ -127,6 +127,11 @@ public class CompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
     private Function<?> getLastFunction() {
         return functions.get(functions.size() - 1);
     }
+    
+    @Override
+    public String toString() {
+        return getSimpleName();
+    }
 
     @Override
     public int hashCode() {

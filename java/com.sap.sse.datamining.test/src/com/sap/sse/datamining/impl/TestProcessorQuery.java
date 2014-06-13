@@ -26,7 +26,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.components.AbstractFilteringRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.AbstractSimpleFilteringRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
@@ -122,14 +122,10 @@ public class TestProcessorQuery {
                 return element.getValue() >= 10;
             }
         };
-        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
             @Override
             protected Iterable<Number> retrieveData(Iterable<Number> element) {
                 return element;
-            }
-            @Override
-            protected Number contextifyElement(Number partialElement) {
-                return partialElement;
             }
         };
         
@@ -162,8 +158,11 @@ public class TestProcessorQuery {
                 ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
         Processor<Double> resultReceiver = new Processor<Double>() {
             @Override
-            public void onElement(Double element) {
+            public void processElement(Double element) {
                 receivedElementOrFinished = true;
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {

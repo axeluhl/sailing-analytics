@@ -1,162 +1,209 @@
 package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
-import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.functions.FunctionRetrievalProcessor;
+import com.sap.sse.datamining.shared.annotations.Connector;
+import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
     
-    private static final Logger LOGGER = Logger.getLogger(SimpleFunctionRegistry.class.getName());
-
-    private final ExecutorService executor;
-    private final Processor<Collection<Function<?>>> functionsReceiver;
+    private final Map<Class<?>, Set<Function<?>>> statistics;
+    private final Map<Class<?>, Set<Function<?>>> dimensions;
+    private final Map<Class<?>, Set<Function<?>>> externalFunctions;
     
-    private final Map<Class<?>, Collection<Function<?>>> functionsMappedByDeclaringClass;
-    private final Map<Class<?>, Collection<Function<?>>> dimensionsMappedByDeclaringClass;
+    private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
-    public SimpleFunctionRegistry(ExecutorService executor) {
-        this.executor = executor;
-        functionsReceiver = new FunctionsReceiver();
+    public SimpleFunctionRegistry() {
+        statistics = new HashMap<>();
+        dimensions = new HashMap<>();
+        externalFunctions = new HashMap<>();
         
-        functionsMappedByDeclaringClass = new HashMap<>();
-        dimensionsMappedByDeclaringClass = new HashMap<>();
+        functionMaps = new ArrayList<>();
+        functionMaps.add(statistics);
+        functionMaps.add(dimensions);
+        functionMaps.add(externalFunctions);
     }
     
     @Override
     public void registerAllWithInternalFunctionPolicy(Collection<Class<?>> internalClassesToScan) {
-        FunctionRetrievalProcessor internalFunctionsRetriever = new InternalFunctionRetrievalProcessor(executor, Arrays.asList(functionsReceiver));
-        internalFunctionsRetriever.onElement(internalClassesToScan);
-        try {
-            internalFunctionsRetriever.finish();
-        } catch (InterruptedException exception) {
-            LOGGER.log(Level.SEVERE, "The functions retrieval got interrupted. Data-Mining won't work!", exception);
+        for (Class<?> internalClass : internalClassesToScan) {
+            scanInternalClass(internalClass);
         }
     }
     
+    private void scanInternalClass(Class<?> internalClass) {
+        scanInternalClass(internalClass, new ArrayList<Function<?>>());
+    }
+
+    private void scanInternalClass(Class<?> internalClass, List<Function<?>> previousFunctions) {
+        for (Method method : internalClass.getMethods()) {
+            if (isValidDimension(method) || isValidStatistic(method)) {
+                registerFunction(previousFunctions, method);
+                continue;
+            }
+            
+            if (isConnector(method)) {
+                handleConnectorMethod(method, previousFunctions);
+            }
+        }
+    }
+
+    private void registerFunction(List<Function<?>> previousFunctions, Method method) {
+        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        if (!previousFunctions.isEmpty()) {
+            function = FunctionFactory.createCompoundFunction(null, previousFunctions, function);
+        }
+        
+        if (function.isDimension()) {
+            addDimension(function);
+        } else {
+            addStatistic(function);
+        }
+    }
+
+    private void addDimension(Function<?> dimension) {
+        Class<?> declaringType = dimension.getDeclaringType();
+        if (!dimensions.containsKey(declaringType)) {
+            dimensions.put(declaringType, new HashSet<Function<?>>());
+        }
+        dimensions.get(declaringType).add(dimension);
+    }
+
+    private void addStatistic(Function<?> statistic) {
+        Class<?> declaringType = statistic.getDeclaringType();
+        if (!statistics.containsKey(declaringType)) {
+            statistics.put(declaringType, new HashSet<Function<?>>());
+        }
+        statistics.get(declaringType).add(statistic);
+    }
+
+    private void handleConnectorMethod(Method method, List<Function<?>> previousFunctions) {
+        Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+        Class<?> returnType = method.getReturnType();
+        List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
+        previousFunctionsClone.add(function);
+        scanInternalClass(returnType, previousFunctionsClone);
+    }
+
+    private boolean isValidDimension(Method method) {
+        return method.getAnnotation(Dimension.class) != null &&
+               !method.getReturnType().equals(Void.TYPE) &&
+               method.getParameterTypes().length == 0;
+    }
+
+    private boolean isValidStatistic(Method method) {
+        return method.getAnnotation(Statistic.class) != null &&
+               !method.getReturnType().equals(Void.TYPE) &&
+               method.getParameterTypes().length == 0;
+    }
+
+    private boolean isConnector(Method method) {
+        return method.getAnnotation(Connector.class) != null;
+    }
+
     @Override
     public void registerAllWithExternalFunctionPolicy(Collection<Class<?>> externalClassesToScan) {
-        FunctionRetrievalProcessor externalFunctionsRetriever = new ExternalFunctionRetrievalProcessor(executor, Arrays.asList(functionsReceiver));
-        externalFunctionsRetriever.onElement(externalClassesToScan);
-        try {
-            externalFunctionsRetriever.finish();
-        } catch (InterruptedException exception) {
-            LOGGER.log(Level.SEVERE, "The functions retrieval got interrupted. Data-Mining won't work!", exception);
-        }
-    }
-
-    @Override
-    public void registerAll(Iterable<Function<?>> functions) {
-        for (Function<?> function : functions) {
-            register(function);
-        }
-    }
-    
-    @Override
-    public void register(Method method) {
-        register(FunctionFactory.createMethodWrappingFunction(method));
-    }
-    
-    @Override
-    public void register(Function<?> function) {
-        putFunctionIntoMap(function);
-        putToDimensionsIfFunctionIsADimension(function);
-    }
-
-    private void putFunctionIntoMap(Function<?> function) {
-        Class<?> key = function.getDeclaringType();
-        if (!functionsMappedByDeclaringClass.containsKey(key)) {
-            functionsMappedByDeclaringClass.put(key, new HashSet<Function<?>>());
-        }
-        functionsMappedByDeclaringClass.get(key).add(function);
-    }
-
-    private void putToDimensionsIfFunctionIsADimension(Function<?> function) {
-        if (function.isDimension()) {
-            Class<?> key = function.getDeclaringType();
-            if (!dimensionsMappedByDeclaringClass.containsKey(key)) {
-                dimensionsMappedByDeclaringClass.put(key, new HashSet<Function<?>>());
+        for (Class<?> externalClass : externalClassesToScan) {
+            for (Method method : externalClass.getMethods()) {
+                if (isValidExternalFunction(method)) {
+                    Function<?> function = FunctionFactory.createMethodWrappingFunction(method);
+                    addExternalFunction(function);
+                }
             }
-            dimensionsMappedByDeclaringClass.get(key).add(function);
         }
     }
     
-    @Override
-    public Collection<Function<?>> getFunctionsOf(Class<?> declaringClass) {
-        Collection<Function<?>> functions = functionsMappedByDeclaringClass.get(declaringClass);
-        return functions != null ? functions : new HashSet<Function<?>>();
+    private void addExternalFunction(Function<?> function) {
+        Class<?> declaringType = function.getDeclaringType();
+        if (!externalFunctions.containsKey(declaringType)) {
+            externalFunctions.put(declaringType, new HashSet<Function<?>>());
+        }
+        externalFunctions.get(declaringType).add(function);
     }
-    
-    @Override
-    public Collection<Function<?>> getDimensionsOf(Class<?> declaringClass) {
-        Collection<Function<?>> dimensions = dimensionsMappedByDeclaringClass.get(declaringClass);
-        return dimensions != null ? dimensions : new HashSet<Function<?>>();
+
+    private boolean isValidExternalFunction(Method method) {
+        return !method.getReturnType().equals(Void.TYPE) && !method.getDeclaringClass().equals(Object.class);
     }
-    
+
+    @Override
+    public void unregisterAllFunctionsOf(Collection<Class<?>> classesToUnregister) {
+        for (Class<?> classToUnregister : classesToUnregister) {
+            unregisterAllFunctionsOf(classToUnregister);
+        }
+    }
+
+    private void unregisterAllFunctionsOf(Class<?> classToUnregister) {
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            functionMap.remove(classToUnregister);
+        }
+    }
+
     @Override
     public Collection<Function<?>> getAllFunctions() {
-        return collectAllFunctionsIn(functionsMappedByDeclaringClass);
+        Collection<Function<?>> allFunctions = new HashSet<>();
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            allFunctions.addAll(asSet(functionMap));
+        }
+        return allFunctions;
+    }
+
+    @Override
+    public Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
+        Collection<Function<?>> allFunctions = new HashSet<>();
+        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
+            allFunctions.addAll(functionMap.get(declaringType));
+        }
+        return allFunctions;
+    }
+
+    @Override
+    public Collection<Function<?>> getStatistics() {
+        return asSet(statistics);
     }
     
     @Override
-    public Collection<Function<?>> getAllDimensions() {
-        return collectAllFunctionsIn(dimensionsMappedByDeclaringClass);
-    }
-
-    private Collection<Function<?>> collectAllFunctionsIn(Map<Class<?>, Collection<Function<?>>> functionsMap) {
-        Set<Function<?>> registeredMethods = new HashSet<>();
-        for (Collection<Function<?>> registeredMethodsOfClass : functionsMap.values()) {
-            registeredMethods.addAll(registeredMethodsOfClass);
-        }
-        return registeredMethods;
+    public Collection<Function<?>> getStatisticsOf(Class<?> declaringType) {
+        return statistics.get(declaringType);
     }
     
-    private class FunctionsReceiver implements Processor<Collection<Function<?>>> {
-        
-        private final Lock functionsRegistrationLock;
+    @Override
+    public Collection<Function<?>> getDimensions() {
+        return asSet(dimensions);
+    }
+    
+    @Override
+    public Collection<Function<?>> getDimensionsOf(Class<?> declaringType) {
+        return dimensions.get(declaringType);
+    }
+    
+    @Override
+    public Collection<Function<?>> getExternalFunctions() {
+        return asSet(externalFunctions);
+    }
 
-        public FunctionsReceiver() {
-            functionsRegistrationLock = new ReentrantLock();
+    @Override
+    public Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType) {
+        return externalFunctions.get(declaringType);
+    }
+    
+    private Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
+        Collection<Function<?>> set = new HashSet<>();
+        for (Entry<?, Set<Function<?>>> entry : map.entrySet()) {
+            set.addAll(entry.getValue());
         }
-
-        @Override
-        public void onElement(Collection<Function<?>> element) {
-            functionsRegistrationLock.lock();
-            try {
-                SimpleFunctionRegistry.this.registerAll(element);
-            } finally {
-                functionsRegistrationLock.unlock();
-            }
-        }
-
-        @Override
-        public void finish() throws InterruptedException {
-        }
-
-        @Override
-        public void abort() {
-        }
-
-        @Override
-        public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-            return additionalDataBuilder;
-        }
-        
+        return set;
     }
 
 }

@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
 
 public interface Boundary extends Serializable {
 	
@@ -23,10 +23,15 @@ public interface Boundary extends Serializable {
 	boolean isWithinBoundaries(Position P);
 	
 	//List<Position> extractLattice(int hPoints, int vPoints);
-	Position[][] extractGrid(int hPoints, int vPoints);
+	Position[][] extractGrid(int hPoints, int vPoints, int borderY, int borderX);
 	//List<Position> extractLattice(Distance hStep, Distance vstep); 
-	public Pair<Integer,Integer> getGridIndex(Position x);
-
+	public Util.Pair<Integer,Integer> getGridIndex(Position x);
+    
+	public int getResY();
+	public int getResX();
+	public int getBorderY();
+	public int getBorderX();
+    
 	Bearing getNorth();
 	Bearing getSouth();
 	Bearing getEast();

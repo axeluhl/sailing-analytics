@@ -10,6 +10,28 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 
+/**
+ * A widget that lets users edit a list of <code>ValueType</code> objects. How the values are displayed and made
+ * editable is controlled by the {@link ListEditorUiStrategy} passed to the constructor. There are two standard UI
+ * strategies: a "collapsed" strategy provided by the abstract class {@link CollapsedListEditorUi} and an "expanded"
+ * strategy, provided by the abstract class {@link ExpandedListEditorUi}. The collapsed strategy displays the values
+ * separated by commas in a single text box and has an "edit' button that pops up a dialog with an "expanded" editing
+ * view for the list. The "expanded" strategy has a widget at its top that can be used to add an element, including an
+ * "Add" button, and beneath it a grid with one row per value where each row holds a (potentially editable) widget
+ * displaying a value, and a "remove" button next to it. The popup that displays the "expanded" strategy editor has a
+ * "Save" and a "Cancel" button at its bottom.<p>
+ * 
+ * To use this micro-framework for list editing, you can either provide only an "expanded" editor, or you can provide
+ * a "collapsed" and an "expanded" editor which are then used as a cascade. If your values are of type {@link String}, you
+ * may use the pre-defined {@link StringListEditorComposite} or {@link StringListInlineEditorComposite} classes. A
+ * "collapsed" editor UI strategy requires the corresponding "expanded" strategy (which is used for the "edit" pop-up
+ * dialog) as a constructor argument.
+ * 
+ * @author Lukas Niemeier
+ * @author Axel Uhl (D043530)
+ * 
+ * @param <ValueType>
+ */
 public class ListEditorComposite<ValueType> extends Composite implements HasValue<List<ValueType>>,
         HasValueChangeHandlers<List<ValueType>> {
 
@@ -17,7 +39,7 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
 
     private List<ValueType> values;
 
-    protected ListEditorComposite(List<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
+    public ListEditorComposite(List<ValueType> initialValues, ListEditorUiStrategy<ValueType> activeUi) {
         this.values = new ArrayList<ValueType>(initialValues);
         this.activeUi = activeUi;
         this.activeUi.setContext(this);
@@ -53,9 +75,4 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
     public void onChange() {
         ValueChangeEvent.fire(this, getValue());
     }
-
-    public boolean isCollapsed() {
-        return activeUi.isCollapsed();
-    }
-
 }

@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
@@ -29,6 +28,7 @@ import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorCombined;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorImpl;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
+import com.sap.sse.common.Util;
 
 /**
  * Test for @WindFieldGenerator
@@ -53,7 +53,7 @@ public class WindFieldGeneratorTest {
         WindFieldGeneratorImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
-        Position[][] positions = bd.extractGrid(hSteps, vSteps);
+        Position[][] positions = bd.extractGrid(hSteps, vSteps, 0, 0);
         assert (positions.length*positions[0].length == hSteps * vSteps);
         int index = 0;
         for (int i = 0; i < positions.length; ++i) {
@@ -61,7 +61,7 @@ public class WindFieldGeneratorTest {
                 logger.info("P" + ++index + ":" + positions[i][j]);
             }
         }
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         assertNotNull("Position Grid is not null", positionGrid);
         assertEquals("Position Grid Number of Rows", vSteps, positionGrid.length);
@@ -95,7 +95,7 @@ public class WindFieldGeneratorTest {
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
@@ -128,7 +128,7 @@ public class WindFieldGeneratorTest {
         assertEquals("StartTime Last Wind Speed ", 9, windList.get(windList.size() - 1).getKnots(), 0);
         // Check the angle
         assertEquals("StartTime First Wind Angle ", 0, windList.get(0).getBearing().getRadians(), 0);
-        Pair<Integer, Integer> pairIndex = getIndex(windList.size(), hSteps);
+        Util.Pair<Integer, Integer> pairIndex = getIndex(windList.size(), hSteps);
         logger.info(pairIndex.toString());
         assertEquals("StartTime One before Middle Wind Angle ", 0.3224948, windList.get(windList.size() / 2 - 2).getBearing()
                 .getRadians(), epsilon);
@@ -240,7 +240,7 @@ public class WindFieldGeneratorTest {
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
@@ -274,15 +274,15 @@ public class WindFieldGeneratorTest {
        
     }
     
-    private Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
-        Pair<Integer, Integer> indexPair = new Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
+    private Util.Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
+        Util.Pair<Integer, Integer> indexPair = new Util.Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
                 + (listIndex - 1) % numCols);
         return indexPair;
     }
 
     @Test
     public void testIndex() {
-        Pair<Integer, Integer> pairIndex = getIndex(1, 30);
+        Util.Pair<Integer, Integer> pairIndex = getIndex(1, 30);
         assertEquals("Index 1 RowIndex ", 1, (int) pairIndex.getA());
         assertEquals("Index 1 ColIndex ", 1, (int) pairIndex.getB());
         pairIndex = getIndex(30, 30);

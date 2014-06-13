@@ -9,64 +9,59 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class ManueverDataRetriever extends AbstractDataRetriever {
 
-	@Override
-	public Collection<GpxRoute> getRoutes(TrackFilesFormat format,
-			final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-			throws FormatNotSupportedException, IOException {
+    @Override
+    public Collection<GpxRoute> getRoutes(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter,
+            boolean rawFixes) throws FormatNotSupportedException, IOException {
 
-		final TimePoint start = race.getStartOfRace() == null ? race
-				.getStartOfTracking() : race.getStartOfRace();
-		final TimePoint end = race.getEndOfRace() == null ? race
-				.getEndOfTracking() : race.getEndOfRace();
+        final TimePoint start = race.getStartOfRace() == null ? race.getStartOfTracking() : race.getStartOfRace();
+        final TimePoint end = race.getEndOfRace() == null ? race.getEndOfTracking() : race.getEndOfRace();
 
-		TrackReaderRetriever<Competitor, Maneuver> retriever = new TrackReaderRetriever<Competitor, Maneuver>() {
-			@Override
-			public TrackReader<Competitor, Maneuver> retrieveTrackReader(
-					Competitor e) {
-				return new TrackReader<Competitor, Maneuver>() {
-					@Override
-					public Iterable<Maneuver> getRawTrack(Competitor e) {
-						try {
-							return race.getManeuvers(e, start, end, false);
-						} catch (NoWindException e1) {
-							e1.printStackTrace();
-						}
-						return null;
-					}
+        TrackReaderRetriever<Competitor, Maneuver> retriever = new TrackReaderRetriever<Competitor, Maneuver>() {
+            @Override
+            public TrackReader<Competitor, Maneuver> retrieveTrackReader(Competitor e) {
+                return new TrackReader<Competitor, Maneuver>() {
+                    @Override
+                    public Iterable<Maneuver> getRawTrack(Competitor e) {
+                        try {
+                            return race.getManeuvers(e, start, end, false);
+                        } catch (NoWindException e1) {
+                            e1.printStackTrace();
+                        }
+                        return null;
+                    }
 
-					@Override
-					public Iterable<Maneuver> getTrack(Competitor e) {
-						try {
-							return race.getManeuvers(e, start, end, false);
-						} catch (NoWindException e1) {
-							e1.printStackTrace();
-						}
-						return null;
-					}
+                    @Override
+                    public Iterable<Maneuver> getTrack(Competitor e) {
+                        try {
+                            return race.getManeuvers(e, start, end, false);
+                        } catch (NoWindException e1) {
+                            e1.printStackTrace();
+                        }
+                        return null;
+                    }
 
-					@Override
-					public IterableLocker getLocker() {
-						return new NoIterableLocker();
-					}
+                    @Override
+                    public IterableLocker getLocker() {
+                        return new NoIterableLocker();
+                    }
 
-				};
-			}
-		};
+                };
+            }
+        };
 
-		return getRoutes(race, dataBeforeAfter, rawFixes,
-				ManeuverToGpxPosition.INSTANCE,
-				race.getRace().getCompetitors(), new NameReader<Competitor>() {
-					@Override
-					public String getName(Competitor s) {
-						return s.getName();
-					}
-				}, retriever);
-	}
+        return getRoutes(race, dataBeforeAfter, rawFixes, ManeuverToGpxPosition.INSTANCE, race.getRace()
+                .getCompetitors(), new NameReader<Competitor>() {
+            @Override
+            public String getName(Competitor s) {
+                return s.getName();
+            }
+        }, retriever);
+    }
 
 }

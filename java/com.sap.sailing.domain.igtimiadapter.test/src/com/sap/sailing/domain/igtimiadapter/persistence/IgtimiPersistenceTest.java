@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
+import com.sap.sse.common.Util;
 
 public class IgtimiPersistenceTest {
     private MongoObjectFactory mongoObjectFactory;

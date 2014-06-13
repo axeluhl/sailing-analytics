@@ -44,7 +44,7 @@ public class LeaderboardEditingPage extends HostPage {
     }
     
     public LeaderboardTable getLeaderboardTable() {
-        return new LeaderboardTable(this.driver, findElementBySeleniumId(context, "LeaderboardTable"));
+        return new LeaderboardTable(this.driver, findElementBySeleniumId(context, "LeaderboardCellTable"));
     }
     
     @Override

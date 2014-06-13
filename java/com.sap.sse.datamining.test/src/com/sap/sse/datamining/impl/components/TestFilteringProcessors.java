@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.components.NonFilteringProcessor;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
@@ -56,15 +55,18 @@ public class TestFilteringProcessors {
     }
 
     @Test
-    public void testNonFilteringProcessor() {
+    public void testNonFilteringProcessorFiltration() {
         Processor<Integer> nonFilteringProcessor = new NonFilteringProcessor<Integer>(receivers);
         processElements(nonFilteringProcessor, createElementsToProcess());
         verifyThatExpectedElementsHasBeenReceived(createElementsToProcess());
+
+        AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+        assertThat(nonFilteringProcessor.getAdditionalResultData(additionalDataBuilder).build(0, null, null).getFilteredDataAmount(), is(0));
     }
 
     private void processElements(Processor<Integer> processor, Collection<Integer> elements) {
         for (Integer element : elements) {
-            processor.onElement(element);
+            processor.processElement(element);
         }
     }
 
@@ -89,12 +91,15 @@ public class TestFilteringProcessors {
         
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
-            public void onElement(Integer element) {
+            public void processElement(Integer element) {
                 if (!receivedElements.containsKey(element)) {
                     receivedElements.put(element, 0);
                 }
                 Integer elementAmount = receivedElements.get(element) + 1;
                 receivedElements.put(element, elementAmount);
+            }
+            @Override
+            public void onFailure(Throwable failure) {
             }
             @Override
             public void finish() throws InterruptedException {

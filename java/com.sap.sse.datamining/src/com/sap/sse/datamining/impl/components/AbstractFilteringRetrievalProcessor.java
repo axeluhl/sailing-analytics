@@ -10,39 +10,28 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 
-public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType, ResultTypeWithContext> 
-             extends AbstractPartitioningParallelProcessor<InputType, ResultType, ResultTypeWithContext> {
+public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType, ResultType> 
+             extends AbstractRetrievalProcessor<InputType, WorkingType, ResultType> {
 
-    private final FilterCriteria<ResultTypeWithContext> criteria;
-    
-    private Lock retrievedDataAmountLock;
-    private int retrievedDataAmount;
+    private final FilterCriteria<ResultType> criteria;
     
     private Lock filteredDataAmountLock;
     private int filteredDataAmount;
 
     public AbstractFilteringRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<ResultTypeWithContext>> resultReceivers, FilterCriteria<ResultTypeWithContext> criteria) {
+            Collection<Processor<ResultType>> resultReceivers, FilterCriteria<ResultType> criteria) {
         super(executor, resultReceivers);
         this.criteria = criteria;
-        retrievedDataAmountLock = new ReentrantLock();
         filteredDataAmountLock = new ReentrantLock();
     }
-
-    @Override
-    protected Iterable<ResultType> partitionElement(InputType element) {
-        return retrieveData(element);
-    }
-
-    protected abstract Iterable<ResultType> retrieveData(InputType element);
     
     @Override
-    protected Callable<ResultTypeWithContext> createInstruction(final ResultType partialElement) {
-        return new Callable<ResultTypeWithContext>() {
+    protected Callable<ResultType> createInstruction(final WorkingType partialElement) {
+        final Callable<ResultType> superInstruction = super.createInstruction(partialElement);
+        return new Callable<ResultType>() {
             @Override
-            public ResultTypeWithContext call() throws Exception {
-                incrementRetrievedDataAmount();
-                ResultTypeWithContext elementWithContext = contextifyElement(partialElement);
+            public ResultType call() throws Exception {
+                ResultType elementWithContext = superInstruction.call();
                 if (criteria.matches(elementWithContext)) {
                     incrementFilteredDataAmount();
                     return elementWithContext;
@@ -50,17 +39,6 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType,
                 return createInvalidResult();
             }
         };
-    }
-
-    protected abstract ResultTypeWithContext contextifyElement(ResultType partialElement);
-
-    private void incrementRetrievedDataAmount() {
-        retrievedDataAmountLock.lock();
-        try {
-            retrievedDataAmount++;
-        } finally {
-            retrievedDataAmountLock.unlock();
-        }
     }
 
     private void incrementFilteredDataAmount() {
@@ -74,7 +52,7 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, ResultType,
     
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount);
+        super.setAdditionalData(additionalDataBuilder);
         additionalDataBuilder.setFilteredDataAmount(filteredDataAmount);
     }
 

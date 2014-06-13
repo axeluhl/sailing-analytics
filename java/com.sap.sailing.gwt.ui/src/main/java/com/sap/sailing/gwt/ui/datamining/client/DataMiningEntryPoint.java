@@ -15,10 +15,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.impl.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.datamining.shared.impl.QueryDefinitionDeprecatedImpl;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -28,12 +28,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.client.execution.SimpleQueryRunner;
-import com.sap.sailing.gwt.ui.datamining.client.presentation.ResultsChart;
+import com.sap.sailing.gwt.ui.datamining.client.presentation.PlainResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.client.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.client.settings.RefreshingSelectionTablesSettings;
 import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.components.GrouperType;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
@@ -46,8 +47,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-        registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         SplitLayoutPanel splitPanel = new SplitLayoutPanel();
@@ -60,7 +61,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         queryDefinitionProvider.getEntryWidget().addStyleName("dataMiningPanel");
         dockPanel.add(queryDefinitionProvider.getEntryWidget());
         
-        ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
+        ResultsPresenter<Number> resultsPresenter = new PlainResultsPresenter(stringMessages);
         splitPanel.addSouth(resultsPresenter.getWidget(), 400);
         
         splitPanel.add(dockPanel);
@@ -69,7 +70,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
         
-        SimpleQueryDefinition queryDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        QueryDefinitionDeprecatedImpl queryDefinition = new QueryDefinitionDeprecatedImpl(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
         queryRunner.run(queryDefinitionProvider.getQueryDefinition());

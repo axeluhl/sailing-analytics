@@ -1,8 +1,9 @@
 package com.sap.sailing.polars.caching.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -13,9 +14,9 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
+import com.sap.sse.common.Util.Pair;
 
 public class PolarFixCacheRaceIntervalTest {
 	

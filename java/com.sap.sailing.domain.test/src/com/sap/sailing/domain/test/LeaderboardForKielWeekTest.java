@@ -21,13 +21,13 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
@@ -48,19 +48,19 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
         Competitor kevin = getCompetitorByName("Kevin");
         RaceColumn column = leaderboard.addRace(getTrackedRace(), "Test Race 1", /* medalRace */ false, defaultFleet);
         assertEquals(17, leaderboard.getTotalPoints(kevin, now), 0.000000001);
-        Pair<Competitor, RaceColumn> key = new Pair<Competitor, RaceColumn>(kevin, column);
+        Util.Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
         assertEquals(17, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
         assertEquals(17, leaderboard.getEntry(kevin, column, now).getTotalPoints(), 0.000000001);
         loadRace("event_20110609_KielerWoch-505_Race_3.txt", "event_20110609_KielerWoch-505_Race_3.mtb"); // 505 Race 3
         column = leaderboard.addRace(getTrackedRace(), "Test Race 2", /* medalRace */ false, defaultFleet);
-        key = new Pair<Competitor, RaceColumn>(kevin, column);
+        key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
         // In Race 3, Hasso ranked 31st
         assertEquals(29, leaderboard.getTotalPoints(kevin, now), 0.000000001);
         assertEquals(12, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
         assertEquals(12, leaderboard.getEntry(kevin, column, now).getTotalPoints(), 0.000000001);
         loadRace("event_20110609_KielerWoch-505_race_4.txt", "event_20110609_KielerWoch-505_race_4.mtb"); // 505 Race 4
         column = leaderboard.addRace(getTrackedRace(), "Test Race 3", /* medalRace */ false, defaultFleet);
-        key = new Pair<Competitor, RaceColumn>(kevin, column);
+        key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
         // now the first race is discarded because Kevin ranked worst compared to the other two; in race 4 he ranked 10th
         assertEquals(22, leaderboard.getTotalPoints(kevin, now), 0.000000001);
         assertEquals(10, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);

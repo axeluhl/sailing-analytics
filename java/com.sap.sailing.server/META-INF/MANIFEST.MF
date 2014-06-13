@@ -25,7 +25,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.operationaltransformation,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization,
- com.sap.sailing.polars
+ com.sap.sailing.polars,
+ com.sap.sse.common
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
@@ -34,9 +35,11 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.server.gateway.test,
    com.sap.sailing.domain.swisstimingadapter.test,
    com.sap.sailing.gwt.ui.test,
-   com.sap.sailing.server.replication.test",
+   com.sap.sailing.server.replication.test,
+   com.sap.sailing.domain.racelogtrackingadapter.test",
  com.sap.sailing.server.masterdata,
  com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.server.racelog.tracking,
  com.sap.sailing.server.test.support;
   x-friends:="com.sap.sailing.server.gateway.test.support"
 

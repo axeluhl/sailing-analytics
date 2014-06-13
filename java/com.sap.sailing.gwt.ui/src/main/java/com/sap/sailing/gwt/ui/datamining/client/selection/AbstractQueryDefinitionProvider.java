@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,7 +34,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
     
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition) {
+    public Iterable<String> validateQueryDefinition(QueryDefinitionDeprecated queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         if (queryDefinition != null) {
@@ -51,7 +51,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinition queryDefinition) {
+    private String validateGrouper(QueryDefinitionDeprecated queryDefinition) {
         GrouperType grouper = queryDefinition.getGrouperType();
         if (grouper == null) {
             return stringMessages.noGrouperSelectedError();
@@ -72,7 +72,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return null;
     }
 
-    private String validateStatisticAndAggregator(QueryDefinition queryDefinition) {
+    private String validateStatisticAndAggregator(QueryDefinitionDeprecated queryDefinition) {
         return queryDefinition.getStatisticType() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
@@ -92,7 +92,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            QueryDefinition queryDefinition = getQueryDefinition();
+            QueryDefinitionDeprecated queryDefinition = getQueryDefinition();
             for (QueryDefinitionChangedListener listener : listeners) {
                 listener.queryDefinitionChanged(queryDefinition);
             }

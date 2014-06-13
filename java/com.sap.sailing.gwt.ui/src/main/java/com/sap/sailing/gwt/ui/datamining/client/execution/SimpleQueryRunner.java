@@ -5,7 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryDefinitionDeprecated;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -54,7 +54,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void run(QueryDefinition queryDefinition) {
+    public void run(QueryDefinitionDeprecated queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
 //            queryStatusLabel.setText(" | " + stringMessages.running());
@@ -89,7 +89,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void queryDefinitionChanged(QueryDefinition newQueryDefinition) {
+    public void queryDefinitionChanged(QueryDefinitionDeprecated newQueryDefinition) {
         run(newQueryDefinition);
     }
 

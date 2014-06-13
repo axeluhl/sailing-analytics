@@ -5,14 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.BearingWithConfidence.DoublePair;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sse.common.Util;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
@@ -65,7 +65,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
         result[0] = createEmptyCluster();
         result[1] = createEmptyCluster();
         if (bearings.size() >= 2) {
-            Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> extremeBearings = getExtremeBearings(minimumDegreeDifferenceBetweenTacks);
+            Util.Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> extremeBearings = getExtremeBearings(minimumDegreeDifferenceBetweenTacks);
             if (extremeBearings != null) {
                 result[0].add(extremeBearings.getA());
                 result[1].add(extremeBearings.getB());
@@ -98,16 +98,16 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      * is scaled by their confidences. This scaled distance is then maximized for those bearings at least
      * <code>minimumDegreeDifferenceBetweenTacks</code> degrees apart.
      */
-    private Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> getExtremeBearings(double minimumDegreeDifferenceBetweenTacks) {
+    private Util.Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> getExtremeBearings(double minimumDegreeDifferenceBetweenTacks) {
         assert bearings.size() >= 2;
         double maxAbsDegDiff = 0;
-        Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> result = null;
+        Util.Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> result = null;
         for (int i=0; i<bearings.size(); i++) {
             for (int j=i+1; j<bearings.size(); j++) {
                 final double confidenceScaledDifference = getConfidenceScaledDifference(bearings.get(i), bearings.get(j));
                 if (Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) >= minimumDegreeDifferenceBetweenTacks
                         && confidenceScaledDifference > maxAbsDegDiff) {
-                    result = new Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>>(bearings.get(i), bearings.get(j));
+                    result = new Util.Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>>(bearings.get(i), bearings.get(j));
                     maxAbsDegDiff = confidenceScaledDifference;
                     assert Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) <= 180.;
                 }

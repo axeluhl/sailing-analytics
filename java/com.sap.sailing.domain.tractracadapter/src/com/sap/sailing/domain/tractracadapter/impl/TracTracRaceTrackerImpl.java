@@ -42,9 +42,8 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -66,6 +65,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
@@ -198,15 +198,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
+    private final GPSFixStore gpsFixStore;
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
-    private HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>> lastProgressPerID;
+    private HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>> lastProgressPerID;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
      */
-    private final Triple<URL, URI, URI> urls;
+    private final Util.Triple<URL, URI, URI> urls;
     private final ScheduledFuture<?> controlPointPositionPoller;
 
     /**
@@ -249,18 +250,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, 
                 tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
@@ -272,10 +273,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, gpsFixStore, 
                 tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
@@ -293,21 +294,24 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
+            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
-        this.windStore = windStore;
+        this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
-        this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
+        this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
+            // don't write the transformed wind fixes into the DB again... see also bug 1974 
+            this.windStore = EmptyWindStore.INSTANCE;
         } else {
             simulator = null;
+            this.windStore = windStore;
         }
         // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
@@ -417,8 +421,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return trackedRegatta;
     }
 
-    static Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
-        return new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+    static Util.Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
+        return new Util.Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
     }
     
     /**
@@ -463,7 +467,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         try {
             clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
             if (clientParams.getRace() != null) {
-                List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstruction = getControlPointsWithPassingInstruction(
+                List<Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstruction = getControlPointsWithPassingInstruction(
                         clientParams, new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
                             @Override
                             public com.sap.sailing.domain.base.ControlPoint produceControlPoint(
@@ -478,7 +482,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             + ". Creating RaceDefinition.");
                     final Iterable<Competitor> competitors = getCompetitors(clientParams);
                     final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
-                List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPointsAndPassingInstructions = getControlPointsWithPassingInstruction(clientParams,
+                List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPointsAndPassingInstructions = getControlPointsWithPassingInstruction(clientParams,
                         new ControlPointProducer<TracTracControlPoint>() {
                     @Override
                     public TracTracControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
@@ -566,11 +570,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * If they differ, a {@link Course#update(Iterable, com.sap.sailing.domain.base.DomainFactory) course update} is triggered.
      */
     private void compareAndUpdateCourseIfNecessary(
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstructions) {
+            List<Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newCourseControlPointsWithPassingInstructions) {
         assert getRaces() != null;
         // to check if a course update is required, compare to the existing course's control points:
         List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-        for (Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction> controlPointAndPassingInstruction : newCourseControlPointsWithPassingInstructions) {
+        for (Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction> controlPointAndPassingInstruction : newCourseControlPointsWithPassingInstructions) {
             newCourseControlPoints.add(controlPointAndPassingInstruction.getA());
         }
         List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
@@ -596,8 +600,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         T produceControlPoint(TracTracControlPoint ttControlPoint);
     }
     
-    private <T> List<Pair<T, PassingInstruction>> getControlPointsWithPassingInstruction( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
-        List<Pair<T, PassingInstruction>> newCourseControlPointsWithPassingInstruction = new ArrayList<>();
+    private <T> List<Util.Pair<T, PassingInstruction>> getControlPointsWithPassingInstruction( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
+        List<Util.Pair<T, PassingInstruction>> newCourseControlPointsWithPassingInstruction = new ArrayList<>();
         final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
         Map<Integer, PassingInstruction> passingInstructionData = domainFactory.getMetadataParser().parsePassingInstructionData(
                 clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
@@ -605,7 +609,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
             PassingInstruction passingInstructions = passingInstructionData.containsKey(i) ? passingInstructionData.get(i) : null;
             final T newControlPoint = controlPointProducer.produceControlPoint(newTracTracControlPoint);
-            newCourseControlPointsWithPassingInstruction.add(new Pair<T, PassingInstruction>(newControlPoint, passingInstructions));
+            newCourseControlPointsWithPassingInstruction.add(new Util.Pair<T, PassingInstruction>(newControlPoint, passingInstructions));
             i++;
         }
         return newCourseControlPointsWithPassingInstruction;
@@ -644,7 +648,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public Triple<URL, URI, URI> getID() {
+    public Util.Triple<URL, URI, URI> getID() {
         return urls;
     }
 
@@ -807,7 +811,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             return;
         }
         Integer counter = 0;
-        final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
+        final Util.Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
         if (lastProgressPair != null) {
             Float lastProgress = lastProgressPair.getB();
             counter = lastProgressPair.getA();
@@ -830,7 +834,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
-        lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
+        lastProgressPerID.put(getID(), new Util.Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
 
@@ -849,5 +853,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         races.add(race);
         updateStatusOfTrackedRace(trackedRace);
     }
+
+	@Override
+	public GPSFixStore getGPSFixStore() {
+		return gpsFixStore;
+	}
 
 }

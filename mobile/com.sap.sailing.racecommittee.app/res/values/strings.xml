@@ -48,7 +48,7 @@
     <string name="racelist_finished">Finished</string>
     <string name="racelist_unknown">Unknown</string>
     <string name="currentlyLoading">Currently loading &#8230;</string>
-    <string name="racingview_header">Course %s Races</string>
+    <string name="racingview_header">Races on course area \'%s\'</string>
     <string name="running_on_unknown">(click to set course)</string>
     <string name="empty"></string>
     <string name="updateIndicator">Update indicator</string>
@@ -157,7 +157,6 @@
 	<string name="wind_unknown">(click to set wind)</string>
 	<string name="wind_info">(%1$s kn, %2$s)</string>
 	<string name="login">Login</string>
-	<string name="login_onto_course_area">Login onto course area</string>
 	<string name="please_select_a_login_type">Please select a login type.</string>
 	
 	<string name="race_list_filter_show_all">Show all</string>
@@ -248,7 +247,9 @@
 	<string name="preference_there_are_no_regattas">There are no regattas loaded.</string>
 	<string name="configure_regatta">Configure regatta %1$s</string>
 
-	<string name="race_start_in_4_minutes">Race start in exactly 4 minutes</string>
+	<string name="race_start_in_4_minutes">4 Minutes</string>
+	<string name="race_start_in_2_minutes">2 Minutes</string>
+	<string name="race_start_in_1_minute">1 Minute</string>
 	<string name="race_reset_course">Reset course</string>
 	
 	<string name="no_course_active">No course active</string>

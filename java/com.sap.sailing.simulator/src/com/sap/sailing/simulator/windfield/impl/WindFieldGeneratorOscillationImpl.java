@@ -11,13 +11,13 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Util;
 
 public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
@@ -41,7 +41,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         if (positions == null || positions.length < 1) {
             return;
         }
-        int vPoints = positions.length;
+        int vPoints = this.boundary.getResY();
         Distance vStep = boundary.getHeight().scale(1.0/(vPoints-1));
         if (windParameters.baseWindSpeed > 0) {
             timeScale = vStep.getNauticalMiles()/windParameters.baseWindSpeed;
@@ -56,7 +56,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             return;
         }
        
-        int ncol = positions[0].length;
+        int ncol = boundary.getResX();
    
         speed = new Speed[ncol];
         double leftSpeed = windParameters.baseWindSpeed*windParameters.leftWindSpeed/100.0;
@@ -82,9 +82,15 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     
     private Speed getSpeed(TimedPosition timedPosition) {
         Position p = timedPosition.getPosition();
-        Pair<Integer,Integer> positionIndex = getPositionIndex(p);
+        Util.Pair<Integer,Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
             int colIndex = positionIndex.getB();
+            if (colIndex < 0) {
+            	colIndex = 0;
+            }
+            if (colIndex >= this.boundary.getResX()) {
+            	colIndex = this.boundary.getResX()-1;
+            }
             return speed[colIndex];
         } else {
             logger.severe("Error finding position " + p);
@@ -95,7 +101,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     
     private Bearing getBearing(TimedPosition timedPosition) {
         Position p = timedPosition.getPosition();
-        Pair<Integer,Integer> positionIndex = getPositionIndex(p);
+        Util.Pair<Integer,Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
             int rowIndex = positionIndex.getA();
             TimePoint timePoint = timedPosition.getTimePoint();

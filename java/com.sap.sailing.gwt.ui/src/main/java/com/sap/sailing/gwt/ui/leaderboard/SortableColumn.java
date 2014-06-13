@@ -5,18 +5,28 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 
 public abstract class SortableColumn<T, C> extends Column<T, C> {
     private SortingOrder preferredSortingOrder;
+    private final DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider;
     
-    protected SortableColumn(Cell<C> cell, SortingOrder preferredSortingOrder) {
+    protected SortableColumn(Cell<C> cell, SortingOrder preferredSortingOrder,
+            DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(cell);
         setSortable(true);
         this.preferredSortingOrder = preferredSortingOrder;
+        this.displayedLeaderboardRowsProvider = displayedLeaderboardRowsProvider;
     }
     
-    protected void updateMinMax(LeaderboardDTO leaderboard) {}
+    /**
+     * Based on the rows returned by the {@link DisplayedLeaderboardRowsProvider} instance passed to the
+     * constructor, updates the min/max values for this column.
+     */
+    protected void updateMinMax() {}
+    
+    protected DisplayedLeaderboardRowsProvider getDisplayedLeaderboardRowsProvider() {
+        return displayedLeaderboardRowsProvider;
+    }
     
     public abstract InvertibleComparator<T> getComparator();
     

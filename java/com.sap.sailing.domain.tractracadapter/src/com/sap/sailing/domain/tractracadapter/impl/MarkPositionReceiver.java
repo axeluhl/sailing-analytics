@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sse.common.Util;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
@@ -101,7 +101,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
-                        enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
+                        enqueue(new Util.Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
                 }, fromTime, toTime);
         result.add(controlPointListener);
@@ -110,7 +110,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     }
 
     @Override
-    protected void handleEvent(Triple<ControlPoint, ControlPointPositionData, Boolean> event) {
+    protected void handleEvent(Util.Triple<ControlPoint, ControlPointPositionData, Boolean> event) {
         if (received++ % 1000 == 0) {
             System.out.print("M");
             if ((received / 1000 + 1) % 80 == 0) {

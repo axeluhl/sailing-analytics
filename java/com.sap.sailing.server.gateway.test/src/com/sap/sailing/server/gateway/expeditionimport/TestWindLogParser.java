@@ -1,16 +1,14 @@
 package com.sap.sailing.server.gateway.expeditionimport;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertThat;
+
 import java.util.List;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.gateway.expeditionimport.WindLogParser;
-
-import static org.junit.Assert.*;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.number.IsCloseTo.*;
 
 public class TestWindLogParser {
     

@@ -10,10 +10,11 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.util.List;
+
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
-import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
-import java.util.List;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
 
 /**
  *
@@ -107,11 +108,11 @@ public class EditSTL extends javax.swing.JDialog {
         });
 
         jCompetitorList.setModel(new javax.swing.AbstractListModel<Competitor>() {
-            Competitor[] competitors = { new CompetitorImpl("Item 1", "DEU", "Item 1"),
-                    new CompetitorImpl("Item 2", "DEU", "Item 2"),
-                    new CompetitorImpl("Item 3", "DEU", "Item 3"),
-                    new CompetitorImpl("Item 4", "DEU", "Item 4"),
-                    new CompetitorImpl("Item 5", "DEU", "Item 5") };
+            Competitor[] competitors = { new CompetitorWithoutID("Item 1", "DEU", "Item 1"),
+                    new CompetitorWithoutID("Item 2", "DEU", "Item 2"),
+                    new CompetitorWithoutID("Item 3", "DEU", "Item 3"),
+                    new CompetitorWithoutID("Item 4", "DEU", "Item 4"),
+                    new CompetitorWithoutID("Item 5", "DEU", "Item 5") };
             public int getSize() { return competitors.length; }
             public Competitor getElementAt(int i) { return competitors[i]; }
         });
@@ -209,7 +210,7 @@ public class EditSTL extends javax.swing.JDialog {
         return stl;
     }
     
-    private class CompetitorWithDesc extends CompetitorImpl {
+    private class CompetitorWithDesc extends CompetitorWithoutID {
         
         public CompetitorWithDesc(String boatID, String NOC, String name){
             super(boatID, NOC, name);

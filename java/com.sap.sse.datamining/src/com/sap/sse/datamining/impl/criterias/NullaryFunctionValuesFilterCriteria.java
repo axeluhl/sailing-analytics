@@ -7,21 +7,21 @@ import java.util.Objects;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
 
-public class NullaryFunctionValuesFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
+public class NullaryFunctionValuesFilterCriteria<DataType> implements FilterCriteria<DataType> {
 
-    private Function<ValueType> function;
-    private Collection<ValueType> valuesToMatch;
+    private Function<?> function;
+    private Collection<?> valuesToMatch;
 
-    public NullaryFunctionValuesFilterCriteria(Function<ValueType> function, Collection<ValueType> valuesToMatch) {
+    public NullaryFunctionValuesFilterCriteria(Function<?> function, Collection<?> valuesToMatch) {
         this.function = function;
         this.valuesToMatch = new HashSet<>(valuesToMatch);
     }
 
     @Override
     public boolean matches(DataType dataEntry) {
-        ValueType value = function.tryToInvoke(dataEntry);
+        Object value = function.tryToInvoke(dataEntry);
         
-        for (ValueType valueToMatch : valuesToMatch) {
+        for (Object valueToMatch : valuesToMatch) {
             if (Objects.equals(value, valueToMatch)) {
                 return true;
             }

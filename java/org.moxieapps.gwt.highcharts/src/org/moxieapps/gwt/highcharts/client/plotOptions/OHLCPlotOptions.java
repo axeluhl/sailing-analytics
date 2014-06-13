@@ -34,7 +34,20 @@ package org.moxieapps.gwt.highcharts.client.plotOptions;
  */
 public class OHLCPlotOptions extends PlotOptions<OHLCPlotOptions> {
 
-    // TODO:
+    /**
+     * Convenience method for setting the 'grouping' option for the chart. Equivalent to:
+     * <pre><code>
+     *     OHLCPlotOptions.setOption("grouping", false);
+     * </code></pre>
+     * Whether to group non-stacked columns or to let them render independent of each other.
+     * Non-grouped columns will be laid out individually and overlap each other. Defaults to true.
+     * @param grouping False to disable grouping of columns
+     * @return A reference to this {@link OHLCPlotOptions} for convenient method chaining.
+     * @since 1.6.0
+     */
+    public OHLCPlotOptions setGrouping(boolean grouping) {
+        return this.setOption("grouping", grouping);
+    }
 
 }
 

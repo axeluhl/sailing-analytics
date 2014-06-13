@@ -19,8 +19,6 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
@@ -30,6 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.common.Util;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -47,13 +46,15 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Logger logger = Logger.getLogger(LeaderboardDTOCache.class.getName());
     
     /**
-     * In live operations, {@link #getLeaderboardByName(Date, Collection, DomainFactory, TrackedRegattaRegistry)} is the application's
+     * In live operations, {@link #getLeaderboardByName(Date, Collection, boolean, DomainFactory, TrackedRegattaRegistry)} is the application's
      * bottleneck. When two clients ask the same data for the same leaderboard with their
      * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
      * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
-     * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache.
+     * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache. The key is
+     * the time point for the query, the names of the races for which details are requested and the flag telling
+     * whether overall details for the leaderboard are requested.
      */
-    private final Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> leaderboardCache;
+    private final Map<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> leaderboardCache;
     private final NamedReentrantReadWriteLock leaderboardCacheLock;
     private int leaderboardByNameCacheHitCount;
     private int leaderboardByNameCacheMissCount;
@@ -83,10 +84,10 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         this.leaderboard = leaderboard;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // Note: don't use access-based ordering as it turns the get(...) call into a "write" access
-        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>(16, 0.75f) {
+        this.leaderboardCache = new LinkedHashMap<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>>(16, 0.75f) {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
-            protected boolean removeEldestEntry(Map.Entry<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> e) {
+            protected boolean removeEldestEntry(Map.Entry<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> e) {
                 return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
             }
         };
@@ -118,10 +119,14 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * The {@link #waitForLatestAnalyses} field is passed on to
      * {@link SailingServiceImpl#computeLeaderboardByName(Leaderboard, TimePoint, Collection, boolean)} if a new cache
      * entry needs to be computed. Caching distinguished between
+     * 
+     * @param addOverallDetails
+     *            tells whether the columns containing the overall details shall be added
      */
-    public LeaderboardDTO getLeaderboardByName(final TimePoint timePoint, final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            final DomainFactory baseDomainFactory, final TrackedRegattaRegistry trackedRegattaRegistry) throws NoWindException, InterruptedException,
-            ExecutionException {
+    public LeaderboardDTO getLeaderboardByName(final TimePoint timePoint,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean addOverallDetails,
+            final DomainFactory baseDomainFactory, final TrackedRegattaRegistry trackedRegattaRegistry)
+            throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
         TimePoint timePointOfLastModification = leaderboard.getTimePointOfLatestModification();
@@ -131,8 +136,8 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         } else {
             adjustedTimePoint = timePoint;
         }
-        Util.Pair<TimePoint, Collection<String>> key = new Util.Pair<TimePoint, Collection<String>>(adjustedTimePoint,
-                namesOfRaceColumnsForWhichToLoadLegDetails);
+        Util.Triple<TimePoint, Collection<String>, Boolean> key = new Util.Triple<TimePoint, Collection<String>, Boolean>(adjustedTimePoint,
+                namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails);
         FutureTask<LeaderboardDTO> future = null;
         boolean cacheHit = false;
         /*
@@ -161,8 +166,8 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     LockUtil.propagateLockSetFrom(callerThread);
                     try {
                         LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
-                                namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses,
-                                trackedRegattaRegistry, baseDomainFactory);
+                                namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory);
                         return result;
                     } finally {
                         LockUtil.unpropagateLockSetFrom(callerThread);

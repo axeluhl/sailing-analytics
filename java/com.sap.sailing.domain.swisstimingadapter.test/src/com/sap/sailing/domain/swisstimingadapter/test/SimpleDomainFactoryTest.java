@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -57,24 +57,26 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         final String raceID = "SAX920103";
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(
-                EmptyRaceLogStore.INSTANCE,
-                raceID, null /* boat class */,
-                new RacingEventServiceImpl()),
-                new Race() {
-                    @Override
-                    public String getDescription() {
-                        return null;
-                    }
+                EmptyRaceLogStore.INSTANCE, raceID, null /* boat class */, new RacingEventServiceImpl()), new Race() {
+            @Override
+            public String getDescription() {
+                return null;
+            }
 
-                    @Override
-                    public String getRaceID() {
-                        return raceID;
-                    }
+            @Override
+            public String getRaceID() {
+                return raceID;
+            }
 
-                    @Override
-                    public BoatClass getBoatClass() {
-                        return null;
-                    }
+            @Override
+            public BoatClass getBoatClass() {
+                return null;
+            }
+
+            @Override
+            public String getRaceName() {
+                return "The famous SAX920103 race";
+            }
         }, new StartList() {
             @Override
             public String getRaceID() {
@@ -106,7 +108,7 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
-        Race race = new RaceImpl("1234", "Race 1234");
+        Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
         Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);
@@ -131,7 +133,7 @@ public class SimpleDomainFactoryTest {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, "TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
-        Race race = new RaceImpl("1234", "Race 1234");
+        Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
         Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);
