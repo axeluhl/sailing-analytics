@@ -148,7 +148,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
         // sailing events table
         AnchorCell anchorCell = new AnchorCell();
-        Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
+        final Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
@@ -172,7 +172,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             }
         };
 
-        TextColumn<EventDTO> isPublicColumn = new TextColumn<EventDTO>() {
+        final TextColumn<EventDTO> isPublicColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
                 return event.isPublic ? stringMessages.yes() : stringMessages.no();
@@ -180,7 +180,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         };
 
         final SafeHtmlCell courseAreasCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> courseAreasColumn = new Column<EventDTO, SafeHtml>(courseAreasCell) {
+        final Column<EventDTO, SafeHtml> courseAreasColumn = new Column<EventDTO, SafeHtml>(courseAreasCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -198,7 +198,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         };
         
         final SafeHtmlCell leaderboardGroupsCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> leaderboardGroupsColumn = new Column<EventDTO, SafeHtml>(leaderboardGroupsCell) {
+        final Column<EventDTO, SafeHtml> leaderboardGroupsColumn = new Column<EventDTO, SafeHtml>(leaderboardGroupsCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -216,7 +216,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         };
 
         final SafeHtmlCell imageURLsCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> imageURLsColumn = new Column<EventDTO, SafeHtml>(imageURLsCell) {
+        final Column<EventDTO, SafeHtml> imageURLsColumn = new Column<EventDTO, SafeHtml>(imageURLsCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -234,7 +234,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         };
 
         final SafeHtmlCell videoURLsCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> videoURLsColumn = new Column<EventDTO, SafeHtml>(videoURLsCell) {
+        final Column<EventDTO, SafeHtml> videoURLsColumn = new Column<EventDTO, SafeHtml>(videoURLsCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -251,8 +251,26 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             }
         };
 
+        final SafeHtmlCell sponsorImageURLsCell = new SafeHtmlCell();
+        final Column<EventDTO, SafeHtml> sponsorImageURLsColumn = new Column<EventDTO, SafeHtml>(sponsorImageURLsCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                boolean first = true;
+                for (String sponsorImageURL : event.getSponsorImageURLs()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    builder.appendEscaped(sponsorImageURL);
+                }
+                return builder.toSafeHtml();
+            }
+        };
+
         final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
+        final Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -269,7 +287,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             }
         };
         
-        ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
+        final ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
                 new EventConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
@@ -291,6 +309,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         courseAreasColumn.setSortable(true);
         imageURLsColumn.setSortable(true);
         videoURLsColumn.setSortable(true);
+        sponsorImageURLsColumn.setSortable(true);
         leaderboardGroupsColumn.setSortable(true);
 
         eventTable = new CellTable<EventDTO>(10000, tableRes);
@@ -302,6 +321,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         eventTable.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         eventTable.addColumn(imageURLsColumn, stringMessages.imageURLs());
         eventTable.addColumn(videoURLsColumn, stringMessages.videoURLs());
+        eventTable.addColumn(sponsorImageURLsColumn, stringMessages.sponsorImageURLs());
         eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
