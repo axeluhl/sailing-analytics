@@ -25,7 +25,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
  * Maintains data about a default {@link Client} that represents this application when interacting with the Igtimi
  * server. The corresponding default {@link IgtimiConnectionFactory} can be obtained from within this bundle using
  * {@link #getInstance()}.{@link #getConnectionFactory()}. Clients outside this bundle shall track the
- * {@link IgtimiConnectionFactory} OSGi service that this activator registeres with the OSGi system upon
+ * {@link IgtimiConnectionFactory} OSGi service that this activator registers with the OSGi system upon
  * {@link #start(BundleContext)}.
  * 
  * @author Axel Uhl (d043530)
@@ -46,6 +46,7 @@ public class Activator implements BundleActivator {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        logger.info(getClass().getName()+" constructor");
         final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
         final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME, DEFAULT_CLIENT_SECRET);
         final String clientRedirectUri = System.getProperty(CLIENT_REDIRECT_URI_PROPERTY_NAME, DEFAULT_CLIENT_REDIRECT_URI);
@@ -55,12 +56,14 @@ public class Activator implements BundleActivator {
         connectionFactory = executor.submit(new Callable<IgtimiConnectionFactoryImpl>() {
             @Override
             public IgtimiConnectionFactoryImpl call() {
+                logger.info("Creating IgtimiConnectionFactory");
                 return new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
             }
         });
         windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {
             @Override
             public IgtimiWindTrackerFactory call() throws InterruptedException, ExecutionException {
+                logger.info("Creating IgtimiWindTrackerFactory");
                 return new IgtimiWindTrackerFactory(connectionFactory.get());
             }
         });
