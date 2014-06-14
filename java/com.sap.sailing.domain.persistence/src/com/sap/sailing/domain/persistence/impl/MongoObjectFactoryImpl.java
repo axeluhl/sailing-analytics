@@ -510,7 +510,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.EVENT_ID.name(), event.getId());
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        eventDBObject.put(FieldNames.EVENT_DESCRIPTION.name(), event.getDescription());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
+        eventDBObject.put(FieldNames.EVENT_LOGO_IMAGE_URL.name(), event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
+        eventDBObject.put(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name(), event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
@@ -526,6 +529,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             videoURLs.add(videoURL.toString());
         }
         eventDBObject.put(FieldNames.EVENT_VIDEO_URLS.name(), videoURLs);
+        BasicDBList sponsorImageURLs = new BasicDBList();
+        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
+            sponsorImageURLs.add(sponsorImageURL.toString());
+        }
+        eventDBObject.put(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name(), sponsorImageURLs);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());

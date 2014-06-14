@@ -45,6 +45,7 @@ public abstract class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.imageURLs = new ConcurrentLinkedQueue<URL>();
         this.videoURLs = new ConcurrentLinkedQueue<URL>();
+        this.sponsorImageURLs = new ConcurrentLinkedQueue<URL>();
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {

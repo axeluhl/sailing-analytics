@@ -3128,7 +3128,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
-            copyEventBaseFieldToDTO(event, eventDTO);
+            copyEventBaseFieldsToDTO(event, eventDTO);
         }
         return eventDTO;
     }
@@ -3138,18 +3138,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardGroupBase.getDescription(), leaderboardGroupBase.hasOverallLeaderboard());
     }
     
-    private void copyEventBaseFieldToDTO(EventBase event, EventBaseDTO eventDTO) {
+    private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = (UUID) event.getId();
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
+        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
     }
     
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
-        copyEventBaseFieldToDTO(event, eventDTO);
+        copyEventBaseFieldsToDTO(event, eventDTO);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -3170,6 +3173,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         for (URL videoURL : event.getVideoURLs()) {
             eventDTO.addVideoURL(videoURL.toString());
+        }
+        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
+            eventDTO.addSponsorImageURL(sponsorImageURL.toString());
         }
         return eventDTO;
     }
