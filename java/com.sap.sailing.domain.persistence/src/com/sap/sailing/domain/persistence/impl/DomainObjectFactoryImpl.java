@@ -986,12 +986,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private Event loadEvent(DBObject eventDBObject) {
         String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
+        String description = (String) eventDBObject.get(FieldNames.EVENT_DESCRIPTION.name());
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
+        result.setDescription(description);
+        String officialWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name());
+        if (officialWebSiteURLAsString != null) {
+            try {
+                result.setOfficialWebsiteURL(new URL(officialWebSiteURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
+        String logoImageURLAsString = (String) eventDBObject.get(FieldNames.EVENT_LOGO_IMAGE_URL.name());
+        if (logoImageURLAsString != null) {
+            try {
+                result.setLogoImageURL(new URL(logoImageURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
         BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
         if (imageURLs != null) {
             for (Object imageURL : imageURLs) {
@@ -1009,6 +1027,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     result.addVideoURL(new URL((String) videoURL));
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
+                }
+            }
+        }
+        BasicDBList sponsorImageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        if (sponsorImageURLs != null) {
+            for (Object sponsorImageURL : sponsorImageURLs) {
+                try {
+                    result.addSponsorImageURL(new URL((String) sponsorImageURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+name+". Ignoring this sponsor image URL.");
                 }
             }
         }

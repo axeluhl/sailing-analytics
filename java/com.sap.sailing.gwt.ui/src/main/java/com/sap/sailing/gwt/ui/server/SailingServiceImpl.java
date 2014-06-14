@@ -3033,13 +3033,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+    public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
+            String logoImageURLString, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings,
+            Iterable<String> sponsorImageURLStrings) throws MalformedURLException {
+        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
         List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
         List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
+        List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
+        getService().apply(
+                new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
+                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
+                        sponsorimagieURLs));
         return getEventById(eventId);
     }
 
@@ -3128,7 +3136,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
-            copyEventBaseFieldToDTO(event, eventDTO);
+            copyEventBaseFieldsToDTO(event, eventDTO);
         }
         return eventDTO;
     }
@@ -3138,18 +3146,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardGroupBase.getDescription(), leaderboardGroupBase.hasOverallLeaderboard());
     }
     
-    private void copyEventBaseFieldToDTO(EventBase event, EventBaseDTO eventDTO) {
+    private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = (UUID) event.getId();
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
+        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
     }
     
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
-        copyEventBaseFieldToDTO(event, eventDTO);
+        copyEventBaseFieldsToDTO(event, eventDTO);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -3170,6 +3181,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         for (URL videoURL : event.getVideoURLs()) {
             eventDTO.addVideoURL(videoURL.toString());
+        }
+        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
+            eventDTO.addSponsorImageURL(sponsorImageURL.toString());
         }
         return eventDTO;
     }

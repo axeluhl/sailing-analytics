@@ -10,12 +10,16 @@ public enum FieldNames {
      * TODO this will have to be renamed to REGATTA_NAME, but compatibility concerns keep us from doing so at the moment
      */
     EVENT_NAME,
+    EVENT_DESCRIPTION,
     EVENT_ID,
     EVENT_IS_PUBLIC,
     EVENT_START_DATE,
     EVENT_END_DATE,
     EVENT_IMAGE_URLS,
     EVENT_VIDEO_URLS,
+    EVENT_SPONSOR_IMAGE_URLS,
+    EVENT_OFFICIAL_WEBSITE_URL,
+    EVENT_LOGO_IMAGE_URL,
     
     REGATTA_NAME,
     REGATTA_ID,
