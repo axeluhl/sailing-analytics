@@ -29,14 +29,18 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
+    protected TextBox descriptionEntryField;
     protected TextBox venueEntryField;
     protected DateBox startDateBox;
     protected DateBox endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
+    protected TextBox officialWebsiteURLEntryField;
+    protected TextBox logoImageURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
     protected StringListInlineEditorComposite imageURLList;
     protected StringListInlineEditorComposite videoURLList;
+    protected StringListInlineEditorComposite sponsorImageURLList;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -126,13 +130,19 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
                 /* suggestValues */ videoURLSuggestions));
         videoURLList.addValueChangeHandler(valueChangeHandler);
+        sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
+                new StringListInlineEditorComposite.ExpandedUi(stringMessages, resources.removeIcon(),
+                /* suggestValues */ imageSuggestionURLs));
+        sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
-        
         result.setName(nameEntryField.getText());
+        result.setDescription(descriptionEntryField.getText());
+        result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
+        result.setLogoImageURL(logoImageURLEntryField.getText().trim().isEmpty() ? null : logoImageURLEntryField.getText().trim());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -150,6 +160,9 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         for (String videoURL : videoURLList.getValue()) {
             result.addVideoURL(videoURL);
         }
+        for (String sponsorImageURL : sponsorImageURLList.getValue()) {
+            result.addSponsorImageURL(sponsorImageURL);
+        }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return result;
     }
@@ -162,19 +175,25 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
             panel.add(additionalWidget);
         }
 
-        Grid formGrid = new Grid(5, 2);
+        Grid formGrid = new Grid(8, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
-        formGrid.setWidget(1, 0, new Label(stringMessages.venue() + ":"));
-        formGrid.setWidget(1, 1, venueEntryField);
-        formGrid.setWidget(2, 0, new Label(stringMessages.startDate() + ":"));
-        formGrid.setWidget(2, 1, startDateBox);
-        formGrid.setWidget(3, 0, new Label(stringMessages.endDate() + ":"));
-        formGrid.setWidget(3, 1, endDateBox);
-        formGrid.setWidget(4, 0, new Label(stringMessages.isPublic() + ":"));
-        formGrid.setWidget(4, 1, isPublicCheckBox);
+        formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
+        formGrid.setWidget(1, 1, descriptionEntryField);
+        formGrid.setWidget(2, 0, new Label(stringMessages.venue() + ":"));
+        formGrid.setWidget(2, 1, venueEntryField);
+        formGrid.setWidget(3, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(3, 1, startDateBox);
+        formGrid.setWidget(4, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(4, 1, endDateBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(5, 1, isPublicCheckBox);
+        formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
+        formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
+        formGrid.setWidget(7, 0, new Label(stringMessages.eventLogoImageURL() + ":"));
+        formGrid.setWidget(7, 1, logoImageURLEntryField);
 
         panel.add(createHeadlineLabel(stringMessages.courseAreas()));
         panel.add(courseAreaNameList);
@@ -182,6 +201,8 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
         panel.add(imageURLList);
         panel.add(createHeadlineLabel(stringMessages.videoURLs()));
         panel.add(videoURLList);
+        panel.add(createHeadlineLabel(stringMessages.sponsorImageURLs()));
+        panel.add(sponsorImageURLList);
         return panel;
     }
 

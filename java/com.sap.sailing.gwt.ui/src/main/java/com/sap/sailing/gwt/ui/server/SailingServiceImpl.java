@@ -3033,13 +3033,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+    public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
+            String logoImageURLString, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings,
+            Iterable<String> sponsorImageURLStrings) throws MalformedURLException {
+        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
         List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
         List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
+        List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
+        getService().apply(
+                new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
+                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
+                        sponsorimagieURLs));
         return getEventById(eventId);
     }
 

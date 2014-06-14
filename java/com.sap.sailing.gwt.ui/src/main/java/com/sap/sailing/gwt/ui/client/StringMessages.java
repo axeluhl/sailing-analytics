@@ -1037,6 +1037,9 @@ public interface StringMessages extends Messages {
     String pleaseSelectASeriesFirst();
     String imageURLs();
     String videoURLs();
+    String sponsorImageURLs();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String eventOfficialWebsiteURL();
+    String eventLogoImageURL();
 }

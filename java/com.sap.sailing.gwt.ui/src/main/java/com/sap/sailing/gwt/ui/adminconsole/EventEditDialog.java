@@ -19,6 +19,8 @@ public class EventEditDialog extends EventDialog {
 
         nameEntryField = createTextBox(event.getName());
         nameEntryField.setVisibleLength(50);
+        descriptionEntryField = createTextBox(event.getDescription());
+        descriptionEntryField.setVisibleLength(50);
         venueEntryField = createTextBox(event.venue.getName());
         venueEntryField.setVisibleLength(35);
         startDateBox = createDateBox(event.startDate, 12);
@@ -35,6 +37,10 @@ public class EventEditDialog extends EventDialog {
                 courseAreaNames.add(courseArea.getName());
             }
         }
+        officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
+        officialWebsiteURLEntryField.setVisibleLength(50);
+        logoImageURLEntryField = createTextBox(event.getLogoImageURL());
+        logoImageURLEntryField.setVisibleLength(50);
         courseAreaNameList.setValue(courseAreaNames);
         List<String> imageURLStringsAsList = new ArrayList<>();
         Util.addAll(event.getImageURLs(), imageURLStringsAsList);
@@ -42,5 +48,8 @@ public class EventEditDialog extends EventDialog {
         List<String> videoURLStringsAsList = new ArrayList<>();
         Util.addAll(event.getVideoURLs(), videoURLStringsAsList);
         videoURLList.setValue(videoURLStringsAsList);
+        List<String> sponsorImageURLStringsAsList = new ArrayList<>();
+        Util.addAll(event.getSponsorImageURLs(), sponsorImageURLStringsAsList);
+        sponsorImageURLList.setValue(sponsorImageURLStringsAsList);
     }
 }

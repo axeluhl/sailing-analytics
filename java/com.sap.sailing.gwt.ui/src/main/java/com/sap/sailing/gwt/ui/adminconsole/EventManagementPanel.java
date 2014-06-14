@@ -578,8 +578,9 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     }
 
     private void updateEventLeaderboardGroups(final EventDTO event, List<UUID> eventLeaderboardGroupUUIDs) {
-        sailingService.updateEvent(event.id, event.getName(), event.startDate, event.endDate, event.venue,
-                event.isPublic, eventLeaderboardGroupUUIDs, event.getImageURLs(), event.getVideoURLs(),
+        sailingService.updateEvent(event.id, event.getName(), event.getDescription(), event.startDate, event.endDate, event.venue,
+                event.isPublic, eventLeaderboardGroupUUIDs, event.getOfficialWebsiteURL(), event.getLogoImageURL(),
+                event.getImageURLs(), event.getVideoURLs(), event.getSponsorImageURLs(),
                 new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -759,8 +760,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
-        sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
-                updatedEvent.isPublic, updatedEventLeaderboardGroupIds, updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(),
+        sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.getDescription(),
+                updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
+                updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
+                updatedEvent.getOfficialWebsiteURL(), updatedEvent.getLogoImageURL(),
+                updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(), updatedEvent.getSponsorImageURLs(),
                 new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
