@@ -142,7 +142,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             revokeIfNecessary(event);
             eventsById.put(event.getId(), event);
         } else {
-            logger.fine(String
+            logger.finer(String
                     .format("%s (%s) was not loaded into log because it already existed there.", event, event.getClass().getName()));
         }
         return isAdded;
