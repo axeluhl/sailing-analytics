@@ -46,6 +46,20 @@ import com.sap.sse.common.Util;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
 
+    /**
+     * Used during master data import to handle connection to correct RaceLogStore
+     */
+    private static transient ThreadLocal<MasterDataImportInformation> ongoingMasterDataImportInformation = new ThreadLocal<MasterDataImportInformation>() {
+        @Override
+        protected MasterDataImportInformation initialValue() {
+            return null;
+        };
+    };
+
+    public static void setOngoingMasterDataImport(MasterDataImportInformation information) {
+        ongoingMasterDataImportInformation.set(information);
+    }
+
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
@@ -121,8 +135,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.configuration = null;
     }
 
-    @Override
-    public void registerRaceLogsOnRaceColumns(Series series) {
+    private void registerRaceLogsOnRaceColumns(Series series) {
         for (RaceColumn raceColumn : series.getRaceColumns()) {
             setRaceLogInformationOnRaceColumn(raceColumn);
         }
@@ -168,8 +181,25 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         regattaListeners = new HashSet<RegattaListener>();
+        MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
+        if (masterDataImportInformation != null) {
+            raceLogStore = masterDataImportInformation.getRaceLogStore();
+        } else {
+            raceLogStore = EmptyRaceLogStore.INSTANCE;
+        }
+        for (Series series : getSeries()) {
+            linkToRegattaAndConnectRaceLogsAndAddListeners(series);
+            if (series.getRaceColumns() != null) {
+                for (RaceColumnInSeries column : series.getRaceColumns()) {
+                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
+                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                }
+            } else {
+                logger.warning("Race Columns were null during deserialization. This should not happen.");
+            }
+        }  
     }
-    
+
     @Override
     public Iterable<? extends Series> getSeries() {
         return Collections.unmodifiableCollection(series);

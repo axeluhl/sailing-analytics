@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,10 +19,6 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -32,21 +26,6 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Util;
 
 public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
-
-    /**
-     * Used during master data import to handle connection to correct RaceLogStore
-     */
-    private static transient ThreadLocal<MasterDataImportInformation> ongoingMasterDataImportInformation = new ThreadLocal<MasterDataImportInformation>() {
-        @Override
-        protected MasterDataImportInformation initialValue() {
-            return null;
-        };
-    };
-
-    public static void setOngoingMasterDataImport(MasterDataImportInformation information) {
-        ongoingMasterDataImportInformation.set(information);
-    }
-
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
     private final List<Fleet> fleetsInAscendingOrder;
@@ -105,23 +84,6 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
-        }
-    }
-
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
-        RaceLogStore raceLogStore = null;
-        if (masterDataImportInformation != null) {
-            raceLogStore = masterDataImportInformation.getRaceLogStore();
-        } else {
-            raceLogStore = EmptyRaceLogStore.INSTANCE;
-        }
-        addRaceColumnListener((RaceColumnListener)regatta);
-        regatta.registerRaceLogsOnRaceColumns(this);
-        for (RaceColumnInSeries column : this.getRaceColumns()) {
-            column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
-                    new RaceLogOnRegattaIdentifier(this.regatta, column.getName())));
         }
     }
 
