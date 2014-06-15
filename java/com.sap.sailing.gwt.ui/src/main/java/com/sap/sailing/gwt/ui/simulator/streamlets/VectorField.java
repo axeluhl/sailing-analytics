@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import java.util.Date;
 
+import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 
@@ -36,12 +37,9 @@ public interface VectorField {
     Vector getVector(Position p, Date at);
 
     /**
-     * @return the maximum {@link Vector#length() length} of any vector returned by {@link #getVector(Position, Date)} in this field for
-     * positions that are {@link #inBounds(Position) within bounds}.
+     * @param zoomLevel the zoom level as returned by {@link MapWidget#getZoom()}
      */
-    double getMaxLength();
-
-    double motionScale(int zoomLevel);
+    double getMotionScale(int zoomLevel);
 
     /**
      * A weight between 0.0 and 1.0 (inclusive) that tells the probability at which a particle at position
@@ -54,7 +52,7 @@ public interface VectorField {
      *            the particle's speed/direction vector which may be <code>null</code>; in this case, an implementation
      *            should return 0.0 as the particle's weight.
      */
-    double particleWeight(Position p, Vector v);
+    double getParticleWeight(Position p, Vector v);
 
     /**
      * Computes a line width for a particle flying at a certain speed.
@@ -62,7 +60,7 @@ public interface VectorField {
      * @param speed
      *            a speed as obtained by computing a {@link Vector}'s {@link Vector#length() length}.
      */
-    double lineWidth(double speed);
+    double getLineWidth(double speed);
 
     /**
      * @return the north-east and the south-west corner of the rectangular area on a Mercator projection that fully

@@ -92,7 +92,7 @@ public class Swarm implements TimeListener {
         while (!done) {
             particle.currentPosition = getRandomPosition();
             Vector v = field.getVector(particle.currentPosition, timePoint);
-            double weight = field.particleWeight(particle.currentPosition, v);
+            double weight = field.getParticleWeight(particle.currentPosition, v);
             if (weight >= Math.random()) {
                 if (v == null || v.length() == 0) {
                     particle.stepsToLive = 0;
@@ -164,6 +164,7 @@ public class Swarm implements TimeListener {
                 }
                 Date time1 = new Date();
                 if (swarmContinue) {
+                    // wait at least 10ms for the next iteration; try to get one iteration done every animationIntervalMillis if possible
                     loopTimer.schedule((int) Math.max(10, animationIntervalMillis - (time1.getTime() - time0.getTime())));
                 } else {
                     projection.clearCanvas();
@@ -188,7 +189,7 @@ public class Swarm implements TimeListener {
                 continue;
             }
             double particleSpeed = particle.v == null ? 0 : particle.v.length();
-            ctxt.setLineWidth(field.lineWidth(particleSpeed));
+            ctxt.setLineWidth(field.getLineWidth(particleSpeed));
             ctxt.setStrokeStyle(field.getColor(particleSpeed));
             ctxt.beginPath();
             ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
@@ -199,10 +200,10 @@ public class Swarm implements TimeListener {
 
     /**
      * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
-     * {@link VectorField#motionScale(int)} at the map's current zoom level.
+     * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
      */
     private boolean execute() {
-        double speed = 0.01 * field.motionScale(map.getZoom());
+        double speed = 0.01 * field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
             if ((particle.stepsToLive > 0) && (particle.v != null)) {

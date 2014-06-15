@@ -201,17 +201,12 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public double getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public double motionScale(int zoomLevel) {
+    public double getMotionScale(int zoomLevel) {
         return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
-    public double particleWeight(Position p, Vector v) {
+    public double getParticleWeight(Position p, Vector v) {
         return v == null ? 0 : (v.length() / this.maxLength + 0.1);
     }
 
@@ -248,7 +243,7 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public double lineWidth(double speed) {
+    public double getLineWidth(double speed) {
         /*
          * absolute linewidth speed == 12kn => linewidth 1.5 speed == 24kn => linewidth 3.0 speed == 6kn => linewidth
          * 0.75

@@ -121,17 +121,12 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public double getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public double motionScale(int zoomLevel) {
+    public double getMotionScale(int zoomLevel) {
         return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
-    public double particleWeight(Position p, Vector v) {
+    public double getParticleWeight(Position p, Vector v) {
         return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
@@ -156,7 +151,7 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public double lineWidth(double speed) {
+    public double getLineWidth(double speed) {
         return 1.0;
     }
 
