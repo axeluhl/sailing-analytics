@@ -21,7 +21,7 @@ public class Swarm implements TimeListener {
 
     private Timer loopTimer;
     private Mercator projection;
-    private VectorField field;
+    private final VectorField field;
     
     /**
      * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
