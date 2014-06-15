@@ -42,12 +42,21 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     private final Map<Serializable, Mark> markCache;
     
+    private final Map<Serializable, ControlPointWithTwoMarks> controlPointWithTwoMarksCache;
+    
     /**
      * For all marks ever created by this factory, the mark {@link WithID#getId() ID}'s string representation
      * is mapped here to the actual ID. This allows clients to send only the string representation to the server
      * and still be able to identify a mark uniquely this way.
      */
     private final Map<String, Serializable> markIdCache;
+    
+    /**
+     * For all ControlPoints ever created by this factory, the mark {@link WithID#getId() ID}'s string representation
+     * is mapped here to the actual ID. This allows clients to send only the string representation to the server
+     * and still be able to identify a ControlPoint uniquely this way.
+     */
+    private final Map<String, Serializable> controlPointWithTwoMarksIdCache;
     
     private final Map<String, BoatClass> boatClassCache;
     
@@ -103,6 +112,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
         markIdCache = new HashMap<String, Serializable>();
+        controlPointWithTwoMarksCache = new HashMap<Serializable, ControlPointWithTwoMarks>();
+        controlPointWithTwoMarksIdCache = new HashMap<String, Serializable>();
         boatClassCache = new HashMap<String, BoatClass>();
         this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
@@ -151,12 +162,28 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         return result;
     }
 
+    @Override
+    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right) {
+        if (controlPointWithTwoMarksCache.containsKey(id)) {
+            return controlPointWithTwoMarksCache.get(id);
+        }
+        return createControlPointWithTwoMarks(id, left, right, name);
+    }
+
+    @Override
+    public ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(
+            String toStringRepresentationOfID, String name, Mark left, Mark right) {
+        Serializable id = toStringRepresentationOfID;
+        if (controlPointWithTwoMarksIdCache.containsKey(toStringRepresentationOfID)) {
+            id = controlPointWithTwoMarksIdCache.get(toStringRepresentationOfID);
+        }
+        return getOrCreateControlPointWithTwoMarks(id, name, left, right);
+    }
+
     private void cacheMark(Serializable id, Mark result) {
         markCache.put(id, result);
         markIdCache.put(id.toString(), id);
     }
-    
-    
     
     @Override
     public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
@@ -170,12 +197,15 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
-       return new ControlPointWithTwoMarksImpl(left, right, name);
+       return createControlPointWithTwoMarks(name, left, right, name);
     }
 
     @Override
     public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
-       return new ControlPointWithTwoMarksImpl(id, left, right, name);
+        ControlPointWithTwoMarks result = new ControlPointWithTwoMarksImpl(id, left, right, name);
+        controlPointWithTwoMarksCache.put(id, result);
+        controlPointWithTwoMarksIdCache.put(id.toString(), id);
+        return result;
     }
 
     @Override

@@ -99,4 +99,8 @@ public interface SharedDomainFactory extends CompetitorFactory {
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     
     Mark getExistingMarkById(Serializable id);
+    
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(Serializable id, String name, Mark left, Mark right);
+    
+    ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
 }
