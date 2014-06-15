@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.domain.common.Bounds;
@@ -12,7 +11,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.gwt.client.player.TimeListener;
 
@@ -48,7 +46,8 @@ public class Swarm implements TimeListener {
     private Bounds visibleBoundsOfField;
     private Date timePoint;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer, VectorField vectorField) {
+        this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
         this.map = map;
@@ -58,21 +57,7 @@ public class Swarm implements TimeListener {
 
     public void start(int animationIntervalMillis, WindFieldDTO windField) {
         projection = new Mercator(fullcanvas, map);
-        // TODO make the VectorField a parameter of Swarm
-        if (windField == null) {
-            SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
-            String jsonStr = bundle.windStreamletsDataJS().getText();
-            RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
-            field = f;
-            map.setZoom(5);
-            map.panTo(f.getCenter());
-            projection.calibrate();
-        } else {
-            field = new SimulatorField(((WindStreamletsCanvasOverlay) fullcanvas).getWindFieldDTO(),
-                    ((WindStreamletsCanvasOverlay) fullcanvas).getWindParams());
-            fullcanvas.setCanvasSettings();
-            projection.calibrate();
-        }
+        projection.calibrate();
         this.updateBounds();
         Context2d ctxt = canvas.getContext2d();
         ctxt.setFillStyle("red");

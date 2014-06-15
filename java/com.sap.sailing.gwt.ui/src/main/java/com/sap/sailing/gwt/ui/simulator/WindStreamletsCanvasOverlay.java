@@ -2,9 +2,13 @@ package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.RectField;
+import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorField;
+import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -52,7 +56,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            this.swarm = new Swarm(this, map, timer);
+            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams());
+            setCanvasSettings();
+            this.swarm = new Swarm(this, map, timer, field);
         }
         this.swarm.start(40, windFieldDTO);
     }
@@ -116,11 +122,13 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         super.draw();
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
-                this.swarm = new Swarm(this, map, timer);
+                SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
+                String jsonStr = bundle.windStreamletsDataJS().getText();
+                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
+                map.setZoom(5);
+                map.panTo(f.getCenter());
+                this.swarm = new Swarm(this, map, timer, f);
                 this.swarm.start(/* animationIntervalMillis */ 40, /* windField */ null);
-            }
-            if (windFieldDTO != null) {
-                // drawing is done by external JavaScript for Streamlets
             }
         }
     }
