@@ -141,25 +141,32 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Mark getOrCreateMark(Serializable id, String name) {
-        Mark result = markCache.get(id);
-        if (result == null) {
-            result = new MarkImpl(id, name);
-            cacheMark(id, result);
-        }
-        return result;
+        return getOrCreateMark(id, name, null, null, null, null);
     }
 
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
-        final Mark result;
-        if (markIdCache.containsKey(toStringRepresentationOfID)) {
-            Serializable id = markIdCache.get(toStringRepresentationOfID);
-            result = getOrCreateMark(id, name);
-        } else {
-            result = new MarkImpl(toStringRepresentationOfID, name);
-            cacheMark(toStringRepresentationOfID, result);
+        return getOrCreateMark(toStringRepresentationOfID, name, null, null, null, null);
+    }
+    
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+        Mark result = markCache.get(id);
+        if (result == null) {
+            result = new MarkImpl(id, name, type, color, shape, pattern);
+            cacheMark(id, result);
         }
         return result;
+    }
+    
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type,
+            String color, String shape, String pattern) {
+        Serializable id = toStringRepresentationOfID;
+        if (markIdCache.containsKey(toStringRepresentationOfID)) {
+            id = markIdCache.get(toStringRepresentationOfID);
+        }
+        return getOrCreateMark(id, name, type, color, shape, pattern);
     }
 
     @Override
@@ -183,16 +190,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     private void cacheMark(Serializable id, Mark result) {
         markCache.put(id, result);
         markIdCache.put(id.toString(), id);
-    }
-    
-    @Override
-    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
-        Mark result = markCache.get(id);
-        if (result == null) {
-            result = new MarkImpl(id, name, type, color, shape, pattern);
-            cacheMark(id, result);
-        }
-        return result;
     }
 
     @Override
