@@ -4,10 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -35,19 +32,24 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         };
         table.addColumn(markNameColumn, stringMessages.mark());
 
-        final SafeHtmlCell markPositionCell = new SafeHtmlCell();
-        Column<MarkDTO, SafeHtml> markPositionColumn = new Column<MarkDTO, SafeHtml>(markPositionCell) {
+        TextColumn<MarkDTO> markPositionColumn = new TextColumn<MarkDTO>() {
             @Override
-            public SafeHtml getValue(MarkDTO mark) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                if(mark.position != null) {
-                    NumberFormat fmt = NumberFormat.getFormat("#.###");
-                    builder.appendEscaped(fmt.format(mark.position.latDeg)+", "+fmt.format(mark.position.lngDeg));
+            public String getValue(MarkDTO mark) {
+                if (mark.position == null) {
+                    return "";
                 }
-                return builder.toSafeHtml();
+                return mark.position.latDeg + ", " + mark.position.lngDeg;
             }
         };
         table.addColumn(markPositionColumn, stringMessages.position());
+
+        TextColumn<MarkDTO> markTypeColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO mark) {
+                return mark.type.toString();
+            }
+        };
+        table.addColumn(markTypeColumn, stringMessages.type());
         
         Column<MarkDTO, SafeHtml> markColorColumn = new ColorColumn<>(new ColorRetriever<MarkDTO>() {
             @Override

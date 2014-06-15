@@ -1042,4 +1042,5 @@ public interface StringMessages extends Messages {
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
     String eventLogoImageURL();
+    String showPingMarkMappings();
 }
