@@ -1217,7 +1217,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     void storeRaceLogEventEvent(DBObject eventEntry) {
         getRaceLogCollection().insert(eventEntry);
-        logger.fine("Inserted event entry into mongo race log collection");
     }
 
     @Override
