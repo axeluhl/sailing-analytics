@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,7 +140,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
                         ? new Date(e.getValue().windFixes.get(e.getValue().windFixes.size()-1).measureTimepoint+1)
                         : beginningOfTime;
                 GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource, endOfTime,
-                        RESOLUTION_IN_MILLIS, Collections.singleton(e.getKey().getType().name()), /* onlyUpToNewestEvent */ true);
+                        RESOLUTION_IN_MILLIS, Arrays.asList(new String[] { e.getKey().getType().name() }), /* onlyUpToNewestEvent */ true);
                 asyncActionsExecutor.execute(getWind, LODA_WIND_STREAMLET_DATA_CATEGORY+" "+e.getKey().name(), new MarkedAsyncCallback<>(
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
@@ -151,7 +151,11 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {
                                 // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max confidences
-                                e.getValue().windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                                if (e.getValue().windFixes == null) {
+                                    e.getValue().windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
+                                } else {
+                                    e.getValue().windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                                }
                                 if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > e.getValue().maxWindConfidence) {
                                     e.getValue().maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
                                 }
