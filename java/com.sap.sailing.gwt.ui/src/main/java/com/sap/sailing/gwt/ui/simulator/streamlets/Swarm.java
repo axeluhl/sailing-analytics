@@ -24,12 +24,13 @@ public class Swarm implements TimeListener {
     
     /**
      * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
-     * {@link #particles} array.
+     * {@link #particles} array. Note that since elements in {@link #particles} can be <code>null</code>, this number
+     * not necessarily represents the exact number of particles visible.
      */
     private int nParticles;
     
     /**
-     * The particles shown in this swarm.
+     * The particles shown in this swarm. Elements in the array may be <code>null</code>.
      */
     private Particle[] particles;
     
@@ -70,10 +71,12 @@ public class Swarm implements TimeListener {
     }
 
     private Particle createParticle() {
-        Particle particle = new Particle();
+        Particle particle = null;
         boolean done = false;
-        // try to create a particle at a random position until the weight is high enough for it to be displayed
-        while (!done) {
+        int attempts = 10;
+        // try a few times to create a particle at a random position until the weight is high enough for it to be displayed
+        while (!done && attempts-- > 0) {
+            particle = new Particle();
             particle.currentPosition = getRandomPosition();
             Vector v = field.getVector(particle.currentPosition, timePoint);
             double weight = field.getParticleWeight(particle.currentPosition, v);
@@ -87,6 +90,8 @@ public class Swarm implements TimeListener {
                 particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 particle.v = v;
                 done = true;
+            } else {
+                particle = null;
             }
         }
         return particle;
@@ -169,7 +174,7 @@ public class Swarm implements TimeListener {
         ctxt.setFillStyle("white");
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if (particle.stepsToLive == 0) {
+            if (particle == null || particle.stepsToLive == 0) {
                 continue;
             }
             double particleSpeed = particle.v == null ? 0 : particle.v.length();
@@ -190,7 +195,7 @@ public class Swarm implements TimeListener {
         double speed = 0.01 * field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if ((particle.stepsToLive > 0) && (particle.v != null)) {
+            if (particle != null && particle.stepsToLive > 0 && particle.v != null) {
                 // move the particle one step in the direction and with the speed indicated by particle.v and
                 // update its currentPosition, currentPixelCoordinate and previousPixelCoordinate fields;
                 // also, its particle.v field is updated based on its new position from the vector field
@@ -206,7 +211,7 @@ public class Swarm implements TimeListener {
                     particle.v = null;
                 }
             } else {
-                // particle timed out (age became 0); create a new one
+                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
                 particles[idx] = this.createParticle();
             }
         }

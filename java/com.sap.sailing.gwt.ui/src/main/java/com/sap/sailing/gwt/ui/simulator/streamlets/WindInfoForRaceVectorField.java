@@ -101,9 +101,15 @@ public class WindInfoForRaceVectorField implements VectorField {
             }
         }
         final BearingWithConfidence<Pair<PositionDTO, Date>> bearing = bearingCluster.getAverage(request);
-        final double bearingRad = bearing.getObject().getRadians();
-        final double speedInKnots = knotSpeedSum / speedCount;
-        return new Vector(speedInKnots*Math.sin(bearingRad), speedInKnots*Math.cos(bearingRad));
+        final Vector result;
+        if (bearing != null && bearing.getObject() != null) {
+            final double bearingRad = bearing.getObject().getRadians();
+            final double speedInKnots = knotSpeedSum / speedCount;
+            result = new Vector(speedInKnots * Math.sin(bearingRad), speedInKnots * Math.cos(bearingRad));
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private WindDTO getTimewiseClosestFix(List<WindDTO> windFixes, Date at) {

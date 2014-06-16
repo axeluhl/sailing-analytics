@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.maps.client.MapWidget;
@@ -21,8 +20,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sailing.gwt.ui.simulator.streamlets.RectField;
-import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -41,7 +38,6 @@ import com.sap.sse.gwt.client.player.Timer;
  */
 public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
-    private static final int nParticles = 5000;
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
     private static final int WIND_FETCH_INTERVAL_IN_MILLIS = 10000;
@@ -193,21 +189,5 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
 
     @Override
     protected void drawCenterChanged() {
-    }
-
-    @Override
-    protected void draw() {
-        super.draw();
-        if (mapProjection != null) {
-            if ((nParticles > 0) && (swarm == null)) {
-                SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
-                String jsonStr = bundle.windStreamletsDataJS().getText();
-                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
-                map.setZoom(5);
-                map.panTo(f.getCenter());
-                this.swarm = new Swarm(this, map, timer, f);
-                this.swarm.start(/* animationIntervalMillis */ 40);
-            }
-        }
     }
 }

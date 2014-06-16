@@ -66,7 +66,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(showSelectedCompetitorsInfoCheckBox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
-        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
+        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
                 
         
