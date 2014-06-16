@@ -22,9 +22,15 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, SingleSelectionModel<DeviceMappingDTO>> {
+    static interface FilterChangedHandler {
+        void onFilterChanged(List<DeviceMappingDTO> filteredList);
+    }
+    
     private final Panel mainPanel;
     private List<DeviceMappingDTO> allMappings = new ArrayList<>();
     private final CheckBox showPingMappingsCb;
+    
+    private final List<FilterChangedHandler> filterHandlers = new ArrayList<>();
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
@@ -35,7 +41,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                togglePingMappings();
+                filterPingMappings();
             }
         });
         mainPanel.add(showPingMappingsCb);
@@ -142,24 +148,34 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         mainPanel.add(table);
     }
     
-    private void togglePingMappings() {
+    private void notifyFilterHandlers() {
+        for (FilterChangedHandler handler : filterHandlers) {
+            handler.onFilterChanged(getDataProvider().getList());
+        }
+    }
+    
+    private void filterPingMappings() {
         boolean show = showPingMappingsCb.getValue();
         getDataProvider().getList().clear();
-        getDataProvider().getList().clear();
         for (DeviceMappingDTO mapping : allMappings) {
-            if (! show || ! "PING".equals(mapping.deviceIdentifier.deviceType)) {
+            if (show || ! "PING".equals(mapping.deviceIdentifier.deviceType)) {
                 getDataProvider().getList().add(mapping);
             }
         }
+        notifyFilterHandlers();
     }
     
     public void refresh(List<DeviceMappingDTO> mappings) {
         allMappings = mappings;
-        togglePingMappings();
+        filterPingMappings();
     }
     
     @Override
     public Widget asWidget() {
         return  mainPanel;
+    }
+    
+    public void addFilterChangedHandler(FilterChangedHandler handler) {
+        filterHandlers.add(handler);
     }
 }
