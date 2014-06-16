@@ -89,15 +89,17 @@ public class WindInfoForRaceVectorField implements VectorField {
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
-                if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
-                    speedCount++;
-                    knotSpeedSum += timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
+                if (timewiseClosestFixForWindSource != null) {
+                    if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
+                        speedCount++;
+                        knotSpeedSum += timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
+                    }
+                    Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(
+                            timewiseClosestFixForWindSource.measureTimepoint));
+                    bearingCluster.add(new BearingWithConfidenceImpl<Util.Pair<PositionDTO, Date>>(
+                            new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), weigher
+                                    .getConfidence(fix, request), request));
                 }
-                Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position,
-                        new Date(timewiseClosestFixForWindSource.measureTimepoint));
-                bearingCluster.add(new BearingWithConfidenceImpl<Util.Pair<PositionDTO,Date>>(
-                        new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg),
-                        weigher.getConfidence(fix, request), request));
             }
         }
         final BearingWithConfidence<Pair<PositionDTO, Date>> bearing = bearingCluster.getAverage(request);
@@ -114,7 +116,7 @@ public class WindInfoForRaceVectorField implements VectorField {
 
     private WindDTO getTimewiseClosestFix(List<WindDTO> windFixes, Date at) {
         final WindDTO result;
-        if (windFixes.isEmpty()) {
+        if (windFixes == null || windFixes.isEmpty()) {
             result = null;
         } else {
             final WindDTO atDummy = new WindDTO();
