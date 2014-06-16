@@ -609,16 +609,22 @@ public class RegattasResource extends AbstractSailingServerResource {
                             TimePoint startTime = trackedLegOfCompetitor.getStartTime();
                             TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
                             TimePoint startOfRace = trackedRace.getStartOfRace();
-                            // between the start of the race and the start of the first leg we have no 'timeSinceGun' for the competitor
-                            if(startOfRace != null && startTime != null) {
+                            // between the start of the race and the start of the first leg we have no 'timeSinceGun'
+                            // for the competitor
+                            if (startOfRace != null && startTime != null) {
                                 long timeSinceGun = -1;
-                                if(finishTime != null) {
+                                if (finishTime != null) {
                                     timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
                                 } else {
                                     timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
                                 }
-                                if(timeSinceGun > 0) {
+                                if (timeSinceGun > 0) {
                                     jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
+                                }
+                                Distance distanceSinceGun = trackedRace.getTrack(competitor).getDistanceTraveled(startOfRace,
+                                        finishTime != null ? finishTime : timePoint);
+                                if (distanceSinceGun != null) {
+                                    jsonCompetitorInLeg.put("distanceSinceGun-m", distanceSinceGun.getMeters());
                                 }
                             }
 
