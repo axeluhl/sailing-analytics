@@ -31,6 +31,9 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
     public EventBase deserialize(JSONObject object) throws JsonDeserializationException {
         UUID id = UUID.fromString((String) object.get(EventBaseJsonSerializer.FIELD_ID));
         String name = object.get(EventBaseJsonSerializer.FIELD_NAME).toString();
+        String description = (String) object.get(EventBaseJsonSerializer.FIELD_DESCRIPTION);
+        String officialWebsiteURLAsString = (String) object.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL);
+        String logoImageURLAsString = (String) object.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL);
         Number startDate = (Number) object.get(EventBaseJsonSerializer.FIELD_START_DATE);
         Number endDate = (Number) object.get(EventBaseJsonSerializer.FIELD_END_DATE);
         final Venue venue;
@@ -49,6 +52,21 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         }
         EventBaseImpl result = new StrippedEventImpl(name, startDate == null ? null : new MillisecondsTimePoint(startDate.longValue()),
                 endDate == null ? null : new MillisecondsTimePoint(endDate.longValue()), venue, /* is public */ true, id, leaderboardGroups);
+        result.setDescription(description);
+        if (officialWebsiteURLAsString != null) {
+            try {
+                result.setOfficialWebsiteURL(new URL(officialWebsiteURLAsString));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing official website URL for event "+name, e);
+            }
+        }
+        if (logoImageURLAsString != null) {
+            try {
+                result.setLogoImageURL(new URL(logoImageURLAsString));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing logo image URL for event "+name, e);
+            }
+        }
         if (object.get(EventBaseJsonSerializer.FIELD_IMAGE_URLS) != null) {
             try {
                 result.setImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_IMAGE_URLS)));
@@ -61,6 +79,13 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 result.setVideoURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_VIDEO_URLS)));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing video URLs for event "+name, e);
+            }
+        }
+        if (object.get(EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS) != null) {
+            try {
+                result.setSponsorImageURLs(getURLsFromStrings(Helpers.getNestedArraySafe(object, EventBaseJsonSerializer.FIELD_SPONSOR_IMAGE_URLS)));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing sponsor image URLs for event "+name, e);
             }
         }
         return result;

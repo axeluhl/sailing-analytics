@@ -236,8 +236,8 @@ import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -381,6 +381,7 @@ import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
@@ -1739,95 +1740,44 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
-
-    /**
-     * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
-     * from the {@code old} {@code CourseBase}, and also from the newly created additional waypoints.
-     * If such a waypoint is found, its control point is added to the control point list for the new course.
-     * Otherwise, a new control point is created using the default {@link com.sap.sailing.domain.base.DomainFactory}
-     * instance.
-     */
-    private List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> resolveControlPoints(
-            CourseBase old, List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
-        Map<ControlPointDTO, ControlPoint> newlyCreatedCache = new HashMap<ControlPointDTO, ControlPoint>();
-        Iterable<Waypoint> waypoints = old.getWaypoints();
-        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
-        for (com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
-            ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
-            ControlPoint match = null;
-            if (newlyCreatedCache.containsKey(controlPointDTO)) {
-                match = newlyCreatedCache.get(controlPointDTO);
-            } else {
-                for (Waypoint oldWP : waypoints) {
-                    ControlPoint oldControlPoint = oldWP.getControlPoint();
-                    if (oldControlPoint.getId().toString().equals(controlPointDTO.getIdAsString())
-                            && markIDsMatch(oldControlPoint.getMarks(), controlPointDTO.getMarks())) {
-                        match = oldControlPoint;
-                        break;
-                    }
-                }
-            }
-            if (match != null) {
-                newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(match, controlPointAndPassingInstruction.getB()));
-            } else {
-                // no match found; create new control point:
-                ControlPoint newControlPoint;
-                if (controlPointDTO instanceof GateDTO) {
-                    GateDTO gateDTO = (GateDTO) controlPointDTO;
-                    final Serializable id;
-                    if (gateDTO.getIdAsString() == null) {
-                        id = UUID.randomUUID();
-                    } else {
-                        id = gateDTO.getIdAsString();
-                    }
-                    Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
-                    Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
-                    newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
-                    newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
-                } else {
-                    newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
-                    PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
-                    newControlPoints.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
-                }
-                newlyCreatedCache.put(controlPointDTO, newControlPoint);
-            }
+    
+    private ControlPoint getOrCreateControlPoint(ControlPointDTO dto) {
+        String id = dto.getIdAsString();
+        if (id == null) {
+            id = UUID.randomUUID().toString();
         }
-        return newControlPoints;
+        if (dto instanceof GateDTO) {
+            GateDTO gateDTO = (GateDTO) dto;
+            Mark left = (Mark) getOrCreateControlPoint(gateDTO.getLeft());
+            Mark right = (Mark) getOrCreateControlPoint(gateDTO.getRight());
+            return baseDomainFactory.getOrCreateControlPointWithTwoMarks(id, gateDTO.getName(), left, right);
+        } else {
+            MarkDTO markDTO = (MarkDTO) dto;
+            return baseDomainFactory.getOrCreateMark(id, dto.getName(), markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+        }
     }
 
     /**
-     * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
-     * from the course that belongs to the race identified by <code>raceIdentifier</code>. If such a waypoint is
-     * found, its control point is added to the control point list for the new course. Otherwise, a new control
-     * point is created using the default {@link com.sap.sailing.domain.base.DomainFactory} instance. The resulting
+     * Creates new ControlPoints, if nThe resulting
      * list of control points is then passed to {@link Course#update(List, com.sap.sailing.domain.base.DomainFactory)} for
      * the course of the race identified by <code>raceIdentifier</code>.
      */
     @Override
-    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
+    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
+            List<Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
-            List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> newControlPoints = resolveControlPoints(course, controlPoints);
+            List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
+            for (Pair<ControlPointDTO, PassingInstruction> waypointDTO : courseDTO) {
+                controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
+            }
             try {
-                course.update(newControlPoints, baseDomainFactory);
+                course.update(controlPoints, baseDomainFactory);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    private boolean markIDsMatch(Iterable<Mark> marks, Iterable<MarkDTO> marksDTOs) {
-        Iterator<Mark> marksIter = marks.iterator();
-        Iterator<MarkDTO> markDTOsIter = marksDTOs.iterator();
-        while (marksIter.hasNext() && markDTOsIter.hasNext()) {
-            Mark nextMark = marksIter.next();
-            MarkDTO nextMarkDTO = markDTOsIter.next();
-            if (!nextMark.getId().toString().equals(nextMarkDTO.getIdAsString())) {
-                return false;
-            }
-        }
-        return marksIter.hasNext() == markDTOsIter.hasNext();
     }
 
     private List<PositionDTO> getMarkPositionDTOs(
@@ -3033,13 +2983,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings) throws MalformedURLException {
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+    public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString,
+            String logoImageURLString, Iterable<String> imageURLStrings, Iterable<String> videoURLStrings,
+            Iterable<String> sponsorImageURLStrings) throws MalformedURLException {
+        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+        URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
+        URL logoImageURL = logoImageURLString != null ? new URL(logoImageURLString) : null;
         List<URL> imageURLs = createURLsFromStrings(imageURLStrings);
         List<URL> videoURLs = createURLsFromStrings(videoURLStrings);
-        getService().apply(new UpdateEvent(eventId, eventName, startTimePoint, endTimePoint, venue.getName(), isPublic, leaderboardGroupIds, imageURLs, videoURLs));
+        List<URL> sponsorimagieURLs = createURLsFromStrings(sponsorImageURLStrings);
+        getService().apply(
+                new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint, venue.getName(),
+                        isPublic, leaderboardGroupIds, logoImageURL, officialWebsiteURL, imageURLs, videoURLs,
+                        sponsorimagieURLs));
         return getEventById(eventId);
     }
 
@@ -3128,7 +3086,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             eventDTO = new EventBaseDTO(event.getName(), lgDTOs);
-            copyEventBaseFieldToDTO(event, eventDTO);
+            copyEventBaseFieldsToDTO(event, eventDTO);
         }
         return eventDTO;
     }
@@ -3138,18 +3096,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardGroupBase.getDescription(), leaderboardGroupBase.hasOverallLeaderboard());
     }
     
-    private void copyEventBaseFieldToDTO(EventBase event, EventBaseDTO eventDTO) {
+    private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = (UUID) event.getId();
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
+        eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
     }
     
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
-        copyEventBaseFieldToDTO(event, eventDTO);
+        copyEventBaseFieldsToDTO(event, eventDTO);
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -3170,6 +3131,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         for (URL videoURL : event.getVideoURLs()) {
             eventDTO.addVideoURL(videoURL.toString());
+        }
+        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
+            eventDTO.addSponsorImageURL(sponsorImageURL.toString());
         }
         return eventDTO;
     }
@@ -4378,11 +4342,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             lastPublishedCourse = new CourseDataImpl(name);
         }
         
-        List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> waypoints = resolveControlPoints(lastPublishedCourse, courseDTO);
+        List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
+        for (Pair<ControlPointDTO, PassingInstruction> waypointDTO : courseDTO) {
+            controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
+        }
         Course course = new CourseImpl(name, lastPublishedCourse.getWaypoints());
         
         try {
-            course.update(waypoints, baseDomainFactory);
+            course.update(controlPoints, baseDomainFactory);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
