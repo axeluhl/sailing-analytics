@@ -906,7 +906,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
         storeRaceLogDeviceMappingEvent(event, result);
-        result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
+        result.put(FieldNames.MARK.name(), storeMark(event.getMappedTo()));
         return result;
     }
 
@@ -1217,7 +1217,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     void storeRaceLogEventEvent(DBObject eventEntry) {
         getRaceLogCollection().insert(eventEntry);
-        logger.fine("Inserted event entry into mongo race log collection");
     }
 
     @Override

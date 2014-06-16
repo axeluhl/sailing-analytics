@@ -48,6 +48,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Exports all data from a leaderboard into XML format. Format is as follows:
@@ -370,7 +371,28 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "rank_based_on_distance_from_starboard_side_of_start_line", competitorToDistanceRank.get(competitor));
             addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", race.getSpeedWhenCrossingStartLine(competitor).getKnots());
-            addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", getMaximumSpeedOverGround(competitor, race).getKnots());
+            com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> gpsFixWithSpeedAndLegInformation = getMaximumSpeedOverGround(competitor, race);
+            if (gpsFixWithSpeedAndLegInformation.getB() != null) {
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", gpsFixWithSpeedAndLegInformation.getB().getKnots());
+                competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", gpsFixWithSpeedAndLegInformation.getA().getTimePoint()));
+                if (gpsFixWithSpeedAndLegInformation.getC() != null) {
+                    // check which leg number it is
+                    int legCounterForMaxSpeed = 0;
+                    for (Leg leg : race.getRace().getCourse().getLegs()) {
+                        legCounterForMaxSpeed++;
+                        if (leg.equals(gpsFixWithSpeedAndLegInformation.getC().getLeg())) {
+                            break;
+                        }
+                    }
+                    addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", legCounterForMaxSpeed);
+                } else {
+                    addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", 0);
+                }
+            } else {
+                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid maximum speed for this race!");
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", 0.0);
+                competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", race.getStartOfRace()));
+            }
             Distance distanceTraveledInThisRace = race.getDistanceTraveled(competitor, race.getEndOfRace());
             if (distanceTraveledInThisRace == null) {
                 raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid distance traveled for this race!");
@@ -427,50 +449,37 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorElement, "nationality_ioc", "");
         }
         
+        TimePoint timePointOfLatestModification = null;
         if (leaderboard.getTimePointOfLatestModification() != null) {
-            TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-            Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed.asMillis());
-            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
-            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification).getMeters());
-            if (totalDistanceSailed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
-            }
-            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification).getB().getKnots());
-            Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, timePointOfLatestModification);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
-            if (averageSpeed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
-            }
-            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
-            
-            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
-            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
+            timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
         } else {
-            TimePoint now = MillisecondsTimePoint.now();
-            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailed(competitor, now).asMillis());
-            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, now, true));
-            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, now);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
-            if (totalDistanceSailed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
-            }
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, now).getMeters());
-            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, now).getB().getKnots());
-            Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, now);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
-            if (averageSpeed == null) {
-                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
-            }
-            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, now, true);
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
-            
-            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
-            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
+            timePointOfLatestModification = MillisecondsTimePoint.now();
         }
+        Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
+        if (totalTimeSailed != null) {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed.asMillis());
+        } else {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", 0);
+        }
+        addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
+        Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
+        if (totalDistanceSailed == null) {
+            competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
+        }
+        addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
+        Distance totalDistanceSailedIncludingNonFinishedRaces = getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification);
+        addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", totalDistanceSailedIncludingNonFinishedRaces != null ? totalDistanceSailedIncludingNonFinishedRaces.getMeters() : 0);
+        Pair<GPSFixMoving, Speed> maximumLeaderboardSpeedOverGround = leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification);
+        addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", maximumLeaderboardSpeedOverGround != null ? maximumLeaderboardSpeedOverGround.getB().getKnots() : 0);
+        Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, timePointOfLatestModification);
+        if (averageSpeed == null) {
+            competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
+        }
+        addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
+        Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
+        addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
+        addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
+        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
         competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());

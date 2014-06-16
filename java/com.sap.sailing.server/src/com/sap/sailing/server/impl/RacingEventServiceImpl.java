@@ -2237,6 +2237,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
             }
             
+            // make sure to initialize listeners correctly
+            for (Regatta regatta : regattasByName.values()) {
+                RegattaImpl regattaImpl = (RegattaImpl)regatta;
+                regattaImpl.initializeSeriesAfterDeserialize();
+            }
+            
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);

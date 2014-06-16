@@ -87,5 +87,7 @@ To support different kinds of file formats, the core code of the [RouteConverter
 
 The core components of RouteConverter are packaged in the bundle ``slash.navigation.routeconverter``. If upstream changes from the original repository should be integrated, overwrite the direct copy in the ``routeconverter-vanilla`` branch. Afterwards, merge this branch into ``routeconverter-adapted``, where custom changes to the library (removing unused components, in-memory preferences factory, ...) live.
 
+The diff between ``routeconverter-vanilla`` and ``routeconverter-adapted`` represents our custom changes to the library. To get new changes into a development version, merge ``routeconverter-adapted`` into ``master`` or whatever feature branch you are working on.
+
 ### Using the Export feature
 Though the export functionality is theoretically accessible by everyone, the UI counterpart resides only within the admin console as an _Export_ button underneath every `TrackedRaceListComposite` (e.g. in the TracTrac panel). If races have been tracked and are selected, the button can be pressed, then the appropriate settings can be made in the popup dialog, and as a result a post request containing this configuration data and the desired races is issued automatically, which returns a ZIP file to the user.
