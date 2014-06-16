@@ -1901,6 +1901,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
+        if (leaderboardGroup.hasOverallLeaderboard()) {
+            addLeaderboard(leaderboardGroup.getOverallLeaderboard());
+        }
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
