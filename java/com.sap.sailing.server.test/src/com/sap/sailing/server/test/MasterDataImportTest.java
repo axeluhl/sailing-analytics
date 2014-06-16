@@ -1797,6 +1797,8 @@ public class MasterDataImportTest {
         LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) leaderboardGroupOnTarget
                 .getOverallLeaderboard();
         Assert.assertNotNull(overallLeaderboard);
+        Leaderboard overallLeaderboardRetrievedByName = destService.getLeaderboardByName(overallLeaderboard.getName());
+        assertSame(overallLeaderboard, overallLeaderboardRetrievedByName);
 
         Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
 
