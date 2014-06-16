@@ -48,11 +48,17 @@ public class EventHeader extends Composite {
         venueName.setInnerHTML(event.venue.getName());
         eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
         
-        eventDescription.setInnerHTML("Missing attribute: The description of the event");
-        eventWebsite.setInnerHTML("Missing link to official event website");
-        eventLogo.setSrc(defaultLogoUrl);
-        eventLogo2.setSrc(defaultLogoUrl);
-        eventLogo3.setSrc(defaultLogoUrl);
+        if(event.getDescription() != null) {
+            eventDescription.setInnerHTML(event.getDescription());
+        }
+        if(event.getOfficialWebsiteURL() != null) {
+            eventWebsite.setInnerHTML(event.getOfficialWebsiteURL());
+        }
+        
+        String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
+        eventLogo.setSrc(logoUrl);
+        eventLogo2.setSrc(logoUrl);
+        eventLogo3.setSrc(logoUrl);
     }
     
 }

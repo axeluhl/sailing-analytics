@@ -21,5 +21,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView {
     public TabletAndDesktopEventView(EventDTO event) {
         eventHeader = new EventHeader(event);
         initWidget(uiBinder.createAndBindUi(this));
+        
+        eventSponsors.setEventSponsors(event);
     }
 }
