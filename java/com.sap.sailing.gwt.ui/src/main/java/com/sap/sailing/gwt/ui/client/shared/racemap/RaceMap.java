@@ -399,7 +399,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return Collections.unmodifiableMap(boatOverlays);
     }
     
-    MapWidget getMap() {
+    public MapWidget getMap() {
         return map;
     }
     

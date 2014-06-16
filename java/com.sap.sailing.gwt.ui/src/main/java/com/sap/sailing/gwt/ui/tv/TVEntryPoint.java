@@ -59,7 +59,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName,
-                showLeaderboard, showWindChart, showCompetitorsChart, /* canReplayWhileLiveIsPossible */ false, autoSelectMedia);
+                showLeaderboard, showWindChart, showCompetitorsChart, showViewStreamlets, /* canReplayWhileLiveIsPossible */ false, autoSelectMedia);
 
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override

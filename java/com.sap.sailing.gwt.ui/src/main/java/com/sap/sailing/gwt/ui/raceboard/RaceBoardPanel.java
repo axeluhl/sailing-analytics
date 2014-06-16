@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -233,12 +234,28 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
-
         addCompetitorsFilterControl(viewControlsPanel);
-
-        addMediaSelectorToNavigationMenu();   
+        addMediaSelectorToNavigationMenu();
+        if (getConfiguration().isShowViewStreamlets()) {
+            showWindStreamlet(raceMap);
+        }
     }
  
+    /**
+     * Loads all of the race's wind and displays it in a full canvas overlay
+     */
+    private void showWindStreamlet(RaceMap raceMap) {
+        // TODO ideas: let WindStreamletsRaceboardOverlay implement TimeListener and let it be responsible for updating the WindInfoForRaceDTO in place;
+        // With an in-place update, the Swarm would implicitly respond to getVector() requests correctly which would probably be the easiest way
+        // to come to an updating streamlet.
+        // The GetWindInfoAction should be assembled for all available wind sources, starting at start of tracking or the last fix in that source,
+        // whichever is later, hence obtaining all new wind fixes for that specific wind source, then updating the existing WindInfoForRaceDTO.
+        // TODO implement WindInfoForRaceDTO.merge to allow for the merging of wind data received from a GetWindInfoAction.
+//        GetWindInfoAction getWindInfo = new GetWindInfoAction(getSailingService(), selectedRaceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, onlyUpToNewestEvent)
+        WindStreamletsRaceboardOverlay streamletOverlay; // = new WindStreamletsCanvasOverlay(raceMap.getMap(), /* zIndex */ 0,
+//                timer, windInfoForRace);
+    }
+
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
         

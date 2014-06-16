@@ -60,7 +60,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
             setCanvasSettings();
             this.swarm = new Swarm(this, map, timer, field);
         }
-        this.swarm.start(40, windFieldDTO);
+        this.swarm.start(40);
     }
 
     public void stopStreamlets() {
@@ -128,7 +128,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
                 map.setZoom(5);
                 map.panTo(f.getCenter());
                 this.swarm = new Swarm(this, map, timer, f);
-                this.swarm.start(/* animationIntervalMillis */ 40, /* windField */ null);
+                this.swarm.start(/* animationIntervalMillis */ 40);
             }
         }
     }

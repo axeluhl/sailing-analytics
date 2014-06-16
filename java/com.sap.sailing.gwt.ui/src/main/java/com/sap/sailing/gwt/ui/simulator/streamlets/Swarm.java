@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.gwt.client.player.TimeListener;
 
@@ -55,7 +54,7 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
     }
 
-    public void start(int animationIntervalMillis, WindFieldDTO windField) {
+    public void start(int animationIntervalMillis) {
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
         this.updateBounds();
