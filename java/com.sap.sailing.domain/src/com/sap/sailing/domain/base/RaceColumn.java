@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
@@ -36,10 +37,11 @@ public interface RaceColumn extends Named {
     RaceLogInformation getRaceLogInformation();
     
     /**
-     * Gets the race column's race log associated to the passed fleet.
+     * Gets the race column's race log associated to the passed fleet. Note that the result may be <code>null</code>
+     * particularly for columns in a {@link MetaLeaderboard}.
      * 
      * @param fleet
-     * @return the race log.
+     * @return the race log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
     RaceLog getRaceLog(Fleet fleet);
     
