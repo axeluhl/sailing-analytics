@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -266,12 +267,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
     private LatLngBounds currentMapBounds;
+    
+    private WindStreamletsRaceboardOverlay streamletOverlay;
+    private final boolean showViewStreamlets;
+    private final RegattaAndRaceIdentifier raceIdentifier;
 
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
-            CompetitorSelectionProvider competitorSelection, StringMessages stringMessages, boolean showMapControls) {
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
+            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets,
+            RegattaAndRaceIdentifier raceIdentifier) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.raceIdentifier = raceIdentifier;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
@@ -289,6 +297,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
+        this.showViewStreamlets = showViewStreamlets;
         initializeData(showMapControls);
         
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
@@ -377,10 +386,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   }
               });
               
-              //If there was a time change before the API was loaded, reset the time
+              // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
+              }
+              // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's visible
+              streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
+                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages);
+              streamletOverlay.addToMap();
+              if (showViewStreamlets) {
+                  streamletOverlay.setVisible(true);
               }
               //Data has been initialized
               RaceMap.this.isMapInitialized = true;
@@ -1670,6 +1686,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
             requiredRedraw = true;
+        }
+        if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
+            settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
+            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
         if (requiredRedraw) {
             redraw();

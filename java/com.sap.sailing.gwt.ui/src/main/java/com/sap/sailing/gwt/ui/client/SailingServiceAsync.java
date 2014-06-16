@@ -139,6 +139,9 @@ public interface SailingServiceAsync {
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
+     * @param windSourceTypeNames
+     *            if <code>null</code>, information from all wind sources is returned; otherwise, information only from
+     *            the sources listed in this parameter by name are returned
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is

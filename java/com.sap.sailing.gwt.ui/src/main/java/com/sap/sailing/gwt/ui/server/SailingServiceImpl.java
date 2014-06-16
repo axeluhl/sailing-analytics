@@ -1316,6 +1316,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
+     * @param to
+     *            if <code>null</code>, data is returned up to end of race; if the end of race is not known and
+     *            <code>null</code> is used for this parameter, <code>null</code> is returned.
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
