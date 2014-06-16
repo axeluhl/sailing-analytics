@@ -1389,8 +1389,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
             e.printStackTrace();
         }
-        Mark mappedTo = baseDomainFactory.getOrCreateMark(
-                (Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
+        //have to load complete mark, as no order is guaranteed for loading of racelog events
+        Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
         TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
         TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
         return raceLogEventFactory.createDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, device, mappedTo, passId, from, to);
