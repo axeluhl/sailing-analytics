@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -393,6 +394,12 @@ public class LeaderboardData extends ExportAction {
                         }
                     }
                     addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", legCounterForMaxSpeed);
+                    TrackedLeg trackedLegWithTypeInformation = gpsFixWithSpeedAndLegInformation.getC().getTrackedLeg();
+                    if (trackedLegWithTypeInformation != null) {
+                        addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", trackedLegWithTypeInformation.getLegType(gpsFixWithSpeedAndLegInformation.getA().getTimePoint()).name());
+                    } else {
+                        addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", "UNKNOWN");
+                    }
                 } else {
                     addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", 0);
                 }
