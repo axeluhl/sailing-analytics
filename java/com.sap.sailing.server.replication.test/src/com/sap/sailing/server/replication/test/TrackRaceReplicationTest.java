@@ -151,7 +151,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testRaceTimeReplication() throws InterruptedException, Exception {
         startTracking();
-        Thread.sleep(1000);
+        Thread.sleep(2000); // kept failing several times for a 1000ms timeout
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
