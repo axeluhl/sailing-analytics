@@ -7,6 +7,13 @@
  
     <g:HTMLPanel>
 		<p:header.EventHeader ui:field='eventHeader'/>
+		<h1>A lot of content</h1>
+		<h1>A lot of content</h1>
+				<h1>A lot of content</h1>
+				<h1>A lot of content</h1>
+						<h1>A lot of content</h1>
+						<h1>A lot of content</h1>
+								<h1>A lot of content</h1>
 		<s:eventsponsors.EventSponsors ui:field='eventSponsors'/>
 	</g:HTMLPanel>
 </ui:UiBinder>    

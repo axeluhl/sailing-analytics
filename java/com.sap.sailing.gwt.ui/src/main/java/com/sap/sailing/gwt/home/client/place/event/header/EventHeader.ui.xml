@@ -8,8 +8,8 @@
     <g:HTMLPanel>
 
 <!-- The header of an event including the event navigation-->
-<div class="{local_res.css.eventheaderwrapper}">
-  <div class="{local_res.css.eventheader}">
+<div data-navigationtype="normal" class="{local_res.css.eventheaderwrapper}">
+  <div ui:field='eventHeaderDiv' class="{local_res.css.eventheader}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
         <div class="{local_res.css.eventheader_intro}"><img ui:field='eventLogo' alt="" height="140" width="140" class="{local_res.css.eventheader_intro_logo}"></img>
@@ -32,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationnormal}">
+  <div ui:field="eventNavigationNormalDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationnormal}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <a href="event-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Overview</a>
@@ -47,7 +47,7 @@
       </div>
     </div>
   </div>
-  <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
+  <div ui:field="eventNavigationCompactDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <a href="event-overview.html">
@@ -68,7 +68,7 @@
       </div>
     </div>
   </div>
-  <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompactfloating}">
+  <div ui:field="eventNavigationFloatingDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompactfloating}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <!--  event -->
