@@ -641,6 +641,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setyRes(yRes);
         windParams.setBorder(border);
         busyIndicator.setBusy(true);
+        timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
@@ -763,6 +764,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setBorder(border);
 
         busyIndicator.setBusy(true);
+        timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getSimulatorResults(mode, raceCourseDirection, windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
