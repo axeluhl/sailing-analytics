@@ -10,6 +10,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.impl.AbstractColor;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -54,7 +55,18 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         Column<MarkDTO, SafeHtml> markColorColumn = new ColorColumn<>(new ColorRetriever<MarkDTO>() {
             @Override
             public Color getColor(MarkDTO t) {
-                return t.color != null && ! t.color.isEmpty() ? new RGBColor(t.color) : null;
+                Color result;
+                try {
+                    result = t.color != null && !t.color.isEmpty() ? AbstractColor
+                            .getColorByLowercaseNameStatic(t.color.toLowerCase()) == null ? new RGBColor(t.color)
+                            : AbstractColor.getColorByLowercaseNameStatic(t.color.toLowerCase()) : null;
+                } catch (IllegalArgumentException e) {
+                    // if the color name isn't recognized, neither as a named color nor as a HTML color code, an exception will
+                    // result because of the attempt to interpret something unknown as an HTML color. Catch this and return null as
+                    // the color
+                    result = null;
+                }
+                return result;
             }
         });
         table.addColumn(markColorColumn, stringMessages.color());
