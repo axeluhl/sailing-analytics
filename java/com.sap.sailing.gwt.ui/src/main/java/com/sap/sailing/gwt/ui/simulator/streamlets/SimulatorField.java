@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class SimulatorField implements VectorField {
 
@@ -36,6 +37,8 @@ public class SimulatorField implements VectorField {
 	private double x1;
 	private double y0;
 	private double y1;
+	
+	private double motionFactor;
 
 	public Position visSW;
 	public Position visNE;
@@ -54,7 +57,7 @@ public class SimulatorField implements VectorField {
 	private double[][][] data;
 	private int step;
 	
-	public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams) {
+	public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
 
 		this.step = 0;
 		
@@ -82,6 +85,8 @@ public class SimulatorField implements VectorField {
 		this.y0 = baseData.get("boundsSW").isObject().get("lat").isNumber().doubleValue();
 		this.y1 = baseData.get("boundsNE").isObject().get("lat").isNumber().doubleValue();
 
+		this.motionFactor = 0.07 * parameters.motionScale;
+		
 		this.visSW = new DegreePosition(0.0, 0.0);
 		this.visNE = new DegreePosition(0.0, 0.0);
 		
@@ -304,7 +309,7 @@ public class SimulatorField implements VectorField {
 	}
 
 	public double motionScale(int zoomLevel) {
-		return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+		return this.motionFactor * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
 	}
 
 	public double particleWeight(Position p, Vector v) {

@@ -5,6 +5,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class RectField implements VectorField {
 
@@ -14,6 +15,8 @@ public class RectField implements VectorField {
 	public double x1;
 	public double y0;
 	public double y1;
+	
+	private double motionFactor;
 
 	//public double visX0;
 	public double visX1;
@@ -30,12 +33,14 @@ public class RectField implements VectorField {
 	private double maxLength;
 	public double particleFactor;
 
-	public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
+	public RectField(Vector[][] field, double x0, double y0, double x1, double y1, StreamletParameters parameters) {
 		this.x0 = x0;
 		this.x1 = x1;
 		this.y0 = y0;
 		this.y1 = y1;
 
+		this.motionFactor = 0.9 * parameters.motionScale;
+		
 		this.visSW = new DegreePosition(0.0, 0.0);
 		this.visNE = new DegreePosition(0.0, 0.0);
 		
@@ -60,7 +65,7 @@ public class RectField implements VectorField {
 		my = (my / this.h) * (y1 - y0) + y0;
 	}
 
-	public static RectField read(String jsonData, boolean correctForSphere) {
+	public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters) {
 		JSONObject data = JSONParser.parseLenient(jsonData).isObject();
 		int w = (int)data.get("gridWidth").isNumber().doubleValue();
 		int h = (int)data.get("gridHeight").isNumber().doubleValue();
@@ -83,7 +88,7 @@ public class RectField implements VectorField {
 				field[x][y] = v;
 			}
 		}
-		RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber().doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue());
+		RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber().doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue(), parameters);
 		return result;
 	}
 
@@ -144,7 +149,7 @@ public class RectField implements VectorField {
 	}
 
 	public double motionScale(int zoomLevel) {
-		return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
+		return this.motionFactor * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
 	}
 
 	public double particleWeight(Position p, Vector v) {
