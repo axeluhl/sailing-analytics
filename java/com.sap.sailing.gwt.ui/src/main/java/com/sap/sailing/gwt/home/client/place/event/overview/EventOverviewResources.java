@@ -31,7 +31,6 @@ public interface EventOverviewResources extends ClientBundle {
         String latestraceresults_detail_wrapperimage();
         String lightbox();
         String lightbox_overlay();
-        String Microsoft();
         String lightbox_overlayhidden();
         String lightbox_content();
         String lightbox_contenthidden();
@@ -69,6 +68,7 @@ public interface EventOverviewResources extends ClientBundle {
         String grid();
         String weathershort_title();
         String weathershort_data();
+        String weathershort_datatemperature();
         String weathershort_datawindspeed();
         String weathershort_datawinddirection();
         String newsupdate();

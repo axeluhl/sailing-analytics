@@ -7,13 +7,10 @@
  
     <g:HTMLPanel>
 		<p:header.EventHeader ui:field='eventHeader'/>
-		<h1>A lot of content</h1>
-		<h1>A lot of content</h1>
-				<h1>A lot of content</h1>
-				<h1>A lot of content</h1>
-						<h1>A lot of content</h1>
-						<h1>A lot of content</h1>
-								<h1>A lot of content</h1>
+		<p:overview.EventOverview ui:field='eventOverview'/>
+		<p:regattalist.EventRegattaList ui:field='eventRegattaList'/>
+		<p:schedule.EventSchedule ui:field='eventSchedule'/>
+		<p:media.EventMedia ui:field='eventMedia'/>
 		<s:eventsponsors.EventSponsors ui:field='eventSponsors'/>
 	</g:HTMLPanel>
 </ui:UiBinder>    
