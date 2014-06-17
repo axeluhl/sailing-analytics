@@ -17,9 +17,11 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -36,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
+public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements AverageLatitudeProvider {
     public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -53,6 +55,9 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     private final StringMessages stringMessages;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final Scheduler scheduler;
+    
+    private long latitudeCount;
+    private double latitudeSum;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
@@ -67,9 +72,26 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
         windInfoForRace.raceIsKnownToStartUpwind = true; // default
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace);
+        updateAverageLatitudeDeg(windInfoForRace);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace, this);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
+    }
+
+    @Override
+    public double getAverageLatitudeDeg() {
+        return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
+    }
+
+    private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
+        for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
+            for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
+                if (wind.position != null) {
+                    latitudeSum += wind.position.latDeg;
+                    latitudeCount++;
+                }
+            }
+        }
     }
 
     public void startStreamlets() {
@@ -150,6 +172,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
 
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {
+                                updateAverageLatitudeDeg(result);
                                 // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max confidences
                                 if (e.getValue().windFixes == null) {
                                     e.getValue().windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;

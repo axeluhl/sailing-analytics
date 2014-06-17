@@ -31,8 +31,17 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     private final double halfConfidenceDistanceNauticalMiles;
     private final double cosineOfAverageLatitude;
     
-    public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance, double averageLatitudeDeg) {
-        this.cosineOfAverageLatitude = Math.cos(averageLatitudeDeg/180.*Math.PI);
+    public static interface AverageLatitudeProvider {
+        double getAverageLatitudeDeg();
+    }
+    
+    public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance,
+            AverageLatitudeProvider averageLatitudeDeg) {
+        try {
+            this.cosineOfAverageLatitude = Math.cos(averageLatitudeDeg.getAverageLatitudeDeg()/180.*Math.PI);
+        } catch (Exception e) {
+            throw new RuntimeException("Internal error", e);
+        }
         this.halfConfidenceAfterMilliseconds = halfConfidenceAfterMilliseconds;
         this.halfConfidenceDistanceNauticalMiles = halfConfidenceDistance.getNauticalMiles();
     }

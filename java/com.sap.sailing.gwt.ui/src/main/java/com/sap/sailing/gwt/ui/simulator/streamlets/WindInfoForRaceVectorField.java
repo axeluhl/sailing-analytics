@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
@@ -53,30 +54,12 @@ public class WindInfoForRaceVectorField implements VectorField {
     };
     private final WindInfoForRaceDTO windInfoForRace;
     
-    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace) {
+    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, AverageLatitudeProvider averageLatitudeDeg) {
         this.windInfoForRace = windInfoForRace;
-        weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */ 3000,
-                                               /* halfConfidenceDistance */ new MeterDistance(1000),
-                                               // FIXME the average latitude initially ends up being NaN because there are no fixes;
-                                               // it needs to be updated each time new wind data is received;
-                                               // use sum/count pattern to update efficiently incrementally
-                                               getAverageLatitudeDeg(windInfoForRace));
+        weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */3000,
+                /* halfConfidenceDistance */new MeterDistance(1000), averageLatitudeDeg);
     }
     
-    private double getAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
-        double latSum = 0;
-        long count = 0;
-        for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
-                if (wind.position != null) {
-                    latSum += wind.position.latDeg;
-                    count++;
-                }
-            }
-        }
-        return latSum / count;
-    }
-
     @Override
     public boolean inBounds(Position p) {
         // all positions are always considered in bounds as we'll always try to interpolate/extrapolate
