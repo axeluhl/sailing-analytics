@@ -30,7 +30,7 @@ public interface Color extends Serializable {
     final Color CYAN = new RGBColor(0, 255, 255);
 
     final Color BLUE = new RGBColor(0, 0, 255);
-
+    
     com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB();
 
     com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV();
