@@ -1670,7 +1670,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
-        MarkType markType = MarkType.valueOf((String) dbObject.get(FieldNames.MARK_TYPE.name()));
+        Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
+        MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
         
         Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
         return mark;
