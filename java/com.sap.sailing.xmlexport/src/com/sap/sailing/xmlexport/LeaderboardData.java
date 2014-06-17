@@ -318,7 +318,11 @@ public class LeaderboardData extends ExportAction {
             for (int i : timePointsInSecondsBeforeStart) {
                 TimePoint beforeRaceStartTime = race.getStartOfRace().minus(i*1000);
                 addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, beforeRaceStartTime).getMeters());
-                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(beforeRaceStartTime).getKnots());
+                Speed estimatedSpeedBeforeStarttime = race.getTrack(competitor).getEstimatedSpeed(beforeRaceStartTime);
+                if (estimatedSpeedBeforeStarttime == null) {
+                    raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid speed " + i + " seconds before start for this race!");
+                }
+                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", estimatedSpeedBeforeStarttime != null ? estimatedSpeedBeforeStarttime.getKnots() : 0);
                 addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceFromStarboardSideOfStartLine(competitor, beforeRaceStartTime).getMeters());
                 
                 Iterator<Mark> marksForStartLine = race.getStartLine(beforeRaceStartTime).getWaypoint().getControlPoint().getMarks().iterator();
@@ -367,7 +371,11 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "start_tack", startTack != null ? startTack.name() : "UNKNOWN");
             addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
-            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
+            Speed estimatedSpeedAtStartSignal = race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace());
+            if (estimatedSpeedAtStartSignal == null) {
+                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid speed at start for this race!");
+            }
+            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", estimatedSpeedAtStartSignal != null ? estimatedSpeedAtStartSignal.getKnots() : 0);
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "rank_based_on_distance_from_starboard_side_of_start_line", competitorToDistanceRank.get(competitor));
             addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", race.getSpeedWhenCrossingStartLine(competitor).getKnots());
