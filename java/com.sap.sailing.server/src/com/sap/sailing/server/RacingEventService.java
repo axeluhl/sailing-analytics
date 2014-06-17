@@ -365,14 +365,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
-     * @param leaderboardGroupIds
-     *            TODO
-     * @param imageURLs TODO
-     * @param videoURLs TODO
-     * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
+    void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -583,5 +580,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void addEventWithoutReplication(Event event);
 
+    /**
+     * Adds the leaderboard group to this service; if the group has an overall leaderboard, the overall leaderboard
+     * is added to this service as well. For both, the group and the overall leaderboard, any previously existing
+     * objects by the same name of that type will be replaced.
+     */
     void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 }

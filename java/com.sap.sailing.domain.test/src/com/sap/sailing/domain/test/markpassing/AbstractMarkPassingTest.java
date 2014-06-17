@@ -42,7 +42,9 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.sap.sse.common.Util;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
@@ -62,7 +64,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         simpleName = getClass().getSimpleName();
     }
 
-    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
+    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
@@ -88,7 +90,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         setUp(raceNumber);
         testWholeRace();
         testMiddleOfRace(0);
@@ -96,9 +98,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     private void testWholeRace() {
-
         Map<Competitor, Map<Waypoint, MarkPassing>> computedPasses = new HashMap<>();
-
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
         new MarkPassingCalculator(getTrackedRace(), false);

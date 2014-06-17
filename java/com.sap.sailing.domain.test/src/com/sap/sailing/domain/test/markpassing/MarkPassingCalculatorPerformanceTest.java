@@ -66,6 +66,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         f.getCandidateDeltas(ron, fixesAdded);
         time = System.currentTimeMillis() - time;
         result.put("FinderPerformance", time);
+        System.out.println(time);
         Assert.assertTrue(time < 2000);
     }
 

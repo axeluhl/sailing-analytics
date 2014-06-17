@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -45,9 +46,12 @@ import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Util;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.Route;
-import com.tractrac.clientmodule.data.RouteData;
+import com.sap.sse.common.Util.Triple;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.route.IControlRoute;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 import difflib.Chunk;
 import difflib.Delta;
@@ -60,7 +64,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private Course course;
     private Regatta domainRegatta;
     private DynamicTrackedRegatta trackedRegatta;
-    private final RouteData[] routeData = new RouteData[1];
+    private final IControlRoute[] routeData = new IControlRoute[1];
     private DomainFactory domainFactory;
 
     public CourseUpdateTest() throws URISyntaxException, MalformedURLException {
@@ -68,29 +72,31 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
-        domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
+        domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
+        IRace tractracRace = getTracTracEvent().getRaces().iterator().next();
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(),
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(), tractracRace,
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
-                }, /* delayToLiveInMillis */ 0l, 
-                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                    }
+                },
+                /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
+                null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber()) {
             @Override
-            protected void handleEvent(com.sap.sse.common.Util.Triple<Route, RouteData, Race> event) {
+            protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
                 super.handleEvent(event);
                 synchronized (routeData) {
-                    routeData[0] = event.getB();
+                    routeData[0] = event.getA();
                     routeData.notifyAll();
                 }
             }
         });
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
@@ -162,9 +168,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
         waitForRouteData();
-        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
-                routeData[0].getPoints());
-        final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(controlPoints.size()-1);
+        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControl removedControlPoint = controlPoints.remove(controlPoints.size()-1);
         course.addCourseListener(new CourseListener() {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -187,9 +192,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testLastButOneWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
         waitForRouteData();
-        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
-                routeData[0].getPoints());
-        final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(1);
+        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
+        final IControl removedControlPoint = controlPoints.remove(1);
         course.addCourseListener(new CourseListener() {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -219,11 +223,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        final com.tractrac.clientmodule.Event event = new com.tractrac.clientmodule.Event(UUID.randomUUID(), "Event1");
-        final com.tractrac.clientmodule.ControlPoint cp1 = event.addControlPoint(UUID.randomUUID(), "CP1", /* hasTwo */false);
+        final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
         waitForRouteData();
-        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
-                routeData[0].getPoints());
+        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -247,15 +249,21 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             ((CourseImpl) course).unlockAfterWrite();
         }
     }
+
+    private IControl createMockedControlPoint(String name, int numberOfMarks, UUID id) {
+        final IControl cp1 = Mockito.mock(IControl.class);
+        Mockito.when(cp1.getName()).thenReturn(name);
+        Mockito.when(cp1.getSize()).thenReturn(numberOfMarks);
+        Mockito.when(cp1.getId()).thenReturn(id);
+        return cp1;
+    }
     
     @Test
     public void testTrackedRacesTrackedLegsUpdatedProperly() throws InterruptedException, PatchFailedException {
         final boolean[] result = new boolean[1];
-        final com.tractrac.clientmodule.Event event = new com.tractrac.clientmodule.Event(UUID.randomUUID(), "Event1");
-        final com.tractrac.clientmodule.ControlPoint cp1 = event.addControlPoint(UUID.randomUUID(), "CP1", /* hasTwo */false);
+        final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
         waitForRouteData();
-        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
-                routeData[0].getPoints());
+        final List<IControl> controlPoints = new ArrayList<>(routeData[0].getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override

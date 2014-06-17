@@ -240,6 +240,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             @Override
             public void ok(WaypointDTO result) {
                 insert(waypoints, result, beforeSelection);
+                waypoints.getSelectionModel().setSelected(result, true);
             }
         }).show();
     }

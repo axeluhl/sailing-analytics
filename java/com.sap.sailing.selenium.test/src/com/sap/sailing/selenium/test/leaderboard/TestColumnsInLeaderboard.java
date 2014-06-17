@@ -114,7 +114,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         tracTracEvents.startTrackingForRace(this.trackableRace);
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.TRACKING);
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(this.trackedRace);
         
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();

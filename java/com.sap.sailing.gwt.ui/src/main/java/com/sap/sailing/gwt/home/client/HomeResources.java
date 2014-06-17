@@ -32,6 +32,7 @@ public interface HomeResources extends ClientBundle {
         String button();
         String buttoninactive();
         String buttonrefresh();
+        String buttonsearch();
         String label();
         String morelink();
         String dummy();
@@ -39,9 +40,6 @@ public interface HomeResources extends ClientBundle {
         String mainsection_header();
         String mainsection_header_title();
         String mainsection_navigation();
-        String flag();
-        String flag_DE();
-        String flag_DK();
     }
     
     @Shared 

@@ -57,7 +57,6 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     public void setUp() {
         this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
-        
         clearState(getContextRoot());
     }
     
@@ -67,53 +66,38 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     @Test
     public void testStartAndStopTrackingWithCorrectRegatta() {
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
-        
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(bmwCupDescriptor);
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
-        
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
-        
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.TRACKING);
-        
-        assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.TRACKING));
-        
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // with the TracAPI, REPLAY races reach status FINISHED when done loading
+        assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.FINISHED));
         trackedRacesList.stopTracking(this.trackedRace);
         trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED);
-        
         assertThat(trackedRacesList.getStatus(this.trackedRace), equalTo(Status.FINISHED));
     }
     
     @Test
     public void testStartTrackingWithDefaultReggataWhileReggataForBoatClassExists() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS));
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
-        
         tracTracEvents.setReggataForTracking(DEFAULT_REGATTA);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
-        
         TargetLocator locator = getWebDriver().switchTo();
         Alert alert = locator.alert();
         String text = alert.getText();
-        
         alert.dismiss();
-        
         String message = "There is at least one regatta for the selected boat classes. Do you really want " +
                 "to use the 'no regatta' selection?";
-        
         assertThat(text, containsString("WARNING"));
         assertThat(text, containsString(message));
     }
@@ -122,30 +106,22 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     public void testStartTrackingWithReggataAndNoneMatchingBoatClass() {
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         RegattaDescriptor idm2013Descriptor = new RegattaDescriptor(IDM_2013_EVENT, IDM_2013_BOAT_CLASS);
-        
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(bmwCupDescriptor);
         regattaStructure.createRegatta(idm2013Descriptor);
-        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
-        
         tracTracEvents.setReggataForTracking(idm2013Descriptor);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
-        
         TargetLocator locator = getWebDriver().switchTo();
         Alert alert = locator.alert();
         String text = alert.getText();
-        
         alert.dismiss();
-        
         String message = String.format("The selected races contain boat classes which are not the same as " +
                 "the boat class '%s' of the selected regatta. Do you really want to use the regatta '%s'?",
                 IDM_2013_BOAT_CLASS, IDM_2013_REGATTA);
-        
         assertThat(text, containsString("WARNING"));
         assertThat(text, containsString(message));
     }

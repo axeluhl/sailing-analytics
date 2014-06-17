@@ -663,6 +663,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
                 timePanel.timeChanged(windParams.getStartTime(), null);
+                if (windParams.isShowStreamlets2()) {
+                	windStreamletsCanvasOverlay.setEndDate(windParams.getEndTime());
+                }
 
                 busyIndicator.setBusy(false);
             }

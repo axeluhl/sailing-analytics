@@ -7,18 +7,24 @@ import java.text.ParseException;
 
 import org.junit.Test;
 
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+
 public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
 
     public StarIDM2013MarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
     }
-    
+
     @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
+    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException,
+            SubscriberInitializationException, CreateModelException {
         testRace("5");
     }
+
     @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException {
+    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException,
+            SubscriberInitializationException, CreateModelException {
         testRace("6");
     }
 
@@ -31,5 +37,5 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
     protected String getExpectedEventName() {
         return "IDM Starboot 2013";
     }
-    
+
 }

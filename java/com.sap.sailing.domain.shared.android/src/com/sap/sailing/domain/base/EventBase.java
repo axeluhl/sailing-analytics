@@ -11,8 +11,10 @@ import com.sap.sse.common.Named;
  * Base interface for an Event consisting of all static information, which might be shared
  * by the server and an Android application.
  */
-public interface EventBase extends Named, Renamable, WithID {
+public interface EventBase extends Named, WithDescription, Renamable, WithID {
 
+    void setDescription(String description);
+    
     /**
      * @return a non-<code>null</code> venue for this event
      */
@@ -49,6 +51,26 @@ public interface EventBase extends Named, Renamable, WithID {
     void removeImageURL(URL imageURL);
     
     /**
+     * An event may have zero or more sponsors, each of which usually want to see their logo on the web page.
+     * 
+     * @return the sponsors' logos; always non-<code>null</code> but possibly empty
+     */
+    Iterable<URL> getSponsorImageURLs();
+    
+    void addSponsorImageURL(URL sponsorImageURL);
+    
+    void removeSponsorImageURL(URL sponsorImageURL);
+    
+    void setSponsorImageURLs(Iterable<URL> sponsorImageURLs);
+    
+    /**
+     * An optional logo image; may return <code>null</code>.
+     */
+    URL getLogoImageURL();
+    
+    void setLogoImageURL(URL logoImageURL);
+    
+    /**
      * Replaces the {@link #getImageURLs() current contents of the image URL sequence} by the image URLs in
      * <code>imageURLs</code>.
      * 
@@ -79,6 +101,14 @@ public interface EventBase extends Named, Renamable, WithID {
      *            <code>null</code>)
      */
     void setVideoURLs(Iterable<URL> videoURLs);
+    
+    /**
+     * @return the URL of the event's official web site, or <code>null</code> if such a site does not exist or its URL
+     *         is not known
+     */
+    URL getOfficialWebsiteURL();
+    
+    void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 }

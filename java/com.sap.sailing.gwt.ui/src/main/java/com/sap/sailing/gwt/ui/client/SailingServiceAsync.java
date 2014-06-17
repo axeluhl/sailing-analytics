@@ -354,9 +354,10 @@ public interface SailingServiceAsync {
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
             AsyncCallback<EventDTO> callback);
 
-    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            AsyncCallback<EventDTO> callback);
+    void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            Iterable<String> sponsorImageURLs, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
@@ -540,7 +541,7 @@ public interface SailingServiceAsync {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
-    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 

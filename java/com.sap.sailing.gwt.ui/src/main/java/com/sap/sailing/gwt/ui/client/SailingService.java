@@ -276,8 +276,10 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    EventDTO updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
+    EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            Iterable<String> sponsorImageURLs) throws Exception;
 
     EventDTO createEvent(String eventName, Date startDate, Date endDate, String description, boolean isPublic,
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs) throws Exception;
@@ -415,7 +417,7 @@ public interface SailingService extends RemoteService {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
-    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
+    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination) throws Exception;
     
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
     

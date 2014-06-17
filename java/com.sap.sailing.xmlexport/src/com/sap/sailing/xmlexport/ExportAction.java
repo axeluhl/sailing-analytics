@@ -30,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
@@ -174,20 +175,21 @@ public abstract class ExportAction {
         return result;
     }
     
-    public Speed getMaximumSpeedOverGround(Competitor competitor, TrackedRace trackedRace) {
-        Speed maxSpeed = null;
+    public com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> getMaximumSpeedOverGround(Competitor competitor, TrackedRace trackedRace) {
+        com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> speedWithGPSFix = null;
+        TrackedLegOfCompetitor legOfCompetitorWhereSpeedHasBeenReached = null;
         if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
             if (!markPassings.isEmpty()) {
                 TimePoint from = markPassings.first().getTimePoint();
                 TimePoint to = trackedRace.getEndOfRace();
-                com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
-                if (maxSpeedWithGPSFix != null) {
-                    maxSpeed = maxSpeedWithGPSFix.getB();
-                }
+                speedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+            }
+            if (speedWithGPSFix != null) {
+                legOfCompetitorWhereSpeedHasBeenReached = trackedRace.getTrackedLeg(competitor, speedWithGPSFix.getA().getTimePoint());
             }
         }
-        return maxSpeed;
+        return new com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor>(speedWithGPSFix.getA(), speedWithGPSFix.getB(), legOfCompetitorWhereSpeedHasBeenReached);
     }
 
     public Speed getAverageSpeedOverGround(Leaderboard leaderboard, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {

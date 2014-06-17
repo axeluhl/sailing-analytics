@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Named;
 

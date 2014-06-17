@@ -129,7 +129,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -1100,7 +1100,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
+    public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             long timeoutInMilliseconds) throws Exception {
         final Object trackerID = params.getTrackerID();
         NamedReentrantReadWriteLock raceTrackersByIdLock = lockRaceTrackersById(trackerID);
@@ -1128,10 +1128,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 } finally {
                     LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
                 }
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 String regattaName = tracker.getRegatta().getName();
                 Regatta regattaWithName = regattasByName.get(regattaName);
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 if (regattaWithName != null) {
                     if (regattaWithName != tracker.getRegatta()) {
                         if (Util.isEmpty(regattaWithName.getAllRaces())) {
@@ -1901,6 +1901,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
+        if (leaderboardGroup.hasOverallLeaderboard()) {
+            addLeaderboard(leaderboardGroup.getOverallLeaderboard());
+        }
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
@@ -2237,6 +2240,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
             }
             
+            // make sure to initialize listeners correctly
+            for (Regatta regatta : regattasByName.values()) {
+                RegattaImpl regattaImpl = (RegattaImpl)regatta;
+                regattaImpl.initializeSeriesAfterDeserialize();
+            }
+            
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
@@ -2278,13 +2287,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
+    public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
         }
         event.setName(eventName);
+        event.setDescription(eventDescription);
         event.setStartDate(startDate);
         event.setEndDate(endDate);
         event.setPublic(isPublic);
@@ -2299,8 +2310,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         }
         event.setLeaderboardGroups(leaderboardGroups);
+        event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setLogoImageURL(logoImageURL);
         event.setImageURLs(imageURLs);
         event.setVideoURLs(videoURLs);
+        event.setSponsorImageURLs(sponsorImageURLs);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
     }
