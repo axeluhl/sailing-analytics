@@ -57,6 +57,9 @@ public class WindInfoForRaceVectorField implements VectorField {
         this.windInfoForRace = windInfoForRace;
         weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */ 3000,
                                                /* halfConfidenceDistance */ new MeterDistance(1000),
+                                               // FIXME the average latitude initially ends up being NaN because there are no fixes;
+                                               // it needs to be updated each time new wind data is received;
+                                               // use sum/count pattern to update efficiently incrementally
                                                getAverageLatitudeDeg(windInfoForRace));
     }
     
@@ -123,13 +126,15 @@ public class WindInfoForRaceVectorField implements VectorField {
             atDummy.measureTimepoint = at.getTime();
             int pos = Collections.binarySearch(windFixes, atDummy, windByMeasureTimePointComparator);
             if (pos < 0) {
-                pos = (-pos) + 1; // now pos points at the insertion point
+                pos = (-pos) - 1; // now pos points at the insertion point
                 if (pos == 0
-                        || Math.abs(windFixes.get(pos).measureTimepoint - at.getTime()) < Math.abs(windFixes
-                                .get(pos - 1).measureTimepoint - at.getTime())) {
+                        || (pos < windFixes.size() &&
+                            Math.abs(windFixes.get(pos).measureTimepoint - at.getTime()) < Math.abs(windFixes
+                                .get(pos - 1).measureTimepoint - at.getTime()))) {
                     result = windFixes.get(pos);
                 } else {
                     // pos doesn't point to the first element, nor is the element at pos time-wise closer than the element at pos-1
+                    // or pos points beyond the end of the list
                     result = windFixes.get(pos-1);
                 }
             } else {

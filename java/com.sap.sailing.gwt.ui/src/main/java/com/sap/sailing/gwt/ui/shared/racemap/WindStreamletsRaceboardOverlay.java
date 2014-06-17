@@ -132,8 +132,8 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     }
     
     private void updateWindField() {
-        Date beginningOfTime = new Date(Long.MIN_VALUE);
-        Date endOfTime = new Date(Long.MAX_VALUE);
+        Date beginningOfTime = null;
+        Date endOfTime = null;
         for (final Entry<WindSource, WindTrackInfoDTO> e : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             if (!Util.contains(windInfoForRace.windSourcesToExclude, e.getKey())) {
                 final Date timeOfLastFixOfSource = (e.getValue().windFixes != null && !e.getValue().windFixes.isEmpty())
