@@ -29,21 +29,21 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     private static final long serialVersionUID = -262428237738496818L;
     private final long halfConfidenceAfterMilliseconds;
     private final double halfConfidenceDistanceNauticalMiles;
-    private final double cosineOfAverageLatitude;
+    private final AverageLatitudeProvider averageLatitudeDegProvider;
     
     public static interface AverageLatitudeProvider {
         double getAverageLatitudeDeg();
     }
     
     public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance,
-            AverageLatitudeProvider averageLatitudeDeg) {
-        try {
-            this.cosineOfAverageLatitude = Math.cos(averageLatitudeDeg.getAverageLatitudeDeg()/180.*Math.PI);
-        } catch (Exception e) {
-            throw new RuntimeException("Internal error", e);
-        }
+            AverageLatitudeProvider averageLatitudeDegProvider) {
         this.halfConfidenceAfterMilliseconds = halfConfidenceAfterMilliseconds;
         this.halfConfidenceDistanceNauticalMiles = halfConfidenceDistance.getNauticalMiles();
+        this.averageLatitudeDegProvider = averageLatitudeDegProvider;
+    }
+
+    private double getCosineOfAverageLatitude() {
+        return Math.cos(averageLatitudeDegProvider.getAverageLatitudeDeg()/180.*Math.PI);
     }
     
     @Override
@@ -69,7 +69,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
 
     private double getApproximateNauticalMileDistance(PositionDTO p1, PositionDTO p2) {
         final double latDiffDeg = Math.abs(p1.latDeg - p2.latDeg);
-        final double normalizedLngDiffDeg = cosineOfAverageLatitude * Math.abs(p1.lngDeg - p2.lngDeg);
+        final double normalizedLngDiffDeg = getCosineOfAverageLatitude() * Math.abs(p1.lngDeg - p2.lngDeg);
         // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.
         return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) / 60.;
     }
