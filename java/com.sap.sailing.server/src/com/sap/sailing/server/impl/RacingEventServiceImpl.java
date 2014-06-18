@@ -1901,6 +1901,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         } finally {
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
+        if (leaderboardGroup.hasOverallLeaderboard()) {
+            addLeaderboard(leaderboardGroup.getOverallLeaderboard());
+        }
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
@@ -2235,6 +2238,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois.readObject()) {
                 remoteSailingServerSet.add(remoteSailingServerReference);
                 logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
+            }
+            
+            // make sure to initialize listeners correctly
+            for (Regatta regatta : regattasByName.values()) {
+                RegattaImpl regattaImpl = (RegattaImpl)regatta;
+                regattaImpl.initializeSeriesAfterDeserialize();
             }
             
             logger.info(logoutput.toString());

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -189,7 +188,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
                     builder.appendEscaped(courseArea.getName());
                     if (i < courseAreasCount) {
-                        builder.appendHtmlConstant("<br>");
+                        builder.appendHtmlConstant(",&nbsp;");
+                        // not more than  4 course areas per line
+                        if(i % 4 == 0) {
+                            builder.appendHtmlConstant("<br>");
+                        }
                     }
                     i++;
                 }
@@ -215,57 +218,39 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             }
         };
 
-        final SafeHtmlCell imageURLsCell = new SafeHtmlCell();
-        final Column<EventDTO, SafeHtml> imageURLsColumn = new Column<EventDTO, SafeHtml>(imageURLsCell) {
+        final TextColumn<EventDTO> imageURLsColumn = new TextColumn<EventDTO>() {
             @Override
-            public SafeHtml getValue(EventDTO event) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                boolean first = true;
-                for (String imageURL : event.getImageURLs()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    builder.appendEscaped(imageURL);
+            public String getValue(EventDTO event) {
+                String result = "";
+                int imageCount = Util.size(event.getImageURLs());
+                if(imageCount > 0) {
+                    result = imageCount + " image(s)";
                 }
-                return builder.toSafeHtml();
+                return result;
             }
         };
 
-        final SafeHtmlCell videoURLsCell = new SafeHtmlCell();
-        final Column<EventDTO, SafeHtml> videoURLsColumn = new Column<EventDTO, SafeHtml>(videoURLsCell) {
+        final TextColumn<EventDTO> videoURLsColumn = new TextColumn<EventDTO>() {
             @Override
-            public SafeHtml getValue(EventDTO event) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                boolean first = true;
-                for (String videoURL : event.getVideoURLs()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    builder.appendEscaped(videoURL);
+            public String getValue(EventDTO event) {
+                String result = "";
+                int videoCount = Util.size(event.getVideoURLs());
+                if(videoCount > 0) {
+                    result = videoCount + " video(s)";
                 }
-                return builder.toSafeHtml();
+                return result;
             }
         };
 
-        final SafeHtmlCell sponsorImageURLsCell = new SafeHtmlCell();
-        final Column<EventDTO, SafeHtml> sponsorImageURLsColumn = new Column<EventDTO, SafeHtml>(sponsorImageURLsCell) {
+        final TextColumn<EventDTO> sponsorImageURLsColumn = new TextColumn<EventDTO>() {
             @Override
-            public SafeHtml getValue(EventDTO event) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                boolean first = true;
-                for (String sponsorImageURL : event.getSponsorImageURLs()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    builder.appendEscaped(sponsorImageURL);
+            public String getValue(EventDTO event) {
+                String result = "";
+                int sponsorImageCount = Util.size(event.getSponsorImageURLs());
+                if(sponsorImageCount > 0) {
+                    result = sponsorImageCount + " sponsor image(s)";
                 }
-                return builder.toSafeHtml();
+                return result;
             }
         };
 
@@ -341,7 +326,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         mainPanel.add(eventTable);
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
-                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn, imageURLsColumn, videoURLsColumn));
+                venueNameColumn, startEndDateColumn, isPublicColumn));
         eventTable.getColumnSortList().push(startEndDateColumn);
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventProvider) {
@@ -646,9 +631,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
 
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
             Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
-            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn,
-            Column<EventDTO, SafeHtml> courseAreasColumn, Column<EventDTO, SafeHtml> imageURLsColumn,
-            Column<EventDTO, SafeHtml> videoURLsColumn) {
+            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
@@ -682,27 +665,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
-            }
-        });
-        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO e1, EventDTO e2) {
-                return new NaturalComparator().compare(Arrays.toString(e1.venue.getCourseAreas().toArray()),
-                        Arrays.toString(e2.venue.getCourseAreas().toArray()));
-            }
-        });
-        result.setComparator(imageURLsColumn, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO e1, EventDTO e2) {
-                return new NaturalComparator().compare(Arrays.toString(Util.toArray(e1.getImageURLs(), new String[0])),
-                        Arrays.toString(Util.toArray(e2.getImageURLs(), new String[0])));
-            }
-        });
-        result.setComparator(videoURLsColumn, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO e1, EventDTO e2) {
-                return new NaturalComparator().compare(Arrays.toString(Util.toArray(e1.getVideoURLs(), new String[0])),
-                        Arrays.toString(Util.toArray(e2.getVideoURLs(), new String[0])));
             }
         });
         return result;
