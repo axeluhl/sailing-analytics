@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainevents.MainEventsResources" />
+    <g:HTMLPanel>
+<!-- The events main content-->
+<div class="{local_res.css.mainevents} {res.mainCss.mainsection}">
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+      <header class="{res.mainCss.mainsection_header}">
+        <h3 class="{res.mainCss.mainsection_header_title}">Latest Events from the Sailing World</h3>
+      </header>
+    </div>
+  </div>
+  <div class="{res.mainCss.grid}">
+      <s:recentevent.RecentEvent ui:field='event1'/>
+      <s:recentevent.RecentEvent ui:field='event2'/>
+      <s:recentevent.RecentEvent ui:field='event3'/>
+  </div>
+  <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}">Show All Events</a></div>
+  </div>
+</div>
+    </g:HTMLPanel>
+</ui:UiBinder>

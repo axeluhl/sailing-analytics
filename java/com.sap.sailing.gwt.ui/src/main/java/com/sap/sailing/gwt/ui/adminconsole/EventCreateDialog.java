@@ -15,12 +15,20 @@ public class EventCreateDialog extends EventDialog {
 
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);
+        descriptionEntryField = createTextArea(null);
+        descriptionEntryField.setCharacterWidth(50);
+        descriptionEntryField.setVisibleLines(2);
+        descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         venueEntryField = createTextBox(null);
         venueEntryField.setVisibleLength(35);
         startDateBox = createDateBox(12);
         startDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT))); 
         endDateBox = createDateBox(12);
-        endDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT))); 
+        endDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT)));
+        officialWebsiteURLEntryField = createTextBox(null);
+        officialWebsiteURLEntryField.setVisibleLength(50);
+        logoImageURLEntryField = createTextBox(null);
+        logoImageURLEntryField.setVisibleLength(50);
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);
     }

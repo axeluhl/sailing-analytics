@@ -125,6 +125,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        result.put("trackedRaceName", raceIdentifier != null ? raceIdentifier.getRaceName() : null);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {

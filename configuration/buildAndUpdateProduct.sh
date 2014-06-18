@@ -84,9 +84,10 @@ android=1
 reporting=0
 suppress_confirmation=0
 extra=''
+parallelexecution=0
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -116,8 +117,11 @@ if [ $# -eq 0 ]; then
     echo "You can overwrite the generated release name by specifying a name with the parameter -n. Do not use spaces or other special characters!"
     echo "Example: $0 -w trac@sapsailing.com -n release-ess-brazil-2013 release"
     echo ""
-    echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
+    echo "hot-deploy: performs hot deployment of named bundle into OSGi server."
     echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
+    echo ""
+    echo "local-deploy: performs deployment of one or more bundles into a local directory"
+    echo "Example: $0 -n com.sap.sailing.www -s /home/user/myserver local-deploy"
     echo ""
     echo "remote-deploy: performs hot deployment of the java code to a remote server"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
@@ -242,9 +246,11 @@ if [[ "$@" == "release" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
 
+    # removing compile reports as they do not belong into a release
+    find $ACDIR -name soycReport | xargs rm -rf
+
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
-    echo "
-MONGODB_NAME=myspecificevent
+    echo "MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=MYSPECIFICEVENT
@@ -271,6 +277,72 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
     echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
 fi
+
+if [[ "$@" == "local-deploy" ]]; then
+    # check parameters
+    if [[ $OSGI_BUNDLE_NAME == "" ]]; then
+        echo "You need to provide -n parameter with bundle name."
+        exit 1
+    fi
+
+    if [ ! -d $p2PluginRepository/plugins ]; then
+        echo "Could not find source directory $p2PluginRepository!"
+        exit 1
+    fi
+
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
+        TARGET_DIR=$TARGET_SERVER_NAME
+    else
+        echo "Please specify a local directory where the server resides using -s parameter"
+    fi
+
+    if [ ! -d $TARGET_DIR/plugins ]; then
+        echo "Could not find target directory $TARGET_DIR/plugins!"
+        exit 1
+    fi
+
+    # locate old bundle
+    BUNDLE_COUNT=`find $TARGET_DIR/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar" | wc -l`
+    OLD_BUNDLE=`find $TARGET_DIR/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar"`
+    if [[ $OLD_BUNDLE == "" ]] || [[ $BUNDLE_COUNT -ne 1 ]]; then
+        echo "ERROR: Could not find any bundle named $OSGI_BUNDLE_NAME ($BUNDLE_COUNT). Perhaps your name is misspelled or you have no build?"
+        exit 1
+    fi
+
+    echo "Found $OLD_BUNDLE"
+    OLD_BUNDLE_BASENAME=`basename $OLD_BUNDLE .jar`
+    OLD_BUNDLE_VERSION=${OLD_BUNDLE_BASENAME#*_}
+
+    echo "OLD bundle is $OSGI_BUNDLE_NAME with version $OLD_BUNDLE_VERSION"
+
+    # locate new bundle
+    NEW_BUNDLE=`find $p2PluginRepository/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar"`
+    NEW_BUNDLE_BASENAME=`basename $NEW_BUNDLE .jar`
+    NEW_BUNDLE_VERSION=${NEW_BUNDLE_BASENAME#*_}
+    echo "NEW bundle is $OSGI_BUNDLE_NAME with version $NEW_BUNDLE_VERSION"
+
+    if [[ $NEW_BUNDLE_VERSION == $OLD_BUNDLE_VERSION ]]; then
+        echo ""
+        echo "WARNING: Bundle versions do not differ. Update not needed."
+    fi
+
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "Do you really want to locally deploy bundle $OSGI_BUNDLE_NAME to $TARGET_DIR? (y/N): " answer
+        case $answer in
+        "Y" | "y") echo "Continuing";;
+        *) echo "Aborting..."
+           exit 1;;
+        esac
+    fi
+
+    # deploy new bundle physically
+    echo ""Removing $OLD_BUNDLE...
+    rm -f $OLD_BUNDLE
+    cp $NEW_BUNDLE $TARGET_DIR/plugins
+    echo "Copied ${NEW_BUNDLE_BASENAME}.jar to $TARGET_DIR/plugins. Please restart the server..."
+    exit 0
+fi
+
 
 if [[ "$@" == "hot-deploy" ]]; then
     # check parameters
@@ -444,6 +516,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
     else
         extra="$extra -DskipTests=false"
+        # TODO: Think about http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
 	fi
 
 	if [ $offline -eq 1 ]; then
@@ -458,6 +531,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	else
 	    extra="$extra -P no-debug.without-proxy"
 	fi
+
+    if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
+        parallelexecution=1
+        echo "INFO: Running build in parallel with 2.5*CPU threads"
+	    extra="$extra -T 2.5C"
+    fi
 
     if [ $android -eq 1 ]; then
         if [[ $ANDROID_HOME == "" ]]; then

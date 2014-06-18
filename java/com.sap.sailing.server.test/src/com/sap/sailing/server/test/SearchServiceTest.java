@@ -3,6 +3,7 @@ package com.sap.sailing.server.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,7 +22,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
@@ -36,14 +41,25 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -241,10 +257,14 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
-        Regatta firstFoundRegatta = iterator.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iterator.next();
+        Regatta firstFoundRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch29er, firstFoundRegatta);
-        Regatta secondFoundRegatta = iterator.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iterator.next();
+        Regatta secondFoundRegatta = secondMatch.getRegatta();
         assertSame(pfingstbusch470, secondFoundRegatta);
+        assertSame(pfingstbusch, secondMatch.getEvent());
     }
 
     @Test
@@ -252,9 +272,44 @@ public class SearchServiceTest {
         Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
-        Regatta earlierStartRegatta = iter.next().getRegatta();
+        final LeaderboardSearchResult firstMatch = iter.next();
+        Regatta earlierStartRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch470, earlierStartRegatta);
-        Regatta laterStartRegatta = iter.next().getRegatta();
+        assertSame(pfingstbusch, firstMatch.getEvent());
+        final LeaderboardSearchResult secondMatch = iter.next();
+        Regatta laterStartRegatta = secondMatch.getRegatta();
         assertSame(aalRegatta, laterStartRegatta);
+        assertSame(aalEvent, secondMatch.getEvent());
+    }
+
+    @Test
+    public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
+        LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                leaderboardGroupBaseJsonSerializer),
+                leaderboardGroupBaseJsonSerializer);
+        LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+        LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
+                new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        leaderboardGroupBaseJsonDeserializer), leaderboardGroupBaseJsonDeserializer);
+        final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
+        LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
+        assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());
+        assertEquals(expected.getEvent().getName(), deserialized.getEvent().getName());
+        assertEquals(expected.getEvent().getId(), deserialized.getEvent().getId());
+        assertEquals(expected.getEvent().getStartDate(), deserialized.getEvent().getStartDate());
+        assertEquals(expected.getEvent().getEndDate(), deserialized.getEvent().getEndDate());
+        assertEquals(expected.getEvent().getVenue().getName(), deserialized.getEvent().getVenue().getName());
+        Iterator<LeaderboardGroup> expectedLGs = expected.getLeaderboardGroups().iterator();
+        Iterator<? extends LeaderboardGroupBase> deserializedLGs = deserialized.getLeaderboardGroups().iterator();
+        while (expectedLGs.hasNext()) {
+            assertTrue(deserializedLGs.hasNext());
+            LeaderboardGroup expectedLG = expectedLGs.next();
+            LeaderboardGroupBase deserializedLG = deserializedLGs.next();
+            assertEquals(expectedLG.getId(), deserializedLG.getId());
+            assertEquals(expectedLG.getName(), deserializedLG.getName());
+            assertEquals(expectedLG.getDescription(), deserializedLG.getDescription());
+        }
     }
 }

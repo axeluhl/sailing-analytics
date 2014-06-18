@@ -63,11 +63,10 @@ public abstract class AbstractSeleniumTest {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.connect();
-            
-            if(connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
+            if (connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
                 throw new RuntimeException(connection.getResponseMessage());
             }
-        } catch(IOException exception) {
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
     }

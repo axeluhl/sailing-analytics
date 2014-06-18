@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.gwt.client.EntryPointHelper;
 
 public class SimulatorEntryPoint extends AbstractEntryPoint {
 
@@ -50,7 +51,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         
     	super.doOnModuleLoad();
         
-        registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
         
     	checkUrlParameters();
 

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -47,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -73,6 +75,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.search.KeywordQuery;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -351,9 +354,10 @@ public interface SailingServiceAsync {
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
             AsyncCallback<EventDTO> callback);
 
-    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            AsyncCallback<EventDTO> callback);
+    void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            Iterable<String> sponsorImageURLs, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
@@ -537,7 +541,7 @@ public interface SailingServiceAsync {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
-    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 
@@ -598,4 +602,32 @@ public interface SailingServiceAsync {
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids, AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
+
+    /**
+     * A client should search a server in a two-step process. First, the client should ask the server which other
+     * servers are available for searching additional content. Then, in a second step, the client should fire the
+     * queries by parallel asynchronous calls to the one server, passing the name of the remote server reference to
+     * search, or <code>null</code> in order to search the server to which the query is sent by the call. This allows a
+     * client to asynchronously receive the results from various servers, not requiring the client to block until all
+     * results from all servers have been received. The key reason for this two-step process is that the GWT RPC does
+     * not support streaming of results.
+     * 
+     * @return the list of server reference names, corresponding with {@link RemoteSailingServerReference#getName()}, to
+     *         be used as parameter in {@link #search(String, KeywordQuery)}. This list does <em>not</em> contain the
+     *         <code>null</code> value used to represent the search on the main server to which the query is sent.
+     */
+    void getSearchServerNames(AsyncCallback<Iterable<String>> callback);
+
+    
+    /**
+     * Call this method once for each result of {@link #getSearchServerNames()} and once with <code>null</code> for
+     * the <code>serverNameOfNullForMain</code> parameter.
+     * 
+     * @param serverNameOrNullForMain
+     *            use <code>null</code> to search on the server to which this request is sent; use a name as retrieved
+     *            by {@link #getSearchServerNames()} which corresponds to a name of a
+     *            {@link RemoteSailingServerReference}, to search a remote server.
+     */
+    void search(String serverNameOrNullForMain, KeywordQuery query,
+            AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
 }

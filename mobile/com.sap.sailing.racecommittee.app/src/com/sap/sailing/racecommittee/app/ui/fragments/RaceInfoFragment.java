@@ -198,6 +198,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
                     getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
+                    windInfoHeader.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
                 }
             }
         }

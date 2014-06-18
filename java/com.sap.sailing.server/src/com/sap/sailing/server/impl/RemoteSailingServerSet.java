@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +24,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -30,6 +31,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
@@ -44,7 +46,8 @@ public class RemoteSailingServerSet {
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
     
     /**
-     * Holds the {@link Event} objects for the events of all registered sailing server instances.
+     * Holds the remote server references managed by this set. Keys are the
+     * {@link RemoteSailingServerReference#getName() names} of the server references.
      */
     private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
     
@@ -75,6 +78,14 @@ public class RemoteSailingServerSet {
         for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
             triggerAsynchronousEventCacheUpdate(ref);
         }
+    }
+    
+    /**
+     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getName() name} equals
+     * <code>name</code>, it is returned. Otherwise, <code>null</code> is returned.
+     */
+    public RemoteSailingServerReference getServerReferenceByName(String name) {
+        return remoteSailingServers.get(name);
     }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
@@ -149,5 +160,16 @@ public class RemoteSailingServerSet {
             remoteSailingServers.put(ref.getName(), ref);
         }
         return updateRemoteServerEventCacheSynchronously(ref);
+    }
+
+    public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
+        List<RemoteSailingServerReference> result = new ArrayList<>();
+        for (Map.Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> e : cachedEventsForRemoteSailingServers.entrySet()) {
+            if (e.getValue().getB() == null) {
+                // no exception; reference considered live
+                result.add(e.getKey());
+            }
+        }
+        return result;
     }
 }

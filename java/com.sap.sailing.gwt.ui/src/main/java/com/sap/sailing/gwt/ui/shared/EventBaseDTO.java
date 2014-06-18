@@ -16,9 +16,13 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public boolean isPublic;
     public UUID id;
 
+    private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
     private List<String> imageURLs = new ArrayList<>();
     private List<String> videoURLs = new ArrayList<>();
+    private List<String> sponsorImageURLs = new ArrayList<>();
+    private String logoImageURL;
+    private String officialWebsiteURL;
     
     /**
      * The base URL for the server instance on which the data for this event can be reached. Could be something like
@@ -38,6 +42,30 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
         this.leaderboardGroups = leaderboardGroups;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLogoImageURL() {
+        return logoImageURL;
+    }
+
+    public void setLogoImageURL(String logoImageURL) {
+        this.logoImageURL = logoImageURL;
+    }
+
+    public String getOfficialWebsiteURL() {
+        return officialWebsiteURL;
+    }
+
+    public void setOfficialWebsiteURL(String officialWebsiteURL) {
+        this.officialWebsiteURL = officialWebsiteURL;
     }
 
     /**
@@ -61,14 +89,22 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         videoURLs.add(videoURL);
     }
 
-    public Iterable<String> getImageURLs() {
+    public void addSponsorImageURL(String sponsorImageURL) {
+        sponsorImageURLs.add(sponsorImageURL);
+    }
+
+    public List<String> getImageURLs() {
         return imageURLs;
     }
 
-    public Iterable<String> getVideoURLs() {
+    public List<String> getVideoURLs() {
         return videoURLs;
     }
     
+    public List<String> getSponsorImageURLs() {
+        return sponsorImageURLs;
+    }
+
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
         return leaderboardGroups;
     }

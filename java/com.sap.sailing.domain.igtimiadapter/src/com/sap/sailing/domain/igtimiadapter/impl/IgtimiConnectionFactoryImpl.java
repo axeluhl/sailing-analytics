@@ -130,7 +130,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public IgtimiConnection connect(Account account) {
+    public IgtimiConnection connect(Account account, boolean correctByDeclination) {
         return new IgtimiConnectionImpl(this, account);
     }
 

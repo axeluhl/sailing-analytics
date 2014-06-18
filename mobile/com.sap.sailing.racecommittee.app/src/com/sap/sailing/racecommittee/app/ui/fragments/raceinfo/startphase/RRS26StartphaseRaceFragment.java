@@ -39,18 +39,18 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
             }
         });
 
-        raceStartIn4Minutes = (Button) getView().findViewById(R.id.raceStartIn4Minutes);
-        raceStartIn4Minutes.setVisibility(View.VISIBLE);
-        raceStartIn4Minutes.setOnClickListener(new OnClickListener() {
+        raceStartIn5Minutes = (Button) getView().findViewById(R.id.raceStartIn5Minutes);
+        raceStartIn5Minutes.setVisibility(View.VISIBLE);
+        raceStartIn5Minutes.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 final TimePoint now = MillisecondsTimePoint.now();
                 getRaceState().setAdvancePass(now);
                 getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
-                getRaceState().forceNewStartTime(now, now.plus(4*60*1000));
+                getRaceState().forceNewStartTime(now, now.plus(5*60*1000));
             }
         });
-        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn2Minutes);
+        raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn1Minute);
         raceStartIn2Minutes.setVisibility(View.VISIBLE);
         raceStartIn2Minutes.setOnClickListener(new OnClickListener() {
             @Override
@@ -58,7 +58,7 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
                 final TimePoint now = MillisecondsTimePoint.now();
                 getRaceState().setAdvancePass(now);
                 getRaceState().setRacingProcedure(now, RacingProcedureType.RRS26);
-                getRaceState().forceNewStartTime(now, now.plus(2*60*1000));
+                getRaceState().forceNewStartTime(now, now.plus(1*60*1000));
             }
         });
     }

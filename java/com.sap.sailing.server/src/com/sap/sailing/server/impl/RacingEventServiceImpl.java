@@ -1,12 +1,16 @@
 package com.sap.sailing.server.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +32,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -39,6 +47,8 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -119,7 +129,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -133,8 +143,12 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.LeaderboardSearchResult;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -174,6 +188,7 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.common.search.ResultImpl;
 
 public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -881,6 +896,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     	mongoObjectFactory.storeSailingServer(result);
     	return result;
     }
+    
+    @Override
+    public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
+        return remoteSailingServerSet.getLiveRemoteServerReferences();
+    }
+
+    @Override
+    public RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName) {
+        return remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
+    }
 
     @Override
     public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
@@ -961,6 +986,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addRegattaWithoutReplication(Regatta regatta) {
+        UUID defaultCourseAreaId = null;
+        if (regatta.getDefaultCourseArea() != null) {
+            defaultCourseAreaId = regatta.getDefaultCourseArea().getId();
+        }
+        boolean wasAdded = addAndConnectRegatta(regatta.isPersistent(), defaultCourseAreaId, regatta);
+        if (!wasAdded) {
+            logger.info("Regatta with name " + regatta.getName() + " already existed, so it hasn't been added.");
+        }
+    }
+
+    @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
@@ -969,6 +1006,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), series, persistent, scoringScheme, id, courseArea);
+        boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
+        if (wasCreated) {
+            logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
+        }
+        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
+    }
+
+    private boolean addAndConnectRegatta(boolean persistent, Serializable defaultCourseAreaId, Regatta regatta) {
         boolean wasCreated = false;
         // try a quick read protected by the concurrent hash map implementation
         if (!regattasByName.containsKey(regatta.getName())) {
@@ -988,7 +1033,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 LockUtil.unlockAfterWrite(regattasByNameLock);
             }
         }
-        logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         if (persistent) {
             updateStoredRegatta(regatta);
         }
@@ -999,7 +1043,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        return new com.sap.sse.common.Util.Pair<Regatta, Boolean>(regatta, wasCreated);
+        return wasCreated;
     }
 
     @Override
@@ -1056,7 +1100,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
+    public RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             long timeoutInMilliseconds) throws Exception {
         final Object trackerID = params.getTrackerID();
         NamedReentrantReadWriteLock raceTrackersByIdLock = lockRaceTrackersById(trackerID);
@@ -1084,10 +1128,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 } finally {
                     LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
                 }
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 String regattaName = tracker.getRegatta().getName();
                 Regatta regattaWithName = regattasByName.get(regattaName);
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
+                // TODO we assume here that the regatta name is unique which necessitates adding the boat class name to it in RegattaImpl constructor
                 if (regattaWithName != null) {
                     if (regattaWithName != tracker.getRegatta()) {
                         if (Util.isEmpty(regattaWithName.getAllRaces())) {
@@ -1845,6 +1889,25 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup) {
+        LockUtil.lockForWrite(leaderboardGroupsByNameLock);
+        try {
+            String groupName = leaderboardGroup.getName();
+            if (leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            }
+            leaderboardGroupsByName.put(groupName, leaderboardGroup);
+            leaderboardGroupsByID.put(leaderboardGroup.getId(), leaderboardGroup);
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
+        }
+        if (leaderboardGroup.hasOverallLeaderboard()) {
+            addLeaderboard(leaderboardGroup.getOverallLeaderboard());
+        }
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+    }
+
+    @Override
     public void removeLeaderboardGroup(String groupName) {
         final LeaderboardGroup leaderboardGroup;
         LockUtil.lockForWrite(leaderboardGroupsByNameLock);
@@ -2177,6 +2240,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 logoutput.append("Received remote sailing server reference "+remoteSailingServerReference);
             }
             
+            // make sure to initialize listeners correctly
+            for (Regatta regatta : regattasByName.values()) {
+                RegattaImpl regattaImpl = (RegattaImpl)regatta;
+                regattaImpl.initializeSeriesAfterDeserialize();
+            }
+            
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
@@ -2194,28 +2263,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void addEventWithoutReplication(Event event) {
+        addEvent(event);
+    }
+
+    @Override
     public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue,
             boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
+        addEvent(result);
         result.setImageURLs(imageURLs);
         result.setVideoURLs(videoURLs);
+        return result;
+    }
+
+    private void addEvent(Event result) {
         if (eventsById.containsKey(result.getId())) {
             throw new IllegalArgumentException("Event with ID " + result.getId()
                     + " already exists which is pretty surprising...");
         }
         eventsById.put(result.getId(), result);
         mongoObjectFactory.storeEvent(result);
-        return result;
     }
 
     @Override
-    public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, Iterable<UUID> leaderboardGroupIds, Iterable<URL> imageURLs, Iterable<URL> videoURLs) {
+    public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
         }
         event.setName(eventName);
+        event.setDescription(eventDescription);
         event.setStartDate(startDate);
         event.setEndDate(endDate);
         event.setPublic(isPublic);
@@ -2230,8 +2310,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         }
         event.setLeaderboardGroups(leaderboardGroups);
+        event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setLogoImageURL(logoImageURL);
         event.setImageURLs(imageURLs);
         event.setVideoURLs(videoURLs);
+        event.setSponsorImageURLs(sponsorImageURLs);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch to keep changes minimial
         mongoObjectFactory.storeEvent(event);
     }
@@ -2461,6 +2544,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            if (passId > raceLog.getCurrentPassId()) {
+                state.setAdvancePass(logicalTimePoint);
+            }
             state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
             return state.getStartTime();
@@ -2594,6 +2680,54 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     @Override
     public Result<LeaderboardSearchResult> search(KeywordQuery query) {
-        return new RegattaByKeywordSearchService().search(this, query);
+        long start = System.currentTimeMillis();
+        logger.info("Searching local server for "+query);
+        Result<LeaderboardSearchResult> result = new RegattaByKeywordSearchService().search(this, query);
+        logger.fine("Search for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
+        return result;
     }
+    
+    @Override
+    public Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query) {
+        long start = System.currentTimeMillis();
+        ResultImpl<LeaderboardSearchResultBase> result = null;
+        RemoteSailingServerReference remoteRef = remoteSailingServerSet.getServerReferenceByName(remoteServerReferenceName);
+        if (remoteRef == null) {
+            result = null;
+        } else {
+            BufferedReader bufferedReader = null;
+            try {
+                try {
+                    final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="+URLEncoder.encode(query.toString(), "UTF-8"));
+                    logger.info("Searching remote server "+remoteRef+" for "+query);
+                    URLConnection urlConnection = eventsURL.openConnection();
+                    urlConnection.connect();
+                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    JSONParser parser = new JSONParser();
+                    Object eventsAsObject = parser.parse(bufferedReader);
+                    final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+                    LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
+                            new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(
+                                    DomainFactory.INSTANCE)), leaderboardGroupBaseJsonDeserializer),
+                            leaderboardGroupBaseJsonDeserializer);
+                    result = new ResultImpl<LeaderboardSearchResultBase>(query, new LeaderboardSearchResultBaseRanker<LeaderboardSearchResultBase>());
+                    JSONArray hitsAsJsonArray = (JSONArray) eventsAsObject;
+                    for (Object hitAsObject : hitsAsJsonArray) {
+                        JSONObject hitAsJson = (JSONObject) hitAsObject;
+                        LeaderboardSearchResultBase hit = deserializer.deserialize(hitAsJson);
+                        result.addHit(hit);
+                    }
+                } finally {
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                }
+            } catch (IOException | ParseException e) {
+                logger.log(Level.INFO, "Exception trying to fetch events from remote server "+remoteRef+": "+e.getMessage(), e);
+            }
+        }
+        logger.fine("Remote search on "+remoteRef+" for "+query+" took "+(System.currentTimeMillis()-start)+"ms");
+        return result;
+    }
+
 }
