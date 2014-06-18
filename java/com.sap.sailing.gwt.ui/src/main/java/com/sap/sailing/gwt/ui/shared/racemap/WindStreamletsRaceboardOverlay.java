@@ -73,7 +73,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
         updateAverageLatitudeDeg(windInfoForRace);
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace, this);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
     }
@@ -91,6 +91,9 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
                     latitudeCount++;
                 }
             }
+        }
+        if (latitudeCount > 0) {
+            windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
         }
     }
 
@@ -216,5 +219,11 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
 
     @Override
     protected void drawCenterChanged() {
+    }
+
+    public void onBoundsChanged() {
+        if (swarm != null) {
+            swarm.onBoundsChanged();
+        }
     }
 }

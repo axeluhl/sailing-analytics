@@ -42,10 +42,12 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindInfoForRaceVectorField implements VectorField {
+public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeProvider {
     private static final double MAX_WIND_SPEED_IN_KNOTS = 40;
     private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
     private final Weigher<Pair<PositionDTO, Date>> weigher;
+    private double averageLatitudeDeg;
+    
     private final Comparator<WindDTO> windByMeasureTimePointComparator = new Comparator<WindDTO>() {
         @Override
         public int compare(WindDTO o1, WindDTO o2) {
@@ -54,12 +56,25 @@ public class WindInfoForRaceVectorField implements VectorField {
     };
     private final WindInfoForRaceDTO windInfoForRace;
     
-    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace, AverageLatitudeProvider averageLatitudeDeg) {
+    public WindInfoForRaceVectorField(WindInfoForRaceDTO windInfoForRace) {
         this.windInfoForRace = windInfoForRace;
         weigher = new PositionDTOAndDateWeigher(/* half confidence after milliseconds */3000,
-                /* halfConfidenceDistance */new MeterDistance(1000), averageLatitudeDeg);
+                /* halfConfidenceDistance */new MeterDistance(100), this);
     }
     
+    /**
+     * Sets the average latitude used for the simplified approximating distance calculation. Until called, 0.0 is
+     * assumed.
+     */
+    public void setAverageLatitudeDeg(double averageLatitudeDeg) {
+        this.averageLatitudeDeg = averageLatitudeDeg;
+    }
+    
+    @Override
+    public double getAverageLatitudeDeg() {
+        return averageLatitudeDeg;
+    }
+
     @Override
     public boolean inBounds(Position p) {
         // all positions are always considered in bounds as we'll always try to interpolate/extrapolate
@@ -155,7 +170,7 @@ public class WindInfoForRaceVectorField implements VectorField {
 
     @Override
     public double getParticleFactor() {
-        return 2.0;
+        return 1.0;
     }
 
     /**

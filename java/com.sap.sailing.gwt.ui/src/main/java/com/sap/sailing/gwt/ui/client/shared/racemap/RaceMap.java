@@ -382,6 +382,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
+                      if (streamletOverlay != null) {
+                          streamletOverlay.onBoundsChanged();
+                      }
                       currentMapBounds = map.getBounds();
                   }
               });
