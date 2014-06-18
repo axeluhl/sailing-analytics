@@ -69,22 +69,22 @@ public class WindInfoForRaceVectorField implements VectorField {
     @Override
     public Vector getVector(Position p, Date at) {
         final Pair<PositionDTO, Date> request = new Pair<>(new PositionDTO(p.getLatDeg(), p.getLngDeg()), at);
-        int speedCount = 0;
-        double knotSpeedSum = 0;
+        double speedConfidenceSum = 0;
+        double knotSpeedSumScaledByConfidence = 0;
         final BearingWithConfidenceCluster<Pair<PositionDTO, Date>> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
                 if (timewiseClosestFixForWindSource != null) {
-                    if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
-                        speedCount++;
-                        knotSpeedSum += timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
-                    }
                     Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(
                             timewiseClosestFixForWindSource.measureTimepoint));
+                    final double confidence = weigher.getConfidence(fix, request);
+                    if (windSourceAndWindTrack.getKey().getType().useSpeed()) {
+                        speedConfidenceSum += confidence;
+                        knotSpeedSumScaledByConfidence += confidence * timewiseClosestFixForWindSource.dampenedTrueWindSpeedInKnots;
+                    }
                     bearingCluster.add(new BearingWithConfidenceImpl<Util.Pair<PositionDTO, Date>>(
-                            new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), weigher
-                                    .getConfidence(fix, request), fix));
+                            new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), confidence, fix));
                 }
             }
         }
@@ -92,7 +92,7 @@ public class WindInfoForRaceVectorField implements VectorField {
         final Vector result;
         if (bearing != null && bearing.getObject() != null) {
             final double bearingRad = bearing.getObject().getRadians();
-            final double speedInKnots = knotSpeedSum / speedCount;
+            final double speedInKnots = knotSpeedSumScaledByConfidence / speedConfidenceSum;
             result = new Vector(speedInKnots * Math.sin(bearingRad), speedInKnots * Math.cos(bearingRad));
         } else {
             result = null;
