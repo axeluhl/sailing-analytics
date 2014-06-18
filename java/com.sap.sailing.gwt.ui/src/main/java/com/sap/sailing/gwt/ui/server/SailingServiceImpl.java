@@ -2576,10 +2576,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 timePoint = new MillisecondsTimePoint(date);
             }
+            TimePoint effectiveTimePoint = timePoint == null ? leaderboard.getNowMinusDelay() : timePoint;
             if (detailType != null) {
                 switch (detailType) {
                 case REGATTA_TOTAL_POINTS_SUM:
-                    for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getTotalPointsSumAfterRaceColumn(timePoint).entrySet()) {
+                    for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getTotalPointsSumAfterRaceColumn(effectiveTimePoint).entrySet()) {
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         List<Double> pointSums = new ArrayList<>();
                         for (Entry<Competitor, Double> e2 : e.getValue().entrySet()) {
@@ -2591,8 +2592,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     break;
                 case REGATTA_RANK:
                 case OVERALL_RANK:
-                    TimePoint effectiveTimePoint = timePoint == null ?
-                            leaderboard.getNowMinusDelay() : timePoint;
                     Map<RaceColumn, List<Competitor>> competitorsFromBestToWorst = leaderboard
                             .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(effectiveTimePoint);
                     for (Entry<RaceColumn, List<Competitor>> e : competitorsFromBestToWorst.entrySet()) {

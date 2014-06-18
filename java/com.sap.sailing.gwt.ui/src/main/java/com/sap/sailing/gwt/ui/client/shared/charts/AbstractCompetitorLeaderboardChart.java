@@ -310,7 +310,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        Map<CompetitorDTO, Double> sumTotalPointsMap = new HashMap<CompetitorDTO, Double>();
         for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
@@ -324,10 +323,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         Double dataValue = dataValues.get(index);
                         if (dataValue != null) {
                             Double sumTotalPoints = dataValue;
-                            if (sumTotalPointsMap.containsKey(competitor)) {
-                                sumTotalPoints += sumTotalPointsMap.get(competitor);
-                            } 
-                            sumTotalPointsMap.put(competitor, sumTotalPoints);
                             series.addPoint(raceColumnNumber, sumTotalPoints, /* redraw */ false, /* shift */ false, /* animation */ false);
                             if (sumTotalPoints > maxTotalPoints) {
                                 maxTotalPoints = sumTotalPoints;

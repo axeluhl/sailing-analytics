@@ -182,7 +182,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             startTime = null;
         }
-        if (startTime != null) {
+        if (trackedRace != null && startTime != null) {
             trackedRace.setStartTimeReceived(startTime);
         }
         final TimePoint startTrackingTime;
@@ -196,7 +196,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             startTrackingTime = null;
         }
-        if (startTrackingTime != null) {
+        if (trackedRace != null && startTrackingTime != null) {
             trackedRace.setStartOfTrackingReceived(startTrackingTime);
         }
         final TimePoint endTrackingTime;
@@ -210,7 +210,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             endTrackingTime = null;
         }
-        if (endTrackingTime != null) {
+        if (trackedRace != null && endTrackingTime != null) {
             trackedRace.setEndOfTrackingReceived(endTrackingTime);
         }
     }

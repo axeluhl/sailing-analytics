@@ -697,17 +697,41 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(TimePoint timePoint)
+    public Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(final TimePoint timePoint)
             throws NoWindException {
-        Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
+        final Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
-        for (RaceColumn raceColumn : getRaceColumns()) {
+        List<Future<?>> futures = new ArrayList<>();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
-            Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
-            for (Competitor competitor : getCompetitors()) {
-                totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, raceColumnsToConsider, timePoint));
+            final Iterable<RaceColumn> finalRaceColumnsToConsider = new ArrayList<>(raceColumnsToConsider);
+            futures.add(executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
+                    for (Competitor competitor : getCompetitors()) {
+                        try {
+                            totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, finalRaceColumnsToConsider, timePoint));
+                        } catch (NoWindException e) {
+                            throw new NoWindError(e);
+                        }
+                    }
+                    synchronized (result) {
+                        result.put(raceColumn, totalPointsSumPerCompetitorInColumn);
+                    }
+                }
+            }));
+        }
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                if (e.getCause() instanceof NoWindError) {
+                    throw ((NoWindError) e.getCause()).getCause();
+                } else {
+                    throw new RuntimeException(e); // no caught exceptions occur in the futures executed
+                }
             }
-            result.put(raceColumn, totalPointsSumPerCompetitorInColumn);
         }
         return result;
     }
