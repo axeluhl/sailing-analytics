@@ -173,7 +173,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 }
                 index++;
 
-                long timeStep = windParams.getTimeStep().getTime();
+                long timeStep = windParams.getTimeStep().asMillis();
                 if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
                     drawPoint(windDTO);
                 }

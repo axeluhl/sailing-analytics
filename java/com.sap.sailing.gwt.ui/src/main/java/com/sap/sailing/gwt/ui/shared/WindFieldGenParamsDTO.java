@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 
 public class WindFieldGenParamsDTO implements IsSerializable {
@@ -17,7 +18,7 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     private Date startTime;
     private Date endTime;
-    private Date timeStep;
+    private Duration timeStep;
 
     private boolean keepState;
     
@@ -111,15 +112,15 @@ public class WindFieldGenParamsDTO implements IsSerializable {
         this.endTime = endTime;
     }
 
-    public Date getTimeStep() {
+    public Duration getTimeStep() {
         return timeStep;
     }
 
-    public void setTimeStep(Date timeStep) {
+    public void setTimeStep(Duration timeStep) {
         this.timeStep = timeStep;
     }
 
-    public void setDefaultTimeSettings(Date startTime, Date timeStep, Date endTime) {
+    public void setDefaultTimeSettings(Date startTime, Duration timeStep, Date endTime) {
     	this.startTime = startTime;
     	this.timeStep = timeStep;
     	this.endTime = endTime;    	
