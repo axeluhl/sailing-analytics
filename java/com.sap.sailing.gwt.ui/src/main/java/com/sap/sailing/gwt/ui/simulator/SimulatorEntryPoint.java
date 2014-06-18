@@ -106,6 +106,18 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             this.streamletPars.swarmScale = Double.parseDouble(tmpStr);
         }
+        tmpStr = Window.Location.getParameter("lineBase");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineBase.");
+        } else {
+            this.streamletPars.lineBase = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("lineScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineScale.");
+        } else {
+            this.streamletPars.lineScale = Double.parseDouble(tmpStr);
+        }
         tmpStr = Window.Location.getParameter("detailZoom");
         if (tmpStr == null || tmpStr.isEmpty()) {
            logger.config("Using default detailZoom.");

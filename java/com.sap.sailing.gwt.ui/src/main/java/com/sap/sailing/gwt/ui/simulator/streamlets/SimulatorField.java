@@ -30,6 +30,8 @@ public class SimulatorField implements VectorField {
 
     private final double xScale;
 	private double motionFactor;
+	private double lineBase;
+	private double lineScale;
     private final double maxLength;
     private final double particleFactor;
 
@@ -64,6 +66,8 @@ public class SimulatorField implements VectorField {
                 (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
         this.xScale = windData.windData.xScale;
 		this.motionFactor = 0.07 * parameters.motionScale;
+		this.lineBase = parameters.lineBase;
+		this.lineScale = parameters.lineScale;
         List<SimulatorWindDTO> gridData = windData.getMatrix();
         int p = 0;
         int imax = windParams.getyRes() + 2 * windParams.getBorderY();
@@ -276,7 +280,7 @@ public class SimulatorField implements VectorField {
          * absolute linewidth speed == 12kn => linewidth 1.5 speed == 24kn => linewidth 3.0 speed == 6kn => linewidth
          * 0.75
          */
-        return Math.round(speed / 8.0 * 100.0) / 100.0;
+        return Math.max(0.01, Math.round((lineBase + lineScale * (speed - 12.0) / 8.0) * 100.0) / 100.0);
     }
 
     @Override
