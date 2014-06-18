@@ -62,7 +62,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
             double y = c;
             distanceConfidence = c / (x + y);
         } else {
-            distanceConfidence = 1;
+            distanceConfidence = 0.0001; // if we have no information about the position, let's not distort an otherwise spatially-resolved field
         }
         return distanceConfidence * timeConfidence;
     }
@@ -71,6 +71,6 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
         final double latDiffDeg = Math.abs(p1.latDeg - p2.latDeg);
         final double normalizedLngDiffDeg = getCosineOfAverageLatitude() * Math.abs(p1.lngDeg - p2.lngDeg);
         // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.
-        return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) / 60.;
+        return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) * 60.;
     }
 }

@@ -84,7 +84,7 @@ public class WindInfoForRaceVectorField implements VectorField {
                             timewiseClosestFixForWindSource.measureTimepoint));
                     bearingCluster.add(new BearingWithConfidenceImpl<Util.Pair<PositionDTO, Date>>(
                             new DegreeBearingImpl(timewiseClosestFixForWindSource.dampenedTrueWindBearingDeg), weigher
-                                    .getConfidence(fix, request), request));
+                                    .getConfidence(fix, request), fix));
                 }
             }
         }
