@@ -1043,4 +1043,6 @@ public interface StringMessages extends Messages {
     String eventOfficialWebsiteURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
+    String boatClassNameMustNotContainSlashes();
+    String regattaNameMustNotContainSlashes();
 }

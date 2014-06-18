@@ -37,58 +37,62 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             boolean nameNotEmpty = regattaToValidate.getName() != null && regattaToValidate.getName().length() > 0;
             boolean boatClassNotEmpty = regattaToValidate.boatClass != null
                     && regattaToValidate.boatClass.getName().length() > 0;
-
             boolean unique = true;
-            for (RegattaDTO regatta : existingRegattas) {
-                if (regatta.getName().equals(regattaToValidate.getName())) {
-                    unique = false;
-                    break;
+            if (boatClassNotEmpty && regattaToValidate.boatClass.getName().contains("/")) {
+                errorMessage = stringMessages.boatClassNameMustNotContainSlashes();
+            } else {
+                for (RegattaDTO regatta : existingRegattas) {
+                    if (regatta.getName().equals(regattaToValidate.getName())) {
+                        unique = false;
+                        break;
+                    }
                 }
-            }
 
-            if (!nameNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterAName();
-            } else if (!boatClassNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterABoatClass();
-            } else if (!unique) {
-                errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
-            }
+                if (!nameNotEmpty) {
+                    errorMessage = stringMessages.pleaseEnterAName();
+                } else if (regattaToValidate.getName().contains("/")) {
+                    errorMessage = stringMessages.regattaNameMustNotContainSlashes();
+                } else if (!boatClassNotEmpty) {
+                    errorMessage = stringMessages.pleaseEnterABoatClass();
+                } else if (!unique) {
+                    errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
+                }
 
-            if (errorMessage == null) {
-                List<SeriesDTO> seriesToValidate = regattaToValidate.series;
-                int index = 0;
-                boolean seriesNameNotEmpty = true;
+                if (errorMessage == null) {
+                    List<SeriesDTO> seriesToValidate = regattaToValidate.series;
+                    int index = 0;
+                    boolean seriesNameNotEmpty = true;
 
-                for (SeriesDTO series : seriesToValidate) {
-                    seriesNameNotEmpty = series.getName() != null && series.getName().length() > 0;
+                    for (SeriesDTO series : seriesToValidate) {
+                        seriesNameNotEmpty = series.getName() != null && series.getName().length() > 0;
+                        if (!seriesNameNotEmpty) {
+                            break;
+                        }
+                        index++;
+                    }
+
+                    int index2 = 0;
+                    boolean seriesUnique = true;
+
+                    HashSet<String> setToFindDuplicates = new HashSet<String>();
+                    for (SeriesDTO series : seriesToValidate) {
+                        if (!setToFindDuplicates.add(series.getName())) {
+                            seriesUnique = false;
+                            break;
+                        }
+                        index2++;
+                    }
+
                     if (!seriesNameNotEmpty) {
-                        break;
+                        errorMessage = stringMessages.series() + " " + (index + 1) + ": "
+                                + stringMessages.pleaseEnterAName();
+                    } else if (!seriesUnique) {
+                        errorMessage = stringMessages.series() + " " + (index2 + 1) + ": "
+                                + stringMessages.seriesWithThisNameAlreadyExists();
                     }
-                    index++;
+
                 }
-
-                int index2 = 0;
-                boolean seriesUnique = true;
-
-                HashSet<String> setToFindDuplicates = new HashSet<String>();
-                for (SeriesDTO series : seriesToValidate) {
-                    if (!setToFindDuplicates.add(series.getName())) {
-                        seriesUnique = false;
-                        break;
-                    }
-                    index2++;
-                }
-
-                if (!seriesNameNotEmpty) {
-                    errorMessage = stringMessages.series() + " " + (index + 1) + ": "
-                            + stringMessages.pleaseEnterAName();
-                } else if (!seriesUnique) {
-                    errorMessage = stringMessages.series() + " " + (index2 + 1) + ": "
-                            + stringMessages.seriesWithThisNameAlreadyExists();
-                }
-
             }
-
             return errorMessage;
         }
 
