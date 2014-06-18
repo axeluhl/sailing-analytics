@@ -75,8 +75,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             if(showBuoyZone && mark.type == MarkType.BUOY) {
                 buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition, buoyZoneRadiusInMeter);
                 if(buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
-                    canvasWidth = buoyZoneRadiusInPixel * 2;
-                    canvasHeight = buoyZoneRadiusInPixel * 2;
+                    canvasWidth = (buoyZoneRadiusInPixel + 1)* 2;
+                    canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
             setCanvasSize((int) canvasWidth, (int) canvasHeight);
@@ -96,7 +96,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 context2d.setStrokeStyle(grayTransparentColor);
                 context2d.setLineWidth(1.0);
                 context2d.beginPath();
-                context2d.arc(buoyZoneRadiusInPixel, buoyZoneRadiusInPixel, buoyZoneRadiusInPixel, 0, Math.PI*2, true); 
+                context2d.arc(buoyZoneRadiusInPixel+1, buoyZoneRadiusInPixel+1, buoyZoneRadiusInPixel, 0, Math.PI*2, true); 
                 context2d.closePath();
                 context2d.stroke();
                 
