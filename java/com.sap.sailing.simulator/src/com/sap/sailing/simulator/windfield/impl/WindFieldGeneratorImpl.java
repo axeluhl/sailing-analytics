@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -41,7 +42,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     /**
      * TimePoint which constitutes one unit of time
      */
-    protected TimePoint timeStep;
+    protected Duration timeStep;
 
     private static Logger logger = Logger.getLogger("com.sap.sailing.windfield");
 
@@ -155,7 +156,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         this.startTime = start;
         this.endTime = end;
         this.timeStep = step;
@@ -167,7 +168,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
 
     @Override
-    public TimePoint getTimeStep() {
+    public Duration getTimeStep() {
         return this.timeStep;
     }
 

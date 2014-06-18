@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -18,62 +18,52 @@ public class SimulatorField implements VectorField {
     private Position rcStart;
     private Position rcEnd;
 
-    private int resY;
-    private int resX;
+    private final int resY;
+    private final int resX;
 
-    private int borderY;
-    private int borderX;
+    private final int borderY;
+    private final int borderX;
 
-    private double bdXi;
-    private double bdPhi;
+    private final Position bdA;
+    private final Position bdB;
+    private final Position bdC;
 
-    private Position bdA;
-    private Position bdB;
-    private Position bdC;
-
-    private double xScale;
+    private final double xScale;
 	private double motionFactor;
+    private final double maxLength;
+    private final double particleFactor;
 
-    private Position visSW;
-    private Position visNE;
-    private boolean visFull = false;
+    /**
+     * The cosine of the field's average latitude (arithmetic average of NW's latitude and SE's latitude) which represents
+     * the average ratio of pixels used per longitude and latitude angle in the Mercator projection. At the equator, this
+     * ration is 1; towards the poles it gets less.
+     */
+    private final double lngScale;
 
-    private double maxLength;
-    private double particleFactor;
+    private final Position nvY;
+    private final Position nvX;
 
-    private double lngScale;
-
-    private Position nvY;
-    private Position nvX;
-    private Position gvX;
-
-    private double[][][] data;
+    private final double[][][] data;
     private final String[] colorsForSpeeds;
     private int step;
 
     public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
         this.colorsForSpeeds = createColorsForSpeeds();
         this.step = 0;
-        String parseString = windData.windDataJSON.substring(18, windData.windDataJSON.length() - 1) + "}";
-        JSONObject baseData = JSONParser.parseLenient(parseString).isObject();
-        this.rcStart = new DegreePosition(baseData.get("rcStart").isObject().get("lat").isNumber().doubleValue(),
-                baseData.get("rcStart").isObject().get("lng").isNumber().doubleValue());
-        this.rcEnd = new DegreePosition(baseData.get("rcEnd").isObject().get("lat").isNumber().doubleValue(), baseData
-                .get("rcEnd").isObject().get("lng").isNumber().doubleValue());
-        this.resY = (int) baseData.get("resY").isNumber().doubleValue();
-        this.resX = (int) baseData.get("resX").isNumber().doubleValue();
-        this.borderY = (int) baseData.get("borderY").isNumber().doubleValue();
-        this.borderX = (int) baseData.get("borderX").isNumber().doubleValue();
-        this.bdXi = (this.borderY + 0.5) / (this.resY - 1);
-        this.bdPhi = 1.0 + 2 * this.bdXi;
+        this.rcStart = new DegreePosition(windData.windData.rcStart.latDeg, windData.windData.rcStart.lngDeg);
+        this.rcEnd = new DegreePosition(windData.windData.rcEnd.latDeg, windData.windData.rcEnd.lngDeg);
+        this.resX = windData.windData.resX;
+        this.resY = windData.windData.resY;
+        this.borderX = windData.windData.borderX;
+        this.borderY = windData.windData.borderY;
+        final double bdXi = (this.borderY + 0.5) / (this.resY - 1);
+        final double bdPhi = 1.0 + 2 * bdXi;
         this.bdA = new DegreePosition(this.rcEnd.getLatDeg() + (this.rcEnd.getLatDeg() - this.rcStart.getLatDeg())
-                * this.bdXi, this.rcEnd.getLngDeg() + (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.bdXi);
-        this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * this.bdPhi,
-                (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * this.bdPhi);
-        this.xScale = baseData.get("xScale").isNumber().doubleValue();
+                * bdXi, this.rcEnd.getLngDeg() + (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * bdXi);
+        this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * bdPhi,
+                (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
+        this.xScale = windData.windData.xScale;
 		this.motionFactor = 0.07 * parameters.motionScale;
-        this.visSW = new DegreePosition(0.0, 0.0);
-        this.visNE = new DegreePosition(0.0, 0.0);
         List<SimulatorWindDTO> gridData = windData.getMatrix();
         int p = 0;
         int imax = windParams.getyRes() + 2 * windParams.getBorderY();
@@ -81,7 +71,8 @@ public class SimulatorField implements VectorField {
         int steps = gridData.size() / (imax * jmax);
         this.data = new double[steps][imax][2 * jmax];
         double maxWindSpeed = 0;
-        double minWindSpeed = 100;
+        double minWindSpeed = Double.MAX_VALUE;
+        // copy the wind data from WindFieldDTO.getMatrix() to the data array, determining min/max wind speed
         for (int s = 0; s < steps; s++) {
             for (int i = 0; i < imax; i++) {
                 for (int j = 0; j < jmax; j++) {
@@ -102,37 +93,20 @@ public class SimulatorField implements VectorField {
         }
         this.maxLength = maxWindSpeed;
         this.particleFactor = 2.0;
-        double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
+        final double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
         this.lngScale = Math.cos(latAvg * Math.PI / 180.0);
-        double difLat = this.rcEnd.getLatDeg() - this.rcStart.getLatDeg();
-        double difLng = (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
-        double difLen = Math.sqrt(difLat * difLat + difLng * difLng);
+        final double difLat = this.rcEnd.getLatDeg() - this.rcStart.getLatDeg();
+        final double difLng = (this.rcEnd.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
+        final double difLen = Math.sqrt(difLat * difLat + difLng * difLng);
         this.nvY = new DegreePosition(difLat / difLen / difLen * (this.resY - 1), difLng / difLen / difLen
                 * (this.resY - 1));
         double nrmLat = -difLng / difLen;
         double nrmLng = difLat / difLen;
         this.nvX = new DegreePosition(nrmLat / this.xScale / difLen * (this.resX - 1), nrmLng / this.xScale / difLen
                 * (this.resX - 1));
-        this.gvX = new DegreePosition(nrmLat * this.xScale * difLen, nrmLng / this.lngScale * this.xScale * difLen);
-        this.bdC = new DegreePosition(this.gvX.getLatDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1),
-                this.gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
-    }
-
-    @Override
-    public Position getRandomPosition() {
-        final Position result;
-        if (this.visFull) {
-            double rndY = Math.random();
-            double rndX = Math.random();
-            double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-            double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
-            result = new DegreePosition(latDeg, lngDeg);
-        } else {
-            double rndY = Math.random();
-            double rndX = Math.random() - 0.5;
-            result = this.getInnerPosition(rndX, rndY);
-        }
-        return result;
+        final Position gvX = new DegreePosition(nrmLat * this.xScale * difLen, nrmLng / this.lngScale * this.xScale * difLen);
+        this.bdC = new DegreePosition(gvX.getLatDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1),
+                gvX.getLngDeg() * (this.resX + 2 * this.borderX - 1) / (this.resX - 1));
     }
 
     private Position getInnerPosition(double factX, double factY) {
@@ -154,19 +128,20 @@ public class SimulatorField implements VectorField {
     }
 
     private Vector interpolate(Position p) {
-        Neighbors idx = this.getNeighbors(p);
+        Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
             GWT.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
         }
-        double avgX = this.data[this.step][idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
-                + this.data[this.step][idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
-                + this.data[this.step][idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
-                + this.data[this.step][idx.yTop][2 * idx.xTop] * idx.yMod * idx.xMod;
-        double avgY = this.data[this.step][idx.yBot][2 * idx.xBot + 1] * (1 - idx.yMod) * (1 - idx.xMod)
-                + this.data[this.step][idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
-                + this.data[this.step][idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
-                + this.data[this.step][idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
+        final double[][] dataAtStep = this.data[this.step];
+        double avgX = dataAtStep[idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
+                + dataAtStep[idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
+                + dataAtStep[idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
+                + dataAtStep[idx.yTop][2 * idx.xTop] * idx.yMod * idx.xMod;
+        double avgY = dataAtStep[idx.yBot][2 * idx.xBot + 1] * (1 - idx.yMod) * (1 - idx.xMod)
+                + dataAtStep[idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
+                + dataAtStep[idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
+                + dataAtStep[idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
         return new Vector(avgX / this.lngScale, avgY);
     }
 
@@ -202,30 +177,11 @@ public class SimulatorField implements VectorField {
 
     private Index getIndex(Position p) {
         // calculate grid indexes
-        Position posR = new DegreePosition(p.getLatDeg() - this.rcStart.getLatDeg(),
-                (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale);
-
+        final double latOffset = p.getLatDeg() - this.rcStart.getLatDeg();
+        final double lngOffset = (p.getLngDeg() - this.rcStart.getLngDeg()) * this.lngScale;
         // closest grid point
-        long yIdx = Math.round(posR.getLatDeg() * this.nvY.getLatDeg() + posR.getLngDeg() * this.nvY.getLngDeg())
-                + this.borderY;
-        long xIdx = Math.round(posR.getLatDeg() * this.nvX.getLatDeg() + posR.getLngDeg() * this.nvX.getLngDeg()
-                + (this.resX - 1) / 2.)
-                + this.borderX;
-
-        if (this.visFull) {
-            if (yIdx >= (this.resY + 2 * this.borderY)) {
-                yIdx = this.resY + 2 * this.borderY - 1;
-            }
-            if (yIdx < 0) {
-                yIdx = 0;
-            }
-            if (xIdx >= (this.resX + 2 * this.borderX)) {
-                xIdx = this.resX + 2 * this.borderX - 1;
-            }
-            if (xIdx < 0) {
-                xIdx = 0;
-            }
-        }
+        long yIdx = Math.round(latOffset * this.nvY.getLatDeg() + lngOffset * this.nvY.getLngDeg()) + this.borderY;
+        long xIdx = Math.round(latOffset * this.nvX.getLatDeg() + lngOffset * this.nvX.getLngDeg() + (this.resX - 1) / 2.) + this.borderX;
         return new Index(xIdx, yIdx);
     }
 
@@ -279,7 +235,7 @@ public class SimulatorField implements VectorField {
 
     @Override
     public double particleWeight(Position p, Vector v) {
-        return v.length() / this.maxLength + 0.1;
+        return v == null ? 0 : (v.length() / this.maxLength + 0.1);
     }
 
     private String[] createColorsForSpeeds() {
@@ -324,45 +280,23 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners() {
+    public Bounds getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
         Position fieldNE = this.getInnerPosition(+0.5, 1.0);
         Position fieldSW = this.getInnerPosition(-0.5, 0.0);
         Position fieldSE = this.getInnerPosition(+0.5, 0.0);
         Position fieldNW = this.getInnerPosition(-0.5, 1.0);
-
-        DegreePosition[] result = new DegreePosition[2];
-
         double minLat = Math.min(Math.min(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.min(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double minLng = Math.min(Math.min(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.min(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        result[0] = new DegreePosition(minLat, minLng);
-
+        Position sw = new DegreePosition(minLat, minLng);
         double maxLat = Math.max(Math.max(fieldNE.getLatDeg(), fieldSW.getLatDeg()),
                 Math.max(fieldNW.getLatDeg(), fieldSE.getLatDeg()));
         double maxLng = Math.max(Math.max(fieldNE.getLngDeg(), fieldSW.getLngDeg()),
                 Math.max(fieldNW.getLngDeg(), fieldSE.getLngDeg()));
-        result[1] = new DegreePosition(maxLat, maxLng);
-
-        return result;
-    }
-
-    @Override
-    public void setVisNE(Position visNE) {
-        this.visNE = visNE;
-    }
-
-    @Override
-    public void setVisSW(Position visSW) {
-        this.visSW = visSW;
-    }
-
-    @Override
-    public void setVisFullCanvas(boolean full) {
-        if (this.visFull != full) {
-            System.out.println("visFull: " + full);
-            this.visFull = full;
-        }
+        Position ne = new DegreePosition(maxLat, maxLng);
+        return new BoundsImpl(sw, ne);
     }
 
     @Override

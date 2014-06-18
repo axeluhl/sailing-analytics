@@ -7,7 +7,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
@@ -23,13 +25,28 @@ public class Swarm {
     private Timer loopTimer;
     private Mercator projection;
     private VectorField field;
+    
+    /**
+     * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
+     * {@link #particles} array.
+     */
     private int nParticles;
+    
+    /**
+     * The particles shown in this swarm.
+     */
     private Particle[] particles;
+    
+    /**
+     * Tells if nothing of this swarm is currently visible on the {@link #map}. This is the case when there is no
+     * intersection between the {@link #field vector field's} {@link VectorField#getFieldCorners() bounds} and the
+     * visible map area.
+     */
     private boolean swarmOffScreen = false;
+    
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    private Position boundsNE;
-    private Position boundsSW;
+    private Bounds visibleBoundsOfField;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, StreamletParameters streamletPars) {
         this.fullcanvas = fullcanvas;
@@ -38,8 +55,9 @@ public class Swarm {
 		this.parameters = streamletPars;
     }
 
-    public void start(int animationDuration, WindFieldDTO windField) {
+    public void start(int animationIntervalMillis, WindFieldDTO windField) {
         projection = new Mercator(fullcanvas, map);
+        // TODO make the VectorField a parameter of Swarm
         if (windField == null) {
             SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
             String jsonStr = bundle.windStreamletsDataJS().getText();
@@ -59,36 +77,47 @@ public class Swarm {
         ctxt.setFillStyle("red");
         particles = this.createParticles();
         this.swarmContinue = true;
-        startLoop(animationDuration);
+        startLoop(animationIntervalMillis);
     }
 
     public void stop() {
         this.swarmContinue = false;
     }
 
-    public Particle createParticle() {
+    private Particle createParticle() {
         Particle particle = new Particle();
         boolean done = false;
+        // try to create a particle at a random position until the weight is high enough for it to be displayed
         while (!done) {
-            particle.pos = field.getRandomPosition();
-            Vector v = field.getVector(particle.pos);
-            double weight = field.particleWeight(particle.pos, v);
+            particle.currentPosition = getRandomPosition();
+            Vector v = field.getVector(particle.currentPosition);
+            double weight = field.particleWeight(particle.currentPosition, v);
             if (weight >= Math.random()) {
-                if (v.length() == 0) {
-                    particle.age = 0;
+                if (v == null || v.length() == 0) {
+                    particle.stepsToLive = 0;
                 } else {
-                    particle.age = 1 + (int) Math.round(Math.random() * 40);
+                    particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                 }
-                particle.pxOld = projection.latlng2pixel(particle.pos);
-                particle.speed = 0;
+                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 particle.v = v;
                 done = true;
             }
         }
         return particle;
     }
+    
+    private Position getRandomPosition() {
+        final Position result;
+        double rndY = Math.random();
+        double rndX = Math.random();
+        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatDeg() + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatDeg();
+        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLngDeg() + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLngDeg();
+        result = new DegreePosition(latDeg, lngDeg);
+        return result;
+    }
 
-    public Particle[] createParticles() {
+    private Particle[] createParticles() {
         Particle[] newParticles = new Particle[nParticles];
         for (int idx = 0; idx < newParticles.length; idx++) {
             newParticles[idx] = this.createParticle();
@@ -101,64 +130,21 @@ public class Swarm {
         swarmPause = 5;
     }
 
-    public void updateBounds() {
-        Position mapNE = new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds()
-                .getNorthEast().getLongitude());
-        Position mapSW = new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds()
-                .getSouthWest().getLongitude());
-        Position[] fieldCorners = this.field.getFieldCorners();
-        Position fieldNE = fieldCorners[1];
-        Position fieldSW = fieldCorners[0];
-        Vector visibleNE = this.isVisible(fieldNE);
-        Vector visibleSW = this.isVisible(fieldSW);
-        boolean useBoundsNorth = (visibleNE.y == 0);
-        boolean useBoundsEast = (visibleNE.x == 0);
-        boolean useBoundsSouth = (visibleSW.y == 0);
-        boolean useBoundsWest = (visibleSW.x == 0);
-        swarmOffScreen = (visibleNE.y > 0) || (visibleSW.y < 0) || (visibleNE.x < 0) || (visibleSW.x > 0);
-        if (swarmOffScreen) {
-            this.boundsNE = fieldNE;
-            this.boundsSW = fieldSW;
-        } else {
-            if ((!useBoundsNorth) && (!useBoundsEast)) {
-                this.boundsNE = mapNE;
-            } else if (!useBoundsNorth) {
-                this.boundsNE = new DegreePosition(mapNE.getLatDeg(), fieldNE.getLngDeg());
-            } else if (!useBoundsEast) {
-                this.boundsNE = new DegreePosition(fieldNE.getLatDeg(), mapNE.getLngDeg());
-            } else {
-                this.boundsNE = fieldNE;
-            }
-            if ((!useBoundsSouth) && (!useBoundsWest)) {
-                this.boundsSW = mapSW;
-            } else if (!useBoundsSouth) {
-                this.boundsSW = new DegreePosition(mapSW.getLatDeg(), fieldSW.getLngDeg());
-            } else if (!useBoundsWest) {
-                this.boundsSW = new DegreePosition(fieldSW.getLatDeg(), mapSW.getLngDeg());
-            } else {
-                this.boundsSW = fieldSW;
-            }
-        }
-        this.field.setVisSW(this.boundsSW);
-        this.field.setVisNE(this.boundsNE);
-        this.field.setVisFullCanvas((!useBoundsNorth) && (!useBoundsEast) && (!useBoundsSouth) && (!useBoundsWest));
-        Vector boundsSWpx = this.projection.latlng2pixel(this.boundsSW);
-        Vector boundsNEpx = this.projection.latlng2pixel(this.boundsNE);
+    private void updateBounds() {
+        Bounds fieldBounds = this.field.getFieldCorners();
+        final BoundsImpl mapBounds = new BoundsImpl(
+                new DegreePosition(map.getBounds().getSouthWest().getLatitude(), map.getBounds().getSouthWest().getLongitude()),
+                new DegreePosition(map.getBounds().getNorthEast().getLatitude(), map.getBounds().getNorthEast().getLongitude()));
+        swarmOffScreen = !fieldBounds.intersects(mapBounds);
+        visibleBoundsOfField = fieldBounds.intersect(mapBounds);
+        Vector boundsSWpx = this.projection.latlng2pixel(visibleBoundsOfField.getSouthWest());
+        Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
     };
 
-    public Vector isVisible(Position pos) {
-        // test for visibility of swarm
-        Vector proj = this.projection.latlng2pixel(pos);
-        Vector result = new Vector();
-        result.x = (proj.x < 0 ? -1 : 0) + (proj.x > canvas.getOffsetWidth() ? 1 : 0);
-        result.y = (proj.y < 0 ? -1 : 0) + (proj.y > canvas.getOffsetHeight() ? 1 : 0);
-        return result;
-    }
-
-    public void startLoop(final int millis) {
+    private void startLoop(final int animationIntervalMillis) {
         // Create animation-loop based on timer timeout
         loopTimer = new com.google.gwt.user.client.Timer() {
             public void run() {
@@ -172,23 +158,21 @@ public class Swarm {
                     particles = createParticles();
                     swarmPause = 0;
                 }
-                // console("swarmOffScreen:"+swarmOffScreen);
                 if ((!swarmOffScreen) && (swarmPause == 0)) {
                     execute();
                 }
                 Date time1 = new Date();
-                // console("delta:"+(time1.getTime()-time0.getTime())+"/"+millis);
                 if (swarmContinue) {
-                    loopTimer.schedule((int) Math.max(10, millis - (time1.getTime() - time0.getTime())));
+                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - (time1.getTime() - time0.getTime())));
                 } else {
                     projection.clearCanvas();
                 }
             }
         };
-        loopTimer.schedule(millis);
+        loopTimer.schedule(animationIntervalMillis);
     }
 
-    public void drawSwarm() {
+    private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
         ctxt.setGlobalAlpha(0.08);
         ctxt.setGlobalCompositeOperation("destination-out");
@@ -199,35 +183,44 @@ public class Swarm {
         ctxt.setFillStyle("white");
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if (particle.age == 0) {
+            if (particle.stepsToLive == 0) {
                 continue;
             }
-            ctxt.setLineWidth(field.lineWidth(particle.speed));
-            ctxt.setStrokeStyle(field.getColor(particle.speed));
+            double particleSpeed = particle.v == null ? 0 : particle.v.length();
+            ctxt.setLineWidth(field.lineWidth(particleSpeed));
+            ctxt.setStrokeStyle(field.getColor(particleSpeed));
             ctxt.beginPath();
-            ctxt.moveTo(particle.pxOld.x, particle.pxOld.y);
-            particle.pxOld = projection.latlng2pixel(particle.pos);
-            ctxt.lineTo(particle.pxOld.x, particle.pxOld.y);
+            ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
+            ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
             ctxt.stroke();
         }
     }
 
-    public boolean execute() {
+    /**
+     * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
+     * {@link VectorField#motionScale(int)} at the map's current zoom level.
+     */
+    private boolean execute() {
         double speed = 0.01 * field.motionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if ((particle.age > 0) && (particle.v != null)) {
-                double latDeg = particle.pos.getLatDeg() + speed * particle.v.y;
-                double lngDeg = particle.pos.getLngDeg() + speed * particle.v.x;
-                particle.pos = new DegreePosition(latDeg, lngDeg);
-                particle.speed = particle.v.length();
-                particle.age--;
-                if ((particle.age > 0) && (this.field.inBounds(particle.pos))) {
-                    particle.v = field.getVector(particle.pos);
+            if ((particle.stepsToLive > 0) && (particle.v != null)) {
+                // move the particle one step in the direction and with the speed indicated by particle.v and
+                // update its currentPosition, currentPixelCoordinate and previousPixelCoordinate fields;
+                // also, its particle.v field is updated based on its new position from the vector field
+                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
+                double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
+                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x;
+                particle.currentPosition = new DegreePosition(latDeg, lngDeg);
+                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                particle.stepsToLive--;
+                if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
+                    particle.v = field.getVector(particle.currentPosition);
                 } else {
                     particle.v = null;
                 }
             } else {
+                // particle timed out (age became 0); create a new one
                 particles[idx] = this.createParticle();
             }
         }
