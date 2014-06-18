@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
@@ -19,6 +20,7 @@ public class Swarm {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
+	private StreamletParameters parameters; 
 
     private Timer loopTimer;
     private Mercator projection;
@@ -46,10 +48,11 @@ public class Swarm {
     private boolean swarmContinue = true;
     private Bounds visibleBoundsOfField;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, StreamletParameters streamletPars) {
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
         this.map = map;
+		this.parameters = streamletPars;
     }
 
     public void start(int animationIntervalMillis, WindFieldDTO windField) {
@@ -58,14 +61,14 @@ public class Swarm {
         if (windField == null) {
             SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
             String jsonStr = bundle.windStreamletsDataJS().getText();
-            RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false);
+            RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, this.parameters);
             field = f;
             map.setZoom(5);
             map.panTo(f.getCenter());
             projection.calibrate();
         } else {
             field = new SimulatorField(((WindStreamletsCanvasOverlay) fullcanvas).getWindFieldDTO(),
-                    ((WindStreamletsCanvasOverlay) fullcanvas).getWindParams());
+                    ((WindStreamletsCanvasOverlay) fullcanvas).getWindParams(), this.parameters);
             fullcanvas.setCanvasSettings();
             projection.calibrate();
         }
@@ -138,7 +141,7 @@ public class Swarm {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
+        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
     };
 
     private void startLoop(final int animationIntervalMillis) {

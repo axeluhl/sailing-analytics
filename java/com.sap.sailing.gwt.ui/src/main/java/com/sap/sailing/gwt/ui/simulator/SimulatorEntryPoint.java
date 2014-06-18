@@ -27,7 +27,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private int xRes = 40;
     private int yRes = 20;
     private int border = 0;
-    private int particles = 0;
+    
+    private StreamletParameters streamletPars = new StreamletParameters();
+
     private boolean autoUpdate = false;
     private char mode = SailingSimulatorConstants.ModeEvent;  // default mode: 'e'vent
     private char event = SailingSimulatorConstants.EventKielerWoche; // default event: 'k'ieler woche
@@ -40,6 +42,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
     private boolean showStreamlets2 = false; // show animated wind streamlets in the wind display and replay modes.
     private boolean injectWindDataJS = false;
+    
     
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
@@ -79,12 +82,49 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             this.border = Integer.parseInt(border);
         }
+        
+        streamletPars.particles = 0;
+        streamletPars.motionScale = 1.0;
+        streamletPars.swarmScale = 1.0;
+        streamletPars.detailZoom = 15;
+
         String particlesStr = Window.Location.getParameter("particles");
         if (particlesStr == null || particlesStr.isEmpty()) {
-           logger.config("Using default particles " + this.particles);
+           logger.config("Using default particles " + this.streamletPars.particles);
         } else {
-            this.particles = Integer.parseInt(particlesStr);
+            this.streamletPars.particles = Integer.parseInt(particlesStr);
         }
+        String tmpStr = Window.Location.getParameter("motionScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default motionScale.");
+        } else {
+            this.streamletPars.motionScale = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("swarmScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default swarmScale.");
+        } else {
+            this.streamletPars.swarmScale = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("lineBase");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineBase.");
+        } else {
+            this.streamletPars.lineBase = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("lineScale");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default lineScale.");
+        } else {
+            this.streamletPars.lineScale = Double.parseDouble(tmpStr);
+        }
+        tmpStr = Window.Location.getParameter("detailZoom");
+        if (tmpStr == null || tmpStr.isEmpty()) {
+           logger.config("Using default detailZoom.");
+        } else {
+            this.streamletPars.detailZoom = Integer.parseInt(tmpStr);
+        }
+        
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
             logger.config("Using default auto update " + autoUpdate);
@@ -179,7 +219,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, particles,
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, stringMessages, this, xRes, yRes, border, streamletPars,
                 autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets, showStreamlets2, injectWindDataJS, showMapControls);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
