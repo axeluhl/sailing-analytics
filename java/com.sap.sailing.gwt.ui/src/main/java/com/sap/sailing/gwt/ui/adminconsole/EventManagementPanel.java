@@ -189,6 +189,10 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                     builder.appendEscaped(courseArea.getName());
                     if (i < courseAreasCount) {
                         builder.appendHtmlConstant(",&nbsp;");
+                        // not more than  4 course areas per line
+                        if(i % 4 == 0) {
+                            builder.appendHtmlConstant("<br>");
+                        }
                     }
                     i++;
                 }
