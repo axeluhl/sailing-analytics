@@ -10,15 +10,17 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.ClockAtMarkElement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.swing.JOptionPane;
+
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.ClockAtMarkElement;
 
 /**
  *

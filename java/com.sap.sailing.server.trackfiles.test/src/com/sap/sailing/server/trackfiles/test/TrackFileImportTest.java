@@ -8,11 +8,12 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.TimeRange;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.server.trackfiles.Import;
-import com.sap.sailing.server.trackfiles.Import.FixCallback;
+import com.sap.sailing.server.trackfiles.impl.RouteConverterGPSFixImporterImpl;
 
 public class TrackFileImportTest {
     private boolean callbackCalled = false;
@@ -23,30 +24,30 @@ public class TrackFileImportTest {
     }
     
     @Test
-    public void testGpx() throws IOException {
+    public void testGpx() throws IOException, FormatNotSupportedException {
         InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
-        Import.INSTANCE.importFixes(in, new FixCallback() {
+        new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void addFix(GPSFix fix, int numberOfFixes, TimeRange timeRange, String trackName) {
+            public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                 if (fix instanceof GPSFixMoving) {
                     callbackCalled = true;
                 }
             }
-        }, false);
+        }, false, "source");
         assertTrue(callbackCalled);
     }
     
     @Test
-    public void testKmlOnlyLatLong() throws IOException {
-        InputStream in = getClass().getResourceAsStream("/sam002903 - COMPETITORS.kml");
-        Import.INSTANCE.importFixes(in, new FixCallback() {
+    public void testKmlOnlyLatLong() throws IOException, FormatNotSupportedException {
+        InputStream in = getClass().getResourceAsStream("/Cardiff Race22 - COMPETITORS.kml");
+        new RouteConverterGPSFixImporterImpl().importFixes(in, new Callback() {
             @Override
-            public void addFix(GPSFix fix, int numberOfFixes, TimeRange timeRange, String trackName) {
+            public void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device) {
                 if (fix instanceof GPSFix) {
                     callbackCalled = true;
                 }
             }
-        }, false);
+        }, false, "source");
         assertTrue(callbackCalled);
     }
 }

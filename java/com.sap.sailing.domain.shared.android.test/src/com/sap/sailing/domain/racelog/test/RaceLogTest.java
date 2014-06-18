@@ -21,7 +21,6 @@ import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -32,6 +31,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sse.common.Util;
 
 public class RaceLogTest {
     

@@ -13,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.AbstractCandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
@@ -23,20 +22,19 @@ import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sse.common.Util;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
     private static LinkedHashMap<String, Long> result = new LinkedHashMap<>();
-    private static String className;
 
     public MarkPassingCalculatorPerformanceTest() {
         super();
-        className = getClass().getName();
     }
 
     @AfterClass
     public static void createXMLFile() throws IOException {
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest", className);
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile(MarkPassingCalculatorPerformanceTest.class);
         for (String key : result.keySet()) {
             MeasurementCase performanceReportCase = performanceReport.addCase(key);
             performanceReportCase.addMeasurement(new Measurement(key, result.get(key)));
@@ -74,7 +72,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         }
         time = System.currentTimeMillis();
         CandidateChooser c = new CandidateChooser(trackedRace);
-        c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
+        c.calculateMarkPassDeltas(bob, new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
         ArrayList<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -84,7 +82,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
                 ne.add(randomCan());
             }
             time = System.currentTimeMillis();
-            c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(ne, old));
+            c.calculateMarkPassDeltas(bob, new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(ne, old));
             times.add(System.currentTimeMillis() - time);
             old = ne;
         }

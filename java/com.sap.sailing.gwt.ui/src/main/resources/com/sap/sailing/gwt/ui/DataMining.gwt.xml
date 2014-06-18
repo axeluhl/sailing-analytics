@@ -9,6 +9,14 @@
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  	<inherits name='com.google.gwt.maps.Maps' />
+	
+  	<!--  Bootstrap API -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+  	
 	<!-- Other module inherits -->
     <inherits name="com.sap.sse.gwt.SSESharedGWT" />
   	<inherits name="com.sap.sse.SSECommon" />
@@ -23,8 +31,10 @@
 	<extend-property name="locale" values="de" />
   	<extend-property name="locale" values="ru"/>
 
-	<source path="client" />
+  	<source path='common'/>
+  	<source path="client" />
 	<source path="datamining" />
+	<source path="simulator" />
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />

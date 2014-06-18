@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.dto;
 
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 /**
  * Like the superclass, but competitors are fetched from the {@link LeaderboardDTO#getSuppressedCompetitors()} list

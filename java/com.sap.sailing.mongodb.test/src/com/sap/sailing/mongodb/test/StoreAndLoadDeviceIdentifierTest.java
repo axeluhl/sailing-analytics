@@ -17,9 +17,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.TimeRangeImpl;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
@@ -38,7 +35,8 @@ import com.sap.sailing.domain.racelog.tracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sse.common.Util;
 
 public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     public StoreAndLoadDeviceIdentifierTest() throws UnknownHostException, MongoException {
@@ -64,7 +62,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         dropTestDB();
 
         logIdentifier = mock(RaceLogIdentifier.class);
-        Triple<String, String, String> triple = new Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
+        com.sap.sse.common.Util.Triple<String, String, String> triple = new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
         when(logIdentifier.getIdentifier()).thenReturn(triple);
         when(logIdentifier.getDeprecatedIdentifier()).thenReturn("");
     }
@@ -142,7 +140,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         TypeBasedServiceFinderFactory forLoading = new MockSmartphoneImeiServiceFinderFactory();
         TypeBasedServiceFinderFactory forStoring = new MockEmptyServiceFinderFactory();
         
-        DeviceIdentifier trackFile = new TrackFileImportDeviceIdentifierImpl("FILE", "track", TimeRangeImpl.create(100, 200), 30);
+        DeviceIdentifier trackFile = new TrackFileImportDeviceIdentifierImpl("FILE", "track");
         DeviceIdentifier loaded = storeAndLoad(trackFile, forStoring, forLoading);
         assertTrue(loaded instanceof PlaceHolderDeviceIdentifier);
         assertEquals(trackFile.getIdentifierType(), loaded.getIdentifierType());

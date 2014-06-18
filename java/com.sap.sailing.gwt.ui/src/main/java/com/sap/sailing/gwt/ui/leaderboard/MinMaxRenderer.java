@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Collection;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
@@ -51,7 +50,7 @@ public class MinMaxRenderer {
 
     /**
      * Gets the percentage of a {@link LeaderboardRowDTO}. If no minimum or maximum value was set by calling
-     * {@link MinMaxRenderer#updateMinMax(Collection)} before zero is returned.
+     * {@link MinMaxRenderer#updateMinMax(DisplayedLeaderboardRowsProvider)} before zero is returned.
      * 
      * @param row
      *            The row to get the percentage for.
@@ -82,13 +81,13 @@ public class MinMaxRenderer {
     /**
      * Updates the {@link MinMaxRenderer#minimumValue} and {@link MinMaxRenderer#maximumValue}.
      * 
-     * @param values
+     * @param displayedLeaderboardRowsProvider
      *            The values of {@link LeaderboardRowDTO}s to determine the minimum and maximum values for.
      */
-    public void updateMinMax(Collection<LeaderboardRowDTO> values) {
+    public void updateMinMax(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         LeaderboardRowDTO minimumRow = null;
         LeaderboardRowDTO maximumRow = null;
-        for (LeaderboardRowDTO row : values) {
+        for (LeaderboardRowDTO row : displayedLeaderboardRowsProvider.getRowsToDisplay()) {
             if (valueProvider.getDoubleValue(row) != null
                     && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;

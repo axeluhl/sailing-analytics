@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -25,7 +26,7 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void addListener(GPSFixReceivedListener listener) {
+    public void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
     }
 
     @Override
@@ -43,5 +44,15 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
             DeviceMapping<Mark> mapping) {
 
+    }
+
+    @Override
+    public TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device) {
+        return null;
+    }
+
+    @Override
+    public long getNumberOfFixes(DeviceIdentifier device) {
+        return 0;
     }
 }

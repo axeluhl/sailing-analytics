@@ -32,8 +32,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -65,6 +63,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 
@@ -77,7 +76,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final String raceDescription;
     private final BoatClass boatClass;
     private final DomainFactory domainFactory;
-    private final Triple<String, String, Integer> id;
+    private final com.sap.sse.common.Util.Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
@@ -143,8 +142,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         return trackedRegatta;
     }
 
-    static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
-        return new Triple<String, String, Integer>(raceID, hostname, port);
+    static com.sap.sse.common.Util.Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
+        return new com.sap.sse.common.Util.Triple<String, String, Integer>(raceID, hostname, port);
     }
 
     @Override
@@ -239,7 +238,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public Triple<String, String, Integer> getID() {
+    public com.sap.sse.common.Util.Triple<String, String, Integer> getID() {
         return id; 
     }
 
@@ -324,54 +323,62 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
             Competitor competitor = getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass);
-            // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
-            // we need to use this to *update* the competitor's mark passings list, not *replace* it
-            TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
-            // now fill with the already existing mark passings for the competitor identified by boatID...
-            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            trackedRace.lockForRead(markPassings);
-            try {
-                for (MarkPassing markPassing : markPassings) {
-                    markPassingsByMarkIndex.put(
-                            trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()),
-                            markPassing);
+            if (competitor == null) {
+                logger.info("Received timing data for boat ID " + boatID + " in race " + raceID
+                        + " but couldn't find a competitor with that boat ID in this race. Ignoring.");
+            } else {
+                // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
+                // we need to use this to *update* the competitor's mark passings list, not *replace* it
+                TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
+                // now fill with the already existing mark passings for the competitor identified by boatID...
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                trackedRace.lockForRead(markPassings);
+                try {
+                    for (MarkPassing markPassing : markPassings) {
+                        markPassingsByMarkIndex.put(
+                                trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()),
+                                markPassing);
+                    }
+                } finally {
+                    trackedRace.unlockAfterRead(markPassings);
                 }
-            } finally {
-                trackedRace.unlockAfterRead(markPassings);
-            }
-            // ...and then overwrite those for which we received "new evidence"
-            for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
-                Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
-                        markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                // If the rank and time information is empty, we interpret this by clearing the mark rounding if any (see
-                // also bug 1911):
-                if (markIndexRankAndTimeSinceStartInMilliseconds.getC() == null) {
-                    markPassingsByMarkIndex.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                } else {
-                    // update mark passing only if we have a start time; guessed start times don't make sense and
-                    // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
-                    // which then cannot be identified as "guessed" anymore...
-                    if (trackedRace.getStartOfRace() != null) {
-                        final TimePoint startTime = trackedRace.getStartOfRace();
-                        MillisecondsTimePoint timePoint = new MillisecondsTimePoint(startTime.asMillis()
-                                + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-                        MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                                getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass));
-                        markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                // ...and then overwrite those for which we received "new evidence"
+                for (com.sap.sse.common.Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
+                    Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
+                            markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                    // If the rank and time information is empty, we interpret this by clearing the mark rounding if any
+                    // (see
+                    // also bug 1911):
+                    if (markIndexRankAndTimeSinceStartInMilliseconds.getC() == null) {
+                        markPassingsByMarkIndex.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
                     } else {
-                        //
-                        logger.warning("Received mark passing with time relative to start of race "
-                                + trackedRace.getRace().getName() + " before having received a race start time."
-                                + " Queueing message for re-application when a start time has been received.");
-                        tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                        // update mark passing only if we have a start time; guessed start times don't make sense and
+                        // for the start line would lead subsequent calls to getStartOfRace() return that guessed start
+                        // time
+                        // which then cannot be identified as "guessed" anymore...
+                        if (trackedRace.getStartOfRace() != null) {
+                            final TimePoint startTime = trackedRace.getStartOfRace();
+                            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(startTime.asMillis()
+                                    + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                            MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                                    getCompetitorByBoatIDAndRaceIDOrBoatClass(boatID, raceID, boatClass));
+                            markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(),
+                                    markPassing);
+                        } else {
+                            //
+                            logger.warning("Received mark passing with time relative to start of race "
+                                    + trackedRace.getRace().getName() + " before having received a race start time."
+                                    + " Queueing message for re-application when a start time has been received.");
+                            tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                        }
                     }
                 }
+                trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
             }
-            trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
         } else {
             if (!loggedIgnore) {
                 logger.info("Ignoring timing data " + markIndicesRanksAndTimesSinceStartInMilliseconds + " for SwissTiming race " + raceID
@@ -401,7 +408,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
         // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
         // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur fuer unsere TV-Grafik wichtig, da damit die Rueckstandsuhr gestartet wird."
     }

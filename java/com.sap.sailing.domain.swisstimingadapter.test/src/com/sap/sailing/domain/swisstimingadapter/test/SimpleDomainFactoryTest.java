@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
 

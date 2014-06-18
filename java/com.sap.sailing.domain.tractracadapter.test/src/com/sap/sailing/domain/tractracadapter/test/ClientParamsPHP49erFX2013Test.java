@@ -8,12 +8,12 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Event;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
+import com.sap.sse.common.Util;
 
 public class ClientParamsPHP49erFX2013Test extends AbstractClientParamsPHPTest {
     

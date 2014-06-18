@@ -1,13 +1,11 @@
 package com.sap.sailing.server.gateway.jaxrs;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
 
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
-@Provider
 public class AccessControlResponseFilter implements ContainerResponseFilter {
 
 	@Override

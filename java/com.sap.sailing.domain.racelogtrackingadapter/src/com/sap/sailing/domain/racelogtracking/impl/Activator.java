@@ -17,6 +17,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifierStringSerializati
 import com.sap.sailing.domain.racelog.tracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
@@ -32,10 +33,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
-import com.sap.sailing.server.gateway.trackfiles.TrackFileImportDeviceIdentifier;
 
 public class Activator implements BundleActivator {
-	private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
 	
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 

@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -46,6 +45,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.Util;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -112,7 +112,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
         TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
-        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(trackedRace.getRace()));
+        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(
+                trackedRace.getTrackedRegatta().getRegatta(), trackedRace.getRace()));
         raceDTO.places = racePlaces;
         updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
         return raceDTO;
@@ -141,7 +142,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
-        Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
+        Util.Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
         PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
         if (startAndFinish.getA() != null) {
             racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
@@ -155,7 +156,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return racePlaces;
     }
 
-    private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
+    private Util.Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
         double radiusCalculationFactor = 10.0;
         Placemark startBest = null;
         Placemark finishBest = null;
@@ -207,7 +208,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                 }
             }
         }
-        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(startBest, finishBest);
+        Util.Pair<Placemark, Placemark> placemarks = new Util.Pair<Placemark, Placemark>(startBest, finishBest);
         return placemarks;
     }
 

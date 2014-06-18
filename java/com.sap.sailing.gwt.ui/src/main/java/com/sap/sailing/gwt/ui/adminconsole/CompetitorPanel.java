@@ -18,10 +18,10 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -34,7 +34,7 @@ public class CompetitorPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final CompetitorTableWrapper competitorTable;
+    private final CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> competitorTable;
     private final MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private final String leaderboardName;
 
@@ -50,7 +50,8 @@ public class CompetitorPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
-        this.competitorTable = new CompetitorTableWrapper(sailingService, stringMessages, errorReporter);
+        this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
+                new MultiSelectionModel<CompetitorDTO>());
         this.competitorSelectionModel = competitorTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

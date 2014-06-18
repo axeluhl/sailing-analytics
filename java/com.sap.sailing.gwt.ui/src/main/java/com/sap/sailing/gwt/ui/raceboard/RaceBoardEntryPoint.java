@@ -90,6 +90,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
         
@@ -102,7 +103,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData());
+                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -113,7 +114,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData());
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData(), showMapControls);
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -129,7 +130,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, UserDTO user, boolean showMapControls) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
@@ -161,7 +162,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
-                leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
+                leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel);
     }  

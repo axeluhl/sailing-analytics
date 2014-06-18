@@ -2,8 +2,8 @@ package com.sap.sailing.datamining.impl.gps_fix;
 
 import com.sap.sailing.datamining.Clusters.WindStrength;
 import com.sap.sailing.datamining.WindStrengthCluster;
-import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;

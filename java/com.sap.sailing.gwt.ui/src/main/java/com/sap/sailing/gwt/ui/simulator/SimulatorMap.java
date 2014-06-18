@@ -327,7 +327,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }*/
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
-            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls) {
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -351,7 +351,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.replayPathCanvasOverlays = null;
         this.raceCourseCanvasOverlay = null;
         this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        this.initializeData();
+        this.initializeData(showMapControls);
         this.parent = parent;
     }
 
@@ -998,7 +998,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     @Override
-    public void initializeData() {
+    public void initializeData(boolean showMapControls) {
         loadMapsAPIV3();
     }
 

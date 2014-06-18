@@ -10,10 +10,11 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.util.List;
+
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
-import java.util.List;
 
 /**
  *

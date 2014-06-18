@@ -20,12 +20,12 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
+public class RacesListBoxPanel extends FormPanel implements RegattasDisplayer, RaceSelectionChangeListener {
     private final List<RaceDTO> raceList;
     private final ListBox raceListBox;
     private final RegattaRefresher regattaRefresher;

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implements Named {
     private static final long serialVersionUID = 2906084982209339774L;
@@ -165,10 +165,18 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         return readLockWrapper;
     }
 
+    /**
+     * Contains the threads currently holding a read lock. Each thread is contained as many times as it
+     * successfully acquired the read lock re-entrantly.
+     */
     public List<Thread> getReaders() {
         return new ArrayList<Thread>(readers);
     }
     
+    /**
+     * @return <code>null</code> if the write lock is not currently held by any thread; the thread holding the write
+     *         lock otherwise.
+     */
     public Thread getWriter() {
         return getOwner();
     }

@@ -228,7 +228,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate,
-            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS) {
+            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS, boolean showMapControls) {
         super();
 
         this.particles = streamletPars.particles;
@@ -313,7 +313,7 @@ public class SimulatorMainPanel extends SimplePanel {
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars, timer, timePanel,
-                windParams, busyIndicator, mode, this);
+                windParams, busyIndicator, mode, this, showMapControls);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);

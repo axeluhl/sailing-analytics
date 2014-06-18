@@ -358,6 +358,12 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
+    String sailingServers();
+    String errorRefreshingSailingServers(String message);
+    String successfullyUpdatedSailingServers();
+    String errorRemovingSailingServers(String message);
+    String addSailingServer();
+    String errorAddingSailingServer(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
@@ -1020,4 +1026,15 @@ public interface StringMessages extends Messages {
     String selectAtLeastOne();
     String selectRaces();
     String importFixes();
+    String noSailingServerInstancesYet();
+    String registeredSailingServerInstances();
+    String filterEventsByName();
+    String leaderboardsExceptFromSelectedGroup();
+    String availableLeaderboardGroups();
+    String leaderboardGroupsOfSelectedEvent();
+    String addRaces();
+    String withNamePrefix();
+    String pleaseSelectASeriesFirst();
+    String imageURLs();
+    String videoURLs();
 }
