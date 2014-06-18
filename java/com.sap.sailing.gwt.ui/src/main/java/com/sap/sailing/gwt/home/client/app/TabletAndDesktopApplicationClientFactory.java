@@ -61,6 +61,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     @Override
     public SearchResultView createSearchResultView() {
-        return new TabletAndDesktopSearchResultView(getPlaceNavigator());
+        return new TabletAndDesktopSearchResultView(getPlaceNavigator(), getEventBus());
     }
 }

@@ -6,23 +6,12 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.eventsponsors.EventSponsorsResources" />
     <g:HTMLPanel>
-
-<!-- Sponsors of an event-->
-<div class="{local_res.css.eventsponsors}">
-  <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-      <h3 class="{local_res.css.eventsponsors_title}">Event Sponsors</h3>
+    <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
+      <div class="{local_res.css.eventsponsors_sponsor}">
+          <g:Anchor ui:field="sponsorLink" styleName="{local_res.css.eventsponsors_sponsor_link}">
+              <img ui:field="sponsorImage" alt="" class="{local_res.css.eventsponsors_sponsor_link_image}"></img>
+           </g:Anchor>
+	  </div>
     </div>
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-      <hr></hr>
-    </div>
-    <g:HTMLPanel ui:field="sponsorsPlaceholder">
-		<!-- the sponsor widgets will be inserted here -->
-	</g:HTMLPanel>
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-      <hr></hr>
-    </div>
-  </div>
-</div>
     </g:HTMLPanel>
 </ui:UiBinder>

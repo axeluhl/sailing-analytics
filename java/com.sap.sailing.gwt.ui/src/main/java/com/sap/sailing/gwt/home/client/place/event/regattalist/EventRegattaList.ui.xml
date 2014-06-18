@@ -1,0 +1,45 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattalist.EventRegattaListResources" />
+    <g:HTMLPanel>
+	regatta list content
+<!-- A list of regattas-->
+<!-- A view, introducing a regatta-->
+<!-- 
+<div class="{local_res.css.eventregattalist}">{#each regatta in event.regattas}
+  <div class="{local_res.css.regatta} {local_res.css.regattalink}">
+    <div class="{res.mediaCss.grid}">
+      <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="event-regatta-schedule.html" class="{local_res.css.regatta_intro}"><img src="images/{regatta.image}" alt="{regatta.name}" height="140" width="140" class="{local_res.css.regatta_intro_image}"></img>
+          <div class="{local_res.css.regatta_intro_header}"><img src="images/{regatta.logo}" alt="" class="{local_res.css.regatta_intro_header_logo}"></img>
+            <h3 class="{local_res.css.regatta_intro_header_name}">{regatta.name}</h3>
+            <div class="{local_res.css.regatta_intro_header_labels}">{#if regatta.isLive}
+              <div data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>{/if regatta.isLive}{#if regatta.series}
+              <div data-labeltype="{regatta.series.id}" class="{res.mainCss.label}">{regatta.series.name}</div>{/if regatta.series}
+            </div>
+          </div>
+          <div class="{local_res.css.regatta_intro_races}">
+            <div data-finished="{race.finished}" class="{local_res.css.regatta_intro_races_race}"></div>
+          </div>
+          <div class="{local_res.css.regatta_intro_details}">
+            <div class="{local_res.css.regatta_intro_details_item}">
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><span class="{local_res.css.regatta_intro_details_item_value}">{regatta.racesCount}</span>&nbsp;<ui:text from='{i18n.regattaIntroContentRaces}'/></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><span class="{local_res.css.regatta_intro_details_item_value}">{regatta.competitorsCount}</span>&nbsp;<ui:text from='{i18n.regattaIntroContentCompetitors}'/></div>
+            </div>
+            <div class="{local_res.css.regatta_intro_details_item} {local_res.css.regatta_intro_details_itemhideoncompact}">
+              <div class="{local_res.css.regatta_intro_details_item_sub}">{feature}
+              </div>
+            </div>
+            <div class="{local_res.css.regatta_intro_details_item} {local_res.css.regatta_intro_details_itemhideoncompact}"><ui:text from='{i18n.regattaIntroContentCourse}'/>:&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.course}</span></div>
+            <div class="{local_res.css.regatta_intro_details_item}"><ui:text from='{i18n.lastUpdate}'/>:&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.lastUpdate}</span></div>
+          </div></a></div>
+    </div>
+  </div>{/each event.regattas}
+</div>
+ -->
+
+    </g:HTMLPanel>
+</ui:UiBinder>
