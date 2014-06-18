@@ -520,15 +520,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        return getTotalPoints(competitor, getRaceColumns(), timePoint);
+    }
+
+    @Override
+    public Double getTotalPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
+            TimePoint timePoint) throws NoWindException {
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
-        for (RaceColumn r : getRaceColumns()) {
-            if (r.isStartsWithZeroScore()) {
+        for (RaceColumn raceColumn : raceColumnsToConsider) {
+            if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
-            if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
-                final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+            if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
+                final Double totalPoints = getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
@@ -686,6 +692,22 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));
+        }
+        return result;
+    }
+
+    @Override
+    public Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(TimePoint timePoint)
+            throws NoWindException {
+        Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            raceColumnsToConsider.add(raceColumn);
+            Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
+            for (Competitor competitor : getCompetitors()) {
+                totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, raceColumnsToConsider, timePoint));
+            }
+            result.put(raceColumn, totalPointsSumPerCompetitorInColumn);
         }
         return result;
     }

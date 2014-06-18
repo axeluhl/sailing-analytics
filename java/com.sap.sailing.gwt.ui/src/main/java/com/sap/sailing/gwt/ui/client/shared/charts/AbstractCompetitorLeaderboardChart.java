@@ -150,7 +150,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
-            case REGATTA_TOTAL_POINTS:
+            case REGATTA_TOTAL_POINTS_SUM:
                 chart.getYAxis().setTickInterval(5.0);
                 chart.getYAxis().setReversed(false);
                 break;
@@ -231,12 +231,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         setWidget(chart);
                         raceColumnNames.clear();
                         
-                        switch(selectedDetailType) {
+                        switch (selectedDetailType) {
                         case OVERALL_RANK:
                         case REGATTA_RANK:
                             fillTotalRanksSeries(result, chartSeries);
                             break;
-                        case REGATTA_TOTAL_POINTS:
+                        case REGATTA_TOTAL_POINTS_SUM:
                             fillTotalPointsSeries(result, chartSeries);
                             break;
                         default:
@@ -298,7 +298,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
-    private void fillTotalPointsSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalPointsSeries(
+            List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result,
+            List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
@@ -312,7 +314,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
-            if(hasValidValues(dataValues)) {
+            if (hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
                 maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
@@ -320,18 +322,17 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                     if (isCompetitorVisible(competitor)) {
                         Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
-                        if(dataValue != null) {
+                        if (dataValue != null) {
                             Double sumTotalPoints = dataValue;
-                            if(sumTotalPointsMap.containsKey(competitor)) {
+                            if (sumTotalPointsMap.containsKey(competitor)) {
                                 sumTotalPoints += sumTotalPointsMap.get(competitor);
                             } 
                             sumTotalPointsMap.put(competitor, sumTotalPoints);
                             series.addPoint(raceColumnNumber, sumTotalPoints, /* redraw */ false, /* shift */ false, /* animation */ false);
-                            if(sumTotalPoints > maxTotalPoints) {
+                            if (sumTotalPoints > maxTotalPoints) {
                                 maxTotalPoints = sumTotalPoints;
                             }
                         }
-                        
                         unusedSeries.remove(series);
                         if (!chartSeries.contains(series)) {
                             chart.addSeries(series);

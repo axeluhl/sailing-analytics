@@ -142,8 +142,6 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -382,6 +380,7 @@ import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
@@ -2563,18 +2562,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> getTotalPointsForRaceColumn(LeaderboardDTO leaderboard,
-            RaceColumnDTO raceColumn) throws NoWindException {
-        List<Double> values = new ArrayList<Double>();
-        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
-        for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
-            LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
-            values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
-            competitorDTOs.add(entry.getKey());
-        }
-        return new com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.getName(), competitorDTOs, values);
-    }
-
     @Override
     public List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
             Date date, DetailType detailType) throws Exception {
@@ -2591,11 +2578,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             if (detailType != null) {
                 switch (detailType) {
-                case REGATTA_TOTAL_POINTS:
-                    LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
-                            /* addOverallDetails */ false, getService(), baseDomainFactory);
-                    for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
-                        result.add(getTotalPointsForRaceColumn(leaderboardDTO, raceColumnDTO));
+                case REGATTA_TOTAL_POINTS_SUM:
+                    for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getTotalPointsSumAfterRaceColumn(timePoint).entrySet()) {
+                        List<CompetitorDTO> competitorDTOs = new ArrayList<>();
+                        List<Double> pointSums = new ArrayList<>();
+                        for (Entry<Competitor, Double> e2 : e.getValue().entrySet()) {
+                            competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(e2.getKey()));
+                            pointSums.add(e2.getValue());
+                        }
+                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, pointSums)); 
                     }
                     break;
                 case REGATTA_RANK:
@@ -2613,7 +2604,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
                             rank++;
                         }
-                        result.add(new com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
+                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
                     }
                     break;
                 default:

@@ -122,7 +122,7 @@ public interface Leaderboard extends LeaderboardBase {
      * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
      * starts with those races. In this case there isn't even any point in time at which all fleets have finished
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
-     * the <i>times</i> at which a race took place but only looking at the resulting scores and discard.<p>
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
@@ -132,6 +132,25 @@ public interface Leaderboard extends LeaderboardBase {
      * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Computes the competitor's total points sum as they were or would have been after each race column (from left to right)
+     * was completed.<p>
+     * 
+     * A leaderboard fills up over time, usually "from left to right" with one race after another finishing.
+     * For split fleets things can vary slightly. There, one fleet may complete a few races before the another fleet
+     * starts with those races. In this case there isn't even any point in time at which all fleets have finished
+     * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
+     * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
+     * 
+     * When computing the total points sum after all columns up to and including the race column that is the key of the resulting
+     * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
+     * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
+     */
+    Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(TimePoint timePoint) throws NoWindException;
     
     /**
      * Tells the number of points carried over from previous races not tracked by this leaderboard for
@@ -216,6 +235,14 @@ public interface Leaderboard extends LeaderboardBase {
      */
     Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
+    /**
+     * Sums up the {@link #getTotalPoints(Competitor, RaceColumn, TimePoint) total points} of <code>competitor</code>
+     * across all race columns listed in <code>raceColumnsToconsider</code>, respecting the
+     * {@link RaceColumn#isStartsWithZeroScore()} property.
+     */
+    Double getTotalPoints(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint)
+            throws NoWindException;
+
     /**
      * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
      * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
@@ -312,10 +339,11 @@ public interface Leaderboard extends LeaderboardBase {
      * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
      * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the
      * number of "races so far" which is then the basis for deciding how many races may be discarded. If a leaderboard
-     * has corrections for a column for the <code>competitor</code> then that column shall be considered for discarding
-     * and counts for determining the number of races so far. Also, if a tracked race is connected to the column and has
-     * started already, the column is to be considered for discarding unless the column has several unordered fleets and
-     * not all fleets have started their race yet (see
+     * has corrections for a column for the <code>competitor</code> that are already to be applied at
+     * <code>timePoint</code> (e.g., because the race can be proven to have finished at <code>timePoint</code>), then
+     * that column shall be considered for discarding and counts for determining the number of races so far. Also, if a
+     * tracked race is connected to the column and has started already, the column is to be considered for discarding
+     * unless the column has several unordered fleets and not all fleets have started their race yet (see
      * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
@@ -459,4 +487,5 @@ public interface Leaderboard extends LeaderboardBase {
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
+
 }
