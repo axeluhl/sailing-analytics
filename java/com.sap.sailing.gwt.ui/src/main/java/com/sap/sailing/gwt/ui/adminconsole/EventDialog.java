@@ -14,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,7 +30,7 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
-    protected TextBox descriptionEntryField;
+    protected TextArea descriptionEntryField;
     protected TextBox venueEntryField;
     protected DateBox startDateBox;
     protected DateBox endDateBox;

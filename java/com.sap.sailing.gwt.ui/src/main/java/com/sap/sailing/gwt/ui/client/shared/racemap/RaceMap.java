@@ -1040,7 +1040,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
                     options.setGeodesic(true);
-                    options.setStrokeColor("#6896c6");
+                    options.setStrokeColor("#2268a0");
                     options.setStrokeWeight(1);
                     options.setStrokeOpacity(1.0);
                     

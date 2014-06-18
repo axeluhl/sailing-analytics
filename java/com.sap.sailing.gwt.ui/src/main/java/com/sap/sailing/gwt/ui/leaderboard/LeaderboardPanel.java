@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -211,6 +212,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean showAddedScores;
 
     /**
+     * When <code>true</code> then an additional column just before the overall points is displayed that sums up
+     * the number of races sailed per competitor.
+     */
+    private boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+
+    /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
      * selected race {@link #autoExpandLastRaceColumn} has been performed once. It must not be performed another time.
      */
@@ -344,6 +351,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             settingsUpdatedExplicitly = true;
         }
         setShowAddedScores(newSettings.isShowAddedScores());
+        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -1261,6 +1269,76 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         }
     }
+    
+    /**
+     * Column that display the number of races a competitor has finished. Currently
+     * taking into account {@link MaxPointsReason#DNS}, {@link MaxPointsReason#DNF}
+     * and {@link MaxPointsReason#DNC}. Configurable over {@link LeaderboardSettings#isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor()}.
+     * 
+     * @author Simon Marcel Pamies
+     */
+    private class TotalRacesCompletedColumn extends SortableColumn<LeaderboardRowDTO, String> {
+        private final String columnStyle;
+        private final MaxPointsReason[] MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES = 
+                new MaxPointsReason[] {MaxPointsReason.DNS, MaxPointsReason.DNF, MaxPointsReason.DNC};
+
+        protected TotalRacesCompletedColumn(String columnStyle) {
+            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            this.columnStyle = columnStyle;
+            setHorizontalAlignment(ALIGN_CENTER);
+        }
+        
+        private int computeNumberOfRacesCompleted(LeaderboardRowDTO object) {
+            int racesSailedInRow = 0;
+            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+                LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
+                if (entryBefore.totalPoints != null) {
+                    if (entryBefore.reasonForMaxPoints.equals(MaxPointsReason.NONE) ||
+                            !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES), entryBefore.reasonForMaxPoints)) {
+                        racesSailedInRow++;
+                    }
+                } 
+            }
+            return racesSailedInRow;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            return "" + computeNumberOfRacesCompleted(object);
+        }
+
+        @Override
+        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+            String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+                
+            sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
+            sb.appendEscaped(getValue(object));
+            sb.appendHtmlConstant("</span>");
+        }
+
+        @Override
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+                    double o1RacesSailed = computeNumberOfRacesCompleted(o1);
+                    double o2RacesSailed = computeNumberOfRacesCompleted(o2);
+                    double result = o1RacesSailed == 0. ? o2RacesSailed == 0. ? 0. : isAscending() ? 1. : -1. : o2RacesSailed == 0. ? isAscending() ? 1. : -1. : o2RacesSailed - o1RacesSailed;
+                    return result > 0 ? 1 : result < 0 ? -1 : 0;
+                }
+            };
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return columnStyle;
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.racesCompleted()), stringMessages.racesCompletedTooltip());
+        }
+    }
 
     /**
      * Displays the totals for a competitor for the entire leaderboard.
@@ -1504,6 +1582,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
         setShowAddedScores(settings.isShowAddedScores());
+        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(getLeaderboardDisplayDate());
         }
@@ -1715,6 +1794,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (autoExpandPreSelectedRace) {
             autoExpandPerformedOnce = false;
         }
+    }
+    
+    private boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
+        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    }
+    
+    private void setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor) {
+        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     }
     
     private boolean isShowAddedScores() {
@@ -2117,6 +2204,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (leaderboard != null) {
             createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
+            updateTotalRacesSailedColumn();
         }
     }
 
@@ -2396,6 +2484,29 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             addColumn(new TotalsColumn(TOTAL_COLUMN_STYLE));
         }
     }
+    
+    private void ensureTotalRacesSailedColumn() {
+        // add a totals column on the right 
+        if (getLeaderboardTable().getColumnCount() == 0
+                || !(getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof TotalRacesCompletedColumn)) {
+            insertColumn(getLeaderboardTable().getColumnCount() - 1, new TotalRacesCompletedColumn(TOTAL_COLUMN_STYLE));
+        }
+    }
+    
+    private void ensureNoTotalRacesSailedColumn() {
+        if ((getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof TotalRacesCompletedColumn)) {
+            removeColumn(getLeaderboardTable().getColumnCount() - 2);
+        }
+    }
+    
+    protected void updateTotalRacesSailedColumn() {
+        final boolean showTotalRacesCompletedColumn = isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor();
+        if (showTotalRacesCompletedColumn) {
+            ensureTotalRacesSailedColumn();
+        } else {
+            ensureNoTotalRacesSailedColumn();
+        }
+    }
 
     /**
      * If the <code>leaderboard</code> {@link LeaderboardDTO#hasCarriedPoints has carried points} and if column #1
@@ -2525,7 +2636,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                isShowAddedScores(), timer.getRefreshInterval(), stringMessages);
+                isShowAddedScores(), timer.getRefreshInterval(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
     }
 
     @Override

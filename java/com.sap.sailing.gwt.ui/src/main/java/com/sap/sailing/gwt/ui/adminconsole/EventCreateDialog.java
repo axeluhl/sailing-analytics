@@ -15,8 +15,10 @@ public class EventCreateDialog extends EventDialog {
 
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);
-        descriptionEntryField = createTextBox(null);
-        descriptionEntryField.setVisibleLength(50);
+        descriptionEntryField = createTextArea(null);
+        descriptionEntryField.setCharacterWidth(50);
+        descriptionEntryField.setVisibleLines(2);
+        descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         venueEntryField = createTextBox(null);
         venueEntryField.setVisibleLength(35);
         startDateBox = createDateBox(12);

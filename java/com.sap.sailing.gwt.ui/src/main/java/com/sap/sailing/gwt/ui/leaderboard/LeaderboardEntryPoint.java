@@ -62,6 +62,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_SHOW_OVERALL_LEADERBOARD = "showOverallLeaderboard";
     private static final String PARAM_SHOW_SERIES_LEADERBOARDS = "showSeriesLeaderboards";
     private static final String PARAM_SHOW_ADDED_SCORES = "showAddedScores";
+    private static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -77,6 +78,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
      * number specified by the parameter.
      */
     private static final String PARAM_NAME_LAST_N = "lastN";
+
     private String leaderboardName;
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
@@ -221,7 +223,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
-                parameterMap.containsKey(PARAM_OVERALL_DETAIL) || parameterMap.containsKey(PARAM_SHOW_ADDED_SCORES)) {
+                parameterMap.containsKey(PARAM_OVERALL_DETAIL) || parameterMap.containsKey(PARAM_SHOW_ADDED_SCORES) ||
+                parameterMap.containsKey(PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED)) {
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_OVERALL_DETAIL));
@@ -229,6 +232,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             List<String> namesOfRacesToShow = getStringListFromParamValue(parameterMap.get(PARAM_RACE_NAME));
             boolean showAddedScores = parameterMap.containsKey(PARAM_SHOW_ADDED_SCORES) ? 
                     Boolean.valueOf(parameterMap.get(PARAM_SHOW_ADDED_SCORES).get(0)) : false;
+            boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor = parameterMap.containsKey(PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED) ?
+                    Boolean.valueOf(parameterMap.get(PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED).get(0)) : false;
             boolean autoExpandPreSelectedRace = parameterMap.containsKey(PARAM_AUTO_EXPAND_PRESELECTED_RACE) ?
                     Boolean.valueOf(parameterMap.get(PARAM_AUTO_EXPAND_PRESELECTED_RACE).get(0)) :
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
@@ -238,7 +243,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null,
                             /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showAddedScores);
+                                    raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor);
 
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
