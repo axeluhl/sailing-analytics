@@ -6,6 +6,7 @@ import umontreal.iro.lecuyer.randvar.GeometricGen;
 import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.rng.RandomStream;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -48,11 +49,11 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         generate(start, end, step, windParameters.baseWindSpeed, windParameters.baseWindBearing);
     }
 
-    protected void generate(TimePoint start, TimePoint end, TimePoint step, double defaultSpeed, double defaultBearing) {
+    protected void generate(TimePoint start, TimePoint end, Duration step, double defaultSpeed, double defaultBearing) {
         super.generate(start, end, step);
         // TODO Check the defaults
         setDefaultWindSpeed(defaultSpeed);

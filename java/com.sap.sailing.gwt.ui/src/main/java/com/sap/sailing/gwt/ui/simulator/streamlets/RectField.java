@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class RectField implements VectorField {
@@ -14,9 +16,6 @@ public class RectField implements VectorField {
     private final double x1;
     private final double y0;
     private final double y1;
-
-    private Position visSW;
-    private Position visNE;
 
     private final int w;
     private final int h;
@@ -31,10 +30,6 @@ public class RectField implements VectorField {
         this.x1 = x1;
         this.y0 = y0;
         this.y1 = y1;
-
-        this.visSW = new DegreePosition(0.0, 0.0);
-        this.visNE = new DegreePosition(0.0, 0.0);
-
         this.field = field;
         this.w = field.length;
         this.h = field[0].length;
@@ -99,15 +94,6 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Position getRandomPosition() {
-        double rndY = Math.random();
-        double rndX = Math.random();
-        double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-        double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
-        return new DegreePosition(latDeg, lngDeg);
-    }
-
-    @Override
     public boolean inBounds(Position p) {
         return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
                 && p.getLatDeg() < this.y1;
@@ -156,7 +142,7 @@ public class RectField implements VectorField {
 
     @Override
     public double particleWeight(Position p, Vector v) {
-        return 1.0 - v.length() / this.maxLength;
+        return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
     @Override
@@ -185,25 +171,11 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners() {
-        DegreePosition[] result = new DegreePosition[2];
-        result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-        result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-        return result;
-    }
-
-    @Override
-    public void setVisNE(Position visNE) {
-        this.visNE = visNE;
-    }
-
-    @Override
-    public void setVisSW(Position visSW) {
-        this.visSW = visSW;
-    }
-
-    @Override
-    public void setVisFullCanvas(boolean full) {
+    public Bounds getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
+        Position sw = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+        Position ne = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+        return new BoundsImpl(sw, ne);
     }
 
     @Override

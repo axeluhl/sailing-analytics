@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -38,7 +39,7 @@ public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implement
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         super.generate(start, end, step);
     }
 
