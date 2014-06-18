@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class SimulatorField implements VectorField {
     private boolean swarmDebug = false;
@@ -31,6 +32,7 @@ public class SimulatorField implements VectorField {
     private Position bdC;
 
     private double xScale;
+	private double motionFactor;
 
     private Position visSW;
     private Position visNE;
@@ -49,7 +51,7 @@ public class SimulatorField implements VectorField {
     private final String[] colorsForSpeeds;
     private int step;
 
-    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams) {
+    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
         this.colorsForSpeeds = createColorsForSpeeds();
         this.step = 0;
         String parseString = windData.windDataJSON.substring(18, windData.windDataJSON.length() - 1) + "}";
@@ -69,6 +71,7 @@ public class SimulatorField implements VectorField {
         this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * this.bdPhi,
                 (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * this.bdPhi);
         this.xScale = baseData.get("xScale").isNumber().doubleValue();
+		this.motionFactor = 0.07 * parameters.motionScale;
         this.visSW = new DegreePosition(0.0, 0.0);
         this.visNE = new DegreePosition(0.0, 0.0);
         List<SimulatorWindDTO> gridData = windData.getMatrix();
@@ -271,7 +274,7 @@ public class SimulatorField implements VectorField {
 
     @Override
     public double motionScale(int zoomLevel) {
-        return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+        return this.motionFactor * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override

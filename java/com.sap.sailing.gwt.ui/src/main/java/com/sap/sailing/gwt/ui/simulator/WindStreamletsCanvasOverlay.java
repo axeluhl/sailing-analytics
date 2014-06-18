@@ -30,6 +30,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     protected WindFieldDTO windFieldDTO;
     protected WindFieldGenParamsDTO windParams = null;
     protected SimulatorMap simulatorMap;
+    protected StreamletParameters streamletPars;
 
     private boolean visible = false;
     private Timer timer;
@@ -40,13 +41,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer,
+    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final StreamletParameters streamletPars,
             final WindFieldGenParamsDTO windParams) {
         super(simulatorMap.getMap(), zIndex);
 
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;
+        this.streamletPars = streamletPars;
 
         this.nParticles = this.simulatorMap.getMainPanel().particles;
 
@@ -139,9 +141,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         eval(jsonField);
     }-*/;
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
+    /*public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
         this(simulatorMap, zIndex, null, null);
-    }
+    }*/
 
     public native void setMapInstance(Object mapInstance) /*-{
         $wnd.swarmMap = mapInstance;
@@ -153,7 +155,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            this.swarm = new Swarm(this, map);
+            this.swarm = new Swarm(this, map, this.streamletPars);
         }
         this.swarm.start(40, windFieldDTO);
     }
@@ -261,7 +263,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         super.draw();
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
-                this.swarm = new Swarm(this, map);
+                this.swarm = new Swarm(this, map, this.streamletPars);
                 this.swarm.start(40, null);
             }
             if (windFieldDTO != null) {
