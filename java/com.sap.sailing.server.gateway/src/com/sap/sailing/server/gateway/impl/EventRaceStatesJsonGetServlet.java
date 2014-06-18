@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
