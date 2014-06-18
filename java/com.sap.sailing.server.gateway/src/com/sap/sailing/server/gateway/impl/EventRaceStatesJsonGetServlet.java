@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -125,6 +126,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        result.put("trackedRaceName", raceIdentifier != null ? raceIdentifier.getRaceName() : null);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
