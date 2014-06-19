@@ -100,6 +100,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -2374,10 +2375,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
             throws NoWindException {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
-        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode);
     }
 
     @Override
@@ -2741,7 +2742,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     starboardMarkPositionWhileApproachingLine).getDifferenceTo(combinedWind.getFrom());
                             Distance windwardDistanceFromFirstToSecondMark;
                             windwardDistanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(
-                                    markPositions.get(0), markPositions.get(1), timePoint);
+                                    markPositions.get(0), markPositions.get(1), timePoint, WindPositionMode.EXACT);
                             final Position worseMarkPosition;
                             final Position betterMarkPosition;
                             if ((isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() > 0)

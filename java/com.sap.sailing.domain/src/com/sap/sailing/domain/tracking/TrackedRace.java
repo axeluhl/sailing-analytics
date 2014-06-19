@@ -460,7 +460,7 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in

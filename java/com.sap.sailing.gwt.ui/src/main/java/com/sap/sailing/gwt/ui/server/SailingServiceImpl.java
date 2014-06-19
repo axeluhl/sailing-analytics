@@ -2429,7 +2429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
+                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, windPositionMode);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 }
                 break;
@@ -2441,12 +2441,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeaderInSeconds(timePoint);
+                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, windPositionMode);
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 if (trackedLeg != null) {
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode, windPositionMode);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;

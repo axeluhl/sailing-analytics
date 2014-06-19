@@ -43,11 +43,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
      * If the competitor hasn't started the leg yet, the full leg distance is returned.
+     * @param windPositionMode TODO
      * 
      * @throws NoWindException
      *             thrown in case no wind direction is known
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
@@ -121,14 +122,16 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
+     * @param windPositionMode TODO
      */
-    Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
+    Double getGapToLeaderInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
     
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
-     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint)}.
+     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint, WindPositionMode)}.
+     * @param windPositionMode TODO
      */
-    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint) throws NoWindException;
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     
@@ -146,13 +149,15 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
      * <code>timePoint</code>, returns the VMG value for this time point. If the competitor has already finished the
      * leg, the VMG at the time when the competitor finished the leg is returned.
+     * @param windPositionMode TODO
      */
-    Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;
+    Speed getVelocityMadeGood(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
+     * @param windPositionMode TODO
      */
-    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
+    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -171,10 +176,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * 
      * If the leg is neither an {@link LegType#UPWIND upwind} nor a {@link LegType#DOWNWIND downwind} leg, the geometric
      * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
-     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint) distance to go} which is
+     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance to go} which is
      * used for ranking.
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a

@@ -644,7 +644,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeader-s",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, windPositionMode));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }

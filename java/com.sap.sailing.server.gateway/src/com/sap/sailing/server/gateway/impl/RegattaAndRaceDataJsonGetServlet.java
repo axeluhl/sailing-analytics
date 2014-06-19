@@ -284,7 +284,7 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                                         distanceTraveled.getMeters());
                             }
                             try {
-                                Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint);
+                                Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint, windPositionMode);
                                 if (velocityMadeGood != null) {
                                     jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
                                     jsonCompetitorInLeg.put("velocityMadeGoodInMetersPerSecond", velocityMadeGood.getMetersPerSecond());
@@ -319,19 +319,19 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, windPositionMode));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }
                             try {
                                 jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",
-                                        trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint));
+                                        trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint, windPositionMode));
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no windward distance will be shown...
                             }
                             try {
                                 jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
-                                        .getWindwardDistanceToGo(timePoint).getMeters());
+                                        .getWindwardDistanceToGo(timePoint, windPositionMode).getMeters());
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no windward distance will be shown...
                             }
