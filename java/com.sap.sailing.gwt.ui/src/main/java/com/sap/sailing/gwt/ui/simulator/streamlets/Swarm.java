@@ -48,7 +48,8 @@ public class Swarm implements TimeListener {
     private Bounds visibleBoundsOfField;
     private Date timePoint;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer, VectorField vectorField, StreamletParameters streamletPars) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
+            VectorField vectorField, StreamletParameters streamletPars) {
         this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
@@ -134,7 +135,8 @@ public class Swarm implements TimeListener {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
+        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
+                * this.parameters.swarmScale);
     };
 
     private void startLoop(final int animationIntervalMillis) {

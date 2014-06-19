@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
@@ -101,7 +102,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         scheduleWindDataRefresh();
         if (swarm == null) {
             setCanvasSettings();
-            this.swarm = new Swarm(this, map, timer, windField);
+            this.swarm = new Swarm(this, map, timer, windField, new StreamletParameters());
         }
         this.swarm.start(animationIntervalMillis);
     }
