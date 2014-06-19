@@ -11,7 +11,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -27,6 +29,8 @@ import com.sap.sailing.mongodb.MongoDBService;
 public class SignInTest {
     private static final Logger logger = Logger.getLogger(SignInTest.class.getName());
     
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+
     @Test
     public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException,
             ParserConfigurationException, SAXException, ClassNotFoundException, InstantiationException,

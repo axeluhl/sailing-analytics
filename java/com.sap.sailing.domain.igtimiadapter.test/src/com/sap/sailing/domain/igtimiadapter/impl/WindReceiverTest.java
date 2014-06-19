@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -29,6 +31,8 @@ import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class WindReceiverTest {
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+
     @Test
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
