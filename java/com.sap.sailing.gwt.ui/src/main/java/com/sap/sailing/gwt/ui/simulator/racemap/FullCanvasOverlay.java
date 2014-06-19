@@ -37,23 +37,12 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     public FullCanvasOverlay(MapWidget map, int zIndex) {
         super(map, zIndex);
-        
-        /*getMap().addDragEndHandler( new DragEndMapHandler() {
-			@Override
-			public void onEvent(DragEndMapEvent event) {
-				// TODO Auto-generated method stub
-				draw();
-			};	
-		});*/
-
         getMap().addCenterChangeHandler(new CenterChangeMapHandler() {
- 			@Override
-			public void onEvent(CenterChangeMapEvent event) {
-				// TODO Auto-generated method stub
-				drawCenterChanged();				
-			};
+            @Override
+            public void onEvent(CenterChangeMapEvent event) {
+                drawCenterChanged();
+            };
         });
-        
     }
     
     /**
@@ -157,11 +146,11 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         drawCircle(x, y,radius,color);
         context2d.setGlobalAlpha(1.0f);
         if (getMap().getZoom() >= 11) {
-        	context2d.setFillStyle(textColor);
-			double fontsize = 9.0 + (12.0-9.0)*(getMap().getZoom() - 10.0)/(12.0-10.0);
-        	context2d.setFont("normal "+fontsize+"px Calibri");
-        	context2d.fillText(text, x + 0.7*fontsize, y + 0.3*fontsize);
-        	//System.out.println("ZoomLevel: "+getMap().getZoomLevel()+", Fontsize: "+fontsize);
+            context2d.setFillStyle(textColor);
+            double fontsize = 9.0 + (12.0 - 9.0) * (getMap().getZoom() - 10.0) / (12.0 - 10.0);
+            context2d.setFont("normal " + fontsize + "px Calibri");
+            context2d.fillText(text, x + 0.7 * fontsize, y + 0.3 * fontsize);
+            // System.out.println("ZoomLevel: "+getMap().getZoomLevel()+", Fontsize: "+fontsize);
         }
     }
     
@@ -220,40 +209,27 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
                 + "knots " + windDTO.trueWindBearingDeg;
         logger.fine(msg);
-
         PositionDTO position = windDTO.position;
-
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
-    
         double x = canvasPositionInPx.getX() - getWidgetPosLeft();
         double y = canvasPositionInPx.getY() - getWidgetPosTop();
-
         //windFieldPoints.put(new ToolTip(x, y), windDTO);
-
         drawArrowPx(x, y, angle, length, weight, drawHead, color);
     }
 
     protected void drawArrowPx(double x, double y, double angle, double length, double weight, boolean drawHead, String color) {
         final double dx = length * Math.sin(angle);
         final double dy = -length * Math.cos(angle);
-
         final double x1 = x + dx / 2;
         final double y1 = y + dy / 2;
-
         drawLine(x - dx / 2, y - dy / 2, x1, y1, weight, color);
-
         final double theta = Math.atan2(-dy, dx);
-
         final double hLength = Math.max(6.,6.+(10./(60.-10.))*Math.max(length-6.,0));
         logger.finer("headlength: "+hLength+", arrowlength: "+length);
-
         if (drawHead) {
             drawHead(x1, y1, theta, hLength, weight, color);
         }
-        //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "�";
-        //drawPointWithText(x, y, text);
-        //drawPoint(x, y);
     }
 
     protected void drawHead(final double x, final double y, final double theta, final double headLength, final double weight, String color) {
@@ -265,7 +241,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         if (t2 <= (-Math.PI)) {
             t2 += 2 * Math.PI;
         }
-
         final double x1 = (x - Math.cos(t) * headLength);
         final double y1 = (y + Math.sin(t) * headLength);
         final double x1o = (x + Math.cos(t) * weight/2);
@@ -274,7 +249,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         final double y2 = (y + Math.sin(t2) * headLength);
         final double x2o = (x + Math.cos(t2) * weight/2);
         final double y2o = (y - Math.sin(t2) * weight/2);
-        
         drawLine(x1o, y1o, x1, y1, weight, color);
         drawLine(x2o, y2o, x2, y2, weight, color);
     }

@@ -4,24 +4,99 @@ import com.google.gwt.i18n.client.Messages;
 
 public interface TextMessages extends Messages {
     String chooseALanguage();
-
     String home();
-
     String events();
-
     String aboutUs();
-
     String contact();
-
     String sponsoring();
-
     String solutions();
-
     String search();
-
     String german();
-
     String english();
-    
     String fullEventSchedule();
+    
+    String live();
+    String lastUpdate();
+    String leaderBoard();
+    String defaultTitle();
+    String boxNewsUpdateTitle();
+    String boxNewsUpdateMoreLink();
+    String boxUpcomingRacesTitle();
+    String boxUpcomingRacesMoreLink();
+    String boxUpcomingRacesCountdownStarting1();
+    String boxUpcomingRacesCountdownStarting2();
+    String boxUpcomingRacesCountdownStarting3();
+    String boxUpcomingRacesCountdownStarted1();
+    String boxUpcomingRacesCountdownStarted2();
+    String boxUpcomingRacesCountdownStarted3();
+    String boxWeather();
+    String boxWeatherUnit();
+    String eventQuickfinderTitle();
+    String latestRaceResultsHeadline();
+    String latestRaceResultsRefresh();
+    String latestRaceResultsRaceCountLabel();
+    String latestRaceResultsRaceCountUnit();
+    String latestRaceResultsIsNew();
+    String latestRaceResultsIsUpdated();
+    String mediaTeaserPhotosTitle();
+    String mediaTeaserVideosTitle();
+    String regattaIntroContentRaces();
+    String regattaIntroContentCompetitors();
+    String regattaIntroContentCourse();
+    String regattasResultsTitle();
+    String sharingEmail();
+    String sharingTwitter();
+    String sharingFacebook();
+    String eventHeaderOverview();
+    String eventHeaderRegattas();
+    String eventHeaderSchedule();
+    String eventHeaderRaces();
+    String eventHeaderMedia();
+    String eventRegattaHeaderRaceSchedule();
+    String eventRegattaHeaderLeaderboard();
+    String eventRegattaLeaderboardLastScoreUpdate();
+    String eventRegattaLeaderboardRegattaRank();
+    String eventRegattaLeaderboardCompetitor();
+    String eventRegattaLeaderboardName();
+    String eventRegattaLeaderboardTotalPoints();
+    String eventSponsorsTitle();
+    String eventOverviewRecentEvents();
+    String eventOverviewUpcomingSchedule();
+    String eventOverviewUpcomingDate();
+    String eventOverviewUpcomingEvent();
+    String eventOverviewUpcomingLocation();
+    String eventOverviewUpcomingSeries();
+    String eventOverviewUpcomingTeaser();
+    String footerCopyright();
+    String footerLegal();
+    String footerPrivacy();
+    String footerLanguage();
+    String headerLogo();
+    String headerHome();
+    String headerEvents();
+    String headerSolutions();
+    String headerSponsoring();
+    String headerSearch();
+    String headerSearchPlaceholder();
+    String mainEventTitle();
+    String mainEventShowAll();
+    String mainMediaTitle();
+    String mainMediaSubtitle();
+    String mainMediaVideosTitle();
+    String mainMediaVideosSubtitle();
+    String mainMediaShowMore();
+    String mainSponsorsReadMore();
+    String socialFooterTitle();
+    String socialFooterShare();
+    String searchResultHeaderLabel();
+    String searchResultHeaderButton();
+    String searchResultHeaderPlaceholder();
+    String searchResultSortLabel();
+    String searchResultSortRelevance();
+    String searchResultSortNewest();
+    String searchResultSortOldest();
+    String searchResultMore();
+    String searchResultSearch();
+    String searchResultSearchAgain();
+    String leaderboardQuickAccessLabel();
 }

@@ -15,10 +15,10 @@
     </div>
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <hr></hr>
-    </div><!-- {#each sponsor in event.sponsors}
-    <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
-      <div class="{local_res.css.eventsponsors_sponsor}"><a href="{sponsor.link}" target="_blank" class="{local_res.css.eventsponsors_sponsor_link}"><img src="images/{sponsor.logo}" alt="{sponsor.name}" class="{local_res.css.eventsponsors_sponsor_link_image}"></img></a></div>
-    </div>{/each event.sponsors} -->
+    </div>
+    <g:HTMLPanel ui:field="sponsorsPlaceholder">
+		<!-- the sponsor widgets will be inserted here -->
+	</g:HTMLPanel>
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <hr></hr>
     </div>

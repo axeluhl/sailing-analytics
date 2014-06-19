@@ -5,9 +5,13 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -40,6 +44,14 @@ public class Header extends Composite {
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, sponsoringPageLink });
         
         searchText.getElement().setAttribute("placeholder", "Search SAPSailing.com");
+        searchText.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    searchButton.click();
+                }
+            }
+        });
     }
 
     @UiHandler("startPageLink")
@@ -65,7 +77,11 @@ public class Header extends Composite {
 
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
-        navigator.goToSearchResult(searchText.getText());
+        if(searchText.getText().isEmpty()) {
+            Window.alert("Please enter a search term.");
+        } else {
+            navigator.goToSearchResult(searchText.getText());
+        }
     }
     
     private void setActiveLink(Anchor link) {

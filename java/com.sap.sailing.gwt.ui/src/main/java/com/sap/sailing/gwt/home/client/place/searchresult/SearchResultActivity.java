@@ -13,20 +13,36 @@ public class SearchResultActivity extends AbstractActivity {
 
     private final SearchResultPlace searchResultPlace;
 
+    private SearchResultView view;
+    
     public SearchResultActivity(SearchResultPlace place, SearchResultClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.searchResultPlace = place;
+        
+        bindEvents();
+    }
+
+    private void bindEvents() {
+        clientFactory.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+            public void onDoSearch(SearchEvent event) {
+                doSearch(event.getSearchText());
+            }
+        });
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        String queryText = searchResultPlace.getSearchQuery();
-        KeywordQuery query = new KeywordQuery(queryText);
-        clientFactory.getSailingService().search(null, query, new AsyncCallback<Iterable<LeaderboardSearchResultDTO>>() {
+        view = clientFactory.createSearchResultView();
+        panel.setWidget(view.asWidget());
+        doSearch(searchResultPlace.getSearchText());
+    }
+
+    protected void doSearch(final String searchText) {
+        KeywordQuery searchQuery = new KeywordQuery(searchText);
+        clientFactory.getSailingService().search(null, searchQuery, new AsyncCallback<Iterable<LeaderboardSearchResultDTO>>() {
             @Override
-            public void onSuccess(Iterable<LeaderboardSearchResultDTO> searchResult) {
-                final SearchResultView view = clientFactory.createSearchResultView();
-                panel.setWidget(view.asWidget());
+            public void onSuccess(Iterable<LeaderboardSearchResultDTO> searchResults) {
+                view.updateSearchResult(searchText, searchResults);
             }
 
             @Override

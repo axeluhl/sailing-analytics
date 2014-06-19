@@ -14,6 +14,7 @@ public interface EventSponsorsResources extends ClientBundle {
         String eventsponsors();
         String eventsponsors_title();
         String eventsponsors_sponsor();
+        String eventsponsors_sponsor_link();
         String eventsponsors_sponsor_link_image();
     }
 }
