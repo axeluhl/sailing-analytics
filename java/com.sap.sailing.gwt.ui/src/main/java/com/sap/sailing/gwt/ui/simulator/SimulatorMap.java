@@ -101,6 +101,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private int xRes;
     private int yRes;
     private int border;
+    private StreamletParameters streamletPars;
     private boolean warningAlreadyShown = false;
     private SimulatorMainPanel parent = null;
     private PathPolyline pathPolyline = null;
@@ -296,7 +297,36 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     }
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, Timer timer,
+    /*public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
+            WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode,
+            SimulatorMainPanel parent) {
+        this.simulatorService = simulatorSvc;
+        this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
+        this.xRes = xRes;
+        this.yRes = yRes;
+        this.border = border;
+        this.timer = timer;
+        this.timePanel = null;
+        timer.addTimeListener(this);
+        this.windParams = windParams;
+        this.busyIndicator = busyIndicator;
+        this.mode = mode;
+        this.colorPalette = new ColorPaletteGenerator();
+        this.dataInitialized = false;
+        this.overlaysInitialized = false;
+        this.windFieldCanvasOverlay = null;
+        this.windLineGuidesCanvasOverlay = null;
+        this.windGridCanvasOverlay = null;
+        this.windLineCanvasOverlay = null;
+        this.replayPathCanvasOverlays = null;
+        this.raceCourseCanvasOverlay = null;
+        this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
+        this.initializeData();
+        this.parent = parent;    
+    }*/
+
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, Timer timer,
             TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls) {
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
@@ -304,6 +334,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.xRes = xRes;
         this.yRes = yRes;
         this.border = border;
+        this.streamletPars = streamletPars;
         this.timer = timer;
         this.timePanel = timePanel;
         timer.addTimeListener(this);
@@ -549,7 +580,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             windLineGuidesCanvasOverlay = new WindLineGuidesCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes);
         }
         if (windParams.isShowStreamlets2()) {
-            windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams);
+        	windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, streamletPars, windParams);
         }
         if (windParams.isShowGrid()) {
             windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes);
@@ -612,6 +643,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setyRes(yRes);
         windParams.setBorder(border);
         busyIndicator.setBusy(true);
+        timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
@@ -734,6 +766,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setBorder(border);
 
         busyIndicator.setBusy(true);
+        timer.pause();
         timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getSimulatorResults(mode, raceCourseDirection, windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
@@ -1090,8 +1123,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                 map.panTo(regattaAreaCanvasOverlay.getCurrentCourseArea().getCenterPos());
                 mapPan = true;
-				if (map.getZoom() < 14) {
-					map.setZoom(14);
+				if (map.getZoom() < streamletPars.detailZoom) {
+					map.setZoom(streamletPars.detailZoom);
 				}
 				
             }

@@ -24,6 +24,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private WindFieldDTO windFieldDTO;
     private final WindFieldGenParamsDTO windParams;
     private final SimulatorMap simulatorMap;
+    private StreamletParameters streamletPars;
 
     private boolean visible = false;
     private final Timer timer;
@@ -32,11 +33,13 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private int nParticles;
     private Swarm swarm;
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
+    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex, final Timer timer, final StreamletParameters streamletPars,
+            final WindFieldGenParamsDTO windParams) {
         super(simulatorMap.getMap(), zIndex);
         this.simulatorMap = simulatorMap;
         this.timer = timer;
         this.windParams = windParams;
+        this.streamletPars = streamletPars;
         this.nParticles = this.simulatorMap.getMainPanel().particles;
         windFieldDTO = null;
         getCanvas().getElement().setId("swarm-display");
@@ -50,9 +53,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         return this.windParams;
     }
 
-    public WindStreamletsCanvasOverlay(SimulatorMap simulatorMap, int zIndex) {
-        this(simulatorMap, zIndex, null, null);
-    }
 
     public void startStreamlets() {
         if (swarm == null) {

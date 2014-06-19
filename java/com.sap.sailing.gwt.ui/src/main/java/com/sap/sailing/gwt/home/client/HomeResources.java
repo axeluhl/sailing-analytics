@@ -33,6 +33,7 @@ public interface HomeResources extends ClientBundle {
         String buttoninactive();
         String buttonrefresh();
         String buttonsearch();
+        String buttonarrowdown();
         String label();
         String morelink();
         String dummy();

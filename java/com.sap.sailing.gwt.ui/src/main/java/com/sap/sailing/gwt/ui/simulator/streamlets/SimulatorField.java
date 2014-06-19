@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class SimulatorField implements VectorField {
     private boolean swarmDebug = false;
@@ -30,6 +31,9 @@ public class SimulatorField implements VectorField {
     private final Position bdC;
 
     private final double xScale;
+	private double motionFactor;
+	private double lineBase;
+	private double lineScale;
     private final double maxLength;
     private final double particleFactor;
 
@@ -48,7 +52,7 @@ public class SimulatorField implements VectorField {
     private final Date startTime;
     private final Duration timeStep;
 
-    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams) {
+    public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
         this.startTime = windParams.getStartTime();
         this.timeStep = windParams.getTimeStep();
         this.colorsForSpeeds = createColorsForSpeeds();
@@ -65,6 +69,9 @@ public class SimulatorField implements VectorField {
         this.bdB = new DegreePosition((this.rcStart.getLatDeg() - this.rcEnd.getLatDeg()) * bdPhi,
                 (this.rcStart.getLngDeg() - this.rcEnd.getLngDeg()) * bdPhi);
         this.xScale = windData.windData.xScale;
+		this.motionFactor = 0.07 * parameters.motionScale;
+		this.lineBase = parameters.lineBase;
+		this.lineScale = parameters.lineScale;
         List<SimulatorWindDTO> gridData = windData.getMatrix();
         int p = 0;
         int imax = windParams.getyRes() + 2 * windParams.getBorderY();
@@ -202,7 +209,7 @@ public class SimulatorField implements VectorField {
 
     @Override
     public double getMotionScale(int zoomLevel) {
-        return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+        return this.motionFactor * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
@@ -248,7 +255,7 @@ public class SimulatorField implements VectorField {
          * absolute linewidth speed == 12kn => linewidth 1.5 speed == 24kn => linewidth 3.0 speed == 6kn => linewidth
          * 0.75
          */
-        return Math.round(speed / 8.0 * 100.0) / 100.0;
+        return Math.max(0.01, Math.round((lineBase + lineScale * (speed - 12.0) / 8.0) * 100.0) / 100.0);
     }
 
     @Override

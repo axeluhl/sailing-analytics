@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.gwt.client.player.TimeListener;
 
@@ -17,6 +18,7 @@ public class Swarm implements TimeListener {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
+	private StreamletParameters parameters; 
 
     private Timer loopTimer;
     private Mercator projection;
@@ -46,12 +48,13 @@ public class Swarm implements TimeListener {
     private Bounds visibleBoundsOfField;
     private Date timePoint;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer, VectorField vectorField) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer, VectorField vectorField, StreamletParameters streamletPars) {
         this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
         this.map = map;
         timer.addTimeListener(this);
+        this.parameters = streamletPars;
         timePoint = timer.getTime();
     }
 
@@ -131,7 +134,7 @@ public class Swarm implements TimeListener {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor());
+        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
     };
 
     private void startLoop(final int animationIntervalMillis) {

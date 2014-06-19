@@ -6,26 +6,26 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.searchresult.SearchResultResources" />
     <g:HTMLPanel>
-<!-- 
 <div class="{local_res.css.searchresult}">
   <div class="{local_res.css.searchresult_header}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
-        <form action="search-results.html" method="get" name="search" class="{local_res.css.searchresult_form}">
+        <div class="{local_res.css.searchresult_form}">
           <label for="searchfor" class="{local_res.css.searchresult_form_label} {local_res.css.searchresult_header_formlabel}">Your Search</label>
-          <input type="text" placeholder="Suchbegriff eingeben" name="q" id="searchfor" value="{search.query}" class="{local_res.css.searchresult_form_input} {local_res.css.searchresult_header_input}"></input>
-          <button type="submit" class="{res.mainCss.button} {local_res.css.searchresult_form_button}">Search</button>
-        </form>
+          <g:TextBox ui:field="searchText1" styleName="{local_res.css.searchresult_form_input} {local_res.css.searchresult_header_input}" />
+          <g:Button ui:field="searchButton1" text="Search" styleName="{res.mainCss.button} {local_res.css.searchresult_form_button}" />
+        </div>
       </div>
     </div>
   </div>
   <div class="{local_res.css.searchresult_content}">
     <div class="{res.mainCss.grid} {local_res.css.searchresult_content_amount}">
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
-        <h5>About&nbsp;{search.results.count}&nbsp;results found for '{search.query}'.
+        <h5><span ui:field="searchResultCount" />&nbsp;result(s) found for '<span ui:field="searchResultFor" />'.
         </h5>
       </div>
       <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
+          <!-- sorting is not supported yet 
         <div class="{local_res.css.searchresult_content_amount_relevance}">
           <div class="{local_res.css.searchresult_content_amount_relevance_label}">Sort by:</div>
           <div class="{local_res.css.dropdown}">
@@ -35,24 +35,35 @@
             <div class="{local_res.css.dropdown_content}"><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Neueste</strong></a><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Älteste</strong></a></div>
           </div>
         </div>
+           -->
       </div>
     </div>
     <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">{#each result in search.results.list}
-        <div class="{local_res.css.searchresult_content_item}"><a href="{result.url}" class="{local_res.css.searchresult_content_item_headline}">{result.title}</a>
-          <div class="{local_res.css.searchresult_content_item_description}">{result.description}<a href="{result.url}" class="{local_res.css.searchresult_content_item_description_morelink}">More</a>
-          </div>
-          <div class="{local_res.css.searchresult_content_item_footer}">{#each event in result.events}<a href="{event.url}" class="{local_res.css.searchresult_content_item_footer_link}">{event.title}</a><span class="{local_res.css.searchresult_content_item_footer_separator}">|</span>{/each}{result.date}
-          </div>
-        </div>{/each}
+      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+	    <g:HTMLPanel ui:field="searchResultItemPanel">
+		</g:HTMLPanel>
+		<!-- paging seems to be old fashioned -> Ubilabs will provide a better approach
         <div class="{res.mainCss.grid} {local_res.css.paging}">
-          <div class="{res.mediaCss.small8} {res.mediaCss.columns}">{#if search.paging.previous}<a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linkprevious}">previous</a>{/if search.paging.previous}{#each page in search.paging.pages}<a href="{page.url}" class="{local_res.css.paging_link}">{page.text}</a><a href="{page.url}" class="{local_res.css.paging_link} {local_res.css.paging_linkactive}">{page.text}</a><a href="{page.url}" class="{local_res.css.paging_link}">{page.text}</a><a href="{page.url}" class="{local_res.css.paging_link}">{page.text}</a><a href="{page.url}" class="{local_res.css.paging_link}">{page.text}</a><a class="{local_res.css.paging_link}">{page.text}</a><a href="{page.url}" class="{local_res.css.paging_link}">{page.text}</a>{/each}{#if search.paging.next}<a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linknext}">next</a>{/if search.paging.next}
+          <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+              <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linkprevious}">previous</a>
+              <a href="http://" class="{local_res.css.paging_link}">1</a>
+              <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkactive}">2</a>
+              <a href="http://" class="{local_res.css.paging_link}">3</a>
+              <a href="http://" class="{local_res.css.paging_link}">4</a>
+              <a href="http://" class="{local_res.css.paging_link}">5</a>
+              <a class="{local_res.css.paging_link}">...</a>
+              <a href="http://" class="{local_res.css.paging_link}">XXX</a>
+              <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linknext}">next</a>
           </div>
           <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
-            <div class="{local_res.css.paging_perpage}"><span class="{local_res.css.paging_link_label}">Per page:</span>{#each perpage in search.paging.perpage}<a href="{perpage.url}" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage} {local_res.css.paging_linkactive}">{perpage.text}</a><a href="{perpage.url}" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">{perpage.text}</a><a href="{perpage.url}" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">{perpage.text}</a>{/each}
+            <div class="{local_res.css.paging_perpage}"><span class="{local_res.css.paging_link_label}">Per page:</span>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage} {local_res.css.paging_linkactive}">10</a>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">20</a>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">30</a>
             </div>
           </div>
         </div>
+        -->
       </div>
     </div>
   </div>
@@ -61,13 +72,12 @@
       <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
         <form action="search-results.html" method="get" name="search" class="{local_res.css.searchresult_form}">
           <label for="searchforfooter" class="{local_res.css.searchresult_form_label}">Search again</label>
-          <input type="text" name="q" id="searchforfooter" value="{search.query}" class="{local_res.css.searchresult_form_input}"></input>
-          <button type="submit" class="{res.mainCss.button} {local_res.css.searchresult_form_button}">Search</button>
+          <g:TextBox ui:field="searchText2" styleName="{local_res.css.searchresult_form_input} {local_res.css.searchresult_header_input}" />
+          <g:Button ui:field="searchButton2" text="Search" styleName="{res.mainCss.button} {local_res.css.searchresult_form_button}" />
         </form>
       </div>
     </div>
   </div>
 </div>
- -->
     </g:HTMLPanel>
 </ui:UiBinder>

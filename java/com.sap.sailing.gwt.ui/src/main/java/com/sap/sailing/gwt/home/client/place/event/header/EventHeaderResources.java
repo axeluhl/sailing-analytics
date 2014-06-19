@@ -17,6 +17,7 @@ public interface EventHeaderResources extends ClientBundle {
         String eventnavigationcompact();
         String eventnavigationcompactfloating();
         String eventheader_intro();
+        String eventheader_intro_description();
         String eventheader_intro_logo();
         String eventheader_intro_name();
         String eventheader_intro_details();
