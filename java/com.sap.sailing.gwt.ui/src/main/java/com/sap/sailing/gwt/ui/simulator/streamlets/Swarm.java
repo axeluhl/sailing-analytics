@@ -82,20 +82,24 @@ public class Swarm implements TimeListener {
         while (!done && attempts-- > 0) {
             particle = new Particle();
             particle.currentPosition = getRandomPosition();
-            Vector v = field.getVector(particle.currentPosition, timePoint);
-            double weight = field.getParticleWeight(particle.currentPosition, v);
-            if (weight >= Math.random()) {
-                if (v == null || v.length() == 0) {
-                    particle.stepsToLive = 0;
+            if (field.inBounds(particle.currentPosition)) {
+                Vector v = field.getVector(particle.currentPosition, timePoint);
+                double weight = field.getParticleWeight(particle.currentPosition, v);
+                if (weight >= Math.random()) {
+                    if (v == null || v.length() == 0) {
+                        particle.stepsToLive = 0;
+                    } else {
+                        particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
+                    }
+                    particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                    particle.previousPixelCoordinate = particle.currentPixelCoordinate;
+                    particle.v = v;
+                    done = true;
                 } else {
-                    particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
+                    particle = null;
                 }
-                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
-                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
-                particle.v = v;
-                done = true;
             } else {
-                particle = null;
+                particle = null; // out of bounds
             }
         }
         return particle;
