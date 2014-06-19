@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -644,7 +645,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeader-s",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, windPositionMode));
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }

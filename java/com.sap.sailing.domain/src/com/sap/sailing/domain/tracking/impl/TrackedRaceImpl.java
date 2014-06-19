@@ -1288,7 +1288,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-        /* halfConfidenceAfterMilliseconds */10000l, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
+        /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         ConfidenceBasedWindAverager<com.sap.sse.common.Util.Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>>();

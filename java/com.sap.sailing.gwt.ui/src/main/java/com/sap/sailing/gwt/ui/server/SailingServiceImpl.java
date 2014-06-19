@@ -240,6 +240,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -2429,7 +2430,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, windPositionMode);
+                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 }
                 break;
@@ -2441,12 +2442,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, windPositionMode);
+                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 if (trackedLeg != null) {
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode, windPositionMode);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;

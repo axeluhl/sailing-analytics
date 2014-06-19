@@ -147,9 +147,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        //Since the course layout makes a wind estimation around 7� and the confidence of the cluster based wind estimation is not
-        // way higher that that of the course layout wind, we will not end up with exactly 180 deg.
-        assertEquals(180.2, combinedWindDirection.getBearing().getDegrees(), 0.1);
+        // The course layout makes a wind estimation around 7deg. The confidence of the cluster based wind estimation is a lot
+        // higher that that of the course layout wind (currently at approximately 10E-13), we will end up quite near 180 deg.
+        assertEquals(180.0, combinedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     /**

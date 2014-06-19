@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -601,8 +602,8 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", competitorLeg.getTime(legFinishTime).asMillis());
-            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime, windPositionMode));
-            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, windPositionMode, windPositionMode);
+            addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime, WindPositionMode.LEG_MIDDLE));
+            Distance windwardDistanceToOverallLeader = competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime, WindPositionMode.LEG_MIDDLE);
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", windwardDistanceToOverallLeader != null ? windwardDistanceToOverallLeader.getMeters() : 0);
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
