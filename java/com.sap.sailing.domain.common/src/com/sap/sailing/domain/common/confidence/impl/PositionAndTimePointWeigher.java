@@ -35,7 +35,7 @@ public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, 
         if (fix.getA() != null && request.getA() != null) {
             distanceConfidence = distanceWeigher.getConfidence(fix.getA(), request.getA());
         } else {
-            distanceConfidence = 1;
+            distanceConfidence = 0.0001;
         }
         return timeConfidence * distanceConfidence;
     }
