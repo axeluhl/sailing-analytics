@@ -701,13 +701,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             throws NoWindException {
         final Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
-        List<Future<?>> futures = new ArrayList<>();
+        Map<RaceColumn, Future<Map<Competitor, Double>>> futures = new HashMap<>();
         for (final RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             final Iterable<RaceColumn> finalRaceColumnsToConsider = new ArrayList<>(raceColumnsToConsider);
-            futures.add(executor.submit(new Runnable() {
+            futures.put(raceColumn, executor.submit(new Callable<Map<Competitor, Double>>() {
                 @Override
-                public void run() {
+                public Map<Competitor, Double> call() {
                     Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
                     for (Competitor competitor : getCompetitors()) {
                         try {
@@ -717,14 +717,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         }
                     }
                     synchronized (result) {
-                        result.put(raceColumn, totalPointsSumPerCompetitorInColumn);
+                        return totalPointsSumPerCompetitorInColumn;
                     }
                 }
             }));
         }
-        for (Future<?> future : futures) {
+        for (RaceColumn raceColumn : getRaceColumns()) {
             try {
-                future.get();
+                result.put(raceColumn, futures.get(raceColumn).get());
             } catch (InterruptedException | ExecutionException e) {
                 if (e.getCause() instanceof NoWindError) {
                     throw ((NoWindError) e.getCause()).getCause();
