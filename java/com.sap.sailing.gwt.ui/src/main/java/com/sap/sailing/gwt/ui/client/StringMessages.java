@@ -1046,7 +1046,7 @@ public interface StringMessages extends Messages {
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
     String regattaNameMustNotContainSlashes();
-    String showNumberOfRacesCompleted();
-    String racesCompleted();
-    String racesCompletedTooltip();
+    String showNumberOfRacesScored();
+    String racesScored();
+    String racesScoredTooltip();
 }
