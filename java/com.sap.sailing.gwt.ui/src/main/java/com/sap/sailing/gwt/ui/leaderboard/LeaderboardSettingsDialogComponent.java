@@ -180,8 +180,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
         }
-        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox = dialog.createCheckbox(stringMessages.showNumberOfRacesCompleted());
-        dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesCompleted());
+        showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox = dialog.createCheckbox(stringMessages.showNumberOfRacesScored());
+        dialog.addTooltip(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox, stringMessages.showNumberOfRacesScored());
         showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.setValue(showOverallColumnWithNumberOfRacesSailedPerCompetitor);
         overallDetailDialogContent.add(showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox);
         overallDetailDialog.add(overallDetailDialogContent);
