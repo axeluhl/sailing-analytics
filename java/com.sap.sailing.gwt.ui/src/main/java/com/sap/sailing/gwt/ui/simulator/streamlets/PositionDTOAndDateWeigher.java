@@ -30,8 +30,6 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     private final long halfConfidenceAfterMilliseconds;
     private final double halfConfidenceDistanceNauticalMiles;
     private final AverageLatitudeProvider averageLatitudeDegProvider;
-    private final static String USE_POSITION_SYSTEM_PROPERTY_NAME = "spatialWind";
-    private final boolean usePosition;
     
     public static interface AverageLatitudeProvider {
         double getAverageLatitudeDeg();
@@ -42,7 +40,6 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
         this.halfConfidenceAfterMilliseconds = halfConfidenceAfterMilliseconds;
         this.halfConfidenceDistanceNauticalMiles = halfConfidenceDistance.getNauticalMiles();
         this.averageLatitudeDegProvider = averageLatitudeDegProvider;
-        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "false"));
     }
 
     private double getCosineOfAverageLatitude() {
@@ -59,20 +56,14 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
             timeConfidence = c / (x + y);
         }
         final double distanceConfidence;
-        // For now, we make the use of the position for spatial wind field calculation optional. It has to be turned
-        // on by providing a system property using -DspatialWind=true
-        if (usePosition) {
-            if (fix.getA() != null && request.getA() != null) {
-                double x = getApproximateNauticalMileDistance(fix.getA(), request.getA());
-                double c = halfConfidenceDistanceNauticalMiles;
-                double y = c;
-                distanceConfidence = c / (x + y);
-            } else {
-                distanceConfidence = 0.0001; // if we have no information about the position, let's not distort an
-                                             // otherwise spatially-resolved field
-            }
+        if (fix.getA() != null && request.getA() != null) {
+            double x = getApproximateNauticalMileDistance(fix.getA(), request.getA());
+            double c = halfConfidenceDistanceNauticalMiles;
+            double y = c;
+            distanceConfidence = c / (x + y);
         } else {
-            distanceConfidence = 1;
+            distanceConfidence = 0.0001; // if we have no information about the position, let's not distort an
+                                         // otherwise spatially-resolved field
         }
         return distanceConfidence * timeConfidence;
     }
