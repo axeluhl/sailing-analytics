@@ -46,6 +46,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
+  * [[Kieler Woche 2014 event page|wiki/kielerwoche2014]]
 
 ### Internal services (not related to wiki but useful)
 
