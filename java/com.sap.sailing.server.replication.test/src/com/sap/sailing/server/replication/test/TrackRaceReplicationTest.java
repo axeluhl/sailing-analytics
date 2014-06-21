@@ -132,7 +132,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         // anyway. When the tracked race then is loaded it is expected
         // to automatically be linked to the leaderboard column.
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
-                new RegattaNameAndRaceName("weym470may122011 (STG)", "weym470may122011")));
+                new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
         assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);
