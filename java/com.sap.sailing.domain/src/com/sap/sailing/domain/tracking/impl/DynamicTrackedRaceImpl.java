@@ -362,6 +362,48 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.waypointAdded(zeroBasedIndex, waypointThatGotAdded);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.log(Level.SEVERE, "notifyListenersWaypointAdded(int, Waypoint)", e);
+            }
+        }
+    }
+
+    private void notifyListenersWaypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.log(Level.SEVERE, "notifyListenersWaypointRemoved(int, Waypoint)", e);
+            }
+        }
+    }
+
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        super.waypointAdded(zeroBasedIndex, waypointThatGotAdded);
+        notifyListenersWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        super.waypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
+        notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
+    }
+
     private void notifyListeners(GPSFix fix, Mark mark) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
