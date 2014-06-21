@@ -2,6 +2,7 @@ package com.sap.sailing.manage2sail.resultimport.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,18 +20,20 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
-import org.osgi.framework.FrameworkUtil;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.manage2sail.resultimport.ScoreCorrectionProviderImpl;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
+import com.sap.sailing.resultimport.impl.ResultUrlRegistryImpl;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 import com.sap.sse.common.Util;
@@ -96,8 +99,8 @@ public class ParserTest {
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
             ParserConfigurationException, JAXBException {
-        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
-                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
+        ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
+                mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
@@ -110,8 +113,8 @@ public class ParserTest {
     
     @Test
     public void testScoreCorrectionProvider() throws Exception {
-        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
-                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
+        ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
+                mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
