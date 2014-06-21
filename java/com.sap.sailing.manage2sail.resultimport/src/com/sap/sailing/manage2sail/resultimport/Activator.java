@@ -1,6 +1,5 @@
 package com.sap.sailing.manage2sail.resultimport;
 
-import java.net.URL;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.HostnameVerifier;
@@ -18,12 +17,14 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class Activator implements BundleActivator {
-    private static String MANAGE2SAIL_KW_2014_URL = "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
 
     public void start(BundleContext bundleContext) throws Exception {
-        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE, ResultUrlRegistry.INSTANCE);
+        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
+                .getResultUrlRegistryService(bundleContext);
+        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE,
+                resultUrlRegistry);
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
-        ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_KW_2014_URL));
+
         createAnAllCertificatesTrustingManagerforSSL();
     }
 

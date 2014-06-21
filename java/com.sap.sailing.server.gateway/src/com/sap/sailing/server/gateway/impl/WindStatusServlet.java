@@ -101,8 +101,12 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             }
         }
         out.println("<h3>Expedition Wind Status</h3>");
-        if (lastExpeditionMessages.size()>0) {
-            for (ExpeditionMessageInfo message : lastExpeditionMessages) {
+        if (!lastExpeditionMessages.isEmpty()) {
+            final List<ExpeditionMessageInfo> copyOfLastExpeditionMessages;
+            synchronized (lastExpeditionMessages) {
+                copyOfLastExpeditionMessages = new ArrayList<>(lastExpeditionMessages);
+            }
+            for (ExpeditionMessageInfo message : copyOfLastExpeditionMessages) {
                 out.println(message);
             }
         } else {
@@ -146,12 +150,14 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             receiver.addListener(new ExpeditionListener() {
                 @Override
                 public void received(ExpeditionMessage message) {
-                    if(message != null && message.getBoatID() >= 0) {
+                    if (message != null && message.getBoatID() >= 0) {
                         ExpeditionMessageInfo info = new ExpeditionMessageInfo();
                         info.boatID = message.getBoatID();
                         info.message = message;
                         info.messageReceivedAt = new Date();
-                        lastExpeditionMessages.add(info);
+                        synchronized (lastExpeditionMessages) {
+                            lastExpeditionMessages.add(info);
+                        }
                     }
                 }
             } 

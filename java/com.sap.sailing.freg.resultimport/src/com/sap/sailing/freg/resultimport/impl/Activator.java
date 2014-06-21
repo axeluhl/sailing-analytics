@@ -24,7 +24,9 @@ public class Activator implements BundleActivator {
         if (scanDirPath == null) {
             scanDirPath = System.getProperty(SCAN_DIR_PATH_PROPERTY_NAME, DEFAULT_SCAN_DIR);
         }
-        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ResultUrlRegistry.INSTANCE);
+        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
+                .getResultUrlRegistryService(bundleContext);
+        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(resultUrlRegistry);
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
         logger.info("Scanning " + scanDirPath + " for official result lists of " + service.getName());
     }
