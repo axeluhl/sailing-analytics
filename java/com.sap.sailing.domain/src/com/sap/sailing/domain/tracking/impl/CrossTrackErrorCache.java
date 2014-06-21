@@ -435,6 +435,27 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
     
     @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        invalidate();
+    }
+
+    /**
+     * Invalidates all cache contents for all competitors from the beginning of time
+     */
+    private void invalidate() {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
+            invalidate(competitor, /* from the beginning of time */ null);
+        }
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        invalidate();
+    }
+
+    @Override
     public String toString() {
         return "CrossTrackErrorCache for competitors "+cachePerCompetitor.keySet();
     }
