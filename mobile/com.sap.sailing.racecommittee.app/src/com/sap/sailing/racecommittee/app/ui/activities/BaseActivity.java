@@ -163,7 +163,7 @@ public abstract class BaseActivity extends LoggableActivity {
             sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
                     errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
-            menuItemLive.setIcon(R.drawable.ic_menu_share_holo_light);
+            menuItemLive.setIcon(R.drawable.ic_menu_share);
             sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
         }
     }
