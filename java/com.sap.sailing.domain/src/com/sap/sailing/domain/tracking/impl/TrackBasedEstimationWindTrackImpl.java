@@ -678,6 +678,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        clearCache();
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        clearCache();
+    }
+
+    @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
