@@ -39,6 +39,8 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
+    private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
+    
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
     private static int igtimiRawMessageCount;
@@ -82,14 +84,18 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("</head>");
         out.println("<body>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
-        if (lastIgtimiMessages != null && lastIgtimiMessages.size() > 0) {
+        if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
+            final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;
+            synchronized (lastIgtimiMessages) {
+                copyOfLastIgtimiMessages = new ArrayList<>(WindStatusServlet.lastIgtimiMessages);
+            }
             int counter = 0;
-            for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
+            for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
                 counter++;
                 IgtimiMessageInfo message = iterator.previous();
                 out.println(message);
                 out.println("<br/>");
-                if (counter >= 10) {
+                if (counter >= NUMBER_OF_MESSAGES_TO_SHOW) {
                     break;
                 }
             }
@@ -101,13 +107,20 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             }
         }
         out.println("<h3>Expedition Wind Status</h3>");
-        if (!lastExpeditionMessages.isEmpty()) {
+        if (lastExpeditionMessages != null && !lastExpeditionMessages.isEmpty()) {
             final List<ExpeditionMessageInfo> copyOfLastExpeditionMessages;
             synchronized (lastExpeditionMessages) {
-                copyOfLastExpeditionMessages = new ArrayList<>(lastExpeditionMessages);
+                copyOfLastExpeditionMessages = new ArrayList<>(WindStatusServlet.lastExpeditionMessages);
             }
-            for (ExpeditionMessageInfo message : copyOfLastExpeditionMessages) {
+            int expeditionMsgCounter = 0;
+            for (ListIterator<ExpeditionMessageInfo> iterator = copyOfLastExpeditionMessages.listIterator(copyOfLastExpeditionMessages.size()); iterator.hasPrevious();) {
+                expeditionMsgCounter++;
+                ExpeditionMessageInfo message = iterator.previous();
                 out.println(message);
+                out.println("<br/>");
+                if (expeditionMsgCounter >= NUMBER_OF_MESSAGES_TO_SHOW) {
+                    break;
+                }
             }
         } else {
             out.println("<i>No Expedition messages received so far!</i>");
