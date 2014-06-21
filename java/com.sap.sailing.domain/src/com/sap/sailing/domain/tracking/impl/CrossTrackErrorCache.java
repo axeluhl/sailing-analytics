@@ -85,6 +85,15 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
 
         private static final long serialVersionUID = 4884868659665863604L;
         
+        public void deleteAll() {
+            lockForWrite();
+            try {
+                getInternalRawFixes().clear();
+            } finally {
+                unlockAfterWrite();
+            }
+        }
+        
         public void deleteAllLaterThan(TimePoint from) {
             // TODO use a specialized ArrayList in a specialized ArrayListNavigableSet and then make removeRange public
             lockForWrite();
@@ -171,7 +180,11 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                             FromTimePointToEndUpdateInterval updateInterval) {
                         CrossTrackErrorSumAndNumberOfFixesTrack result;
                         if (oldValue != null) {
-                            oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            if (updateInterval == null) {
+                                oldValue.deleteAll();
+                            } else {
+                                oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            }
                             computedCacheUpdate.lockForRead();
                             try {
                                 for (CrossTrackErrorSumAndNumberOfFixes entry : computedCacheUpdate.getRawFixes()) {
@@ -446,7 +459,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
         Collections.shuffle(shuffledCompetitors);
         for (Competitor competitor : shuffledCompetitors) {
-            invalidate(competitor, /* from the beginning of time */ null);
+            cachePerCompetitor.triggerUpdate(competitor, null /* meaning: from the beginning of time */);
         }
     }
 
