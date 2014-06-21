@@ -138,6 +138,12 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/abort_running_race"
                     android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+                
+                <Button
+                    android:id="@+id/race_running_base_reset_course"
+                    android:layout_width="197dp"
+                    android:layout_height="50dp"
+                    android:text="@string/race_reset_course" />
             </LinearLayout>
             
         </ScrollView>

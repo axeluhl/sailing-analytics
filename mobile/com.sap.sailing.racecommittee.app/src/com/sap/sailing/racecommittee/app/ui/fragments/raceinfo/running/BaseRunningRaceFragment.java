@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     private ImageButton generalRecallButton;
     private TextView startCountUpTextView;
     private TextView nextCountdownTextView;
+    private Button resetCourseButton;
 
     protected ImageButton individualRecallButton;
     protected TextView individualRecallLabel;
@@ -57,6 +59,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         generalRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_general_recall);
         individualRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_individual_recall);
         individualRecallLabel = (TextView) getView().findViewById(R.id.race_running_base_individual_recall_label);
+        resetCourseButton = (Button) getView().findViewById(R.id.race_running_base_reset_course);
         
         if (getRacingProcedure().hasIndividualRecall()) {
             individualRecallButton.setOnClickListener(new OnClickListener() {
@@ -100,6 +103,13 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                 RaceDialogFragment fragment = new AbortTypeSelectionDialog();
                 fragment.setArguments(getRecentArguments());
                 fragment.show(getFragmentManager(), "dialogAPNovemberMode");
+            }
+        });
+        
+        resetCourseButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View paramView) {
+                showCourseDesignDialog();
             }
         });
         

@@ -94,6 +94,12 @@
                 android:layout_marginTop="2dp"
                 android:text="@string/abort_running_race"
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+            
+            <Button
+                android:id="@+id/race_finishing_reset_course"
+                android:layout_width="140dp"
+                android:layout_height="50dp"
+                android:text="@string/race_reset_course" />
         </LinearLayout>
 
         <!-- END ACTION SECTION -->
