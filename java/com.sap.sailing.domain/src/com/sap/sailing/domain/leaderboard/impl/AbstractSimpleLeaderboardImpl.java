@@ -288,6 +288,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
 
         @Override
+        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
         public void statusChanged(TrackedRaceStatus newStatus) {
             // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
