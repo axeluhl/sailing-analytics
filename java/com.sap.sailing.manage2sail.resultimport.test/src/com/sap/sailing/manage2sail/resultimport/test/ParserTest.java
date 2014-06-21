@@ -19,6 +19,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
+import org.osgi.framework.FrameworkUtil;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
@@ -95,8 +96,10 @@ public class ParserTest {
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
             ParserConfigurationException, JAXBException {
-        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
-                ParserFactory.INSTANCE, ResultUrlRegistry.INSTANCE);
+        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
+                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
+        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
+                getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForYES = hasResultsFor.get(YES_EVENT_NAME);
@@ -107,8 +110,10 @@ public class ParserTest {
     
     @Test
     public void testScoreCorrectionProvider() throws Exception {
-        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
-                ParserFactory.INSTANCE, ResultUrlRegistry.INSTANCE);
+        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
+                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
+        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
+                getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForYES = hasResultsFor.get(YES_EVENT_NAME);
         com.sap.sse.common.Util.Pair<String, TimePoint> resultFor29er = null;

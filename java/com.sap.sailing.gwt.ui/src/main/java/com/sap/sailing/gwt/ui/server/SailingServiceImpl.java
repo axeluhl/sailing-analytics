@@ -50,6 +50,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -3387,8 +3388,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            Iterable<URL> allUrls = ResultUrlRegistry.INSTANCE.getResultUrls(resultProviderName);
+            Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
             for (URL url : allUrls) {
                 result.add(url.toString());
             }
@@ -3399,9 +3401,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-                ResultUrlRegistry.INSTANCE.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
+                resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
             }
         }
     }
@@ -3410,8 +3413,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addResultImportUrl(String resultProviderName, String url) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
-            ResultUrlRegistry.INSTANCE.registerResultUrl(resultProviderName, new URL(url));
+            ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
+            resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url));
         }
+    }
+
+    private ResultUrlRegistry getResultUrlRegistry() {
+        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
+                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
+        return resultUrlRegistry;
     }    
 
     @Override
