@@ -89,7 +89,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                 IgtimiMessageInfo message = iterator.previous();
                 out.println(message);
                 out.println("<br/>");
-                if (counter >= 10) {
+                if (counter >= 20) {
                     break;
                 }
             }
@@ -106,8 +106,14 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             synchronized (lastExpeditionMessages) {
                 copyOfLastExpeditionMessages = new ArrayList<>(lastExpeditionMessages);
             }
+            int expeditionMsgCounter = 0;
             for (ExpeditionMessageInfo message : copyOfLastExpeditionMessages) {
+                expeditionMsgCounter++;
                 out.println(message);
+                out.println("<br/>");
+                if (expeditionMsgCounter >= 20) {
+                    break;
+                }
             }
         } else {
             out.println("<i>No Expedition messages received so far!</i>");
