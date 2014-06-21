@@ -14,5 +14,6 @@ Import-Package: com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.server,
- org.osgi.framework;version="1.5.0"
+ org.osgi.framework;version="1.5.0",
+ org.osgi.util.tracker;version="1.5.1"
 Require-Bundle: com.sap.sse.common
