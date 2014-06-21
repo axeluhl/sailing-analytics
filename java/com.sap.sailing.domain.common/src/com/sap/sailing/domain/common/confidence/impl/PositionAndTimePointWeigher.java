@@ -19,23 +19,32 @@ import com.sap.sse.common.Util;
  *
  */
 public class PositionAndTimePointWeigher implements Weigher<Util.Pair<Position, TimePoint>> {
+    private final static String USE_POSITION_SYSTEM_PROPERTY_NAME = "spatialWind";
     private static final long serialVersionUID = -262428237738496818L;
     private final Weigher<TimePoint> timeWeigher;
     private final Weigher<Position> distanceWeigher;
-    
+    private final boolean usePosition;
+
     public PositionAndTimePointWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance) {
         timeWeigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
         distanceWeigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(halfConfidenceDistance);
+        this.usePosition = Boolean.valueOf(System.getProperty(USE_POSITION_SYSTEM_PROPERTY_NAME, "false"));
     }
     
     @Override
-    public double getConfidence(Util.Pair<Position, TimePoint> fix, Util.Pair<Position, TimePoint> request) {
-        final double timeConfidence = timeWeigher.getConfidence(fix.getB(), request.getB());
+    public double getConfidence(Util.Pair<Position, TimePoint> fix, Util.Pair<Position, TimePoint> reference) {
+        final double timeConfidence = timeWeigher.getConfidence(fix.getB(), reference.getB());
         final double distanceConfidence;
-        if (fix.getA() != null && request.getA() != null) {
-            distanceConfidence = distanceWeigher.getConfidence(fix.getA(), request.getA());
+        // For now, we make the use of the position for spatial wind field calculation optional. It has to be turned
+        // on by providing a system property using -DspatialWind=true
+        if (usePosition && reference != null) {
+            if (fix.getA() != null && reference.getA() != null) {
+                distanceConfidence = distanceWeigher.getConfidence(fix.getA(), reference.getA());
+            } else {
+                distanceConfidence = 0.1;
+            }
         } else {
-            distanceConfidence = 0.0001;
+            distanceConfidence = 1;
         }
         return timeConfidence * distanceConfidence;
     }

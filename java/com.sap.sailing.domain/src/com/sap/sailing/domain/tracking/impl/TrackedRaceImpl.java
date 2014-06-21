@@ -100,6 +100,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -1287,7 +1288,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-        /* halfConfidenceAfterMilliseconds */10000l, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
+        /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         ConfidenceBasedWindAverager<com.sap.sse.common.Util.Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>>();
@@ -2374,10 +2375,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
             throws NoWindException {
         final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
-        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint, windPositionMode);
     }
 
     @Override
@@ -2741,7 +2742,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     starboardMarkPositionWhileApproachingLine).getDifferenceTo(combinedWind.getFrom());
                             Distance windwardDistanceFromFirstToSecondMark;
                             windwardDistanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(
-                                    markPositions.get(0), markPositions.get(1), timePoint);
+                                    markPositions.get(0), markPositions.get(1), timePoint, WindPositionMode.EXACT);
                             final Position worseMarkPosition;
                             final Position betterMarkPosition;
                             if ((isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() > 0)

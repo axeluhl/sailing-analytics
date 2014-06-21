@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.Util;
 
@@ -168,13 +169,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException {
+    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
         if (hasFinishedLeg(timePoint)) {
             return Distance.NULL;
         } else {
             Distance result = null;
             for (Mark mark : getLeg().getTo().getMarks()) {
-                Distance d = getWindwardDistanceTo(mark, timePoint);
+                Distance d = getWindwardDistanceTo(mark, timePoint, windPositionMode);
                 if (result == null || d != null && d.compareTo(result) < 0) {
                     result = d;
                 }
@@ -188,8 +189,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned.
+     * @param windPositionMode TODO
      */
-    private Distance getWindwardDistanceTo(Mark mark, TimePoint at) throws NoWindException {
+    private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
@@ -203,22 +205,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedMarkPosition == null) {
             return null;
         }
-        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
+        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at, windPositionMode);
     }
 
     /**
      * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
      * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
      * the leg's direction.
+     * @param windPositionMode see {@link #getWind(Position, TimePoint, WindPositionMode)}
      * 
      * @throws NoWindException in case the wind direction is not known
      */
-    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at) throws NoWindException {
+    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
         SpeedWithBearing result = null;
         if (speed != null) {
             Bearing projectToBearing;
             if (getTrackedLeg().isUpOrDownwindLeg(at)) {
-                Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+                Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at, windPositionMode);
                 if (wind == null) {
                     throw new NoWindException("Need at least wind direction to determine windward speed");
                 }
@@ -236,11 +239,18 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing
-     * to all positions on the course, only variable over time.
+     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing to all
+     * positions on the course, only variable over time.
+     * 
+     * @param windPositionMode
+     *            For {@link WindPositionMode#EXACT}, the wind at position <code>p</code> is determined. For type
+     *            {@link WindPositionMode#LEG_MIDDLE}, the {@link TrackedLeg#getMiddleOfLeg middle of the tracked leg}
+     *            is determined and used as position. If the mode is {@link WindPositionMode#GLOBAL_AVERAGE}, <code>null</code>
+     *            is passed as position to {@link TrackedRace#getWind(Position, TimePoint)} which yields a general average
+     *            of the various wind sources available for the race, independent of any position.
      */
-    Wind getWind(Position p, TimePoint at) {
-        return getTrackedRace().getWind(p, at);
+    Wind getWind(Position p, TimePoint at, WindPositionMode windPositionMode) {
+        return getTrackedRace().getWind(getTrackedLeg().getEffectiveWindPosition(p, at, windPositionMode), at);
     }
 
     @Override
@@ -270,7 +280,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 if (endPos != null) {
                     Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
                             getTrackedRace().getTrack(getCompetitor())
-                                    .getEstimatedPosition(start.getTimePoint(), false), endPos, to);
+                                    .getEstimatedPosition(start.getTimePoint(), false), endPos, to, WindPositionMode.EXACT);
                     result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
                 }
             }
@@ -338,7 +348,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
+    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
         Competitor leader = getTrackedRace().getOverallLeader(timePoint);
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
@@ -360,14 +370,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
                             Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode);
                             result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
                             result = new MeterDistance(result.getMeters()
                                     + getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode)
                                             .getMeters());
                             break;
                         }
@@ -417,14 +427,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint)
+    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
             throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return leaderInLegAtTimePoint;
             }
-        });
+        }, windPositionMode);
     }
 
     private static interface LeaderGetter {
@@ -432,22 +442,22 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getGapToLeaderInSeconds(final TimePoint timePoint) throws NoWindException {
+    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint);
             }
-        });
+        }, windPositionMode);
     }
     
-    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter) throws NoWindException {
+    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter, WindPositionMode windPositionMode) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
-        Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
+        Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint, windPositionMode);
         Double result = null;
         // Has our competitor started the leg already? If not, we won't be able to compute a gap
         if (hasStartedLeg(timePoint)) {
@@ -479,7 +489,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                                 return null;
                             } else {
                                 // leader has finished already; our competitor hasn't
-                                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
+                                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint, windPositionMode);
                                 long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()
                                         - whenLeaderFinishedLeg.asMillis();
                                 return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond()
@@ -506,7 +516,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             return null;
                         } else {
                             Distance windwardDistanceToGo = getTrackedLeg().getAbsoluteWindwardDistance(ourEstimatedPosition,
-                                    leaderEstimatedPosition, timePoint);
+                                    leaderEstimatedPosition, timePoint, windPositionMode);
                             return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
                         }
                     }
@@ -543,7 +553,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getVelocityMadeGood(TimePoint at) throws NoWindException {
+    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
         if (hasStartedLeg(at)) {
             TimePoint timePoint;
             if (hasFinishedLeg(at)) {
@@ -553,7 +563,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 timePoint = at;
             }
             SpeedWithBearing speedOverGround = getSpeedOverGround(timePoint);
-            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint);
+            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint, windPositionMode);
         } else {
             return null;
         }
@@ -576,14 +586,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
         Double result;
         if (hasFinishedLeg(timePoint)) {
             result = 0.0;
         } else {
             if (hasStartedLeg(timePoint)) {
-                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
-                Speed vmg = getVelocityMadeGood(timePoint);
+                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint, windPositionMode);
+                Speed vmg = getVelocityMadeGood(timePoint, windPositionMode);
                 result = vmg == null ? null : windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
             } else {
                 result = null;
@@ -769,7 +779,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         
         Bearing projectToBearing;
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
-            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at, WindPositionMode.EXACT);
             if (wind == null) {
                 throw new NoWindException("Need at least wind direction to determine windward speed");
             }

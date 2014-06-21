@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 
 /**
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
@@ -46,7 +47,8 @@ public class RaceRankComparator implements Comparator<Competitor> {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
             if (trackedLegOfCompetitor != null) {
-                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint));
+                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint,
+                        WindPositionMode.LEG_MIDDLE));
             }
         }
     }
