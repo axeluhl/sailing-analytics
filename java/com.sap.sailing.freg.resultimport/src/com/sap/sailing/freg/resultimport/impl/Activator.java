@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
@@ -24,8 +25,10 @@ public class Activator implements BundleActivator {
         if (scanDirPath == null) {
             scanDirPath = System.getProperty(SCAN_DIR_PATH_PROPERTY_NAME, DEFAULT_SCAN_DIR);
         }
-        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
-                .getResultUrlRegistryService(bundleContext);
+
+        ServiceReference<ResultUrlRegistry> serviceRefUrlRegistry = bundleContext.getServiceReference(ResultUrlRegistry.class);
+        ResultUrlRegistry resultUrlRegistry = bundleContext.getService(serviceRefUrlRegistry);
+
         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(resultUrlRegistry);
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
         logger.info("Scanning " + scanDirPath + " for official result lists of " + service.getName());

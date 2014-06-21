@@ -11,6 +11,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
@@ -19,8 +20,9 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) throws Exception {
-        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
-                .getResultUrlRegistryService(bundleContext);
+        ServiceReference<ResultUrlRegistry> serviceRefUrlRegistry = bundleContext.getServiceReference(ResultUrlRegistry.class);
+        ResultUrlRegistry resultUrlRegistry = bundleContext.getService(serviceRefUrlRegistry);
+
         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE,
                 resultUrlRegistry);
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
