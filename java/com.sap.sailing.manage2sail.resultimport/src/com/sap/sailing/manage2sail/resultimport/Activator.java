@@ -11,26 +11,36 @@ import javax.net.ssl.X509TrustManager;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.resultimport.impl.ResultUrlRegistryServiceTrackerCustomizer;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class Activator implements BundleActivator {
 
+    private ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
+
     public void start(BundleContext bundleContext) throws Exception {
-        ServiceReference<ResultUrlRegistry> serviceRefUrlRegistry = bundleContext.getServiceReference(ResultUrlRegistry.class);
-        ResultUrlRegistry resultUrlRegistry = bundleContext.getService(serviceRefUrlRegistry);
+        resultUrlRegistryServiceTracker = new ServiceTracker<>(bundleContext, ResultUrlRegistry.class,
+                new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
 
-        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE,
-                resultUrlRegistry);
-        bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
+                    @Override
+                    protected ScoreCorrectionProvider configureScoreCorrectionProvider(
+                            ResultUrlRegistry resultUrlRegistry) {
+                        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(
+                                ParserFactory.INSTANCE, resultUrlRegistry);
+                        return service;
+                    }
+                });
 
+        resultUrlRegistryServiceTracker.open();
         createAnAllCertificatesTrustingManagerforSSL();
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
+        resultUrlRegistryServiceTracker.close();
     }  
 
     private void createAnAllCertificatesTrustingManagerforSSL() throws Exception {
