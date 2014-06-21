@@ -50,7 +50,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -398,6 +397,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
+    private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
+
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
@@ -452,6 +453,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        resultUrlRegistryServiceTracker = createAndOpenResultUrlRegistryServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
         raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
@@ -553,6 +555,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BundleContext context) {
         ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> createAndOpenResultUrlRegistryServiceTracker(
+            BundleContext context) {
+        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> result = new ServiceTracker<ResultUrlRegistry, ResultUrlRegistry>(
+                context, ResultUrlRegistry.class.getName(), null);
         result.open();
         return result;
     }
@@ -3423,9 +3433,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private ResultUrlRegistry getResultUrlRegistry() {
-        ResultUrlRegistry resultUrlRegistry = com.sap.sailing.resultimport.Activator
-                .getResultUrlRegistryService(FrameworkUtil.getBundle(this.getClass()).getBundleContext());
-        return resultUrlRegistry;
+        return resultUrlRegistryServiceTracker.getService();
     }    
 
     @Override
