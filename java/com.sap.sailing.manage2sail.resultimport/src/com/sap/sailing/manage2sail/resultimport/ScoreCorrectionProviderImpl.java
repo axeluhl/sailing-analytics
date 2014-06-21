@@ -101,7 +101,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                                     if(divisionGender != null) {
                                         divisionBoatClassAndGender += ", " + divisionGender.name();  
                                     }
-                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender)) {
+                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
                                         return new XRRRegattaResultsAsScoreCorrections(event, division, this,
                                                 parser);
                                     }
