@@ -1225,4 +1225,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogIdentifier(identifier, query);
         getRaceLogCollection().remove(query);
     }
+
+    @Override
+    public void storeResultUrl(String resultProviderName, URL url) {
+        DBCollection resultUrlsCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        DBObject query = new BasicDBObject(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
+        DBObject entry = new BasicDBObject(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
+        entry.put(FieldNames.RESULT_URL.name(), url.toString());
+        resultUrlsCollection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeResultUrl(String resultProviderName, URL url) {
+        DBCollection resultUrlsCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        DBObject query = new BasicDBObjectBuilder().add(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName)
+                .add(FieldNames.RESULT_URL.name(), url.toString()).get();
+        resultUrlsCollection.remove(query);
+    }
 }
