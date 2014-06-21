@@ -31,7 +31,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.impl.BaseRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
@@ -114,7 +114,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
-        trackedRace.addListener(new BaseRaceChangeListener() {
+        trackedRace.addListener(new AbstractRaceChangeListener() {
             boolean currentlyLoadingFirst = true;
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
