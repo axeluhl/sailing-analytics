@@ -12,6 +12,7 @@ public class RaceBoardViewConfiguration {
     private String activeCompetitorsFilterSetName;
     private boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
+    private final boolean showNavigationPanel;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -28,16 +29,19 @@ public class RaceBoardViewConfiguration {
         showWindChart = false;
         showCompetitorsChart = false;
         autoSelectMedia = false;
+        showNavigationPanel = true;
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces,
+            boolean autoSelectMedia, boolean showNavigationPanel) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
-		this.autoSelectMedia = autoSelectMedia;
+        this.autoSelectMedia = autoSelectMedia;
+        this.showNavigationPanel = showNavigationPanel;
     }
 
     public boolean isShowLeaderboard() {
@@ -63,5 +67,9 @@ public class RaceBoardViewConfiguration {
     public boolean isAutoSelectMedia() {
 		return autoSelectMedia;
 	}
+
+    public boolean isShowNavigationPanel() {
+        return showNavigationPanel;
+    }
 
 }
