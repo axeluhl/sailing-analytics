@@ -8,7 +8,9 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -181,15 +183,23 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         getRacingEventService().removeOperationExecutionListener(this);
     }
 
-    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
+    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
+        List<RacingEventServiceOperation<?>> operationsList = new ArrayList<RacingEventServiceOperation<?>>();
+        operationsList.add(operation);
+        broadcastOperations(operationsList);
+    }
+    
+    private void broadcastOperations(Iterable<RacingEventServiceOperation<?>> operationsList) throws IOException {
         // serialize operation into message
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(operation);
+        oos.writeObject(operationsList);
         oos.close();
         if (masterChannel != null) {
             masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bos.toByteArray());
-            replicationInstancesManager.log(operation);
+            for (RacingEventServiceOperation<?> operation : operationsList) {
+                replicationInstancesManager.log(operation);
+            }
         }
     }
 

@@ -75,9 +75,12 @@ public class Replicator implements Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a serialized
-     * {@link RacingEventServiceOperation}, and applies it to the {@link RacingEventService} which is obtained from the
-     * service tracker passed to this replicator at construction time.
+     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's an
+     * {@link Iterable} of serialized {@link RacingEventServiceOperation} objects, and applies it to the
+     * {@link RacingEventService} which is obtained from the service tracker passed to this replicator at construction
+     * time.
+     * 
+     * @see ReplicationServiceImpl#executed(RacingEventServiceOperation)
      */
     @Override
     public void run() {
@@ -92,8 +95,9 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
                         .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
-                RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
-                applyOrQueue(operation);
+                @SuppressWarnings("unchecked")
+                Iterable<RacingEventServiceOperation<?>> operations = (Iterable<RacingEventServiceOperation<?>>) ois.readObject();
+                applyOrQueue(operations);
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");
                 break;
@@ -159,11 +163,15 @@ public class Replicator implements Runnable {
      * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately applied to
      * the receiving replica.
      */
-    private synchronized void applyOrQueue(RacingEventServiceOperation<?> operation) {
+    private synchronized void applyOrQueue(Iterable<RacingEventServiceOperation<?>> operations) {
         if (suspended) {
-            queue(operation);
+            for (RacingEventServiceOperation<?> operation : operations) {
+                queue(operation);
+            }
         } else {
-            apply(operation);
+            for (RacingEventServiceOperation<?> operation : operations) {
+                apply(operation);
+            }
         }
     }
 
