@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +38,8 @@ import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     
-    private boolean finishedLoadingFirstBeforeSecond = true;
+    private int numberOfSwitchesBetweenLoadingRaceLogs = 0;
+    private Integer previouslyLoading = null;
     private int numFixesReceived = 0;
         
     @Test
@@ -115,18 +115,15 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
         trackedRace.addListener(new BaseRaceChangeListener() {
-            boolean currentlyLoadingFirst = true;
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
                 numFixesReceived++;
-                if (currentlyLoadingFirst) {
-                    if (fix.getTimePoint().asMillis() > numFixes/2) {
-                        currentlyLoadingFirst = false;
-                    }
-                } else {
-                    if (fix.getTimePoint().asMillis() <= numFixes/2) {
-                        finishedLoadingFirstBeforeSecond = false;
-                    }
+                int currentlyLoading = fix.getTimePoint().asMillis() <= numFixes/2 ? 1 : 2;
+                if (previouslyLoading == null) {
+                    previouslyLoading = currentlyLoading;
+                } else if (previouslyLoading != currentlyLoading) {
+                    previouslyLoading = currentlyLoading;
+                    numberOfSwitchesBetweenLoadingRaceLogs++;
                 }
             }
         });
@@ -137,7 +134,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog2);
         
-        assertTrue(finishedLoadingFirstBeforeSecond);
+        assertEquals(1, numberOfSwitchesBetweenLoadingRaceLogs);
         assertEquals(numFixes, numFixesReceived);
     }
 }
