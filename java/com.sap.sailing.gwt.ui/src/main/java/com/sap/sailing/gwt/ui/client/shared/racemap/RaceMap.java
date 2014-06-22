@@ -527,7 +527,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
                                             // we filter out measured wind sources with a very little confidence
-                                            if (windTrackInfoDTO.minWindConfidence > 0.01) {
+                                            if (windTrackInfoDTO.minWindConfidence > 0.0001) {
                                                 windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
                                             break;
@@ -668,7 +668,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             for (WindSource toRemoveWindSource : toRemoveWindSources) {
                 WindSensorOverlay removedWindSensorOverlay = windSensorOverlays.remove(toRemoveWindSource);
-                if(removedWindSensorOverlay != null) {
+                if (removedWindSensorOverlay != null) {
                     removedWindSensorOverlay.removeFromMap();
                 }
             }
