@@ -2028,6 +2028,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 GPSFixMoving next = approximationPointsIter.next();
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 // compute course change on "approximation track"
+                // FIXME bug 2009: when a maneuver (particularly a penalty circle) is executed at high turn rates, approximations may lead to turns >180deg, hence inferred to turn the wrong way; need to loop across the non-approximated fixes here!
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
                 com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>(current,
