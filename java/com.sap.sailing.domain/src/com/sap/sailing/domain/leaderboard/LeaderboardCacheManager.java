@@ -104,6 +104,16 @@ public class LeaderboardCacheManager {
         }
 
         @Override
+        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
             removeFromCache(leaderboard);
         }

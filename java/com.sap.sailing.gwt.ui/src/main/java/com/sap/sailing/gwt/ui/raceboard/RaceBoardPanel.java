@@ -163,6 +163,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         componentControlsPanel = new FlowPanel();
         componentControlsPanel.addStyleName("raceBoardNavigation");
         toolbarPanel.add(componentControlsPanel);
+
         viewControlsPanel = new FlowPanel();
         viewControlsPanel.addStyleName("raceBoardControls");
         toolbarPanel.add(viewControlsPanel);

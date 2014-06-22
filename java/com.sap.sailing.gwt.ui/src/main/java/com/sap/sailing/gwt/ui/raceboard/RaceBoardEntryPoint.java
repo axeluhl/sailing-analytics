@@ -93,9 +93,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia);
-        
+        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
+                showWindChart, showCompetitorsChart, showViewStreamlets, canReplayWhileLiveIsPossible, autoSelectMedia,
+                showNavigationPanel);
+
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
@@ -166,7 +168,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
-        createRaceBoardInOneScreenMode(raceBoardPanel);
+        createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
@@ -218,7 +220,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return logoAndTitlePanel;
     }
     
-    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
+    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
+            RaceBoardViewConfiguration raceboardViewConfiguration) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
@@ -230,9 +233,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
-        p.addNorth(toolbarPanel, 40);
-        p.addSouth(timePanel, 90);                     
+        if (raceboardViewConfiguration.isShowNavigationPanel()) {
+            p.addNorth(toolbarPanel, 40);
+        }
+        p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
-    }    
+    }
 }

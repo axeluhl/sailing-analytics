@@ -13,6 +13,7 @@ public class RaceBoardViewConfiguration {
     private final boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
     private final boolean showViewStreamlets;
+    private boolean showNavigationPanel;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -28,12 +29,12 @@ public class RaceBoardViewConfiguration {
     public RaceBoardViewConfiguration() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false,
-                /* canReplayDuringLiveRaces */ false, /* autoSelectMedia */ false);
+        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, /* showNavigationPanel */true);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets,
-            boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean canReplayDuringLiveRaces,
+            boolean autoSelectMedia, boolean showNavigationPanel) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
@@ -41,6 +42,7 @@ public class RaceBoardViewConfiguration {
         this.showViewStreamlets = showViewStreamlets;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.autoSelectMedia = autoSelectMedia;
+        this.showNavigationPanel = showNavigationPanel;
     }
 
     public boolean isShowLeaderboard() {
@@ -70,5 +72,9 @@ public class RaceBoardViewConfiguration {
     public boolean isAutoSelectMedia() {
 		return autoSelectMedia;
 	}
+
+    public boolean isShowNavigationPanel() {
+        return showNavigationPanel;
+    }
 
 }
