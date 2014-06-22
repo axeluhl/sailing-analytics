@@ -1486,9 +1486,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     double factorForBefore = 1-factorForAfter;
                     PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
                             factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
-                    double betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
-                            multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
-                            multiply(factorForAfter)).divide(1).getDegrees();
+                    final double betweenBearing;
+                    if (fixBefore.speedWithBearing == null) {
+                        if (fixAfter.speedWithBearing == null) {
+                            betweenBearing = 0;
+                        } else {
+                            betweenBearing = fixAfter.speedWithBearing.bearingInDegrees;
+                        }
+                    } else if (fixAfter.speedWithBearing == null) {
+                        betweenBearing = fixBefore.speedWithBearing.bearingInDegrees;
+                    } else {
+                        betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
+                                multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
+                                        multiply(factorForAfter)).divide(1).getDegrees();
+                    }
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
                             factorForBefore*fixBefore.speedWithBearing.speedInKnots + factorForAfter*fixAfter.speedWithBearing.speedInKnots,
                             betweenBearing);
