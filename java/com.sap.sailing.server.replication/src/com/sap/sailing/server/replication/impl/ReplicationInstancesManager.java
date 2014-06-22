@@ -3,6 +3,7 @@ package com.sap.sailing.server.replication.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,18 +81,17 @@ public class ReplicationInstancesManager {
      * 
      * @see #getStatistics
      */
-    public void log(Iterable<RacingEventServiceOperation<?>> replicatedOperations) {
+    public void log(List<Class<?>> classes) {
         for (ReplicaDescriptor replica : getReplicaDescriptors()) {
             Map<Class<? extends RacingEventServiceOperation<?>>, Integer> counts = replicationCounts.get(replica);
             if (counts == null) {
                 counts = new HashMap<Class<? extends RacingEventServiceOperation<?>>, Integer>();
                 replicationCounts.put(replica, counts);
             }
-            for (RacingEventServiceOperation<?> replicatedOperation : replicatedOperations) {
-                @SuppressWarnings("unchecked")
+            for (Class<?> replicatedOperationClass : classes) {
                 // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
-                Class<? extends RacingEventServiceOperation<?>> operationClass =
-                            (Class<? extends RacingEventServiceOperation<?>>) replicatedOperation.getClass();
+                @SuppressWarnings("unchecked")
+                Class<? extends RacingEventServiceOperation<?>> operationClass = (Class<? extends RacingEventServiceOperation<?>>) replicatedOperationClass;
                 Integer count = counts.get(operationClass);
                 if (count == null) {
                     count = 0;
@@ -102,7 +102,7 @@ public class ReplicationInstancesManager {
             if (totalOps == null) {
                 totalOps = 0l;
             }
-            totalOps += Util.size(replicatedOperations);
+            totalOps += Util.size(classes);
             totalNumberOfOperations.put(replica, totalOps);
             Long totalMessages = totalMessageCount.get(replica);
             if (totalMessages == null) {

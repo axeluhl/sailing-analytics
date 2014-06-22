@@ -31,6 +31,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -92,7 +93,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * has passed since the last sending, managed by a {@link Timer}. Writers need to synchronize on this buffer. This includes the
      * addition of an operation to the buffer as well as the atomic sending and clearing.
      */
-    private final List<RacingEventServiceOperation<?>> outboundBuffer;
+    private final List<Pair<Class<?>, byte[]>> outboundBuffer;
     
     /**
      * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
@@ -233,13 +234,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
      */
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(operation);
+        oos.close();
+        final byte[] bytes = bos.toByteArray();
         synchronized (outboundBuffer) {
-            outboundBuffer.add(operation);
+            outboundBuffer.add(new Pair<Class<?>, byte[]>(operation.getClass(), bytes));
             if (sendingTask == null) {
                 sendingTask = new TimerTask() {
                     @Override
                     public void run() {
-                        final Iterable<RacingEventServiceOperation<?>> listToSend;
+                        final Iterable<Pair<Class<?>, byte[]>> listToSend;
                         synchronized (outboundBuffer) {
                             listToSend = new ArrayList<>(outboundBuffer);
                             outboundBuffer.clear();
@@ -257,15 +263,21 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         }
     }
     
-    private void broadcastOperations(Iterable<RacingEventServiceOperation<?>> operationsList) throws IOException {
-        // serialize operation into message
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(operationsList);
+    private void broadcastOperations(Iterable<Pair<Class<?>, byte[]>> listToSend) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(buf);
+        List<Class<?>> classes = new ArrayList<>();
+        List<byte[]> byteArrays = new ArrayList<>();
+        for (Pair<Class<?>, byte[]> op : listToSend) {
+            classes.add(op.getA());
+            byteArrays.add(op.getB());
+        }
+        oos.writeObject(byteArrays);
         oos.close();
+        // copy serialized operations into message
         if (masterChannel != null) {
-            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bos.toByteArray());
-            replicationInstancesManager.log(operationsList);
+            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
+            replicationInstancesManager.log(classes);
         }
     }
 

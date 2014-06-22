@@ -96,8 +96,14 @@ public class Replicator implements Runnable {
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
                         .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
                 @SuppressWarnings("unchecked")
-                Iterable<RacingEventServiceOperation<?>> operations = (Iterable<RacingEventServiceOperation<?>>) ois.readObject();
-                applyOrQueue(operations);
+                Iterable<byte[]> byteArrays = (Iterable<byte[]>) ois.readObject();
+                for (byte[] serializedOperation : byteArrays) {
+                    ObjectInputStream operationOIS = racingEventServiceTracker
+                            .getRacingEventService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
+                                    new ByteArrayInputStream(serializedOperation));
+                    RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                    applyOrQueue(operation);
+                }
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");
                 break;
@@ -163,15 +169,11 @@ public class Replicator implements Runnable {
      * If the replicator is currently {@link #suspended}, the <code>operation</code> is queued, otherwise immediately applied to
      * the receiving replica.
      */
-    private synchronized void applyOrQueue(Iterable<RacingEventServiceOperation<?>> operations) {
+    private synchronized void applyOrQueue(RacingEventServiceOperation<?> operation) {
         if (suspended) {
-            for (RacingEventServiceOperation<?> operation : operations) {
-                queue(operation);
-            }
+            queue(operation);
         } else {
-            for (RacingEventServiceOperation<?> operation : operations) {
-                apply(operation);
-            }
+            apply(operation);
         }
     }
 
