@@ -10,15 +10,17 @@
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
           <div class="{local_res.css.regatta_intro}"><img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140" class="{local_res.css.regatta_intro_image}"></img>
-          <div class="{local_res.css.regatta_intro_header}"><a href="event-regatta-schedule.html">
-              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName" /></h3>{#if regatta.isLive}
-              <div data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>{/if regatta.isLive}</a>
+          <div class="{local_res.css.regatta_intro_header}">
+              <g:Anchor ui:field="regattaRacesLink">
+	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName" /></h3>
+	              <div ui:field="isLiveElement" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
+              </g:Anchor>
             <div class="{local_res.css.regatta_intro_header_labels}">
               <div data-labeltype="" class="{res.mainCss.label}"><span ui:field="leaderboardGroupName" /></div>
             </div>
           </div>
           <div class="{local_res.css.regatta_intro_meta}">Phase
-            <div class="{local_res.css.regatta_intro_meta_scoring}">{regatta.lastRace}
+            <div class="{local_res.css.regatta_intro_meta_scoring}"><span ui:field="regattaSeriesName" />
             </div>
             <div class="{local_res.css.regatta_intro_meta_leaderboardlink}"><a href="">Leaderboard</a></div>
           </div>
@@ -26,23 +28,21 @@
             <div data-finished="race.finished" class="{local_res.css.regatta_intro_races_race}"></div>
           </div>
           <div class="{local_res.css.regatta_intro_details}">
-              <!-- 
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentCompetitors}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.competitorsCount}</span></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentCompetitors}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="competitorsCount" /></span></div>
             </div>
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentMethod}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.method}</span></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentMethod}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="boatDesign" /></span></div>
             </div>
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentScoring}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.scoring}</span></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentScoring}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="scoringSystem" /></span></div>
             </div>
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentWindAvg}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.windAvg}</span></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentWindAvg}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="averageWind" /></span></div>
             </div>
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentRaces}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.racesCount}</span></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}"><ui:text from='{i18n.regattaIntroContentRaces}'/>&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="plannedRacesCount" /></span></div>
             </div>
-             -->
           </div>
         </div>
       </div>

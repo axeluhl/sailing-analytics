@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -21,7 +22,7 @@ public class EventRegattaList extends Composite {
 
     @UiField HTMLPanel regattaListItemPanel;
 
-    public EventRegattaList(EventDTO event) {
+    public EventRegattaList(EventDTO event, EventPageNavigator pageNavigator) {
         this.event = event;
         
         EventRegattaListResources.INSTANCE.css().ensureInjected();
@@ -29,7 +30,7 @@ public class EventRegattaList extends Composite {
 
         for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                EventRegattaListItem eventRegattaListItem = new EventRegattaListItem(leaderboardGroup, leaderboard);
+                EventRegattaListItem eventRegattaListItem = new EventRegattaListItem(pageNavigator, leaderboardGroup, leaderboard);
                 regattaListItemPanel.add(eventRegattaListItem);
             }
         }
