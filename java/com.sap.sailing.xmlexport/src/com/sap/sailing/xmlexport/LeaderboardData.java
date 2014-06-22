@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -227,8 +228,10 @@ public class LeaderboardData extends ExportAction {
         
         LineDetails start = race.getStartLine(race.getStartOfTracking());
         addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
-        addNamedElementWithValue(raceElement, "start_advantage_in_meters", start.getAdvantage().getMeters());
-        addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", start.getAdvantageousSideWhileApproachingLine().name());
+        Distance advantage = start.getAdvantage();
+        addNamedElementWithValue(raceElement, "start_advantage_in_meters", advantage != null ? advantage.getMeters() : 0);
+        NauticalSide nauticalSideWhileApproaching = start.getAdvantageousSideWhileApproachingLine();
+        addNamedElementWithValue(raceElement, "advantageous_side_while_approaching_start_line", nauticalSideWhileApproaching != null ? nauticalSideWhileApproaching.name() : "UNKNOWN");
 
         Distance raceCourseLength = race.getCourseLength();
         if (raceCourseLength == null) {
