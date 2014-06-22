@@ -62,7 +62,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private final Set<RaceDefinition> races;
+    private Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;
@@ -185,6 +185,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
         if (masterDataImportInformation != null) {
             raceLogStore = masterDataImportInformation.getRaceLogStore();
+            races = new HashSet<RaceDefinition>();
         } else {
             raceLogStore = EmptyRaceLogStore.INSTANCE;
         }
