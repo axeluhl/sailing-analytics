@@ -371,7 +371,7 @@ public interface TrackedRace extends Serializable {
      *         to determining the bearing. If in the future we have data about polar diagrams specific to boat classes,
      *         we may be able to also infer the wind speed from the boat tracks.
      */
-    Wind getEstimatedWindDirection(Position position, TimePoint timePoint);
+    Wind getEstimatedWindDirection(TimePoint timePoint);
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -484,11 +484,11 @@ public interface TrackedRace extends Serializable {
             Iterable<WindSource> windSourcesToExclude);
 
     /**
-     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
+     * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind
      * estimation, relative to the <code>timePoint</code> for which the request is made, in the result. The
      * {@link Wind#getPosition() position} of all {@link Wind} fixes returned is <code>null</code>.
      */
-    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint);
 
     /**
      * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals

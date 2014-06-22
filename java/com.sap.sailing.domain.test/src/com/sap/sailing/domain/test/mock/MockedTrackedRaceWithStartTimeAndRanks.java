@@ -306,7 +306,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
+    public Wind getEstimatedWindDirection(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -399,7 +399,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

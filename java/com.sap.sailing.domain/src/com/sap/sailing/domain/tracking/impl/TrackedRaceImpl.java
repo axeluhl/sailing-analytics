@@ -1287,10 +1287,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
-        Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
+        Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(
         /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         ConfidenceBasedWindAverager<com.sap.sse.common.Util.Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
-                .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
+                .createWindAverager(weigher);
         List<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
             // TODO consider parallelizing and consider caching
@@ -1644,20 +1644,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(position,
-                timePoint);
+    public Wind getEstimatedWindDirection(TimePoint timePoint) {
+        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(timePoint);
         return estimatedWindWithConfidence == null ? null : estimatedWindWithConfidence.getObject();
     }
 
     @Override
-    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
         DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */0.0000000001);
-        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, position,
-                dummyMarkPassingForNow, weigher);
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, dummyMarkPassingForNow,
+                weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
         int upwindNumberOfRelevantBoats = 0;
@@ -1709,10 +1708,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 resultBearing.getConfidence(), resultBearing.getRelativeTo(), /* useSpeed */false);
     }
 
-    // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't
-    // contribute as confidently as boats close by
     private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsByLegType(TimePoint timePoint,
-            Position position, DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
+            DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
         Weigher<TimePoint> weigherForMarkPassingProximity = new HyperbolicTimeDifferenceWeigher(
                 getMillisecondsOverWhichToAverageSpeed() * 5);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
