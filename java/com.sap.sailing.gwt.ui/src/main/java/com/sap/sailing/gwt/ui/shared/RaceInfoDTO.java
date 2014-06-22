@@ -51,6 +51,7 @@ public class RaceInfoDTO implements IsSerializable {
     public Flags lastLowerFlag;
     public boolean isLastFlagDisplayed;
     public boolean isRaceAbortedInPassBefore;
+    public Date abortingTimeInPassBefore;
     public boolean isTracked;
     public RaceCourseDTO lastCourseDesign;
     public String lastCourseName;
