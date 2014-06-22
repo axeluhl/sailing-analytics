@@ -2881,8 +2881,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
-                    replicationCountByOperationClassName));
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor
+                    .getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
+                    replicationCountByOperationClassName, service.getAverageNumberOfOperationsPerMessage(replicaDescriptor)));
         }
         ReplicationMasterDTO master;
         ReplicationMasterDescriptor replicatingFromMaster = service.isReplicatingFromMaster();

@@ -380,6 +380,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
+    
+    @Override
+    public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor) {
+        return replicationInstancesManager.getAverageNumberOfOperationsPerMessage(replicaDescriptor);
+    }
 
     @Override
     public void stopToReplicateFromMaster() throws IOException {
