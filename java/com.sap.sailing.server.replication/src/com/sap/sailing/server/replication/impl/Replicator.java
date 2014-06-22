@@ -65,7 +65,6 @@ public class Replicator implements Runnable {
      *            them directly.
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
-     * @param baseDomainFactory TODO
      */
     public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer, DomainFactory baseDomainFactory) {
         this.queue = new ArrayList<RacingEventServiceOperation<?>>();
@@ -83,10 +82,7 @@ public class Replicator implements Runnable {
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        while (true) {
-            if (isBeingStopped()) {
-                break;
-            }
+        while (!isBeingStopped()) {
             try {
                 Delivery delivery = consumer.nextDelivery();
                 byte[] bytesFromMessage = delivery.getBody();
@@ -152,7 +148,6 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
-        
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     

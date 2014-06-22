@@ -283,6 +283,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         }
     }
 
+    /**
+     * {@link #broadcastOperation(RacingEventServiceOperation) Broadcasts} the <code>operation</code> to all registered
+     * replicas by publishing it to the fan-out exchange.
+     */
     @Override
     public <T> void executed(RacingEventServiceOperation<T> operation) {
         try {
