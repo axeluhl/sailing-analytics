@@ -114,8 +114,10 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         if (raceLog != null && !raceLog.isEmpty()) {
             TimePoint startTime = new StartTimeFinder(raceLog).analyze();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+            TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
             
-            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, now);
         }
         return result;
     }

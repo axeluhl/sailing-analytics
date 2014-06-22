@@ -844,6 +844,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             if (abortingFlagEvent != null) {
                 raceInfoDTO.isRaceAbortedInPassBefore = true;
+                raceInfoDTO.abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint().asDate();
                 
                 if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
@@ -3646,7 +3647,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entry.currentServerTime = new Date();
         
         if (showOnlyRacesOfSameDay) {
-            if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {
+            if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, entry.raceInfo.abortingTimeInPassBefore, dayToCheck)) {
                 entry = null;
             }
         }

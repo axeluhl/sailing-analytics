@@ -7,9 +7,11 @@ import com.sap.sailing.domain.common.TimePoint;
 
 public class RaceStateOfSameDayHelper {
     
-    public static boolean isRaceStateOfSameDay(TimePoint raceStartTimePoint, TimePoint raceFinishedTimePoint, Calendar now) {
+    public static boolean isRaceStateOfSameDay(TimePoint raceStartTimePoint, TimePoint raceFinishedTimePoint, 
+            TimePoint abortingTimePoint, Calendar now) {
         Date raceStartTime = null;
         Date raceFinishedTime = null;
+        Date abortingTime = null;
         
         if (raceStartTimePoint != null) {
             raceStartTime = raceStartTimePoint.asDate();
@@ -17,8 +19,11 @@ public class RaceStateOfSameDayHelper {
         if (raceFinishedTimePoint != null) {
             raceFinishedTime = raceFinishedTimePoint.asDate();
         }
+        if (abortingTimePoint != null) {
+            abortingTime = abortingTimePoint.asDate();
+        }
         
-        return isRaceStateOfSameDay(raceStartTime, raceFinishedTime, now);
+        return isRaceStateOfSameDay(raceStartTime, raceFinishedTime, abortingTime, now);
     }
     
     public static boolean isRaceStateOfSameDay(Date raceStartTime, Date raceFinishedTime, Calendar now) {
@@ -33,6 +38,19 @@ public class RaceStateOfSameDayHelper {
             Calendar startTimeCal = Calendar.getInstance();
             startTimeCal.setTime(raceStartTime);
             if(isSameDay(now, startTimeCal)) {
+                result = true;
+            }
+        }
+        
+        return result;
+    }
+    
+    public static boolean isRaceStateOfSameDay(Date raceStartTime, Date raceFinishedTime, Date abortingTime, Calendar now) {
+        boolean result = isRaceStateOfSameDay(raceStartTime, raceFinishedTime, now);
+        if (!result && (abortingTime != null)) {
+            Calendar abortingTimeCal = Calendar.getInstance();
+            abortingTimeCal.setTime(abortingTime);
+            if(isSameDay(now, abortingTimeCal)) {
                 result = true;
             }
         }
