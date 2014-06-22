@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sse.common.Util;
 
 public class ReplicationInstancesManager {
 
@@ -20,6 +21,20 @@ public class ReplicationInstancesManager {
     private Map<ReplicaDescriptor, Map<Class<? extends RacingEventServiceOperation<?>>, Integer>> replicationCounts;
     
     /**
+     * Used to calculate the average number of operations per message sent/received for each replica.
+     * 
+     * @see #totalMessageCount
+     */
+    private final Map<ReplicaDescriptor, Long> totalNumberOfOperations;
+
+    /**
+     * Used to calculate the average number of operations per message sent/received for each replica.
+     * 
+     * @see #totalNumberOfOperations
+     */
+    private final Map<ReplicaDescriptor, Long> totalMessageCount;
+    
+    /**
      * The descriptor of the replication master
      */
     private ReplicationMasterDescriptor replicationMasterDescriptor;
@@ -27,6 +42,8 @@ public class ReplicationInstancesManager {
     public ReplicationInstancesManager() {
         replicaDescriptors = new HashSet<ReplicaDescriptor>();
         replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends RacingEventServiceOperation<?>>,Integer>>();
+        totalMessageCount = new HashMap<>();
+        totalNumberOfOperations = new HashMap<>();
     }
     
     /**
@@ -63,27 +80,56 @@ public class ReplicationInstancesManager {
      * 
      * @see #getStatistics
      */
-    public <T> void log(RacingEventServiceOperation<T> replicatedOperation) {
+    public void log(Iterable<RacingEventServiceOperation<?>> replicatedOperations) {
         for (ReplicaDescriptor replica : getReplicaDescriptors()) {
             Map<Class<? extends RacingEventServiceOperation<?>>, Integer> counts = replicationCounts.get(replica);
             if (counts == null) {
                 counts = new HashMap<Class<? extends RacingEventServiceOperation<?>>, Integer>();
                 replicationCounts.put(replica, counts);
             }
-            @SuppressWarnings("unchecked") // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
-            Class<? extends RacingEventServiceOperation<T>> operationClass = (Class<? extends RacingEventServiceOperation<T>>) replicatedOperation
-                    .getClass();
-            Integer count = counts.get(operationClass);
-            if (count == null) {
-                count = 0;
+            for (RacingEventServiceOperation<?> replicatedOperation : replicatedOperations) {
+                @SuppressWarnings("unchecked")
+                // safe because replicatedOperation is declared of type RacingEventserviceOperation<T>
+                Class<? extends RacingEventServiceOperation<?>> operationClass =
+                            (Class<? extends RacingEventServiceOperation<?>>) replicatedOperation.getClass();
+                Integer count = counts.get(operationClass);
+                if (count == null) {
+                    count = 0;
+                }
+                counts.put(operationClass, ++count);
             }
-            count++;
-            counts.put(operationClass, count);
+            Long totalOps = totalNumberOfOperations.get(replica);
+            if (totalOps == null) {
+                totalOps = 0l;
+            }
+            totalOps += Util.size(replicatedOperations);
+            totalNumberOfOperations.put(replica, totalOps);
+            Long totalMessages = totalMessageCount.get(replica);
+            if (totalMessages == null) {
+                totalMessages = 0l;
+            }
+            totalMessageCount.put(replica, ++totalMessages);
         }
     }
     
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replica) {
         return replicationCounts.get(replica);
+    }
+    
+    public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replica) {
+        final double result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            Long operationsCount = totalNumberOfOperations.get(replica);
+            if (operationsCount == null) {
+                result = 0;
+            } else {
+                result = ((double) operationsCount)/(double) messageCount;
+            }
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
     public void removeAll() {

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +52,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private final ReplicationInstancesManager replicationInstancesManager;
     
-    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final RacingEventService localService;
     
@@ -84,39 +86,82 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private Replicator replicator;
     private Thread replicatorThread;
     
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
-        this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        racingEventServiceTracker = getRacingEventServiceTracker();
-        racingEventServiceTracker.open();
-        localService = null;
-        this.exchangeName = exchangeName;
-        this.exchangeHost = exchangeHost;
-        replicator = null;
-        serverUUID = UUID.randomUUID();
-        logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
-    }
-
-    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
-        return new ServiceTracker<RacingEventService, RacingEventService>(
-                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
-    }
+    /**
+     * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the overhead,
+     * several operations can be serialized into a single message. The actual serialization of the buffer happens after a short duration
+     * has passed since the last sending, managed by a {@link Timer}. Writers need to synchronize on this buffer. This includes the
+     * addition of an operation to the buffer as well as the atomic sending and clearing.
+     */
+    private final List<RacingEventServiceOperation<?>> outboundBuffer;
     
     /**
-     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using
-     * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
-     * @param exchangeName the name of the exchange to which replicas can bind
+     * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
      */
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
+    private final Timer timer;
+    
+    /**
+     * Sends all operations in {@link #outboundBuffer}. When holding the monitor of {@link #outboundBuffer},
+     * the following rules hold:
+     * 
+     * <ul>
+     *   <li>if <code>null</code>, adding an operation to {@link #outboundBuffer} needs to create and assign a new timer that
+     *       schedules a sending task.
+     *   </li>
+     *   <li>if not <code>null</code>, an operation added to {@link #outboundBuffer} is guaranteed to be sent by the timer
+     *   </li>
+     * </ul>
+     * 
+     */
+    private TimerTask sendingTask;
+    
+    /**
+     * Defines for how many milliseconds the {@link #timer} will wait since the first operation has been added to an empty
+     * {@link #outboundBuffer} until it carries out the actual transmission task. The longer this duration, the more operations
+     * are likely to be sent per message transmitted, reducing overhead but correspondingly increasing latency.
+     */
+    private final long TRANSMISSION_DELAY_MILLIS = 100;
+    
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
+        this(exchangeName, exchangeHost, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
+    }
+    
+    private ReplicationServiceImpl(String exchangeName, String exchangeHost,
+            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService,
+            boolean createRacingEventServiceTracker) throws IOException {
+        timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>(); // XXX why is this a map? there should be only one connection to a master
+        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        if (createRacingEventServiceTracker) {
+            racingEventServiceTracker = getRacingEventServiceTracker();
+            racingEventServiceTracker.open();
+        } else {
+            racingEventServiceTracker = null;
+        }
         this.localService = localService;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
         replicator = null;
         serverUUID = UUID.randomUUID();
+        outboundBuffer = new ArrayList<>();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
+        
+    }
+
+    /**
+     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using an OSGi
+     * service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
+     * 
+     * @param exchangeName
+     *            the name of the exchange to which replicas can bind
+     */
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
+            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
+        this(exchangeName, exchangeHost, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
+    }
+    
+    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
+        return new ServiceTracker<RacingEventService, RacingEventService>(
+                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
     }
     
     private Channel createMasterChannel(String exchangeName, String exchangeHost) throws IOException {
@@ -183,10 +228,33 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         getRacingEventService().removeOperationExecutionListener(this);
     }
 
+    /**
+     * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
+     * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
+     */
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
-        List<RacingEventServiceOperation<?>> operationsList = new ArrayList<RacingEventServiceOperation<?>>();
-        operationsList.add(operation);
-        broadcastOperations(operationsList);
+        synchronized (outboundBuffer) {
+            outboundBuffer.add(operation);
+            if (sendingTask == null) {
+                sendingTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        final Iterable<RacingEventServiceOperation<?>> listToSend;
+                        synchronized (outboundBuffer) {
+                            listToSend = new ArrayList<>(outboundBuffer);
+                            outboundBuffer.clear();
+                            sendingTask = null;
+                        }
+                        try {
+                            broadcastOperations(listToSend);
+                        } catch (IOException e) {
+                            logger.log(Level.SEVERE, "Error trying to replicate the following operations: "+listToSend, e);
+                        }
+                    }
+                };
+                timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
+            }
+        }
     }
     
     private void broadcastOperations(Iterable<RacingEventServiceOperation<?>> operationsList) throws IOException {
@@ -197,9 +265,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         oos.close();
         if (masterChannel != null) {
             masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bos.toByteArray());
-            for (RacingEventServiceOperation<?> operation : operationsList) {
-                replicationInstancesManager.log(operation);
-            }
+            replicationInstancesManager.log(operationsList);
         }
     }
 
