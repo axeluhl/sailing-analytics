@@ -438,7 +438,7 @@ public class LeaderboardData extends ExportAction {
             }
             addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", speedWhenCrossingStartline != null ? speedWhenCrossingStartline.getKnots() : 0);
             com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> gpsFixWithSpeedAndLegInformation = getMaximumSpeedOverGround(competitor, race);
-            if (gpsFixWithSpeedAndLegInformation.getB() != null) {
+            if (gpsFixWithSpeedAndLegInformation != null && gpsFixWithSpeedAndLegInformation.getB() != null) {
                 addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", gpsFixWithSpeedAndLegInformation.getB().getKnots());
                 competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", gpsFixWithSpeedAndLegInformation.getA().getTimePoint()));
                 if (gpsFixWithSpeedAndLegInformation.getC() != null) {
@@ -463,6 +463,8 @@ public class LeaderboardData extends ExportAction {
             } else {
                 addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_in_knots", 0.0);
                 competitorRaceDataElement.addContent(createTimedXML("maximum_race_speed_measured_at_", race.getStartOfRace()));
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg_with_type", "UNKNOWN");
+                addNamedElementWithValue(competitorRaceDataElement, "maximum_race_speed_over_ground_reached_in_leg", 0);
                 raceConfidenceAndErrorMessages = updateConfidence("Competitor " + competitor.getName() + " has no valid maximum speed for this race!", 0.5, raceConfidenceAndErrorMessages);
             }
             Distance distanceTraveledInThisRace = race.getDistanceTraveled(competitor, race.getEndOfRace());
