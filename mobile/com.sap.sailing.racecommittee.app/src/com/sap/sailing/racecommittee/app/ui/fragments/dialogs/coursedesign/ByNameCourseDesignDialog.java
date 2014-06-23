@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
+import java.util.Collections;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -15,6 +18,7 @@ import android.widget.ListAdapter;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
@@ -40,10 +44,12 @@ public class ByNameCourseDesignDialog extends RaceDialogFragment {
         getDialog().setTitle(getString(R.string.set_course_layout));
 
         GridView grid = (GridView) getView().findViewById(R.id.byNameCourseDesignGrid);
+        final List<String> courses = preferences.getByNameCourseDesignerCourseNames();
+        Collections.sort(courses, new NaturalComparator());
 
         ListAdapter buttonAdapter = new BaseAdapter() {
             public int getCount() {
-                return preferences.getByNameCourseDesignerCourseNames().size();
+                return courses.size();
             }
 
             public Object getItem(int position) {
@@ -70,7 +76,7 @@ public class ByNameCourseDesignDialog extends RaceDialogFragment {
                     button = (Button) convertView;
                 }
 
-                button.setText(preferences.getByNameCourseDesignerCourseNames().get(position));
+                button.setText(courses.get(position));
                 return button;
             }
         };
