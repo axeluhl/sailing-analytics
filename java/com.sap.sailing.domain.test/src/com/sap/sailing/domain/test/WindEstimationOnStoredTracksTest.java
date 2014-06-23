@@ -61,7 +61,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
         getTrackedRace().recordWind(new WindImpl(markPositions.get("Windward mark"), somewhenOnAnUpwind,
                 new KnotSpeedWithBearingImpl(
                 /* speedInKnots */14.7, new DegreeBearingImpl(90))), new WindSourceImpl(WindSourceType.WEB));
-        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, somewhenOnAnUpwind);
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(somewhenOnAnUpwind);
         assertNotNull(estimatedWindDirection);
     }
     

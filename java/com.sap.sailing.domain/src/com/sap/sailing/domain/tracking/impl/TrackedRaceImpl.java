@@ -79,6 +79,7 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -111,6 +112,7 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -1287,10 +1289,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
-        Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
+        Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(
         /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         ConfidenceBasedWindAverager<com.sap.sse.common.Util.Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
-                .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
+                .createWindAverager(weigher);
         List<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
             // TODO consider parallelizing and consider caching
@@ -1644,28 +1646,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(position,
-                timePoint);
+    public Wind getEstimatedWindDirection(TimePoint timePoint) {
+        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(timePoint);
         return estimatedWindWithConfidence == null ? null : estimatedWindWithConfidence.getObject();
     }
 
     @Override
-    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
         DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */0.0000000001);
-        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, position,
-                dummyMarkPassingForNow, weigher);
+        Map<LegType, Pair<BearingWithConfidenceCluster<TimePoint>, ScalablePosition>> bearings = clusterBearingsByLegType(
+                timePoint, dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
         int upwindNumberOfRelevantBoats = 0;
         double confidence = 0;
-        int numberOfBoatsRelevantForEstimate = 0;
         BearingWithConfidence<TimePoint> resultBearing = null;
+        ScalablePosition scaledPosition = null;
+        int numberOfFixesConsideredForScaledPosition = 0;
         if (bearings != null) {
-            BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(
+            BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings.get(LegType.UPWIND).getA().splitInTwo(
                     getMinimumAngleBetweenDifferentTacksUpwind(), timePoint);
             if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
@@ -1676,10 +1678,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         * getRace().getBoatClass().getUpwindWindEstimationConfidence(upwindNumberOfRelevantBoats);
                 reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
                         .middle(average1.getObject()).reverse(), confidence, timePoint);
+                scaledPosition = bearings.get(LegType.UPWIND).getB();
+                numberOfFixesConsideredForScaledPosition += bearings.get(LegType.UPWIND).getA().size();
             }
             BearingWithConfidenceImpl<TimePoint> downwindAverage = null;
             int downwindNumberOfRelevantBoats = 0;
-            BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND)
+            BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).getA()
                     .splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind(), timePoint);
             if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
@@ -1690,8 +1694,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         * getRace().getBoatClass().getDownwindWindEstimationConfidence(downwindNumberOfRelevantBoats);
                 downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
                         average1.getObject()), confidence, timePoint);
+                if (scaledPosition == null) {
+                    scaledPosition = bearings.get(LegType.DOWNWIND).getB();
+                } else {
+                    scaledPosition.add(bearings.get(LegType.DOWNWIND).getB());
+                }
+                numberOfFixesConsideredForScaledPosition += bearings.get(LegType.DOWNWIND).getA().size();
             }
-            numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
             BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
             assert upwindNumberOfRelevantBoats == 0 || reversedUpwindAverage != null;
             if (upwindNumberOfRelevantBoats > 0) {
@@ -1703,21 +1712,36 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             resultBearing = resultCluster.getAverage(timePoint);
         }
-        return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(
-                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())),
+        final Position position;
+        if (scaledPosition == null) {
+            position = null;
+        } else {
+            position = scaledPosition.divide(numberOfFixesConsideredForScaledPosition);
+        }
+        return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(position, timePoint,
+                new KnotSpeedWithBearingImpl(/* speedInKnots, not to be used */ 0, resultBearing.getObject())),
                 resultBearing.getConfidence(), resultBearing.getRelativeTo(), /* useSpeed */false);
     }
 
-    // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't
-    // contribute as confidently as boats close by
-    private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsByLegType(TimePoint timePoint,
-            Position position, DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
+    /**
+     * Using the competitor tracks, the competitors are clustered into those going upwind and those going downwind at
+     * <code>timePoint</code>. The result provides a {@link BearingWithConfidenceCluster} for all leg types, but only
+     * those for {@link LegType#UPWIND} and {@link LegType#DOWNWIND} will actually contain values. In addition
+     * to the bearing clusters, a {@link ScalablePosition} is returned as the second part of each {@link Pair} returned
+     * for each leg type. That is the "sum" of all competitor positions at which a speed/bearing was added to the respective
+     * bearing cluster. To obtain an average position for the cluster, the {@link ScalablePosition} can be
+     * {@link ScalablePosition#divide(double) divided} by the {@link BearingWithConfidenceCluster#size() size} of
+     * the bearing cluster.
+     */
+    private Map<LegType, Pair<BearingWithConfidenceCluster<TimePoint>, ScalablePosition>> clusterBearingsByLegType(TimePoint timePoint,
+            DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
         Weigher<TimePoint> weigherForMarkPassingProximity = new HyperbolicTimeDifferenceWeigher(
                 getMillisecondsOverWhichToAverageSpeed() * 5);
-        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<>();
+        Map<LegType, ScalablePosition> scaledCentersOfGravity = new HashMap<>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
+            scaledCentersOfGravity.put(legType, null);
         }
         Map<TrackedLeg, LegType> legTypesCache = new HashMap<TrackedLeg, LegType>();
         getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're
@@ -1786,9 +1810,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                             markPassingProximityConfidenceReduction
                                                     * estimatedSpeedWithConfidence.getConfidence(),
                                             estimatedSpeedWithConfidence.getRelativeTo());
-                                    BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings
-                                            .get(legType);
+                                    BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
                                     bearingClusterForLegType.add(bearing);
+                                    final Position position = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+                                    final ScalablePosition scalablePosition = new ScalablePosition(position);
+                                    final ScalablePosition scaledCenterOfGravitySoFar = scaledCentersOfGravity.get(legType);
+                                    final ScalablePosition newScaledCenterOfGravity;
+                                    if (scaledCenterOfGravitySoFar == null) {
+                                        newScaledCenterOfGravity = scalablePosition;
+                                    } else {
+                                        newScaledCenterOfGravity = scaledCenterOfGravitySoFar.add(scalablePosition);
+                                    }
+                                    scaledCentersOfGravity.put(legType, newScaledCenterOfGravity);
                                 }
                             }
                         }
@@ -1802,7 +1835,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             getRace().getCourse().unlockAfterRead();
         }
-        return bearings;
+        final Map<LegType, Pair<BearingWithConfidenceCluster<TimePoint>, ScalablePosition>> result;
+        if (bearings == null) {
+            result = null;
+        } else {
+            result = new HashMap<>();
+            for (LegType legType : LegType.values()) {
+                result.put(legType, new Pair<>(bearings.get(legType), scaledCentersOfGravity.get(legType)));
+            }
+        }
+        return result;
     }
 
     /**

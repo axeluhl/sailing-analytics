@@ -294,7 +294,7 @@ public class WindTest {
             new MarkPassingImpl(finish, w3, competitor)    
         }));
         assertFalse(boatClass.typicallyStartsUpwind());
-        assertNull(trackedRace.getEstimatedWindDirection(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
+        assertNull(trackedRace.getEstimatedWindDirection(MillisecondsTimePoint.now()));
     }
 
     @Test
