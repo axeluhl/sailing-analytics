@@ -1,0 +1,106 @@
+/**
+ * The solutions page
+ */
+.solutions {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_nav {
+  border-bottom: 1px solid #ccc;
+  display: table;
+  width: 100%;
+}
+.solutions_nav_link {
+  display: table-cell;
+  font-size: 1em;
+  display: inline-block;
+  padding: 0.9375em 0.9375em 0.5em;
+  color: #666;
+  border-bottom: 0.25em solid #fff;
+}
+.solutions_nav_link:hover {
+  text-decoration: none;
+  color: #000;
+  border-bottom: 0.25em solid #f0ab00;
+}
+.solutions_content {
+  position: relative;
+  z-index: 2;
+}
+.solutions_content .parallax {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.solutions_content .grid {
+  padding: 6.25em 0;
+  height: 100%;
+}
+.solutions_contentsap {
+  background: #fff;
+  height: 34.375em;
+}
+.solutions_contentsap .grid {
+  background-repeat: no-repeat;
+  background-image: url("../images/solutions-sap.png");
+  background-position: left center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+}
+.solutions_contentrace {
+  background: #f8f8f8;
+  height: 40.625em;
+}
+.solutions_contentrace .parallax {
+  height: 150%;
+  background-repeat: no-repeat;
+  background-image: url("../images/solutions-race.png");
+  background-position: right bottom;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+}
+.solutions_contentpost {
+  background: #fff;
+  height: 30em;
+}
+.solutions_contentpost .grid {
+  background-repeat: no-repeat;
+  background-image: url("../images/solutions-post.png");
+  background-position: left center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+}
+.solutions_contenttraining {
+  background: #f8f8f8;
+  height: 38.75em;
+}
+.solutions_contenttraining .parallax {
+  height: 180%;
+  background-repeat: no-repeat;
+  background-image: url("../images/solutions-training.png");
+  background-position: right bottom;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+}
+.solutions_contentsimulator {
+  background: #fff;
+  height: 36.25em;
+}
+.solutions_contentsimulator .grid {
+  background-repeat: no-repeat;
+  background-image: url("../images/solutions-simulator.png");
+  background-position: left center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+}
+.solutions_content_linkappstore {
+  display: inline-block;
+  margin-top: 2.5em;
+}
