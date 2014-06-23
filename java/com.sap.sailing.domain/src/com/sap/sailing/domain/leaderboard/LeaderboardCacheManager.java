@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.leaderboard;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.impl.ConcurrentWeakHashMap;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
@@ -45,7 +47,7 @@ public class LeaderboardCacheManager {
     private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
     private final NamedReentrantReadWriteLock scoreCorrectionAndCompetitorChangeListenersLock;
     private final WeakHashMap<Leaderboard, CacheInvalidationUponCompetitorChangeListener> competitorChangeListeners;
-    private final WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
+    private final ConcurrentWeakHashMap<Leaderboard, ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
     private class CacheInvalidationListener implements RaceChangeListener {
@@ -219,7 +221,7 @@ public class LeaderboardCacheManager {
     
     public LeaderboardCacheManager(LeaderboardCache leaderboardCache) {
         this.leaderboardCache = leaderboardCache;
-        this.invalidationListenersPerLeaderboard = new WeakHashMap<>();
+        this.invalidationListenersPerLeaderboard = new ConcurrentWeakHashMap<>();
         this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
         this.scoreCorrectionListeners = new WeakHashMap<>();
         this.scoreCorrectionAndCompetitorChangeListenersLock = new NamedReentrantReadWriteLock(
@@ -228,11 +230,10 @@ public class LeaderboardCacheManager {
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
-        synchronized (invalidationListenersPerLeaderboard) {
-            Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
-                    .remove(leaderboard);
-            if (listenersMap != null) {
-                for (Map.Entry<TrackedRace, Set<CacheInvalidationListener>> e : listenersMap.entrySet()) {
+        ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.remove(leaderboard);
+        if (listenersMap != null) {
+            for (Map.Entry<TrackedRace, Set<CacheInvalidationListener>> e : listenersMap.entrySet()) {
+                synchronized (e.getValue()) { // the Set is a Collections.synchronizedSet, and synchronization is required for iteration
                     for (CacheInvalidationListener listener : e.getValue()) {
                         listener.removeFromTrackedRace();
                     }
@@ -315,17 +316,7 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        removeFromCache(leaderboard);
-                        Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
-                                .get(leaderboard);
-                        if (listenersMap != null) {
-                            Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
-                            if (listeners != null) {
-                                for (CacheInvalidationListener listener : listeners) {
-                                    listener.removeFromTrackedRace();
-                                }
-                            }
-                        }
+                        removeFromCache(leaderboard); // removes all listeners from invalidationListenersPerLeaderboard and from their TrackedRaces
                     }
 
                     @Override
@@ -403,24 +394,20 @@ public class LeaderboardCacheManager {
     }
 
     private void registerListener(final Leaderboard leaderboard, TrackedRace trackedRace) {
-        Map<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
+        ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
         final CacheInvalidationListener listener;
-        synchronized (invalidationListenersPerLeaderboard) {
-            listener = new CacheInvalidationListener(leaderboard, trackedRace);
-            trackedRace.addListener(listener);
-            invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
-            if (invalidationListeners == null) {
-                invalidationListeners = new HashMap<TrackedRace, Set<CacheInvalidationListener>>();
-                invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
-            }
+        listener = new CacheInvalidationListener(leaderboard, trackedRace);
+        trackedRace.addListener(listener);
+        invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
+        if (invalidationListeners == null) {
+            invalidationListeners = new ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>>();
+            invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
         }
         Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
         if (listeners == null) {
-            listeners = new HashSet<CacheInvalidationListener>();
+            listeners = Collections.synchronizedSet(new HashSet<CacheInvalidationListener>());
             invalidationListeners.put(trackedRace, listeners);
         }
         listeners.add(listener);
     }
-    
-
 }
