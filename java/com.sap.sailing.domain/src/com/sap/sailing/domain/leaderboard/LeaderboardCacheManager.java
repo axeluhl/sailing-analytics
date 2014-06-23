@@ -413,13 +413,13 @@ public class LeaderboardCacheManager {
                 invalidationListeners = new HashMap<TrackedRace, Set<CacheInvalidationListener>>();
                 invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
             }
+            Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
+            if (listeners == null) {
+                listeners = new HashSet<CacheInvalidationListener>();
+                invalidationListeners.put(trackedRace, listeners);
+            }
+            listeners.add(listener);
         }
-        Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
-        if (listeners == null) {
-            listeners = new HashSet<CacheInvalidationListener>();
-            invalidationListeners.put(trackedRace, listeners);
-        }
-        listeners.add(listener);
     }
     
 
