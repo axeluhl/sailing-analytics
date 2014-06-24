@@ -46,6 +46,7 @@ public class RemoteMessageStreamTest {
         System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
         String messageAsString = new String(trimmedMessage);
         assertEquals(message, messageAsString);
+        assertEquals(-1, inputStream.getInputStream().read());
     }
 
     @Test
@@ -61,6 +62,7 @@ public class RemoteMessageStreamTest {
         System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
         String messageAsString = new String(trimmedMessage);
         assertEquals(message, messageAsString);
+        assertEquals(-1, inputStream.getInputStream().read());
     }
 
     @Test
@@ -77,7 +79,15 @@ public class RemoteMessageStreamTest {
         System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
         String messageAsString = new String(trimmedMessage);
         assertEquals(message, messageAsString);
+        final String message2 = "Hello Back!";
+        outputStream.write(message2.getBytes());
         outputStream.close();
+        int numberOfReadBytes2 = inputStream.getInputStream().read(buf);
+        assertEquals(message2.getBytes().length, numberOfReadBytes2);
+        byte[] trimmedMessage2 = new byte[numberOfReadBytes2];
+        System.arraycopy(buf, 0, trimmedMessage2, 0, numberOfReadBytes2);
+        String messageAsString2 = new String(trimmedMessage2);
+        assertEquals(message2, messageAsString2);
     }
 
     private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
