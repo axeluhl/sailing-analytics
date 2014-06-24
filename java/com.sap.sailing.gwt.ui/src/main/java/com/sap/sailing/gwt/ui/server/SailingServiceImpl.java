@@ -830,11 +830,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (startTime != null) {
                 FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now());
                 List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+                FlagPoleState previousFlagState = activeFlagState.getPreviousState(state.getRacingProcedure(), startTime);
+                List<FlagPole> previousFlags = previousFlagState.getCurrentState();
+                FlagPole mostInterestingFlagPole = FlagPoleState.getMostInterestingFlagPole(previousFlags, activeFlags);
+
                 // TODO: adapt the LastFlagFinder#getMostRecent method!
-                if (!activeFlags.isEmpty()) {
-                    raceInfoDTO.lastUpperFlag = activeFlags.get(0).getUpperFlag();
-                    raceInfoDTO.lastLowerFlag = activeFlags.get(0).getLowerFlag();
-                    raceInfoDTO.isLastFlagDisplayed = activeFlags.get(0).isDisplayed();
+                if (mostInterestingFlagPole != null) {
+                    raceInfoDTO.lastUpperFlag = mostInterestingFlagPole.getUpperFlag();
+                    raceInfoDTO.lastLowerFlag = mostInterestingFlagPole.getLowerFlag();
+                    raceInfoDTO.lastFlagsAreDisplayed = mostInterestingFlagPole.isDisplayed();
+                    raceInfoDTO.lastFlagsDisplayedStateChanged = previousFlagState.hasPoleChanged(mostInterestingFlagPole);
                 }
             }
             
@@ -847,7 +852,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
                     raceInfoDTO.lastLowerFlag = abortingFlagEvent.getLowerFlag();
-                    raceInfoDTO.isLastFlagDisplayed = abortingFlagEvent.isDisplayed();
+                    raceInfoDTO.lastFlagsAreDisplayed = abortingFlagEvent.isDisplayed();
+                    raceInfoDTO.lastFlagsDisplayedStateChanged = true;
                 }
             }
             
@@ -864,7 +870,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
                     raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                     raceInfoDTO.lastLowerFlag = Flags.NONE;
-                    raceInfoDTO.isLastFlagDisplayed = true;
+                    raceInfoDTO.lastFlagsAreDisplayed = true;
+                    raceInfoDTO.lastFlagsDisplayedStateChanged = true;
                 }
             }
             
@@ -883,7 +890,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
 
         return raceInfoDTO;
-    }    
+    }
     
     private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, ReadonlyRaceState state) {
         RaceInfoExtensionDTO info = null;
