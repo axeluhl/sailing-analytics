@@ -4,7 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +93,20 @@ public class RemoteMessageStreamTest {
         String messageAsString2 = new String(trimmedMessage2);
         assertEquals(message2, messageAsString2);
     }
+
+    @Test
+    public void testSerializedObjectsCutInPieces() throws IOException, InterruptedException, ClassNotFoundException {
+        setupStreams(/* messageSizeInBytes */ 10, /* syncAfterTimeout */ false);
+        List<String> l = new ArrayList<>();
+        final String message = "Hello World!";
+        l.add(message);
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(l);
+        oos.close();
+        ObjectInputStream ois = new ObjectInputStream(inputStream.getInputStream());
+        assertEquals(l, ois.readObject());
+    }
+
 
     private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
         outputStream = new AMPQOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
