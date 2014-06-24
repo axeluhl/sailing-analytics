@@ -1,12 +1,15 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.rabbitmq.client.Channel;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 
 /**
@@ -31,7 +34,7 @@ public class AMPQOutputStream extends OutputStream {
     // FIXME this seems inherently unsafe as it is not properly escaped if it occurs in the actual stream
     static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
 
-    private static final long DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS = 5000;
+    public static final Duration DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS = new MillisecondsDurationImpl(5000);
     private static final long DURATION_TO_PAUSE_SYNCER_THREAD_AS_MILLIS = 1000;
 
     private final Channel channel;
@@ -52,7 +55,7 @@ public class AMPQOutputStream extends OutputStream {
         this.closed = false;
 
         if (syncAfterTimeout) {
-            Runnable syncer = new Runnable() {
+            new Thread("Timeout syncer for "+getClass().getSimpleName()+" on channel "+channel) {
                 @Override
                 public void run() {
                     while (!closed) {
@@ -60,7 +63,7 @@ public class AMPQOutputStream extends OutputStream {
                             if (timeLastDataHasBeenReceived != null) {
                                 TimePoint now = MillisecondsTimePoint.now();
                                 // FIXME the timing should better be managed by a Timer instance with delays based on last send and wake-up / test time point
-                                if ((now.asMillis() - timeLastDataHasBeenReceived.asMillis()) >= DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS) {
+                                if (timeLastDataHasBeenReceived.until(now).compareTo(DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS) > 0) {
                                     try {
                                         sendBuffer();
                                         timeLastDataHasBeenReceived = MillisecondsTimePoint.now(); // reset time to avoid unnecessary write attempt
@@ -78,8 +81,7 @@ public class AMPQOutputStream extends OutputStream {
                         }
                     }
                 }
-            };
-            new Thread(syncer, "Syncer for " + AMPQOutputStream.class.getName() + " on exchange " + queueName).run();
+            }.start();
         }
     }
 

@@ -63,6 +63,23 @@ public class RemoteMessageStreamTest {
         assertEquals(message, messageAsString);
     }
 
+    @Test
+    public void testDataIsSentAfterTimeout() throws IOException, InterruptedException {
+        setupStreams(/* messageSizeInBytes */ 1000, /* syncAfterTimeout */ true);
+        final String message = "Hello World!";
+        outputStream.write(message.getBytes());
+        // wait until timeout should cause bytes to be sent, plus a bit to give Rabbit some time
+        Thread.sleep(AMPQOutputStream.DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS.plus(1000).asMillis());
+        byte[] buf = new byte[100];
+        int numberOfReadBytes = inputStream.getInputStream().read(buf);
+        assertEquals(message.getBytes().length, numberOfReadBytes);
+        byte[] trimmedMessage = new byte[numberOfReadBytes];
+        System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
+        String messageAsString = new String(trimmedMessage);
+        assertEquals(message, messageAsString);
+        outputStream.close();
+    }
+
     private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
         outputStream = new AMPQOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
         inputStream = new AMPQInputStream(channel, outputStream.getQueueName());
