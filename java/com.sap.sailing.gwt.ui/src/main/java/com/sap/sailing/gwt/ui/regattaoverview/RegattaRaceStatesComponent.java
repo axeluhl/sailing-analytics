@@ -16,6 +16,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -38,6 +39,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -83,6 +85,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final VerticalPanel mainPanel;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT);
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -206,6 +209,18 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                                 timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
                             }
                         }));
+    }
+    
+    private String formatTime(Date time) {
+        String result = "-";
+        if (time != null) {
+            result = "";
+            if (! CalendarUtil.isSameDate(time, new Date())) {
+                result += dateFormatter.format(time) + " ";
+            }
+            result += timeFormatter.format(time);
+        }
+        return result;
     }
 
     private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {
@@ -341,11 +356,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> raceStartTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                String result = "-";
-                if (entryDTO.raceInfo.startTime != null) {
-                    result = timeFormatter.format(entryDTO.raceInfo.startTime);
-                }
-                return result;
+                return formatTime(entryDTO.raceInfo.startTime);
             }
         };
         raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -459,11 +470,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                String lastUpdateTime = "-";
-                if (entryDTO.raceInfo.lastUpdateTime != null) {
-                    lastUpdateTime = timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
-                }
-                return lastUpdateTime;
+                return formatTime(entryDTO.raceInfo.lastUpdateTime);
             }
         };
         lastUpdateColumn.setSortable(true);

@@ -5,7 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -58,6 +64,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+
+    private boolean toolbarHidden;
 
     @Override
     protected void doOnModuleLoad() {    
@@ -220,9 +228,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
             RaceBoardViewConfiguration raceboardViewConfiguration) {
-        DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
+        final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
+        final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");
@@ -231,9 +239,30 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
-        if (raceboardViewConfiguration.isShowNavigationPanel()) {
-            p.addNorth(toolbarPanel, 40);
+        p.addNorth(toolbarPanel, 40);
+        toolbarHidden = false;
+        if (!raceboardViewConfiguration.isShowNavigationPanel()) {
+            p.setWidgetHidden(toolbarPanel, true);
+            toolbarHidden = true;
         }
+        Event.addNativePreviewHandler(new NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(NativePreviewEvent event) {
+                NativeEvent ne = event.getNativeEvent();
+                if ("keydown".equals(ne.getType()) && ne.getCtrlKey()
+                        && (ne.getKeyCode() == 'm' || ne.getKeyCode() == 'M')) {
+                    ne.preventDefault();
+                    Scheduler.get().scheduleDeferred(new Command() {
+                        @Override
+                        public void execute() {
+                            p.setWidgetHidden(toolbarPanel, !toolbarHidden);
+                            toolbarHidden = !toolbarHidden;
+                        }
+                    });
+
+                }
+            }
+        });
         p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
