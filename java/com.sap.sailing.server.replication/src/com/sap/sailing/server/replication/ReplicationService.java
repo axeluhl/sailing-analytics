@@ -1,9 +1,11 @@
 package com.sap.sailing.server.replication;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Map;
 import java.util.UUID;
 
+import com.rabbitmq.client.Channel;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
@@ -64,4 +66,6 @@ public interface ReplicationService {
      * @return
      */
     UUID getServerIdentifier();
+
+    Channel createMasterChannel() throws IOException, ConnectException;
 }

@@ -1,8 +1,10 @@
 package com.sap.sailing.server.replication.impl;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
@@ -165,10 +167,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
     }
     
-    private Channel createMasterChannel(String exchangeName, String exchangeHost) throws IOException {
+    private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
+        Channel result = createMasterChannel();
+        result.exchangeDeclare(exchangeName, "fanout");
+        logger.info("Created fanout exchange "+exchangeName+" successfully.");
+        return result;
+    }
+
+    @Override
+    public Channel createMasterChannel() throws IOException, ConnectException {
         final ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(exchangeHost); // ...and use default port
-        
         Channel result = null;
         try {
             result = connectionFactory.newConnection().createChannel();
@@ -177,9 +186,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             logger.severe("Could not connect to messaging queue on " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
             throw ex;
         }
-        
-        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
-        result.exchangeDeclare(exchangeName, "fanout");
+        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort());
         return result;
     }
 
@@ -200,7 +207,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             addAsListenerToRacingEventService();
             synchronized (this) {
                 if (masterChannel == null) {
-                    masterChannel = createMasterChannel(exchangeName, exchangeHost);
+                    masterChannel = createMasterChannelAndDeclareFanoutExchange();
                 }
             }
         }
@@ -322,8 +329,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
+        String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
+        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
         final RacingEventService racingEventService = getRacingEventService();
-        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(is));
+        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(
+                rabbitInputStreamProvider.getInputStream()));
         logger.info("Starting to receive initial load");
         racingEventService.initiallyFillFrom(ois);
         logger.info("Done receiving initial load");

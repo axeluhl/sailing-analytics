@@ -2,6 +2,8 @@ package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -17,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -38,6 +43,11 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     public static final String ACTION = "action";
     public static final String SERVER_UUID = "uuid";
     public static final String ADDITIONAL_INFORMATION = "additional";
+
+    /**
+     * The size of the packages into which the initial load is split
+     */
+    private static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
 
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -69,8 +79,13 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
+            Connection rabbitConnection = new ConnectionFactory().newConnection();
+            Channel channel = rabbitConnection.createChannel();
+            RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel, /* syncAfterTimeout */ false);
+            PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
+            br.println(ros.getQueueName().getBytes());
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new CountingOutputStream(
-                    resp.getOutputStream(), /* log every megabyte */1024l * 1024l, Level.INFO,
+                    ros, /* log every megabyte */1024l * 1024l, Level.INFO,
                     "HTTP output for initial load for " + req.getRemoteHost()));
             ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
             try {
@@ -82,6 +97,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace(resp.getWriter());
             }
+            ros.close();
             break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
