@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 public class RabbitOutputStream extends OutputStream {
     private static final Logger logger = Logger.getLogger(RabbitOutputStream.class.getName());
 
-    // FIXME this seems inherently unsafe as it is not properly escaped if it occurs in the actual stream
     static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
 
     public static final Duration DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS = new MillisecondsDurationImpl(5000);
@@ -133,7 +132,15 @@ public class RabbitOutputStream extends OutputStream {
     private synchronized void sendBuffer() throws IOException {
         if (count > 0) {
             if (this.channel != null && this.channel.isOpen()) {
-                byte[] message = new byte[count];
+                final byte[] message;
+                // check for the unlikely case that a client has coincidentally submitted the TERMINATION_COMMAND; we escape by
+                // appending a random byte which makes the length differ; the input stream provider will skip one byte after receiving
+                // the TERMINATION_COMMAND at the beginning of a message whose length is greater than that of the TERMINATION_COMMAND.
+                if (startsWithTerminationCommand(streamBuffer, count)) {
+                    message = new byte[count+1];
+                } else {
+                    message = new byte[count];
+                }
                 System.arraycopy(streamBuffer, 0, message, 0, count);
                 this.channel.basicPublish(/* exchangeName */"", /* routingKey */queueName, /* properties */null, message);
                 count = 0;
@@ -142,5 +149,17 @@ public class RabbitOutputStream extends OutputStream {
                 throw new IOException("AMPQ Channel seems to be closed!");
             }
         }
+    }
+
+    static boolean startsWithTerminationCommand(byte[] bytes, int count) {
+        boolean result = true;
+        if (count < TERMINATION_COMMAND.length) {
+            result = false;
+        } else {
+            for (int i = 0; i < TERMINATION_COMMAND.length && result; i++) {
+                result = bytes[i] == TERMINATION_COMMAND[i];
+            }
+        }
+        return result;
     }
 }

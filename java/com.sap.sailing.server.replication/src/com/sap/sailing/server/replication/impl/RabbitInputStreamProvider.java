@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,14 +47,24 @@ public class RabbitInputStreamProvider extends NamedImpl {
                     try {
                         Delivery delivery = messageConsumer.nextDelivery();
                         byte[] bytesFromMessage = delivery.getBody();
-                        if (bytesFromMessage.length != RabbitOutputStream.TERMINATION_COMMAND.length
-                                || !Arrays.equals(bytesFromMessage, RabbitOutputStream.TERMINATION_COMMAND)) {
-                            messagesAreWrittenToThis.write(bytesFromMessage);
-                        } else {
-                            // termination sequence received - stop receiving messages
-                            messagesAreWrittenToThis.close();
-                            break;
+                        if (RabbitOutputStream.startsWithTerminationCommand(bytesFromMessage, bytesFromMessage.length)) {
+                            if (bytesFromMessage.length == RabbitOutputStream.TERMINATION_COMMAND.length) {
+                                // received exactly TERMINATION_COMMAND
+                                messagesAreWrittenToThis.close();
+                                break;
+                            } else {
+                                // more to come; skip one byte which is the "escape" symbol ensuring that the message
+                                // sizes don't match
+                                byte[] newBytesFromMessage = new byte[bytesFromMessage.length - 1];
+                                System.arraycopy(bytesFromMessage, 0, newBytesFromMessage, 0,
+                                        RabbitOutputStream.TERMINATION_COMMAND.length);
+                                System.arraycopy(bytesFromMessage, RabbitOutputStream.TERMINATION_COMMAND.length + 1,
+                                        newBytesFromMessage, RabbitOutputStream.TERMINATION_COMMAND.length,
+                                        bytesFromMessage.length - RabbitOutputStream.TERMINATION_COMMAND.length - 1);
+                                bytesFromMessage = newBytesFromMessage;
+                            }
                         }
+                        messagesAreWrittenToThis.write(bytesFromMessage);
                     } catch (ShutdownSignalException | ConsumerCancelledException e) {
                         logger.log(Level.INFO, "Problem with message queue "+getName(), e);
                         break;
