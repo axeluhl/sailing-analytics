@@ -378,8 +378,14 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 if (declinationService == null) {
                     trueHeading = hdgm;
                 } else {
-                    Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
-                    trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                    try {
+                        Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
+                        trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Correction of declination was requested but unsuccessful. Can't correct heading "+
+                                hdgm+"@"+timePoint+" by declination. Forwarding exception.");
+                        throw e;
+                    }
                 }
             } else {
                 trueHeading = null;
