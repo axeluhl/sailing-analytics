@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -16,8 +18,8 @@ import org.junit.Test;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.sap.sailing.server.replication.impl.AMPQInputStream;
-import com.sap.sailing.server.replication.impl.AMPQOutputStream;
+import com.sap.sailing.server.replication.impl.RabbitInputStreamProvider;
+import com.sap.sailing.server.replication.impl.RabbitOutputStream;
 
 /**
  * A number of tests for the {@link OutputStream} / {@link InputStream} implementation using an underlying RabbitMQ message queue.
@@ -27,8 +29,8 @@ import com.sap.sailing.server.replication.impl.AMPQOutputStream;
  */
 public class RemoteMessageStreamTest {
     private Channel channel;
-    private AMPQOutputStream outputStream;
-    private AMPQInputStream inputStream;
+    private RabbitOutputStream outputStream;
+    private RabbitInputStreamProvider inputStream;
     
     @Before
     public void setUp() throws IOException {
@@ -54,7 +56,7 @@ public class RemoteMessageStreamTest {
     }
 
     @Test
-    public void testBasicConnectivityInMultiplePackets() throws IOException {
+    public void testBasicCddonnectivityInMultiplePackets() throws IOException {
         setupStreams(/* messageSizeInBytes */ 5, /* syncAfterTimeout */ false);
         final String message = "Hello World!";
         outputStream.write(message.getBytes());
@@ -75,7 +77,7 @@ public class RemoteMessageStreamTest {
         final String message = "Hello World!";
         outputStream.write(message.getBytes());
         // wait until timeout should cause bytes to be sent, plus a bit to give Rabbit some time
-        Thread.sleep(AMPQOutputStream.DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS.plus(1000).asMillis());
+        Thread.sleep(RabbitOutputStream.DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS.plus(1000).asMillis());
         byte[] buf = new byte[100];
         int numberOfReadBytes = inputStream.getInputStream().read(buf);
         assertEquals(message.getBytes().length, numberOfReadBytes);
@@ -107,9 +109,24 @@ public class RemoteMessageStreamTest {
         assertEquals(l, ois.readObject());
     }
 
+    @Test
+    public void testEscapedTerminatorTransmission() throws IOException {
+        setupStreams(/* messageSizeInBytes */ 20, /* syncAfterTimeout */ false);
+        byte[] terminator = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
+        outputStream.write(terminator);
+        outputStream.close();
+        byte[] buf = new byte[100];
+        int numberOfReadBytes = inputStream.getInputStream().read(buf);
+        assertEquals(terminator.length, numberOfReadBytes);
+        byte[] trimmedMessage = new byte[numberOfReadBytes];
+        System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
+        assertTrue(Arrays.equals(terminator, trimmedMessage));
+        assertEquals(-1, inputStream.getInputStream().read());
+    }
 
+    
     private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
-        outputStream = new AMPQOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
-        inputStream = new AMPQInputStream(channel, outputStream.getQueueName());
+        outputStream = new RabbitOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
+        inputStream = new RabbitInputStreamProvider(channel, outputStream.getQueueName());
     }
 }

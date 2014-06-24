@@ -20,16 +20,16 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
  * <p>
  * 
  * Usage: call the constructor with a channel to a RabbitMQ connection. Then, extract the queue name assigned (see
- * {@link #getQueueName()} and get it to the client. On the client, use {@link AMPQInputStream}, passing the queue name
- * to the constructor. The client can then obtain an {@link InputStream} from the {@link AMPQInputStream} by calling
- * {@link AMPQInputStream#getInputStream()} from which the content can be read. The client will receive EOF at the end
+ * {@link #getQueueName()} and get it to the client. On the client, use {@link RabbitInputStreamProvider}, passing the queue name
+ * to the constructor. The client can then obtain an {@link InputStream} from the {@link RabbitInputStreamProvider} by calling
+ * {@link RabbitInputStreamProvider#getInputStream()} from which the content can be read. The client will receive EOF at the end
  * of the stream.
  * 
  * @author Simon Marcel Pamies
  * @author Axel Uhl (d043530)
  */
-public class AMPQOutputStream extends OutputStream {
-    private static final Logger logger = Logger.getLogger(AMPQOutputStream.class.getName());
+public class RabbitOutputStream extends OutputStream {
+    private static final Logger logger = Logger.getLogger(RabbitOutputStream.class.getName());
 
     // FIXME this seems inherently unsafe as it is not properly escaped if it occurs in the actual stream
     static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
@@ -46,7 +46,7 @@ public class AMPQOutputStream extends OutputStream {
     private int count;
     private final byte streamBuffer[];
 
-    public AMPQOutputStream(int messageSizeInBytes, Channel channel, boolean syncAfterTimeout) throws IOException {
+    public RabbitOutputStream(int messageSizeInBytes, Channel channel, boolean syncAfterTimeout) throws IOException {
         super();
         this.streamBuffer = new byte[messageSizeInBytes];
         this.count = 0;
@@ -59,7 +59,7 @@ public class AMPQOutputStream extends OutputStream {
                 @Override
                 public void run() {
                     while (!closed) {
-                        synchronized (AMPQOutputStream.this) {
+                        synchronized (RabbitOutputStream.this) {
                             if (timeLastDataHasBeenReceived != null) {
                                 TimePoint now = MillisecondsTimePoint.now();
                                 // FIXME the timing should better be managed by a Timer instance with delays based on last send and wake-up / test time point

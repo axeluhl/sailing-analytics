@@ -17,23 +17,24 @@ import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 /**
- * Input stream that reads messages from AMP queue and puts them into a byte stream.
+ * Input stream that reads messages from a RabbitMQ queue filled by a {@link RabbitOutputStream} and lets a client read
+ * this stream from {@link #getInputStream()}.
  * 
  * @author Simon Marcel Pamies
  * @author Axel Uhl
  */
-public class AMPQInputStream extends NamedImpl {
-    private static final Logger logger = Logger.getLogger(AMPQInputStream.class.getName());
+public class RabbitInputStreamProvider extends NamedImpl {
+    private static final Logger logger = Logger.getLogger(RabbitInputStreamProvider.class.getName());
     private static final long serialVersionUID = 1342935135386887494L;
 
     private final PipedInputStream clientReadsFromThis;
     private final PipedOutputStream messagesAreWrittenToThis;
     
-    public AMPQInputStream(Channel channel, String queueName) throws IOException {
+    public RabbitInputStreamProvider(Channel channel, String queueName) throws IOException {
         this(channel, queueName, /* name */ UUID.randomUUID().toString());
     }
     
-    public AMPQInputStream(Channel channel, String queueName, String name) throws IOException {
+    public RabbitInputStreamProvider(Channel channel, String queueName, String name) throws IOException {
         super(name);
         assert name != null;
         messagesAreWrittenToThis = new PipedOutputStream();
@@ -47,8 +48,8 @@ public class AMPQInputStream extends NamedImpl {
                     try {
                         Delivery delivery = messageConsumer.nextDelivery();
                         byte[] bytesFromMessage = delivery.getBody();
-                        if (bytesFromMessage.length != AMPQOutputStream.TERMINATION_COMMAND.length
-                                || !Arrays.equals(bytesFromMessage, AMPQOutputStream.TERMINATION_COMMAND)) {
+                        if (bytesFromMessage.length != RabbitOutputStream.TERMINATION_COMMAND.length
+                                || !Arrays.equals(bytesFromMessage, RabbitOutputStream.TERMINATION_COMMAND)) {
                             messagesAreWrittenToThis.write(bytesFromMessage);
                         } else {
                             // termination sequence received - stop receiving messages
