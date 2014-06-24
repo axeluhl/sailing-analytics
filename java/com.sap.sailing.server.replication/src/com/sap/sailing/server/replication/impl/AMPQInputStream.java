@@ -2,82 +2,73 @@ package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 
 /**
  * Input stream that reads messages from AMP queue and puts them into a byte stream.
  * 
  * @author Simon Marcel Pamies
+ * @author Axel Uhl
  */
-public class AMPQInputStream extends InputStream {
+public class AMPQInputStream extends NamedImpl {
+    private static final Logger logger = Logger.getLogger(AMPQInputStream.class.getName());
+    private static final long serialVersionUID = 1342935135386887494L;
 
-    private static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
-
-    private final QueueingConsumer messageConsumer;
-    private final ArrayList<Byte> streamBuffer;
-    private final Runnable reader;
-
-    /**
-     * Fair lock for making sure that reading from message stream does not interfere with read operation.
-     */
-    private final NamedReentrantReadWriteLock readWriteLock;
-
-    public AMPQInputStream(QueueingConsumer consumer) {
-        super();
-        this.messageConsumer = consumer;
-        this.streamBuffer = new ArrayList<Byte>();
-        this.readWriteLock = new NamedReentrantReadWriteLock("Lock for message reader on " + consumer.getConsumerTag(), /* fair */
-                true);
-        this.reader = new Runnable() {
+    private final PipedInputStream clientReadsFromThis;
+    private final PipedOutputStream messagesAreWrittenToThis;
+    
+    public AMPQInputStream(Channel channel, String queueName) throws IOException {
+        this(channel, queueName, /* name */ UUID.randomUUID().toString());
+    }
+    
+    public AMPQInputStream(Channel channel, String queueName, String name) throws IOException {
+        super(name);
+        assert name != null;
+        messagesAreWrittenToThis = new PipedOutputStream();
+        clientReadsFromThis = new PipedInputStream(messagesAreWrittenToThis);
+        final QueueingConsumer messageConsumer = new QueueingConsumer(channel);
+        channel.basicConsume(queueName, /* auto-ack */ true, messageConsumer);
+        new Thread() {
             @Override
             public void run() {
                 while (true) {
-                    LockUtil.lockForWrite(readWriteLock);
                     try {
                         Delivery delivery = messageConsumer.nextDelivery();
                         byte[] bytesFromMessage = delivery.getBody();
-                        if (bytesFromMessage.length != TERMINATION_COMMAND.length
-                                && Arrays.equals(bytesFromMessage, TERMINATION_COMMAND)) {
-                            for (int i = 0; i < bytesFromMessage.length; i++) {
-                                streamBuffer.add(bytesFromMessage[i]);
-                            }
+                        if (bytesFromMessage.length != AMPQOutputStream.TERMINATION_COMMAND.length
+                                || !Arrays.equals(bytesFromMessage, AMPQOutputStream.TERMINATION_COMMAND)) {
+                            messagesAreWrittenToThis.write(bytesFromMessage);
                         } else {
                             // termination sequence received - stop receiving messages
+                            messagesAreWrittenToThis.close();
                             break;
                         }
                     } catch (ShutdownSignalException | ConsumerCancelledException e) {
+                        logger.log(Level.INFO, "Problem with message queue "+getName(), e);
                         break;
                     } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Reading of next message in stream "+getName()+" Interrupted; continuing", e);
+                    } catch (IOException e) {
                         e.printStackTrace();
-                    } finally {
-                        LockUtil.unlockAfterWrite(readWriteLock);
                     }
                 }
             }
-        };
-        new Thread(reader).run(); // start receiving messages right away
+        }.start();
     }
 
-    @Override
-    public int read() throws IOException {
-        int result = 0;
-        LockUtil.lockForWrite(readWriteLock); // need write lock because we're removing items
-        try {
-            if (!streamBuffer.isEmpty()) {
-                result = streamBuffer.remove(0).intValue();
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(readWriteLock);
-        }
-        return result; // can be 0 when the stream buffer is empty
+    public InputStream getInputStream() {
+        return clientReadsFromThis;
     }
-
 }

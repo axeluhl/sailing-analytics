@@ -8,12 +8,19 @@ import java.util.logging.Logger;
 import com.rabbitmq.client.Channel;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
- * Output stream that can split its contents into messages for RabbitMQ. This stream will create a RabbitMQ message for
- * a number of bytes written to that stream.
+ * Output stream that can split its contents into messages for RabbitMQ. This stream creates a RabbitMQ queue and sends
+ * a RabbitMQ message for a configurable number of bytes written to that stream or after a timeout of
+ * {@link #DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS } and send it to the queue whose name was provided to the
+ * constructor.
+ * <p>
+ * 
+ * Usage: call the constructor with a channel to a RabbitMQ connection. Then, extract the queue name assigned (see
+ * {@link #getQueueName()} and get it to the client. On the client, use {@link AMPQInputStream}, passing the queue name
+ * to the constructor. The client can then obtain an {@link InputStream} from the {@link AMPQInputStream} by calling
+ * {@link AMPQInputStream#getInputStream()} from which the content can be read. The client will receive EOF at the end
+ * of the stream.
  * 
  * @author Simon Marcel Pamies
  * @author Axel Uhl (d043530)
@@ -22,13 +29,13 @@ public class AMPQOutputStream extends OutputStream {
     private static final Logger logger = Logger.getLogger(AMPQOutputStream.class.getName());
 
     // FIXME this seems inherently unsafe as it is not properly escaped if it occurs in the actual stream
-    private static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
+    static final byte TERMINATION_COMMAND[] = new byte[] { 2, 6, 0, 4, 1, 9, 8, 2, 0, 1, 4, 2 };
 
     private static final long DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS = 5000;
     private static final long DURATION_TO_PAUSE_SYNCER_THREAD_AS_MILLIS = 1000;
 
     private final Channel channel;
-    private final String exchangeName;
+    private final String queueName;
 
     private boolean closed;
 
@@ -36,21 +43,12 @@ public class AMPQOutputStream extends OutputStream {
     private int count;
     private final byte streamBuffer[];
 
-    /**
-     * Lock to ensure that the syncer thread and {@link #write(int)} do not interfere with operations on {@link #streamBuffer}, the
-     * {@link #count} index into this buffer and the {@link #timeLastDataHasBeenReceived} time stamp. Both, the {@link #write(int)}
-     * method and the syncer thread will request a write lock because both will perform modifications and therefore need mutually
-     * exclusive access.
-     */
-    private final NamedReentrantReadWriteLock streamBufferCountAndTimestampLock;
-
-    public AMPQOutputStream(int messageSizeInBytes, Channel channel, String exchangeName, boolean syncAfterTimeout) {
+    public AMPQOutputStream(int messageSizeInBytes, Channel channel, boolean syncAfterTimeout) throws IOException {
         super();
-        this.streamBufferCountAndTimestampLock = new NamedReentrantReadWriteLock("Lock for " + exchangeName, /* fair */false);
         this.streamBuffer = new byte[messageSizeInBytes];
         this.count = 0;
         this.channel = channel;
-        this.exchangeName = exchangeName;
+        this.queueName = channel.queueDeclare().getQueue();
         this.closed = false;
 
         if (syncAfterTimeout) {
@@ -58,9 +56,7 @@ public class AMPQOutputStream extends OutputStream {
                 @Override
                 public void run() {
                     while (!closed) {
-                        LockUtil.lockForRead(streamBufferCountAndTimestampLock); // unfair read lock - could not be granted if write
-                                                             // operation in progress
-                        try {
+                        synchronized (AMPQOutputStream.this) {
                             if (timeLastDataHasBeenReceived != null) {
                                 TimePoint now = MillisecondsTimePoint.now();
                                 // FIXME the timing should better be managed by a Timer instance with delays based on last send and wake-up / test time point
@@ -73,22 +69,24 @@ public class AMPQOutputStream extends OutputStream {
                                         break;
                                     }
                                 }
-                                try {
-                                    Thread.sleep(DURATION_TO_PAUSE_SYNCER_THREAD_AS_MILLIS);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
                             }
-                        } finally {
-                            LockUtil.unlockAfterRead(streamBufferCountAndTimestampLock);
+                        }
+                        try {
+                            Thread.sleep(DURATION_TO_PAUSE_SYNCER_THREAD_AS_MILLIS);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
             };
-            new Thread(syncer, "Syncer for " + AMPQOutputStream.class.getName() + " on exchange " + exchangeName).run();
+            new Thread(syncer, "Syncer for " + AMPQOutputStream.class.getName() + " on exchange " + queueName).run();
         }
     }
 
+    public String getQueueName() {
+        return queueName;
+    }
+    
     /**
      * The method writes a byte to the buffer. If this fills up the buffer to its limit, the buffer is {@link #sendBuffer() sent}
      * as a message and cleared again. The {@link #timeLastDataHasBeenReceived} timestamp is updated to the current time.
@@ -123,7 +121,7 @@ public class AMPQOutputStream extends OutputStream {
 
     private void finish() throws IOException {
         sendBuffer();
-        this.channel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, TERMINATION_COMMAND);
+        this.channel.basicPublish(/* exchangeName */ "", /* routingKey */ queueName, /* properties */null, TERMINATION_COMMAND);
     }
 
     /**
@@ -134,7 +132,7 @@ public class AMPQOutputStream extends OutputStream {
         if (this.channel != null && this.channel.isOpen()) {
             byte[] message = new byte[count];
             System.arraycopy(streamBuffer, 0, message, 0, count);
-            this.channel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, message);
+            this.channel.basicPublish(/* exchangeName */ "", /* routingKey */ queueName, /* properties */null, message);
             count = 0;
         } else {
             this.closed = true;
