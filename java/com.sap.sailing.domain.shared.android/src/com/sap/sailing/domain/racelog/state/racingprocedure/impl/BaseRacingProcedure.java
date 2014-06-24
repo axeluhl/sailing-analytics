@@ -177,10 +177,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected void update() {
         boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
-        // always call listeners for changed flag, as this does not only affect recal, but also
-        // changes start procedure, for which some text elements need to be updated
-        // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
-        changedListeners.onActiveFlagsChanged(this);
         
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
@@ -192,6 +188,11 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
         }
+        
+        // always call listeners for changed flag, as this does not only affect recal, but also
+        // changes start procedure, for which some text elements need to be updated
+        // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
+        changedListeners.onActiveFlagsChanged(this);
     }
 
     private void rescheduleIndividualRecallTimeout(TimePoint displayTime) {
