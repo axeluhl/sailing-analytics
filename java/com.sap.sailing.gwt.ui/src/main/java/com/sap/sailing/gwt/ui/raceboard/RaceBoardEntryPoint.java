@@ -65,7 +65,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
-    private boolean toolbarHidden;
+    private boolean toolbarAndLogoAndTitleBarHidden;
 
     @Override
     protected void doOnModuleLoad() {    
@@ -236,14 +236,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
+        final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
-        toolbarHidden = false;
+        toolbarAndLogoAndTitleBarHidden = false;
         if (!raceboardViewConfiguration.isShowNavigationPanel()) {
             p.setWidgetHidden(toolbarPanel, true);
-            toolbarHidden = true;
+            globalNavigationPanel.setVisible(false);
+            toolbarAndLogoAndTitleBarHidden = true;
         }
         Event.addNativePreviewHandler(new NativePreviewHandler() {
             @Override
@@ -255,8 +256,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     Scheduler.get().scheduleDeferred(new Command() {
                         @Override
                         public void execute() {
-                            p.setWidgetHidden(toolbarPanel, !toolbarHidden);
-                            toolbarHidden = !toolbarHidden;
+                            p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
+                            globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
+                            toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
                         }
                     });
 
