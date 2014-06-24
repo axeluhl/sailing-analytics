@@ -45,12 +45,13 @@ public class RabbitOutputStream extends OutputStream {
     private int count;
     private final byte streamBuffer[];
 
-    public RabbitOutputStream(int messageSizeInBytes, Channel channel, boolean syncAfterTimeout) throws IOException {
+    public RabbitOutputStream(int messageSizeInBytes, Channel channel, String queueName, boolean syncAfterTimeout) throws IOException {
         super();
         this.streamBuffer = new byte[messageSizeInBytes];
         this.count = 0;
         this.channel = channel;
-        this.queueName = channel.queueDeclare().getQueue();
+        this.queueName = channel.queueDeclare(queueName, /* durable */ false, /* exclusive */ false, /* autoDelete */ false,
+                /* args */ null).getQueue();
         this.closed = false;
 
         if (syncAfterTimeout) {

@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,7 +127,7 @@ public class RemoteMessageStreamTest {
 
     
     private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
-        outputStream = new RabbitOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
+        outputStream = new RabbitOutputStream(messageSizeInBytes, channel, UUID.randomUUID().toString(), syncAfterTimeout);
         inputStream = new RabbitInputStreamProvider(channel, outputStream.getQueueName());
     }
 }

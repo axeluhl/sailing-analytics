@@ -81,7 +81,8 @@ public class ReplicationServlet extends SailingServerHttpServlet {
         case INITIAL_LOAD:
             Connection rabbitConnection = new ConnectionFactory().newConnection();
             Channel channel = rabbitConnection.createChannel();
-            RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel, /* syncAfterTimeout */ false);
+            RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                    /* queueName */ "initialLoad-for-"+req.getRemoteHost(), /* syncAfterTimeout */ false);
             PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
             br.println(ros.getQueueName().getBytes());
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new CountingOutputStream(
