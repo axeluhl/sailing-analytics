@@ -1398,9 +1398,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
-        return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getCourseSidelines(raceIdentifier, date), getQuickRanks(
-                raceIdentifier, date));
+        final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
+        final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
+        final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
+        final List<QuickRankDTO> quickRanks = getQuickRanks(raceIdentifier, date);
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks);
     }    
 
     /**
