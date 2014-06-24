@@ -73,11 +73,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO getCurrentUser() {
+        System.out.println("Context: " + getThreadLocalRequest().getContextPath());
         User user = securityService.getCurrentUser();
         if (user == null){
             return null;
         }
-        securityService.getUrls(getServletContext());
         return createUserDTOFromUser(user);
     }
 
@@ -200,14 +200,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public void setSetting(String key, String clazz, String setting) {
         if (clazz.equals(Boolean.class.getName())){
-            securityService.setSettings(key, Boolean.parseBoolean(setting));
+            securityService.setSetting(key, Boolean.parseBoolean(setting));
         }
         else if (clazz.equals(Integer.class.getName())){
-            securityService.setSettings(key, Integer.parseInt(setting));
+            securityService.setSetting(key, Integer.parseInt(setting));
         }
         else {
-            securityService.setSettings(key, setting);
+            securityService.setSetting(key, setting);
         }
+        securityService.refreshSecurityConfig(getServletContext());
     }
 
     @Override
@@ -267,6 +268,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         credential.setRedirectUrl(credentialDTO.getRedirectUrl());
         credential.setState(credentialDTO.getState());
         credential.setVerifier(credentialDTO.getVerifier());
+        credential.setOauthToken(credentialDTO.getOauthToken());
         return credential;
     }
     
@@ -278,5 +280,26 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             socialUserDTO.setProperty(s.name(), socialUser.getProperty(s.name()));
         }
         return socialUserDTO;
+    }
+
+    @Override
+    public void addSetting(String key, String clazz, String setting) {
+        try {
+            securityService.addSetting(key, Class.forName(clazz));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (UserManagementException e) {
+            e.printStackTrace();
+        }
+        if (clazz.equals(Boolean.class.getName())){
+            securityService.setSetting(key, Boolean.parseBoolean(setting));
+        }
+        else if (clazz.equals(Integer.class.getName())){
+            securityService.setSetting(key, Integer.parseInt(setting));
+        }
+        else {
+            securityService.setSetting(key, setting);
+        }
+        securityService.refreshSecurityConfig(getServletContext());
     }
 }

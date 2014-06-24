@@ -1,7 +1,6 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.util.SimpleByteSource;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -71,9 +71,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         Set<String> roles = new HashSet<String>();
-        Object rolesO = userDBObject.get(FieldNames.User.ROLES.name());
+        BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
         if (rolesO != null){
-            roles.addAll((Collection<String>) rolesO);
+            for (Object o : rolesO){
+                roles.add((String) o);
+            }
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
@@ -84,9 +86,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {
         Map<AccountType, Account> accounts = new HashMap<>();
-        Set<Entry<String, Object>> entrySet = accountsMap.toMap().entrySet();
-        for (Entry<String, Object> e : entrySet){
-            AccountType type = AccountType.valueOf(e.getKey());
+        Map<?, ?> accountsM = (Map<?, ?>) accountsMap.toMap();
+        for (Entry<?, ?> e : accountsM.entrySet()){
+            AccountType type = AccountType.valueOf((String) e.getKey());
             Account account = createAccountFromDBObject((DBObject) e.getValue(), type);
             accounts.put(type, account);
         }
@@ -110,5 +112,79 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         default:
             return null;
         }
+    }
+
+    @Override
+    public Map<String, Object> loadSettings() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
+
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
+            DBObject settingDBObject = (DBObject) settingsCollection.findOne(query);
+            if (settingDBObject != null) {
+                result = loadSettingMap(settingDBObject);
+            }
+            else {
+                logger.info("No stored settings found!");
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load settings.");
+            logger.log(Level.SEVERE, "loadSettings", e);
+        }
+
+        return result;
+    }
+
+    private Map<String, Object> loadSettingMap(DBObject settingDBObject) {
+        Map<String, Object> result = new HashMap<>();
+        Map<?, ?> map = ((DBObject) settingDBObject.get(FieldNames.Settings.MAP.name())).toMap();
+        for (Entry<?, ?> e : map.entrySet()){
+            String key = (String) e.getKey();
+            Object value = e.getValue();
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, Class<?>> loadSettingTypes() {
+        Map<String, Class<?>> result = new HashMap<String, Class<?>>();
+        DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
+
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
+            DBObject settingTypesDBObject = settingsCollection.findOne(query);
+            if (settingTypesDBObject != null) {
+                result = loadSettingTypesMap(settingTypesDBObject);
+            }
+            else {
+                logger.info("No stored setting types found!");
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load setting types.");
+            logger.log(Level.SEVERE, "loadSettingTypes", e);
+        }
+
+        return result;
+    }
+
+    private Map<String, Class<?>> loadSettingTypesMap(DBObject settingTypesDBObject) {
+        Map<String, Class<?>> result = new HashMap<>();
+        Map<?, ?> map = ((DBObject) settingTypesDBObject.get(FieldNames.Settings.MAP.name())).toMap();
+        for (Entry<?, ?> e : map.entrySet()){
+            String key = (String) e.getKey();
+            Class<?> value = null;
+            try {
+                value = Class.forName((String) e.getValue());
+            } catch (ClassNotFoundException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            result.put(key, value);
+        }
+        return result;
     }
 }

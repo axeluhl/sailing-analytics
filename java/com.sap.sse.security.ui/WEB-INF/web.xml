@@ -4,8 +4,11 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 
-
 	<!-- Apache Shiro -->
+	<context-param>
+		<param-name>shiroEnvironmentClass</param-name>
+		<param-value>com.sap.sse.security.CustomWebEnvironment</param-value>
+	</context-param>
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener
 		</listener-class>
@@ -39,7 +42,7 @@
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet>
 		<display-name>Redirect Servlet</display-name>
 		<servlet-name>RedirectServlet</servlet-name>
@@ -59,6 +62,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>remoteLogging</servlet-name>
-		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging</url-pattern>
+		<url-pattern>/com.sap.sse.security.ui.OAuthLogin/remote_logging
+		</url-pattern>
 	</servlet-mapping>
 </web-app>

@@ -233,6 +233,10 @@ public class OAuthRealm extends AuthorizingRealm {
             throw new RuntimeException("Could not retrieve protected resource: " + e);
         }
         
+        if (socialUser.getProperty("NAME") == null){
+            throw new AuthenticationException("Username cannot be null!");
+        }
+        
         socialUser.setSessionId(sessionId);
         socialUser.setProperty(Social.PROVIDER.name(), authProviderName);
         

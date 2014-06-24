@@ -9,6 +9,13 @@ public class FieldNames {
         ROLES;
     }
     
+    public static enum Settings {
+        NAME,
+        MAP,
+        TYPES,
+        VALUES;
+    }
+    
     public static enum Account {
         NAME;
     }

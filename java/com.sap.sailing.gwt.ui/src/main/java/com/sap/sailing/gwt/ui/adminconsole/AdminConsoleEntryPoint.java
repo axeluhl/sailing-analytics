@@ -232,7 +232,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     }
     
     private boolean isUserInRole(/*TODO [S056866] UserDTO user,*/ UserRoles[] roles) {
-        boolean result = false;
+        boolean result = true;
 //        for(UserRoles enabledRole: roles) {
 //            if (user.roles.contains(enabledRole.name())) {
 //                result = true;

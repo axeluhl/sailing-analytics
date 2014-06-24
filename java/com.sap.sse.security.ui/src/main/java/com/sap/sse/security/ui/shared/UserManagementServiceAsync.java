@@ -38,4 +38,6 @@ public interface UserManagementServiceAsync {
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
 
+    void addSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
+
 }

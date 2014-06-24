@@ -10,10 +10,10 @@ import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
 public class ClientUtils
 {
-    private final static String AUTH_PROVIDER_COOKIE      = "gwtgoogleoauthtest_provider";
-    private final static String AUTH_PROVIDER_NAME_COOKIE = "gwtgoogleoauthtest_provider_name";
-    private final static String USERNAME_COOKIE           = "gwtgoogleoauthtest_user";
-    private final static String REDIRECT_URL_COOKIE       = "gwtgoogleoauthtest_redirect_url";
+    private final static String AUTH_PROVIDER_COOKIE       = "sapsailing_provider";
+    private final static String AUTH_PROVIDER_NAME_COOKIE  = "sapsailing_provider_name";
+    private final static String USERNAME_COOKIE            = "sapsailing_user";
+    private final static String REDIRECT_URL_COOKIE        = "sapsailing_redirect_url";
     
     public final static int DIALOG_X_POSITION = 20;
     public final static int DIALOG_Y_POSITION = 110;
@@ -405,6 +405,12 @@ public class ClientUtils
                 return credential;
             }
             case GOOGLE:
+            {
+                CredentialDTO credential = new CredentialDTO();
+                credential.setAuthProvider(ap);
+                credential.setVerifier(Location.getParameter("oauth_verifier"));
+                return credential;
+            }
             case WINDOWS_LIVE:
             case FOURSQUARE:
             {
@@ -478,6 +484,13 @@ public class ClientUtils
                 ClientUtils.reload();
             }
         });
-    }    
+    }
+    
+    public static int nthOccurrence(String str, char c, int n) {
+        int pos = str.indexOf(c, 0);
+        while (n-- > 0 && pos != -1)
+            pos = str.indexOf(c, pos+1);
+        return pos;
+    }
 }
 

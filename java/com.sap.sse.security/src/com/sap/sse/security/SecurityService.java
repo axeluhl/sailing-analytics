@@ -41,11 +41,12 @@ public interface SecurityService {
     void addRoleForUser(String name, String role) throws UserManagementException;
     void removeRoleFromUser(String name, String role) throws UserManagementException;
     
-    void setSettings(String key, Object setting);
+    void addSetting(String key, Class<?> clazz) throws UserManagementException;
+    void setSetting(String key, Object setting);
     <T> T getSetting(String key, Class<T> clazz);
     
     Map<String, Object> getAllSettings();
     Map<String, Class<?>> getAllSettingTypes();
     
-    Iterable<String> getUrls(ServletContext context);
+    void refreshSecurityConfig(ServletContext context);
 }

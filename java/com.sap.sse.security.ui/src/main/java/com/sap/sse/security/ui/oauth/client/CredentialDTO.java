@@ -1,9 +1,8 @@
 package com.sap.sse.security.ui.oauth.client;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-@SuppressWarnings("serial")
-public class CredentialDTO implements Serializable
+public class CredentialDTO implements IsSerializable
 {
     private String authProviderName;
     private int    authProvider;
@@ -13,6 +12,7 @@ public class CredentialDTO implements Serializable
     private String loginName;
     private String password;
     private String email;
+    private String oauthToken;
     
     public String getAuthProviderName()
     {
@@ -77,6 +77,12 @@ public class CredentialDTO implements Serializable
     public void setEmail(String email)
     {
         this.email=email;
+    }
+    public String getOauthToken() {
+        return oauthToken;
+    }
+    public void setOauthToken(String oauthToken) {
+        this.oauthToken = oauthToken;
     }
     
 }

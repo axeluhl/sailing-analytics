@@ -37,6 +37,9 @@ public class RedirectServlet extends HttpServlet {
         }
         else {
             switch (target){
+            case "login":
+                resp.sendRedirect(resp.encodeRedirectURL(createLoginLink(parameters, req)));
+                break;
             case "oauthlogin":
                 resp.sendRedirect(resp.encodeRedirectURL(createOAuthLink(parameters, req)));
                 break;
@@ -95,7 +98,7 @@ public class RedirectServlet extends HttpServlet {
             link += entry.getKey() + "=" + entry.getValue();
             i++;
         }
-        if (debugParam != null && !debugParam.isEmpty()) {
+        if (debugParam != null && !debugParam.isEmpty() && parameters.get("gwt.codesvr") == null) {
             link += i == 1 ? "?" : "&";
             link += "gwt.codesvr=" + debugParam;
         }

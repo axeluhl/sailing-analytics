@@ -32,6 +32,7 @@ public interface UserManagementService extends RemoteService {
     Map<String, String> getSettingTypes();
     
     void setSetting(String key, String clazz, String setting);
+    void addSetting(String key, String clazz, String setting);
     
     
     //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------

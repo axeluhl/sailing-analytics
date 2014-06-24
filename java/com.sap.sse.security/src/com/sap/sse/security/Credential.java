@@ -13,6 +13,7 @@ public class Credential implements Serializable
     private String loginName;
     private String password;
     private String email;
+    private String oauthToken;
     
     public String getAuthProviderName()
     {
@@ -77,6 +78,12 @@ public class Credential implements Serializable
     public void setEmail(String email)
     {
         this.email=email;
+    }
+    public String getOauthToken() {
+        return oauthToken;
+    }
+    public void setOauthToken(String oauthToken) {
+        this.oauthToken = oauthToken;
     }
     
 }

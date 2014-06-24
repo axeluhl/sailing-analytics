@@ -4,13 +4,15 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.sap.sse.security.ui.oauth.client.component.LoginScreen;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.loginpanel.LoginPanel;
+import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
@@ -22,17 +24,14 @@ public class OAuthLoginEntryPoint implements EntryPoint {
 
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
-    private LoginScreen loginScreen = new LoginScreen();
-    private TextBox status = new TextBox();
+    private OAuthLoginPanel loginScreen = new OAuthLoginPanel(userManagementService);
+    private FlowPanel content = new FlowPanel();
 
     public void onModuleLoad() {
         registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
-        GWT.log("Loading app..");
-        setupLoginScreenHandlers();
-        FlowPanel fp = new FlowPanel();
-        fp.add(loginScreen);
-        fp.add(status);
-        RootPanel.get().add(fp);
+        
+        RootPanel.get().add(content);
+        setContentMessage("Loading...");
         try {
             handleRedirect();
         } catch (Exception e) {
@@ -45,26 +44,27 @@ public class OAuthLoginEntryPoint implements EntryPoint {
     private void handleRedirect() throws Exception {
         if (ClientUtils.redirected()) {
             if (!ClientUtils.alreadyLoggedIn()) {
-                status.setText("Trying to verify social user...");
+                setContentMessage("Trying to verify user...");
                 verifySocialUser();
             }
             else {
-                status.setText("Fetching user information...");
+                setContentMessage("Fetching user information...");
                 userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Could not get user information!");
-                        status.setText("Could not get user information!" + caught.getMessage());
+                        setContent(loginScreen);
                     }
 
                     @Override
                     public void onSuccess(UserDTO result) {
                         if (result == null){
-                            status.setText("Not logged in!");
+                            setContent(loginScreen);
                         }
                         else {
-                            status.setText("Logged in as:" + result.getName());
+                            LoginPanel.fireUserUpdateEvent();
+                            setLoggedInContent(result);
+                            closeWindow();
                         }
                     }
                 });
@@ -74,17 +74,18 @@ public class OAuthLoginEntryPoint implements EntryPoint {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Could not get user information!");
-                    status.setText("Could not get user information!" + caught.getMessage());
+                    setContent(loginScreen);
                 }
 
                 @Override
                 public void onSuccess(UserDTO result) {
                     if (result == null){
-                        status.setText("Not logged in!");
+                        setContent(loginScreen);
                     }
                     else {
-                        status.setText("Logged in as:" + result.getName());
+                        LoginPanel.fireUserUpdateEvent();
+                        setLoggedInContent(result);
+                        closeWindow();
                     }
                 }
             });
@@ -99,179 +100,27 @@ public class OAuthLoginEntryPoint implements EntryPoint {
 
             @Override
             public void onFailure(Throwable caught) {
-                status.setText("Could not log in! Reason:" + caught.getMessage());
+                setContent(loginScreen);
             }
 
             @Override
             public void onSuccess(UserDTO result) {
                 if (result == null){
-                    status.setText("Could not log in!");
+                    setContent(loginScreen);
                     return;
                 }
                 String name = result.getName();
 
                 log(authProviderName + " user '" + name + "' is verified!\n");
                 ClientUtils.saveUsername(name);
-                status.setText("Logged in as:" + name);
+                setLoggedInContent(result);
+                LoginPanel.fireUserUpdateEvent();
+                closeWindow();
             }
         });
     }
 
-    private void setupLoginScreenHandlers() {
-
-        loginScreen.getFacebookImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Facebook");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getGoogleImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Google");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getTwitterImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Twitter");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getYahooImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Yahoo!");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getLinkedinImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Linkedin");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getInstagramImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Instagram");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getVimeoImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Vimeo");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getGithubImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("github");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getFlickrImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("flickr");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getLiveImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("Windows Live");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getTumblrImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("tumblr.");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getFoursquareImage().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final int authProvider = ClientUtils.getAuthProvider("foursquare");
-                getAuthorizationUrl(authProvider);
-            }
-        });
-
-        loginScreen.getBtnLogin().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-
-                // clear all cookes first
-                ClientUtils.clearCookies();
-                // save the auth provider to cookie
-                ClientUtils.saveAuthProvider(ClientUtils.DEFAULT);
-
-                try {
-                    verifySocialUser();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-    }
-
-    private void getAuthorizationUrl(final int authProvider) {
-//        String authProviderName = ClientUtils.getAuthProviderName(authProvider);
-        final String callbackUrl = ClientUtils.getCallbackUrl();
-        GWT.log("Getting authorization url");
-
-        final CredentialDTO credential = new CredentialDTO();
-        credential.setRedirectUrl(callbackUrl);
-        credential.setAuthProvider(authProvider);
-        
-        userManagementService.getAuthorizationUrl(credential, new AsyncCallback<String>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                ClientUtils.handleException(caught);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                String authorizationUrl = result;
-                GWT.log("Authorization url: " + authorizationUrl);
-
-                // clear all cookes first
-                ClientUtils.clearCookies();
-
-                // save the auth provider to cookie
-                ClientUtils.saveAuthProvider(authProvider);
-
-                // save the redirect url to a cookie as well
-                // we need to redirect there after logout
-                ClientUtils.saveRediretUrl(callbackUrl);
-
-                // Window.alert("Redirecting to: " + authorizationUrl);
-                ClientUtils.redirect(authorizationUrl);
-            }
-        });
-    }
+    
 
     public void log(String msg) {
         GWT.log(msg);
@@ -283,4 +132,30 @@ public class OAuthLoginEntryPoint implements EntryPoint {
         
         serviceToRegister.setServiceEntryPoint(baseURL + servicePath);
     }
+    
+    private void setContentMessage(String msg){
+        content.clear();
+        content.add(new Label(msg));
+    }
+    
+    private void setContent(Widget w){
+        content.clear();
+        content.add(w);
+    }
+    
+    private void setLoggedInContent(UserDTO user){
+        content.clear();
+        content.add(new Label("Logged in as " + user.getName()));
+        content.add(new Button("Close", new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                closeWindow();
+            }
+        }));
+    }
+    
+    public static native void closeWindow()/*-{
+        $doc.windowCloser();
+    }-*/;
 }

@@ -27,7 +27,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
-import org.apache.shiro.web.env.WebEnvironment;
+import org.apache.shiro.web.env.IniWebEnvironment;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
@@ -67,6 +67,11 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     
     private SecurityManager securityManager;
     private UserStore store;
+    private static Ini shiroConfiguration;
+    static {
+        shiroConfiguration = new Ini();
+        shiroConfiguration.loadFromPath("classpath:shiro.ini");
+    }
     
     public SecurityServiceImpl() {
         
@@ -93,9 +98,6 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
             }
         }
         
-        
-        Ini ini = new Ini();
-        ini.loadFromPath("classpath:shiro.ini");
         Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
         for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
             String[] classifier = e.getKey().split("_");
@@ -106,17 +108,17 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                     n += "_" + classifier[i];
                 }
                 String value = store.getSetting(n, String.class);
-                if (ini.getSection("urls") == null){
-                    ini.addSection("urls");
-                }
-                ini.getSection("urls").put(key, value);
+//                if (shiroConfiguration.getSection("urls") == null){
+//                    shiroConfiguration.addSection("urls");
+//                }
+                shiroConfiguration.getSection("urls").put(key, value);
             }
         }
-        for (Entry<String, String> e : ini.getSection("urls").entrySet()){
+        for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()){
             System.out.println(e.getKey() + ": " + e.getValue());
         }
 //        ini.getSection("urls").put("", "");
-        Factory<SecurityManager> factory = new IniSecurityManagerFactory(ini);
+        Factory<SecurityManager> factory = new IniSecurityManagerFactory(shiroConfiguration);
 //        LifecycleUtils.init(ini);
         
         
@@ -206,7 +208,9 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
 
     @Override
-    public void setSettings(String key, Object setting) {
+    public void setSetting(String key, Object setting) {
+        String[] split = key.split("_");
+        if (split[0].equals("URLS"))
         store.setSetting(key, setting);
     }
 
@@ -240,7 +244,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
         if (!subject.isAuthenticated()) {
             try {
                 subject.login(otoken);
-                logger.info("User [" + subject.getPrincipal().toString() + "] logged in successfully.");
+                logger.info("User [" + SessionUtils.loadUsername() + "] logged in successfully.");
             } catch (UnknownAccountException uae) {
                 logger.info("There is no user with username of " + subject.getPrincipal());
                 throw new UserManagementException("Invalid credentials!");
@@ -435,24 +439,70 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     }
 
     @Override
-    public Iterable<String> getUrls(ServletContext context) {
-        WebEnvironment env = WebUtils.getRequiredWebEnvironment(context);
+    public void addSetting(String key, Class<?> clazz) throws UserManagementException {
+        if (!isValidSettingsKey(key)){
+            throw new UserManagementException("Invalid key!");
+        }
+        store.addSetting(key, clazz);
+    }
+    
+    public static boolean isValidSettingsKey(String key){
+        char[] characters = key.toCharArray();
+        for (char c : characters){
+            if (!Character.isLetter(c) && c != '_'){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void refreshSecurityConfig(ServletContext context) {
+        logger.info("Refreshing security configuration!");
+        IniWebEnvironment env = (IniWebEnvironment) WebUtils.getRequiredWebEnvironment(context);
+        System.out.println("Env: " + env);
         FilterChainResolver resolver = env.getFilterChainResolver();
+        System.out.println("Resolver: " + resolver);
         if (resolver instanceof PathMatchingFilterChainResolver){
             PathMatchingFilterChainResolver pmfcr = (PathMatchingFilterChainResolver) resolver;
             FilterChainManager filterChainManager = pmfcr.getFilterChainManager();
-            System.out.println("Filters:");
-            for (Entry<String, Filter> e : filterChainManager.getFilters().entrySet()){
-                System.out.println(e.getKey() + ": " + e.getValue().toString());
+            System.out.println(filterChainManager);
+            
+            
+            
+            Set<String> chainNames = filterChainManager.getChainNames();
+            
+            System.out.println("Chains:");
+            for (String s: chainNames){
+                System.out.println(s + ": " + Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
             }
-            System.out.println("Chains");
-            filterChainManager.createChain("/Register.html", "authc");
-            for (String s : filterChainManager.getChainNames()){
-                System.out.println(s);
-                System.out.println(Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
-                
-            }
+
+//            Map<String, Class<?>> allSettingTypes = store.getAllSettingTypes();
+//            for (Entry<String, Class<?>> e : allSettingTypes.entrySet()){
+//                String[] classifier = e.getKey().split("_");
+//                if (classifier[0].equals("URLS") && !classifier[1].equals("AUTH")){
+//                    String url = store.getSetting(e.getKey(), String.class);
+//                    String n = classifier[0] + "_AUTH";
+//                    for (int i = 1; i < classifier.length; i++){
+//                        n += "_" + classifier[i];
+//                    }
+//                    String filter = store.getSetting(n, String.class);
+//                    if (url != null && filter != null){
+//                        if (!chainNames.contains(url)){
+//                            filterChainManager.createChain(url, filter);
+//                            logger.info("Created filter " + filter + " for " + url);
+//                        }
+//                        else {
+//                            filterChainManager.addToChain(url, filter);
+//                            logger.info("Updated filter " + filter + " for " + url);
+//                        }
+//                    }
+//                }
+//            }
         }
-        return null;
+    }
+
+    public static Ini getShiroConfiguration() {
+        return shiroConfiguration;
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sse.security.userstore.mongodb;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -18,6 +19,8 @@ import com.sap.sse.security.userstore.shared.UserStore;
 public class UserStoreImpl implements UserStore {
     private static final Logger logger = Logger.getLogger(UserStoreImpl.class.getName());
     
+    private String name = "MongoDB user store";
+    
     private ConcurrentHashMap<String, User> users;
     private ConcurrentHashMap<String, Object> settings;
     private ConcurrentHashMap<String, Class<?>> settingTypes;
@@ -26,35 +29,51 @@ public class UserStoreImpl implements UserStore {
         users = new ConcurrentHashMap<>();
         settings = new ConcurrentHashMap<>();
         settingTypes = new ConcurrentHashMap<String, Class<?>>();
-        initDefaultSettings();
-        initSocialSettingsIfEmpty();
-        addSetting("email_required", Boolean.class);
+        for (Entry<String, Class<?>> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettingTypes().entrySet()){
+            settingTypes.put(e.getKey(), e.getValue());
+        }
+        for (Entry<String, Object> e : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSettings().entrySet()){
+            settings.put(e.getKey(), e.getValue());
+        }
+        boolean changed = false;
+        changed = changed | initDefaultSettingsIfEmpty();
+        changed = changed | initSocialSettingsIfEmpty();
+        if (changed){
+            PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettingTypes(settingTypes);
+            PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettings(settings);
+        }
         for (User u : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadAllUsers()){
             users.put(u.getName(), u);
         }
     }
     
-    private void initSocialSettingsIfEmpty() {
+    private boolean initSocialSettingsIfEmpty() {
+        boolean changed = false;
         for (SocialSettingsKeys ssk : SocialSettingsKeys.values()){
             if (settingTypes.get(ssk.name()) == null || settings.get(ssk.name()) == null){
                 addSetting(ssk.name(), String.class);
                 setSetting(ssk.name(), ssk.getValue());
+                changed = true;
             }
         }
+        return changed;
     }
     
-    private void initDefaultSettings(){
+    private boolean initDefaultSettingsIfEmpty(){
+        boolean changed = false;
         for (DefaultSettings ds : DefaultSettings.values()){
             if (settingTypes.get(ds.name()) == null || settings.get(ds.name()) == null){
                 addSetting(ds.name(), String.class);
                 setSetting(ds.name(), ds.getValue());
+                changed = true;
             }
         }
+        return changed;
     }
 
     @Override
     public String getName() {
-        return "MongoDB user store";
+        return name;
     }
 
     @Override
@@ -130,6 +149,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void addSetting(String key, Class<?> type) {
         settingTypes.put(key, type);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettingTypes(settingTypes);
     }
 
     @Override
@@ -139,6 +159,7 @@ public class UserStoreImpl implements UserStore {
             return;
         }
         settings.put(key, setting);
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSettings(settings);
     }
 
     @Override

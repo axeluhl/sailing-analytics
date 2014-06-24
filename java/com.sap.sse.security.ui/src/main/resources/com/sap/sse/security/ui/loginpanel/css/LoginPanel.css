@@ -53,7 +53,7 @@
 }
 
 .loginPanel-expanded {
-	height: 170px;
+	height: auto;
 }
 
 .loginPanel-infoPanel {

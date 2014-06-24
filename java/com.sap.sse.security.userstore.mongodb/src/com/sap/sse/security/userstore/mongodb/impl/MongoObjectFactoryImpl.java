@@ -75,4 +75,44 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return dbAccount;
     }
+
+    @Override
+    public void storeSettings(Map<String, Object> settings) {
+        DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        settingCollection.ensureIndex(FieldNames.Settings.NAME.name());
+        DBObject dbSettings = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
+        dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
+        dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
+
+        settingCollection.update(query, dbSettings, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void storeSettingTypes(Map<String, Class<?>> settingTypes) {
+        DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        settingCollection.ensureIndex(FieldNames.Settings.NAME.name());
+        DBObject dbSettingTypes = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
+        dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
+        dbSettingTypes.put(FieldNames.Settings.MAP.name(), createSettingTypesMapObject(settingTypes));
+
+        settingCollection.update(query, dbSettingTypes, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+    }
+    
+    private DBObject createSettingsMapObject(Map<String, Object> settings){
+        DBObject dbSettings = new BasicDBObject();
+        for (Entry<String, Object> e : settings.entrySet()){
+            dbSettings.put(e.getKey(), e.getValue());
+        }
+        return dbSettings;
+    }
+    
+    private DBObject createSettingTypesMapObject(Map<String, Class<?>> settingTypes){
+        DBObject dbSettingTypes = new BasicDBObject();
+        for (Entry<String, Class<?>> e : settingTypes.entrySet()){
+            dbSettingTypes.put(e.getKey(), e.getValue().getName());
+        }
+        return dbSettingTypes;
+    }
 }

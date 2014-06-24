@@ -26,20 +26,27 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.oauth.client.component.OAuthLoginPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UserManagementService;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 
-public class LoginPanel extends FlowPanel {
+public class LoginPanel extends FlowPanel implements UserStatusEventHandler {
 
-    private UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+    private static final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
     
-    private static List<UserStatusEventHandler> handlers = new ArrayList<>();
+    static {
+        registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
+    }
+    
+    private static final List<UserStatusEventHandler> handlers = new ArrayList<>();
 
     private FormPanel loginPanel;
     private FlowPanel userPanel;
     private SimplePanel infoPanel;
+    
+    private static int counter = 0;
 
     private boolean expanded = false;
     private static UserDTO currentUser = null;
@@ -52,10 +59,11 @@ public class LoginPanel extends FlowPanel {
     private PasswordTextBox password;
 
     private FlowPanel wrapperPanel;
+    
+    private final int id;
 
     public LoginPanel() {
-        registerASyncService((ServiceDefTarget) userManagementService, "service/usermanagement");
-        
+        id = counter++;
         StylesheetResources.INSTANCE.css().ensureInjected();
         
         wrapperPanel = new FlowPanel();
@@ -87,6 +95,9 @@ public class LoginPanel extends FlowPanel {
         infoPanel.setWidget(loginPanel);
         wrapperPanel.add(infoPanel);
         add(wrapperPanel);
+        
+        addUserStatusEventHandler(this);
+        registerStorageListener();
         updateUser();
     }
 
@@ -106,6 +117,7 @@ public class LoginPanel extends FlowPanel {
                     @Override
                     public void onSuccess(SuccessInfo result) {
                         if (result.isSuccessful()) {
+                            fireUserUpdateEvent();
                             updateUser();
                         } else {
                             Window.alert(result.getMessage());
@@ -129,6 +141,8 @@ public class LoginPanel extends FlowPanel {
         formContent.add(submit);
         Anchor register = new Anchor("Register", EntryPointLinkFactory.createRegistrationLink(new HashMap<String, String>()));
         formContent.add(register);
+        
+        formContent.add(new OAuthLoginPanel(userManagementService));
 
         loginPanel.setWidget(formContent);
     }
@@ -157,6 +171,7 @@ public class LoginPanel extends FlowPanel {
                         public void onSuccess(SuccessInfo result) {
                             currentUser = null;
                             updateStatus();
+                            fireUserUpdateEvent();
                         }
                     });
                 }
@@ -164,13 +179,21 @@ public class LoginPanel extends FlowPanel {
         }
     }
 
-    private void updateUser() {
+    private static void updateUser() {
         userManagementService.getCurrentUser(new AsyncCallback<UserDTO>() {
 
             @Override
             public void onSuccess(UserDTO result) {
+                if (result != null && currentUser != null && result.getName().equals(currentUser.getName())){
+                    return;
+                }
                 currentUser = result;
-                updateStatus();
+                System.out.println("User changed to " + (result == null ? "No User" : result.getName()) + "handlers: " + handlers.size());
+                for (int i = 0; i < handlers.size(); i++){
+                    System.out.print(handlers.get(i) + ", ");
+                    handlers.get(i).onUserStatusChange(currentUser);
+                }
+                System.out.println();
             }
 
             @Override
@@ -207,9 +230,6 @@ public class LoginPanel extends FlowPanel {
         expanded = false;
         wrapperPanel.addStyleName(StylesheetResources.INSTANCE.css().loginPanelCollapsed());
         wrapperPanel.removeStyleName(StylesheetResources.INSTANCE.css().loginPanelExpanded());
-        for (UserStatusEventHandler handler : handlers){
-            handler.onUserStatusChange(currentUser);
-        }
     }
 
     private void toggleLoginPanel() {
@@ -224,7 +244,7 @@ public class LoginPanel extends FlowPanel {
         }
     }
     
-    protected void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
+    protected static void registerASyncService(ServiceDefTarget serviceToRegister, String servicePath) {
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.indexOf('/', moduleBaseURL.indexOf(':')+3)+1);
         serviceToRegister.setServiceEntryPoint(baseURL + "security/ui/" + servicePath);
@@ -240,5 +260,53 @@ public class LoginPanel extends FlowPanel {
 
     public static void removeUserStatusEventHandler(UserStatusEventHandler handler) {
         handlers.remove(handler);
+    }
+
+    @Override
+    public void onUserStatusChange(UserDTO user) {
+        updateStatus();
+    }
+    
+    public static native void registerStorageListener()/*-{
+        window.addEventListener("storage", @com.sap.sse.security.ui.loginpanel.LoginPanel::updateUser(),false);
+    }-*/;
+    
+    /** Used to synchronize changes in the user status between all browser tabs/windows.
+     * 
+     */
+    public static native void fireUserUpdateEvent()/*-{
+        localStorage.setItem("update","true");
+        localStorage.setItem("update","false");
+    }-*/;
+    
+    public static native String getUpdateProperty()/*-{
+        return localStorage.getItem("update");
+    }-*/;
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LoginPanel other = (LoginPanel) obj;
+        if (id != other.id)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "LoginPanel [id=" + id + "]";
     }
 }
