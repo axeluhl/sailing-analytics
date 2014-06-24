@@ -566,6 +566,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
+                jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asMillis());
 
                 JSONArray jsonLegs = new JSONArray();
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
