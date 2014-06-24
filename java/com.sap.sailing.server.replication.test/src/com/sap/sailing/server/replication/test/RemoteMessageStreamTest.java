@@ -24,6 +24,7 @@ import com.sap.sailing.server.replication.impl.AMPQOutputStream;
 public class RemoteMessageStreamTest {
     private Channel channel;
     private AMPQOutputStream outputStream;
+    private AMPQInputStream inputStream;
     
     @Before
     public void setUp() throws IOException {
@@ -34,8 +35,7 @@ public class RemoteMessageStreamTest {
     
     @Test
     public void testBasicConnectivityInOnePacket() throws IOException {
-        outputStream = new AMPQOutputStream(/* messageSizeInBytes */ 8192, channel, /* syncAfterTimeout */ false);
-        AMPQInputStream inputStream = new AMPQInputStream(channel, outputStream.getQueueName());
+        setupStreams(/* messageSizeInBytes */ 8192, /* syncAfterTimeout */ false);
         final String message = "Hello World!";
         outputStream.write(message.getBytes());
         outputStream.close();
@@ -46,5 +46,25 @@ public class RemoteMessageStreamTest {
         System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
         String messageAsString = new String(trimmedMessage);
         assertEquals(message, messageAsString);
+    }
+
+    @Test
+    public void testBasicConnectivityInMultiplePackets() throws IOException {
+        setupStreams(/* messageSizeInBytes */ 5, /* syncAfterTimeout */ false);
+        final String message = "Hello World!";
+        outputStream.write(message.getBytes());
+        outputStream.close();
+        byte[] buf = new byte[100];
+        int numberOfReadBytes = inputStream.getInputStream().read(buf);
+        assertEquals(message.getBytes().length, numberOfReadBytes);
+        byte[] trimmedMessage = new byte[numberOfReadBytes];
+        System.arraycopy(buf, 0, trimmedMessage, 0, numberOfReadBytes);
+        String messageAsString = new String(trimmedMessage);
+        assertEquals(message, messageAsString);
+    }
+
+    private void setupStreams(int messageSizeInBytes, boolean syncAfterTimeout) throws IOException {
+        outputStream = new AMPQOutputStream(messageSizeInBytes, channel, syncAfterTimeout);
+        inputStream = new AMPQInputStream(channel, outputStream.getQueueName());
     }
 }

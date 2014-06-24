@@ -93,7 +93,7 @@ public class AMPQOutputStream extends OutputStream {
      */
     @Override
     public synchronized void write(int b) throws IOException {
-        assert count < streamBuffer.length - 1;
+        assert count < streamBuffer.length;
         if (this.closed) {
             throw new IOException("This stream has been closed by an earlier operation.");
         }
@@ -129,14 +129,16 @@ public class AMPQOutputStream extends OutputStream {
      * The method is synchronized as it needs exclusive and atomic access to {@link #count} and {@link #streamBuffer}.
      */
     private synchronized void sendBuffer() throws IOException {
-        if (this.channel != null && this.channel.isOpen()) {
-            byte[] message = new byte[count];
-            System.arraycopy(streamBuffer, 0, message, 0, count);
-            this.channel.basicPublish(/* exchangeName */ "", /* routingKey */ queueName, /* properties */null, message);
-            count = 0;
-        } else {
-            this.closed = true;
-            throw new IOException("AMPQ Channel seems to be closed!");
+        if (count > 0) {
+            if (this.channel != null && this.channel.isOpen()) {
+                byte[] message = new byte[count];
+                System.arraycopy(streamBuffer, 0, message, 0, count);
+                this.channel.basicPublish(/* exchangeName */"", /* routingKey */queueName, /* properties */null, message);
+                count = 0;
+            } else {
+                this.closed = true;
+                throw new IOException("AMPQ Channel seems to be closed!");
+            }
         }
     }
 }
