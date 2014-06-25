@@ -67,6 +67,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -1428,7 +1429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate)
             throws NoWindException {
-        Map<Pair<TrackedLegOfCompetitor, TimePoint>, LegType> legTypeCache = new HashMap<>();
+        Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
         Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
@@ -1483,11 +1484,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
                             LegType legType;
-                            if (trackedLegOfCompetitor != null) {
+                            if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getLeg() != null) {
                                 TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(fix.getTimePoint(), /* resolutionInMilliseconds */
                                         60000);
-                                Pair<TrackedLegOfCompetitor, TimePoint> cacheKey = new Pair<TrackedLegOfCompetitor, TimePoint>(
-                                        trackedLegOfCompetitor, quantifiedTimePoint);
+                                Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(
+                                        trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
                                 legType = legTypeCache.get(cacheKey);
                                 if (legType == null) {
                                     legType = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
@@ -1510,12 +1511,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
                                     Tack tack2 = wind2 == null ? null : trackedRace.getTack(competitor, toTimePointExcluding, wind2);
                                     LegType legType2;
-                                    if (trackedLegOfCompetitor != null) {
+                                    if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getLeg() != null) {
                                         TimePoint quantifiedTimePoint = quantifyTimePointWithResolution(
                                                 fix.getTimePoint(), /* resolutionInMilliseconds */
                                                 60000);
-                                        Pair<TrackedLegOfCompetitor, TimePoint> cacheKey = new Pair<TrackedLegOfCompetitor, TimePoint>(
-                                                trackedLegOfCompetitor, quantifiedTimePoint);
+                                        Pair<Leg, TimePoint> cacheKey = new Pair<Leg, TimePoint>(
+                                                trackedLegOfCompetitor.getLeg(), quantifiedTimePoint);
                                         legType2 = legTypeCache.get(cacheKey);
                                         if (legType2 == null) {
                                             legType2 = trackedRace.getTrackedLeg(trackedLegOfCompetitor.getLeg())
