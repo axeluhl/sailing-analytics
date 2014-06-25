@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +61,22 @@ public class Replicator implements Runnable {
     
     private boolean stopped = false;
     
+    /**
+     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+     */
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+
+    /**
+     * Used for the parallel execution of operations that don't
+     * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
+     */
+    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+
     /**
      * @param master
      *            descriptor of the master server from which this replicator receives messages
@@ -193,8 +213,18 @@ public class Replicator implements Runnable {
         }
     }
 
-    private synchronized void apply(RacingEventServiceOperation<?> operation) {
-        racingEventServiceTracker.getRacingEventService().apply(operation);
+    private synchronized void apply(final RacingEventServiceOperation<?> operation) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                racingEventServiceTracker.getRacingEventService().apply(operation);
+            }
+        };
+        if (operation.requiresSynchronousExecution()) {
+            runnable.run();
+        } else {
+            executor.execute(runnable);
+        }
     }
     
     private synchronized void queue(RacingEventServiceOperation<?> operation) {

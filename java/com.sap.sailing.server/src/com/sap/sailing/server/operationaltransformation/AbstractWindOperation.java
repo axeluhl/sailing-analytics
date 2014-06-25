@@ -15,6 +15,15 @@ public abstract class AbstractWindOperation extends AbstractRaceOperation<Void> 
         this.wind = wind;
     }
 
+    /**
+     * Operations of this type can be run in parallel to other operations; subsequent operations do not have to wait
+     * for this operation's completion.
+     */
+    @Override
+    public boolean requiresSynchronousExecution() {
+        return false;
+    }
+
     protected WindSource getWindSource() {
         return windSource;
     }
