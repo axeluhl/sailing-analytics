@@ -117,8 +117,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void setFixedPassing(Competitor c, Waypoint w, TimePoint t) {
-        Candidate fixedCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, 1, w);
+    public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
+        Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, null);
         NavigableSet<Candidate> fixed = fixedPassings.get(c);
         if (!fixed.add(fixedCan)) {
             Candidate old = fixed.ceiling(fixedCan);
@@ -131,10 +131,10 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void removeFixedPassing(Competitor c, Waypoint w) {
+    public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
         Candidate toRemove = null;
         for (Candidate can : fixedPassings.get(c)) {
-            if (can.getWaypoint() == w) {
+            if (can.getOneBasedIndexOfWaypoint()-1 == zeroBasedIndexOfWaypoint) {
                 toRemove = can;
                 break;
             }

@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.SuppressedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -27,17 +29,18 @@ import com.sap.sailing.domain.tracking.Wind;
  * This includes for example the {@link RaceLogRaceStatus} indicating the current race's start.
  */
 public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
-    
+
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
     private DynamicTrackedRace trackedRace;
-    
+
     private final WindSource raceCommitteeWindSource;
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
     private FixedMarkPassingsFinder fixedPassingsFinder;
     private SuppressedMarkPassingsFinder suppressedPassingsFinder;
+    private MarkPassingUpdateListener markPassingUpdateListener;
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
@@ -54,9 +57,15 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         analyze();
     }
 
+    public void listenForMarkPassingEvents(MarkPassingUpdateListener listener) {
+        markPassingUpdateListener = listener;
+    }
+
     /**
      * Retrieves all wind fixes available in the race log and adds them to the wind track for RACECOMMITTEEE
-     * @param raceLog The race log from which the available wind fixes shall be retrieved.
+     * 
+     * @param raceLog
+     *            The race log from which the available wind fixes shall be retrieved.
      */
     private void initializeWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
@@ -81,7 +90,9 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     /**
      * Removes all wind fixes that are in the RaceLog from the RACECOMMITTEE wind source
-     * @param raceLog the RaceLog of which the wind fixes shall be removed
+     * 
+     * @param raceLog
+     *            the RaceLog of which the wind fixes shall be removed
      */
     private void removeAllWindFixesFromWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
@@ -106,27 +117,29 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             // ... onCourseDesignChangedByRaceCommittee() might be called more than once.
             trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
         } else {
-            logger.info("Could not find any course design update on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
+            logger.info("Could not find any course design update on race log of " + trackedRace.getRace().getName()
+                    + "! Not sending out any events.");
         }
     }
-    
+
     private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
         /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
-        
+
         TimePoint startTime = startTimeFinder.analyze();
         if (startTime == null) {
             startTime = startTimeProvidedByEvent;
         }
-        
+
         if (startTime != null) {
             /* invoke listeners with received start time, this will also trigger tractrac update */
             trackedRace.onStartTimeChangedByRaceCommittee(startTime);
         } else {
-            logger.info("Could not find any valid start time on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
+            logger.info("Could not find any valid start time on race log of " + trackedRace.getRace().getName()
+                    + "! Not sending out any events.");
         }
     }
-    
+
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
@@ -150,4 +163,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
 
+    @Override
+    public void visit(FixedMarkPassingEvent event) {
+        if (markPassingUpdateListener != null) {
+            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
+                    event.getTimePointOfFixedPassing());
+
+        }
+    }
 }

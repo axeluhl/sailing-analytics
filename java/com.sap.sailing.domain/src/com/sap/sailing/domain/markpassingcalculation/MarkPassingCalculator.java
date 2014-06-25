@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -28,6 +29,8 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
@@ -93,8 +96,8 @@ public class MarkPassingCalculator {
             List<Waypoint> addedWaypoints = new ArrayList<>();
             List<Waypoint> removedWaypoints = new ArrayList<>();
             Integer smallestChangedWaypointIndex = null;
-            List<MarkPassing> fixedMarkPassings = new ArrayList<>();
-            List<MarkPassing> removedMarkPassings = new ArrayList<>();
+            List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings = new ArrayList<>();
+            List<Pair<Competitor, Integer>> removedMarkPassings = new ArrayList<>();
             while (!finished) {
                 List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                 try {
@@ -113,7 +116,7 @@ public class MarkPassingCalculator {
                     }
                 }
                 if (!suspended) {
-                    // TODO Interplay between changing waypoints and setting fixed passes?
+                    // TODO Interplay between changing waypoints and setting fixed passes and course changes...
                     if (smallestChangedWaypointIndex != null) {
                         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
                                 .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
@@ -132,12 +135,13 @@ public class MarkPassingCalculator {
             }
         }
 
-        private void updateFixedMarkPassings(List<MarkPassing> fixedMarkPassings, List<MarkPassing> removedMarkPassings) {
-            for (MarkPassing m : removedMarkPassings) {
-                chooser.removeFixedPassing(m.getCompetitor(), m.getWaypoint());
+        private void updateFixedMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                List<Pair<Competitor, Integer>> removedMarkPassings) {
+            for (Pair<Competitor, Integer> pair : removedMarkPassings) {
+                chooser.removeFixedPassing(pair.getA(), pair.getB());
             }
-            for (MarkPassing m : fixedMarkPassings) {
-                chooser.setFixedPassing(m.getCompetitor(), m.getWaypoint(), m.getTimePoint());
+            for (Triple<Competitor, Integer, TimePoint> triple : fixedMarkPassings) {
+                chooser.setFixedPassing(triple.getA(), triple.getB(), triple.getC());
             }
         }
 
@@ -247,8 +251,8 @@ public class MarkPassingCalculator {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex, List<MarkPassing> fixMarkPassing,
-                    List<MarkPassing> removeFixedMarkPassing) {
+                    Integer smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                    List<Pair<Competitor, Integer>> removedMarkPassings) {
             }
         });
     }
@@ -266,11 +270,11 @@ public class MarkPassingCalculator {
         }
     }
 
-    public void addFixedPassing(MarkPassing m) {
-        listener.addFixedPassing(m);
+    public void addFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
+        listener.addFixedPassing(c, zeroBasedIndexOfWaypoint, t);
     }
 
-    public void removeFixedPassing(MarkPassing m) {
-        listener.removeFixedPassing(m);
+    public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
+        listener.removeFixedPassing(c, zeroBasedIndexOfWaypoint);
     }
 }

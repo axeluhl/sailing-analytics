@@ -6,8 +6,10 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * Is queued between {@link MarkPassingCalculator} and {@link MarkPassingUpdateListener}.
@@ -20,6 +22,6 @@ public interface StorePositionUpdateStrategy {
      */
     void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
             List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-            Integer smallestChangedWaypointIndex, List<MarkPassing> fixMarkPassing,
-            List<MarkPassing> removeFixedMarkPassing);
+            Integer smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+            List<Pair<Competitor, Integer>> removedMarkPassings);
 }

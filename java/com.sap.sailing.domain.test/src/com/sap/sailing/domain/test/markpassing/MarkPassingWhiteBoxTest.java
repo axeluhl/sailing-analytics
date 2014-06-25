@@ -207,7 +207,6 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
     }
 
     public void fixAndUnfixMarkPassing() {
-        // TODO this is before the latest method of updating waypoints therefore probably wrong
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001027, -0.000001), new MillisecondsTimePoint(
                 11000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(340)));
         GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000396, -0.000602), new MillisecondsTimePoint(
@@ -238,19 +237,19 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         MarkPassing markPassingBeforeAdding = Util.get(markPassingsBeforeFixing, 1);
         assertTrue(markPassingBeforeAdding.getTimePoint().asMillis() == 60000);
 
-        chooser.setFixedPassing(tom, waypointToSet, new MillisecondsTimePoint(58000));
+        chooser.setFixedPassing(tom, 1, new MillisecondsTimePoint(58000));
 
         NavigableSet<MarkPassing> markPassingsAfterFixing = race.getMarkPassings(tom);
         MarkPassing markPassingAfterAdding = Util.get(markPassingsAfterFixing, 1);
         assertTrue(markPassingAfterAdding.getTimePoint().asMillis() == 58000);
 
-        chooser.setFixedPassing(tom, waypointToSet, new MillisecondsTimePoint(59000));
+        chooser.setFixedPassing(tom, 1, new MillisecondsTimePoint(59000));
 
         NavigableSet<MarkPassing> markPassingsAfterSecondFixing = race.getMarkPassings(tom);
         MarkPassing markPassingAfterSecondAdding = Util.get(markPassingsAfterSecondFixing, 1);
         assertTrue(markPassingAfterSecondAdding.getTimePoint().asMillis() == 59000);
 
-        chooser.removeFixedPassing(tom, waypointToSet);
+        chooser.removeFixedPassing(tom, 1);
 
         NavigableSet<MarkPassing> markPassingsAfterRemoving = race.getMarkPassings(tom);
         MarkPassing markPassingAfterRemoving = Util.get(markPassingsAfterRemoving, 1);
