@@ -110,7 +110,6 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -181,31 +180,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private long updateCount;
 
     /**
-     * To enable cleaning of cache entries in {@link #competitorRankings} for an entire race, this map remembers all time
-     * points for which cache entries for this race were put into {@link #competitorRankings}. Whenever entries are
-     * about to be expunged from {@link #competitorRankings}, their time points are removed from this set which is a
-     * synchronized set.
+     * Limit for the cache size in {@link #competitorRankings} and respectively in {@link #competitorRankingsLocks}.
      */
-    private transient Set<TimePoint> timePointsForWhichCompetitorRankingsCacheEntriesExist;
+    private static final int MAX_COMPETITOR_RANKINGS_CACHE_SIZE = 10;
     
-    /**
-     * Holds a size-limited cache of the {@link #getCompetitorsFromBestToWorst(TimePoint)} results. When entries are about
-     * to be expunged, the corresponding key is removed as well from {@link #competitorRankingsLocks} and from
-     * {@link #timePointsForWhichCompetitorRankingsCacheEntriesExist}.<p>
-     * 
-     * All access to this structure must use <code>synchronized</code> as if this were a synchronized hash map.
-     */
-    private final static LinkedHashMap<Pair<TimePoint, TrackedRaceImpl>, List<Competitor>> competitorRankings;
+    private transient LinkedHashMap<TimePoint, List<Competitor>> competitorRankings;
 
     /**
-     * The locks managed here mainly correspond with the {@link #competitorRankings} structure ("mainly" because when an
-     * entry is about to be expunged from {@link #competitorRankings} then the corresponding key will first be removed
-     * from this map, limiting its size in the same way that the size of {@link #competitorRankings} is limited). When
+     * The locks managed here correspond with the {@link #competitorRankings} structure. When
      * {@link #getCompetitorsFromBestToWorst(TimePoint)} starts to compute rankings, it locks the write lock for the
-     * time point / tracked race. Readers use the read lock. Checking / entering a lock into this map uses
-     * <code>synchronized</code> on the map itself.
+     * time point. Readers use the read lock. Checking / entering a lock into this map uses <code>synchronized</code> on
+     * the map itself.
      */
-    private final static ConcurrentHashMap<Pair<TimePoint, TrackedRaceImpl>, NamedReentrantReadWriteLock> competitorRankingsLocks;
+    private transient LinkedHashMap<TimePoint, NamedReentrantReadWriteLock> competitorRankingsLocks;
 
     /**
      * legs appear in the order in which they appear in the race's course
@@ -284,33 +271,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final NamedReentrantReadWriteLock loadingFromGPSFixStoreLock;
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
-    
-    private static final int MAX_NUMBER_OF_COMPETITOR_RANK_CACHE_ENTRIES = 10000;
-    
-    static {
-        competitorRankings = new LinkedHashMap<Pair<TimePoint, TrackedRaceImpl>, List<Competitor>>(
-                MAX_NUMBER_OF_COMPETITOR_RANK_CACHE_ENTRIES, 0.75f) {
-                    private static final long serialVersionUID = 2826008515372742341L;
-
-                    @Override
-                    protected boolean removeEldestEntry(Entry<Pair<TimePoint, TrackedRaceImpl>, List<Competitor>> eldest) {
-                        final boolean remove = size() > MAX_NUMBER_OF_COMPETITOR_RANK_CACHE_ENTRIES;
-                        if (remove) {
-                            competitorRankingsLocks.remove(eldest.getKey());
-                            eldest.getKey().getB().timePointsForWhichCompetitorRankingsCacheEntriesExist.remove(eldest.getKey().getA());
-                        }
-                        return remove;
-                    }
-        };
-        competitorRankingsLocks = new ConcurrentHashMap<>();
-    }
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         locksForMarkPassings = new IdentityHashMap<>();
-        timePointsForWhichCompetitorRankingsCacheEntriesExist = Collections.synchronizedSet(new HashSet<TimePoint>());
         attachedRaceLogs = new HashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
@@ -414,12 +380,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
+        competitorRankings = createCompetitorRankingsCache();
+        competitorRankingsLocks = createCompetitorRankingsLockMap();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
+    }
+
+    private LinkedHashMap<TimePoint, NamedReentrantReadWriteLock> createCompetitorRankingsLockMap() {
+        return new LinkedHashMap<TimePoint, NamedReentrantReadWriteLock>() {
+            private static final long serialVersionUID = 6298801656693955386L;
+            @Override
+            protected boolean removeEldestEntry(Entry<TimePoint, NamedReentrantReadWriteLock> eldest) {
+                return size() > MAX_COMPETITOR_RANKINGS_CACHE_SIZE;
+            }
+        };
+    }
+
+    private LinkedHashMap<TimePoint, List<Competitor>> createCompetitorRankingsCache() {
+        return new LinkedHashMap<TimePoint, List<Competitor>>() {
+            private static final long serialVersionUID = -6044369612727021861L;
+            @Override
+            protected boolean removeEldestEntry(Entry<TimePoint, List<Competitor>> eldest) {
+                return size() > MAX_COMPETITOR_RANKINGS_CACHE_SIZE;
+            }
+        };
     }
 
     /**
@@ -460,11 +448,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        timePointsForWhichCompetitorRankingsCacheEntriesExist = Collections.synchronizedSet(new HashSet<TimePoint>());
         attachedRaceLogs = new HashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
+        competitorRankings = createCompetitorRankingsCache();
+        competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
@@ -1023,55 +1012,42 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
         NamedReentrantReadWriteLock readWriteLock;
-        Pair<TimePoint, TrackedRaceImpl> cacheKey = new Pair<TimePoint, TrackedRaceImpl>(timePoint, this);
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
             if (readWriteLock == null) {
                 readWriteLock = new NamedReentrantReadWriteLock("competitor rankings for race " + getRace().getName()
                         + " for time point " + timePoint, /* fair */false);
-                competitorRankingsLocks.put(cacheKey, readWriteLock);
+                competitorRankingsLocks.put(timePoint, readWriteLock);
             }
         }
         List<Competitor> rankedCompetitors;
-        final boolean lockForWrite;
         synchronized (competitorRankings) {
-            rankedCompetitors = competitorRankings.get(cacheKey);
-            if (rankedCompetitors == null) {
-                lockForWrite = true;
-            } else {
-                lockForWrite = false;
-            }
+            rankedCompetitors = competitorRankings.get(timePoint);
         }
-        if (lockForWrite) {
+        if (rankedCompetitors == null) {
             LockUtil.lockForWrite(readWriteLock);
-        } else {
-            LockUtil.lockForRead(readWriteLock);
-        }
-        try {
-            if (rankedCompetitors == null) {
-                synchronized (competitorRankings) {
-                    rankedCompetitors = competitorRankings.get(cacheKey); // try again; maybe a writer released the write
-                }                                                         // lock after updating the cache
+            try {
                 if (rankedCompetitors == null) {
-                    RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                    rankedCompetitors = new ArrayList<Competitor>();
-                    for (Competitor c : getRace().getCompetitors()) {
-                        rankedCompetitors.add(c);
-                    }
-                    Collections.sort(rankedCompetitors, comparator);
-                    synchronized (competitorRankings) {
-                        competitorRankings.put(cacheKey, rankedCompetitors);
+                    rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
+                                                                           // write
+                                                                           // lock after updating the cache
+                    if (rankedCompetitors == null) {
+                        RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                        rankedCompetitors = new ArrayList<Competitor>();
+                        for (Competitor c : getRace().getCompetitors()) {
+                            rankedCompetitors.add(c);
+                        }
+                        Collections.sort(rankedCompetitors, comparator);
+                        synchronized (competitorRankings) {
+                            competitorRankings.put(timePoint, rankedCompetitors);
+                        }
                     }
                 }
-            }
-            return rankedCompetitors;
-        } finally {
-            if (lockForWrite) {
+            } finally {
                 LockUtil.unlockAfterWrite(readWriteLock);
-            } else {
-                LockUtil.unlockAfterRead(readWriteLock);
             }
         }
+        return rankedCompetitors;
     }
 
     @Override
@@ -1462,23 +1438,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             cacheInvalidationTimer.cancel();
                             cacheInvalidationTimer = null;
                         }
-                        // Important: don't synchronize on timePointsForWhichCompetitorRankingsCacheEntriesExist first and then on
-                        // competitorRankings because the opposite locking order is likely taking place in removeEldestEntry which could
-                        // lead to a deadlock.
-                        Set<TimePoint> timePointsToRemoveCacheEntriesFor;
-                        synchronized (timePointsForWhichCompetitorRankingsCacheEntriesExist) {
-                            timePointsToRemoveCacheEntriesFor = new HashSet<>(timePointsForWhichCompetitorRankingsCacheEntriesExist);
-                            timePointsForWhichCompetitorRankingsCacheEntriesExist.clear();
+                        synchronized (competitorRankings) {
+                            competitorRankings.clear();
                         }
-                        for (TimePoint timePoint : timePointsToRemoveCacheEntriesFor) {
-                            Pair<TimePoint, TrackedRaceImpl> cacheKey = new Pair<>(timePoint, TrackedRaceImpl.this);
-                            synchronized (competitorRankings) {
-                                competitorRankings.remove(cacheKey);
-                            }
-                            synchronized (competitorRankingsLocks) {
-                                competitorRankingsLocks.remove(cacheKey);
-                            }
-
+                        synchronized (competitorRankingsLocks) {
+                            competitorRankingsLocks.clear();
                         }
                     }
                 }, DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS);
