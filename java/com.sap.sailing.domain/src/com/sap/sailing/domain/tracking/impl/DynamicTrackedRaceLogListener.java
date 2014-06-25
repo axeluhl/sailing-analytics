@@ -13,8 +13,10 @@ import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.FixedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.SuppressedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -34,6 +36,8 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
+    private FixedMarkPassingsFinder fixedPassingsFinder;
+    private SuppressedMarkPassingsFinder suppressedPassingsFinder;
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;

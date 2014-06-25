@@ -10,9 +10,9 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sse.common.Util.Triple;
 
-public class FixedMarkPassingsAnalyzer extends RaceLogAnalyzer<Set<Triple<Competitor, Integer, TimePoint>>> {
+public class FixedMarkPassingsFinder extends RaceLogAnalyzer<Set<Triple<Competitor, Integer, TimePoint>>> {
 
-    public FixedMarkPassingsAnalyzer(RaceLog raceLog) {
+    public FixedMarkPassingsFinder(RaceLog raceLog) {
         super(raceLog);
     }
 

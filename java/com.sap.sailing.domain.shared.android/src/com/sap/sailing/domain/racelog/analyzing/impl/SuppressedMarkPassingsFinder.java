@@ -9,9 +9,9 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sse.common.Util.Pair;
 
-public class SuppressedMarkPassingsAnalyzer extends RaceLogAnalyzer<Set<Pair<Competitor, Integer>>> {
+public class SuppressedMarkPassingsFinder extends RaceLogAnalyzer<Set<Pair<Competitor, Integer>>> {
 
-    public SuppressedMarkPassingsAnalyzer(RaceLog raceLog) {
+    public SuppressedMarkPassingsFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
