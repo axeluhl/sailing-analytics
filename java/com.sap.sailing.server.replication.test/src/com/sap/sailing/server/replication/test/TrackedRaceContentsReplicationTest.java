@@ -164,6 +164,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         trackedRace.recordWind(wind, webWindSource);
+        Thread.sleep(500); // wind addition and wind removal are asynchronous operations that could otherwise pass each other
         trackedRace.removeWind(wind, webWindSource);
         final WindTrack windTrack = trackedRace.getOrCreateWindTrack(webWindSource);
         windTrack.lockForRead();
