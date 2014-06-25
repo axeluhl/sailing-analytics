@@ -262,7 +262,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                                     leaderboardsTabPanel.selectTab(0);
                                 } else {
                                     leaderboardCheckBox.setValue(false);
-                                    errorReporter.reportError("Error trying to load leaderboard. Event could not be associated to Regatta.");
+                                    errorReporter.reportError("Error trying to load leaderboard. Either the event could not be associated to Regatta or there are no tracked races.");
                                 }
                             }
                             @Override
