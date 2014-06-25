@@ -1894,8 +1894,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
      */
     @Override
-    public Tack getTack(Competitor competitor, TimePoint timePoint, Wind wind) {
-        final SpeedWithBearing estimatedSpeed = getTrack(competitor).getEstimatedSpeed(timePoint);
+    public Tack getTack(SpeedWithBearing estimatedSpeed, Wind wind, TimePoint timePoint) {
         Tack result = null;
         if (estimatedSpeed != null) {
             result = getTack(wind, estimatedSpeed.getBearing());

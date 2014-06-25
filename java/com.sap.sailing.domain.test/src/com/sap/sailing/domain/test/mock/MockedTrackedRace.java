@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -540,7 +541,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
     
     @Override
-    public Tack getTack(Competitor competitor, TimePoint timePoint, Wind wind) {
+    public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
