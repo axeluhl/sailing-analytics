@@ -88,7 +88,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
             protected boolean removeEldestEntry(Map.Entry<Util.Triple<TimePoint, Collection<String>, Boolean>, FutureTask<LeaderboardDTO>> e) {
-                return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
+                return size() > 10; // remember 10 LeaderboardDTOs per leaderboard
             }
         };
         leaderboardCacheLock = new NamedReentrantReadWriteLock("leaderboardCacheLock for "+leaderboard.getName(), /* fair */ false);

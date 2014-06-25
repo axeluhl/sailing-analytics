@@ -45,6 +45,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private final UserAgentDetails userAgent;
     private final LogoAndTitlePanel logoAndTitlePanel;
     private final DockLayoutPanel dockPanel;
+    private final AsyncActionsExecutor asyncActionsExecutor;
     
     /**
      * We use two timers: one for the leaderboard, one for the race board. This way, we can stop one while the other continues.
@@ -93,6 +94,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         this.dockPanel = dockPanel;
         this.showRaceDetails = showRaceDetails;
         
+        asyncActionsExecutor = new AsyncActionsExecutor();
         showWindChart = false;
         leaderboard = null;
         leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
@@ -106,13 +108,13 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
 
-        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
+        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings,
         /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true) {
             @Override
@@ -146,7 +148,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer, raceSelectionModel, leaderboardName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor,null, raceboardTimer, raceSelectionModel, leaderboardName,
                 null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false);
         return raceBoardPanel;
     }
