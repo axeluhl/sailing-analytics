@@ -1472,17 +1472,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Tack tack;
-                            try {
-                                tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                            } catch (NoWindException nwe) {
-                                tack = null;
-                            }
+                            Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
+                            Tack tack = wind == null? null : trackedRace.getTack(competitor, fix.getTimePoint(), wind);
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                            Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             GPSFixDTO fixDTO = createGPSFixDTO(fix, track.getEstimatedSpeed(fix.getTimePoint()), windDTO, tack, legType, /* extrapolate */
                                     false);
@@ -1493,17 +1488,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 // check if fix was at date and if extrapolation is requested
                                 if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
                                     Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2;
-                                    try {
-                                        tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
-                                    } catch (NoWindException nwe) {
-                                        tack2 = null;
-                                    }
+                                    Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
+                                    Tack tack2 = wind2 == null ? null : trackedRace.getTack(competitor, toTimePointExcluding, wind2);
                                     LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
                                             .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
-                                    Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
                                     WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),

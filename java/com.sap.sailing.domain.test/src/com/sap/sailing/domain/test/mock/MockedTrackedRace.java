@@ -538,6 +538,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public Tack getTack(Competitor competitor, TimePoint timePoint, Wind wind) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Wind getDirectionFromStartToNextMark(TimePoint at) {

@@ -381,6 +381,15 @@ public interface TrackedRace extends Serializable {
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
+     * requested.<br />
+     * This method outperforms {@link #getTack(Competitor, TimePoint)}, but requires the correct wind for the given
+     * time and competitor position.<br />
+     * This method monitors the competitors' GPS tracks.
+     */
+    Tack getTack(Competitor competitor, TimePoint timePoint, Wind wind);
+
     TrackedRegatta getTrackedRegatta();
 
     /**

@@ -1852,6 +1852,43 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
+     * This is probably best explained by example. If the wind bearing is from port to starboard, the situation looks
+     * like this:
+     * 
+     * <pre>
+     *                                 ^
+     *                 Wind            | Boat
+     *               ----------->      |
+     *                                 |
+     * 
+     * </pre>
+     * 
+     * In this case, the boat gets the wind from port, so the result has to be {@link Tack#PORT}. The angle between the
+     * boat's heading (which we can only approximate by the boat's course over ground) and the wind bearing in this case
+     * is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code> in this case will
+     * return a bearing representing -90 degrees.
+     * <p>
+     * 
+     * If the wind is blowing the other way, the angle returned by {@link Bearing#getDifferenceTo(Bearing)} will
+     * correspond to +90 degrees. In other words, a negative angle means starboard tack, a positive angle represents
+     * port tack.
+     * <p>
+     * 
+     * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     * 
+     * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
+     */
+    @Override
+    public Tack getTack(Competitor competitor, TimePoint timePoint, Wind wind) {
+        final SpeedWithBearing estimatedSpeed = getTrack(competitor).getEstimatedSpeed(timePoint);
+        Tack result = null;
+        if (estimatedSpeed != null) {
+            result = getTack(wind, estimatedSpeed.getBearing());
+        }
+        return result;
+    }
+
+    /**
      * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
      * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
      * 
@@ -1861,15 +1898,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
         final Wind wind = getWind(where, timePoint);
-        Tack result;
         if (wind == null) {
             throw new NoWindException("Can't determine wind direction in position " + where + " at " + timePoint
                     + ", therefore cannot determine tack");
         }
+        return getTack(wind, boatBearing);
+    }
+
+
+    /**
+     * Based on the wind, compares the <code>boatBearing</code> to the wind's bearing at
+     * that time and place and determined the tack.
+     */
+    private Tack getTack(Wind wind, Bearing boatBearing) {
         Bearing windBearing = wind.getBearing();
         Bearing difference = windBearing.getDifferenceTo(boatBearing);
-        result = difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
-        return result;
+        return difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
     }
 
     @Override
