@@ -152,10 +152,11 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     public void testRaceTimeReplication() throws InterruptedException, Exception {
         startTracking();
         // now wait at least until the start of tracking time has been received on the master copy
-        boolean receivedStartOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null;
-        while (!receivedStartOfTracking) { // relying on the Timeout rule for this test
+        boolean receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+                master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
+        while (!receivedStartAndEndOfTracking) { // relying on the Timeout rule for this test
             Thread.sleep(10);
-            receivedStartOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+            receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
         Thread.sleep(2000); // kept failing several times for a 1000ms timeout
