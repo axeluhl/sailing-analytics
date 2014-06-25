@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1817,21 +1816,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 RaceDefinition race = trackedRace.getRace();
-                for (Competitor competitor : race.getCompetitors()) {
-                    int rank = trackedRace.getRank(competitor, dateAsTimePoint);
+                int rank = 1;
+                for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(dateAsTimePoint)) {
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
                     if (trackedLeg != null) {
                         int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                         QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumber);
                         result.add(quickRankDTO);
                     }
+                    rank++;
                 }
-                Collections.sort(result, new Comparator<QuickRankDTO>() {
-                    @Override
-                    public int compare(QuickRankDTO o1, QuickRankDTO o2) {
-                        return o1.rank - o2.rank;
-                    }
-                });
             }
         }
         return result;
