@@ -1,7 +1,11 @@
 #!/bin/sh
 
 # source variables
-. `pwd`/env.sh
+if [ "$TMP" = "" ]; then
+  TMP=/tmp
+fi
+PWD=`pwd`
+. "$PWD/env.sh"
 
 PARAM=$@
 
@@ -36,13 +40,13 @@ if [[ $TELNET_ACTIVE != "" ]]; then
 fi
 
 scriptdir=`dirname "$0"`
-LIB_DIR=`pwd`/native-libraries
+LIB_DIR="$PWD/native-libraries"
 
-if [[ ! -d `pwd`/logs ]]; then
+if [[ ! -d "$PWD/logs" ]]; then
     mkdir logs
 fi
 
-if [[ ! -d `pwd`/tmp ]]; then
+if [[ ! -d "$PWD/tmp" ]]; then
     mkdir tmp
 fi
 
@@ -72,7 +76,7 @@ APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.db
 REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT"
 
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
-    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -configuration ./ -clean 2>/dev/null >/dev/null &
+    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -127,10 +131,10 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open and reachable from the outside"
-    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
+    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
 
 elif [[ $PARAM == "fg" ]]; then
-    $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
+    $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
 
 fi
 

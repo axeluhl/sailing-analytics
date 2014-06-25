@@ -31,7 +31,7 @@ public class RaceDetailPanel extends SimplePanel {
             d = -d;
         }
         NumberFormat decimalFormat = NumberFormat.getFormat("##.###");
-        return "" + d + '\u00B0' + m + '\u2032' + decimalFormat.format(s) + '\u2033'; // add º, ', " symbols
+        return "" + d + '\u00B0' + m + '\u2032' + decimalFormat.format(s) + '\u2033'; // add ï¿½, ', " symbols
     }
 
     private static final int MAX_PROCEDURE_FIELDS = 2;
@@ -50,7 +50,9 @@ public class RaceDetailPanel extends SimplePanel {
     private final Label finishTimeLabel = new Label();
     private final Label finishDurationLabel = new Label();
     private final Label protestTimeLabel = new Label();
+    private final Label protestDateLabel = new Label();
     private final Label updateTimeLabel = new Label();
+    private final Label updateDateLabel = new Label();
     private final Label vesselPositionLabel = new Label();
     private final Label windLabel = new Label();
     private final Label startProcedureLabel = new Label();
@@ -94,9 +96,9 @@ public class RaceDetailPanel extends SimplePanel {
         basicsGrid.setWidget(2, 1, protestTimeLabel);
         basicsGrid.setWidget(0, 2, startDateLabel);
         basicsGrid.setWidget(1, 2, finishDurationLabel);
-        basicsGrid.setWidget(2, 2, new Label(""));
+        basicsGrid.setWidget(2, 2, protestDateLabel);
 
-        Grid managementGrid = new Grid(3, 2);
+        Grid managementGrid = new Grid(3, 3);
         managementGrid.setCellSpacing(cellSpacing);
         managementGrid.setWidget(0, 0, new Label("Last update at"));
         managementGrid.setWidget(1, 0, new Label("Vessel position"));
@@ -104,6 +106,7 @@ public class RaceDetailPanel extends SimplePanel {
         managementGrid.setWidget(0, 1, updateTimeLabel);
         managementGrid.setWidget(1, 1, vesselPositionLabel);
         managementGrid.setWidget(2, 1, windLabel);
+        managementGrid.setWidget(0, 2, updateDateLabel);
 
         procedureGrid = new FlexTable();
         procedureGrid.setCellSpacing(cellSpacing);
@@ -166,9 +169,17 @@ public class RaceDetailPanel extends SimplePanel {
                 .format(data.raceInfo.protestFinishTime);
         protestTimeLabel.setText(protestTimeText);
 
+        String protestDateText = data.raceInfo.protestFinishTime == null ? "" : dateFormatter
+                .format(data.raceInfo.protestFinishTime);
+        protestDateLabel.setText(protestDateText);
+
         String updateTimeText = data.raceInfo.lastUpdateTime == null ? "-" : timeFormatter
                 .format(data.raceInfo.lastUpdateTime);
         updateTimeLabel.setText(updateTimeText);
+
+        String updateDateText = data.raceInfo.lastUpdateTime == null ? "" : dateFormatter
+                .format(data.raceInfo.lastUpdateTime);
+        updateDateLabel.setText(updateDateText);
 
         String vesselPositionText = stringMessages.unknown();
         String windText = stringMessages.unknown();

@@ -1779,4 +1779,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     stringRepresentation, deviceType, stringRepresentation);
         }
     }
+
+    @Override
+    public Map<String, Set<URL>> loadResultUrls() {
+        Map<String, Set<URL>> resultUrls = new HashMap<>();
+        DBCollection resultUrlCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        for (DBObject dbObject : resultUrlCollection.find()) {
+            String providerName = (String) dbObject.get(FieldNames.RESULT_PROVIDERNAME.name());
+            String urlString = (String) dbObject.get(FieldNames.RESULT_URL.name());
+            URL url;
+            try {
+                url = new URL(urlString);
+            } catch (MalformedURLException e) {
+                logger.log(Level.SEVERE, "Failed to parse result Url String: " + urlString + ". Did not load url!");
+                continue;
+            }
+            if (!resultUrls.containsKey(providerName)) {
+                resultUrls.put(providerName, new HashSet<URL>());
+            }
+            Set<URL> set = resultUrls.get(providerName);
+            set.add(url);
+        }
+        return resultUrls;
+    }
 }

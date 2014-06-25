@@ -396,6 +396,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
+    private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
+
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
@@ -450,6 +452,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        resultUrlRegistryServiceTracker = createAndOpenResultUrlRegistryServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
         raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
@@ -551,6 +554,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BundleContext context) {
         ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> createAndOpenResultUrlRegistryServiceTracker(
+            BundleContext context) {
+        ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> result = new ServiceTracker<ResultUrlRegistry, ResultUrlRegistry>(
+                context, ResultUrlRegistry.class.getName(), null);
         result.open();
         return result;
     }
@@ -1387,9 +1398,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
-        return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getCourseSidelines(raceIdentifier, date), getQuickRanks(
-                raceIdentifier, date));
+        final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
+        final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
+        final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
+        final List<QuickRankDTO> quickRanks = getQuickRanks(raceIdentifier, date);
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks);
     }    
 
     /**
@@ -3387,8 +3400,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
-            Iterable<URL> allUrls = ResultUrlRegistry.INSTANCE.getResultUrls(resultProviderName);
+            Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
             for (URL url : allUrls) {
                 result.add(url.toString());
             }
@@ -3399,9 +3413,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-                ResultUrlRegistry.INSTANCE.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
+                resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
             }
         }
     }
@@ -3410,8 +3425,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addResultImportUrl(String resultProviderName, String url) throws Exception {
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
-            ResultUrlRegistry.INSTANCE.registerResultUrl(resultProviderName, new URL(url));
+            ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
+            resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url));
         }
+    }
+
+    private ResultUrlRegistry getResultUrlRegistry() {
+        return resultUrlRegistryServiceTracker.getService();
     }    
 
     @Override

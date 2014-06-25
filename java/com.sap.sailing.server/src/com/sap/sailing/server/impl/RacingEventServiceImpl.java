@@ -1328,6 +1328,16 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
             replicate(new UpdateRaceTimes(getRaceIdentifier(), startOfTracking, endOfTracking, startTimeReceived));
         }
+        
+        @Override
+        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+            // no-op; the course change is replicated by the separate CourseChangeReplicator
+        }
+
+        @Override
+        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+            // no-op; the course change is replicated by the separate CourseChangeReplicator
+        }
 
         @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {

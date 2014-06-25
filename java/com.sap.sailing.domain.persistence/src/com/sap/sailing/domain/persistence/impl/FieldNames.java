@@ -108,4 +108,7 @@ public enum FieldNames {
     
     // Timespan
     FROM_MILLIS, TO_MILLIS,
+
+    // Result Import url fields
+    RESULT_PROVIDERNAME, RESULT_URL
 }

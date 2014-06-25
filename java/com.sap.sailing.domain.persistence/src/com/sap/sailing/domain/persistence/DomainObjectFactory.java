@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.persistence;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
@@ -123,4 +125,6 @@ public interface DomainObjectFactory {
     DomainFactory getBaseDomainFactory();
 
     Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
+
+    Map<String, Set<URL>> loadResultUrls();
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
+import java.net.URL;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
@@ -130,5 +131,9 @@ public interface MongoObjectFactory {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
     void removeRaceLog(RaceLogIdentifier identifier);
+
+    void storeResultUrl(String resultProviderName, URL url);
+
+    void removeResultUrl(String resultProviderName, URL url);
 
 }

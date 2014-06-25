@@ -5,7 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -59,6 +65,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
+    private boolean toolbarAndLogoAndTitleBarHidden;
+
     @Override
     protected void doOnModuleLoad() {    
         super.doOnModuleLoad();
@@ -92,9 +100,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
-        
+        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
+                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia, showNavigationPanel);
+
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
@@ -165,7 +174,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
-        createRaceBoardInOneScreenMode(raceBoardPanel);
+        createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
@@ -217,21 +226,47 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return logoAndTitlePanel;
     }
     
-    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
-        DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
+    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel,
+            RaceBoardViewConfiguration raceboardViewConfiguration) {
+        final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
+        final Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
+        final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
-        p.addSouth(timePanel, 90);                     
+        toolbarAndLogoAndTitleBarHidden = false;
+        if (!raceboardViewConfiguration.isShowNavigationPanel()) {
+            p.setWidgetHidden(toolbarPanel, true);
+            globalNavigationPanel.setVisible(false);
+            toolbarAndLogoAndTitleBarHidden = true;
+        }
+        Event.addNativePreviewHandler(new NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(NativePreviewEvent event) {
+                NativeEvent ne = event.getNativeEvent();
+                if ("keydown".equals(ne.getType()) && ne.getCtrlKey()
+                        && (ne.getKeyCode() == 'm' || ne.getKeyCode() == 'M')) {
+                    ne.preventDefault();
+                    Scheduler.get().scheduleDeferred(new Command() {
+                        @Override
+                        public void execute() {
+                            p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
+                            globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
+                            toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
+                        }
+                    });
+
+                }
+            }
+        });
+        p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
-    }    
+    }
 }
