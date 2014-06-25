@@ -102,7 +102,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             List<FlagPole> flagChanges = flagState.computeUpcomingChanges();
             if (!flagChanges.isEmpty()) {
                 TimePoint changeAt = flagState.getNextStateValidFrom();
-                FlagPole changePole = getMostInterestingFlagPole(flagChanges);
+                FlagPole changePole = FlagPoleState.getMostInterestingFlagPole(flagChanges);
                 
                 renderFlagChangesCountdown(targetView, changeAt, changePole);
                 flagPoleCache = new FlagPoleCache(changePole, changeAt);
@@ -123,15 +123,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected void onIndividualRecallChanged(boolean displayed) {
         // overwrite in derived fragments
-    }
-
-    private FlagPole getMostInterestingFlagPole(List<FlagPole> poles) {
-        for (FlagPole pole : poles) {
-            if (pole.isDisplayed()) {
-                return pole;
-            }
-        }
-        return poles.get(0);
     }
 
     private void renderFlagChangesCountdown(TextView targetView, TimePoint changeAt, FlagPole changePole) {

@@ -131,7 +131,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
 
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, AsyncActionsExecutor asyncActionsExecutor, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
@@ -150,7 +150,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
-        asyncActionsExecutor = new AsyncActionsExecutor();
+        this.asyncActionsExecutor = asyncActionsExecutor;
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
