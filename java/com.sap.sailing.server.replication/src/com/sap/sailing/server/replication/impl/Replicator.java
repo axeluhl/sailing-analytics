@@ -3,9 +3,11 @@ package com.sap.sailing.server.replication.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,12 +85,31 @@ public class Replicator implements Runnable {
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        long messageCount = 0;
+        Field _queue;
+        try {
+            _queue = QueueingConsumer.class.getDeclaredField("_queue");
+            _queue.setAccessible(true);
+        } catch (Exception e) {
+            _queue = null;
+        }
         while (true) {
             if (isBeingStopped()) {
                 break;
             }
             try {
                 Delivery delivery = consumer.nextDelivery();
+                messageCount++;
+                if (_queue != null) {
+                    if (messageCount % 10000l == 0) {
+                        try {
+                            logger.info("Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                        } catch (Exception e) {
+                            // it didn't work; but it's a log message only...
+                            logger.info("Received another 10000 replication messages");
+                        }
+                    }
+                }
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
