@@ -94,7 +94,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         Class<?> returnType = method.getReturnType();
         List<Function<?>> previousFunctionsClone = new ArrayList<>(previousFunctions);
         previousFunctionsClone.add(function);
-        scanInternalClass(returnType, previousFunctionsClone);
+        scanInternalClass(returnType, previousFunctionsClone); 
     }
 
     private boolean isValidDimension(Method method) {
@@ -110,7 +110,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
 
     private boolean isConnector(Method method) {
-        return method.getAnnotation(Connector.class) != null;
+        return method.getAnnotation(Connector.class) != null &&
+                !method.getReturnType().equals(Void.TYPE) &&
+                method.getParameterTypes().length == 0;
     }
 
     @Override
