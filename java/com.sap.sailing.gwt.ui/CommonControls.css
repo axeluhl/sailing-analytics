@@ -350,6 +350,14 @@ body ::-webkit-scrollbar-track {
     margin: 0 14px 0 0;
 }
 
+.timePanel-timeslider-play {
+    float:left;
+    padding: 10px;
+    border-right: 1px solid #fcbb22;
+    height: 24px;
+    margin: 5px 14px 5px 0;
+}
+
 .timePanel-controls-playSpeed {
   vertical-align: middle;
   line-height: 25px;

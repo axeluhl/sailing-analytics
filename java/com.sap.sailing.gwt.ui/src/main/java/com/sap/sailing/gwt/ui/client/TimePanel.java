@@ -71,6 +71,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Button slowDownButton;
     private final Button speedUpButton;
 
+    private final FlowPanel controlsPanel;
+    private final SimplePanel timePanelSlider;
+    private final FlowPanel timePanelSliderFlowWrapper;
+    private final FlowPanel playControlPanel;
+    private final FlowPanel timePanelInnerWrapper;
+
     /** 
      * the minimum time the slider extends it's time when the end of the slider is reached
      */
@@ -99,14 +105,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
-        FlowPanel timePanelInnerWrapper = new FlowPanel();
+        timePanelInnerWrapper = new FlowPanel();
         timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
         timePanelInnerWrapper.setSize("100%", "100%");
         
-        SimplePanel timePanelSlider = new SimplePanel();
+        timePanelSlider = new SimplePanel();
+        timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
         timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();
         playPauseButton = new Button("");
@@ -141,16 +149,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
         });
         
-        timePanelInnerWrapper.add(timePanelSlider);
+        timePanelInnerWrapper.add(timePanelSliderFlowWrapper);
         timePanelSlider.add(timeSlider);
 
-        FlowPanel controlsPanel = new FlowPanel();
+        controlsPanel = new FlowPanel();
         
         controlsPanel.setStyleName("timePanel-controls");
         timePanelInnerWrapper.add(controlsPanel);
         
         // play button control
-        FlowPanel playControlPanel = new FlowPanel();
+        playControlPanel = new FlowPanel();
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
@@ -291,6 +299,20 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
+    }
+
+    public void hideControlsPanelAndMovePlayButtonUp() {
+        controlsPanel.remove(playControlPanel);
+        timePanelInnerWrapper.remove(controlsPanel);
+        timePanelSliderFlowWrapper.insert(playControlPanel, 0);
+        playControlPanel.setStyleName("timePanel-timeslider-play");
+    }
+
+    public void showControlsPanelAndMovePlayButtonDown() {
+        timePanelInnerWrapper.add(controlsPanel);
+        timePanelSliderFlowWrapper.remove(playControlPanel);
+        controlsPanel.insert(playControlPanel, 0);
+        playControlPanel.setStyleName("timePanel-controls-play");
     }
 
     @Override
