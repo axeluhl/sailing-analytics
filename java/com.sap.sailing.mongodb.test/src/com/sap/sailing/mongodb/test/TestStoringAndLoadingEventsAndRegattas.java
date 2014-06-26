@@ -469,6 +469,36 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
 
     @Test
+    public void testLoadStoreRegattaWithFleetsEnsuringFleetOrdering() {
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegatta(regattaBaseName, boatClass,
+                /* persistent */ false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertEquals(regattaBaseName, loadedRegatta.getBaseName());
+
+        Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
+        Series loadedQualifyingSeries = seriesIter.next();
+        
+        Iterator<? extends Fleet> qualiFleetIt = loadedQualifyingSeries.getFleets().iterator();
+        Fleet qualiFleet1 = qualiFleetIt.next();
+        assertEquals(qualiFleet1.getName(), "Yellow");
+        Fleet qualiFleet2 = qualiFleetIt.next();
+        assertEquals(qualiFleet2.getName(), "Blue");
+        
+        Series loadedFinalSeries = seriesIter.next();
+        Iterator<? extends Fleet> finalFleetIt = loadedFinalSeries.getFleets().iterator();
+        Fleet finalFleet1 = finalFleetIt.next();
+        assertEquals(finalFleet1.getName(), "Gold");
+        Fleet finalFleet2 = finalFleetIt.next();
+        assertEquals(finalFleet2.getName(), "Silver");
+    }
+
+    @Test
     public void testStorageOfRaceIdentifiersOnRaceColumnInSeries() {
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
