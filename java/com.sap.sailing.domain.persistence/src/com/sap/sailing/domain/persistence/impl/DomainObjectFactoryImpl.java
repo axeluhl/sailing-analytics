@@ -1153,10 +1153,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries.get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
-        Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
+        List<Fleet> fleets = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
-        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns);
+        Series series = new SeriesImpl(name, isMedal, fleets, raceColumnNames, trackedRegattaRegistry);
         if (dbSeries.get(FieldNames.SERIES_DISCARDING_THRESHOLDS.name()) != null) {
             ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbSeries, FieldNames.SERIES_DISCARDING_THRESHOLDS);
             series.setResultDiscardingRule(resultDiscardingRule);
@@ -1174,11 +1174,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return series;
     }
 
-    /**
-     * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
-     * used in the {@link Series#getFleets()} collection.
-     */
-    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns) {
         List<String> result = new ArrayList<String>();
         for (Object o : dbRaceColumns) {
             DBObject dbRaceColumn = (DBObject) o;
@@ -1203,12 +1199,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {
-        Map<String, Fleet> result = new HashMap<String, Fleet>();
+    private List<Fleet> loadFleets(BasicDBList dbFleets) {
+        List<Fleet> result = new ArrayList<Fleet>();
         for (Object o : dbFleets) {
             DBObject dbFleet = (DBObject) o;
             Fleet fleet = loadFleet(dbFleet);
-            result.put(fleet.getName(), fleet);
+            result.add(fleet);
         }
         return result;
     }
