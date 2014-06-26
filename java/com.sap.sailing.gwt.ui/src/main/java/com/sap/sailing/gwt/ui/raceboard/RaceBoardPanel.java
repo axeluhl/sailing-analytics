@@ -538,7 +538,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return toolbarPanel; 
     }
 
-    public Panel getTimePanel() {
+    public RaceTimePanel getTimePanel() {
         return timePanel; 
     }
 

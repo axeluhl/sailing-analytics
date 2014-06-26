@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -250,6 +251,16 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             globalNavigationPanel.setVisible(false);
             toolbarAndLogoAndTitleBarHidden = true;
         }
+
+        p.addSouth(timePanel, 90);
+        p.add(raceBoardPanel);
+        p.addStyleName("dockLayoutPanel");
+
+        addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
+    }
+
+    private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,
+            final RaceBoardPanel raceBoardPanel, final Panel timeWrapperPanel) {
         Event.addNativePreviewHandler(new NativePreviewHandler() {
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -263,14 +274,19 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                             p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
                             globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
                             toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
+                            RaceTimePanel timePanel = raceBoardPanel.getTimePanel();
+                            if (toolbarAndLogoAndTitleBarHidden) {
+                                timePanel.hideControlsPanelAndMovePlayButtonUp();
+                                p.setWidgetSize(timeWrapperPanel, 53);
+                            } else {
+                                timePanel.showControlsPanelAndMovePlayButtonDown();
+                                p.setWidgetSize(timeWrapperPanel, 90);
+                            }
                         }
                     });
 
                 }
             }
         });
-        p.addSouth(timePanel, 90);
-        p.add(raceBoardPanel);
-        p.addStyleName("dockLayoutPanel");
     }
 }
