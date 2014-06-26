@@ -353,7 +353,6 @@ body ::-webkit-scrollbar-track {
 .timePanel-timeslider-play {
     float:left;
     padding: 10px;
-    border-right: 1px solid #fcbb22;
     height: 24px;
     margin: 5px 14px 5px 0;
 }
