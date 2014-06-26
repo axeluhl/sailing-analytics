@@ -219,7 +219,7 @@ public abstract class AbstractServerReplicationTest {
                             } else if (request.contains("INITIAL_LOAD")) {
                                 Channel channel = masterReplicationService.createMasterChannel();
                                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
-                                        /* queueName */ "initial-load-for-TestClient", /* syncAfterTimeout */ false);
+                                        /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
                                 pw.println(ros.getQueueName());
                                 final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
                                 final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);

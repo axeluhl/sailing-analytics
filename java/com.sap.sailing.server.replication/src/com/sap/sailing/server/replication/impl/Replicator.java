@@ -116,7 +116,6 @@ public class Replicator implements Runnable {
             _queue = null;
         }
         while (!isBeingStopped()) {
-
            try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
@@ -157,12 +156,10 @@ public class Replicator implements Runnable {
                 if (isBeingStopped()) {
                     break;
                 }
-                
                 if (sse.isInitiatedByApplication()) {
                     logger.severe("Application shut down messaging queue for " + this.toString());
                     break;
                 }
-                
                 logger.info(sse.getMessage());
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
