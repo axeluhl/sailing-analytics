@@ -17,26 +17,29 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.actions.GetRaceTimesInfoAction;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 public class RaceTimesInfoProvider {
     
     private final SailingServiceAsync sailingService;
+    private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
     
     private final Set<RegattaAndRaceIdentifier> raceIdentifiers;
     private long requestIntervalInMillis;
     
     private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
-    
     private final Set<RaceTimesInfoProviderListener> listeners;
     
     /**
      * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
      */
-    public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RaceTimesInfoProvider(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter,
             Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestIntervalInMillis) {
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(raceIdentifiers);
         this.requestIntervalInMillis = requestIntervalInMillis;
@@ -97,7 +100,8 @@ public class RaceTimesInfoProvider {
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
+            GetRaceTimesInfoAction getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
+            asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage(),
