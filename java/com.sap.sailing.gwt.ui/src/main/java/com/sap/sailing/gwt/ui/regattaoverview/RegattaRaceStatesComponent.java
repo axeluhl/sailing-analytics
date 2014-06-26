@@ -89,6 +89,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
     private final UUID eventId;
 
     private EventDTO eventDTO;
@@ -129,6 +130,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
         this.eventId = eventId;
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
@@ -193,7 +195,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
-                
+                                errorReporter.reportError(cause.getMessage());
                             }
                 
                             @Override
@@ -386,7 +388,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public SafeHtml getValue(final RegattaOverviewEntryDTO entryDTO) {
                 String status = flagInterpreter.getMeaningOfRaceStateAndFlags(entryDTO.raceInfo.lastStatus, entryDTO.raceInfo.lastUpperFlag, 
-                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
+                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.lastFlagsAreDisplayed);
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 sb.appendHtmlConstant("<a class=\"pointeredLink\">");
                 sb.appendEscaped(status);
@@ -455,12 +457,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     tooltip += " " + FlagsMeaningExplanator.getFlagsMeaning(stringMessages,
                             entryDTO.raceInfo.lastUpperFlag, 
                             entryDTO.raceInfo.lastLowerFlag, 
-                            entryDTO.raceInfo.isLastFlagDisplayed);
+                            entryDTO.raceInfo.lastFlagsAreDisplayed);
                 }
                 return SailingFlagsBuilder.render(
                         entryDTO.raceInfo.lastUpperFlag,
                         entryDTO.raceInfo.lastLowerFlag,
-                        entryDTO.raceInfo.isLastFlagDisplayed,
+                        entryDTO.raceInfo.lastFlagsAreDisplayed,
+                        entryDTO.raceInfo.lastFlagsDisplayedStateChanged,
                         tooltip);
             }
             
@@ -493,7 +496,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 } else if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.HOTEL)) {
                     additionalInformation.append(stringMessages.furtherSignalsAshore());
                     isInfoBefore = true;
-                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.isLastFlagDisplayed) {
+                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.lastFlagsAreDisplayed) {
                     additionalInformation.append(stringMessages.earlyStarters());
                     isInfoBefore = true;
                 }

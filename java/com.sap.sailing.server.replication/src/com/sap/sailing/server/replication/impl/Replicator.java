@@ -3,9 +3,15 @@ package com.sap.sailing.server.replication.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,6 +62,22 @@ public class Replicator implements Runnable {
     private boolean stopped = false;
     
     /**
+     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+     */
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+
+    /**
+     * Used for the parallel execution of operations that don't
+     * {@link RacingEventServiceOperation#requiresSynchronousExecution()}.
+     */
+    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+
+    /**
      * @param master
      *            descriptor of the master server from which this replicator receives messages
      * @param racingEventServiceTracker
@@ -83,12 +105,31 @@ public class Replicator implements Runnable {
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        long messageCount = 0;
+        Field _queue;
+        try {
+            _queue = QueueingConsumer.class.getDeclaredField("_queue");
+            _queue.setAccessible(true);
+        } catch (Exception e) {
+            _queue = null;
+        }
         while (true) {
             if (isBeingStopped()) {
                 break;
             }
             try {
                 Delivery delivery = consumer.nextDelivery();
+                messageCount++;
+                if (_queue != null) {
+                    if (messageCount % 10000l == 0) {
+                        try {
+                            logger.info("Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                        } catch (Exception e) {
+                            // it didn't work; but it's a log message only...
+                            logger.info("Received another 10000 replication messages");
+                        }
+                    }
+                }
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
@@ -172,8 +213,18 @@ public class Replicator implements Runnable {
         }
     }
 
-    private synchronized void apply(RacingEventServiceOperation<?> operation) {
-        racingEventServiceTracker.getRacingEventService().apply(operation);
+    private synchronized void apply(final RacingEventServiceOperation<?> operation) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                racingEventServiceTracker.getRacingEventService().apply(operation);
+            }
+        };
+        if (operation.requiresSynchronousExecution()) {
+            runnable.run();
+        } else {
+            executor.execute(runnable);
+        }
     }
     
     private synchronized void queue(RacingEventServiceOperation<?> operation) {

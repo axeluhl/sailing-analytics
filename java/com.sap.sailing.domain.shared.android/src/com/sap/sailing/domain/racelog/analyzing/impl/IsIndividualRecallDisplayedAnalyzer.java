@@ -9,11 +9,15 @@ public class IsIndividualRecallDisplayedAnalyzer extends RaceLogAnalyzer<Boolean
     private final IndividualRecallFinder removedFinder;
     
     public IsIndividualRecallDisplayedAnalyzer(RaceLog raceLog) {
-        this(raceLog, new IndividualRecallDisplayedFinder(raceLog), new IndividualRecallRemovedFinder(raceLog));
+        this(raceLog, null);
+    }
+    
+    public IsIndividualRecallDisplayedAnalyzer(RaceLog raceLog, TimePoint at) {
+        this(raceLog, new IndividualRecallDisplayedFinder(raceLog, at), new IndividualRecallRemovedFinder(raceLog, at), at);
     }
 
     public IsIndividualRecallDisplayedAnalyzer(RaceLog raceLog, IndividualRecallDisplayedFinder displayedFinder,
-            IndividualRecallRemovedFinder removedFinder) {
+            IndividualRecallRemovedFinder removedFinder, TimePoint at) {
         super(raceLog);
         this.displayedFinder = displayedFinder;
         this.removedFinder = removedFinder;
