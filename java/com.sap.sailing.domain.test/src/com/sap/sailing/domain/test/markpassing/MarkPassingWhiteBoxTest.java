@@ -75,7 +75,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         
         NavigableSet<MarkPassing> markPassings = race.getMarkPassings(ron);
         assertEquals(1, markPassings.size());
-        chooser.suppressMarkPassings(ron, markPassings.first().getWaypoint());
+        chooser.suppressMarkPassings(ron, 1);
         NavigableSet<MarkPassing> markPassingsAfterSupressing = race.getMarkPassings(ron);
         assertEquals(0, markPassingsAfterSupressing.size());
 

@@ -51,7 +51,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
-    private Map<Competitor, Waypoint> suppressedPassings = new HashMap<>();
+    private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
     private TimePoint raceStartTime;
     private final CandidateWithSettableTime start;
     private final Candidate end;
@@ -145,8 +145,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint) {
-        suppressedPassings.put(c, firstSuppressedWaypoint);
+    public void suppressMarkPassings(Competitor c, Integer zeroBasedIndexOfWaypoint) {
+        suppressedPassings.put(c, zeroBasedIndexOfWaypoint);
         findShortestPath(c);
     }
 
@@ -215,9 +215,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
         Candidate startOfFixedInterval = fixedPasses.first();
         Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
-        Waypoint suppressedWaypoint = suppressedPassings.get(c);
-        Integer oneBasedIndexOfSuppressedWaypoint = suppressedWaypoint != null ? race.getRace().getCourse()
-                .getIndexOfWaypoint(suppressedWaypoint) + 1 : end.getOneBasedIndexOfWaypoint();
+        Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
+        Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end.getOneBasedIndexOfWaypoint();
         while (endOfFixedInterval != null) {
             if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
                 endOfFixedInterval = end;

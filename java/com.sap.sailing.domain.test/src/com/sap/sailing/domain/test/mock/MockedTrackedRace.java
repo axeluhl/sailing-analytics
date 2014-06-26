@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -959,6 +960,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setMarkPassingRaceLogListener(MarkPassingUpdateListener listener) {
         // TODO Auto-generated method stub
         
     }

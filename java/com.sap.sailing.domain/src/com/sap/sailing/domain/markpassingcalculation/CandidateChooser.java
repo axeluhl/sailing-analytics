@@ -24,7 +24,7 @@ public interface CandidateChooser {
 
     void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint);
     
-    void suppressMarkPassings(Competitor c, Waypoint firstSuppressedWaypoint);
+    void suppressMarkPassings(Competitor c, Integer zeroBasedIndexOfWaypoint);
     
     void stopSuppressingMarkPassings(Competitor c);
     

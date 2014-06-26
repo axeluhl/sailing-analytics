@@ -21,7 +21,7 @@ public interface StorePositionUpdateStrategy {
      * no fixes exist yet for that object, a new entry is created.
      */
     void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
-            List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-            Integer smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-            List<Pair<Competitor, Integer>> removedMarkPassings);
+            List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, Integer smallestChangedWaypointIndex,
+            List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings, List<Pair<Competitor, Integer>> removedMarkPassings,
+            List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings);
 }

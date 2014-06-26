@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.FixedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
@@ -21,8 +23,11 @@ import com.sap.sailing.domain.racelog.analyzing.impl.SuppressedMarkPassingsFinde
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.
@@ -38,6 +43,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
+
     private FixedMarkPassingsFinder fixedPassingsFinder;
     private SuppressedMarkPassingsFinder suppressedPassingsFinder;
     private MarkPassingUpdateListener markPassingUpdateListener;
@@ -55,9 +61,23 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         startTimeFinder = new StartTimeFinder(raceLog);
         initializeWindTrack(raceLog);
         analyze();
+        if(markPassingUpdateListener!=null){
+            suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
+            fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
+            analyzeMarkPassings();
+        }
     }
 
-    public void listenForMarkPassingEvents(MarkPassingUpdateListener listener) {
+    private void analyzeMarkPassings() {
+        for(Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()){
+            setSuppressedPassing(pair.getA(), pair.getB());
+        }
+        for(Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()){
+            setFixedMarkPassing(triple.getA(), triple.getB(), triple.getC());
+        }
+    }
+
+    public void setMarkPassingUpdateListener(MarkPassingUpdateListener listener) {
         markPassingUpdateListener = listener;
     }
 
@@ -140,6 +160,14 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
+    private void setFixedMarkPassing(Competitor c, Integer zeroBasedIndexOfPassedWaypoint, TimePoint timePointOfFixedPassing) {
+        markPassingUpdateListener.addFixedPassing(c, zeroBasedIndexOfPassedWaypoint, timePointOfFixedPassing);
+    }
+
+    private void setSuppressedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
+        markPassingUpdateListener.addSuppressedPassing(c, zeroBasedIndexOfWaypoint);
+    }
+
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
@@ -166,9 +194,20 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(FixedMarkPassingEvent event) {
         if (markPassingUpdateListener != null) {
-            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
+            setFixedMarkPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
                     event.getTimePointOfFixedPassing());
-
         }
+    }
+
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
+        if (markPassingUpdateListener != null) {
+            setSuppressedPassing(event.getInvolvedBoats().get(0), event.getIndexOfFirstSuppressedWaypoint());
+        }
+    }
+
+    @Override
+    public void visit(RevokeEvent event) {
+        // TODO Auto-generated method stub
     }
 }
