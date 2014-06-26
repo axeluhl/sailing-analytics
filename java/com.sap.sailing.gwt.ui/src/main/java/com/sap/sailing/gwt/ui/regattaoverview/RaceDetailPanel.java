@@ -141,7 +141,7 @@ public class RaceDetailPanel extends SimplePanel {
             return;
         }
         String statusText = flagInterpreter.getMeaningOfRaceStateAndFlags(data.raceInfo.lastStatus,
-                data.raceInfo.lastUpperFlag, data.raceInfo.lastLowerFlag, data.raceInfo.isLastFlagDisplayed);
+                data.raceInfo.lastUpperFlag, data.raceInfo.lastLowerFlag, data.raceInfo.lastFlagsAreDisplayed);
         String headerLabelText = data.regattaDisplayName + " " + data.raceInfo.fleetName + " " + data.raceInfo.raceName
                 + " (" + statusText + ")";
         headerLabel.setText(stringMessages.showingDetailsOfRace(headerLabelText));

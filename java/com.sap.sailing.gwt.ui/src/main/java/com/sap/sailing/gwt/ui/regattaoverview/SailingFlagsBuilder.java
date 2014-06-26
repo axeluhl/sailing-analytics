@@ -40,15 +40,15 @@ public class SailingFlagsBuilder {
         return SafeStylesUtils.fromTrustedString("float:left;padding-right:10px;");
     }
     
-    public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, String tooltip) {
+    public static SafeHtml render(Flags upperFlag, Flags lowerFlag, boolean isDisplayed, boolean displayStateChanged, String tooltip) {
         FlagImageResolver flagImageResolver = new FlagImageResolver();
-        ImageResource upperFlagImage = flagImageResolver.resolveFlagToImage(upperFlag);
-        ImageResource lowerFlagImage = flagImageResolver.resolveFlagToImage(lowerFlag);
-        ImageResource directionImage = flagImageResolver.resolveFlagDirectionToImage(isDisplayed);
+        ImageResource upperFlagImage = flagImageResolver.resolveFlagToImage(upperFlag, isDisplayed, displayStateChanged);
+        ImageResource lowerFlagImage = flagImageResolver.resolveFlagToImage(lowerFlag, isDisplayed, displayStateChanged);
+        ImageResource directionImage = flagImageResolver.resolveFlagDirectionToImage(isDisplayed, displayStateChanged);
         
         SafeHtml upperFlagHtml = (upperFlagImage != null) ? makeImagePrototype(upperFlagImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
         SafeHtml lowerFlagHtml = (lowerFlagImage != null) ? makeImagePrototype(lowerFlagImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
-        SafeHtml directionHtml = (upperFlagImage != null) ? makeImagePrototype(directionImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
+        SafeHtml directionHtml = (directionImage != null) ? makeImagePrototype(directionImage).getSafeHtml() : SafeHtmlUtils.EMPTY_SAFE_HTML;
         
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
         SafeStyles imgStyle = getImageStyle();
