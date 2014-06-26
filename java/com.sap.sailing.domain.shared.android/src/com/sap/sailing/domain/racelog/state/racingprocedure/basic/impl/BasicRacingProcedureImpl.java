@@ -47,7 +47,7 @@ public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 
     @Override
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
-        return new FlagPoleState(Collections.<FlagPole>emptyList());
+        return new FlagPoleState(Collections.<FlagPole>emptyList(), null);
     }
 
     @Override

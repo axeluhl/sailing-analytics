@@ -210,6 +210,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     private boolean stopped;
 
+    private final TrackedRegattaRegistry trackedRegattaRegistry;
+
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
      * data from there. Receiving continues until {@link #stop()} is called.
@@ -294,6 +296,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         super();
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
         urls = createID(paramURL, liveURI, storedURI);
@@ -593,11 +596,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         updateStatusOfTrackedRaces();
         if (!stopped) {
             try {
-                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
-                // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
-                // at this point without missing any data.
-                stop();
-            } catch (InterruptedException e) {
+                for (RaceDefinition race : getRaces()) {
+                    // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the TracAPI then
+                    // all subscriptions have received all their data and it's therefore safe to stop all subscriptions
+                    // at this point without missing any data.
+                    trackedRegattaRegistry.stopTracking(regatta, race);
+                }
+            } catch (InterruptedException | IOException e) {
                 logger.log(Level.INFO, "Interrupted while trying to stop tracker "+this, e);
             }
         }

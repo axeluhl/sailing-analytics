@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +30,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.impl.BaseRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
@@ -39,7 +38,8 @@ import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     
-    private boolean finishedLoadingFirstBeforeSecond = true;
+    private int numberOfSwitchesBetweenLoadingRaceLogs = 0;
+    private Integer previouslyLoading = null;
     private int numFixesReceived = 0;
         
     @Test
@@ -114,19 +114,16 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
-        trackedRace.addListener(new BaseRaceChangeListener() {
-            boolean currentlyLoadingFirst = true;
+        trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
                 numFixesReceived++;
-                if (currentlyLoadingFirst) {
-                    if (fix.getTimePoint().asMillis() > numFixes/2) {
-                        currentlyLoadingFirst = false;
-                    }
-                } else {
-                    if (fix.getTimePoint().asMillis() <= numFixes/2) {
-                        finishedLoadingFirstBeforeSecond = false;
-                    }
+                int currentlyLoading = fix.getTimePoint().asMillis() <= numFixes/2 ? 1 : 2;
+                if (previouslyLoading == null) {
+                    previouslyLoading = currentlyLoading;
+                } else if (previouslyLoading != currentlyLoading) {
+                    previouslyLoading = currentlyLoading;
+                    numberOfSwitchesBetweenLoadingRaceLogs++;
                 }
             }
         });
@@ -137,7 +134,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog2);
         
-        assertTrue(finishedLoadingFirstBeforeSecond);
+        assertEquals(1, numberOfSwitchesBetweenLoadingRaceLogs);
         assertEquals(numFixes, numFixesReceived);
     }
 }

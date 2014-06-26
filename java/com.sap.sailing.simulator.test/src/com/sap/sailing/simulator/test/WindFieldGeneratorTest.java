@@ -14,11 +14,13 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -98,9 +100,7 @@ public class WindFieldGeneratorTest {
         wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
-       
-       
+        Duration timeStep = new MillisecondsDurationImpl(30 * 1000);
         wf.generate(startTime, null, timeStep);
         wf.setTimeScale(1.0);
         SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
@@ -243,7 +243,7 @@ public class WindFieldGeneratorTest {
         wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        Duration timeStep = new MillisecondsDurationImpl(30 * 1000);
         wf.generate(startTime, null, timeStep);
 
         SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));

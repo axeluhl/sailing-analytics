@@ -3,8 +3,11 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 
 public class RectField implements VectorField {
 
@@ -15,8 +18,7 @@ public class RectField implements VectorField {
     private final double y0;
     private final double y1;
 
-    private Position visSW;
-    private Position visNE;
+	private double motionFactor;
 
     private final int w;
     private final int h;
@@ -25,16 +27,13 @@ public class RectField implements VectorField {
     private final double particleFactor;
     private final String[] colorsForSpeeds;
 
-    public RectField(Vector[][] field, double x0, double y0, double x1, double y1) {
+    public RectField(Vector[][] field, double x0, double y0, double x1, double y1, StreamletParameters parameters) {
         colorsForSpeeds = createColorsForSpeeds();
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;
         this.y1 = y1;
-
-        this.visSW = new DegreePosition(0.0, 0.0);
-        this.visNE = new DegreePosition(0.0, 0.0);
-
+		this.motionFactor = 0.9 * parameters.motionScale;
         this.field = field;
         this.w = field.length;
         this.h = field[0].length;
@@ -57,7 +56,7 @@ public class RectField implements VectorField {
         my = (my / this.h) * (y1 - y0) + y0;
     }
 
-    public static RectField read(String jsonData, boolean correctForSphere) {
+    public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters) {
         JSONObject data = JSONParser.parseLenient(jsonData).isObject();
         int w = (int) data.get("gridWidth").isNumber().doubleValue();
         int h = (int) data.get("gridHeight").isNumber().doubleValue();
@@ -82,7 +81,7 @@ public class RectField implements VectorField {
             }
         }
         RectField result = new RectField(field, data.get("x0").isNumber().doubleValue(), data.get("y0").isNumber()
-                .doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue());
+                .doubleValue(), data.get("x1").isNumber().doubleValue(), data.get("y1").isNumber().doubleValue(), parameters);
         return result;
     }
 
@@ -96,15 +95,6 @@ public class RectField implements VectorField {
 
     @Override
     public void prevStep() {
-    }
-
-    @Override
-    public Position getRandomPosition() {
-        double rndY = Math.random();
-        double rndX = Math.random();
-        double latDeg = rndY * this.visSW.getLatDeg() + (1 - rndY) * this.visNE.getLatDeg();
-        double lngDeg = rndX * this.visSW.getLngDeg() + (1 - rndX) * this.visNE.getLngDeg();
-        return new DegreePosition(latDeg, lngDeg);
     }
 
     @Override
@@ -151,12 +141,12 @@ public class RectField implements VectorField {
 
     @Override
     public double motionScale(int zoomLevel) {
-        return 0.9 * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
+        return this.motionFactor * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
     public double particleWeight(Position p, Vector v) {
-        return 1.0 - v.length() / this.maxLength;
+        return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
     @Override
@@ -185,25 +175,11 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Position[] getFieldCorners() {
-        DegreePosition[] result = new DegreePosition[2];
-        result[0] = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
-        result[1] = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
-        return result;
-    }
-
-    @Override
-    public void setVisNE(Position visNE) {
-        this.visNE = visNE;
-    }
-
-    @Override
-    public void setVisSW(Position visSW) {
-        this.visSW = visSW;
-    }
-
-    @Override
-    public void setVisFullCanvas(boolean full) {
+    public Bounds getFieldCorners() {
+        // FIXME this is not date line-safe. If the field crosses +180°E (the international date line), this will fail
+        Position sw = new DegreePosition(Math.min(this.y0, this.y1), Math.min(this.x0, this.x1));
+        Position ne = new DegreePosition(Math.max(this.y0, this.y1), Math.max(this.x0, this.x1));
+        return new BoundsImpl(sw, ne);
     }
 
     @Override

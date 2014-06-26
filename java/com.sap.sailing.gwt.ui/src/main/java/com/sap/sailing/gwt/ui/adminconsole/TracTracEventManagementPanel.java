@@ -296,6 +296,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.regattaName);
+                if (t.boatClassNames != null) {
+                    for (String boatClassName : t.boatClassNames) {
+                        strings.add(boatClassName);
+                    }
+                }
                 return strings;
             }
         };

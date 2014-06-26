@@ -28,6 +28,8 @@ public class DetailTypeFormatter {
             return stringMessages.totalPoints();
         case REGATTA_TOTAL_POINTS:
             return stringMessages.totalPoints();            
+        case REGATTA_TOTAL_POINTS_SUM:
+            return stringMessages.totalPoints();            
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
@@ -194,6 +196,7 @@ public class DetailTypeFormatter {
         case OVERALL_RANK:
         case RACE_TOTAL_POINTS:
         case REGATTA_TOTAL_POINTS:
+        case REGATTA_TOTAL_POINTS_SUM:
         case CURRENT_LEG:
         case TACK:
         case START_TACK:
@@ -292,6 +295,8 @@ public class DetailTypeFormatter {
         case RACE_TOTAL_POINTS:
             return stringMessages.raceTotalPointsTooltip();
         case REGATTA_TOTAL_POINTS:
+            return stringMessages.regattaTotalPointsTooltip();            
+        case REGATTA_TOTAL_POINTS_SUM:
             return stringMessages.regattaTotalPointsTooltip();            
         case RANK_GAIN:
             return stringMessages.rankGainTooltip();

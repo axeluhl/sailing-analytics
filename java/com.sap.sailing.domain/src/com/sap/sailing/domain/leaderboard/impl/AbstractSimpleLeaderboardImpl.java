@@ -288,6 +288,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
 
         @Override
+        public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
         public void statusChanged(TrackedRaceStatus newStatus) {
             // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
@@ -520,15 +530,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        return getTotalPoints(competitor, getRaceColumns(), timePoint);
+    }
+
+    @Override
+    public Double getTotalPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
+            TimePoint timePoint) throws NoWindException {
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
-        for (RaceColumn r : getRaceColumns()) {
-            if (r.isStartsWithZeroScore()) {
+        for (RaceColumn raceColumn : raceColumnsToConsider) {
+            if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
-            if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
-                final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+            if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
+                final Double totalPoints = getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
@@ -686,6 +702,46 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));
+        }
+        return result;
+    }
+
+    @Override
+    public Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(final TimePoint timePoint)
+            throws NoWindException {
+        final Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        Map<RaceColumn, Future<Map<Competitor, Double>>> futures = new HashMap<>();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            raceColumnsToConsider.add(raceColumn);
+            final Iterable<RaceColumn> finalRaceColumnsToConsider = new ArrayList<>(raceColumnsToConsider);
+            futures.put(raceColumn, executor.submit(new Callable<Map<Competitor, Double>>() {
+                @Override
+                public Map<Competitor, Double> call() {
+                    Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
+                    for (Competitor competitor : getCompetitors()) {
+                        try {
+                            totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, finalRaceColumnsToConsider, timePoint));
+                        } catch (NoWindException e) {
+                            throw new NoWindError(e);
+                        }
+                    }
+                    synchronized (result) {
+                        return totalPointsSumPerCompetitorInColumn;
+                    }
+                }
+            }));
+        }
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            try {
+                result.put(raceColumn, futures.get(raceColumn).get());
+            } catch (InterruptedException | ExecutionException e) {
+                if (e.getCause() instanceof NoWindError) {
+                    throw ((NoWindError) e.getCause()).getCause();
+                } else {
+                    throw new RuntimeException(e); // no caught exceptions occur in the futures executed
+                }
+            }
         }
         return result;
     }

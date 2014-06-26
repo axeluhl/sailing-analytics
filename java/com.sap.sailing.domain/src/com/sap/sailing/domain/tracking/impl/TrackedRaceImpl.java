@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.Timer;
@@ -178,7 +179,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private long updateCount;
 
-    private transient Map<TimePoint, List<Competitor>> competitorRankings;
+    /**
+     * Limit for the cache size in {@link #competitorRankings} and respectively in {@link #competitorRankingsLocks}.
+     */
+    private static final int MAX_COMPETITOR_RANKINGS_CACHE_SIZE = 10;
+    
+    private transient LinkedHashMap<TimePoint, List<Competitor>> competitorRankings;
 
     /**
      * The locks managed here correspond with the {@link #competitorRankings} structure. When
@@ -186,7 +192,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * time point. Readers use the read lock. Checking / entering a lock into this map uses <code>synchronized</code> on
      * the map itself.
      */
-    private transient Map<TimePoint, NamedReentrantReadWriteLock> competitorRankingsLocks;
+    private transient LinkedHashMap<TimePoint, NamedReentrantReadWriteLock> competitorRankingsLocks;
 
     /**
      * legs appear in the order in which they appear in the race's course
@@ -374,14 +380,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
-        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        competitorRankings = createCompetitorRankingsCache();
+        competitorRankingsLocks = createCompetitorRankingsLockMap();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
+    }
+
+    private LinkedHashMap<TimePoint, NamedReentrantReadWriteLock> createCompetitorRankingsLockMap() {
+        return new LinkedHashMap<TimePoint, NamedReentrantReadWriteLock>() {
+            private static final long serialVersionUID = 6298801656693955386L;
+            @Override
+            protected boolean removeEldestEntry(Entry<TimePoint, NamedReentrantReadWriteLock> eldest) {
+                return size() > MAX_COMPETITOR_RANKINGS_CACHE_SIZE;
+            }
+        };
+    }
+
+    private LinkedHashMap<TimePoint, List<Competitor>> createCompetitorRankingsCache() {
+        return new LinkedHashMap<TimePoint, List<Competitor>>() {
+            private static final long serialVersionUID = -6044369612727021861L;
+            @Override
+            protected boolean removeEldestEntry(Entry<TimePoint, List<Competitor>> eldest) {
+                return size() > MAX_COMPETITOR_RANKINGS_CACHE_SIZE;
+            }
+        };
     }
 
     /**
@@ -426,8 +452,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
-        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        competitorRankings = createCompetitorRankingsCache();
+        competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
@@ -995,44 +1021,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         List<Competitor> rankedCompetitors;
-        final boolean lockForWrite;
         synchronized (competitorRankings) {
             rankedCompetitors = competitorRankings.get(timePoint);
-            if (rankedCompetitors == null) {
-                lockForWrite = true;
-            } else {
-                lockForWrite = false;
-            }
         }
-        if (lockForWrite) {
+        if (rankedCompetitors == null) {
             LockUtil.lockForWrite(readWriteLock);
-        } else {
-            LockUtil.lockForRead(readWriteLock);
-        }
-        try {
-            if (rankedCompetitors == null) {
-                rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write
-                                                                       // lock after updating the cache
+            try {
                 if (rankedCompetitors == null) {
-                    RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                    rankedCompetitors = new ArrayList<Competitor>();
-                    for (Competitor c : getRace().getCompetitors()) {
-                        rankedCompetitors.add(c);
-                    }
-                    Collections.sort(rankedCompetitors, comparator);
-                    synchronized (competitorRankings) {
-                        competitorRankings.put(timePoint, rankedCompetitors);
+                    rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
+                                                                           // write
+                                                                           // lock after updating the cache
+                    if (rankedCompetitors == null) {
+                        RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                        rankedCompetitors = new ArrayList<Competitor>();
+                        for (Competitor c : getRace().getCompetitors()) {
+                            rankedCompetitors.add(c);
+                        }
+                        Collections.sort(rankedCompetitors, comparator);
+                        synchronized (competitorRankings) {
+                            competitorRankings.put(timePoint, rankedCompetitors);
+                        }
                     }
                 }
-            }
-            return rankedCompetitors;
-        } finally {
-            if (lockForWrite) {
+            } finally {
                 LockUtil.unlockAfterWrite(readWriteLock);
-            } else {
-                LockUtil.unlockAfterRead(readWriteLock);
             }
         }
+        return rankedCompetitors;
     }
 
     @Override
@@ -1852,6 +1867,42 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
+     * This is probably best explained by example. If the wind bearing is from port to starboard, the situation looks
+     * like this:
+     * 
+     * <pre>
+     *                                 ^
+     *                 Wind            | Boat
+     *               ----------->      |
+     *                                 |
+     * 
+     * </pre>
+     * 
+     * In this case, the boat gets the wind from port, so the result has to be {@link Tack#PORT}. The angle between the
+     * boat's heading (which we can only approximate by the boat's course over ground) and the wind bearing in this case
+     * is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code> in this case will
+     * return a bearing representing -90 degrees.
+     * <p>
+     * 
+     * If the wind is blowing the other way, the angle returned by {@link Bearing#getDifferenceTo(Bearing)} will
+     * correspond to +90 degrees. In other words, a negative angle means starboard tack, a positive angle represents
+     * port tack.
+     * <p>
+     * 
+     * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     * 
+     * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
+     */
+    @Override
+    public Tack getTack(SpeedWithBearing estimatedSpeed, Wind wind, TimePoint timePoint) {
+        Tack result = null;
+        if (estimatedSpeed != null) {
+            result = getTack(wind, estimatedSpeed.getBearing());
+        }
+        return result;
+    }
+
+    /**
      * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
      * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
      * 
@@ -1861,15 +1912,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
         final Wind wind = getWind(where, timePoint);
-        Tack result;
         if (wind == null) {
             throw new NoWindException("Can't determine wind direction in position " + where + " at " + timePoint
                     + ", therefore cannot determine tack");
         }
+        return getTack(wind, boatBearing);
+    }
+
+
+    /**
+     * Based on the wind, compares the <code>boatBearing</code> to the wind's bearing at
+     * that time and place and determined the tack.
+     */
+    private Tack getTack(Wind wind, Bearing boatBearing) {
         Bearing windBearing = wind.getBearing();
         Bearing difference = windBearing.getDifferenceTo(boatBearing);
-        result = difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
-        return result;
+        return difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
     }
 
     @Override
@@ -2026,6 +2084,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 GPSFixMoving next = approximationPointsIter.next();
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 // compute course change on "approximation track"
+                // FIXME bug 2009: when a maneuver (particularly a penalty circle) is executed at high turn rates, approximations may lead to turns >180deg, hence inferred to turn the wrong way; need to loop across the non-approximated fixes here!
                 CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
                         .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
                 com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>(current,

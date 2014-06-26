@@ -104,11 +104,13 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final boolean showRaceDetails;
     private final boolean canReplayDuringLiveRaces;
     private final boolean showMapControls;
+    private final boolean showNavigationPanel;
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
-            boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
+            boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls,
+            boolean showNavigationPanel) {
         super();
         this.isEmbedded = embedded;
         this.showRaceDetails = showRaceDetails;
@@ -117,6 +119,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         this.sailingService = sailingService;
         this.stringMessages = stringConstants;
         this.errorReporter = errorReporter;
+        this.showNavigationPanel = showNavigationPanel;
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
         setWidth("95%");
@@ -424,6 +427,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
+                Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
         if (viewMode != null && !viewMode.isEmpty()) {

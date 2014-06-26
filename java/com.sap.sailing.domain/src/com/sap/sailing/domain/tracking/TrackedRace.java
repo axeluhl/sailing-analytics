@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -381,6 +382,17 @@ public interface TrackedRace extends Serializable {
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
+     * requested.
+     * <p>
+     * This method outperforms {@link #getTack(Competitor, TimePoint)}, based on being passed an already calculated wind
+     * for the given time and competitor position as well as the competitors speed and course over ground.
+     * <p>
+     * This method will acquire the read lock for the competitor's track.
+     */
+    Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint);
+
     TrackedRegatta getTrackedRegatta();
 
     /**
@@ -578,8 +590,11 @@ public interface TrackedRace extends Serializable {
     RaceLog getRaceLog(Serializable identifier);
     
     /**
-     * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
-     * @param listener the listener to operate with.
+     * A setter for the listener on course design changes suggested by one of the {@link RaceLog}s attached to this
+     * race. The listener is mostly part of the tracking provider adapter.
+     * 
+     * @param listener
+     *            the listener to operate with.
      */
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
