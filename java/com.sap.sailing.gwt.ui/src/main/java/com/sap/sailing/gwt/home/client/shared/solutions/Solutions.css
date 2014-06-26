@@ -6,99 +6,151 @@
   font-size: 1rem;
 }
 .solutions_nav {
-  border-bottom: 1px solid #ccc;
-  display: table;
-  width: 100%;
+  border-bottom: 1px solid #ddd;
 }
 .solutions_nav_link {
-  display: table-cell;
-  font-size: 1em;
   display: inline-block;
-  padding: 0.9375em 0.9375em 0.5em;
+  padding: 0.9375em 0 0.6875em 0;
+  border-bottom: 0.25em solid transparent;
+  font-weight: 600;
   color: #666;
-  border-bottom: 0.25em solid #fff;
+  margin-right: 0.3125em;
 }
-.solutions_nav_link:hover {
+.solutions_nav_link:hover,
+.solutions_nav_link:focus {
+  border-bottom-color: #f0ab00;
   text-decoration: none;
-  color: #000;
-  border-bottom: 0.25em solid #f0ab00;
+  color: #333;
+}
+.solutions_nav_link:last-child {
+  margin-right: 0;
 }
 .solutions_content {
   position: relative;
   z-index: 2;
 }
-.solutions_content .parallax {
+.solutions_content:nth-child\(odd\) {
+  background-color: #f8f8f8;
+}
+.solutions_content:nth-child\(even\) {
+  background-color: #fff;
+}
+.solutions_content_parallax {
   position: absolute;
-  width: 100%;
   top: 0;
+  bottom: 0;
   left: 0;
+  right: 0;
   z-index: -1;
 }
-.solutions_content .grid {
-  padding: 6.25em 0;
+.solutions_content_grid {
   height: 100%;
+  padding: 3.125em 0;
 }
 .solutions_contentsap {
-  background: #fff;
-  height: 34.375em;
-}
-.solutions_contentsap .grid {
+  max-width: 82.5em;
+  margin: auto;
   background-repeat: no-repeat;
-  background-image: url("../images/solutions-sap.png");
-  background-position: left center;
+  background-position: center center;
   -webkit-background-size: 100%;
   -moz-background-size: 100%;
   background-size: 100%;
+  background-image: url("images/home/solutions-sap.png");
+}
+.solutions_contentsap_grid {
+	padding: 6.25em 0 11.25em;
+	/**
+  padding: 3.75em 0 4.0625em;
+  */
 }
 .solutions_contentrace {
-  background: #f8f8f8;
-  height: 40.625em;
+  font-size: 16px;
+  font-size: 1rem;
 }
-.solutions_contentrace .parallax {
-  height: 150%;
+.solutions_contentrace_grid {
+	padding: 3.75em 0 15%;
+	/**
+  padding: 2.5em 0 10%;
+  */
+}
+.solutions_contentrace_parallax {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contentrace_parallax_background {
+  margin: auto;
+  height: 100%;
+  max-width: 82.5em;
   background-repeat: no-repeat;
-  background-image: url("../images/solutions-race.png");
-  background-position: right bottom;
-  -webkit-background-size: 100%;
-  -moz-background-size: 100%;
-  background-size: 100%;
+  background-image: url("images/home/solutions-race.png");
+  -webkit-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  /**
+  background-position: center 18.75em;
+  */
+  background-position: center 12.75em;
 }
+/**
+.solutions_contentrace_parallax.noparallax .background {
+  background-position: center bottom;
+}
+*/
 .solutions_contentpost {
-  background: #fff;
-  height: 30em;
+  font-size: 16px;
+  font-size: 1rem;
 }
-.solutions_contentpost .grid {
+.solutions_contentpost_grid {
   background-repeat: no-repeat;
-  background-image: url("../images/solutions-post.png");
+  background-image: url("images/home/solutions-post.png");
   background-position: left center;
   -webkit-background-size: 100%;
   -moz-background-size: 100%;
   background-size: 100%;
+  padding: 1.5625em 0;
 }
 .solutions_contenttraining {
-  background: #f8f8f8;
-  height: 38.75em;
+  font-size: 16px;
+  font-size: 1rem;
 }
-.solutions_contenttraining .parallax {
-  height: 180%;
+.solutions_contenttraining_grid {
+  padding-top: 4.6875em;
+}
+.solutions_contenttraining_parallax {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contenttraining_parallax_background {
+  margin: auto;
+  height: 100%;
+  max-width: 75em;
   background-repeat: no-repeat;
-  background-image: url("../images/solutions-training.png");
-  background-position: right bottom;
-  -webkit-background-size: 100%;
-  -moz-background-size: 100%;
-  background-size: 100%;
+  background-image: url("images/home/solutions-training.png");
+  -webkit-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  background-position: center 12.5em;
 }
+/**
+.solutions_contenttraining_parallax.noparallax .background {
+  background-position: center 6.25em;
+}
+*/
 .solutions_contentsimulator {
-  background: #fff;
-  height: 36.25em;
+  font-size: 16px;
+  font-size: 1rem;
 }
-.solutions_contentsimulator .grid {
+.solutions_contentsimulator_grid {
   background-repeat: no-repeat;
-  background-image: url("../images/solutions-simulator.png");
+  background-image: url("images/home/solutions-simulator.png");
   background-position: left center;
   -webkit-background-size: 100%;
   -moz-background-size: 100%;
   background-size: 100%;
+	padding: 6.25em 0 12.5em;
+/**
+  padding: 3.125em 0 3.125em;
+  */
 }
 .solutions_content_linkappstore {
   display: inline-block;

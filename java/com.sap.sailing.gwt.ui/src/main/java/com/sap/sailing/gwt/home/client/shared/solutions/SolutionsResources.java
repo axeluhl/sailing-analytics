@@ -15,13 +15,22 @@ public interface SolutionsResources extends ClientBundle {
         String solutions_nav();
         String solutions_nav_link();
         String solutions_content();
-        String parallax();
-        String grid();
+        String solutions_content_parallax();
+        String solutions_content_grid();
         String solutions_contentsap();
+        String solutions_contentsap_grid();
         String solutions_contentrace();
+        String solutions_contentrace_grid();
+        String solutions_contentrace_parallax();
+        String solutions_contentrace_parallax_background();
         String solutions_contentpost();
+        String solutions_contentpost_grid();
         String solutions_contenttraining();
+        String solutions_contenttraining_grid();
+        String solutions_contenttraining_parallax();
+        String solutions_contenttraining_parallax_background();
         String solutions_contentsimulator();
+        String solutions_contentsimulator_grid();
         String solutions_content_linkappstore();
     }
 }
