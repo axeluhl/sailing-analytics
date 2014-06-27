@@ -256,8 +256,8 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
 
-            Candidate marker = endOfFixedInterval;
-            while (marker != startOfFixedInterval) {
+            Candidate marker = candidateWithParentAndSmallestTotalCost.get(endOfFixedInterval).getA();
+            while (marker.getOneBasedIndexOfWaypoint() > 0) {
                 mostLikelyCandidates.add(marker);
                 marker = candidateWithParentAndSmallestTotalCost.get(marker).getA();
             }
