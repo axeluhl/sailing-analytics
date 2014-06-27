@@ -631,4 +631,6 @@ public interface SailingServiceAsync {
      */
     void search(String serverNameOrNullForMain, KeywordQuery query,
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
+
+    void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 }

@@ -1048,4 +1048,6 @@ public interface StringMessages extends Messages {
     String racesScored();
     String racesScoredTooltip();
     String showUncorrectedNetPoints();
+    String setStartTimeReceived();
+    String setStartTimeReceivedDescription();
 }

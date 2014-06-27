@@ -118,6 +118,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -4690,5 +4691,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
                 leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
                 leaderboardGroups);
+    }
+
+    @Override
+    public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
+        if (newStartTimeReceived != null) {
+            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
+                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+            DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+            trackedRace.setStartTimeReceived(new MillisecondsTimePoint(newStartTimeReceived));
+            
+            return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
+        }
+        return null;
     }
 }
