@@ -34,6 +34,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
@@ -83,6 +84,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
+
+    private CheckBox showUncorrectedNetPointsCheckbox;
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -630,13 +633,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         
         
 
-        Grid scoreCorrectionInfoGrid = new Grid(3,3);
+        Grid scoreCorrectionInfoGrid = new Grid(3,4);
         scoreCorrectionInfoGrid.setCellPadding(3);
-        scoreCorrectionInfoGrid.setWidget(0,  0, new Label("Last score correction time:"));
+        scoreCorrectionInfoGrid.setWidget(0,  0, new Label("Last score correction time:")); // FIXME i18n
         lastScoreCorrectionTimeBox = new DateBox();
         scoreCorrectionInfoGrid.setWidget(0,  1, lastScoreCorrectionTimeBox);
 
-        scoreCorrectionInfoGrid.setWidget(1,  0, new Label("Last score correction comment:"));
+        scoreCorrectionInfoGrid.setWidget(1,  0, new Label("Last score correction comment:")); // FIXME i18n
         lastScoreCorrectionCommentBox = new TextBox();
         scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
 
@@ -664,9 +667,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
 
-        final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'");
+        final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'"); // FIXME i18n
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
-        scoreCorrectionInfoGrid.setWidget(0,  2, setScoreCorrectionDefaultTimeBtn);
+        scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
+        showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());
+        scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedNetPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -882,6 +887,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;
+    }
+    
+    /**
+     * Computing the uncorrected scores can be expensive for large leaderboards; disable by default but allow user to enable
+     */
+    @Override
+    protected boolean isFillNetPointsUncorrected() {
+        return showUncorrectedNetPointsCheckbox.getValue();
     }
 
     @Override

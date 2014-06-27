@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
@@ -46,7 +47,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Logger logger = Logger.getLogger(LeaderboardDTOCache.class.getName());
     
     /**
-     * In live operations, {@link #getLeaderboardByName(Date, Collection, boolean, DomainFactory, TrackedRegattaRegistry)} is the application's
+     * In live operations, {@link #getLeaderboardByName(Date, Collection, boolean, DomainFactory, TrackedRegattaRegistry, boolean)} is the application's
      * bottleneck. When two clients ask the same data for the same leaderboard with their
      * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
      * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
@@ -122,10 +123,13 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * 
      * @param addOverallDetails
      *            tells whether the columns containing the overall details shall be added
+     * @param fillNetPointsUncorrected
+     *            whether to fill the {@link LeaderboardEntryDTO#netPointsUncorrected} field which can be quite
+     *            expensive
      */
     public LeaderboardDTO getLeaderboardByName(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean addOverallDetails,
-            final DomainFactory baseDomainFactory, final TrackedRegattaRegistry trackedRegattaRegistry)
+            final DomainFactory baseDomainFactory, final TrackedRegattaRegistry trackedRegattaRegistry, final boolean fillNetPointsUncorrected)
             throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
@@ -167,7 +171,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     try {
                         LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory);
+                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, fillNetPointsUncorrected);
                         return result;
                     } finally {
                         LockUtil.unpropagateLockSetFrom(callerThread);

@@ -465,7 +465,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         getSailingService().getLeaderboardByName(getLeaderboardName(),
                 timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                 /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                shallAddOverallDetails(), previousLeaderboard.getId(), new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                shallAddOverallDetails(), previousLeaderboard.getId(), /* fillNetPointsUncorrected */ false,
+                new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
                         new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                             @Override
                             public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
@@ -1896,8 +1897,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
-                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    shallAddOverallDetails(), /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages);
+                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), shallAddOverallDetails(), /* previousLeaderboard */
+                    getLeaderboard(), isFillNetPointsUncorrected(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -1917,6 +1918,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             getBusyIndicator().setBusy(false);
         }
+    }
+
+    protected boolean isFillNetPointsUncorrected() {
+        return false;
     }
 
     /**

@@ -185,7 +185,8 @@ public interface SailingServiceAsync {
 
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
+            boolean addOverallDetails, String previousLeaderboardId, boolean fillNetPointsUncorrected,
+            AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
