@@ -21,7 +21,7 @@ public class AbstractTestWithIgtimiConnection {
     public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
-        connection = connectionFactory.connect(account, /* correctByDeclination */ true);
+        connection = connectionFactory.connect(account);
     }
 
 }

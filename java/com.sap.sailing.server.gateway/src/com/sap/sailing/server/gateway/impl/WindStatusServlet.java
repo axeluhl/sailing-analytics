@@ -137,7 +137,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             if (account.getUser() != null) {
-                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account, /* correctByDeclination */ true);
+                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices(), DeclinationService.INSTANCE);
