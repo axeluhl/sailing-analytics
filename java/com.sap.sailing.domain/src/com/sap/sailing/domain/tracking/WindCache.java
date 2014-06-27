@@ -1,0 +1,16 @@
+package com.sap.sailing.domain.tracking;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.TimePoint;
+
+/**
+ * When comprehensive calculations are prone to query wind several times for the same competitor in the same race for
+ * the same time point, a cache of this type can be used to eliminate repeated evaluation of common sub-expressions that
+ * are expensive to calculate.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public interface WindCache {
+    Wind getWind(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
+}
