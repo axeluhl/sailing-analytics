@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -40,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.useragent.UserAgentChecker;
@@ -65,7 +67,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
-    private boolean toolbarHidden;
+    private boolean toolbarAndLogoAndTitleBarHidden;
 
     @Override
     protected void doOnModuleLoad() {    
@@ -170,8 +172,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
+        AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, asyncActionsExecutor, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider, showMapControls);
         raceBoardPanel.fillRegattas(regattas);
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
@@ -236,15 +239,26 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
+        final FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
-        toolbarHidden = false;
+        toolbarAndLogoAndTitleBarHidden = false;
         if (!raceboardViewConfiguration.isShowNavigationPanel()) {
             p.setWidgetHidden(toolbarPanel, true);
-            toolbarHidden = true;
+            globalNavigationPanel.setVisible(false);
+            toolbarAndLogoAndTitleBarHidden = true;
         }
+
+        p.addSouth(timePanel, 90);
+        p.add(raceBoardPanel);
+        p.addStyleName("dockLayoutPanel");
+
+        addModeratorShortkeyFunctionality(p, toolbarPanel, raceBoardPanel, timePanel);
+    }
+
+    private void addModeratorShortkeyFunctionality(final DockLayoutPanel p, final Panel toolbarPanel,
+            final RaceBoardPanel raceBoardPanel, final Panel timeWrapperPanel) {
         Event.addNativePreviewHandler(new NativePreviewHandler() {
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -255,16 +269,22 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     Scheduler.get().scheduleDeferred(new Command() {
                         @Override
                         public void execute() {
-                            p.setWidgetHidden(toolbarPanel, !toolbarHidden);
-                            toolbarHidden = !toolbarHidden;
+                            p.setWidgetHidden(toolbarPanel, !toolbarAndLogoAndTitleBarHidden);
+                            globalNavigationPanel.setVisible(toolbarAndLogoAndTitleBarHidden);
+                            toolbarAndLogoAndTitleBarHidden = !toolbarAndLogoAndTitleBarHidden;
+                            RaceTimePanel timePanel = raceBoardPanel.getTimePanel();
+                            if (toolbarAndLogoAndTitleBarHidden) {
+                                timePanel.hideControlsPanelAndMovePlayButtonUp();
+                                p.setWidgetSize(timeWrapperPanel, 53);
+                            } else {
+                                timePanel.showControlsPanelAndMovePlayButtonDown();
+                                p.setWidgetSize(timeWrapperPanel, 90);
+                            }
                         }
                     });
 
                 }
             }
         });
-        p.addSouth(timePanel, 90);
-        p.add(raceBoardPanel);
-        p.addStyleName("dockLayoutPanel");
     }
 }

@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -89,6 +90,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
     private final UUID eventId;
 
     private EventDTO eventDTO;
@@ -129,6 +131,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
         this.eventId = eventId;
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
@@ -193,7 +196,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
-                
+                                errorReporter.reportError(cause.getMessage());
                             }
                 
                             @Override
@@ -386,7 +389,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public SafeHtml getValue(final RegattaOverviewEntryDTO entryDTO) {
                 String status = flagInterpreter.getMeaningOfRaceStateAndFlags(entryDTO.raceInfo.lastStatus, entryDTO.raceInfo.lastUpperFlag, 
-                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
+                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.lastFlagsAreDisplayed);
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 sb.appendHtmlConstant("<a class=\"pointeredLink\">");
                 sb.appendEscaped(status);
@@ -455,12 +458,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     tooltip += " " + FlagsMeaningExplanator.getFlagsMeaning(stringMessages,
                             entryDTO.raceInfo.lastUpperFlag, 
                             entryDTO.raceInfo.lastLowerFlag, 
-                            entryDTO.raceInfo.isLastFlagDisplayed);
+                            entryDTO.raceInfo.lastFlagsAreDisplayed);
                 }
                 return SailingFlagsBuilder.render(
                         entryDTO.raceInfo.lastUpperFlag,
                         entryDTO.raceInfo.lastLowerFlag,
-                        entryDTO.raceInfo.isLastFlagDisplayed,
+                        entryDTO.raceInfo.lastFlagsAreDisplayed,
+                        entryDTO.raceInfo.lastFlagsDisplayedStateChanged,
                         tooltip);
             }
             
@@ -477,7 +481,18 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.lastUpdateTime.compareTo(right.raceInfo.lastUpdateTime);
+                boolean nullGreater = false;
+                Date leftLastUpdateTime = left.raceInfo.lastUpdateTime;
+                Date rightLastUpdateTime = right.raceInfo.lastUpdateTime;
+                
+                if (leftLastUpdateTime == rightLastUpdateTime) {
+                    return 0;
+                } else if (leftLastUpdateTime == null) {
+                    return (nullGreater ? 1 : -1);
+                } else if (rightLastUpdateTime == null) {
+                    return (nullGreater ? -1 : 1);
+                }
+                return leftLastUpdateTime.compareTo(rightLastUpdateTime);
             }
         });
         lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -493,7 +508,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 } else if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.HOTEL)) {
                     additionalInformation.append(stringMessages.furtherSignalsAshore());
                     isInfoBefore = true;
-                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.isLastFlagDisplayed) {
+                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.lastFlagsAreDisplayed) {
                     additionalInformation.append(stringMessages.earlyStarters());
                     isInfoBefore = true;
                 }
@@ -537,7 +552,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         
         table.addColumnSortHandler(regattaOverviewListHandler);
-        table.getColumnSortList().push(courseAreaColumn);
+        ColumnSortInfo lastUpdateColumnSortInfo = new ColumnSortInfo(lastUpdateColumn, /*ascending*/ false);
+        table.getColumnSortList().push(lastUpdateColumnSortInfo);
         
         return table;
     }

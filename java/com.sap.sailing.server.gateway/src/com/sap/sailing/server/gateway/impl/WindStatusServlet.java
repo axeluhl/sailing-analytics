@@ -189,9 +189,13 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         
         public String toString() {
             if (message.getTrueWind() != null) {
-                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " Bearing: " + message.getTrueWindBearing().getDegrees();
+                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " From: " + getFromAsDegrees();
             }
             return messageReceivedAt.toString() + ": [" + boatID + "] " + message.getOriginalMessage();
+        }
+
+        private double getFromAsDegrees() {
+            return message.getTrueWindBearing().reverse().getDegrees();
         }
     }
     

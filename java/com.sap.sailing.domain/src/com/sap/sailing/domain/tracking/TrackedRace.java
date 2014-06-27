@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -380,6 +381,17 @@ public interface TrackedRace extends Serializable {
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
+     * requested.
+     * <p>
+     * This method outperforms {@link #getTack(Competitor, TimePoint)}, based on being passed an already calculated wind
+     * for the given time and competitor position as well as the competitors speed and course over ground.
+     * <p>
+     * This method will acquire the read lock for the competitor's track.
+     */
+    Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint);
 
     TrackedRegatta getTrackedRegatta();
 
