@@ -12,9 +12,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 public class ControlPointTableWrapper<S extends SelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
     public ControlPointTableWrapper(S selectionModel, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, false);
-
-        mainPanel.add(table);
+        super(sailingService, stringMessages, errorReporter, selectionModel, true);
         
         TextColumn<ControlPointDTO> nameColumn = new TextColumn<ControlPointDTO>() {
             @Override

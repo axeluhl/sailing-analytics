@@ -139,7 +139,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         table.addColumn(toCol, stringMessages.to());
 
         table.addColumnSortHandler(listHandler);
-        mainPanel.add(table);
     }
     
     private void notifyFilterHandlers() {
