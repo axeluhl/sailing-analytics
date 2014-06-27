@@ -117,32 +117,34 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     @Override
-    public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> markFixes) {
+    public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> markFixes) {
         Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
         TimePoint start = null;
         TimePoint end = null;
-        for (GPSFix fix : markFixes) {
-            Util.Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-            TimePoint newStart = timePoints.getA();
-            TimePoint newEnd = timePoints.getB();
-            start = start == null || start.after(newStart) ? newStart : start;
-            end = end == null || end.before(newEnd) ? newEnd : end;
+        for (Entry<Mark, List<GPSFix>> fixes : markFixes.entrySet()) {
+            for (GPSFix fix : fixes.getValue()) {
+                Util.Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(fixes.getKey())
+                        .getEstimatedPositionTimePeriodAffectedBy(fix);
+                TimePoint newStart = timePoints.getA();
+                TimePoint newEnd = timePoints.getB();
+                start = start == null || start.after(newStart) ? newStart : start;
+                end = end == null || end.before(newEnd) ? newEnd : end;
+            }
         }
         for (Competitor c : race.getRace().getCompetitors()) {
             List<GPSFix> comFixes = new ArrayList<>();
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
             GPSFix comFix = track.getFirstFixAtOrAfter(start);
             if (comFix != null) {
-                TimePoint fixTimePoint = comFix.getTimePoint();
                 if (end != null) {
-                    while (comFix != null && !fixTimePoint.after(end)) {
+                    while (comFix != null && !comFix.getTimePoint().after(end)) {
                         comFixes.add(comFix);
-                        comFix = track.getFirstFixAfter(fixTimePoint);
+                        comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 } else {
                     while (comFix != null) {
                         comFixes.add(comFix);
-                        comFix = track.getFirstFixAfter(fixTimePoint);
+                        comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 }
             }

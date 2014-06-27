@@ -134,7 +134,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
         Candidate toRemove = null;
         for (Candidate can : fixedPassings.get(c)) {
-            if (can.getOneBasedIndexOfWaypoint()-1 == zeroBasedIndexOfWaypoint) {
+            if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
                 toRemove = can;
                 break;
             }
@@ -216,7 +216,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         Candidate startOfFixedInterval = fixedPasses.first();
         Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
         Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
-        Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end.getOneBasedIndexOfWaypoint();
+        Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end
+                .getOneBasedIndexOfWaypoint();
         while (endOfFixedInterval != null) {
             if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
                 endOfFixedInterval = end;
@@ -232,8 +233,8 @@ public class CandidateChooserImpl implements CandidateChooser {
             int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
 
             boolean endFound = false;
-            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval, 0,
-                    race.getRace().getCourse()), 0.0));
+            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, 1, null), startOfFixedInterval,
+                    0, race.getRace().getCourse()), 0.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
@@ -266,11 +267,15 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
         boolean changed = false;
         Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
-        for (Candidate can : mostLikelyCandidates) {
-            MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
-            if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
-                changed = true;
-                break;
+        if (currentPasses.size() != mostLikelyCandidates.size()) {
+            changed = true;
+        } else {
+            for (Candidate can : mostLikelyCandidates) {
+                MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
+                if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
+                    changed = true;
+                    break;
+                }
             }
         }
         if (changed) {

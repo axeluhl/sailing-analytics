@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -172,32 +170,21 @@ public class MarkPassingCalculator {
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes, Map<Mark, List<GPSFix>> newMarkFixes) {
             Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
-            List<FutureTask<Map<Competitor, List<GPSFix>>>> markTasks = new ArrayList<>();
-            for (Entry<Mark, List<GPSFix>> markEntry : newMarkFixes.entrySet()) {
-                FutureTask<Map<Competitor, List<GPSFix>>> task = new FutureTask<>(new FixesAffectedByNewMarkFixes(markEntry.getKey(),
-                        markEntry.getValue()));
-                markTasks.add(task);
-                executor.submit(task);
-            }
+
             for (Entry<Competitor, List<GPSFix>> competitorEntry : newCompetitorFixes.entrySet()) {
-                HashSet<GPSFix> fixesForCompetitor = new HashSet<>();
+                Set<GPSFix> fixesForCompetitor = new HashSet<>();
                 combinedCompetitorFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
-            for (FutureTask<Map<Competitor, List<GPSFix>>> task : markTasks) {
-                Map<Competitor, List<GPSFix>> fixes = new HashMap<>();
-                try {
-                    fixes = task.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.severe("Threw Exception " + e.getMessage() + " while calculating fixes affected by new Mark Fixes.");
-                }
-                for (Entry<Competitor, List<GPSFix>> competitorEntry : fixes.entrySet()) {
-                    Set<GPSFix> fixesForCompetitor = combinedCompetitorFixes.get(competitorEntry.getKey());
-                    if (fixesForCompetitor == null) {
-                        fixesForCompetitor = new HashSet<>();
-                        combinedCompetitorFixes.put(competitorEntry.getKey(), fixesForCompetitor);
+            if (!newMarkFixes.isEmpty()) {
+                for (Entry<Competitor, List<GPSFix>> fixesAffectedByNewMarkFixes : finder
+                        .calculateFixesAffectedByNewMarkFixes(newMarkFixes).entrySet()) {
+                    Set<GPSFix> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
+                    if (fixes == null) {
+                        fixes = new HashSet<>();
+                        combinedCompetitorFixes.put(fixesAffectedByNewMarkFixes.getKey(), fixes);
                     }
-                    fixesForCompetitor.addAll(competitorEntry.getValue());
+                    fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
             List<Callable<Object>> tasks = new ArrayList<>();
@@ -228,20 +215,6 @@ public class MarkPassingCalculator {
             }
         }
 
-        private class FixesAffectedByNewMarkFixes implements Callable<Map<Competitor, List<GPSFix>>> {
-            Mark m;
-            Iterable<GPSFix> fixes;
-
-            public FixesAffectedByNewMarkFixes(Mark m, Iterable<GPSFix> fixes) {
-                this.m = m;
-                this.fixes = fixes;
-            }
-
-            @Override
-            public Map<Competitor, List<GPSFix>> call() {
-                return finder.calculateFixesAffectedByNewMarkFixes(m, fixes);
-            }
-        }
     }
 
     /**

@@ -16,10 +16,7 @@ import com.sap.sse.common.Util;
  */
 public interface CandidateFinder {
 
-    /**
-     * @return The fixes for each Competitor that may have changed their status as a {@link Candidate} because of new mark fixes..
-     */
-    Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
+    
 
     /**
      * @param fixes
@@ -36,5 +33,11 @@ public interface CandidateFinder {
     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
     
     Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex);
+
+    /**
+     * @return The fixes for each Competitor that may have changed their status as a {@link Candidate} because of new
+     *         mark fixes..
+     */
+    Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> newMarkFixes);
 
 }
