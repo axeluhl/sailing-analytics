@@ -59,14 +59,17 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     public void addTo(RaceLog raceLog) {
-        raceLog.addListener(this);
+        if (raceLog == null) {
+            logger.severe("Trying to add "+this+" as listener to a null race log for tracked race "+trackedRace.getRace());
+        } else {
+            raceLog.addListener(this);
         raceLogs.add(raceLog);
-        trackedRace.invalidateStartTime();
-        trackedRace.invalidateEndTime();
-        courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-        startTimeFinder = new StartTimeFinder(raceLog);
-        initializeWindTrack(raceLog);
-        analyze();
+            trackedRace.invalidateStartTime();
+            trackedRace.invalidateEndTime();
+            courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+            startTimeFinder = new StartTimeFinder(raceLog);
+            initializeWindTrack(raceLog);
+            analyze();
         if (markPassingUpdateListener != null) {
             suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
             fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
