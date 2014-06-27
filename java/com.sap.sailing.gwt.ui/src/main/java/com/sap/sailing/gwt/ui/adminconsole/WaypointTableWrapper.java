@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 public class WaypointTableWrapper<S extends SelectionModel<WaypointDTO>> extends TableWrapper<WaypointDTO, S> {    
     public WaypointTableWrapper(S selectionModel, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel);
+        super(sailingService, stringMessages, errorReporter, selectionModel, false);
 
         mainPanel.add(table);
         

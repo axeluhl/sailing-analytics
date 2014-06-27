@@ -30,8 +30,8 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
 
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
-            S selectionModel) {
-        super(sailingService, stringMessages, errorReporter, selectionModel);
+            S selectionModel, boolean enablePager) {
+        super(sailingService, stringMessages, errorReporter, selectionModel, enablePager);
         
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(dataProvider.getList());
         
@@ -130,14 +130,13 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
             }
         };
 
-        mainPanel.add(filterField);
+        mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(displayColorColumn, stringMessages.color());
         table.addColumn(competitorIdColumn, stringMessages.id());
-        mainPanel.add(table);
     }
     
     public Iterable<CompetitorDTO> getAllCompetitors() {
