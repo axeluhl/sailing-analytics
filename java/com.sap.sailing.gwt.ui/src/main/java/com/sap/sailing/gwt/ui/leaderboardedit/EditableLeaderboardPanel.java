@@ -17,6 +17,8 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -671,6 +673,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
         showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());
+        showUncorrectedNetPointsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                timeChanged(getTimer().getTime(), getTimer().getTime());
+            }
+        });
         scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedNetPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
@@ -894,7 +902,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      */
     @Override
     protected boolean isFillNetPointsUncorrected() {
-        return showUncorrectedNetPointsCheckbox.getValue();
+        return showUncorrectedNetPointsCheckbox==null?false:showUncorrectedNetPointsCheckbox.getValue();
     }
 
     @Override

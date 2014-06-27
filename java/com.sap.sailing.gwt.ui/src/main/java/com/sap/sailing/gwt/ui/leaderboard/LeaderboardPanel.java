@@ -2721,4 +2721,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             timer.removeTimeListener(this);
         }
     }
+
+    protected Timer getTimer() {
+        return timer;
+    }
 }

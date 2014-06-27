@@ -98,7 +98,8 @@ public class TestColumnSwapping {
             sailingService.moveLeaderboardColumnUp(TEST_LEADERBOARD_NAME, races[2]);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
-            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* addOverallDetails */ true, /* previous leaderboard ID */ null, fillNetPointsUncorrected).getLeaderboardDTO(/* previousVersion */ null);
+            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* addOverallDetails */ true, /* previous leaderboard ID */ null,
+                    /* fillNetPointsUncorrected */ false).getLeaderboardDTO(/* previousVersion */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
@@ -139,7 +140,8 @@ public class TestColumnSwapping {
     public void testColumnSwappingFabian() {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
-            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* addOverallDetails */ true, /* previous leaderboard ID */ null, fillNetPointsUncorrected).getLeaderboardDTO(/* previousVersion */ null);
+            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* addOverallDetails */
+                    true, /* previous leaderboard ID */null, /* fillNetPointsUncorrected */false).getLeaderboardDTO(/* previousVersion */null);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
