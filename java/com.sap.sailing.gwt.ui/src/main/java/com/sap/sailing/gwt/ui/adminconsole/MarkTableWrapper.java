@@ -21,9 +21,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
     public MarkTableWrapper(S selectionModel, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, selectionModel);
-
-        mainPanel.add(table);
+        super(sailingService, stringMessages, errorReporter, selectionModel, true);
         
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
