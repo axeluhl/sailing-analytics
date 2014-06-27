@@ -60,29 +60,21 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     public void addTo(RaceLog raceLog) {
         if (raceLog == null) {
-            logger.severe("Trying to add "+this+" as listener to a null race log for tracked race "+trackedRace.getRace());
+            logger.severe("Trying to add " + this + " as listener to a null race log for tracked race " + trackedRace.getRace());
         } else {
             raceLog.addListener(this);
-        raceLogs.add(raceLog);
+            raceLogs.add(raceLog);
             trackedRace.invalidateStartTime();
             trackedRace.invalidateEndTime();
             courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             startTimeFinder = new StartTimeFinder(raceLog);
             initializeWindTrack(raceLog);
             analyze();
-        if (markPassingUpdateListener != null) {
-            suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
-            fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
-            analyzeMarkPassings();
-        }
-    }
-
-    private void analyzeMarkPassings() {
-        for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
-            setSuppressedPassing(pair.getA(), pair.getB());
-        }
-        for (Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()) {
-            setFixedMarkPassing(triple.getA(), triple.getB(), triple.getC());
+            if (markPassingUpdateListener != null) {
+                suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
+                fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
+                analyzeMarkPassings();
+            }
         }
     }
 
@@ -93,8 +85,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     /**
      * Retrieves all wind fixes available in the race log and adds them to the wind track for RACECOMMITTEEE
      * 
-     * @param raceLog
-     *            The race log from which the available wind fixes shall be retrieved.
+     * @param raceLog The race log from which the available wind fixes shall be retrieved.
      */
     private void initializeWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
@@ -115,7 +106,9 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
             raceLogs.remove(raceLog);
-            // TODO Notify MPC
+            fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
+            suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
+            removeMarkPassings();
         }
     }
 
@@ -129,6 +122,15 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
         for (Wind wind : windFixesFinder.analyze()) {
             trackedRace.removeWind(wind, raceCommitteeWindSource);
+        }
+    }
+
+    private void removeMarkPassings() {
+        for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
+            markPassingUpdateListener.removeSuppressedPassing(pair.getA());
+        }
+        for (Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()) {
+            markPassingUpdateListener.removeFixedPassing(triple.getA(), triple.getB());
         }
     }
 
@@ -171,12 +173,13 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
-    private void setFixedMarkPassing(Competitor c, Integer zeroBasedIndexOfPassedWaypoint, TimePoint timePointOfFixedPassing) {
-        markPassingUpdateListener.addFixedPassing(c, zeroBasedIndexOfPassedWaypoint, timePointOfFixedPassing);
-    }
-
-    private void setSuppressedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
-        markPassingUpdateListener.addSuppressedPassing(c, zeroBasedIndexOfWaypoint);
+    private void analyzeMarkPassings() {
+        for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
+            markPassingUpdateListener.addSuppressedPassing(pair.getA(), pair.getB());
+        }
+        for (Triple<Competitor, Integer, TimePoint> triple : fixedPassingsFinder.analyze()) {
+            markPassingUpdateListener.addFixedPassing(triple.getA(), triple.getB(), triple.getC());
+        }
     }
 
     @Override
@@ -205,15 +208,14 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(FixedMarkPassingEvent event) {
         if (markPassingUpdateListener != null) {
-            setFixedMarkPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
-                    event.getTimePointOfFixedPassing());
+            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(), event.getTimePointOfFixedPassing());
         }
     }
 
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
         if (markPassingUpdateListener != null) {
-            setSuppressedPassing(event.getInvolvedBoats().get(0), event.getIndexOfFirstSuppressedWaypoint());
+            markPassingUpdateListener.addSuppressedPassing(event.getInvolvedBoats().get(0), event.getIndexOfFirstSuppressedWaypoint());
         }
     }
 
