@@ -46,6 +46,8 @@ import com.sap.sse.common.Util;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
+    
+    // TODO Parallelization!!
 
     private final int strictnessOfDistanceBasedProbability = 8;
     private final double penaltyForWrongSide = 0.7;
@@ -67,8 +69,6 @@ public class CandidateFinderImpl implements CandidateFinder {
             return arg0.getTimePoint().compareTo(arg1.getTimePoint());
         }
     };
-
-    // private int xteCalculationCounter;
 
     public CandidateFinderImpl(DynamicTrackedRace race) {
         this.race = race;
@@ -118,6 +118,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> markFixes) {
+        //TODO Right now creates on time stretch between the 2 outside markfixes
         Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
         TimePoint start = null;
         TimePoint end = null;
@@ -171,10 +172,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         if (newCans.size() != 0 || wrongCans.size() != 0) {
             logger.finest(newCans.size() + " new Candidates and " + wrongCans.size() + " removed Candidates for " + c);
         }
-        /*
-         * if (c.getName().equals("ChinaSpirit")) { System.out.println("Number Of Fixes: " + Util.size(fixes));
-         * System.out.println("Number  Of Calculations: " + xteCalculationCounter); }
-         */
         return new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
@@ -420,16 +417,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
-    /*
-     * Calculates the distance from each fix to each mark or line.
-     * 
-     * private void calculatesDistances(Competitor c, Iterable<GPSFix> fixes, Iterable<Waypoint> waypointsToCalculateTo)
-     * { TreeMap<GPSFix, Map<Mark, Distance>> comDistances = distances.get(c); for (GPSFix fix : fixes) { Map<Mark,
-     * Distance> fixDistances = comDistances.get(fix); if (fixDistances == null) { fixDistances = new HashMap<Mark,
-     * Distance>(); comDistances.put(fix, fixDistances); } for (Waypoint w : waypointsToCalculateTo) { Distance distance
-     * = calculateDistance(fix.getPosition(), w, fix.getTimePoint()); fixDistances.put(m, distance); } } }
-     */
-
     /**
      * For each fix the cross-track error(s) to each waypoint are calculated. Then all Util.Pairs of fixes are checked
      * for being a candidate.
@@ -547,9 +534,6 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
         if (result == null) {
-            /*
-             * if (c.getName().equals("ChinaSpirit")) { xteCalculationCounter++; }
-             */
             result = new HashMap<>();
             Position p = fix.getPosition();
             TimePoint t = fix.getTimePoint();
