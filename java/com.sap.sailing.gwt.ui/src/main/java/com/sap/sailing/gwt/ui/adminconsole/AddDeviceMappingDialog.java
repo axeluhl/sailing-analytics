@@ -103,7 +103,7 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         
         final SingleSelectionModel<MarkDTO> markSelectionModel = new SingleSelectionModel<MarkDTO>();
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new SingleSelectionModel<CompetitorDTO>());
+                new SingleSelectionModel<CompetitorDTO>(), true);
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
                 markSelectionModel, sailingService, stringMessages, errorReporter);
         
@@ -200,8 +200,8 @@ public class AddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
         tablesPanel.add(marksPanel);
         tablesPanel.add(competitorsPanel);
         
-        marksPanel.setContentWidget(markTable.getTable());
-        competitorsPanel.setContentWidget(competitorTable.getTable());
+        marksPanel.setContentWidget(markTable.asWidget());
+        competitorsPanel.setContentWidget(competitorTable.asWidget());
         
         return panel;
     }

@@ -10,8 +10,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -25,8 +23,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
     static interface FilterChangedHandler {
         void onFilterChanged(List<DeviceMappingDTO> filteredList);
     }
-    
-    private final Panel mainPanel;
     private List<DeviceMappingDTO> allMappings = new ArrayList<>();
     private final CheckBox showPingMappingsCb;
     
@@ -34,9 +30,8 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>());
+        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>(), true);
         
-        mainPanel = new VerticalPanel();
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -44,8 +39,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
                 filterPingMappings();
             }
         });
-        mainPanel.add(showPingMappingsCb);
-        mainPanel.add(table);
+        mainPanel.insert(showPingMappingsCb, 0);
         
         table.setWidth("1000px", true);
         table.addStyleName("wrap-cols");
@@ -145,7 +139,6 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
         table.addColumn(toCol, stringMessages.to());
 
         table.addColumnSortHandler(listHandler);
-        mainPanel.add(table);
     }
     
     private void notifyFilterHandlers() {
