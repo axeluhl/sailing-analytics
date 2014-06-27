@@ -118,6 +118,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -651,7 +652,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId) throws NoWindException, InterruptedException, ExecutionException,
+            String previousLeaderboardId, boolean fillNetPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
         try {
             long startOfRequestHandling = System.currentTimeMillis();
@@ -665,7 +666,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     timePoint = new MillisecondsTimePoint(date);
                 }
                 LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory);
+                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillNetPointsUncorrected);
                 LeaderboardDTO previousLeaderboardDTO = null;
                 synchronized (leaderboardByNameResultsCacheById) {
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
@@ -4690,5 +4691,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
                 leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
                 leaderboardGroups);
+    }
+
+    @Override
+    public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
+        if (newStartTimeReceived != null) {
+            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
+                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+            DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+            trackedRace.setStartTimeReceived(new MillisecondsTimePoint(newStartTimeReceived));
+            
+            return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
+        }
+        return null;
     }
 }
