@@ -4211,7 +4211,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-            IgtimiConnection conn = igtimiConnectionFactory.connect(account, correctByDeclination);
+            IgtimiConnection conn = igtimiConnectionFactory.connect(account);
             Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
             for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
                 RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();

@@ -188,7 +188,8 @@ public class LiveLeaderboardUpdater implements Runnable {
                 }
             }
         }
-        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
+        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" for "+getLeaderboard().getName()+
+                " cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
         return result;
     }
 

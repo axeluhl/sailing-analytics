@@ -61,7 +61,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         });
         
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new SingleSelectionModel<CompetitorDTO>());
+                new SingleSelectionModel<CompetitorDTO>(), true);
         markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
                 new SingleSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
         
@@ -181,8 +181,8 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
         tablesPanel.add(marksPanel);
         tablesPanel.add(competitorsPanel);
         
-        marksPanel.setContentWidget(markTable.getTable());
-        competitorsPanel.setContentWidget(competitorTable.getTable());
+        marksPanel.setContentWidget(markTable.asWidget());
+        competitorsPanel.setContentWidget(competitorTable.asWidget());
         
         return panel;
     }
