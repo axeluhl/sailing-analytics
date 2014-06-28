@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -480,7 +481,18 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.lastUpdateTime.compareTo(right.raceInfo.lastUpdateTime);
+                boolean nullGreater = false;
+                Date leftLastUpdateTime = left.raceInfo.lastUpdateTime;
+                Date rightLastUpdateTime = right.raceInfo.lastUpdateTime;
+                
+                if (leftLastUpdateTime == rightLastUpdateTime) {
+                    return 0;
+                } else if (leftLastUpdateTime == null) {
+                    return (nullGreater ? 1 : -1);
+                } else if (rightLastUpdateTime == null) {
+                    return (nullGreater ? -1 : 1);
+                }
+                return leftLastUpdateTime.compareTo(rightLastUpdateTime);
             }
         });
         lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -540,7 +552,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         
         table.addColumnSortHandler(regattaOverviewListHandler);
-        table.getColumnSortList().push(courseAreaColumn);
+        ColumnSortInfo lastUpdateColumnSortInfo = new ColumnSortInfo(lastUpdateColumn, /*ascending*/ false);
+        table.getColumnSortList().push(lastUpdateColumnSortInfo);
         
         return table;
     }

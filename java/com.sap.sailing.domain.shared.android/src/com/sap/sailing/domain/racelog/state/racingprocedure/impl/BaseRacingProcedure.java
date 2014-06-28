@@ -208,7 +208,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
         }
-
+        
         // always call listeners for changed flag, as this does not only affect recal, but also
         // changes start procedure, for which some text elements need to be updated
         // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
