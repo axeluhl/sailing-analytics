@@ -517,11 +517,25 @@ public interface TrackedRace extends Serializable {
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
 
+    /**
+     * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind on leg and leg bearing is provided.
+     */
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalyses) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
+
+    /**
+     * Same as {@link #getAverageSignedCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind direction and leg bearing is provided.
+     */
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
@@ -685,4 +699,5 @@ public interface TrackedRace extends Serializable {
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
     
     GPSFixStore getGPSFixStore();
+
 }

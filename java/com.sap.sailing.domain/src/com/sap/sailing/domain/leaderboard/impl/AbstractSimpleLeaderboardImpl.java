@@ -1578,9 +1578,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
                     .getWindwardDistanceToOverallLeader(competitor, timePoint);
             final Distance averageAbsoluteCrossTrackError = trackedRace == null ? null : trackedRace.getAverageAbsoluteCrossTrackError(
-                    competitor, timePoint, waitForLatestAnalyses);
+                    competitor, timePoint, waitForLatestAnalyses, cache);
             final Distance averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
-                    competitor, timePoint, waitForLatestAnalyses);
+                    competitor, timePoint, waitForLatestAnalyses, cache);
             return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageAbsoluteCrossTrackError, averageSignedCrossTrackError);
         } finally {
             course.unlockAfterRead();
