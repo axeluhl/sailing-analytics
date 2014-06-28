@@ -126,32 +126,38 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
             getConfiguration().getClassFlag() : Flags.CLASS;
         if (now.before(startTime.minus(startPhaseClassUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)), 
+                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)),
+                    null,
                     Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
                     startTime.minus(startPhaseClassUpInterval));
         } else if (now.before(startTime.minus(startPhaseStartModeUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
+                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)),
+                    startTime.minus(startPhaseClassUpInterval),
                     Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)), 
                     startTime.minus(startPhaseStartModeUpInterval));
         } else if (now.before(startTime.minus(startPhaseStartModeDownInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)), 
+                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)),
+                    startTime.minus(startPhaseStartModeUpInterval),
                     Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
                     startTime.minus(startPhaseStartModeDownInterval));
         } else if (now.before(startTime)) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
+                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)),
+                    startTime.minus(startPhaseStartModeDownInterval),
                     Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)), 
                     startTime);
         } else {
-            if (isIndividualRecallDisplayed()) {
+            if (isIndividualRecallDisplayed(now)) {
                 return new FlagPoleState(
                         Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        getIndividualRecallDisplayedTime(),
                         Arrays.asList(new FlagPole(Flags.XRAY, false)),
                         getIndividualRecallRemovalTime());
             } else {
-                return new FlagPoleState(Collections.<FlagPole>emptyList());
+                TimePoint recallRemoved = getIndividualRecallRemovalTime();
+                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);
             }
         }
     }

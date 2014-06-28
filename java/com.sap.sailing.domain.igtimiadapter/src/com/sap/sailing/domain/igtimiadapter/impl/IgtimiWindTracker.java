@@ -44,7 +44,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                     for (Account account : accounts) {
                         try {
                             if (!stopping) {
-                                IgtimiConnection connection = connectionFactory.connect(account, correctByDeclination);
+                                IgtimiConnection connection = connectionFactory.connect(account);
                                 Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                 if (!stopping) {
                                     LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);

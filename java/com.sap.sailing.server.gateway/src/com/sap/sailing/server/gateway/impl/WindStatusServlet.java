@@ -137,7 +137,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             if (account.getUser() != null) {
-                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account, /* correctByDeclination */ true);
+                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices(), DeclinationService.INSTANCE);
@@ -189,9 +189,13 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         
         public String toString() {
             if (message.getTrueWind() != null) {
-                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " Bearing: " + message.getTrueWindBearing().getDegrees();
+                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " From: " + getFromAsDegrees();
             }
             return messageReceivedAt.toString() + ": [" + boatID + "] " + message.getOriginalMessage();
+        }
+
+        private double getFromAsDegrees() {
+            return message.getTrueWindBearing().reverse().getDegrees();
         }
     }
     

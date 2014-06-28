@@ -533,7 +533,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
                 }
             } else {
-                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.getName())) {
+                if (!tracTracBoatClassName.equals(selectedRegatta.boatClass.getName())) {
                     return false;
                 }
             }

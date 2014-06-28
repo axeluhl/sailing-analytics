@@ -38,17 +38,19 @@ public class FlagImageResolver {
         flagImageMap.put(Flags.ZULU, resources.flagZulu());
     }
     
-    public ImageResource resolveFlagToImage(Flags flag) {
-        return flagImageMap.get(flag);
+    public ImageResource resolveFlagToImage(Flags flag, boolean isDisplayed, boolean displayStateChanged) {
+        return isDisplayed || displayStateChanged ? flagImageMap.get(flag) : null;
     }
     
-    public ImageResource resolveFlagDirectionToImage(boolean isDisplayed) {
-        ImageResource result;
+    public ImageResource resolveFlagDirectionToImage(boolean isDisplayed, boolean displayStateChanged) {
+        ImageResource result = null;
         
-        if (isDisplayed) {
-            result = resources.arrowUp();
-        } else {
-            result = resources.arrowDown();
+        if (displayStateChanged) {
+            if (isDisplayed) {
+                result = resources.arrowUp();
+            } else {
+                result = resources.arrowDown();
+            }
         }
         
         return result;

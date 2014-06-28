@@ -69,6 +69,16 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     boolean isIndividualRecallDisplayed();
 
     /**
+     * Returns <code>true</code> if there is an individual recall signaled in the {@link RaceLog} at the TimePoint {@code at}.
+     */
+    boolean isIndividualRecallDisplayed(TimePoint at);
+
+    /**
+     * Gets the time the individual recall flag was displayed (or <code>null</code>).
+     */
+    TimePoint getIndividualRecallDisplayedTime();
+
+    /**
      * Gets the time the individual recall flag was removed (or <code>null</code>).
      */
     TimePoint getIndividualRecallRemovalTime();

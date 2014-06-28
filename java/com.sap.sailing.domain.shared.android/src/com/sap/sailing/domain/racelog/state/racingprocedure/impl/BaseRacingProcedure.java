@@ -13,6 +13,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
@@ -46,6 +47,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
     private final IndividualRecallDisplayedFinder recallDisplayedFinder;
+    private final IndividualRecallRemovedFinder recallRemovedFinder;
     private final RaceLogEventVisitor raceLogListener;
 
     private boolean cachedIsIndividualRecallDisplayed;
@@ -67,6 +69,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
+        this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -126,17 +129,34 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     public boolean isIndividualRecallDisplayed() {
         return cachedIsIndividualRecallDisplayed;
     }
+
+    @Override
+    public boolean isIndividualRecallDisplayed(TimePoint at) {
+        if (hasIndividualRecall()) {
+            return new IsIndividualRecallDisplayedAnalyzer(getRaceLog(), at).analyze();
+        }
+        return false;
+    }
+    
+    @Override
+    public TimePoint getIndividualRecallDisplayedTime() {
+        if (hasIndividualRecall()) {
+            return recallDisplayedFinder.analyze();
+        }
+        return null;
+    }
     
     @Override
     public TimePoint getIndividualRecallRemovalTime() {
+        TimePoint displayed = getIndividualRecallDisplayedTime();
         if (hasIndividualRecall()) {
-            if (isIndividualRecallDisplayed()) {
-                TimePoint displayTime = recallDisplayedFinder.analyze();
-                if (displayTime != null) {
-                    return displayTime.plus(individualRecallRemovalTimeout);
-                }
+            TimePoint removedEvent = recallRemovedFinder.analyze();
+            if (removedEvent != null && (displayed == null || removedEvent.after(displayed))) {
+                return removedEvent;
             }
-
+        }
+        if (displayed != null) {
+            return displayed.plus(individualRecallRemovalTimeout);
         }
         return null;
     }
@@ -177,10 +197,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected void update() {
         boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
-        // always call listeners for changed flag, as this does not only affect recal, but also
-        // changes start procedure, for which some text elements need to be updated
-        // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
-        changedListeners.onActiveFlagsChanged(this);
         
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
@@ -192,6 +208,11 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
         }
+        
+        // always call listeners for changed flag, as this does not only affect recal, but also
+        // changes start procedure, for which some text elements need to be updated
+        // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
+        changedListeners.onActiveFlagsChanged(this);
     }
 
     private void rescheduleIndividualRecallTimeout(TimePoint displayTime) {

@@ -8,7 +8,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
 
 /**
@@ -21,7 +20,7 @@ import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
 public interface IgtimiConnectionFactory {
     Iterable<Account> getAllAccounts();
 
-    IgtimiConnection connect(Account account, boolean correctByDeclination);
+    IgtimiConnection connect(Account account);
     
     /**
      * Removes the account and the credentials associated with it permanently. The account is identified by the e-mail
@@ -39,7 +38,7 @@ public interface IgtimiConnectionFactory {
     /**
      * Using the "account" service, retrieves the {@link Account} information for this access token and stores the token
      * that authorizes this factory's client to access the account together with the {@link Account} data. This information is
-     * used when a caller wants to {@link #connect(Account, DeclinationService)} to a specific account on behalf of the {@link Client} to
+     * used when a caller wants to {@link #connect(Account)} to a specific account on behalf of the {@link Client} to
      * which this factory belongs.
      * @return 
      */

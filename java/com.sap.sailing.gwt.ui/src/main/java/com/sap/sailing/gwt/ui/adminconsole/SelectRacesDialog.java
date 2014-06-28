@@ -47,7 +47,7 @@ public class SelectRacesDialog extends DataEntryDialog<Set<RaceColumnDTOAndFleet
     
     @Override
     protected Widget getAdditionalWidget() {
-        return racesTable.getTable();
+        return racesTable.asWidget();
     }
 
     @Override
