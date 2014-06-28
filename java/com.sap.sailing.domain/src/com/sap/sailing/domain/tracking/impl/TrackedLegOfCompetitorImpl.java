@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.LegTypeCache;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -625,14 +624,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
-            LegTypeCache cache) throws NoWindException {
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Double result;
         if (hasFinishedLeg(timePoint)) {
             result = 0.0;
         } else {
             if (hasStartedLeg(timePoint)) {
                 Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint, windPositionMode);
-                Speed vmg = getVelocityMadeGood(timePoint, windPositionMode);
+                Speed vmg = getVelocityMadeGood(timePoint, windPositionMode, cache);
                 result = vmg == null ? null : windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
             } else {
                 result = null;
