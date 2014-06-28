@@ -3,9 +3,20 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
-    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="global_res" type="com.sap.sailing.gwt.home.client.shared.sponsoring.GlobalResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.sponsoring.SponsoringResources" />
     <g:HTMLPanel>
         Placeholder for sponsoring content
-    </g:HTMLPanel>
+		<div class="{local_res.css.localA}">
+    		<div class="{global_res.globalCss.grid}">
+    		    Global inside Local
+        	</div>
+        </div>
+		<div class="{local_res.css.localA}">
+    		    Local
+        </div>
+    		<div class="{global_res.globalCss.grid}">
+    		    Global
+        </div>
+				</g:HTMLPanel>
 </ui:UiBinder>

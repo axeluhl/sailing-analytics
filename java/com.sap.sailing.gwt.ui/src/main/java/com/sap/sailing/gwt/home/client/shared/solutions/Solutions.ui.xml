@@ -21,7 +21,7 @@
     </div>
   </div>
   <div ui:field="sailingAnalytics" class="{local_res.css.solutions_content} {local_res.css.solutions_contentsap}">
-    <div class="{res.mainCss.grid} {local_res.css.solutions_content_grid} {local_res.css.solutions_contentsap_grid}">
+    <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSAPHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSAPText1}'/></p>
@@ -30,10 +30,10 @@
     </div>
   </div>
   <div ui:field="race" class="{local_res.css.solutions_content} {local_res.css.solutions_contentrace}">
-    <div class="{local_res.css.solutions_content_parallax} {local_res.css.solutions_contentrace_parallax">
-      <div class="{local_res.css.solutions_contentrace_parallax_background}"></div>
+    <div class="{local_res.css.parallax}">
+      <div class="{local_res.css.background}"></div>
     </div>
-    <div class="{res.mainCss.grid} {local_res.css.solutions_content_grid}">
+    <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsRaceHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsRaceText}'/></p><a href="#" class="{res.mainCss.button}">Start Tour</a>
@@ -41,7 +41,7 @@
     </div>
   </div>
   <div ui:field="postRace" class="{local_res.css.solutions_content} {local_res.css.solutions_contentpost}">
-    <div class="{res.mainCss.grid} {local_res.css.solutions_contentpost_grid} {local_res.css.solutions_content_grid}">
+    <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsPostHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsPostText}'/></p>
@@ -49,10 +49,10 @@
     </div>
   </div>
   <div ui:field="trainingDiary" class="{local_res.css.solutions_content} {local_res.css.solutions_contenttraining}">
-    <div class="{local_res.css.solutions_content_parallax} {local_res.css.solutions_contenttraining_parallax}">
-      <div class="{local_res.css.solutions_contenttraining_parallax_background}"></div>
+    <div class="{local_res.css.parallax}">
+      <div class="{local_res.css.background}"></div>
     </div>
-    <div class="{res.mainCss.grid} {local_res.css.solutions_content_grid} {local_res.css.solutions_contenttraining_grid}">
+    <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsTrainingHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsTrainingText}'/></p>
@@ -63,7 +63,7 @@
     </div>
   </div>
   <div ui:field="simulator" class="{local_res.css.solutions_content} {local_res.css.solutions_contentsimulator}">
-    <div class="{res.mainCss.grid} {local_res.css.solutions_contentsimulator_grid} {local_res.css.solutions_content_grid}">
+    <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSimulatorHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSimulatorText}'/></p><a href="#" class="{res.mainCss.button}">Learn More</a>
