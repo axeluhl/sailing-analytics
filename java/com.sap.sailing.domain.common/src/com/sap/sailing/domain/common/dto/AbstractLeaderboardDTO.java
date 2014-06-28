@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sse.common.Util;
@@ -59,21 +60,23 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     }
 
     /**
-     * If the race whose name is specified in <code>raceName</code> has at least one competitor who has valid
-     * {@link LeaderboardEntryDTO#legDetails} for that race, the maximum number of entries of all such competitors in
-     * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is
-     * returned.
+     * If the race column whose name is specified in <code>raceColumnName</code> has at least one competitor who has valid
+     * {@link LeaderboardEntryDTO#legDetails} for that race column, the maximum number of entries of all such competitors in
+     * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is returned.
+     * If you specify an non null <code>preselectedRace</code> the leg count is calculated only for that race.
      */
-    public int getLegCount(String raceColumnName) {
+    public int getLegCount(String raceColumnName, RaceIdentifier preselectedRace) {
         int result = -1;
         for (LeaderboardRowDTO row : rows.values()) {
-            if (row.fieldsByRaceColumnName.get(raceColumnName) != null && row.fieldsByRaceColumnName.get(raceColumnName).legDetails != null) {
-                result = Math.max(result, row.fieldsByRaceColumnName.get(raceColumnName).legDetails.size());
+            LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.legDetails != null
+                    && (preselectedRace == null || (preselectedRace != null && preselectedRace.equals(leaderboardEntryDTO.race)))) {
+                result = Math.max(result, leaderboardEntryDTO.legDetails.size());
             }
         }
         return result;
     }
-
+ 
     /**
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
      * in this leaderboard.
