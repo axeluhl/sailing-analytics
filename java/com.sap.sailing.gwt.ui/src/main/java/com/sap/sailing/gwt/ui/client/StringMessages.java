@@ -1052,4 +1052,7 @@ public interface StringMessages extends Messages {
     String showUncorrectedNetPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
+    String lastScoreCorrectionsTime();
+    String lastScoreCorrectionsComment();
+    String setTimeToNow();
 }

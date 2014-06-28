@@ -637,11 +637,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         Grid scoreCorrectionInfoGrid = new Grid(3,4);
         scoreCorrectionInfoGrid.setCellPadding(3);
-        scoreCorrectionInfoGrid.setWidget(0,  0, new Label("Last score correction time:")); // FIXME i18n
+        scoreCorrectionInfoGrid.setWidget(0,  0, new Label(stringMessages.lastScoreCorrectionsTime() + ":"));
         lastScoreCorrectionTimeBox = new DateBox();
         scoreCorrectionInfoGrid.setWidget(0,  1, lastScoreCorrectionTimeBox);
 
-        scoreCorrectionInfoGrid.setWidget(1,  0, new Label("Last score correction comment:")); // FIXME i18n
+        scoreCorrectionInfoGrid.setWidget(1,  0, new Label(stringMessages.lastScoreCorrectionsComment() + ":"));
         lastScoreCorrectionCommentBox = new TextBox();
         scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
 
@@ -669,7 +669,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
 
-        final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'"); // FIXME i18n
+        final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow()); // FIXME i18n
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
         showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());

@@ -166,7 +166,18 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
             return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, true)), startTime,
                     Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
         } else {
-            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
+            if (isFinished(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+            } else if (isInFinishingPhase(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
+                        getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
+                        null);
+            } else {
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
+            }
         }
     }
 
