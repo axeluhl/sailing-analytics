@@ -507,23 +507,58 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
+                        .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
+        return isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns);
+    }
+
+    /**
+     * Same as {@link #isDiscarded(Competitor, RaceColumn, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when total points are to be computed for more than one column for the same
+     * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
+     * once and not again for each column (which would lead to quadratic effort).
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            final Set<RaceColumn> discardedRaceColumns) {
         return !raceColumn.isMedalRace()
                 && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule()
-                        .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
-                                raceColumn);
+                && discardedRaceColumns.contains(raceColumn);
     }
 
     @Override
     public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return getTotalPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
-    
+
     @Override
     public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
+        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
+                .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
+        return getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
+    }
+
+    /**
+     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when total points are to be computed for more than one column for the same
+     * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
+     * once and not again for each column (which would lead to quadratic effort).
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    @Override
+    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns)
+            throws NoWindException {
         Double result;
-        if (isDiscarded(competitor, raceColumn, raceColumnsToConsider, timePoint)) {
+        if (isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns)) {
             result = 0.0;
         } else {
             final Double netPoints = getNetPoints(competitor, raceColumn, timePoint);
@@ -547,12 +582,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
+        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
+                .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
         for (RaceColumn raceColumn : raceColumnsToConsider) {
             if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
             if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
-                final Double totalPoints = getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
+                final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
@@ -688,6 +725,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint) throws NoWindException {
+        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
+        return getEntry(competitor, race, timePoint, discardedRaceColumns);
+    }
+    
+    @Override
+    public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns) throws NoWindException {
         Callable<Integer> trackedRankProvider = new Callable<Integer>() {
             public Integer call() throws NoWindException {
                 return getTrackedRank(competitor, race, timePoint);
@@ -695,13 +739,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         };
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
                 timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
-        boolean discarded = isDiscarded(competitor, race, timePoint);
+        boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
-        return new EntryImpl(trackedRankProvider, correctedScore,
-                new Callable<Double>() { @Override public Double call() { return correctedResults.getUncorrectedScore(); } },
-                correctedResults.isCorrected(),
-                        discarded ? DOUBLE_0
-                                : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()), correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
+        return new EntryImpl(trackedRankProvider, correctedScore, new Callable<Double>() {
+            @Override
+            public Double call() {
+                return correctedResults.getUncorrectedScore();
+            }
+        }, correctedResults.isCorrected(), discarded ? DOUBLE_0 : correctedScore == null ? null
+                : Double.valueOf(correctedScore * race.getFactor()), correctedResults.getMaxPointsReason(), discarded,
+                race.getFleetOfCompetitor(competitor));
     }
 
     @Override
@@ -1274,13 +1321,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
             result.competitors.add(competitorDTO);
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
+            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
                 RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(
                         new Callable<LeaderboardEntryDTO>() {
                             @Override
                             public LeaderboardEntryDTO call() {
                                 try {
-                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint);
+                                    Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                                     return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                             namesOfRaceColumnsForWhichToLoadLegDetails != null
                                                     && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -81,9 +82,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
+            Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
+                    competitor, leaderboard, raceColumnsToConsider, timePoint);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 totalPointsCache.put(new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint));
+                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
             }
         }
     }
