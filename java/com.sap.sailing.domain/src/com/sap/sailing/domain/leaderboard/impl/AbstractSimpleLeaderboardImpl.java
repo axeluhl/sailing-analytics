@@ -581,12 +581,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
+        final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
+                .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
         for (RaceColumn raceColumn : raceColumnsToConsider) {
             if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
             if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
-                final Double totalPoints = getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
+                final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
