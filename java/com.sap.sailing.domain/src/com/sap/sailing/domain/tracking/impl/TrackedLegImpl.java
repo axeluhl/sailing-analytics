@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
@@ -308,18 +309,22 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     
     @Override
     public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
-        LegType legType = getLegType(at);
+        return getWindwardDistance(pos1, pos2, at, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+        LegType legType = cache.getLegType(this, at);
         if (legType != LegType.REACHING) { // upwind or downwind
             Wind wind = getTrackedRace().getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
-                return pos2.alongTrackDistance(pos1, getLegBearing(at));
+                return pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
                 return pos2.alongTrackDistance(projectionToLineThroughPos2, legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
             }
         } else {
             // reaching leg, return distance projected onto leg's bearing
-            return pos2.alongTrackDistance(pos1, getLegBearing(at));
+            return pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
         }
     }
 

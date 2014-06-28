@@ -10,12 +10,10 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.LegBearingCache;
-import com.sap.sailing.domain.tracking.LegTypeCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
@@ -35,7 +33,7 @@ import com.sap.sse.common.Util.Triple;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardDTOCalculationReuseCache implements WindCache, LegTypeCache, LegBearingCache {
+public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBearingCache {
     /**
      * The reference time point for all queries to which values will be cached here. Queries that don't match this time point are
      * neither cached nor looked up in the cache.

@@ -12,5 +12,9 @@ import com.sap.sailing.domain.common.TimePoint;
  *
  */
 public interface WindCache {
+    /**
+     * Estimates the <code>competitor</code>'s position at <code>timePoint</code> and determines the wind at that position and
+     * at that time.
+     */
     Wind getWind(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint);
 }

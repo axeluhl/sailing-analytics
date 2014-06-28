@@ -125,10 +125,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
     
     /**
+     * Same as {@link #getGapToLeaderInSeconds(TimePoint)}, only that a cache for wind and leg type data is used.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
      * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint)}.
      */
     Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint) throws NoWindException;
+
+    /**
+     * Same as {@link #getGapToLeaderInSeconds(TimePoint, Competitor)}, only that an additional cache is used
+     * to avoid redundant evaluations of leg types and wind field information across various calculations that
+     * all can use the same basic information.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     
@@ -208,4 +220,16 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Computes the angle between the competitors direction and the wind.
      */
     Bearing getBeatAngle(TimePoint at) throws NoWindException;
+
+    /**
+     * Same as {@link #getBeatAngle}, only that additionally a cache is provided that can allow the method to use
+     * cached wind and leg type values.
+     */
+    Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
+     * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
+     * use already computed values for wind and leg type, potentially also updating the cache as it goes.
+     */
+    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 }

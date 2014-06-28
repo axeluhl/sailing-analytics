@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Duration;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.Util;
 
@@ -213,18 +215,18 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * 
      * @throws NoWindException in case the wind direction is not known
      */
-    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at) throws NoWindException {
+    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         SpeedWithBearing result = null;
         if (speed != null) {
             Bearing projectToBearing;
-            if (getTrackedLeg().isUpOrDownwindLeg(at)) {
-                Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+            if (cache.getLegType(getTrackedLeg(), at) != LegType.REACHING) {
+                Wind wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
                 if (wind == null) {
                     throw new NoWindException("Need at least wind direction to determine windward speed");
                 }
                 projectToBearing = wind.getBearing();
             } else {
-                projectToBearing = getTrackedLeg().getLegBearing(at);
+                projectToBearing = cache.getLegBearing(getTrackedLeg(), at);
             }
             double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
             if (cos < 0) {
@@ -233,14 +235,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
         }
         return result;
-    }
-
-    /**
-     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing
-     * to all positions on the course, only variable over time.
-     */
-    Wind getWind(Position p, TimePoint at) {
-        return getTrackedRace().getWind(p, at);
     }
 
     @Override
@@ -255,6 +249,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException {
+        return getAverageVelocityMadeGood(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    @Override
+    public Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Speed result = null;
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
@@ -419,35 +418,46 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint)
             throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, leaderInLegAtTimePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindLegTypeAndLegBearingCache cache)
+            throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return leaderInLegAtTimePoint;
             }
-        });
+        }, cache);
     }
 
     private static interface LeaderGetter {
         Competitor getLeader();
     }
-    
+
     @Override
     public Double getGapToLeaderInSeconds(final TimePoint timePoint) throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    @Override
+    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
                 return getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint);
             }
-        });
+        }, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter) throws NoWindException {
+    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
-        Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
+        Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint, cache);
         Double result = null;
         // Has our competitor started the leg already? If not, we won't be able to compute a gap
         if (hasStartedLeg(timePoint)) {
@@ -553,7 +563,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 timePoint = at;
             }
             SpeedWithBearing speedOverGround = getSpeedOverGround(timePoint);
-            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint);
+            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint, new NoCachingWindLegTypeAndLegBearingCache());
         } else {
             return null;
         }
@@ -765,24 +775,26 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Bearing getBeatAngle(TimePoint at) throws NoWindException {
+        return getBeatAngle(at, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Bearing beatAngle = null;
-        
         Bearing projectToBearing;
-        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
-            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+        if (cache.getLegType(getTrackedLeg(), at) != LegType.REACHING) {
+            Wind wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
             if (wind == null) {
                 throw new NoWindException("Need at least wind direction to determine windward speed");
             }
             projectToBearing = wind.getBearing();
         } else {
-            projectToBearing = getTrackedLeg().getLegBearing(at);
+            projectToBearing = cache.getLegBearing(getTrackedLeg(), at);
         }
-        
         SpeedWithBearing speed = getSpeedOverGround(at);
         if (speed != null) {
             beatAngle = projectToBearing.getDifferenceTo(speed.getBearing());
         }
-        
         return beatAngle;
     }
 }

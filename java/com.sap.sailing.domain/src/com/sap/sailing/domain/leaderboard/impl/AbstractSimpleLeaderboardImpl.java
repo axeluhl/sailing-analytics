@@ -83,6 +83,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.RaceColumnListeners;
@@ -1619,7 +1620,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
                 // This is because for the previous leg it's decided based on the mark passings; for the next (current) leg it's decided based on
                 // windward distance and VMG
-                Double gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg);
+                Double gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg, cache);
                 if (gapAtEndOfPreviousLegInSeconds != null) {
                     result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLegInSeconds;
                 }
@@ -1704,7 +1705,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
-    private Double getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg) throws NoWindException {
+    private Double getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         final Double result;
         final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
         course.lockForRead();
@@ -1735,7 +1736,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 TrackedLeg previousTrackedLeg = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLeg(course.getLegs().get(indexOfStartWaypoint-1));
                 TrackedLegOfCompetitor previousTrackedLegOfCompetitor = previousTrackedLeg.getTrackedLeg(trackedLeg.getCompetitor());
-                result = previousTrackedLegOfCompetitor.getGapToLeaderInSeconds(previousTrackedLegOfCompetitor.getFinishTime());
+                result = previousTrackedLegOfCompetitor.getGapToLeaderInSeconds(previousTrackedLegOfCompetitor.getFinishTime(), cache);
             }
             return result;
         } finally {

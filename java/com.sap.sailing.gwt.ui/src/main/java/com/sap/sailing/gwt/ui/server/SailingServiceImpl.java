@@ -2555,7 +2555,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
-                    @Override
+                            @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
                                 Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                         competitorDTO.getIdAsString());
