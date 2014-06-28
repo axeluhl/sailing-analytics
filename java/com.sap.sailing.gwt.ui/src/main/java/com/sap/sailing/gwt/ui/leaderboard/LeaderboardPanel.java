@@ -834,7 +834,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         protected void ensureExpansionDataIsLoaded(final Runnable callWhenExpansionDataIsLoaded) {
-            if (getLeaderboard().getLegCount(getRaceColumnName()) != -1) {
+            if (getLeaderboard().getLegCount(getRaceColumnName(), preSelectedRace) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
                 updateLeaderboardAndRun(callWhenExpansionDataIsLoaded);
@@ -918,7 +918,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
-                int legCount = getLeaderboard().getLegCount(getRaceColumnName());
+                int legCount = getLeaderboard().getLegCount(getRaceColumnName(), preSelectedRace);
                 if (legCount != -1) {
                     for (int i = 0; i < legCount; i++) {
                         LegColumn legColumn = getLegColumn(i);
@@ -2086,8 +2086,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     // longer
                     // know the correct leg count.
                     if (!rc.isTogglingInProcess() && rc.isExpanded()) {
-                        int oldLegCount = getLeaderboard().getLegCount(rc.getRaceColumnName());
-                        int newLegCount = newLeaderboard.getLegCount(rc.getRaceColumnName());
+                        int oldLegCount = getLeaderboard().getLegCount(rc.getRaceColumnName(), preSelectedRace);
+                        int newLegCount = newLeaderboard.getLegCount(rc.getRaceColumnName(), preSelectedRace);
                         if (oldLegCount != newLegCount) {
                             result.add(rc);
                         }
