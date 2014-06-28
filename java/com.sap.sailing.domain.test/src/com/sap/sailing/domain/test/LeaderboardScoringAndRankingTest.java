@@ -722,10 +722,12 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private void checkScoresAfterSomeRaces(Leaderboard leaderboard, List<RaceColumn> raceColumnsToConsider,
             double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
         for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
+            final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule()
+                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint);
             for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
                 assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
                         leaderboard.getTotalPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
-                                raceColumnsToConsider, timePoint), 0.00000001);
+                                timePoint, discardedRaceColumns), 0.00000001);
             }
         }
     }
