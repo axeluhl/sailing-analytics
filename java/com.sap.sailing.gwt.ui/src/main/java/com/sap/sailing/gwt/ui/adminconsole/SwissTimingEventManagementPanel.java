@@ -448,8 +448,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         // Check if the assigned regatta makes sense
         List<SwissTimingRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<SwissTimingRaceRecordDTO>();
         for (SwissTimingRaceRecordDTO race : selectedRaces) {
-            if (!checkBoatClassMatch(race, selectedRegatta))
+            if (!checkBoatClassMatch(race, selectedRegatta)) {
                 racesWithNotMatchingBoatClasses.add(race);
+            }
         }
         if (racesWithNotMatchingBoatClasses.size() > 0) {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
