@@ -10,6 +10,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
@@ -262,9 +263,14 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     if (fix.getTimePoint().after(to)) {
                         break;
                     }
-                    Speed averagedSpeedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
-                    if (averagedSpeedAtFixTime != null && averagedSpeedAtFixTime.compareTo(max) > 0) {
-                        max = averagedSpeedAtFixTime;
+                    Speed speedAtFixTime = null;
+                    if (fix instanceof GPSFixMoving) {
+                        speedAtFixTime = ((GPSFixMoving)fix).getSpeed();
+                    } else {
+                        speedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
+                    }
+                    if (speedAtFixTime != null && speedAtFixTime.compareTo(max) > 0) {
+                        max = speedAtFixTime;
                         maxSpeedFix = fix;
                     }
                 }

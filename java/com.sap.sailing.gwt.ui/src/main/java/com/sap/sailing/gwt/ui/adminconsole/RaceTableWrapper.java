@@ -25,7 +25,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, S selectionModel) {
-        super(sailingService, stringMessages, errorReporter, selectionModel);
+        super(sailingService, stringMessages, errorReporter, selectionModel, false);
         
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
                 new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
