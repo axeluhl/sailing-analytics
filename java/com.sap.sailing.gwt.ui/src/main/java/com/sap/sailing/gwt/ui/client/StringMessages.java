@@ -1047,4 +1047,7 @@ public interface StringMessages extends Messages {
     String showNumberOfRacesScored();
     String racesScored();
     String racesScoredTooltip();
+    String showUncorrectedNetPoints();
+    String setStartTimeReceived();
+    String setStartTimeReceivedDescription();
 }

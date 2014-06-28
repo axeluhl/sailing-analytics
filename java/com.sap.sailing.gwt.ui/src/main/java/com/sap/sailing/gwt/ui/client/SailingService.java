@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -149,7 +150,7 @@ public interface SailingService extends RemoteService {
     
     IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId) throws Exception;
+            String previousLeaderboardId, boolean fillNetPointsUncorrected) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
@@ -512,4 +513,9 @@ public interface SailingService extends RemoteService {
      *            {@link RemoteSailingServerReference}, to search a remote server.
      */
     Iterable<LeaderboardSearchResultDTO> search(String serverNameOrNullForMain, KeywordQuery query) throws Exception;
+    
+    /**
+     * @return The RaceDTO of the modified race or <code>null</code>, if the given newStartTimeReceived was null.
+     */
+    RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived);
 }
