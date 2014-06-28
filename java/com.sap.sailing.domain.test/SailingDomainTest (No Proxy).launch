@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
+<booleanAttribute key="com.sap.jvm.profiling.ui.widgets.allowDebugging" value="false"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.sap.sailing.domain.test/src/com/sap/sailing/domain/test"/>
 </listAttribute>
@@ -18,7 +19,14 @@
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/sapjvm7"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.domain.test"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -DspatialWind=true"/>
+<stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ID%CTX_KEY%false%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%KEY_JRUBY_SUPPORT%CTX_KEY%false%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-IO_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-METHOD_PARAMETER_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-NETWORK_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_RESOLVE_ALL_HOSTS%CTX_KEY%true%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
+<stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 </launchConfiguration>

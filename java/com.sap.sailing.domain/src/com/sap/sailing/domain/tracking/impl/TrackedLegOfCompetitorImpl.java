@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -24,13 +25,15 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LegTypeCache;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sse.common.Util;
 
@@ -191,7 +194,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned.
-     * @param windPositionMode TODO
      */
     private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
@@ -218,7 +220,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * 
      * @throws NoWindException in case the wind direction is not known
      */
-    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, final TimePoint at, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
         SpeedWithBearing result = null;
         if (speed != null) {
             Bearing projectToBearing;
@@ -227,7 +230,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 if (windPositionMode == WindPositionMode.EXACT) {
                     wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
                 } else {
-                    wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at, windPositionMode);
+                    wind = getTrackedRace().getWind(
+                            getTrackedLeg().getEffectiveWindPosition(
+                                    new Callable<Position>() { @Override public Position call() {
+                                        return getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
+                                    }}, at, windPositionMode), at);
                 }
                 if (wind == null) {
                     throw new NoWindException("Need at least wind direction to determine windward speed");
@@ -437,11 +444,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode)
             throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, leaderInLegAtTimePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeaderInSeconds(timePoint, leaderInLegAtTimePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint, WindLegTypeAndLegBearingCache cache)
+    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache)
             throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
@@ -457,11 +465,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
-        return getGapToLeaderInSeconds(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getGapToLeaderInSeconds(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException {
+    public Double getGapToLeaderInSeconds(final TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
@@ -573,6 +582,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+        return getVelocityMadeGood(at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         if (hasStartedLeg(at)) {
             TimePoint timePoint;
             if (hasFinishedLeg(at)) {
@@ -582,7 +596,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 timePoint = at;
             }
             SpeedWithBearing speedOverGround = getSpeedOverGround(timePoint);
-            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint, windPositionMode, cache);
         } else {
             return null;
         }
@@ -606,6 +620,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getEstimatedTimeToNextMarkInSeconds(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
+    @Override
+    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+            LegTypeCache cache) throws NoWindException {
         Double result;
         if (hasFinishedLeg(timePoint)) {
             result = 0.0;
