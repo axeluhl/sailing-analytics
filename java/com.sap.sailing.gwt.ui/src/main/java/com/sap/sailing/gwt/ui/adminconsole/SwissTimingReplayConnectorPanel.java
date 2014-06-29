@@ -342,15 +342,19 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         String boatClassName = swissTimingRaceRecord.boat_class;
         if (boatClassName != null) {
             if (selectedRegatta == null) {
+                if (swissTimingRaceRecord.hasRememberedRegatta) {
+                    return true;
+                }
+                
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((boatClassName == null && regatta.boatClass == null) ||
-                            (regatta.boatClass != null && boatClassName.equalsIgnoreCase(regatta.boatClass.getName()))) {
+                            (regatta.boatClass != null && boatClassName.equals(regatta.boatClass.getName()))) {
                         return false;
                     }
                 }
             } else {
-                if (!boatClassName.equalsIgnoreCase(selectedRegatta.boatClass.getName())) {
+                if (!boatClassName.equals(selectedRegatta.boatClass.getName())) {
                     return false;
                 }
             }

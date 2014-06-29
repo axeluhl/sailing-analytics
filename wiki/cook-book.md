@@ -178,6 +178,8 @@ Changing this to a greater value, such as 65536, helps, e.g., to avoid the follo
     su: cannot set user id: Resource temporarily unavailable
 </pre>
 
+Make sure to also set the right limits in `/etc/profile.d/sailing.sh`!!
+
 ### Set limits (ulimit) for a running process
 
 <pre>
