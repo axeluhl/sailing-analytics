@@ -17,6 +17,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -443,6 +444,36 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
+        
+        // Check if the assigned regatta makes sense
+        List<SwissTimingRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<SwissTimingRaceRecordDTO>();
+        for (SwissTimingRaceRecordDTO race : selectedRaces) {
+            if (!checkBoatClassMatch(race, selectedRegatta)) {
+                racesWithNotMatchingBoatClasses.add(race);
+            }
+        }
+        if (racesWithNotMatchingBoatClasses.size() > 0) {
+            StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
+            builder.append("WARNING\n");
+            if (selectedRegatta != null) {
+                builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
+                        selectedRegatta.getName()));
+            } else {
+                builder.append(stringMessages.regattaExistForSelectedBoatClass());
+            }
+            builder.append("\n\n");
+            builder.append(stringMessages.races());
+            builder.append("\n");
+            for (SwissTimingRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
+                builder.append(record.raceName);
+                builder.append("\n");
+            }
+            if (!Window.confirm(builder.toString())) {
+                return;
+            }
+        }
+        
         sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, trackWind, correctWindByDeclination,
@@ -458,6 +489,30 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         regattaRefresher.fillRegattas();
                     }
                 });
+    }
+
+    private boolean checkBoatClassMatch(SwissTimingRaceRecordDTO swissTimingRecord, RegattaDTO selectedRegatta) {
+        String boatClassName = swissTimingRecord.boatClass;
+        if (boatClassName != null) {
+            if (selectedRegatta == null) {
+                if (swissTimingRecord.hasRememberedRegatta) {
+                    return true;
+                }
+                
+                // in case no regatta has been selected we check if there would be a matching regatta
+                for (RegattaDTO regatta : getAvailableRegattas()) {
+                    if ((boatClassName == null && regatta.boatClass == null) ||
+                            (regatta.boatClass != null && boatClassName.equals(regatta.boatClass.getName()))) {
+                        return false;
+                    }
+                }
+            } else {
+                if (!boatClassName.equals(selectedRegatta.boatClass.getName())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {

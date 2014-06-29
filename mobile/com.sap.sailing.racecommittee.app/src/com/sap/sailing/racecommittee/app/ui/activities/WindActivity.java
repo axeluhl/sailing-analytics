@@ -73,11 +73,6 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             buildAlertMessageNoGps();
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
-        
-        //        Criteria crit = new Criteria();
-        //        crit.setAccuracy(Criteria.ACCURACY_FINE);
-        //        String provider = locationManager.getBestProvider(crit, true);
-        //        onLocationChanged(locationManager.getLastKnownLocation(provider));
 
         windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -124,7 +119,11 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    compassView.setDirection(Float.valueOf(windBearingEditText.getText().toString()));
+                    String windBearingText = windBearingEditText.getText().toString();
+                    if (windBearingText.length() > 0) {
+                        compassView.setDirection(Float.valueOf(windBearingText));
+                    }
+                    
                 }
             }
         });
@@ -132,7 +131,10 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
+                    String windSpeedText = windSpeedEditText.getText().toString();
+                    if (windSpeedText.length() > 0) {
+                        windSpeedSeekBar.setProgress(Double.valueOf(windSpeedText).intValue() * 10);
+                    }
                 }
             }
         });

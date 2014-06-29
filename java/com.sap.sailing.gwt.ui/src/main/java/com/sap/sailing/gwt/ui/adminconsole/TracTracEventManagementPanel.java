@@ -525,6 +525,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (boatClassNames != null && Util.size(boatClassNames) > 0) {
             String tracTracBoatClassName = boatClassNames.iterator().next();
             if (selectedRegatta == null) {
+                if (tracTracRecord.hasRememberedRegatta) {
+                    return true;
+                }
+                
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
