@@ -25,6 +25,9 @@ public interface EventRegattaListResources extends ClientBundle {
         String label();
         String regatta_intro_races();
         String regatta_intro_races_race();
+        String regatta_intro_meta();
+        String regatta_intro_meta_scoring();
+        String regatta_intro_meta_leaderboardlink();
         String regatta_intro_details();
         String regatta_intro_details_item();
         String regatta_intro_details_item_sub();

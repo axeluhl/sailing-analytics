@@ -8,12 +8,6 @@
     <g:HTMLPanel>
 
 <!-- The overview page of an event-->
-	<h3>Here we will see the event overview content</h3>
-	<h3>Here we will see the event overview content</h3>
-	<h3>Here we will see the event overview content</h3>
-	<h3>Here we will see the event overview content</h3>
-	<h3>Here we will see the event overview content</h3>
-	<h3>Here we will see the event overview content</h3>
 			
 <!-- Ubilabs has to cut this page into partials 
 <div class="{local_res.css.eventoverview}">
