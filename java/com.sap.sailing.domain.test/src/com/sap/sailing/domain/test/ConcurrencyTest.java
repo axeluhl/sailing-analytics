@@ -56,7 +56,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void comparSingleThreadedApproximationWithMultiThreaded() {
+    public void compareSingleThreadedApproximationWithMultiThreaded() {
         int numberOfCPUs = Runtime.getRuntime().availableProcessors();
         logger.info("Number of processors: "+numberOfCPUs);
         assertTrue(numberOfCPUs >= 1);

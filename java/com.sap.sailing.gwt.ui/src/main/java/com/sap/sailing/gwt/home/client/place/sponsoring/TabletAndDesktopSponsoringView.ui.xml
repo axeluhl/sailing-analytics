@@ -1,17 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.sponsoring"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:style>
-		.panel {
-			width: 100%;
-			background-color: rgb(255,255,255);
-			border: solid 1px black;
-		}
-    </ui:style>
+	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
  
-	<g:VerticalPanel styleName="{style.panel}">
-    	<g:HTML>
-    		Sponsoring content
-    	</g:HTML>
-    </g:VerticalPanel> 
+    <g:HTMLPanel>
+		<s:sponsoring.Sponsoring ui:field='sponsoring'/>
+	</g:HTMLPanel>
 </ui:UiBinder>    

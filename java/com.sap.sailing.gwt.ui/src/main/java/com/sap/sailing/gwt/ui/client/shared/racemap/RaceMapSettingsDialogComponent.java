@@ -35,6 +35,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
+    private CheckBox showWindStreamletOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
@@ -63,6 +64,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSelectedCompetitorsInfoCheckBox = dialog.createCheckbox(stringMessages.showSelectedCompetitorsInfo());
         showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
         vp.add(showSelectedCompetitorsInfoCheckBox);
+
+        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
+        vp.add(showWindStreamletOverlayCheckbox);
+                
         
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
@@ -200,14 +206,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setHelpLinesSettings(helpLinesSettings);
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
+        result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
-        if(helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
-            result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
+        if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
+            result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);
         }
-        if(helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
+        if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
             result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
         }
-        
         return result;
     }
     

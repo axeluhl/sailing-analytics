@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -242,6 +241,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -850,6 +850,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             if (abortingFlagEvent != null) {
                 raceInfoDTO.isRaceAbortedInPassBefore = true;
+                raceInfoDTO.abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint().asDate();
                 
                 if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
@@ -1340,6 +1341,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
+     * @param to
+     *            if <code>null</code>, data is returned up to end of race; if the end of race is not known and
+     *            <code>null</code> is used for this parameter, <code>null</code> is returned.
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
@@ -1418,7 +1422,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final List<QuickRankDTO> quickRanks = getQuickRanks(raceIdentifier, date);
         return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks);
-    }    
+    }
 
     /**
      * {@link LegType}s are cached within the method with a resolution of one minute. The cache key is a pair of
@@ -1492,7 +1496,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Wind wind = trackedRace.getWind(fix.getPosition(), toTimePointExcluding);
+                            Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
                             final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
                             Tack tack = wind == null? null : trackedRace.getTack(estimatedSpeed, wind, fix.getTimePoint());
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
@@ -1854,21 +1858,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 RaceDefinition race = trackedRace.getRace();
-                for (Competitor competitor : race.getCompetitors()) {
-                    int rank = trackedRace.getRank(competitor, dateAsTimePoint);
+                int rank = 1;
+                for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(dateAsTimePoint)) {
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
                     if (trackedLeg != null) {
                         int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                         QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumber);
                         result.add(quickRankDTO);
                     }
+                    rank++;
                 }
-                Collections.sort(result, new Comparator<QuickRankDTO>() {
-                    @Override
-                    public int compare(QuickRankDTO o1, QuickRankDTO o2) {
-                        return o1.rank - o2.rank;
-                    }
-                });
             }
         }
         return result;
@@ -2481,7 +2480,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
+                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 }
                 break;
@@ -2493,12 +2492,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeaderInSeconds(timePoint);
+                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 if (trackedLeg != null) {
-                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+                    Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 }
                 break;
@@ -2560,7 +2559,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
-                    @Override
+                            @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
                                 Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                         competitorDTO.getIdAsString());
@@ -3686,7 +3685,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entry.currentServerTime = new Date();
         
         if (showOnlyRacesOfSameDay) {
-            if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {
+            if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, entry.raceInfo.abortingTimeInPassBefore, dayToCheck)) {
                 entry = null;
             }
         }

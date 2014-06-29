@@ -1043,6 +1043,8 @@ public interface StringMessages extends Messages {
     String eventOfficialWebsiteURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
+    String errorFetchingWindStreamletData(String message);
+    String showWindStreamletOverlay();
     String regattaNameMustNotContainSlashes();
     String showNumberOfRacesScored();
     String racesScored();
