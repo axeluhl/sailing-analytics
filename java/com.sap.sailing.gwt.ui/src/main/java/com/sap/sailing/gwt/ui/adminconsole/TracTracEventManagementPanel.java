@@ -569,11 +569,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
         if (racesWithNotMatchingBoatClasses.size() > 0) {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
-            builder.append("WARNING\n");
             if (selectedRegatta != null) {
                 builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
-                        selectedRegatta.getName()));
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName()));
             } else {
                 builder.append(stringMessages.regattaExistForSelectedBoatClass());
             }
@@ -584,9 +582,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 builder.append(record.name);
                 builder.append("\n");
             }
-            if (!Window.confirm(builder.toString())) {
-                return;
-            }
+            
+            Window.alert(builder.toString());
+            return;
         }
         
         final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();
