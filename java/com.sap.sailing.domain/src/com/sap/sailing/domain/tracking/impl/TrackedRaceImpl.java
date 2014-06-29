@@ -272,11 +272,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final NamedReentrantReadWriteLock loadingFromGPSFixStoreLock;
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
+    
+    /**
+     * Caches wind requests for a few seconds to accelerate access in live mode
+     */
+    private transient ShortTimeWindCache shortTimeWindCache;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new HashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
@@ -459,6 +465,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
         logger.info("Deserialized race " + getRace().getName());
+        shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
     }
 
     @Override
@@ -1268,6 +1275,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
+        return shortTimeWindCache.getWind(p, at);
+    }
+    
+    Wind getWindUncached(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());
     }
 

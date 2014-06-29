@@ -1418,7 +1418,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final List<QuickRankDTO> quickRanks = getQuickRanks(raceIdentifier, date);
         return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks);
-    }    
+    }
 
     /**
      * {@link LegType}s are cached within the method with a resolution of one minute. The cache key is a pair of
@@ -1492,7 +1492,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Wind wind = trackedRace.getWind(fix.getPosition(), toTimePointExcluding);
+                            Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
                             final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
                             Tack tack = wind == null? null : trackedRace.getTack(estimatedSpeed, wind, fix.getTimePoint());
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
