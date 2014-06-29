@@ -380,10 +380,10 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
 
         if (racesWithNotMatchingBoatClasses.size() > 0) {
-            String warningText = "WARNING\n";
+            String warningText = "";
             if (selectedRegatta != null) {
                 warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(), selectedRegatta.getName());
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName());
             } else {
                 warningText += stringMessages.regattaExistForSelectedBoatClass();
             }
@@ -392,9 +392,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             for (SwissTimingReplayRaceDTO record : racesWithNotMatchingBoatClasses) {
                 warningText += record.name + "\n";
             }
-            if(!Window.confirm(warningText)) {
-                return;
-            }
+
+            Window.alert(warningText);
+            return;
         }
         
         final List<SwissTimingReplayRaceDTO> selectedRaces = new ArrayList<SwissTimingReplayRaceDTO>();

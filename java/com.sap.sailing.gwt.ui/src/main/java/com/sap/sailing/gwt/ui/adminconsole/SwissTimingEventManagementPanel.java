@@ -457,8 +457,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             builder.append("WARNING\n");
             if (selectedRegatta != null) {
                 builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
-                        selectedRegatta.getName()));
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName()));
             } else {
                 builder.append(stringMessages.regattaExistForSelectedBoatClass());
             }
@@ -469,9 +468,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 builder.append(record.raceName);
                 builder.append("\n");
             }
-            if (!Window.confirm(builder.toString())) {
-                return;
-            }
+
+            Window.alert(builder.toString());
+            return;
         }
         
         sailingService.trackWithSwissTiming(
