@@ -61,6 +61,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends RaceLogTrackingDialog {
         super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, false);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
+        
         deviceMappingTable.addFilterChangedHandler(new FilterChangedHandler() {
             @Override
             public void onFilterChanged(List<DeviceMappingDTO> filteredList) {

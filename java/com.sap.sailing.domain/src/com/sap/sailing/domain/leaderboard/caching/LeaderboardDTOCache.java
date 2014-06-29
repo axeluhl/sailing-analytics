@@ -119,7 +119,6 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * The {@link #waitForLatestAnalyses} field is passed on to
      * {@link SailingServiceImpl#computeLeaderboardByName(Leaderboard, TimePoint, Collection, boolean)} if a new cache
      * entry needs to be computed. Caching distinguished between
-     * 
      * @param addOverallDetails
      *            tells whether the columns containing the overall details shall be added
      */
@@ -167,7 +166,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     try {
                         LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory);
+                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
                         return result;
                     } finally {
                         LockUtil.unpropagateLockSetFrom(callerThread);

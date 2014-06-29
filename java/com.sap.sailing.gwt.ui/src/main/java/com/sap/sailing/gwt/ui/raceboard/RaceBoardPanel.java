@@ -209,7 +209,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages, showMapControls);
+        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
@@ -234,10 +235,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
-
         addCompetitorsFilterControl(viewControlsPanel);
-
-        addMediaSelectorToNavigationMenu();   
+        addMediaSelectorToNavigationMenu();
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {

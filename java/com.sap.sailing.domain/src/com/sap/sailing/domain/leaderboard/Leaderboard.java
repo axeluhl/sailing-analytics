@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -73,7 +74,7 @@ public interface Leaderboard extends LeaderboardBase {
     LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
-            DomainFactory baseDomainFactory) throws NoWindException;
+            DomainFactory baseDomainFactory, boolean fillNetPointsUncorrected) throws NoWindException;
 
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
@@ -113,7 +114,18 @@ public interface Leaderboard extends LeaderboardBase {
     Fleet getFleet(String fleetName);
     
     Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
-    
+
+    /**
+     * Same as {@link #getEntry}, but the discards for the competitor across the leaderboard can be provided for better performance
+     * in case the entries for several columns shall be computed by multiple calls to this method.
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+
     /**
      * Computes the competitor's ranks as they were or would have been after each race column (from left to right)
      * was completed.<p>
@@ -438,6 +450,20 @@ public interface Leaderboard extends LeaderboardBase {
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when total points are to be computed for more than one column for the same
+     * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
+     * once and not again for each column (which would lead to quadratic effort).
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
+     */
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
+            Set<RaceColumn> discardedRaceColumns) throws NoWindException;
+
     TimePoint getNowMinusDelay();
     
     /**
@@ -475,7 +501,6 @@ public interface Leaderboard extends LeaderboardBase {
      *            point at which to evaluate the leaderboard status
      * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            the names of the race columns of which to expand the details in the result
-     * @param addOverallDetails TODO
      * @param trackedRegattaRegistry
      *            used to determine which of the races are still being tracked and which ones are not
      * @param baseDomainFactory
@@ -483,7 +508,7 @@ public interface Leaderboard extends LeaderboardBase {
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillNetPointsUncorrected) throws NoWindException,
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();

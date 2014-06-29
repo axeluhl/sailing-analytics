@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -21,7 +21,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     protected final CellTable<T> table;
     protected final S selectionModel;
     protected final ListDataProvider<T> dataProvider;
-    protected Panel mainPanel;
+    protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
 
@@ -33,7 +33,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     }
 
     public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            S selectionModel) {
+            S selectionModel, boolean enablePager) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.selectionModel = selectionModel;
@@ -43,6 +43,13 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         dataProvider.addDataDisplay(table);
         table.setSelectionModel(selectionModel);
         mainPanel.add(table);
+        
+        if (enablePager) {
+            table.setPageSize(8);
+            SimplePager pager = new SimplePager();
+            pager.setDisplay(table);
+            mainPanel.add(pager);
+        }
     }
     
     public CellTable<T> getTable() {

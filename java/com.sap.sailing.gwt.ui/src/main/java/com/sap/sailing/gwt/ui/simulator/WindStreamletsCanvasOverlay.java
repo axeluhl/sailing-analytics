@@ -2,9 +2,13 @@ package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.RectField;
+import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorField;
+import com.sap.sailing.gwt.ui.simulator.streamlets.SimulatorJSBundle;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -52,13 +56,11 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     public void startStreamlets() {
         if (swarm == null) {
-            this.swarm = new Swarm(this, map, this.streamletPars);
+            final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars);
+            setCanvasSettings();
+            this.swarm = new Swarm(this, map, timer, field, streamletPars);
         }
-        this.swarm.start(40, windFieldDTO);
-    }
-
-    public void setStreamletsStep(int step) {
-        this.swarm.getField().setStep(step);
+        this.swarm.start(40);
     }
 
     public void stopStreamlets() {
@@ -120,11 +122,13 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         super.draw();
         if (mapProjection != null) {
             if ((nParticles > 0) && (swarm == null)) {
-                this.swarm = new Swarm(this, map, this.streamletPars);
-                this.swarm.start(/* animationIntervalMillis */ 40, /* windField */ null);
-            }
-            if (windFieldDTO != null) {
-                // drawing is done by external JavaScript for Streamlets
+                SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
+                String jsonStr = bundle.windStreamletsDataJS().getText();
+                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars);
+                map.setZoom(5);
+                map.panTo(f.getCenter());
+                this.swarm = new Swarm(this, map, timer, f, streamletPars);
+                this.swarm.start(/* animationIntervalMillis */ 40);
             }
         }
     }
@@ -135,8 +139,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     @Override
     public void timeChanged(final Date newDate, Date oldDate) {
-        int step = (int) ((newDate.getTime() - this.windParams.getStartTime().getTime()) / this.windParams.getTimeStep().asMillis());
-        this.setStreamletsStep(step);
     }
 
     @Override

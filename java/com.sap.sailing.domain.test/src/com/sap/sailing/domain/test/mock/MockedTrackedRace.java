@@ -54,6 +54,8 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -283,7 +285,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
+    public Wind getEstimatedWindDirection(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -594,7 +596,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
             throws NoWindException {
         // TODO Auto-generated method stub
         return null;
@@ -632,7 +634,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -681,6 +683,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -960,6 +969,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -12,8 +12,12 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IsFinishedAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.IsInFinishingPhaseAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
@@ -48,6 +52,8 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
     private final IndividualRecallDisplayedFinder recallDisplayedFinder;
     private final IndividualRecallRemovedFinder recallRemovedFinder;
+    private final FinishingTimeFinder finishingTimeFinder;
+    private final FinishedTimeFinder finishedTimeFinder;
     private final RaceLogEventVisitor raceLogListener;
 
     private boolean cachedIsIndividualRecallDisplayed;
@@ -70,6 +76,8 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
         this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
+        this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
+        this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -207,9 +215,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 changedListeners.onIndividualRecallRemoved(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
-        }
-
-        // always call listeners for changed flag, as this does not only affect recal, but also
+        }    
+        
+        // always call listeners for changed flag, as this does not only affect recall, but also
         // changes start procedure, for which some text elements need to be updated
         // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
         changedListeners.onActiveFlagsChanged(this);
@@ -262,5 +270,23 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         if (scheduler != null) {
             scheduler.unscheduleAllEvents();
         }
+    }
+    
+    protected boolean isFinished(TimePoint at) {
+        IsFinishedAnalyzer analyzer = new IsFinishedAnalyzer(raceLog, finishedTimeFinder, at);
+        return analyzer.analyze();
+    }
+    
+    protected boolean isInFinishingPhase(TimePoint at) {
+        IsInFinishingPhaseAnalyzer analyzer = new IsInFinishingPhaseAnalyzer(raceLog, finishingTimeFinder, at);
+        return analyzer.analyze();
+    }
+    
+    protected TimePoint getFinishingTime() {
+        return finishingTimeFinder.analyze();
+    }
+    
+    protected TimePoint getFinishedTime() {
+        return finishedTimeFinder.analyze();
     }
 }
