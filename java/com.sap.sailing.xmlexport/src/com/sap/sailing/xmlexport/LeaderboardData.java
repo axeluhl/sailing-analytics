@@ -528,11 +528,27 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorElement, "nationality_ioc", "");
         }
         
+        // determine the last race and take the timepoint from there
         TimePoint timePointOfLatestModification = null;
-        if (leaderboard.getTimePointOfLatestModification() != null) {
-            timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+        RaceColumn lastRaceColumnWithTrackedRace = null;
+        for (RaceColumn column : leaderboard.getRaceColumns()) {
+            if (column.hasTrackedRaces()) {
+                lastRaceColumnWithTrackedRace = column;
+            }
+        }
+        TimePoint endOfRaceForLastTrackedRaceInLeaderboard = null;
+        if (lastRaceColumnWithTrackedRace != null) {
+            TrackedRace lastTrackedRace = lastRaceColumnWithTrackedRace.getTrackedRace(competitor);
+            endOfRaceForLastTrackedRaceInLeaderboard = lastTrackedRace.getEndOfRace();
+        }
+        if (endOfRaceForLastTrackedRaceInLeaderboard != null) {
+            timePointOfLatestModification = endOfRaceForLastTrackedRaceInLeaderboard;
         } else {
-            timePointOfLatestModification = MillisecondsTimePoint.now();
+            if (leaderboard.getTimePointOfLatestModification() != null) {
+                timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            } else {
+                timePointOfLatestModification = MillisecondsTimePoint.now();
+            }
         }
         Duration totalTimeSailed = leaderboard.getTotalTimeSailed(competitor, timePointOfLatestModification);
         if (totalTimeSailed != null) {
