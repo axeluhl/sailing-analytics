@@ -1,27 +1,22 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.hamcrest.Matchers.*;
-
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
-
 import org.junit.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver.TargetLocator;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
-
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
-
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
-
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -41,7 +36,6 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     
     private static final String DEFAULT_REGATTA = "Default regatta";
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)";  //$NON-NLS-1$
-    private static final String IDM_2013_REGATTA = "IDM 5O5 2013 (505)";  //$NON-NLS-1$
     
     private static final String RACE = "BMW Cup Race %d";
     
@@ -96,9 +90,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         Alert alert = locator.alert();
         String text = alert.getText();
         alert.dismiss();
-        String message = "There is at least one regatta for the selected boat classes. Do you really want " +
-                "to use the 'no regatta' selection?";
-        assertThat(text, containsString("WARNING"));
+        String message = "There is at least one regatta for the selected boat classes.";
         assertThat(text, containsString(message));
     }
     
@@ -120,9 +112,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         String text = alert.getText();
         alert.dismiss();
         String message = String.format("The selected races contain boat classes which are not the same as " +
-                "the boat class '%s' of the selected regatta. Do you really want to use the regatta '%s'?",
-                IDM_2013_BOAT_CLASS, IDM_2013_REGATTA);
-        assertThat(text, containsString("WARNING"));
+                "the boat class '%s' of the selected regatta.", IDM_2013_BOAT_CLASS);
         assertThat(text, containsString(message));
     }
 }

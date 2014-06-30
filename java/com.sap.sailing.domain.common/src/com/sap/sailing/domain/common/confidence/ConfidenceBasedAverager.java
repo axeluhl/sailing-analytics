@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.confidence;
+package com.sap.sailing.domain.common.confidence;
 
 public interface ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> {
     /**

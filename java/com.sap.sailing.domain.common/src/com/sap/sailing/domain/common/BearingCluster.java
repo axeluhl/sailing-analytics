@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it

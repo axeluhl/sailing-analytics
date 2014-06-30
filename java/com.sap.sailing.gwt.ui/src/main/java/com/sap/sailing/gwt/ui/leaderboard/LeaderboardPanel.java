@@ -918,9 +918,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
-                int legCount = getLeaderboard().getLegCount(getRaceColumnName(), preSelectedRace);
-                if (legCount != -1) {
-                    for (int i = 0; i < legCount; i++) {
+                int maxLegCount = getLeaderboard().getLegCount(getRaceColumnName(), preSelectedRace);
+                if (maxLegCount != -1) {
+                    for (int i = 0; i < maxLegCount; i++) {
                         LegColumn legColumn = getLegColumn(i);
                         result.add(legColumn);
                     }

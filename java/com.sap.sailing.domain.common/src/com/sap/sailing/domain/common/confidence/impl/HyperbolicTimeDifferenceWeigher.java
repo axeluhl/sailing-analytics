@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.confidence.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.Weigher;
 
 public class HyperbolicTimeDifferenceWeigher implements Weigher<TimePoint> {
     private static final long serialVersionUID = 4378168079868145134L;
@@ -16,7 +16,7 @@ public class HyperbolicTimeDifferenceWeigher implements Weigher<TimePoint> {
      * <pre>
      *   |fix-request|=halfConfidenceAfterMilliseconds ==&gt; result==0.5
      *   0 &lt;= result &lt;= 1
-     *   fix=request ==&gt; result==1
+     *   fix==request ==&gt; result==1
      * </pre>
      * 
      * This implies the following formula for result := f(x):

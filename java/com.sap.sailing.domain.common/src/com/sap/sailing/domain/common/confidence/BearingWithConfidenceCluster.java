@@ -1,17 +1,12 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.common.confidence;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sse.common.Util;
 
 /**

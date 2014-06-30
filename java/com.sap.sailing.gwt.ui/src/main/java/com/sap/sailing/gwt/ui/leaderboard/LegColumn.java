@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
  * 
  */
 public class LegColumn extends ExpandableSortableColumn<String> {
-    private final String raceName;
+    private final String raceColumnName;
     private final int legIndex;
     private final StringMessages stringMessages;
     private final String headerStyle;
@@ -218,13 +218,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
         
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceColumnName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), preferredSortingOrder,
                 stringMessages, detailHeaderStyle, detailColumnStyle, legDetailSelection, leaderboardPanel);
         setHorizontalAlignment(ALIGN_CENTER);
-        this.raceName = raceName;
+        this.raceColumnName = raceColumnName;
         this.legIndex = legIndex;
         this.stringMessages = stringMessages;
         this.headerStyle = headerStyle;
@@ -308,7 +308,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     private String getRaceName() {
-        return raceName;
+        return raceColumnName;
     }
 
     private LegEntryDTO getLegEntry(LeaderboardRowDTO row) {
@@ -347,9 +347,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     
     @Override
     public String getValue(LeaderboardRowDTO row) {
+        LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
+        int legDetailsCount = leaderboardEntryDTO.legDetails.size();
         LegEntryDTO legEntry = getLegEntry(row);
         if (legEntry != null && legEntry.rank != 0) {
             return ""+legEntry.rank;
+        }  else if (legIndex+1 > legDetailsCount) {
+            return "n/a";
         } else {
             return "";
         }

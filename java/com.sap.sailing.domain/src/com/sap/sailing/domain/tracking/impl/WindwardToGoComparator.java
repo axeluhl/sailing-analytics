@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 
 /**
  * Compares competitor tracks based on the windward distance they still have to go and/or leg completion times at a
@@ -79,7 +80,7 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
     private Distance getWindwardDistanceToGo(TrackedLegOfCompetitor o1) throws NoWindException {
         Distance result = wwdtgCache.get(o1);
         if (result == null) {
-            result = o1.getWindwardDistanceToGo(timePoint);
+            result = o1.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
             wwdtgCache.put(o1, result);
         }
         return result;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.confidence.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
 import com.sap.sailing.domain.common.scalablevalue.AbstractScalarValue;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;

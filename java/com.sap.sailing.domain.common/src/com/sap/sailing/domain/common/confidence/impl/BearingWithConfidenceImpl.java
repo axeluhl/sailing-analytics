@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common.confidence.impl;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.scalablevalue.IsScalable;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;

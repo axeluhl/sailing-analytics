@@ -4,19 +4,17 @@ import java.util.Date;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
-import com.sap.sailing.gwt.ui.simulator.WindStreamletsCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sse.gwt.client.player.TimeListener;
 
-public class Swarm {
+public class Swarm implements TimeListener {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
@@ -24,16 +22,17 @@ public class Swarm {
 
     private Timer loopTimer;
     private Mercator projection;
-    private VectorField field;
+    private final VectorField field;
     
     /**
      * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
-     * {@link #particles} array.
+     * {@link #particles} array. Note that since elements in {@link #particles} can be <code>null</code>, this number
+     * not necessarily represents the exact number of particles visible.
      */
     private int nParticles;
     
     /**
-     * The particles shown in this swarm.
+     * The particles shown in this swarm. Elements in the array may be <code>null</code>.
      */
     private Particle[] particles;
     
@@ -47,31 +46,22 @@ public class Swarm {
     private int swarmPause = 0;
     private boolean swarmContinue = true;
     private Bounds visibleBoundsOfField;
+    private Date timePoint;
 
-    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, StreamletParameters streamletPars) {
+    public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
+            VectorField vectorField, StreamletParameters streamletPars) {
+        this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
         this.map = map;
-		this.parameters = streamletPars;
+        timer.addTimeListener(this);
+        this.parameters = streamletPars;
+        timePoint = timer.getTime();
     }
 
-    public void start(int animationIntervalMillis, WindFieldDTO windField) {
+    public void start(int animationIntervalMillis) {
         projection = new Mercator(fullcanvas, map);
-        // TODO make the VectorField a parameter of Swarm
-        if (windField == null) {
-            SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
-            String jsonStr = bundle.windStreamletsDataJS().getText();
-            RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, this.parameters);
-            field = f;
-            map.setZoom(5);
-            map.panTo(f.getCenter());
-            projection.calibrate();
-        } else {
-            field = new SimulatorField(((WindStreamletsCanvasOverlay) fullcanvas).getWindFieldDTO(),
-                    ((WindStreamletsCanvasOverlay) fullcanvas).getWindParams(), this.parameters);
-            fullcanvas.setCanvasSettings();
-            projection.calibrate();
-        }
+        projection.calibrate();
         this.updateBounds();
         Context2d ctxt = canvas.getContext2d();
         ctxt.setFillStyle("red");
@@ -85,23 +75,31 @@ public class Swarm {
     }
 
     private Particle createParticle() {
-        Particle particle = new Particle();
+        Particle particle = null;
         boolean done = false;
-        // try to create a particle at a random position until the weight is high enough for it to be displayed
-        while (!done) {
+        int attempts = 10;
+        // try a few times to create a particle at a random position until the weight is high enough for it to be displayed
+        while (!done && attempts-- > 0) {
+            particle = new Particle();
             particle.currentPosition = getRandomPosition();
-            Vector v = field.getVector(particle.currentPosition);
-            double weight = field.particleWeight(particle.currentPosition, v);
-            if (weight >= Math.random()) {
-                if (v == null || v.length() == 0) {
-                    particle.stepsToLive = 0;
+            if (field.inBounds(particle.currentPosition)) {
+                Vector v = field.getVector(particle.currentPosition, timePoint);
+                double weight = field.getParticleWeight(particle.currentPosition, v);
+                if (weight >= Math.random()) {
+                    if (v == null || v.length() == 0) {
+                        particle.stepsToLive = 0;
+                    } else {
+                        particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
+                    }
+                    particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                    particle.previousPixelCoordinate = particle.currentPixelCoordinate;
+                    particle.v = v;
+                    done = true;
                 } else {
-                    particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
+                    particle = null;
                 }
-                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
-                particle.previousPixelCoordinate = particle.currentPixelCoordinate;
-                particle.v = v;
-                done = true;
+            } else {
+                particle = null; // out of bounds
             }
         }
         return particle;
@@ -141,7 +139,8 @@ public class Swarm {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
+        this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
+                * this.parameters.swarmScale);
     };
 
     private void startLoop(final int animationIntervalMillis) {
@@ -163,6 +162,7 @@ public class Swarm {
                 }
                 Date time1 = new Date();
                 if (swarmContinue) {
+                    // wait at least 10ms for the next iteration; try to get one iteration done every animationIntervalMillis if possible
                     loopTimer.schedule((int) Math.max(10, animationIntervalMillis - (time1.getTime() - time0.getTime())));
                 } else {
                     projection.clearCanvas();
@@ -183,11 +183,11 @@ public class Swarm {
         ctxt.setFillStyle("white");
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if (particle.stepsToLive == 0) {
+            if (particle == null || particle.stepsToLive == 0) {
                 continue;
             }
             double particleSpeed = particle.v == null ? 0 : particle.v.length();
-            ctxt.setLineWidth(field.lineWidth(particleSpeed));
+            ctxt.setLineWidth(field.getLineWidth(particleSpeed));
             ctxt.setStrokeStyle(field.getColor(particleSpeed));
             ctxt.beginPath();
             ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
@@ -198,13 +198,13 @@ public class Swarm {
 
     /**
      * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
-     * {@link VectorField#motionScale(int)} at the map's current zoom level.
+     * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
      */
     private boolean execute() {
-        double speed = 0.01 * field.motionScale(map.getZoom());
+        double speed = 0.01 * field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
-            if ((particle.stepsToLive > 0) && (particle.v != null)) {
+            if (particle != null && particle.stepsToLive > 0 && particle.v != null) {
                 // move the particle one step in the direction and with the speed indicated by particle.v and
                 // update its currentPosition, currentPixelCoordinate and previousPixelCoordinate fields;
                 // also, its particle.v field is updated based on its new position from the vector field
@@ -215,12 +215,12 @@ public class Swarm {
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
-                    particle.v = field.getVector(particle.currentPosition);
+                    particle.v = field.getVector(particle.currentPosition, timePoint);
                 } else {
                     particle.v = null;
                 }
             } else {
-                // particle timed out (age became 0); create a new one
+                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
                 particles[idx] = this.createParticle();
             }
         }
@@ -230,5 +230,10 @@ public class Swarm {
 
     public VectorField getField() {
         return field;
+    }
+
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        timePoint = newTime;
     }
 }

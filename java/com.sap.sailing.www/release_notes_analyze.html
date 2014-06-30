@@ -38,6 +38,22 @@
 					<h2 class="articleSubheadline">June 2014</h2>
 
 					<ul class="bulletList">
+						<li>In the "Maps" settings in the RaceBoard page there is a new checkbox named
+						    "Show wind streamlets overlay." If you select it and wait for about a minute,
+						    a complete wind field will be calculated and visualized as an overlay on top
+						    of the race course display. It reacts to you moving the time slider and shows
+						    how the wind differs at different locations on the course. Stronger and faster-moving
+						    streamlets mean stronger breeze.
+						</li>
+						<li>Wind is now calculated location-based. At locations closer to a sensor, that sensor
+						    has a higher influence on the local wind field than sensors further away. The wind
+						    estimations based on the courses sailed are assigned a location that corresponds with
+						    the "center of gravity" of the field that was used for the estimation. For example,
+						    if the fleet is approaching the windward mark and the wind sensor in on the committee
+						    boat on the leeward side of the course, the course-based estimation influences the
+						    assumed wind field more on the windward side whereas the sensor counts more for
+						    the leeward side.
+						</li>
 						<li>Switched to the latest version of the Highcharts charting framework. This leads to improvements
 						    especially on mobile devices. Charts can be zoomed using pinch gestures now.
 						</li>
