@@ -147,7 +147,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void recordFix(Mark mark, GPSFix fix) {
-        getOrCreateTrack(mark).addGPSFix(fix);
+        if ((getStartOfTracking() == null || getStartOfTracking().compareTo(fix.getTimePoint()) <= 0) &&
+            (getEndOfTracking() == null || getEndOfTracking().compareTo(fix.getTimePoint()) >= 0)) {
+            getOrCreateTrack(mark).addGPSFix(fix);
+        }
     }
 
     @Override
