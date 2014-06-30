@@ -155,6 +155,15 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
                         getIndividualRecallDisplayedTime(),
                         Arrays.asList(new FlagPole(Flags.XRAY, false)),
                         getIndividualRecallRemovalTime());
+            } else if (isFinished(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+            } else if (isInFinishingPhase(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
+                        getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
+                        null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();
                 return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);

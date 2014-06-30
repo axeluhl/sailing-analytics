@@ -26,6 +26,7 @@ public interface HomeResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/large.css")
     MinWidth50emCss largeCss();
 
+    @Shared 
     public interface MainCss extends CssResource {
         String grid();
         String stackenblochen();

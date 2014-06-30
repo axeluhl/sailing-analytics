@@ -225,4 +225,25 @@ public class BoundsTest {
         assertTrue(i.isEmpty());
     }
     
+    @Test
+    public void infiniteIntersectNoDateLine() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
+        Bounds b2 = new BoundsImpl(new DegreePosition(-10, -20), new DegreePosition(20, 20));
+        Bounds i = b1.intersect(b2);
+        assertEquals(-10, i.getSouthWest().getLatDeg(), 0.0000001);
+        assertEquals(20, i.getNorthEast().getLatDeg(), 0.0000001);
+        assertEquals(-20, i.getSouthWest().getLngDeg(), 0.0000001);
+        assertEquals(20, i.getNorthEast().getLngDeg(), 0.0000001);
+    }
+
+    @Test
+    public void infiniteIntersectDateLine() {
+        Bounds b1 = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
+        Bounds b2 = new BoundsImpl(new DegreePosition(-10, 170), new DegreePosition(20, -170));
+        Bounds i = b1.intersect(b2);
+        assertEquals(-10, i.getSouthWest().getLatDeg(), 0.0000001);
+        assertEquals(20, i.getNorthEast().getLatDeg(), 0.0000001);
+        assertEquals(170, i.getSouthWest().getLngDeg(), 0.0000001);
+        assertEquals(-170, i.getNorthEast().getLngDeg(), 0.0000001);
+    }
 }

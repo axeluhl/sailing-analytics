@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
+import java.util.Date;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.maps.client.base.LatLng;
@@ -86,18 +88,6 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public void setStep(int step) {
-    }
-
-    @Override
-    public void nextStep() {
-    }
-
-    @Override
-    public void prevStep() {
-    }
-
-    @Override
     public boolean inBounds(Position p) {
         return p.getLngDeg() >= this.x0 && p.getLngDeg() < this.x1 && p.getLatDeg() >= this.y0
                 && p.getLatDeg() < this.y1;
@@ -119,7 +109,7 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public Vector getVector(Position p) {
+    public Vector getVector(Position p, Date at) {
         double lngDeg = (this.w - 1 - 1e-6) * (p.getLngDeg() - this.x0) / (this.x1 - this.x0);
         double latDeg = (this.h - 1 - 1e-6) * (p.getLatDeg() - this.y0) / (this.y1 - this.y0);
         if ((lngDeg < 0) || (lngDeg > (this.w - 1)) || (latDeg < 0) || (latDeg > (this.h - 1))) {
@@ -135,17 +125,12 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public double getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public double motionScale(int zoomLevel) {
+    public double getMotionScale(int zoomLevel) {
         return this.motionFactor * Math.pow(1.7, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
-    public double particleWeight(Position p, Vector v) {
+    public double getParticleWeight(Position p, Vector v) {
         return v == null ? 0 : (1.0 - v.length() / this.maxLength);
     }
     
@@ -170,7 +155,7 @@ public class RectField implements VectorField {
     }
 
     @Override
-    public double lineWidth(double speed) {
+    public double getLineWidth(double speed) {
         return 1.0;
     }
 

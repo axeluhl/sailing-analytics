@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
+import java.util.Date;
+
+import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 
 /**
- * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position)}
+ * A field of vectors to display in a streamlet {@link Swarm}. The {@link Vector}s returned by {@link #getVector(Position, Date)}
  * are used to initialize {@link Particle}s. Their "speed" is the {@link Vector#length() length} of the vector.<p>
  * 
  * This field provides color strings for each possible speed which are then used to style the particles as they fly through
@@ -23,21 +26,20 @@ public interface VectorField {
     /**
      * The vector field's value at position <code>p</code>.
      * 
+     * @param at
+     *            the time at which to query the vector field
+     * 
      * @return the speed/direction vector that tells how a particle will fly at this position in the vector field, or
      *         <code>null</code> if there should not be a flying particle, e.g., because the field does not know how a
      *         particle would fly at this position. An implementation that does not cleverly extrapolate outside the
-     *         field's {@link #inBounds(Position) bounds} should return <code>null</code> for out-of-bounds
-     *         positions.
+     *         field's {@link #inBounds(Position) bounds} should return <code>null</code> for out-of-bounds positions.
      */
-    Vector getVector(Position p);
+    Vector getVector(Position p, Date at);
 
     /**
-     * @return the maximum {@link Vector#length() length} of any vector returned by {@link #getVector(Position)} in this field for
-     * positions that are {@link #inBounds(Position) within bounds}.
+     * @param zoomLevel the zoom level as returned by {@link MapWidget#getZoom()}
      */
-    double getMaxLength();
-
-    double motionScale(int zoomLevel);
+    double getMotionScale(int zoomLevel);
 
     /**
      * A weight between 0.0 and 1.0 (inclusive) that tells the probability at which a particle at position
@@ -50,7 +52,7 @@ public interface VectorField {
      *            the particle's speed/direction vector which may be <code>null</code>; in this case, an implementation
      *            should return 0.0 as the particle's weight.
      */
-    double particleWeight(Position p, Vector v);
+    double getParticleWeight(Position p, Vector v);
 
     /**
      * Computes a line width for a particle flying at a certain speed.
@@ -58,7 +60,7 @@ public interface VectorField {
      * @param speed
      *            a speed as obtained by computing a {@link Vector}'s {@link Vector#length() length}.
      */
-    double lineWidth(double speed);
+    double getLineWidth(double speed);
 
     /**
      * @return the north-east and the south-west corner of the rectangular area on a Mercator projection that fully
@@ -69,12 +71,6 @@ public interface VectorField {
     Bounds getFieldCorners();
 
     double getParticleFactor();
-
-    void setStep(int step);
-
-    void nextStep();
-
-    void prevStep();
 
     /**
      * Computes a color for a particle flying at a certain speed.

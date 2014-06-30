@@ -525,6 +525,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (boatClassNames != null && Util.size(boatClassNames) > 0) {
             String tracTracBoatClassName = boatClassNames.iterator().next();
             if (selectedRegatta == null) {
+                if (tracTracRecord.hasRememberedRegatta) {
+                    return true;
+                }
+                
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
@@ -565,11 +569,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
         if (racesWithNotMatchingBoatClasses.size() > 0) {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
-            builder.append("WARNING\n");
             if (selectedRegatta != null) {
                 builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
-                        selectedRegatta.getName()));
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName()));
             } else {
                 builder.append(stringMessages.regattaExistForSelectedBoatClass());
             }
@@ -580,9 +582,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 builder.append(record.name);
                 builder.append("\n");
             }
-            if (!Window.confirm(builder.toString())) {
-                return;
-            }
+            
+            Window.alert(builder.toString());
+            return;
         }
         
         final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();

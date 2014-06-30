@@ -12,9 +12,11 @@ import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
 import com.sap.sailing.gwt.home.client.place.event.regattalist.EventRegattaList;
+import com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaSchedule;
 import com.sap.sailing.gwt.home.client.place.event.schedule.EventSchedule;
 import com.sap.sailing.gwt.home.client.shared.eventsponsors.EventSponsors;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
     private static EventViewUiBinder uiBinder = GWT.create(EventViewUiBinder.class);
@@ -27,20 +29,23 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @UiField(provided=true) EventSchedule eventSchedule;
     @UiField(provided=true) EventMedia eventMedia;
     @UiField(provided=true) EventRegattaList eventRegattaList;
+    @UiField(provided=true) EventRegattaSchedule eventRegattaSchedule;
+    
     @UiField EventSponsors eventSponsors;
 
     private final List<Widget> pageElements;
     
     public TabletAndDesktopEventView(EventDTO event) {
         eventHeader = new EventHeader(event, this);
-        eventRegattaList = new EventRegattaList(event);
+        eventRegattaList = new EventRegattaList(event, this);
+        eventRegattaSchedule = new EventRegattaSchedule(event, this);
         eventOverview = new EventOverview(event);
         eventSchedule = new EventSchedule(event);
         eventMedia = new EventMedia(event);
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventMedia, eventSchedule });
+        pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaSchedule, eventMedia, eventSchedule });
         setVisibleEventElement(eventOverview);
 
         eventSponsors.setEventSponsors(event);
@@ -54,6 +59,11 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @Override
     public void goToRegattas() {
         setVisibleEventElement(eventRegattaList);
+    }
+
+    @Override
+    public void goToRegattaRaces(StrippedLeaderboardDTO leaderboard) {
+        setVisibleEventElement(eventRegattaSchedule);
     }
 
     @Override
