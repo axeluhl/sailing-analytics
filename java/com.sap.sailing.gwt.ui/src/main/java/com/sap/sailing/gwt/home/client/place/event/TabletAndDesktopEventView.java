@@ -6,8 +6,11 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
@@ -15,7 +18,9 @@ import com.sap.sailing.gwt.home.client.place.event.regattalist.EventRegattaList;
 import com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaSchedule;
 import com.sap.sailing.gwt.home.client.place.event.schedule.EventSchedule;
 import com.sap.sailing.gwt.home.client.shared.eventsponsors.EventSponsors;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
@@ -35,7 +40,10 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     private final List<Widget> pageElements;
     
-    public TabletAndDesktopEventView(EventDTO event) {
+    private final SailingServiceAsync sailingService;
+    
+    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event) {
+        this.sailingService = sailingService;
         eventHeader = new EventHeader(event, this);
         eventRegattaList = new EventRegattaList(event, this);
         eventRegattaSchedule = new EventRegattaSchedule(event, this);
@@ -63,7 +71,32 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
 
     @Override
     public void goToRegattaRaces(StrippedLeaderboardDTO leaderboard) {
-        setVisibleEventElement(eventRegattaSchedule);
+        switch (leaderboard.type) {
+        case RegattaLeaderboard:
+            sailingService.getRegattaByName(leaderboard.regattaName, new AsyncCallback<RegattaDTO>() {
+                @Override
+                public void onSuccess(RegattaDTO regatta) {
+                    eventRegattaSchedule.setRacesFromRegatta(regatta);
+                    setVisibleEventElement(eventRegattaSchedule);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Shit happens");
+                }
+            });
+            break;
+        case FlexibleLeaderboard:
+            eventRegattaSchedule.setRacesFromFlexibleLeaderboard(leaderboard);
+            setVisibleEventElement(eventRegattaSchedule);
+            break;
+        case FlexibleMetaLeaderboard:
+            setVisibleEventElement(eventRegattaSchedule);
+            break;
+        case RegattaMetaLeaderboard:
+            setVisibleEventElement(eventRegattaSchedule);
+            break;
+        }
     }
 
     @Override

@@ -733,10 +733,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RegattaDTO> getRegattas() throws IllegalArgumentException {
+    public List<RegattaDTO> getRegattas() {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
             result.add(convertToRegattaDTO(regatta));
+        }
+        return result;
+    }
+
+    @Override
+    public RegattaDTO getRegattaByName(String regattaName) {
+        RegattaDTO result = null;
+        if (regattaName != null && !regattaName.isEmpty()) {
+            Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+            if (regatta != null) {
+                result = convertToRegattaDTO(regatta);
+            }
         }
         return result;
     }

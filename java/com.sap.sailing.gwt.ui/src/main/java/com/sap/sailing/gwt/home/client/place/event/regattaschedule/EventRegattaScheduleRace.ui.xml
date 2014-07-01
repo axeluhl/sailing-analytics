@@ -6,15 +6,10 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources" />
     <g:HTMLPanel>
-		<h3>Races of Regatta <span ui:field="regattaName" /></h3>
-        <!-- 
-<div class="{local_res.css.eventregattaschedule}">
-  <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        {#each series in regatta.series}<s:eventRegattaSchedule.EventRegattaScheduleSeries ui:field='series'></s>{/each regatta.series}
-    </div>
-  </div>
-</div>
-         -->
+<!-- 
+{#if race.isTracked}<a href="{race.link}" data-live="{race.isLive}" data-upcoming="{race.isUpcoming}" class="{local_res.css.eventregattaschedule_series_fleet_race} {local_res.css.eventregattaschedule_series_fleet_racetracked}">
+  <div class="{local_res.css.eventregattaschedule_series_fleet_race_name}">{race.name}</div>
+  <div class="{local_res.css.eventregattaschedule_series_fleet_race_details}">{race.details}</div></a>{/if race.isTracked}
+ -->        
     </g:HTMLPanel>
 </ui:UiBinder>
