@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaschedule;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -25,7 +26,8 @@ public class EventRegattaScheduleFleet extends Composite {
 
     @SuppressWarnings("unused")
     private final FleetDTO fleet;
-    
+
+    @UiField DivElement fleetDiv;
     @UiField SpanElement fleetName;
     @UiField HTMLPanel racesListPanel;
     
@@ -38,6 +40,7 @@ public class EventRegattaScheduleFleet extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         fleetName.setInnerText(fleet.getName());
+        fleetDiv.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
         
         for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
             EventRegattaScheduleRace eventRegattaScheduleRace = new EventRegattaScheduleRace(fleet, raceColumn);

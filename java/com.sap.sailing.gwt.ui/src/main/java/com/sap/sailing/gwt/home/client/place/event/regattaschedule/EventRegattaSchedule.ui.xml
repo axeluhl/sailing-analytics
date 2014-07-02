@@ -6,7 +6,12 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources" />
     <g:HTMLPanel>
+  <div class="{res.mainCss.grid}">
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 		<h3>Races of Regatta <span ui:field="regattaName" /></h3>
+    </div>
+  </div>
+        
 <div class="{local_res.css.eventregattaschedule}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
