@@ -6,9 +6,10 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources" />
     <g:HTMLPanel>
-
-<div class="{local_res.css.eventregattaschedule_series}">
-  <h3 class="{local_res.css.eventregattaschedule_series_name}">{series.name}</h3><span class="{local_res.css.eventregattaschedule_series_date}">{series.date}</span>{#each fleet in series.trackedRaces.fleets}<s:eventRegattaSchedule.EventRegattaScheduleFleet ui:field='fleet'></s>{/each series.trackedRaces.fleets}
-</div>
+		<div class="{local_res.css.eventregattaschedule_series}">
+		  <h3 class="{local_res.css.eventregattaschedule_series_name}"><span ui:field="seriesName" /></h3>
+			<span class="{local_res.css.eventregattaschedule_series_date}"><span ui:field="seriesDate" /></span>
+			<g:HTMLPanel ui:field="fleetsListPanel" />
+		</div>
     </g:HTMLPanel>
 </ui:UiBinder>

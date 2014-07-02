@@ -7,14 +7,12 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources" />
     <g:HTMLPanel>
 		<h3>Races of Regatta <span ui:field="regattaName" /></h3>
-        <!-- 
 <div class="{local_res.css.eventregattaschedule}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        {#each series in regatta.series}<s:eventRegattaSchedule.EventRegattaScheduleSeries ui:field='series'></s>{/each regatta.series}
+		    <g:HTMLPanel ui:field="seriesListPanel" />
     </div>
   </div>
 </div>
-         -->
     </g:HTMLPanel>
 </ui:UiBinder>
