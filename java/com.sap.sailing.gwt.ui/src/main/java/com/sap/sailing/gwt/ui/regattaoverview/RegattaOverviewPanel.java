@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -101,6 +102,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.userAgent = userAgent;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
+
         retrieveEvent();
         retrieveRegattaStructure();
         
@@ -184,21 +186,31 @@ public class RegattaOverviewPanel extends SimplePanel {
         flexTable.setWidget(0, 0, eventVenueGrid);
         flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        leaderboardCheckBox = addLeaderboardEnablerButton();
-        this.leaderboardCheckBox.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
+        final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
+                && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
+        if (showLeaderboardButton) {
+            leaderboardCheckBox = addLeaderboardEnablerButton();
+            leaderboardCheckBox.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
+        } else {
+            leaderboardCheckBox = null;
+        }
+
         HorizontalPanel refreshStartStopClockPanel = getRefreshStartStopClockPanel();
-        
         flexTable.setWidget(0, 1, refreshStartStopClockPanel);
         
         mainPanel.add(flexTable);
         mainPanel.add(regattaRaceStatesComponent);
         
-        leaderboardsTabPanel = new TabPanel();
-        leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
-        mainPanel.add(leaderboardsTabPanel);
+        if (showLeaderboardButton) {
+            leaderboardsTabPanel = new TabPanel();
+            leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
+            leaderboardsTabPanel.setVisible(false);
+            mainPanel.add(leaderboardsTabPanel);
+        } else {
+            leaderboardsTabPanel = null;
+        }
         
         onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
-        addLeaderboardEnablerButton();
     }
     
     private CheckBox addLeaderboardEnablerButton() {
@@ -227,33 +239,40 @@ public class RegattaOverviewPanel extends SimplePanel {
         /*
          * Load a tabbed widget with one tab per regatta. Each tab contains the leaderboard for the regatta.
          */
-        if (showLeaderboard) {
-            final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-            final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
-            sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                    new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-                        @Override
-                        public void onSuccess(List<StrippedLeaderboardDTO> result) {
-                            leaderboardsTabPanel.clear();
-                            for (StrippedLeaderboardDTO leaderboard : result) {
-                                LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
-                                        new AsyncActionsExecutor(), leaderboardSettings, 
-                                        /*preSelectedRace*/null, 
-                                        competitorSelectionProvider, 
-                                        null, leaderboard.name, 
-                                        errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
-                                leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+        if (leaderboardsTabPanel != null) {
+            if (showLeaderboard) {
+                final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+                final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+                sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
+                        new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+                            @Override
+                            public void onSuccess(List<StrippedLeaderboardDTO> result) {
+                                leaderboardsTabPanel.clear();
+                                for (StrippedLeaderboardDTO leaderboard : result) {
+                                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
+                                            new AsyncActionsExecutor(), leaderboardSettings, 
+                                            /*preSelectedRace*/null, 
+                                            competitorSelectionProvider, 
+                                            null, leaderboard.name, 
+                                            errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
+                                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+                                }
+                                if (!result.isEmpty()) {
+                                    leaderboardsTabPanel.setVisible(true);
+                                    leaderboardsTabPanel.selectTab(0);
+                                } else {
+                                    leaderboardCheckBox.setValue(false);
+                                    errorReporter.reportError("Error trying to load leaderboard. Either the event could not be associated to Regatta or there are no tracked races.");
+                                }
                             }
-                            leaderboardsTabPanel.setVisible(true);
-                            leaderboardsTabPanel.selectTab(0);
-                        }
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-                    }));
-        } else {
-            leaderboardsTabPanel.clear();
-            leaderboardsTabPanel.setVisible(false);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                            }
+                        }));
+            } else {
+                leaderboardsTabPanel.clear();
+                leaderboardsTabPanel.setVisible(false);
+            }
         }
     }
 
@@ -263,7 +282,9 @@ public class RegattaOverviewPanel extends SimplePanel {
         refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
-        refreshStartStopClockPanel.add(leaderboardCheckBox);
+        if (leaderboardCheckBox != null) {
+            refreshStartStopClockPanel.add(leaderboardCheckBox);
+        }
         refreshStartStopClockPanel.add(settingsButton);
         refreshStartStopClockPanel.add(refreshNowButton);
         refreshStartStopClockPanel.add(startStopUpdatingButton);
@@ -289,7 +310,6 @@ public class RegattaOverviewPanel extends SimplePanel {
                     public void onSuccess(EventDTO result) {
                         if (result != null) {
                             setEvent(result);
-                            loadLeaderboard();
                         }
                     }
                 }));

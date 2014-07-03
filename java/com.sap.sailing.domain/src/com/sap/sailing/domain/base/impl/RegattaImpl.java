@@ -62,7 +62,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private final Set<RaceDefinition> races;
+    private Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;
@@ -177,6 +177,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
      * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is assembled
      * for this empty race log and applied to all columns.
+     * Make sure to call {@link #initializeSeriesAfterDeserialize()} after the object graph has been de-serialized.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
@@ -184,9 +185,19 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
         if (masterDataImportInformation != null) {
             raceLogStore = masterDataImportInformation.getRaceLogStore();
+            races = new HashSet<RaceDefinition>();
         } else {
             raceLogStore = EmptyRaceLogStore.INSTANCE;
         }
+    }
+    
+    /**
+     * {@link RaceColumnListeners} may not be de-serialized (yet) when the regatta
+     * is de-serialized. Do avoid re-registering empty objects most probably leading
+     * to null pointer exception one need to initialize all listeners after
+     * all objects have been read.
+     */
+    public void initializeSeriesAfterDeserialize() {
         for (Series series : getSeries()) {
             linkToRegattaAndConnectRaceLogsAndAddListeners(series);
             if (series.getRaceColumns() != null) {

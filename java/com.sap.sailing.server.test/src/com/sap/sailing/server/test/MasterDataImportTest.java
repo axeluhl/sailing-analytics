@@ -297,6 +297,8 @@ public class MasterDataImportTest {
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(regattaOnTarget);
 
+        Assert.assertEquals(false, regattaOnTarget.getAllRaces().iterator().hasNext());
+
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
 
         RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
@@ -1797,6 +1799,8 @@ public class MasterDataImportTest {
         LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) leaderboardGroupOnTarget
                 .getOverallLeaderboard();
         Assert.assertNotNull(overallLeaderboard);
+        Leaderboard overallLeaderboardRetrievedByName = destService.getLeaderboardByName(overallLeaderboard.getName());
+        assertSame(overallLeaderboard, overallLeaderboardRetrievedByName);
 
         Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
 

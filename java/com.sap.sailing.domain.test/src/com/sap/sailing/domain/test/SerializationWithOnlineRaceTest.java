@@ -29,7 +29,9 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.model.lib.api.event.CreateModelException;
 import com.sap.sse.common.Util;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
     public SerializationWithOnlineRaceTest() throws MalformedURLException, URISyntaxException {
@@ -37,7 +39,7 @@ public class SerializationWithOnlineRaceTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),

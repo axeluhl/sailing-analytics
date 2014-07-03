@@ -37,7 +37,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             boolean nameNotEmpty = regattaToValidate.getName() != null && regattaToValidate.getName().length() > 0;
             boolean boatClassNotEmpty = regattaToValidate.boatClass != null
                     && regattaToValidate.boatClass.getName().length() > 0;
-
             boolean unique = true;
             for (RegattaDTO regatta : existingRegattas) {
                 if (regatta.getName().equals(regattaToValidate.getName())) {
@@ -48,6 +47,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
+            } else if (regattaToValidate.getName().contains("/")) {
+                errorMessage = stringMessages.regattaNameMustNotContainSlashes();
             } else if (!boatClassNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterABoatClass();
             } else if (!unique) {
@@ -88,7 +89,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 }
 
             }
-
             return errorMessage;
         }
 

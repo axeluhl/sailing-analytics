@@ -65,9 +65,13 @@ public class AbstractGPSFixStoreTest {
         mongoOF.getGPSFixMetadataCollection().drop();
     }
 
-    protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
+    protected void map(RaceLog raceLog, Competitor comp, DeviceIdentifier device, long from, long to) {
         raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(MillisecondsTimePoint.now(), author, device,
                 comp, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+    }
+
+    protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
+        map(raceLog, comp, device, from, to);
     }
 
     protected void map(Mark mark, DeviceIdentifier device, long from, long to) {

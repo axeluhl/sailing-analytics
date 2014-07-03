@@ -10,9 +10,11 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -49,7 +51,7 @@ public class SimulatorTest {
         wf.setPositionGrid(positions);
         Date startDate = new Date(0);
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
-        TimePoint timeStep = new MillisecondsTimePoint(30000);
+        Duration timeStep = new MillisecondsDurationImpl(30000);
         wf.generate(startTime, null, timeStep);
 
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);

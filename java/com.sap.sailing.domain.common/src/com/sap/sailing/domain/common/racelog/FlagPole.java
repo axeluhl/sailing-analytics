@@ -34,4 +34,9 @@ public class FlagPole {
                 this.isDisplayed == otherPole.isDisplayed;
     }
 
+    public boolean describesSameButForDisplayed(FlagPole otherPole) {
+        return this.upperFlag == otherPole.upperFlag &&
+                this.lowerFlag == otherPole.lowerFlag;
+    }
+
 }

@@ -139,6 +139,9 @@ public interface SailingServiceAsync {
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
+     * @param windSourceTypeNames
+     *            if <code>null</code>, information from all wind sources is returned; otherwise, information only from
+     *            the sources listed in this parameter by name are returned
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
@@ -185,7 +188,8 @@ public interface SailingServiceAsync {
 
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
+            boolean addOverallDetails, String previousLeaderboardId, boolean fillNetPointsUncorrected,
+            AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
@@ -354,9 +358,10 @@ public interface SailingServiceAsync {
             List<String> courseAreaNames, Iterable<String> imageURLs, Iterable<String> videoURLs,
             AsyncCallback<EventDTO> callback);
 
-    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
-            Iterable<UUID> leaderboardGroupIds, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            AsyncCallback<EventDTO> callback);
+    void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
+            Iterable<String> sponsorImageURLs, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
@@ -456,7 +461,7 @@ public interface SailingServiceAsync {
 
     /**
      * @param detailType
-     *            supports {@link DetailType#REGATTA_RANK}, {@link DetailType#REGATTA_TOTAL_POINTS} and
+     *            supports {@link DetailType#REGATTA_RANK}, {@link DetailType#REGATTA_TOTAL_POINTS_SUM} and
      *            {@link DetailType#OVERALL_RANK}.
      * 
      * @return the first triple element is the race column name; then follows the list of competitors, and finally the
@@ -540,7 +545,7 @@ public interface SailingServiceAsync {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
-    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 
@@ -629,4 +634,6 @@ public interface SailingServiceAsync {
      */
     void search(String serverNameOrNullForMain, KeywordQuery query,
             AsyncCallback<Iterable<LeaderboardSearchResultDTO>> callback);
+
+    void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 }

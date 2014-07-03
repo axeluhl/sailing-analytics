@@ -986,12 +986,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private Event loadEvent(DBObject eventDBObject) {
         String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
+        String description = (String) eventDBObject.get(FieldNames.EVENT_DESCRIPTION.name());
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
         TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
         Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
+        result.setDescription(description);
+        String officialWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name());
+        if (officialWebSiteURLAsString != null) {
+            try {
+                result.setOfficialWebsiteURL(new URL(officialWebSiteURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
+        String logoImageURLAsString = (String) eventDBObject.get(FieldNames.EVENT_LOGO_IMAGE_URL.name());
+        if (logoImageURLAsString != null) {
+            try {
+                result.setLogoImageURL(new URL(logoImageURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing logo image URL "+logoImageURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
         BasicDBList imageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
         if (imageURLs != null) {
             for (Object imageURL : imageURLs) {
@@ -1009,6 +1027,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     result.addVideoURL(new URL((String) videoURL));
                 } catch (MalformedURLException e) {
                     logger.severe("Error parsing video URL "+videoURL+" for event "+name+". Ignoring this video URL.");
+                }
+            }
+        }
+        BasicDBList sponsorImageURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        if (sponsorImageURLs != null) {
+            for (Object sponsorImageURL : sponsorImageURLs) {
+                try {
+                    result.addSponsorImageURL(new URL((String) sponsorImageURL));
+                } catch (MalformedURLException e) {
+                    logger.severe("Error parsing sponsor image URL "+sponsorImageURL+" for event "+name+". Ignoring this sponsor image URL.");
                 }
             }
         }
@@ -1123,10 +1151,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries.get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
-        Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
+        List<Fleet> fleets = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
-        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns);
+        Series series = new SeriesImpl(name, isMedal, fleets, raceColumnNames, trackedRegattaRegistry);
         if (dbSeries.get(FieldNames.SERIES_DISCARDING_THRESHOLDS.name()) != null) {
             ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbSeries, FieldNames.SERIES_DISCARDING_THRESHOLDS);
             series.setResultDiscardingRule(resultDiscardingRule);
@@ -1144,11 +1172,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return series;
     }
 
-    /**
-     * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
-     * used in the {@link Series#getFleets()} collection.
-     */
-    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns) {
         List<String> result = new ArrayList<String>();
         for (Object o : dbRaceColumns) {
             DBObject dbRaceColumn = (DBObject) o;
@@ -1173,12 +1197,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {
-        Map<String, Fleet> result = new HashMap<String, Fleet>();
+    private List<Fleet> loadFleets(BasicDBList dbFleets) {
+        List<Fleet> result = new ArrayList<Fleet>();
         for (Object o : dbFleets) {
             DBObject dbFleet = (DBObject) o;
             Fleet fleet = loadFleet(dbFleet);
-            result.put(fleet.getName(), fleet);
+            result.add(fleet);
         }
         return result;
     }
@@ -1361,8 +1385,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
             e.printStackTrace();
         }
-        Mark mappedTo = baseDomainFactory.getOrCreateMark(
-                (Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
+        //have to load complete mark, as no order is guaranteed for loading of racelog events
+        Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
         TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
         TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
         return raceLogEventFactory.createDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, device, mappedTo, passId, from, to);
@@ -1642,7 +1666,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
-        MarkType markType = MarkType.valueOf((String) dbObject.get(FieldNames.MARK_TYPE.name()));
+        Object markTypeRaw = dbObject.get(FieldNames.MARK_TYPE.name());
+        MarkType markType = markTypeRaw == null ? null : MarkType.valueOf((String) markTypeRaw);
         
         Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
         return mark;
@@ -1730,5 +1755,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(
                     stringRepresentation, deviceType, stringRepresentation);
         }
+    }
+
+    @Override
+    public Map<String, Set<URL>> loadResultUrls() {
+        Map<String, Set<URL>> resultUrls = new HashMap<>();
+        DBCollection resultUrlCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        for (DBObject dbObject : resultUrlCollection.find()) {
+            String providerName = (String) dbObject.get(FieldNames.RESULT_PROVIDERNAME.name());
+            String urlString = (String) dbObject.get(FieldNames.RESULT_URL.name());
+            URL url;
+            try {
+                url = new URL(urlString);
+            } catch (MalformedURLException e) {
+                logger.log(Level.SEVERE, "Failed to parse result Url String: " + urlString + ". Did not load url!");
+                continue;
+            }
+            if (!resultUrls.containsKey(providerName)) {
+                resultUrls.put(providerName, new HashSet<URL>());
+            }
+            Set<URL> set = resultUrls.get(providerName);
+            set.add(url);
+        }
+        return resultUrls;
     }
 }

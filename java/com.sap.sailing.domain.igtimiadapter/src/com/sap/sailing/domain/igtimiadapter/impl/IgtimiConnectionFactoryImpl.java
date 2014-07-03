@@ -55,13 +55,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
     
     private final Map<Account, String> accessTokensByAccount;
-    private Map<String, Account> accountsByEmail;
+    private final Map<String, Account> accountsByEmail;
+    private final Map<Account, IgtimiConnection> connectionsByAccount;
     private final Client client;
     private final MongoObjectFactory mongoObjectFactory;
     
     public IgtimiConnectionFactoryImpl(Client client, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.accessTokensByAccount = new HashMap<>();
         this.accountsByEmail = new HashMap<>();
+        connectionsByAccount = new HashMap<>();
         this.client = client;
         this.mongoObjectFactory = mongoObjectFactory;
         for (String accessToken : domainObjectFactory.getAccessTokens()) {
@@ -131,7 +133,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public IgtimiConnection connect(Account account) {
-        return new IgtimiConnectionImpl(this, account);
+        IgtimiConnection connection;
+        synchronized (connectionsByAccount) {
+            connection = connectionsByAccount.get(account);
+            if (connection == null) {
+                connection = new IgtimiConnectionImpl(this, account);
+                connectionsByAccount.put(account, connection);
+            }
+        }
+        return connection;
     }
 
     private String getAccessTokenForAccount(Account account) {

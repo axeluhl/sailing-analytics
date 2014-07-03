@@ -42,7 +42,9 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -227,11 +229,11 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, int particles, boolean autoUpdate,
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate,
             char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets, boolean showStreamlets2, boolean injectWindDataJS, boolean showMapControls) {
         super();
 
-        this.particles = particles;
+        this.particles = streamletPars.particles;
         
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
@@ -306,13 +308,13 @@ public class SimulatorMainPanel extends SimplePanel {
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
-        int secondsTimeStep = (int) windParams.getTimeStep().getTime() / 1000;
+        int secondsTimeStep = (int) windParams.getTimeStep().asSeconds();
         timer.setPlaySpeedFactor(secondsTimeStep);
         timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, timer, timePanel,
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars, timer, timePanel,
                 windParams, busyIndicator, mode, this, showMapControls);
         simulatorMap.setSize("100%", "100%");
 
@@ -363,7 +365,7 @@ public class SimulatorMainPanel extends SimplePanel {
         long epochTime = (defaultNow.getTime()/86400000)*86400000 - utcOffSet*3600000; // today, midnight in default time zone
 
         Date startTime = new Date(epochTime);
-        Date timeStep = new Date(15 * 1000);
+        Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
         Date endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
         windParams.setDefaultTimeSettings(startTime, timeStep, endTime);
     }

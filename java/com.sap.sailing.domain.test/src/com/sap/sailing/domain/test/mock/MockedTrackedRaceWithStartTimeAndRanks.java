@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -41,6 +42,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -305,13 +308,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
+    public Wind getEstimatedWindDirection(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -372,7 +381,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode)
             throws NoWindException {
         // TODO Auto-generated method stub
         return null;
@@ -398,7 +407,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -411,6 +420,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -605,20 +621,27 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalyses, WindLegTypeAndLegBearingCache cache) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
             boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
 
-	@Override
-	public GPSFixStore getGPSFixStore() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
-    public void waitUntilLoadingFromGPSFixStoreComplete() throws InterruptedException {
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
         // TODO Auto-generated method stub
         
     }

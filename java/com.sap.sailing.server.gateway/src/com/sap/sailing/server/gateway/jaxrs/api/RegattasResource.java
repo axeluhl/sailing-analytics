@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -566,6 +567,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
+                jsonRaceResults.put("startOfRace-ms", trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asMillis());
 
                 JSONArray jsonLegs = new JSONArray();
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
@@ -596,15 +598,38 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonCompetitorInLeg.put("averageSOG-kts", UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround.getKnots()));
                             }
                             try {
-								Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
-								Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
-								Integer numberOfPenaltyCircles = trackedLegOfCompetitor.getNumberOfPenaltyCircles(timePoint);
+                                Integer numberOfTacks = trackedLegOfCompetitor.getNumberOfTacks(timePoint);
+                                Integer numberOfJibes = trackedLegOfCompetitor.getNumberOfJibes(timePoint);
+                                Integer numberOfPenaltyCircles = trackedLegOfCompetitor
+                                        .getNumberOfPenaltyCircles(timePoint);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);
-							} catch (NoWindException e) {
-							}
-                            
+                            } catch (NoWindException e) {
+                            }
+
+                            TimePoint startTime = trackedLegOfCompetitor.getStartTime();
+                            TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+                            TimePoint startOfRace = trackedRace.getStartOfRace();
+                            // between the start of the race and the start of the first leg we have no 'timeSinceGun'
+                            // for the competitor
+                            if (startOfRace != null && startTime != null) {
+                                long timeSinceGun = -1;
+                                if (finishTime != null) {
+                                    timeSinceGun = finishTime.asMillis() - startOfRace.asMillis();
+                                } else {
+                                    timeSinceGun = timePoint.asMillis() - startOfRace.asMillis();
+                                }
+                                if (timeSinceGun > 0) {
+                                    jsonCompetitorInLeg.put("timeSinceGun-ms", timeSinceGun);
+                                }
+                                Distance distanceSinceGun = trackedRace.getTrack(competitor).getDistanceTraveled(startOfRace,
+                                        finishTime != null ? finishTime : timePoint);
+                                if (distanceSinceGun != null) {
+                                    jsonCompetitorInLeg.put("distanceSinceGun-m", distanceSinceGun.getMeters());
+                                }
+                            }
+
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));
@@ -621,7 +646,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                             try {
                                 jsonCompetitorInLeg.put("gapToLeader-s",
-                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no gap to leader will be shown...
                             }

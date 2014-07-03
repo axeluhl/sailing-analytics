@@ -154,7 +154,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
 
     private void notifyListeners(List<Fix> fixes) {
         for (BulkFixReceiver listener : listeners.keySet()) {
-            listener.received(fixes);
+            try {
+                listener.received(fixes);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error notifying listener "+listener+" of Igtimi fixes "+fixes, e);
+            }
         }
     }
 

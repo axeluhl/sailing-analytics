@@ -100,6 +100,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     @Test
     public void testLoadStoreSimpleEventWithLinkToLeaderboardGroups() throws MalformedURLException {
         final String eventName = "Event Name";
+        final String eventDescription = "Event Description";
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final Venue venue = new VenueImpl(venueName);
@@ -120,10 +121,15 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final LeaderboardGroup lg2 = createLeaderboardGroup("lg2");
         event.addLeaderboardGroup(lg1);
         event.addLeaderboardGroup(lg2);
+        event.setDescription(eventDescription);
         event.addImageURL(new URL("http://some.host/with/some/file1.jpg"));
         event.addImageURL(new URL("http://some.host/with/some/file2.jpg"));
         event.addVideoURL(new URL("http://some.host/with/some/file1.mp4"));
         event.addVideoURL(new URL("http://some.host/with/some/file2.mp4"));
+        event.addSponsorImageURL(new URL("http://some.host/with/some/file4.mp4"));
+        event.addSponsorImageURL(new URL("http://some.host/with/some/file5.mp4"));
+        event.setOfficialWebsiteURL(new URL("http://official.website.com"));
+        event.setLogoImageURL(new URL("http://official.logo.com"));
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -146,6 +152,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         });
         assertNotNull(loadedEvent);
         assertEquals(eventName, loadedEvent.getName());
+        assertEquals(eventDescription, loadedEvent.getDescription());
+        assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
+        assertEquals(event.getLogoImageURL(), loadedEvent.getLogoImageURL());
         assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
         Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
         assertSame(lg1, lgIter.next());
@@ -160,6 +169,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         }
         assertTrue("image URLs "+loadedEvent.getImageURLs()+" but expected "+event.getImageURLs(), Util.equals(event.getImageURLs(), loadedEvent.getImageURLs()));
         assertTrue("video URLs "+loadedEvent.getVideoURLs()+" but expected "+event.getVideoURLs(), Util.equals(event.getVideoURLs(), loadedEvent.getVideoURLs()));
+        assertTrue("sponsor image URLs "+loadedEvent.getSponsorImageURLs()+" but expected "+event.getSponsorImageURLs(), Util.equals(event.getSponsorImageURLs(), loadedEvent.getSponsorImageURLs()));
     }
     
     @Test
@@ -456,6 +466,36 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             assertEquals("M", raceColumn.getName());
             assertTrue(Util.equals(loadedMedalSeries.getFleets(), raceColumn.getFleets()));
         }
+    }
+
+    @Test
+    public void testLoadStoreRegattaWithFleetsEnsuringFleetOrdering() {
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegatta(regattaBaseName, boatClass,
+                /* persistent */ false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertEquals(regattaBaseName, loadedRegatta.getBaseName());
+
+        Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
+        Series loadedQualifyingSeries = seriesIter.next();
+        
+        Iterator<? extends Fleet> qualiFleetIt = loadedQualifyingSeries.getFleets().iterator();
+        Fleet qualiFleet1 = qualiFleetIt.next();
+        assertEquals(qualiFleet1.getName(), "Yellow");
+        Fleet qualiFleet2 = qualiFleetIt.next();
+        assertEquals(qualiFleet2.getName(), "Blue");
+        
+        Series loadedFinalSeries = seriesIter.next();
+        Iterator<? extends Fleet> finalFleetIt = loadedFinalSeries.getFleets().iterator();
+        Fleet finalFleet1 = finalFleetIt.next();
+        assertEquals(finalFleet1.getName(), "Gold");
+        Fleet finalFleet2 = finalFleetIt.next();
+        assertEquals(finalFleet2.getName(), "Silver");
     }
 
     @Test

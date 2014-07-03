@@ -18,6 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -235,8 +236,9 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
-    public Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        logger.info("Importing Igtimi wind for tracked races "+trackedRaces);
+    public Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces,
+            boolean correctByDeclination) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        logger.info("Importing Igtimi wind for tracked races " + trackedRaces);
         TimePoint startOfWindow = new MillisecondsTimePoint(Long.MAX_VALUE);
         TimePoint endOfWindow = new MillisecondsTimePoint(0);
         for (DynamicTrackedRace trackedRace : trackedRaces) {
@@ -268,7 +270,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         }
         final Map<TrackedRace, Integer> result;
         if (!deviceSerialNumbers.isEmpty()) {
-            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers);
+            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers,
+                    correctByDeclination ? DeclinationService.INSTANCE : null);
             final WindListenerSendingToTrackedRace windListener = new WindListenerSendingToTrackedRace(
                     trackedRaces, Activator.getInstance().getWindTrackerFactory());
             windReceiver.addListener(windListener);

@@ -20,4 +20,38 @@ public abstract class AbstractColor implements Color {
         }
         return builder.toString().toUpperCase();
     }
+
+    public static Color getColorByLowercaseNameStatic(String lowercaseColorName) {
+        final Color result;
+        if ("white".equals(lowercaseColorName)) {
+            result = WHITE;
+        } else if ("light_gray".equals(lowercaseColorName)) {
+            result = LIGHT_GRAY;
+        } else if ("gray".equals(lowercaseColorName)) {
+            result = GRAY;
+        } else if ("dark_gray".equals(lowercaseColorName)) {
+            result = DARK_GRAY;
+        } else if ("black".equals(lowercaseColorName)) {
+            result = BLACK;
+        } else if ("red".equals(lowercaseColorName)) {
+            result = RED;
+        } else if ("pink".equals(lowercaseColorName)) {
+            result = PINK;
+        } else if ("orange".equals(lowercaseColorName)) {
+            result = ORANGE;
+        } else if ("yellow".equals(lowercaseColorName)) {
+            result = YELLOW;
+        } else if ("green".equals(lowercaseColorName)) {
+            result = GREEN;
+        } else if ("magenta".equals(lowercaseColorName)) {
+            result = MAGENTA;
+        } else if ("cyan".equals(lowercaseColorName)) {
+            result = CYAN;
+        } else if ("blue".equals(lowercaseColorName)) {
+            result = BLUE;
+        } else {
+            result = null;
+        }
+        return result;
+    }
 }

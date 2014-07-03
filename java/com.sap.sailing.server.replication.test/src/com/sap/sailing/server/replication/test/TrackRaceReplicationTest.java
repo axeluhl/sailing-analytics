@@ -31,7 +31,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -44,7 +44,7 @@ import com.sap.sse.common.Util;
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
     private RegattaAndRaceIdentifier raceIdentifier;
-    private RacesHandle racesHandle;
+    private RaceHandle racesHandle;
     private final boolean[] notifier = new boolean[1];
     private RaceTrackingConnectivityParameters trackingParams;
 
@@ -127,6 +127,10 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);
+        // set the race identifier in the column; the tracked race
+        // doesn't exist yet, but the race identifier is recorded already
+        // anyway. When the tracked race then is loaded it is expected
+        // to automatically be linked to the leaderboard column.
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
                 new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
@@ -147,7 +151,15 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testRaceTimeReplication() throws InterruptedException, Exception {
         startTracking();
-        Thread.sleep(1000);
+        // now wait at least until the start of tracking time has been received on the master copy
+        boolean receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+                master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
+        while (!receivedStartAndEndOfTracking) { // relying on the Timeout rule for this test
+            Thread.sleep(10);
+            receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+                    master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
+        }
+        Thread.sleep(2000); // kept failing several times for a 1000ms timeout
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());

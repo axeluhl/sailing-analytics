@@ -1,12 +1,16 @@
-Sailing Analytics on a stick
-============================
+# Sailing Analytics on a stick
 
 This is a package to enable running the SAP Sailing Analytics from a stick.
-It is provided as-is without warranty. If you need support then contact
-axel.uhl@sap.com or simon.marcel.pamies@sap.com.
+It is provided as-is without warranty. The most common usecase is to have a laptop 
+running in a lounge that replicates data from a master server that runs in the cloud.
 
-The most common usecase is to have a laptop running in a loung that replicates data
-from a master server that runs in the cloud.
+## Create a stick
+
+- You need a stick with at least 4GB of free space!
+- Copy the contents of $GIT/stick to the root of your USB stick
+- Extract the file http://releases.sapsailing.com/stick-binaries-1.2.tar.gz to the root of your USB stick. 
+You should get 5 new directories `mongodb`, `java`, `mongodb-data`, `mongodb-logs` and `server`. Check that `server/logs` and `server/tmp` has been created.
+- Install a Sailing Analytics release by executing `scripts/refreshInstance.sh install-release <release>` (this only works under linux or mac)
 
 ## Configuration
 
@@ -28,10 +32,9 @@ that the server version on the stick corresponds to the one that is running in t
 - (Windows) First you need to start the database by executing start-mongo.bat. Wait at least
 5 minutes until MongoDB has created all necessary files. Before the database hasn't been
 initialized you won't be able to start the Sailing Analytics server. After the database
-has started up you can start up the analytics server by running start.bat. Watch out for any
+has started up you can start up the analytics server by running start.bat. Watch out for any 
 error messages that might come up. After the server has been started you should be able to
 reach it by using http://127.0.0.1:8888/.
 
 - (Linux) All you need is to start the whole thing by executing start.sh. This will take care
 of starting up the database and then starting the analytics server.
-

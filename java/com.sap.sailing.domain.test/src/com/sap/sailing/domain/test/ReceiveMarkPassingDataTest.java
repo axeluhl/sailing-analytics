@@ -6,13 +6,11 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -25,14 +23,15 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.MarkPassingsData;
+import com.tractrac.model.lib.api.data.IControlPassing;
+import com.tractrac.model.lib.api.data.IControlPassings;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
 
 public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
-    final private MarkPassingsData[] firstData = new MarkPassingsData[1];
+    final private IControlPassings[] firstData = new IControlPassings[1];
     private RaceDefinition raceDefinition;
     
     public ReceiveMarkPassingDataTest() throws URISyntaxException,
@@ -48,30 +47,8 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
      */
     @Before
     public void setupListener() {
-        final Race race = getTracTracEvent().getRaceList().iterator().next();
+        final IRace race = getTracTracRace();
         Receiver receiver = new Receiver() {
-            @Override
-            public Iterable<TypeController> getTypeControllersAndStart() {
-                final TypeController[] markPassingsListener = new TypeController[1];
-                markPassingsListener[0] = MarkPassingsData.subscribe(race,
-                        new ICallbackData<RaceCompetitor, MarkPassingsData>() {
-                            private boolean first = true;
-
-                            @Override
-                            public void gotData(RaceCompetitor route, MarkPassingsData record, boolean isLiveData) {
-                                if (first) {
-                                    synchronized (semaphor) {
-                                        firstData[0] = record;
-                                        semaphor.notifyAll();
-                                        getController().remove(markPassingsListener[0]);
-                                    }
-                                    first = false;
-                                }
-                            }
-                        });
-                return Collections.singleton(markPassingsListener[0]);
-            }
-
             @Override
             public void stopPreemptively() {
             }
@@ -91,17 +68,41 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             @Override
             public void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds) {
             }
+
+            @Override
+            public void subscribe() {
+                getRaceSubscriber().subscribeControlPassings(new IControlPassingsListener() {
+                    private boolean first = true;
+                    
+                    @Override
+                    public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                        if (first) {
+                            synchronized (semaphor) {
+                                firstData[0] = controlPassings;
+                                semaphor.notifyAll();
+                                getRaceSubscriber().unsubscribeControlPassings(this);
+                            }
+                            first = false;
+                        }
+                    }
+                });
+            }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null)),
-                getTracTracEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l,
-                /* simulator */ null, new DynamicRaceDefinitionSet() {
+                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(
+                        EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */null)),
+                        getTracTracEvent().getRaces().iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
+                /* simulator */null,
+                new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
-                },
-                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                    }
+                }, /* trackedRegattaRegistry */null,
+                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
+                getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -132,14 +133,14 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         }
         assertNotNull(firstData[0]);
         assertTrue(firstData[0].getPassings().size() > 0);
-        MarkPassingsData.Entry entry = firstData[0].getPassings().iterator().next();
+        IControlPassing entry = firstData[0].getPassings().iterator().next();
         assertNotNull(entry);
         // we expect to find the mark passings in order, so as we traverse the course for
         // its waypoints and compare their control points to the control point received,
         // the first waypoint is used
         boolean found = false;
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
-            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(new ControlPointAdapter(entry.getControlPoint()))) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(new ControlPointAdapter(entry.getControl()))) {
                 found = true;
             }
         }

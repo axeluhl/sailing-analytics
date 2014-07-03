@@ -114,8 +114,10 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         if (raceLog != null && !raceLog.isEmpty()) {
             TimePoint startTime = new StartTimeFinder(raceLog).analyze();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
+            TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
             
-            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, now);
         }
         return result;
     }
@@ -125,6 +127,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        result.put("trackedRaceName", raceIdentifier != null ? raceIdentifier.getRaceName() : null);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {

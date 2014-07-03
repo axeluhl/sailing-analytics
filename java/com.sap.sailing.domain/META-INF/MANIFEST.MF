@@ -9,7 +9,6 @@ Bundle-ClassPath: .
 Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.confidence,
- com.sap.sailing.domain.confidence.impl;x-friends:="com.sap.sailing.domain.test",
  com.sap.sailing.domain.leaderboard,
  com.sap.sailing.domain.leaderboard.caching,
  com.sap.sailing.domain.leaderboard.impl,

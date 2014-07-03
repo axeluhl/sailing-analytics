@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
@@ -32,7 +32,7 @@ public class RaceDataAccessEval {
     private static URI storedUri;
     private static RacingEventServiceImpl service;
     private static TracTracAdapterFactory tracTracAdapterFactory;
-    private static RacesHandle raceHandle;
+    private static RaceHandle raceHandle;
     public boolean storedend = false;
 
     public static void main(String[] args) throws Exception, InterruptedException, MalformedURLException,

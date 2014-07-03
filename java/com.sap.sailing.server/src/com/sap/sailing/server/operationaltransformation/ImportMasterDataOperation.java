@@ -223,15 +223,18 @@ public class ImportMasterDataOperation extends
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
-                RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
-                RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
-                log.lockForRead();
-                try {
-                    for (RaceLogEvent event : log.getRawFixes()) {
-                        event.accept(storeVisitor);
+                if (log != null) {
+                    RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+                    RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
+                            identifier, mongoObjectFactory);
+                    log.lockForRead();
+                    try {
+                        for (RaceLogEvent event : log.getRawFixes()) {
+                            event.accept(storeVisitor);
+                        }
+                    } finally {
+                        log.unlockAfterRead();
                     }
-                } finally {
-                    log.unlockAfterRead();
                 }
             }
         }
