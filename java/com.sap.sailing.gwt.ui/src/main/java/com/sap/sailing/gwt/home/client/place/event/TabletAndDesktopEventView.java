@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
     private static EventViewUiBinder uiBinder = GWT.create(EventViewUiBinder.class);
@@ -41,11 +42,11 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     
     private final SailingServiceAsync sailingService;
     
-    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event) {
+    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, Timer timerForClientServerOffset) {
         this.sailingService = sailingService;
         eventHeader = new EventHeader(event, this);
         eventRegattaList = new EventRegattaList(event, this);
-        eventRegattaSchedule = new EventRegattaSchedule(event, this);
+        eventRegattaSchedule = new EventRegattaSchedule(event, timerForClientServerOffset, this);
         eventOverview = new EventOverview(event);
         eventSchedule = new EventSchedule(event);
         eventMedia = new EventMedia(event);
@@ -53,7 +54,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         initWidget(uiBinder.createAndBindUi(this));
         
         pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaSchedule, eventMedia, eventSchedule });
-        setVisibleEventElement(eventOverview);
+        goToRegattas();
 
         eventSponsors.setEventSponsors(event);
     }
@@ -61,21 +62,24 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @Override
     public void goToOverview() {
         setVisibleEventElement(eventOverview);
+        eventHeader.setDataNavigationType("normal");
     }
 
     @Override
     public void goToRegattas() {
         setVisibleEventElement(eventRegattaList);
+        eventHeader.setDataNavigationType("normal");
     }
 
     @Override
-    public void goToRegattaRaces(StrippedLeaderboardDTO leaderboard) {
+    public void goToRegattaRaces(final StrippedLeaderboardDTO leaderboard) {
         switch (leaderboard.type) {
         case RegattaLeaderboard:
             sailingService.getRegattaByName(leaderboard.regattaName, new AsyncCallback<RegattaDTO>() {
                 @Override
                 public void onSuccess(RegattaDTO regatta) {
-                    eventRegattaSchedule.setRacesFromRegatta(regatta);
+                    eventRegattaSchedule.setRacesFromRegatta(regatta, leaderboard);
+                    eventHeader.setDataNavigationType("compact");
                     setVisibleEventElement(eventRegattaSchedule);
                 }
 
@@ -87,12 +91,15 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             break;
         case FlexibleLeaderboard:
             eventRegattaSchedule.setRacesFromFlexibleLeaderboard(leaderboard);
+            eventHeader.setDataNavigationType("compact");
             setVisibleEventElement(eventRegattaSchedule);
             break;
         case FlexibleMetaLeaderboard:
+            eventHeader.setDataNavigationType("compact");
             setVisibleEventElement(eventRegattaSchedule);
             break;
         case RegattaMetaLeaderboard:
+            eventHeader.setDataNavigationType("compact");
             setVisibleEventElement(eventRegattaSchedule);
             break;
         }
@@ -101,11 +108,13 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @Override
     public void goToSchedule() {
         setVisibleEventElement(eventSchedule);
+        eventHeader.setDataNavigationType("normal");
     }
 
     @Override
     public void goToMedia() {
         setVisibleEventElement(eventMedia);
+        eventHeader.setDataNavigationType("normal");
     }
     
     private void setVisibleEventElement(Widget visibleWidget) {

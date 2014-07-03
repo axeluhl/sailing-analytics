@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.SmartphoneStartView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 
 public class SmartphoneApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
@@ -30,7 +31,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     @Override
-    public EventView createEventView(EventDTO event) {
+    public EventView createEventView(EventDTO event, Timer timerForClientServerOffset) {
         return null;
     }
 

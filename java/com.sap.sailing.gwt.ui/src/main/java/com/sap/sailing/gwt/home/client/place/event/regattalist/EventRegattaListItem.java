@@ -23,49 +23,31 @@ public class EventRegattaListItem extends Composite {
 
     @UiField SpanElement regattaName;
     @UiField SpanElement leaderboardGroupName;
-
     @UiField SpanElement competitorsCount;
-    @UiField SpanElement boatDesign; 
-    @UiField SpanElement scoringSystem; 
-    @UiField SpanElement averageWind; 
-    @UiField SpanElement plannedRacesCount; 
-    @UiField SpanElement regattaSeriesName; 
-
     @UiField DivElement isLiveElement; 
     @UiField Anchor regattaRacesLink;
     
     @SuppressWarnings("unused")
     private RegattaDTO regatta;
     
-    private final LeaderboardGroupDTO leaderboardGroup;
     private final StrippedLeaderboardDTO leaderboard;
     private final EventPageNavigator pageNavigator;
     
     public EventRegattaListItem(EventPageNavigator pageNavigator, LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
         this.pageNavigator = pageNavigator;
-        this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
 
         EventRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        updateUI();
+        regattaName.setInnerText(leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name);
+        leaderboardGroupName.setInnerText(leaderboardGroup.getName());
+        
+        competitorsCount.setInnerText("XYZ");
     }
 
     @UiHandler("regattaRacesLink")
     public void goToRegattaRaces(ClickEvent e) {
         pageNavigator.goToRegattaRaces(leaderboard);
-    }
-
-    private void updateUI() {
-        regattaName.setInnerText(leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name);
-        leaderboardGroupName.setInnerText(leaderboardGroup.getName());
-        
-        competitorsCount.setInnerText("XYZ");
-        boatDesign.setInnerText("XYZ");
-        scoringSystem.setInnerText("XYZ");
-        averageWind.setInnerText("XYZ");
-        plannedRacesCount.setInnerText("XYZ");
-        regattaSeriesName.setInnerText("ABC");
     }
 }

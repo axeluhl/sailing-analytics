@@ -11,6 +11,15 @@ public interface EventHeaderResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String dropdown();
+        String dropdown_head();
+        String dropdown_head_title();
+        String dropdown_head_titlebutton();
+        String dropdown_content();
+        String dropdown_content_link();
+        String dropdown_content_link_title();
+        String dropdown_content_link_subtitle();
+        String leaderboardquickaccess();
         String eventheaderwrapper();
         String eventheader();
         String eventnavigationnormal();

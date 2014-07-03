@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaschedule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
@@ -10,8 +13,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class EventRegattaScheduleFleet extends Composite {
     private static EventRegattaScheduleSeriesUiBinder uiBinder = GWT.create(EventRegattaScheduleSeriesUiBinder.class);
@@ -19,8 +23,6 @@ public class EventRegattaScheduleFleet extends Composite {
     interface EventRegattaScheduleSeriesUiBinder extends UiBinder<Widget, EventRegattaScheduleFleet> {
     }
 
-    @SuppressWarnings("unused")
-    private final RegattaDTO regatta;
     @SuppressWarnings("unused")
     private final SeriesDTO series;
 
@@ -31,8 +33,7 @@ public class EventRegattaScheduleFleet extends Composite {
     @UiField SpanElement fleetName;
     @UiField HTMLPanel racesListPanel;
     
-    public EventRegattaScheduleFleet(RegattaDTO regatta, SeriesDTO series, FleetDTO fleet) {
-        this.regatta = regatta;
+    public EventRegattaScheduleFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet, Timer timerForClientServerOffset) {
         this.series = series;
         this.fleet = fleet;
         
@@ -42,10 +43,24 @@ public class EventRegattaScheduleFleet extends Composite {
         fleetName.setInnerText(fleet.getName());
         fleetDiv.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
         
-        for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
-            EventRegattaScheduleRace eventRegattaScheduleRace = new EventRegattaScheduleRace(fleet, raceColumn);
+        List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
+        for(RaceColumnDTO raceColumn: racesOfFleet) {
+            EventRegattaScheduleRace eventRegattaScheduleRace = new EventRegattaScheduleRace(fleet, raceColumn, timerForClientServerOffset);
             racesListPanel.add(eventRegattaScheduleRace);
         }
     }
     
+    private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet) {
+        List<RaceColumnDTO> racesColumnsOfFleet = new ArrayList<RaceColumnDTO>();
+        for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
+            for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
+                if (fleet.equals(fleetOfRaceColumn)) {
+                    // We have to get the race column from the leaderboard, because the race column of the series
+                    // have no tracked race and would be displayed as inactive race.
+                    racesColumnsOfFleet.add(leaderboard.getRaceColumnByName(raceColumn.getName()));
+                }
+            }
+        }
+        return racesColumnsOfFleet;
+    }
 }

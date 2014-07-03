@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsori
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
@@ -35,8 +36,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public EventView createEventView(EventDTO event) {
-        return new TabletAndDesktopEventView(getSailingService(), event);
+    public EventView createEventView(EventDTO event, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopEventView(getSailingService(), event, timerForClientServerOffset);
     }
 
     @Override
