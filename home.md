@@ -16,6 +16,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
+  * [[JMX Support|wiki/jmx]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
