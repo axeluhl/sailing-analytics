@@ -1302,7 +1302,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         trackedRace.getRace().getCourse().lockForRead();
                         try {
                             for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache));
                             }
                         } finally {
                             trackedRace.getRace().getCourse().unlockAfterRead();

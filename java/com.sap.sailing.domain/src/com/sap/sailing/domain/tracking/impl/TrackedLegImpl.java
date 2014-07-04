@@ -127,6 +127,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     
     @Override
     public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
+        return getRanks(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         List<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
         LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
         int i=1;
@@ -338,6 +343,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode);
         final Distance result;
         if (preResult.getMeters() >= 0) {
