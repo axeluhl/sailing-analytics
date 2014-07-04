@@ -66,6 +66,17 @@ public class AbstractPosition implements Position {
         }
         return result;
     }
+    
+    @Override
+    public double getQuickApproximateNauticalMileDistance(Position p) {
+        double latDeg = getLatDeg();
+        double pLatDeg = p.getLatDeg();
+        final double latDiffDeg = Math.abs(latDeg - pLatDeg);
+        double cosineOfAverageLatitude = Math.cos((latDeg+pLatDeg)/2./180.*Math.PI);
+        final double normalizedLngDiffDeg = cosineOfAverageLatitude * Math.abs(getLngDeg() - p.getLngDeg());
+        // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.
+        return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) * 60.;
+    }
 
     @Override
     public Bearing getBearingGreatCircle(Position p) {

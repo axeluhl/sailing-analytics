@@ -93,5 +93,16 @@ public interface Position extends Serializable {
      * by superposing and aligning them based on wind direction or bearing of start line.
      */
     Position getTargetCoordinates(Position localOrigin, Bearing localEquatorBearing, Position targetOrigin, Bearing targetEquatorBearing);
+
+    /**
+     * Computes an approximate distance between this position and <code>p</code> by
+     * using the average latitude's cosine to scale the longitudes and then calculate
+     * the distance non-spherically in an imaginary Euklidian plane. The error is below
+     * 1% even for several hundred nautical miles of randomly chosen distances, and even
+     * lower (~.1%) for distances below ten nautical miles.<p>
+     * 
+     * The method executes efficiently and requires only one call to the cosine method.
+     */
+    double getQuickApproximateNauticalMileDistance(Position p);
     
 }
