@@ -1287,7 +1287,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         } else {
             result.discardThresholds = null;
         }
-        // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
+        // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep
+        // invalidating the ranks cache in TrackedLegImpl. Then problem then is that the sorting based on wind data is repeated for
+        // each competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
         // details are requested only once and pass them into getLeaderboardEntryDTO
         final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
