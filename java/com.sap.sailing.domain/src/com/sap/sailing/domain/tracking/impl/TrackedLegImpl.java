@@ -98,7 +98,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return getCompetitorTracksOrderedByRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
     }
     
-    private List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         List<TrackedLegOfCompetitor> rankedCompetitorList;
         synchronized (competitorTracksOrderedByRank) {
             rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);

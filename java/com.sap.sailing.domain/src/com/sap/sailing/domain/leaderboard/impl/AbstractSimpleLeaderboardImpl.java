@@ -1681,7 +1681,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (legRanks != null) {
                 result.rank = legRanks.get(trackedLeg.getCompetitor());
             } else {
-                result.rank = trackedLeg.getRank(timePoint);
+                result.rank = trackedLeg.getRank(timePoint, cache);
             }
             result.started = trackedLeg.hasStartedLeg(timePoint);
             Speed velocityMadeGood;

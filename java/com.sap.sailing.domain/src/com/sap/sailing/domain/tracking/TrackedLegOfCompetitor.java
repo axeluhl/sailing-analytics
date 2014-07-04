@@ -129,6 +129,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
     int getRank(TimePoint timePoint);
 
     /**
+     * Same as {@link #getRank(TimePoint)} with the additional option to provide a cache
+     * that can help avoid redundant calculations of wind and leg data.
+     */
+    int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
      * @param windPositionMode TODO
