@@ -9,5 +9,5 @@ In order to gain access to the VM using JMX it needs to be started with a few sy
 
 You can then launch your local `jconsole` tool from the JDK to connect to the remote VM. Ideally, you launch a VNC server on the machine running the Java VM that you want to monitor and execute `jconsole` in a terminal running in that VNC server. This avoids firewall hassle which can be pretty difficult to handle when trying to monitor a JMX-enabled VM remotely.
 
-![JConsole Screenshot](wiki/images/jconsole.png)
+![JConsole Screenshot](/wiki/images/jconsole.png)
 <center>Screenshot of a VNC viewer showing the running JConsole client.</center>
