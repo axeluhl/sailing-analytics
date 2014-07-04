@@ -26,7 +26,9 @@
           <div class="{local_res.css.regatta_intro_meta}">Phase
             <div class="{local_res.css.regatta_intro_meta_scoring}"><span ui:field="regattaPhase" />
             </div>
-            <div class="{local_res.css.regatta_intro_meta_leaderboardlink}"><a href="">Leaderboard</a></div>
+            <div class="{local_res.css.regatta_intro_meta_leaderboardlink}">
+                <g:Anchor ui:field="leaderboardLink">Leaderboard</g:Anchor>
+			</div>
           </div>
           <div class="{local_res.css.regatta_intro_races}">
             <div data-finished="race.finished" class="{local_res.css.regatta_intro_races_race}"></div>

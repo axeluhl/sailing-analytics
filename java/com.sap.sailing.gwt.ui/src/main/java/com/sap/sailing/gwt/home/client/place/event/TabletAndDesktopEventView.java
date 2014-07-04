@@ -133,7 +133,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     
     @Override
     public void openLeaderboardViewer(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
-        
+        String link = EntryPointLinkFactory.createLeaderboardLink(createLeaderboardLinkParameters(leaderboardGroup, leaderboard));
+        Window.open(link, "_blank", "");
     }
 
     private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
@@ -144,6 +145,20 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
+        return linkParams;
+    }
+
+    private Map<String, String> createLeaderboardLinkParameters(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
+        Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("name", leaderboard.name);
+        linkParams.put("showRaceDetails", "true");
+        linkParams.put("embedded", "true");                   
+        if (leaderboard.displayName != null) {
+            linkParams.put("displayName", leaderboard.displayName);
+        }
+        if(leaderboardGroup != null) {
+            linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
+        }
         return linkParams;
     }
 

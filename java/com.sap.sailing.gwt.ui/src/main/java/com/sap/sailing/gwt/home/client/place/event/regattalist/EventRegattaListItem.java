@@ -58,4 +58,10 @@ public class EventRegattaListItem extends Composite {
     public void goToRegattaRaces(ClickEvent e) {
         pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard);
     }
+    
+    @UiHandler("leaderboardLink")
+    public void goToLeaderboard(ClickEvent e) {
+        pageNavigator.openLeaderboardViewer(leaderboardGroup, leaderboard);
+    }
+
 }

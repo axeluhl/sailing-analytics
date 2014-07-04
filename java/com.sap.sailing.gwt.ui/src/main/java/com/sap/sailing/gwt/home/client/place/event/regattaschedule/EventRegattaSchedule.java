@@ -35,7 +35,7 @@ public class EventRegattaSchedule extends Composite {
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;
         
-        regattaHeader = new EventRegattaHeader(event, timerForClientServerOffset);
+        regattaHeader = new EventRegattaHeader(event, timerForClientServerOffset, pageNavigator);
         
         EventRegattaScheduleResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
