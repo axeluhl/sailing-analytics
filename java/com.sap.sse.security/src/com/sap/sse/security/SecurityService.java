@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 
+import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 
 import com.sap.sse.security.userstore.shared.SocialUserAccount;
@@ -49,4 +50,6 @@ public interface SecurityService {
     Map<String, Class<?>> getAllSettingTypes();
     
     void refreshSecurityConfig(ServletContext context);
+    
+    CacheManager getCacheManager();
 }

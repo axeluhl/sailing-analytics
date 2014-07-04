@@ -70,10 +70,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return users;
     }
+    
+    
 
     @Override
     public UserDTO getCurrentUser() {
-        System.out.println("Context: " + getThreadLocalRequest().getContextPath());
+        logger.info("Request: " + getThreadLocalRequest().getRequestURL());
         User user = securityService.getCurrentUser();
         if (user == null){
             return null;

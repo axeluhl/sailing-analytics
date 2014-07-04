@@ -14,8 +14,14 @@ public class CustomFilter extends PassThruAuthenticationFilter {
     @Override
     protected void redirectToLogin(ServletRequest request, ServletResponse response) throws IOException {
         String loginUrl = "http://" + request.getServerName() + ":" + request.getLocalPort() + getLoginUrl();
+        boolean first = true;
         for (Entry<String, String[]> e : request.getParameterMap().entrySet()){
-            loginUrl += "&"+ e.getKey()+"=";
+            if (first){
+                loginUrl += "?"+ e.getKey()+"=";
+            }
+            else {
+                loginUrl += "&"+ e.getKey()+"=";
+            }
             for(int i = 0; i < e.getValue().length; i++){
                 loginUrl+=e.getValue()[i];
                 if (i < e.getValue().length - 2){

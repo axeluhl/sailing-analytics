@@ -10,10 +10,6 @@
 	</context-param>
 	
     <!-- Apache Shiro -->
-    <listener>
-		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener
-		</listener-class>
-	</listener>
     
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener
@@ -45,4 +41,19 @@
 		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>/login</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+    	<servlet-name>Jersey REST API</servlet-name>
+		<servlet-class>com.sap.sse.security.jaxrs.RestServletContainer</servlet-class>
+		<init-param>
+        		<param-name>javax.ws.rs.Application</param-name>
+        		<param-value>com.sap.sse.security.jaxrs.api.RestApiApplication</param-value>
+   		</init-param>
+		<load-on-startup>1</load-on-startup>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>Jersey REST API</servlet-name>
+    	<url-pattern>/api/*</url-pattern>
+  	</servlet-mapping>
+  	
 </web-app>

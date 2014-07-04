@@ -25,8 +25,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.client.UserManagementImageResources;
 import com.sap.sse.security.ui.client.resources.IconResources;
 import com.sap.sse.security.ui.shared.UserManagementServiceAsync;
 

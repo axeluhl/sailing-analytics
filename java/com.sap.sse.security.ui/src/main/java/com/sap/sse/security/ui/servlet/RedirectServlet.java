@@ -33,26 +33,35 @@ public class RedirectServlet extends HttpServlet {
             parameters.put("gwt.codesvr", "127.0.0.1:9997");
         }
         if (target == null){
-            resp.sendRedirect(resp.encodeRedirectURL(createLoginLink(parameters, req)));
+            doHiddenRedirect(resp, resp.encodeRedirectURL(createLoginLink(parameters, req)));
         }
         else {
             switch (target){
             case "login":
-                resp.sendRedirect(resp.encodeRedirectURL(createLoginLink(parameters, req)));
+                doHiddenRedirect(resp, resp.encodeRedirectURL(createLoginLink(parameters, req)));
                 break;
             case "oauthlogin":
-                resp.sendRedirect(resp.encodeRedirectURL(createOAuthLink(parameters, req)));
+                doHiddenRedirect(resp, resp.encodeRedirectURL(createOAuthLink(parameters, req)));
                 break;
             case "registration":
-                resp.sendRedirect(resp.encodeRedirectURL(createRegistrationLink(parameters, req)));
+                doHiddenRedirect(resp, resp.encodeRedirectURL(createRegistrationLink(parameters, req)));
                 break;
             case "usermanagement":
-                resp.sendRedirect(resp.encodeRedirectURL(createRegistrationLink(parameters, req)));
+                doHiddenRedirect(resp, resp.encodeRedirectURL(createRegistrationLink(parameters, req)));
                 break;
             default:
-                resp.sendRedirect(resp.encodeRedirectURL(createLoginLink(parameters, req)));
+                doHiddenRedirect(resp, resp.encodeRedirectURL(createLoginLink(parameters, req)));
             }
         }
+    }
+    
+    private void doHiddenRedirect(HttpServletResponse resp, String target) throws IOException{
+        String html = "<html><head><script type='text/javascript'>";
+        html += "window.location = '" + target +"';";
+        html +="</script></head><body></body></html>";
+        resp.setContentType("text/html");
+        resp.getWriter().append(html);
+        resp.getWriter().flush();
     }
 
     @Override

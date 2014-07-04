@@ -19,14 +19,16 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.config.Ini;
-import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
+import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
 import org.apache.shiro.web.env.IniWebEnvironment;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
@@ -66,6 +68,7 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
     
     private SecurityManager securityManager;
+    private CacheManager cacheManager = new EhCacheManager();
     private UserStore store;
     private static Ini shiroConfiguration;
     static {
@@ -114,11 +117,12 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
                 shiroConfiguration.getSection("urls").put(key, value);
             }
         }
+//        shiroConfiguration.getSection("urls").put("/**", "anon");
         for (Entry<String, String> e : shiroConfiguration.getSection("urls").entrySet()){
             System.out.println(e.getKey() + ": " + e.getValue());
         }
 //        ini.getSection("urls").put("", "");
-        Factory<SecurityManager> factory = new IniSecurityManagerFactory(shiroConfiguration);
+        Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
 //        LifecycleUtils.init(ini);
         
         
@@ -504,5 +508,10 @@ public class SecurityServiceImpl  extends RemoteServiceServlet implements Securi
 
     public static Ini getShiroConfiguration() {
         return shiroConfiguration;
+    }
+
+    @Override
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
 }
