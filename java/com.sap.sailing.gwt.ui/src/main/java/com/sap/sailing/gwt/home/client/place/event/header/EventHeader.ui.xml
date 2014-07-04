@@ -31,10 +31,10 @@
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
         <div class="{res.mediaCss.columns}">
-            <a href="event-overview.html">
+            <g:Anchor ui:field="regattasLink">
               	<img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
-			</a>
-            <a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}"><span ui:field='eventName2' /></a>
+			</g:Anchor>
+            <g:Anchor ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}"><span ui:field='eventName2' /></g:Anchor>
       </div>
     </div>
   </div>

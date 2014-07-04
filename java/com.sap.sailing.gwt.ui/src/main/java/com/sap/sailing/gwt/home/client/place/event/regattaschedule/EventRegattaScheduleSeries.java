@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -22,7 +23,7 @@ public class EventRegattaScheduleSeries extends Composite {
     @UiField SpanElement seriesDate;
     @UiField HTMLPanel fleetsListPanel;
     
-    public EventRegattaScheduleSeries(StrippedLeaderboardDTO leaderboard, SeriesDTO series, Timer timerForClientServerOffset) {
+    public EventRegattaScheduleSeries(StrippedLeaderboardDTO leaderboard, SeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         EventRegattaScheduleResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -30,7 +31,7 @@ public class EventRegattaScheduleSeries extends Composite {
         seriesDate.setInnerText("A Date of the series???");
 
         for(FleetDTO fleet: series.getFleets()) {
-            EventRegattaScheduleFleet eventRegattaScheduleFleet = new EventRegattaScheduleFleet(leaderboard, series, fleet, timerForClientServerOffset); 
+            EventRegattaScheduleFleet eventRegattaScheduleFleet = new EventRegattaScheduleFleet(leaderboard, series, fleet, timerForClientServerOffset, pageNavigator); 
             fleetsListPanel.add(eventRegattaScheduleFleet);
         }
     }

@@ -20,7 +20,7 @@
             </div>
           </div>
           <div class="{local_res.css.regatta_intro_meta}">Phase
-            <div class="{local_res.css.regatta_intro_meta_scoring}"><span ui:field="regattaSeriesName" />
+            <div class="{local_res.css.regatta_intro_meta_scoring}"><span ui:field="regattaPhase" />
             </div>
             <div class="{local_res.css.regatta_intro_meta_leaderboardlink}"><a href="">Leaderboard</a></div>
           </div>

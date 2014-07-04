@@ -4,8 +4,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
@@ -21,12 +24,12 @@ public class EventHeader extends Composite {
     private final EventDTO event;
 
 //    @UiField Anchor overviewLink;
-//    @UiField Anchor regattasLink;
+      @UiField Anchor regattasLink;
 //    @UiField Anchor scheduleLink;
 //    @UiField Anchor mediaLink;
 //
 //    @UiField Anchor overviewLink2;
-//    @UiField Anchor regattasLink2;
+      @UiField Anchor regattasLink2;
 //    @UiField Anchor scheduleLink2;
 //    @UiField Anchor mediaLink2;
 //
@@ -54,7 +57,6 @@ public class EventHeader extends Composite {
 //    private final List<Anchor> links2;
 //    private final List<Anchor> links3;
     
-    @SuppressWarnings("unused")
     private final EventPageNavigator pageNavigator;
 
     public EventHeader(EventDTO event, EventPageNavigator pageNavigator) {
@@ -120,29 +122,29 @@ public class EventHeader extends Composite {
 //        setActiveLink(links2, overviewLink2);
 //        setActiveLink(links3, overviewLink3);
 //    }
-//
-//    @UiHandler("regattasLink")
-//    void regattasClicked(ClickEvent event) {
-//        showRegattas();        
-//    }
-//
-//    @UiHandler("regattasLink2")
-//    void regattas2Clicked(ClickEvent event) {
-//        showRegattas();        
-//    }
-//
+
+    @UiHandler("regattasLink")
+    void regattasClicked(ClickEvent event) {
+        showRegattas();        
+    }
+
+    @UiHandler("regattasLink2")
+    void regattas2Clicked(ClickEvent event) {
+        showRegattas();        
+    }
+
 //    @UiHandler("regattasLink3")
 //    void regattas3Clicked(ClickEvent event) {
 //        showRegattas();        
 //    }
 //
-//    private void showRegattas() {
-//        pageNavigator.goToRegattas();
+    private void showRegattas() {
+        pageNavigator.goToRegattas();
 //        setActiveLink(links1, regattasLink);
 //        setActiveLink(links2, regattasLink2);
 //        setActiveLink(links3, regattasLink3);
-//    }
-//    
+    }
+    
 //    @UiHandler("scheduleLink")
 //    void scheduleClicked(ClickEvent event) {
 //        showSchedule();
