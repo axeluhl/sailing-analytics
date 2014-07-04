@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sse.common.Util;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest {
 
@@ -73,19 +75,19 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     @Test
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
+        Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, Util.get(getTracTracEvent().getRaces(), 0),
                 EmptyWindStore.INSTANCE,
-                /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
-                0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
+                0l, /* simulator */ null, /* delayToLiveInMillis */
+                new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE);
+                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
-        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaceList().iterator().next().getId());
-        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
+        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaces().iterator().next().getId());
+        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {

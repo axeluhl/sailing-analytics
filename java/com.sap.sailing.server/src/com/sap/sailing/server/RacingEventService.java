@@ -15,14 +15,19 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -36,12 +41,14 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -50,6 +57,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -59,6 +67,10 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.common.search.Result;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -79,7 +91,7 @@ import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
-        LeaderboardRegistry, TrackerManager {
+        LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -149,7 +161,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * comment where a wind tracker may provide information such as its type name or, if applicable,
      * connectivity information such as the network port on which it receives wind information.
      */
-    Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
+    Iterable<Util.Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
@@ -217,15 +229,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<String, LeaderboardGroup> getLeaderboardGroups();
 
     /**
-     * @param groupName The name of the requested leaderboard group
-     * @return The leaderboard group with the name <code>groupName</code>, or <code>null</code> if theres no such group
-     */
-    LeaderboardGroup getLeaderboardGroupByName(String groupName);
-
-    /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * 
+     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
@@ -234,10 +240,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
+     * 
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
-            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
+            boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
@@ -260,7 +267,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
-    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
@@ -326,17 +333,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
 
     /**
-     * Returns the event with given id. When no event is found, <b>null</b> is returned.
-     * 
-     * @param id
-     * 			The id of the event.
-     * @return The event with given id.
-     */
-    Event getEvent(Serializable id);
-
-    /**
-     * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the
-     * regattas with the names in <code>regattaNames</code> and saves it in the database.
+     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and the regattas with the
+     * names in <code>regattaNames</code>, saves it in the database and replicates it. Use for TESTING only!
      * 
      * @param eventName
      *            The name of the new event
@@ -355,9 +353,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id);
 
     /**
-     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
-     * regattas with the names in <code>regattaNames</code> and updates it in the database.
-     * @param id TODO
+     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
+     * the names in <code>regattaNames</code> and updates it in the database.
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -368,12 +365,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
-     * @param regattaNames
-     *            The names of the regattas contained in the event.<br />
-     * 
      * @return The new event
      */
-    void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -386,6 +382,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void removeEvent(UUID id);
 
+    
+    /**
+     * @return a thread-safe copy of the events (or the exception that occurred trying to obtain the events; arranged in
+     *         a {@link Util.Pair}) of from all sailing server instances currently known by the service; it's safe for
+     *         callers to iterate over the iterable returned, and no risk of a {@link ConcurrentModificationException}
+     *         exists
+     */
+    Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers();
+
+    RemoteSailingServerReference addRemoteSailingServerReference(String name, URL url);
+
+    void removeRemoteSailingServerReference(String name);
+
+    
     CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
@@ -437,7 +447,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
-    Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
@@ -448,7 +458,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
-            UUID id);
+            UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
@@ -492,19 +502,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param startTime the new Start-Time
      * @return
      */
-    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
+    TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
+     * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
-    Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     
     DomainObjectFactory getDomainObjectFactory();
     
     WindStore getWindStore();
+
+    GPSFixStore getGPSFixStore();
+    
+    RaceTracker getRaceTrackerById(Object id);
+    
+    RaceLogEventAuthor getServerAuthor();
+    
+    CompetitorStore getCompetitorStore();
+    
+    TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
 
     /**
      * This lock exists to allow only one master data import at a time to avoid situation where multiple Imports
@@ -527,4 +547,43 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
 
     void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
+
+    /**
+     * For the reference to a remote sailing server, updates its events cache and returns the event list
+     * or, if fetching the event list from the remote server did fail, the exception for which it failed.
+     */
+    Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref);
+
+    /**
+     * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.
+     */
+    Result<LeaderboardSearchResult> search(KeywordQuery query);
+
+    /**
+     * Searches a specific remote server whose reference has the {@link RemoteSailingServerReference#getName() name}
+     * <code>remoteServerReferenceName</code>. If a remote server reference with that name is not known,
+     * <code>null</code> is returned. Otherwise, a non-<code>null</code> and possibly empty search result set is
+     * returned.
+     */
+    Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
+
+    /**
+     * References to remote servers may be dead or alive. This is internally determined by regularly polling those
+     * servers for their events list. If the events list cannot be successfully retrieved, the server is considered "dead."
+     * This method returns the "live" server references.
+     */
+    Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences();
+
+    RemoteSailingServerReference getRemoteServerReferenceByName(String remoteServerReferenceName);
+
+    void addRegattaWithoutReplication(Regatta regatta);
+
+    void addEventWithoutReplication(Event event);
+
+    /**
+     * Adds the leaderboard group to this service; if the group has an overall leaderboard, the overall leaderboard
+     * is added to this service as well. For both, the group and the overall leaderboard, any previously existing
+     * objects by the same name of that type will be replaced.
+     */
+    void addLeaderboardGroupWithoutReplication(LeaderboardGroup leaderboardGroup);
 }

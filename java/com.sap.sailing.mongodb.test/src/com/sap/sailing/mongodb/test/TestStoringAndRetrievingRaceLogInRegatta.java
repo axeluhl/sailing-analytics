@@ -6,20 +6,16 @@ import static org.junit.Assert.assertNull;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -27,22 +23,12 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoUtils;
@@ -51,7 +37,6 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
@@ -63,62 +48,16 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.Util;
 
-public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
-
-    String raceColumnName = "My.First$Race$1";
-    String regattaName = "TestRegatta";
-    final String yellowFleetName = "Yellow";
-    final String seriesName = "Qualifying";
-    MongoObjectFactory mongoObjectFactory = null;
-    DomainObjectFactory domainObjectFactory = null;
-    Regatta regatta = null;
-    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
-
+public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     public TestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
         super();
     }
 
-    @Before
-    public void setUp() {
-        now = MillisecondsTimePoint.now();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
-
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        regatta = createRegattaAndAddRaceColumns(1, regattaName, boatClass, true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
-    }
-    
-    private Regatta createRegattaAndAddRaceColumns(final int numberOfQualifyingRaces, final String regattaBaseName, BoatClass boatClass, boolean persistent, ScoringScheme scoringScheme) {
-        Regatta regatta = createRegattaWithoutRaceColumns(regattaBaseName, boatClass, persistent, scoringScheme, null);
-        regatta.getSeriesByName(seriesName).addRaceColumn(raceColumnName, /* trackedRegattaRegistry */ null);
-        
-        return regatta;
-    }
-    
-    private Regatta createRegattaWithoutRaceColumns(final String regattaBaseName, BoatClass boatClass, boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
-        List<String> emptyRaceColumnNames = Collections.emptyList();
-        List<Series> series = new ArrayList<Series>();
-        
-        // -------- qualifying series ------------
-        List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
-        qualifyingFleets.add(new FleetImpl(yellowFleetName));
-        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, qualifyingFleets,
-                emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
-        series.add(qualifyingSeries);
-        
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
-        
-        Regatta regatta = new RegattaImpl(raceLogStore, regattaBaseName, boatClass, series, persistent, scoringScheme, "123", courseArea);
-        return regatta;
-    }
-    
     private void addAndStoreRaceLogEvent(Regatta regatta, String raceColumnName, RaceLogEvent event) {
         Series series = regatta.getSeriesByName(seriesName);
         Fleet fleet = series.getFleetByName(yellowFleetName);
@@ -136,14 +75,18 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
         return loadedSeries.getRaceColumnByName(raceColumnName).getRaceLog(loadedFleet);
     }
     
+    @Override
+    protected List<Fleet> createQualifyingFleets() {
+        List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
+        qualifyingFleets.add(new FleetImpl(yellowFleetName));
+        return qualifyingFleets;
+    }
+    
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
         RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
-
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
-
         RaceLog loadedRaceLog = retrieveRaceLog();
-
         loadedRaceLog.lockForRead();
         try {
             RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
@@ -161,11 +104,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogStartProcedureChangedEvent() {        
         RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, author, 0, RacingProcedureType.ESS);
-
-       addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
-
+        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
-
         loadedRaceLog.lockForRead();
         try {
             RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
@@ -249,7 +189,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
+        storedPositioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         
         RaceLogFinishPositioningListChangedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(now, author, 0, storedPositioningList);
 
@@ -279,7 +219,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
+        storedPositioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         
         RaceLogFinishPositioningConfirmedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, storedPositioningList);
 

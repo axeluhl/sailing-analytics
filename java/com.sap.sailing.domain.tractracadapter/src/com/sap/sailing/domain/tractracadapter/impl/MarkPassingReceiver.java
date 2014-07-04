@@ -7,58 +7,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.MarkPassingsData;
+import com.tractrac.model.lib.api.data.IControlPassing;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
+import com.tractrac.model.lib.api.data.IControlPassings;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
 
-public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
+public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, IControlPassings, Void> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
+    private final IControlPassingsListener listener;
     
-    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            Simulator simulator, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator);
+    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
+            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+        listener = new IControlPassingsListener() {
+            @Override
+            public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                enqueue(new Triple<IRaceCompetitor, IControlPassings, Void>(raceCompetitor, controlPassings, null));
+            }
+        };
     }
 
-    /**
-     * The listeners returned will, when added to a controller, receive events about the
-     * course definition of a race. When this happens, a new {@link RaceDefinition} is
-     * created with the respective {@link Course} and added to the {@link #event event}.
-     * Starts a thread for this object, blocking for events received which are then handled
-     * asynchronously.
-     */
     @Override
-    public Iterable<TypeController> getTypeControllersAndStart() {
-        List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : getTracTracEvent().getRaceList()) {
-            TypeController controlPointListener = MarkPassingsData.subscribe(race,
-                new ICallbackData<RaceCompetitor, MarkPassingsData>() {
-                    @Override
-                    public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
-                        enqueue(new Triple<RaceCompetitor, MarkPassingsData, Boolean>(competitor, record, isLiveData));
-                    }
-                });
-            result.add(controlPointListener);
-        }
-        setAndStartThread(new Thread(this, getClass().getName()));
-        return result;
+    public void subscribe() {
+        getRaceSubscriber().subscribeControlPassings(listener);
+        startThread();
     }
     
-    protected void handleEvent(Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
+    @Override
+    protected void unsubscribe() {
+        getRaceSubscriber().unsubscribeControlPassings(listener);
+    }
+
+    protected void handleEvent(Util.Triple<IRaceCompetitor, IControlPassings, Void> event) {
         System.out.print("L"); // as in "Leg"
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
         if (trackedRace != null) {
@@ -67,8 +63,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
             // Note: the entries always describe all mark passings for the competitor so far in the current race in
             // order
-            for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
-                ControlPoint controlPointPassed = passing.getControlPoint();
+            for (IControlPassing passing : event.getB().getPassings()) {
+                IControl controlPointPassed = passing.getControl();
                 com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
                         .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
                 Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
@@ -80,7 +76,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     passingsByWaypoint.put(passed, markPassing);
                 } else {
                     logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
-                            + passing.getControlPoint());
+                            + passing.getControl());
                 }
             }
             List<MarkPassing> markPassings = new ArrayList<MarkPassing>();

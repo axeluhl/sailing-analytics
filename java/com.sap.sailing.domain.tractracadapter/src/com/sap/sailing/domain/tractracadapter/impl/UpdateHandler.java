@@ -90,6 +90,7 @@ public class UpdateHandler {
     }
     
     protected void checkAndLogUpdateResponse(HttpURLConnection connection) throws IOException, ParseException {
+        connection.setConnectTimeout(10000/*milliseconds*/);
         connection.connect();
         BufferedReader reader = getResponseOnUpdateFromTracTrac(connection);
         Object responseBody = JSONValue.parseWithException(reader);

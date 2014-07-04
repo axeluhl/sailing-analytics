@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.RaceProperties;
@@ -21,6 +20,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulatorUISelection;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Util;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 
@@ -103,7 +103,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             }
 
             wf.setBoundary(bd);
-            Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1]);
+            Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1], gridRes[2], gridRes[3]);
             wf.setPositionGrid(positionGrid);
             wf.generate(wf.getStartTime(), wf.getEndTime(), wf.getTimeStep());
         }
@@ -231,7 +231,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path gpsPath = null;
         Path gpsPathPoly = null;
 
-        Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
+        Util.Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
                 selection.getLegIndex());
         allPaths = result.getA();
         this.raceCourse = result.getB();

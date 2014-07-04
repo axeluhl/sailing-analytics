@@ -4,10 +4,10 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Util;
 
 /**
  * A virtual wind track based on some virtual sequence of raw wind fixes. Subclasses should override
@@ -42,20 +42,23 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     }
 
     /**
+     * Delegates to {@link #getAveragedWindUnsynchronized(Position, TimePoint)}
+     */
+    @Override
+    public Wind getAveragedWind(Position p, TimePoint at) {
+        final WindWithConfidence<Util.Pair<Position, TimePoint>> windWithConfidence = getAveragedWindUnsynchronized(p, at);
+        return windWithConfidence == null ? null : windWithConfidence.getObject();
+    }
+    
+    /**
      * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
      * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
      * calling the base class's implementation. If either race start or time of newest event are not known, the known
      * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
      */
     @Override
-    public Wind getAveragedWind(Position p, TimePoint at) {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getAveragedWindUnsynchronized(p, at);
-        return windWithConfidence == null ? null : windWithConfidence.getObject();
-    }
-    
-    @Override
-    public WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
-        WindWithConfidence<Pair<Position, TimePoint>> result = null;
+    public WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+        WindWithConfidence<Util.Pair<Position, TimePoint>> result = null;
         TimePoint adjustedAt;
         final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();

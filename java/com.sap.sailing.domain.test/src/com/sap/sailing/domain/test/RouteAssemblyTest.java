@@ -9,14 +9,12 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.clientmodule.Route;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.RouteData;
+import com.tractrac.model.lib.api.route.IControlRoute;
+import com.sap.sse.common.Util;
+import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
 
 public class RouteAssemblyTest extends AbstractTracTracLiveTest {
 
@@ -27,36 +25,12 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
 
     @Test
     public void testReceiveRouteData() {
-        final Route[] firstRoute = new Route[1];
-        final RouteData[] firstData = new RouteData[1];
+        final IControlRoute[] firstRoute = new IControlRoute[1];
         final Object semaphor = new Object();
         
         Receiver receiver = new Receiver() {
             @Override
             public void stopPreemptively() {
-            }
-
-            @Override
-            public Iterable<TypeController> getTypeControllersAndStart() {
-                final TypeController routeListener[] = new TypeController[1];
-                routeListener[0] = RouteData.subscribe(getTracTracEvent().getRaceList().iterator().next(),
-                        new ICallbackData<Route, RouteData>() {
-                            private boolean first = true;
-
-                            @Override
-                            public void gotData(Route route, RouteData record, boolean isLiveData) {
-                                if (first) {
-                                    synchronized (semaphor) {
-                                        firstRoute[0] = route;
-                                        firstData[0] = record;
-                                        semaphor.notifyAll();
-                                        getController().remove(routeListener[0]);
-                                    }
-                                    first = false;
-                                }
-                            }
-                        });
-                return Collections.singleton(routeListener[0]);
             }
 
             @Override
@@ -74,6 +48,25 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
             @Override
             public void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds) {
             }
+
+            @Override
+            public void subscribe() {
+                getRaceSubscriber().subscribeRouteChanges(new IControlRouteChangeListener() {
+                    private boolean first = true;
+
+                    @Override
+                    public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
+                        if (first) {
+                            synchronized (semaphor) {
+                                firstRoute[0] = controlRoute;
+                                semaphor.notifyAll();
+                                getRaceSubscriber().unsubscribeRouteChanges(this);
+                            }
+                            first = false;
+                        }
+                    }
+                });
+            }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));
         synchronized (semaphor) {
@@ -87,8 +80,7 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
             }
         }
         assertNotNull(firstRoute[0]);
-        assertNotNull(firstData[0]);
-        Course course = DomainFactory.INSTANCE.createCourse(firstRoute[0].getName(), getTracTracControlPointsWithPassingInstructions(firstData[0].getPoints()));
+        Course course = DomainFactory.INSTANCE.createCourse(firstRoute[0].getName(), getTracTracControlPointsWithPassingInstructions(firstRoute[0].getControls()));
         assertNotNull(course);
         assertEquals("windward-leeward training", course.getName());
         assertEquals(3, Util.size(course.getWaypoints()));

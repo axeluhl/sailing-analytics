@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -10,6 +11,16 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
+/**
+ * Tries to locate a tracked race based on a {@link RaceIdentifier}. If the tracked race is found,
+ * it is linked to the leaderboard column identified by the leaderboard name and column name.
+ * Otherwise, only the race identifier is recorded in the column so that when the tracked race
+ * appears at a later point it time, it will automatically be linked to the column identified
+ * by name.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation<Boolean> {
     private static final Logger logger = Logger.getLogger(ConnectTrackedRaceToLeaderboardColumn.class.getName());
     private static final long serialVersionUID = -1336511401516212508L;

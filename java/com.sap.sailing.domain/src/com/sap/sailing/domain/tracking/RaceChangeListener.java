@@ -3,13 +3,14 @@ package com.sap.sailing.domain.tracking;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 
 
-public interface RaceChangeListener {
+public interface RaceChangeListener extends CourseListener {
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor);
     
     void markPositionChanged(GPSFix fix, Mark mark);

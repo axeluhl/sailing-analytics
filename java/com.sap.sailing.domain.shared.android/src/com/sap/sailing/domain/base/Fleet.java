@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 /**
  * For each fleet in a {@link Series} there is one {@link RaceDefinition race} per "race column." Competitor to fleet

@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -12,10 +14,14 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
+import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
  * 
@@ -23,14 +29,22 @@ import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
  *
  */
 public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
+    private final SailingServiceAsync sailingService = GWT.create(SailingService.class);
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
+
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, /* defaultValue */ true);
+        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
                 && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         final String groupName;
@@ -81,7 +95,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
-                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces);
+                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
+                    showMapControls, showNavigationPanel);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),

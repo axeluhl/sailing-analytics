@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Util;
 
 public interface WindTrack extends DynamicTrack<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
+    
+    public static final Distance WIND_HALF_CONFIDENCE_DISTANCE = new MeterDistance(100);
+    public static final long WIND_HALF_CONFIDENCE_TIME_MILLIS = 10000l;
 
     /**
      * Estimates a wind force and direction based on tracked wind data.<p>
@@ -22,7 +27,7 @@ public interface WindTrack extends DynamicTrack<Wind> {
      */
     Wind getAveragedWind(Position p, TimePoint at);
     
-    WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
 
     /**
      * A listener is notified whenever a new fix is added to this track

@@ -14,7 +14,11 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse.common</module>
 		<module>com.sap.sse.gwt</module>
+		<module>com.sap.sse.datamining</module>
+		<module>com.sap.sse.datamining.shared</module>
+		<module>com.sap.sse.datamining.test</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
@@ -24,11 +28,16 @@
 		<module>com.sap.sailing.datamining.shared</module>
 		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
+		<module>com.sap.sailing.domain.deckmanadapter</module>
+		<module>com.sap.sailing.domain.deckmanadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter</module>
 		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
@@ -65,7 +74,7 @@
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sailing.domain.tractracadapter.test</module>
+		<module>com.sap.sse.common.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
 		<module>com.sap.sailing.operationaltransformation.test</module>
@@ -92,12 +101,12 @@
 		<module>com.sap.sailing.velum.resultimport.test</module>
 		<module>com.sap.sailing.sailwave.resultimport</module>
 		<module>com.sap.sailing.sailwave.resultimport.test</module>
+		<module>com.sap.sailing.manage2sail</module>
 		<module>com.sap.sailing.manage2sail.resultimport</module>
 		<module>com.sap.sailing.manage2sail.resultimport.test</module>
 		<module>com.sap.sailing.nmeaconnector.test</module>
 		<module>com.sap.sailing.simulator.test</module>
 		<module>com.sap.sailing.server.trackfiles.test</module>
-		<module>de.csenk.gwt.ws</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>com.sap.sailing.feature.p2build</module>
 	</modules>
@@ -112,7 +121,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest
+		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
@@ -152,16 +161,16 @@
             <id>no-debug.without-proxy</id>
             <properties>
                 <tycho.build.argLine>
-				  ${parameters.common} ${parameters.vm-settings}
-				</tycho.build.argLine>
+		  ${parameters.common} ${parameters.vm-settings}
+		</tycho.build.argLine>
             </properties>
         </profile>
         <profile>
             <id>debug.with-proxy</id>
             <properties>
                 <tycho.build.argLine>
-			      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
-				</tycho.build.argLine>
+		      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+		</tycho.build.argLine>
             </properties>
         </profile>
         <profile>
@@ -169,7 +178,7 @@
             <properties>
                 <tycho.build.argLine>
                   ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
-				</tycho.build.argLine>
+		</tycho.build.argLine>
             </properties>
         </profile>
     </profiles>

@@ -8,14 +8,18 @@ import java.net.URISyntaxException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sse.common.Util;
 
 public class WebSocketServerListTest {
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+
     @Test
     public void testWebSocketServerList() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         final ClientImpl testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",

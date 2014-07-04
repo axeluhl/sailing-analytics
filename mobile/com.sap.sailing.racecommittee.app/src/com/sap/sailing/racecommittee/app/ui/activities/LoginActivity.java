@@ -187,7 +187,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                 // We have to take the passed instance, LoginActivity.this might be a new instance!
                 LoginDialog localLoginDialog = (LoginDialog) dialog;
-                preferences.setAuthor(localLoginDialog.getAuthor());
                 switch (localLoginDialog.getSelectedLoginType()) {
                 case OFFICER:
                     ExLog.i(TAG, "Communication with backend is active.");
@@ -203,6 +202,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             Toast.LENGTH_LONG).show();
                     return;
                 }
+                preferences.setAuthor(localLoginDialog.getAuthor());
 
                 if (selectedCourseArea == null) {
                     Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();

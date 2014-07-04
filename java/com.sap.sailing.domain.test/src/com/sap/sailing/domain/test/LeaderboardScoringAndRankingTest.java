@@ -32,12 +32,12 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -57,6 +57,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sse.common.Util;
 
 public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private ArrayList<Series> series;
@@ -600,16 +601,16 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
         createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
                 new Competitor[][] { f1, f2, f3 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
-        long totalTimeSailedC0_InRace1 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], earlier.plus(1000));
-        assertEquals(1000l, totalTimeSailedC0_InRace1);
-        long totalTimeSailedC0_InRace2 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], now.plus(1000));
-        assertEquals(now.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace2);
-        long totalTimeSailedC0_InRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], later.plus(1000));
-        assertEquals(later.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace3);
-        long totalTimeSailedC0_AtEndOfRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish);
-        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AtEndOfRace3);
-        long totalTimeSailedC0_AfterRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish.plus(1000));
-        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3);
+        Duration totalTimeSailedC0_InRace1 = leaderboard.getTotalTimeSailed(c[0], earlier.plus(1000));
+        assertEquals(1000l, totalTimeSailedC0_InRace1.asMillis());
+        Duration totalTimeSailedC0_InRace2 = leaderboard.getTotalTimeSailed(c[0], now.plus(1000));
+        assertEquals(now.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace2.asMillis());
+        Duration totalTimeSailedC0_InRace3 = leaderboard.getTotalTimeSailed(c[0], later.plus(1000));
+        assertEquals(later.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace3.asMillis());
+        Duration totalTimeSailedC0_AtEndOfRace3 = leaderboard.getTotalTimeSailed(c[0], finish);
+        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AtEndOfRace3.asMillis());
+        Duration totalTimeSailedC0_AfterRace3 = leaderboard.getTotalTimeSailed(c[0], finish.plus(1000));
+        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3.asMillis());
     }
 
     @Test
@@ -721,10 +722,12 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private void checkScoresAfterSomeRaces(Leaderboard leaderboard, List<RaceColumn> raceColumnsToConsider,
             double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
         for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
+            final Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule()
+                    .getDiscardedRaceColumns(competitors[competitorIndex], leaderboard, raceColumnsToConsider, timePoint);
             for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
                 assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
                         leaderboard.getTotalPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
-                                raceColumnsToConsider, timePoint), 0.00000001);
+                                timePoint, discardedRaceColumns), 0.00000001);
             }
         }
     }

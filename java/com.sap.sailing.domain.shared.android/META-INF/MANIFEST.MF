@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0"
+Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sse.common
 Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.configuration,
  com.sap.sailing.domain.base.configuration.impl,
@@ -26,6 +27,10 @@ Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.racelog.state.racingprocedure.impl,
  com.sap.sailing.domain.racelog.state.racingprocedure.rrs26,
  com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl,
+ com.sap.sailing.domain.racelog.tracking,
+ com.sap.sailing.domain.racelog.tracking.analyzing.impl,
+ com.sap.sailing.domain.racelog.tracking.events,
+ com.sap.sailing.domain.racelog.tracking.impl,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl,
  com.sap.sailing.util.impl

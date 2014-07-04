@@ -1,0 +1,80 @@
+package com.sap.sailing.mongodb.test;
+
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Before;
+
+import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+
+public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
+
+    protected final String raceColumnName = "My.First$Race$1";
+    protected final String regattaName = "TestRegatta";
+    protected final String yellowFleetName = "Yellow";
+    protected final String seriesName = "Qualifying";
+    protected MongoObjectFactory mongoObjectFactory = null;
+    protected DomainObjectFactory domainObjectFactory = null;
+    protected Regatta regatta = null;
+    protected RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+
+    public AbstractTestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
+        super();
+    }
+
+    @Before
+    public void setUp() {
+        now = MillisecondsTimePoint.now();
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        regatta = createRegattaAndAddRaceColumns(1, regattaName, boatClass, true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+    }
+    
+    private Regatta createRegattaAndAddRaceColumns(final int numberOfQualifyingRaces, final String regattaBaseName, BoatClass boatClass, boolean persistent, ScoringScheme scoringScheme) {
+        Regatta regatta = createRegattaWithoutRaceColumns(regattaBaseName, boatClass, persistent, scoringScheme, null);
+        regatta.getSeriesByName(seriesName).addRaceColumn(raceColumnName, /* trackedRegattaRegistry */ null);
+        return regatta;
+    }
+    
+    private Regatta createRegattaWithoutRaceColumns(final String regattaBaseName, BoatClass boatClass, boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
+        List<Series> series = createSeriesForTestRegatta();
+        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
+        Regatta regatta = new RegattaImpl(raceLogStore, regattaBaseName, boatClass, series, persistent, scoringScheme, "123", courseArea);
+        return regatta;
+    }
+
+    private List<Series> createSeriesForTestRegatta() {
+        List<Series> series = new ArrayList<Series>();
+        // -------- qualifying series ------------
+        List<String> emptyRaceColumnNames = Collections.emptyList();
+        List<Fleet> qualifyingFleets = createQualifyingFleets();
+        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, qualifyingFleets,
+                emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
+        series.add(qualifyingSeries);
+        return series;
+    }
+
+    abstract protected List<Fleet> createQualifyingFleets();
+}

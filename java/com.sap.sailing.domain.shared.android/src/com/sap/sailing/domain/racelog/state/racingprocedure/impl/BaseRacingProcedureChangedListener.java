@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 
 public abstract class BaseRacingProcedureChangedListener implements RacingProcedureChangedListener {
 

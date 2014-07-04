@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint.LeaderboardUrlSettings;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
 
@@ -109,7 +109,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
@@ -172,12 +172,12 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
             chartDetailListBox = dialog.createListBox(false);
             urlSettingsContent.add(chartDetailListBox);
-            if(leaderboardType.isMetaLeaderboard()) {
+            if (leaderboardType.isMetaLeaderboard()) {
                 chartDetailListBox.addItem(DetailType.OVERALL_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
             } else {
                 chartDetailListBox.addItem(DetailType.REGATTA_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
             }
             chartDetailListBox.setSelectedIndex(0);
             

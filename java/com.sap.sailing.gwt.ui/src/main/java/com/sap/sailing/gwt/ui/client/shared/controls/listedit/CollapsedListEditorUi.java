@@ -9,9 +9,29 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
+/**
+ * Base class for "collapsed" list editing UIs for use in a {@link ListEditorComposite}. An editing strategy of this
+ * type shows the list of values in a single character string, together with an "Edit" button which pops up a dialog
+ * that contains an "expanded" editor of type {@link ExpandedListEditorUi}.
+ * <p>
+ * 
+ * To implement a "collapsed" editor, subclasses have to provide the {@link String} representation of a value list in
+ * method {@link #getCollapsedValueText(List)} and need to provide the widget used to edit the list. This widget will be
+ * displayed in the pop-up dialog, together with a "Save" and a "Cancel" button. It is a common pattern to use a
+ * {@link ListEditorComposite} with the respective {@link ExpandedListEditorUi} strategy that will be passed through
+ * from this class's constructor to the {@link #createExpandedUi(List, ExpandedListEditorUi)} method.<p>
+ * 
+ * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved()} method(s)
+ * to be notified of changes to the list.
+ * 
+ * @author Lukas Niemeier
+ * @author Axel Uhl (D043530)
+ * 
+ * @param <ValueType>
+ */
 public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<ValueType> {
     private static final int collapsedTitleMaxLength = 20;
 
@@ -76,11 +96,6 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
         }
         collapsedValuesBox.setText(shortText);
         collapsedValuesBox.setTitle(text);
-    }
-
-    @Override
-    public boolean isCollapsed() {
-        return true;
     }
 
     private class PopupEditDialog extends DataEntryDialog<List<ValueType>> {

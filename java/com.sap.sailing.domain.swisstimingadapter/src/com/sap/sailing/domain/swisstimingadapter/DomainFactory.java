@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -29,18 +30,20 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
-    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
+    Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType);
-    
-    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, RaceType raceType);
+    Competitor createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass);
 
-    Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType);
+    Competitor createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
+
+    Competitor createCompetitorWithoutID(String boatID, String threeLetterIOCCode, String name, String raceId, BoatClass boatClass);
     
-    Competitor getCompetitorByBoatIDAndRaceID(String boatID, String raceID);
-    
+    String getCompetitorID(String boatID, RaceType raceType);
+
+    String getCompetitorID(String boatID, BoatClass boatClass);
+
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
     com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID);
@@ -52,13 +55,12 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     void removeRace(String raceID);
-    
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
-            boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RaceSpecificMessageLoader messageLoader);
 
     RaceType getRaceTypeFromRaceID(String raceID);
+
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
+            String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 

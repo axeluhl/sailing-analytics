@@ -8,17 +8,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Double>> {
+public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, Double>> {
     private final ListBox maxPointsBox;
     private final DoubleBox netPointsBox;
     private final StringMessages stringMessages;
     
     public EditScoreDialog(StringMessages stringMessages, String competitorName, String raceColumnName,
-            MaxPointsReason oldMaxPointsReason, Double oldNetPoints, DialogCallback<Pair<MaxPointsReason, Double>> callback) {
+            MaxPointsReason oldMaxPointsReason, Double oldNetPoints, DialogCallback<Util.Pair<MaxPointsReason, Double>> callback) {
         super(stringMessages.correctScore(), stringMessages.correctScoreFor(competitorName, raceColumnName),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, /* animationEnabled */ true,
                 callback);
@@ -40,7 +40,7 @@ public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Doubl
     }
 
     @Override
-    protected Pair<MaxPointsReason, Double> getResult() {
+    protected Util.Pair<MaxPointsReason, Double> getResult() {
         final MaxPointsReason maxPointsReason;
         if ("".equals(maxPointsBox.getItemText(maxPointsBox.getSelectedIndex()))) {
             maxPointsReason = null;
@@ -48,7 +48,7 @@ public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Doubl
             maxPointsReason = MaxPointsReason.valueOf(maxPointsBox.getItemText(maxPointsBox.getSelectedIndex()));
         }
         final Double netScore = netPointsBox.getValue();
-        return new Pair<MaxPointsReason, Double>(maxPointsReason, netScore);
+        return new Util.Pair<MaxPointsReason, Double>(maxPointsReason, netScore);
     }
 
     @Override

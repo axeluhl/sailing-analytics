@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
+import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.HasConfidence;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
@@ -63,8 +64,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
                 int i=0;
                 GPSFixMoving last = relevantFixes.get(i);
                 // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
-                // "relevant" fix is found
-                if (maxSpeedForSmoothing == null || last.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                // "relevant" fix is found; exclude SOG/COG of fixes with SOG/COG==0/0
+                if ((last.getSpeed().getBearing().getDegrees() != 0 || last.getSpeed().getKnots() > 0) && (maxSpeedForSmoothing == null || last.getSpeed().compareTo(maxSpeedForSmoothing) <= 0)) {
                     SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                             last.getSpeed(),
                             /* original confidence */0.9, last.getTimePoint());
@@ -78,8 +79,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
                     // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
-                    // "relevant" fix is found
-                    if (maxSpeedForSmoothing == null || next.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                    // "relevant" fix is found; exclude announced SOG/COG if 0/0
+                    if ((last.getSpeed().getBearing().getDegrees() != 0 || last.getSpeed().getKnots() > 0)
+                            && (maxSpeedForSmoothing == null || next.getSpeed().compareTo(maxSpeedForSmoothing) <= 0)) {
                         SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                                 next.getSpeed(), /* original confidence */0.9, next.getTimePoint());
                         speeds.add(computedSpeedWithConfidence);

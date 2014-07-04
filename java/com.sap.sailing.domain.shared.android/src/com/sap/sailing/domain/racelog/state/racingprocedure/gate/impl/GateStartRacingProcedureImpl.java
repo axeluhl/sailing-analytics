@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -28,6 +27,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacing
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
+import com.sap.sse.common.Util;
 
 public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {
 
@@ -146,24 +146,38 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         TimePoint gateShutdownTime = getGateShutdownTimePoint(startTime);
         if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, false), new FlagPole(Flags.PAPA,
-                    false)), Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
+                    false)), null, Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
                     startTime.minus(startPhaseClassOverGolfUpIntervall));
         } else if (now.before(startTime.minus(startPhasePapaUpInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
+                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
                     startTime.minus(startPhasePapaUpInterval));
         } else if (now.before(startTime.minus(startPhasePapaDownInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    true)), Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
+                    true)), startTime.minus(startPhasePapaUpInterval),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
                     startTime.minus(startPhasePapaDownInterval));
         } else if (now.before(startTime)) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), Arrays.asList(new FlagPole(classFlag, false), new FlagPole(Flags.GOLF, true)), startTime);
+                    false)), startTime.minus(startPhasePapaDownInterval),
+                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(Flags.GOLF, true)), startTime);
         } else if (now.before(gateShutdownTime)) {
-            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, true)), Arrays.asList(new FlagPole(
-                    Flags.GOLF, false)), gateShutdownTime);
+            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, true)), startTime,
+                    Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
         } else {
-            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, false)));
+            if (isFinished(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+            } else if (isInFinishingPhase(now)) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
+                        getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
+                        null);
+            } else {
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
+            }
         }
     }
 

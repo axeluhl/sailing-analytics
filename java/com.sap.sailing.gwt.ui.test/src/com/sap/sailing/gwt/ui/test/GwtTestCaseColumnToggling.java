@@ -18,12 +18,12 @@ import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sse.common.Util;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
     
@@ -65,7 +65,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, /* hidden */ true, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, /* hidden */ true, new AsyncCallback<Util.Pair<String,List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -73,7 +73,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(Pair<String, List<TracTracRaceRecordDTO>> result) {
+            public void onSuccess(Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                 System.out.println("Listed races.");
                 for (TracTracRaceRecordDTO rr : result.getB()){
                     if (rr.name.equals(TRACKED_RACE)){
@@ -178,7 +178,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboardByNameAndDeleteColumn(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* previousLeaderboardId */ null, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* addOverallDetails */ false, /* previousLeaderboardId */ null,
+                /* fillUncorrectedNetPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");

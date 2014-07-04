@@ -5,17 +5,18 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
  * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
  * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
- * tracker yet. Through the {@link RacesHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
- * {@link RacesHandle#getRaces() blocking get} for the races tracked by this tracker.
+ * tracker yet. Through the {@link RaceHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
+ * {@link RaceHandle#getRaces() blocking get} for the races tracked by this tracker.
  * <p>
  * 
  * The data received by the tracker is usually fed into {@link TrackedRace} objects that {@link TrackedRace#getRace()
@@ -57,11 +58,13 @@ public interface RaceTracker {
     
     Set<RegattaAndRaceIdentifier> getRaceIdentifiers();
 
-    RacesHandle getRacesHandle();
+    RaceHandle getRacesHandle();
 
     DynamicTrackedRegatta getTrackedRegatta();
     
     WindStore getWindStore();
+    
+    GPSFixStore getGPSFixStore();
 
     /**
      * returns a unique key for this tracker which can, e.g., be used as a key in a {@link Map}

@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
 

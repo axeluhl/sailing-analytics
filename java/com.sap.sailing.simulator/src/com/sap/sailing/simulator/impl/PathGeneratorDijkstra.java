@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -22,6 +21,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Util;
 
 public class PathGeneratorDijkstra extends PathGeneratorBase {
 
@@ -49,7 +49,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
         int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
         // steps
-        Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
+        Position[][] sailGrid = boundary.extractGrid(gridh, gridv, 0, 0);
 
         // create adjacency graph including start and end
         Map<Position, List<Position>> graph = new HashMap<Position, List<Position>>();
@@ -73,12 +73,12 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
         // create tentative distance matrix
         // additional to tentative distances, the matrix also contains the root of each position
         // that can be </null> if unavailable
-        Map<Position, Pair<Long, Position>> tentativeDistances = new HashMap<Position, Pair<Long, Position>>();
+        Map<Position, Util.Pair<Long, Position>> tentativeDistances = new HashMap<Position, Util.Pair<Long, Position>>();
         for (Position p : graph.keySet()) {
-            tentativeDistances.put(p, new Pair<Long, Position>(Long.MAX_VALUE, null));
+            tentativeDistances.put(p, new Util.Pair<Long, Position>(Long.MAX_VALUE, null));
         }
-        tentativeDistances.put(start, new Pair<Long, Position>(startTime.asMillis(), null));
-        tentativeDistances.put(end, new Pair<Long, Position>(Long.MAX_VALUE, null));
+        tentativeDistances.put(start, new Util.Pair<Long, Position>(startTime.asMillis(), null));
+        tentativeDistances.put(end, new Util.Pair<Long, Position>(Long.MAX_VALUE, null));
 
         // create set of unvisited nodes
         List<Position> unvisited = new ArrayList<Position>(graph.keySet());
@@ -118,7 +118,7 @@ public class PathGeneratorDijkstra extends PathGeneratorBase {
 
                 Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
                 if (tentativeDistanceToP < tentativeDistances.get(p).getA()) {
-                    tentativeDistances.put(p, new Pair<Long, Position>(tentativeDistanceToP, currentPosition));
+                    tentativeDistances.put(p, new Util.Pair<Long, Position>(tentativeDistanceToP, currentPosition));
                 }
             }
 

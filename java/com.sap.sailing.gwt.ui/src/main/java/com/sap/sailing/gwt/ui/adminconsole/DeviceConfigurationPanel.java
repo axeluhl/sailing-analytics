@@ -22,9 +22,9 @@ import com.sap.sailing.gwt.ui.client.SelectionProviderImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO>, DeviceConfigurationCloneListener {
 

@@ -32,21 +32,21 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidget {
 
@@ -103,18 +103,23 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
     private final boolean canReplayDuringLiveRaces;
+    private final boolean showMapControls;
+    private final boolean showNavigationPanel;
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
-            boolean showRaceDetails, boolean canReplayDuringLiveRaces) {
+            boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls,
+            boolean showNavigationPanel) {
         super();
         this.isEmbedded = embedded;
         this.showRaceDetails = showRaceDetails;
+        this.showMapControls = showMapControls;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.sailingService = sailingService;
         this.stringMessages = stringConstants;
         this.errorReporter = errorReporter;
+        this.showNavigationPanel = showNavigationPanel;
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
         setWidth("95%");
@@ -384,12 +389,11 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet) {
         List<RaceColumnDTO> racesColumnsOfFleet = new ArrayList<RaceColumnDTO>();
-        
         for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
             for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
-                if(fleet.equals(fleetOfRaceColumn)) {
-                    //We have to get the race column from the leaderboard, because the race column of the series
-                    //have no tracked race and would be displayed as inactive race.
+                if (fleet.equals(fleetOfRaceColumn)) {
+                    // We have to get the race column from the leaderboard, because the race column of the series
+                    // have no tracked race and would be displayed as inactive race.
                     racesColumnsOfFleet.add(leaderboard.getRaceColumnByName(raceColumn.getName()));
                 }
             }
@@ -422,6 +426,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (canReplayDuringLiveRaces) {
             linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
+                Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
         if (viewMode != null && !viewMode.isEmpty()) {

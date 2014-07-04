@@ -20,13 +20,13 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sse.common.Util;
 
 public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTrackedRace {
     // ---------------- BearingWithConfidenceCluster -----------------
@@ -61,7 +61,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
         getTrackedRace().recordWind(new WindImpl(markPositions.get("Windward mark"), somewhenOnAnUpwind,
                 new KnotSpeedWithBearingImpl(
                 /* speedInKnots */14.7, new DegreeBearingImpl(90))), new WindSourceImpl(WindSourceType.WEB));
-        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, somewhenOnAnUpwind);
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(somewhenOnAnUpwind);
         assertNotNull(estimatedWindDirection);
     }
     

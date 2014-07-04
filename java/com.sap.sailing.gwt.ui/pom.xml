@@ -10,7 +10,7 @@
   <artifactId>com.sap.sailing.gwt.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
   <properties>
-      <gwt.version>2.6.0</gwt.version>
+      <gwt.version>2.6.1</gwt.version>
   </properties>
 
   <repositories>
@@ -33,12 +33,18 @@
 	<dependency>
 		<groupId>org.moxieapps.gwt</groupId>
 		<artifactId>org.moxieapps.gwt.highcharts</artifactId>
-		<version>1.5.0-SNAPSHOT</version>
+		<version>1.6.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
     	<artifactId>com.sap.sailing.domain.common</artifactId>
+    	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
+    </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.common</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
@@ -56,7 +62,7 @@
     </dependency>
     <dependency>
     	<groupId>com.sap.sailing</groupId>
-    	<artifactId>de.csenk.gwt.ws</artifactId>
+    	<artifactId>com.sap.sse.datamining.shared</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
@@ -73,15 +79,18 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.6.0</version>
+        <version>2.6.1</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
-		  <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
+		      <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
+		  <!--
 		  <userAgents>chrome</userAgents>
+		  -->
 	          <modules>
 	            <module>com.sap.sailing.gwt.ui.EmulatedJRE</module>
+		        <module>com.sap.sailing.gwt.Home</module>
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
 		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
 		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
@@ -100,6 +109,8 @@
 		      <localWorkers>3</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
 		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
+              <!--<compileReport>true</compileReport>
+              <detailedSoyc>true</detailedSoyc>-->
 	        </configuration>
             <goals>
               <goal>compile</goal>

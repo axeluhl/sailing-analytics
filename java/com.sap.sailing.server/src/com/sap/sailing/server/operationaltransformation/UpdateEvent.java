@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.util.List;
+import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -13,17 +13,31 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final TimePoint startDate;
     private final TimePoint endDate;
     private final boolean isPublic;
-    private final List<String> regattaNames;
+    private final Iterable<UUID> leaderboardGroupIds;
     private final String eventName;
+    private final String eventDescription;
+    private final URL officialWebsiteURL;
+    private final URL logoImageURL;
+    private final Iterable<URL> imageURLs;
+    private final Iterable<URL> videoURLs;
+    private final Iterable<URL> sponsorImageURLs;
 
-    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames) {
+    public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL logoImageURL,
+            URL officialWebsiteURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs) {
         super(id);
         this.eventName = eventName;
+        this.eventDescription = eventDescription;
         this.startDate = startDate;
         this.endDate = endDate;
         this.venueName = venueName;
         this.isPublic = isPublic;
-        this.regattaNames = regattaNames;
+        this.leaderboardGroupIds = leaderboardGroupIds;
+        this.officialWebsiteURL = officialWebsiteURL;
+        this.logoImageURL = logoImageURL;
+        this.imageURLs = imageURLs;
+        this.videoURLs = videoURLs;
+        this.sponsorImageURLs = sponsorImageURLs;
     }
 
     @Override
@@ -40,7 +54,8 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, regattaNames);
+        toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
+                leaderboardGroupIds, officialWebsiteURL, logoImageURL, imageURLs, videoURLs, sponsorImageURLs);
         return null;
     }
 }

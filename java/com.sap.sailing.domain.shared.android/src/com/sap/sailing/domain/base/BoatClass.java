@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sse.common.Named;
 
 public interface BoatClass extends Named, IsManagedBySharedDomainFactory {
     /**

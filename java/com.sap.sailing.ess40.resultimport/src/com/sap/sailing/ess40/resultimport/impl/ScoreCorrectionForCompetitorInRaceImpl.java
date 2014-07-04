@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionForCompetitorInRace {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionForCompetitorInRaceImpl.class.getName());
@@ -13,7 +13,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
     private final Double points;
     private final MaxPointsReason maxPointsReason;
     
-    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Pair<String, Double> rankAndPoints) {
+    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Util.Pair<String, Double> rankAndPoints) {
         this.teamName = teamName;
         if (rankAndPoints == null) {
             points = 0.0;

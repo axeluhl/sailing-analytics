@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;
@@ -28,6 +27,7 @@ import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.EventGender;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
+import com.sap.sse.common.Util;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
@@ -57,8 +57,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+        Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
@@ -67,12 +67,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                     if(resultDocDescr.getCompetitorGenderType() != null) {
                         boatClass += ", " + resultDocDescr.getCompetitorGenderType().name();
                     }
-                    Set<Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
+                    Set<Util.Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
                     if(eventResultsSet == null) {
-                        eventResultsSet = new HashSet<Pair<String, TimePoint>>();
+                        eventResultsSet = new HashSet<Util.Pair<String, TimePoint>>();
                         result.put(eventName, eventResultsSet);
                     }
-                    eventResultsSet.add(new Pair<String, TimePoint>(boatClass, resultDocDescr.getLastModified()));
+                    eventResultsSet.add(new Util.Pair<String, TimePoint>(boatClass, resultDocDescr.getLastModified()));
                 }
             }
         } catch (IOException e) {
@@ -101,7 +101,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                                     if(divisionGender != null) {
                                         divisionBoatClassAndGender += ", " + divisionGender.name();  
                                     }
-                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender)) {
+                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
                                         return new XRRRegattaResultsAsScoreCorrections(event, division, this,
                                                 parser);
                                     }

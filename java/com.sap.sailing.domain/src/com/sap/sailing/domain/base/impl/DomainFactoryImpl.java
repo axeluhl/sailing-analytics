@@ -28,13 +28,14 @@ import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -44,6 +45,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.Util;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -86,6 +88,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointFirstGets10LastBreaksTie();
         case LOW_POINT_WINNER_GETS_ZERO:
             return new LowPointWinnerGetsZero();
+        case HIGH_POINT_WINNER_GETS_FIVE:
+            return new HighPointWinnerGetsFive();
+        case HIGH_POINT_WINNER_GETS_SIX:
+            return new HighPointWinnerGetsSix();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -106,7 +112,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
         TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
-        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(trackedRace.getRace()));
+        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(
+                trackedRace.getTrackedRegatta().getRegatta(), trackedRace.getRace()));
         raceDTO.places = racePlaces;
         updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
         return raceDTO;
@@ -135,7 +142,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
-        Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
+        Util.Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
         PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
         if (startAndFinish.getA() != null) {
             racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
@@ -149,7 +156,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return racePlaces;
     }
 
-    private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
+    private Util.Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
         double radiusCalculationFactor = 10.0;
         Placemark startBest = null;
         Placemark finishBest = null;
@@ -201,7 +208,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                 }
             }
         }
-        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(startBest, finishBest);
+        Util.Pair<Placemark, Placemark> placemarks = new Util.Pair<Placemark, Placemark>(startBest, finishBest);
         return placemarks;
     }
 

@@ -49,18 +49,26 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     private boolean higherScoresIsBetter;
 
+    /**
+     * Tells whether this leaderboard has data about overall details. This corresponds with the <code>addOverallDetails</code> request parameter
+     * for a leaderboard DTO computation.
+     */
+    private boolean hasOverallDetails;
+
     LeaderboardDTO() {} // for serialization
 
     /**
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
+     * @param hasOverallDetails TODO
      */
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
+    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
         initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
         this.higherScoresIsBetter = higherScoreIsBetter;
+        this.hasOverallDetails = hasOverallDetails;
     }
 
     private void initCollections() {
@@ -164,5 +172,13 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    /**
+     * Tells whether this leaderboard has data about overall details. This corresponds with the <code>addOverallDetails</code> request parameter
+     * for a leaderboard DTO computation.
+     */
+    public boolean hasOverallDetails() {
+        return hasOverallDetails;
     }
 }

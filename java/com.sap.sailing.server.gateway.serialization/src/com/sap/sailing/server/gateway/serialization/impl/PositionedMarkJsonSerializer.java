@@ -5,10 +5,10 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Util;
 
-public class PositionedMarkJsonSerializer implements JsonSerializer<Pair<Mark, Position>> {
+public class PositionedMarkJsonSerializer implements JsonSerializer<Util.Pair<Mark, Position>> {
     public static final String FIELD_MARK = "mark";
     public static final String FIELD_POSITION = "position";
 
@@ -21,7 +21,7 @@ public class PositionedMarkJsonSerializer implements JsonSerializer<Pair<Mark, P
     }
 
     @Override
-    public JSONObject serialize(Pair<Mark, Position> positionedMark) {
+    public JSONObject serialize(Util.Pair<Mark, Position> positionedMark) {
         JSONObject result = new JSONObject();
 
         result.put(FIELD_MARK, markSerializer.serialize(positionedMark.getA()));

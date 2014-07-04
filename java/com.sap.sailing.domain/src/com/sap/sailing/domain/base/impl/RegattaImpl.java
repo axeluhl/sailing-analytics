@@ -29,11 +29,11 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
@@ -42,11 +42,27 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Util;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
+
+    /**
+     * Used during master data import to handle connection to correct RaceLogStore
+     */
+    private static transient ThreadLocal<MasterDataImportInformation> ongoingMasterDataImportInformation = new ThreadLocal<MasterDataImportInformation>() {
+        @Override
+        protected MasterDataImportInformation initialValue() {
+            return null;
+        };
+    };
+
+    public static void setOngoingMasterDataImport(MasterDataImportInformation information) {
+        ongoingMasterDataImportInformation.set(information);
+    }
+
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private final Set<RaceDefinition> races;
+    private Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;
@@ -111,7 +127,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.series = seriesList;
         for (Series s : series) {
-            linkToRegattaAndAddListeners(s);
+            linkToRegattaAndConnectRaceLogsAndAddListeners(s);
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -159,12 +175,40 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
-     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is assembled
+     * for this empty race log and applied to all columns.
+     * Make sure to call {@link #initializeSeriesAfterDeserialize()} after the object graph has been de-serialized.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        raceLogStore = EmptyRaceLogStore.INSTANCE;
         regattaListeners = new HashSet<RegattaListener>();
+        MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
+        if (masterDataImportInformation != null) {
+            raceLogStore = masterDataImportInformation.getRaceLogStore();
+            races = new HashSet<RaceDefinition>();
+        } else {
+            raceLogStore = EmptyRaceLogStore.INSTANCE;
+        }
+    }
+    
+    /**
+     * {@link RaceColumnListeners} may not be de-serialized (yet) when the regatta
+     * is de-serialized. Do avoid re-registering empty objects most probably leading
+     * to null pointer exception one need to initialize all listeners after
+     * all objects have been read.
+     */
+    public void initializeSeriesAfterDeserialize() {
+        for (Series series : getSeries()) {
+            linkToRegattaAndConnectRaceLogsAndAddListeners(series);
+            if (series.getRaceColumns() != null) {
+                for (RaceColumnInSeries column : series.getRaceColumns()) {
+                    column.setRaceLogInformation(new RaceLogInformationImpl(raceLogStore,
+                            new RaceLogOnRegattaIdentifier(this, column.getName())));
+                }
+            } else {
+                logger.warning("Race Columns were null during deserialization. This should not happen.");
+            }
+        }  
     }
 
     @Override
@@ -306,12 +350,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         setRaceLogInformationOnRaceColumn(raceColumn);
-        
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
 
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+            raceLogStore.removeRaceLog(identifier);
+        }
         raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
     }
 
@@ -403,7 +450,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void addSeries(Series seriesToAdd) {
         Series existingSeries = getSeriesByName(seriesToAdd.getName());
         if (existingSeries == null) {
-            linkToRegattaAndAddListeners(seriesToAdd);
+            linkToRegattaAndConnectRaceLogsAndAddListeners(seriesToAdd);
             synchronized (this.series) {
                 ArrayList<Series> newSeriesList = new ArrayList<Series>();
                 for (Series seriesObject : this.series) {
@@ -415,7 +462,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
     }
 
-    private void linkToRegattaAndAddListeners(Series seriesToAdd) {
+    private void linkToRegattaAndConnectRaceLogsAndAddListeners(Series seriesToAdd) {
         seriesToAdd.setRegatta(this);
         seriesToAdd.addRaceColumnListener(this);
         registerRaceLogsOnRaceColumns(seriesToAdd);

@@ -60,7 +60,7 @@ public class TestColumnSwapping {
                 public String generateRandomUUID() {
                     return UUID.randomUUID().toString();
                 }
-            });
+            }, /* hasOverallDetails */ false);
             leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
@@ -98,7 +98,8 @@ public class TestColumnSwapping {
             sailingService.moveLeaderboardColumnUp(TEST_LEADERBOARD_NAME, races[2]);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
-            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* previous leaderboard ID */ null).getLeaderboardDTO(/* previousVersion */ null);
+            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* addOverallDetails */ true, /* previous leaderboard ID */ null,
+                    /* fillNetPointsUncorrected */ false).getLeaderboardDTO(/* previousVersion */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
@@ -123,7 +124,7 @@ public class TestColumnSwapping {
             public String generateRandomUUID() {
                 return UUID.randomUUID().toString();
             }
-        });
+        }, /* hasOverallDetails */ false);
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);
         lb.addRace("2", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);
@@ -139,7 +140,8 @@ public class TestColumnSwapping {
     public void testColumnSwappingFabian() {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
-            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* previous leaderboard ID */ null).getLeaderboardDTO(/* previousVersion */ null);
+            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* addOverallDetails */
+                    true, /* previous leaderboard ID */null, /* fillNetPointsUncorrected */false).getLeaderboardDTO(/* previousVersion */null);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

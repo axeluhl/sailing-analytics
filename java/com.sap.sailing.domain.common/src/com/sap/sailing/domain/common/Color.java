@@ -3,7 +3,6 @@ package com.sap.sailing.domain.common;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.domain.common.impl.Util;
 
 public interface Color extends Serializable {
     final Color WHITE = new RGBColor(255, 255, 255);
@@ -31,10 +30,10 @@ public interface Color extends Serializable {
     final Color CYAN = new RGBColor(0, 255, 255);
 
     final Color BLUE = new RGBColor(0, 0, 255);
+    
+    com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB();
 
-    Util.Triple<Integer, Integer, Integer> getAsRGB();
-
-    Util.Triple<Float, Float, Float> getAsHSV();
+    com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV();
 
     String getAsHtml();
 }

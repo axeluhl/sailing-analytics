@@ -1,17 +1,16 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThat;
+
 import java.util.Date;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
-
-import static org.hamcrest.core.Is.is;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       

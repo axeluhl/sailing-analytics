@@ -7,9 +7,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -30,25 +32,36 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
@@ -269,7 +282,7 @@ public class WindTest {
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
                         boatClass, Collections.singleton(competitor)), Collections.<Sideline> emptyList(),
-                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
+                        EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 30000);
         TimePoint start = MillisecondsTimePoint.now();
@@ -281,6 +294,60 @@ public class WindTest {
             new MarkPassingImpl(finish, w3, competitor)    
         }));
         assertFalse(boatClass.typicallyStartsUpwind());
-        assertNull(trackedRace.getEstimatedWindDirection(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
+        assertNull(trackedRace.getEstimatedWindDirection(MillisecondsTimePoint.now()));
+    }
+
+    @Test
+    public void testWindAveragingBasedOnPosition() {
+        Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
+        /* halfConfidenceAfterMilliseconds */10000l, new MeterDistance(1000));
+        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
+        TimePoint now = MillisecondsTimePoint.now();
+        final DegreePosition p1 = new DegreePosition(0, 0);
+        WindWithConfidence<Pair<Position, TimePoint>> w1 = new WindWithConfidenceImpl<>(
+                new WindImpl(p1, now, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))),
+                /* confidence */ 1.0, new Pair<Position, TimePoint>(p1, now), /* useSpeed */ true);
+        final Position p2 = p1.translateGreatCircle(new DegreeBearingImpl(0), new MeterDistance(1000));
+        WindWithConfidence<Pair<Position, TimePoint>> w2 = new WindWithConfidenceImpl<>(
+                new WindImpl(p2, now, new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0))),
+                /* confidence */ 1.0, new Pair<Position, TimePoint>(p2, now), /* useSpeed */ true);
+        List<WindWithConfidence<Pair<Position, TimePoint>>> fixes = new ArrayList<>();
+        fixes.add(w1);
+        fixes.add(w2);
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtP1 = averager.getAverage(fixes, new Pair<Position, TimePoint>(p1, now));
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtP2 = averager.getAverage(fixes, new Pair<Position, TimePoint>(p2, now));
+        // first careful assertion: at p1 where wind is from the west (to the east), wind should be further from the
+        // west (further to the east) than at p2 where wind is from the south (to the north).
+        final Bearing averageAtP1Bearing = averageAtP1.getObject().getBearing();
+        assertTrue(Math.abs(averageAtP1Bearing.getDifferenceTo(w1.getObject().getBearing()).getDegrees()) <
+                Math.abs(averageAtP1Bearing.getDifferenceTo(w2.getObject().getBearing()).getDegrees()));
+        // ...and vice versa
+        final Bearing averageAtP2Bearing = averageAtP2.getObject().getBearing();
+        assertTrue(Math.abs(averageAtP2Bearing.getDifferenceTo(w2.getObject().getBearing()).getDegrees()) <
+                Math.abs(averageAtP2Bearing.getDifferenceTo(w1.getObject().getBearing()).getDegrees()));
+        // expect the arithmetic average at the point which is in the middle between the two positions
+        Position middleBetweenP1AndP2 = p1.translateGreatCircle(p1.getBearingGreatCircle(p2), p1.getDistance(p2).scale(.5));
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtMiddleBetweenP1AndP2 = averager.getAverage(fixes,
+                new Pair<Position, TimePoint>(middleBetweenP1AndP2, now));
+        assertEquals(15, averageAtMiddleBetweenP1AndP2.getObject().getKnots(), 0.00001);
+        assertEquals(45, averageAtMiddleBetweenP1AndP2.getObject().getBearing().getDegrees(), 0.00001);
+        
+        // now try again with distance 2km and demand the difference between the position-dependent readings to be greater
+        final Position p3 = p1.translateGreatCircle(new DegreeBearingImpl(0), new MeterDistance(2000));
+        WindWithConfidence<Pair<Position, TimePoint>> w3 = new WindWithConfidenceImpl<>(
+                new WindImpl(p3, now, new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0))),
+                /* confidence */ 1.0, new Pair<Position, TimePoint>(p3, now), /* useSpeed */ true);
+        List<WindWithConfidence<Pair<Position, TimePoint>>> fixesFurtherApart = new ArrayList<>();
+        fixesFurtherApart.add(w1);
+        fixesFurtherApart.add(w3);
+        WindWithConfidence<Pair<Position, TimePoint>> averageFurtherApartAtP1 = averager.getAverage(fixesFurtherApart, new Pair<Position, TimePoint>(p1, now));
+        WindWithConfidence<Pair<Position, TimePoint>> averageAtP3 = averager.getAverage(fixesFurtherApart, new Pair<Position, TimePoint>(p3, now));
+        assertTrue(averageFurtherApartAtP1.getObject().getKnots() < averageAtP1.getObject().getKnots());
+        assertTrue(averageAtP3.getObject().getKnots() > averageAtP2.getObject().getKnots());
+        assertTrue(Math.abs(averageFurtherApartAtP1.getObject().getBearing().getDifferenceTo(w1.getObject().getBearing()).getDegrees())
+                < Math.abs(averageAtP1.getObject().getBearing().getDifferenceTo(w1.getObject().getBearing()).getDegrees()));
+        assertTrue(Math.abs(averageAtP3.getObject().getBearing().getDifferenceTo(w3.getObject().getBearing()).getDegrees())
+                < Math.abs(averageAtP2.getObject().getBearing().getDifferenceTo(w3.getObject().getBearing()).getDegrees()));
     }
 }

@@ -38,7 +38,7 @@ public class ExportPopup extends DialogBox {
         getCaption().setText(stringMessages.export());
 
         formPanel = new FormPanel("_blank");
-        formPanel.setAction("/sailingserver/trackfiles");
+        formPanel.setAction("/sailingserver/trackfiles/export");
         formPanel.setMethod(FormPanel.METHOD_POST);
         mainPanel = new VerticalPanel();
         formPanel.setWidget(mainPanel);

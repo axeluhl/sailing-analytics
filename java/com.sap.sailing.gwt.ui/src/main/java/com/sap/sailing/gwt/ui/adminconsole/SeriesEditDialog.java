@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorCo
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
 
@@ -247,7 +247,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         private final Label addRacesHintLabel;
         
         public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
-            super(stringMessages, removeImage, Collections.<String>emptyList());
+            super(stringMessages, removeImage, /* suggest values */ Collections.<String>emptyList());
 
             this.seriesName = seriesName;
             this.regatta = regatta;
@@ -344,7 +344,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             HorizontalPanel addRacesPanel = new HorizontalPanel();
             addRacesPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             addRacesPanel.setSpacing(5);
-            addRacesPanel.add(new Label("Add races"));
+            addRacesPanel.add(new Label(stringMessages.addRaces()));
 
             for(int i = 1; i <= 50; i++) {
                 addRacesFromListBox.addItem("" + i);
@@ -366,9 +366,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             });
             
             addRacesPanel.add(addRacesFromListBox);
-            addRacesPanel.add(new Label("to"));
+            addRacesPanel.add(new Label(stringMessages.to()));
             addRacesPanel.add(addRacesToListBox);
-            addRacesPanel.add(new Label("with name prefix"));
+            addRacesPanel.add(new Label(stringMessages.withNamePrefix()));
 
             raceNamePrefixTextBox.setWidth("20px");
             if ("Default".equals(seriesName)) {
@@ -390,16 +390,14 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 @Override
                 public void onClick(ClickEvent event) {
                     SeriesDTO selectedSeries = getSelectedSeries();
-                    if(selectedSeries != null) {
+                    if (selectedSeries != null) {
                         List<String> raceNamesToAdd = resolveRaceNamesToAdd();
-                        for(String raceToAdd: raceNamesToAdd) {
+                        for (String raceToAdd : raceNamesToAdd) {
                             addValue(raceToAdd);
-                            }
+                        }
                         validate();
-//                        updateFromToListboxesSelection();
-//                        updateHintLabel();
                     } else {
-                        Window.alert("Please select a series first.");
+                        Window.alert(stringMessages.pleaseSelectASeriesFirst());
                     }
                 }
             });

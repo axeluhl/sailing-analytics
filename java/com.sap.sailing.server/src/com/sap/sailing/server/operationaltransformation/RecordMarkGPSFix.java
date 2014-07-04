@@ -18,6 +18,15 @@ public class RecordMarkGPSFix extends AbstractRaceOperation<Void> {
         this.fix = fix;
     }
 
+    /**
+     * Operations of this type can be run in parallel to other operations; subsequent operations do not have to wait
+     * for this operation's completion.
+     */
+    @Override
+    public boolean requiresSynchronousExecution() {
+        return false;
+    }
+
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());

@@ -66,13 +66,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -82,14 +78,12 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
@@ -105,6 +99,12 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
@@ -267,12 +267,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
     private LatLngBounds currentMapBounds;
+    
+    private WindStreamletsRaceboardOverlay streamletOverlay;
+    private final boolean showViewStreamlets;
+    private final RegattaAndRaceIdentifier raceIdentifier;
 
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
-            CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
+            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets,
+            RegattaAndRaceIdentifier raceIdentifier) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.raceIdentifier = raceIdentifier;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
@@ -290,13 +297,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
-        initializeData();
+        this.showViewStreamlets = showViewStreamlets;
+        initializeData(showMapControls);
         
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
         combinedWindPanel.setVisible(false);
     }
     
-    private void loadMapsAPIV3() {
+    private void loadMapsAPIV3(final boolean showMapControls) {
         boolean sensor = true;
 
         // load all the libs for use in the maps
@@ -309,9 +317,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = MapOptions.newInstance();
               mapOptions.setScrollWheel(true);
-              mapOptions.setMapTypeControl(true);
-              mapOptions.setPanControl(true);
-              mapOptions.setZoomControl(true);
+              mapOptions.setMapTypeControl(showMapControls);
+              mapOptions.setPanControl(showMapControls);
+              mapOptions.setZoomControl(showMapControls);
               mapOptions.setScaleControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
@@ -330,15 +338,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
               scaleControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
               mapOptions.setScaleControlOptions(scaleControlOptions);
+              mapOptions.setStreetViewControl(false);
+              if (showMapControls) {
+                  ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
+                  zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  mapOptions.setZoomControlOptions(zoomControlOptions);
 
-              ZoomControlOptions zoomControlOptions = ZoomControlOptions.newInstance();
-              zoomControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-              mapOptions.setZoomControlOptions(zoomControlOptions);
-
-              PanControlOptions panControlOptions = PanControlOptions.newInstance();
-              panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
-              mapOptions.setPanControlOptions(panControlOptions);
-              
+                  PanControlOptions panControlOptions = PanControlOptions.newInstance();
+                  panControlOptions.setPosition(ControlPosition.TOP_RIGHT);
+                  mapOptions.setPanControlOptions(panControlOptions);
+              }
               map = new MapWidget(mapOptions);
               RaceMap.this.add(map, 0, 0);
               RaceMap.this.add(combinedWindPanel, 10, 10);
@@ -373,14 +382,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
+                      if (streamletOverlay != null) {
+                          streamletOverlay.onBoundsChanged();
+                      }
                       currentMapBounds = map.getBounds();
                   }
               });
               
-              //If there was a time change before the API was loaded, reset the time
+              // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
+              }
+              // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's visible
+              streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
+                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages);
+              streamletOverlay.addToMap();
+              if (showViewStreamlets) {
+                  streamletOverlay.setVisible(true);
               }
               //Data has been initialized
               RaceMap.this.isMapInitialized = true;
@@ -399,7 +418,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return Collections.unmodifiableMap(boatOverlays);
     }
     
-    MapWidget getMap() {
+    public MapWidget getMap() {
         return map;
     }
     
@@ -424,7 +443,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
-                    final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
+                    final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
@@ -491,7 +510,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames);
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, newTime, 1000L, 1, windSourceTypeNames,
+                            /* onlyUpToNewestEvent==false means get us any data we can get by a best effort */ false);
                     asyncActionsExecutor.execute(getWindInfoAction, GET_WIND_DATA_CATEGORY, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -500,15 +520,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
                         @Override
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
-                            List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
+                            List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
                                         case EXPEDITION:
                                             // we filter out measured wind sources with a very little confidence
-                                            if (windTrackInfoDTO.minWindConfidence > 0.01) {
-                                                windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
+                                            if (windTrackInfoDTO.minWindConfidence > 0.0001) {
+                                                windSourcesToShow.add(new com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                             }
                                             break;
                                         case COMBINED:
@@ -628,10 +648,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showWindSensorsOnMap(List<Pair<WindSource, WindTrackInfoDTO>> windSensorsList) {
+    protected void showWindSensorsOnMap(List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSensorsList) {
         if (map != null) {
             Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorOverlays.keySet());
-            for (Pair<WindSource, WindTrackInfoDTO> windSourcePair : windSensorsList) {
+            for (com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO> windSourcePair : windSensorsList) {
                 WindSource windSource = windSourcePair.getA(); 
                 WindTrackInfoDTO windTrackInfoDTO = windSourcePair.getB();
 
@@ -648,7 +668,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             for (WindSource toRemoveWindSource : toRemoveWindSources) {
                 WindSensorOverlay removedWindSensorOverlay = windSensorOverlays.remove(toRemoveWindSource);
-                if(removedWindSensorOverlay != null) {
+                if (removedWindSensorOverlay != null) {
                     removedWindSensorOverlay.removeFromMap();
                 }
             }
@@ -762,7 +782,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
     
-    private Pair<Integer, CompetitorDTO> getLeadingVisibleCompetitorInfo(Iterable<CompetitorDTO> competitorsToShow) {
+    private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getLeadingVisibleCompetitorInfo(Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
@@ -770,7 +790,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (Util.contains(competitorsToShow, quickRank.competitor)) {
                 leadingCompetitorDTO = quickRank.competitor;
                 legOfLeaderCompetitor = quickRank.legNumber;
-                return new Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
+                return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }
         return null;
@@ -778,11 +798,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null
-                && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
+                && !lastCombinedWindTrackInfoDTO.windFixes.isEmpty()) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
-                Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
+                com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
                 // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
                 // don't show anything
                 GPSFixDTO lastBoatFix = null;
@@ -896,7 +916,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
-            Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
+            com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
             int legOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
             // draw the start line
@@ -1020,7 +1040,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
                     options.setGeodesic(true);
-                    options.setStrokeColor("#6896c6");
+                    options.setStrokeColor("#2268a0");
                     options.setStrokeWeight(1);
                     options.setStrokeOpacity(1.0);
                     
@@ -1428,7 +1448,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
-                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
+                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
                         MarkerOptions options = MarkerOptions.newInstance();
                         options.setTitle(maneuver.toString(stringMessages));
                         options.setIcon(maneuverMarker.getIcon_MarkerImage());
@@ -1480,16 +1500,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     } else {
                         closer = fixAfter;
                     }
-                    Date betweenDate = new Date((fixBefore.timepoint.getTime() + fixAfter.timepoint.getTime()) / 2);
-                    PositionDTO betweenPosition = new PositionDTO((fixBefore.position.latDeg + fixAfter.position.latDeg)/2,
-                            (fixBefore.position.lngDeg + fixAfter.position.lngDeg)/2);
-                    double betweenBearing = new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees).middle(
-                            new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).getDegrees();
+                    // now compute a weighted average depending on the time difference to "date" (see also bug 1924)
+                    double factorForAfter = (double) (date.getTime()-fixBefore.timepoint.getTime()) / (double) (fixAfter.timepoint.getTime() - fixBefore.timepoint.getTime());
+                    double factorForBefore = 1-factorForAfter;
+                    PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
+                            factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
+                    double betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
+                            multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
+                            multiply(factorForAfter)).divide(1).getDegrees();
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
-                            (fixBefore.speedWithBearing.speedInKnots + fixAfter.speedWithBearing.speedInKnots)/2,
+                            factorForBefore*fixBefore.speedWithBearing.speedInKnots + factorForAfter*fixAfter.speedWithBearing.speedInKnots,
                             betweenBearing);
-                    // TODO move SpeedWithBearing and GPSFix with implementation classes to com.sap.sailing.domain.common and share in GWT bundle
-                    result = new GPSFixDTO(betweenDate, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
+                    result = new GPSFixDTO(date, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
                             closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
                 }
             } else {
@@ -1668,6 +1690,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
             requiredRedraw = true;
         }
+        if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
+            settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
+            streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+        }
         if (requiredRedraw) {
             redraw();
         }
@@ -1786,8 +1812,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void initializeData() {
-        loadMapsAPIV3();
+    public void initializeData(boolean showMapControls) {
+        loadMapsAPIV3(showMapControls);
     }
 
     @Override

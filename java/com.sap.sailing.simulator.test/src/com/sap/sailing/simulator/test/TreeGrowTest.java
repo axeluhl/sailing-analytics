@@ -8,12 +8,14 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -43,7 +45,7 @@ public class TreeGrowTest {
         course.add(end);
         PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        Position[][] positions = bd.extractGrid(10, 10);
+        Position[][] positions = bd.extractGrid(10, 10, 0, 0);
         //RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
         //Speed knotSpeed = new KnotSpeedImpl(8);
         WindControlParameters windParameters = new WindControlParameters(12, start.getBearingGreatCircle(end).reverse().getDegrees());
@@ -51,7 +53,7 @@ public class TreeGrowTest {
         wf.setPositionGrid(positions);
         Date startDate = new Date(0);
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
-        TimePoint timeStep = new MillisecondsTimePoint(20000);
+        Duration timeStep = new MillisecondsDurationImpl(20000);
         wf.generate(startTime, null, timeStep);
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
 

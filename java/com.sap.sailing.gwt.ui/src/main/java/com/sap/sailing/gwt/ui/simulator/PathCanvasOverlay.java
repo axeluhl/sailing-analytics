@@ -13,12 +13,12 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.common.Named;
+import com.sap.sse.gwt.client.player.Timer;
 
 /**
  * This class implements the layer which displays the optimal path on the path. Currently there is a single path to be
@@ -173,7 +173,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 }
                 index++;
 
-                long timeStep = windParams.getTimeStep().getTime();
+                long timeStep = windParams.getTimeStep().asMillis();
                 if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
                     drawPoint(windDTO);
                 }

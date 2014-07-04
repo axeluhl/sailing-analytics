@@ -1,15 +1,15 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -37,10 +37,11 @@ public interface RaceColumn extends Named {
     RaceLogInformation getRaceLogInformation();
     
     /**
-     * Gets the race column's race log associated to the passed fleet.
+     * Gets the race column's race log associated to the passed fleet. Note that the result may be <code>null</code>
+     * particularly for columns in a {@link MetaLeaderboard}.
      * 
      * @param fleet
-     * @return the race log.
+     * @return the race log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
     RaceLog getRaceLog(Fleet fleet);
     
@@ -126,7 +127,7 @@ public interface RaceColumn extends Named {
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
-    Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+    com.sap.sse.common.Util.Pair<Competitor, RaceColumn> getKey(Competitor competitor);
 
     RaceColumnListeners getRaceColumnListeners();
 

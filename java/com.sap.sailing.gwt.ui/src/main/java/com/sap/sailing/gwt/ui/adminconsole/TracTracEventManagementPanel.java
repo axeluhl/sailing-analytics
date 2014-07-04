@@ -36,18 +36,17 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -297,6 +296,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.regattaName);
+                if (t.boatClassNames != null) {
+                    for (String boatClassName : t.boatClassNames) {
+                        strings.add(boatClassName);
+                    }
+                }
                 return strings;
             }
         };
@@ -466,8 +470,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String tractracUsername = tractracUsernameTextBox.getValue();
         final String tractracPassword = tractracPasswordTextBox.getValue();
 
-        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>(
-                new AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
+                new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         loadingMessageLabel.setText("");
@@ -475,19 +479,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
         
                     @Override
-                    public void onSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
+                    public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
                         TracTracEventManagementPanel.this.availableTracTracRaces.clear();
-                        
                         final String eventName = result.getA();
                         final List<TracTracRaceRecordDTO> eventRaces = result.getB();
-                        
                         if (eventRaces != null) {
                             TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
+                            racesFilterablePanel.updateAll(availableTracTracRaces);
                         }
-                        
                         List<TracTracRaceRecordDTO> races = TracTracEventManagementPanel.this.raceList.getList();
-                        
                         races.clear();
                         races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
                         
@@ -524,6 +525,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (boatClassNames != null && Util.size(boatClassNames) > 0) {
             String tracTracBoatClassName = boatClassNames.iterator().next();
             if (selectedRegatta == null) {
+                if (tracTracRecord.hasRememberedRegatta) {
+                    return true;
+                }
+                
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
@@ -532,7 +537,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
                 }
             } else {
-                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.getName())) {
+                if (!tracTracBoatClassName.equals(selectedRegatta.boatClass.getName())) {
                     return false;
                 }
             }
@@ -564,11 +569,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
         if (racesWithNotMatchingBoatClasses.size() > 0) {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
-            builder.append("WARNING\n");
             if (selectedRegatta != null) {
                 builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
-                        selectedRegatta.getName()));
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName()));
             } else {
                 builder.append(stringMessages.regattaExistForSelectedBoatClass());
             }
@@ -579,9 +582,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 builder.append(record.name);
                 builder.append("\n");
             }
-            if (!Window.confirm(builder.toString())) {
-                return;
-            }
+            
+            Window.alert(builder.toString());
+            return;
         }
         
         final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();

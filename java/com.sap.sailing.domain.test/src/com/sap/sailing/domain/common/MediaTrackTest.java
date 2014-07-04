@@ -1,12 +1,13 @@
 package com.sap.sailing.domain.common;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Date;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
-
-import static org.junit.Assert.*;
 
 public class MediaTrackTest {
     

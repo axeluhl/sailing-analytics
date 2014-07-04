@@ -2,12 +2,13 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesCalculationUtil {
 
-    public static Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
+    public static Util.Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
         Date min = null;
         Date max = null;
 
@@ -54,7 +55,7 @@ public class RaceTimesCalculationUtil {
             break;
         }
         
-        return new Pair<Date, Date>(min, max);
+        return new Util.Pair<Date, Date>(min, max);
     }
     
     private static long calculateRaceExtensionTime(Date startTime, Date endTime) {

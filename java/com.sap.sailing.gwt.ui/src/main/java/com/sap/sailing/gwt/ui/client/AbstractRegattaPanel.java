@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 //TODO: Do not inherit from FormPanel since the provided functionality is never used!
-public abstract class AbstractRegattaPanel extends FormPanel implements RegattaDisplayer {
+public abstract class AbstractRegattaPanel extends FormPanel implements RegattasDisplayer {
     protected final SailingServiceAsync sailingService;
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));

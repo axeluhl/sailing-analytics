@@ -1,6 +1,5 @@
 package com.sap.sailing.manage2sail.resultimport;
 
-import java.net.URL;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.HostnameVerifier;
@@ -12,26 +11,36 @@ import javax.net.ssl.X509TrustManager;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.resultimport.impl.ResultUrlRegistryServiceTrackerCustomizer;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class Activator implements BundleActivator {
-    // private static String MANAGE2SAIL_KIELWEEK_2013_URL = "http://manage2sail.com/api/public/links/event/da33884e-24fe-44f6-8501-d253587f7cc8?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
-    private static String MANAGE2SAIL_TW_2013_URL = "http://manage2sail.com/api/public/links/event/937a5c0a-5a28-4a07-806a-8c8ec1efc85c?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+
+    private ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     public void start(BundleContext bundleContext) throws Exception {
-        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE, ResultUrlRegistry.INSTANCE);
-        bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
-        
-        // ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_KIELWEEK_2013_URL));
-        ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_TW_2013_URL));
-        
+        resultUrlRegistryServiceTracker = new ServiceTracker<>(bundleContext, ResultUrlRegistry.class,
+                new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
+
+                    @Override
+                    protected ScoreCorrectionProvider configureScoreCorrectionProvider(
+                            ResultUrlRegistry resultUrlRegistry) {
+                        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(
+                                ParserFactory.INSTANCE, resultUrlRegistry);
+                        return service;
+                    }
+                });
+
+        resultUrlRegistryServiceTracker.open();
         createAnAllCertificatesTrustingManagerforSSL();
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
+        resultUrlRegistryServiceTracker.close();
     }  
 
     private void createAnAllCertificatesTrustingManagerforSSL() throws Exception {

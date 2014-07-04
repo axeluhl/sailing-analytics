@@ -7,6 +7,9 @@ import java.text.ParseException;
 
 import org.junit.Test;
 
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+
 public class KW470MarkPassingTest extends AbstractMarkPassingTest {
 
     public KW470MarkPassingTest() throws MalformedURLException, URISyntaxException {
@@ -14,19 +17,19 @@ public class KW470MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace4() throws IOException, InterruptedException, URISyntaxException, ParseException {
+    public void testRace4() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         testRace("4");
     }
-    
-    @Test
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
-        testRace("5");
-    }
-    
-    @Test
-    public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException {
-        testRace("6");
-    }
+
+    /*
+     * Ignored on master branch
+     * 
+     * @Test public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+     * testRace("5"); }
+     * 
+     * @Test public void testRace6() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+     * testRace("6"); }
+     */
 
     @Override
     protected String getFileName() {

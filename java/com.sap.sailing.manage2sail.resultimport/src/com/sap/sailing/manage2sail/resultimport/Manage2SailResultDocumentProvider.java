@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.manage2sail.EventResultDescriptor;
+import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
+import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;
@@ -23,7 +26,7 @@ public class Manage2SailResultDocumentProvider implements ResultDocumentProvider
     @Override
     public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        Manage2SailEventResultsParser parser = new Manage2SailEventResultsParser();
+        Manage2SailEventResultsParserImpl parser = new Manage2SailEventResultsParserImpl();
         for (URL url : resultUrlProvider.getUrls()) {
             URLConnection eventResultConn = url.openConnection();
             EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());

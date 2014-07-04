@@ -35,6 +35,96 @@
 				<h2 class="articleHeadline">Analyzing Races, Leaderboards</h2>
 
 				<div class="innerContent">
+					<h2 class="articleSubheadline">June 2014</h2>
+
+					<ul class="bulletList">
+						<li>In the "Maps" settings in the RaceBoard page there is a new checkbox named
+						    "Show wind streamlets overlay." If you select it and wait for about a minute,
+						    a complete wind field will be calculated and visualized as an overlay on top
+						    of the race course display. It reacts to you moving the time slider and shows
+						    how the wind differs at different locations on the course. Stronger and faster-moving
+						    streamlets mean stronger breeze.
+						</li>
+						<li>Wind is now calculated location-based. At locations closer to a sensor, that sensor
+						    has a higher influence on the local wind field than sensors further away. The wind
+						    estimations based on the courses sailed are assigned a location that corresponds with
+						    the "center of gravity" of the field that was used for the estimation. For example,
+						    if the fleet is approaching the windward mark and the wind sensor in on the committee
+						    boat on the leeward side of the course, the course-based estimation influences the
+						    assumed wind field more on the windward side whereas the sensor counts more for
+						    the leeward side.
+						</li>
+						<li>Switched to the latest version of the Highcharts charting framework. This leads to improvements
+						    especially on mobile devices. Charts can be zoomed using pinch gestures now.
+						</li>
+						<li>To support the use of the SAP Sailing Analytics also for live video streaming formats, we
+						    introduced a new URL parameter <tt>viewShowMapControls</tt> for the <tt>Spectator.html</tt>
+						    and the <tt>RaceBoard.html</tt> pages. Setting this parameter to "false"
+						    will suppress the zoom, pan and map type selection
+						    controls on the map display. Example:
+						    <a href="http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false">http://danishleague2014.sapsailing.com/gwt/Spectator.html?leaderboardGroupName=Danish%20League%202014&showRaceDetails=true&viewShowMapControls=false</a>.
+						    When used for the <tt>Spectator.html</tt> URL, this will apply
+						    to all <tt>RaceBoard.html</tt> pages (all races) reached from there. Of course, the map
+						    can still be panned and zoomed using the usual mouse gestures. A left double click zooms
+						    in, a right double click zooms out. Zoom can also be controlled using the mouse wheel.
+						    And panning works by clicking on the map and dragging the mouse. Without the map type
+						    control, switching to satellite view is not possible (keep this in mind when tracking
+						    races in China, see below for Google's random coordinate transformations there).
+						</li>
+					</ul>
+					
+					<h2 class="articleSubheadline">May 2014</h2>
+
+					<ul class="bulletList">
+						<li>Fixed an issue with the wind speed charts. Charts that only had a single, unchanged
+						    wind speed crashed the browser. The solution scales the right hand side Y-axis denoting
+						    the wind speed such that it always starts at 0kts.
+						</li> 
+						<li>Analysis of tacks and jibes around mark passings has now been improved. Before,
+						    a jibe followed by a tack that turns in the same direction (e.g., to port) so far
+						    was always called a penalty maneuver. Now, if a mark passing separates such a tack
+						    from such a jibe, no penalty is called anymore, and the two maneuvers are identified
+						    correctly.
+						</li>
+						<li>Another note on maneuver analysis: we received questions regarding the maneuvers
+						    involved in clearing an OCS. The SAP Sailing Analytics treat a clearing of
+						    an OCS, going back behind the start line and crossing it again, as if the competitor
+						    started again. In particular this means that all maneuvers prior to this new start
+						    do not count for the metrics; neither does the distance sailed between the first (OCS)
+						    start and the clear start.
+						</li>
+						<li>A hint regarding the "distance to start line" metrics: please keep in mind that currently this
+						    measurement is calculated as the distance of the GPS tracker from the line. Unless the tracker
+						    is mounted near the bow (or at the bow sprit, if any), the distance calculated this way will
+						    be greater than what counts for crossing the line. Ordering, comparing and aggregating over this
+						    figure still makes sense as long as you remember this detail.
+						</li>
+						<li>Introduced a new leaderboard entry "XTE +/-" featuring a signed cross-track error which shows
+						    for a leg and also aggregated for an entire race on which side of the leg a competitor stayed on
+						    average. Currently, the "side" is defined as viewing in the leg's direction, so "left" for a downwind
+						    leg is the same side as "right" for the corresponding upwind leg.
+						</li>
+					</ul>
+					
+					<h2 class="articleSubheadline">April 2014</h2>
+
+					<ul class="bulletList">
+						<li>China races, such as in Qingdao, may have the map background displayed at slightly wrong locations.
+						    This is due to an intentional random transformation that Google applies to GPS locations for
+						    China. You can circumvent this issue by switching to satellite view where the map background is displayed
+						    correctly. <img src="images/mapsatellite.png"/>
+						</li>
+						<li>Fixed a bug that in some cases has caused the wind chart, the advantage line, the wind indicator on the map
+						    and the leaderboard to use slightly different wind values. The problem was related to different averaging and
+						    damping methods used for these values which has now been aligned.
+						</li>
+						<li>Fixed a bug that caused the time spent in a leg, race or regatta to always show the time at the end of the leg
+						    if the leg has been started by the competitor at the time point queried, e.g., by the time slider. While this
+						    did not have any serious effects in live mode, for replay races this left the leg time and race time constant
+							at the total time spent so far up to the end of the last leg the competitor had started at that time.
+					    </li>
+					</ul>
+					
 					<h2 class="articleSubheadline">March 2014</h2>
 
 					<ul class="bulletList">
@@ -46,13 +136,12 @@
 						
 						<li>Added tooltips for leaderboard settings.</li>
 						
-						<li>Added a new URL entry point called LiveRaceSimpleView. This entry point can be used to
-						display custom designs related to a live race. This entry point is tied to a leaderboard and
-						can detect which race is currently live or scheduled. It then triggers specific views that
-						can display a countdown or a simplified version of a ranking. Currently views exist for
-						the Extreme Sailing Series.</li>
-						
 						<li>Fixed HighPointOverall scheme to also break a tie by looking at the ranks of the last regatta.</li>
+
+						<li>Progress indicator when expanding a race in the RaceBoard view</li>
+
+						<li>Leaderboard column "GPS Lag" shows how far a competitor's GPS signal lags behind the average
+						    tracking quality. A background color bar classifies into good/ok/bad (green/yellow/red).</li>
 					</ul>
 					
 					<h2 class="articleSubheadline">February 2014</h2>

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -27,8 +28,10 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sse.common.Util;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -86,7 +89,7 @@ public interface TrackedRace extends Serializable {
      * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over
      * the result must <code>synchronize</code> on the result.
      */
-    Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
+    Iterable<Util.Pair<Waypoint, Util.Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
@@ -369,7 +372,7 @@ public interface TrackedRace extends Serializable {
      *         to determining the bearing. If in the future we have data about polar diagrams specific to boat classes,
      *         we may be able to also infer the wind speed from the boat tracks.
      */
-    Wind getEstimatedWindDirection(Position position, TimePoint timePoint);
+    Wind getEstimatedWindDirection(TimePoint timePoint);
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -378,6 +381,17 @@ public interface TrackedRace extends Serializable {
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
+     * requested.
+     * <p>
+     * This method outperforms {@link #getTack(Competitor, TimePoint)}, based on being passed an already calculated wind
+     * for the given time and competitor position as well as the competitors speed and course over ground.
+     * <p>
+     * This method will acquire the read lock for the competitor's track.
+     */
+    Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint);
 
     TrackedRegatta getTrackedRegatta();
 
@@ -397,7 +411,8 @@ public interface TrackedRace extends Serializable {
     /**
      * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
      * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>.
+     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
+     * the competitor's {@link GPSFixTrack track}.
      */
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
@@ -442,9 +457,12 @@ public interface TrackedRace extends Serializable {
      * tracked race. This runs synchronized with the otherwise asynchronous loading of wind tracks, triggered by the
      * constructor of the {@link TrackedRace} implementation classes. This procedure guarantees that eventually the
      * listener will have received a notification for all wind fixes, regardless of whether they were already loaded at
-     * the time the listener is registered or they are loaded after the registration has completed.
+     * the time the listener is registered or they are loaded after the registration has completed.<p>
+     * 
+     * The same is true for the GPS fixes for marks and competitors.
      */
-    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded);
+    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded,
+            boolean notifyAboutGPSFixesAlreadyLoaded);
 
     void removeListener(RaceChangeListener listener);
 
@@ -454,13 +472,13 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
      * {@link #getWindSourcesToExclude}.
      */
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
 
     /**
      * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
@@ -474,14 +492,15 @@ public interface TrackedRace extends Serializable {
      * by each wind source are used during computing the averaged result across the wind sources. The result has the
      * averaged confidence attached.
      */
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude);
 
     /**
-     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
-     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
+     * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind
+     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result. The
+     * {@link Wind#getPosition() position} of all {@link Wind} fixes returned is <code>null</code>.
      */
-    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint);
 
     /**
      * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals
@@ -496,8 +515,31 @@ public interface TrackedRace extends Serializable {
      *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
      *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
+
+    /**
+     * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind on leg and leg bearing is provided.
+     */
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalyses) throws NoWindException;
+
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+            throws NoWindException;
+
+    /**
+     * Same as {@link #getAverageSignedCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind direction and leg bearing is provided.
+     */
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalysis) throws NoWindException;
 
     WindStore getWindStore();
 
@@ -509,16 +551,22 @@ public interface TrackedRace extends Serializable {
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalyses) throws NoWindException;
+    /**
+     * When provided with a {@link WindStore} during construction, the tracked race will
+     * asynchronously load the wind data for this tracked race from the wind store and the GPS store in a
+     * background thread and update this tracked race with the results. Clients that want to wait for the wind
+     * loading process to complete can do so by calling this method which will block until the wind loading has
+     * completed.
+     */
+    void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
-     * data for this tracked race from the wind store in a background thread and update this tracked race with the
-     * results. Clients that want to wait for the wind loading process to complete can do so by calling this method
-     * which will block until the wind loading has completed.
+     * Whenever a {@link RaceLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
+     * found in the {@code RaceLog} in a separate thread. This method blocks if there is such a thread loading
+     * fixes, until that thread is finished.
+     * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
      */
-    void waitUntilWindLoadingComplete() throws InterruptedException;
+    void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -540,6 +588,12 @@ public interface TrackedRace extends Serializable {
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
+     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link DeviceMappingEvent}s
+     * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
+     * serialization until it is finished. If multiple race logs are attached, the loading process is
+     * forced to be serialized.
+     * To garuantee that a the fixes for a race log have been fully loaded before continuing,
+     * {@link #waitForLoadingFromGPSFixStoreToFinishRunning} can be used.
      * @param raceLog to be attached.
      */
     void attachRaceLog(RaceLog raceLog);
@@ -551,8 +605,11 @@ public interface TrackedRace extends Serializable {
     RaceLog getRaceLog(Serializable identifier);
     
     /**
-     * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
-     * @param listener the listener to operate with.
+     * A setter for the listener on course design changes suggested by one of the {@link RaceLog}s attached to this
+     * race. The listener is mostly part of the tracking provider adapter.
+     * 
+     * @param listener
+     *            the listener to operate with.
      */
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
@@ -641,4 +698,7 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
+    
+    GPSFixStore getGPSFixStore();
+
 }

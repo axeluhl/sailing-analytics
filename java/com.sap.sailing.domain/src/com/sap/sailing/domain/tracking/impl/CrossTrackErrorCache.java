@@ -38,7 +38,7 @@ import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
  * The results can be cached. Cache invalidation becomes necessary as mark passings, mark positions and boat positions
  * change. For this purpose, this cache subscribes itself as a listener to the {@link TrackedRace} to which it belongs
  * and manages cache invalidations autonomously.
- *   
+ *
  * @author Axel Uhl (D043530)
  *
  */
@@ -48,13 +48,15 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     private static class CrossTrackErrorSumAndNumberOfFixes implements Timed {
         private static final long serialVersionUID = -278130726836884454L;
         private final TimePoint timePoint;
-        private final double distanceInMetersSumFromStart;
+        private final double absoluteDistanceInMetersSumFromStart;
+        private final double signedDistanceInMetersSumFromStart;
         private final int fixCountFromStart;
 
-        public CrossTrackErrorSumAndNumberOfFixes(TimePoint timePoint, double distanceInMetersSumFromStart, int fixCountFromStart) {
+        public CrossTrackErrorSumAndNumberOfFixes(TimePoint timePoint, double absoluteDistanceInMetersSumFromStart, double signedDistanceInMetersSumFromStart, int fixCountFromStart) {
             super();
             this.timePoint = timePoint;
-            this.distanceInMetersSumFromStart = distanceInMetersSumFromStart;
+            this.absoluteDistanceInMetersSumFromStart = absoluteDistanceInMetersSumFromStart;
+            this.signedDistanceInMetersSumFromStart = signedDistanceInMetersSumFromStart;
             this.fixCountFromStart = fixCountFromStart;
         }
 
@@ -63,8 +65,12 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             return timePoint;
         }
 
-        public double getDistanceInMetersSumFromStart() {
-            return distanceInMetersSumFromStart;
+        public double getAbsoluteDistanceInMetersSumFromStart() {
+            return absoluteDistanceInMetersSumFromStart;
+        }
+
+        public double getSignedDistanceInMetersSumFromStart() {
+            return signedDistanceInMetersSumFromStart;
         }
 
         public int getFixCountFromStart() {
@@ -78,6 +84,15 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         }
 
         private static final long serialVersionUID = 4884868659665863604L;
+        
+        public void deleteAll() {
+            lockForWrite();
+            try {
+                getInternalRawFixes().clear();
+            } finally {
+                unlockAfterWrite();
+            }
+        }
         
         public void deleteAllLaterThan(TimePoint from) {
             // TODO use a specialized ArrayList in a specialized ArrayListNavigableSet and then make removeRange public
@@ -115,7 +130,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         public FromTimePointToEndUpdateInterval join(FromTimePointToEndUpdateInterval otherUpdateInterval) {
             return new FromTimePointToEndUpdateInterval(getFrom()==null?
                     otherUpdateInterval.getFrom():otherUpdateInterval.getFrom()==null?
-                            getFrom():(getFrom().compareTo(otherUpdateInterval.getFrom())<0)?
+                            getFrom():getFrom().before(otherUpdateInterval.getFrom())?
                                     getFrom():otherUpdateInterval.getFrom());
         }
 
@@ -165,7 +180,11 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                             FromTimePointToEndUpdateInterval updateInterval) {
                         CrossTrackErrorSumAndNumberOfFixesTrack result;
                         if (oldValue != null) {
-                            oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            if (updateInterval == null) {
+                                oldValue.deleteAll();
+                            } else {
+                                oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            }
                             computedCacheUpdate.lockForRead();
                             try {
                                 for (CrossTrackErrorSumAndNumberOfFixes entry : computedCacheUpdate.getRawFixes()) {
@@ -185,6 +204,10 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         owner.addListener(this);
     }
     
+    private interface CrossTrackErrorMeterRetriever {
+        double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry);
+    }
+    
     /**
      * Answers the query from the cache contents.
      * 
@@ -194,8 +217,43 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      *            whether to wait for any currently ongoing cache update calculation; if <code>false</code>, the current
      *            cache entry will be used
      */
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatest) throws NoWindException {
+        CrossTrackErrorMeterRetriever absoluteMetersRetriever = new CrossTrackErrorMeterRetriever() {
+            @Override
+            public double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry) {
+                return cacheEntry.getAbsoluteDistanceInMetersSumFromStart();
+            }
+        };
+        return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, absoluteMetersRetriever);
+    }
+
+    /**
+     * Answers the query from the cache contents.
+     * 
+     * @param upwindOnly
+     *            if <code>true</code>, only fixes in upwind legs are considered during aggregation
+     * @param waitForLatest
+     *            whether to wait for any currently ongoing cache update calculation; if <code>false</code>, the current
+     *            cache entry will be used
+     */
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatest) throws NoWindException {
+        CrossTrackErrorMeterRetriever signedMetersRetriever = new CrossTrackErrorMeterRetriever() {
+            @Override
+            public double getDistanceInMetersSumFromStart(CrossTrackErrorSumAndNumberOfFixes cacheEntry) {
+                return cacheEntry.getSignedDistanceInMetersSumFromStart();
+            }
+        };
+        return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, signedMetersRetriever);
+    }
+
+    /**
+     * @param absoluteMetersRetriever determines whether the absolute or signed cross track error will be aggregated
+     */
+    private Distance getAbsoluteOrSignedAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
+            boolean upwindOnly, boolean waitForLatest, CrossTrackErrorMeterRetriever absoluteMetersRetriever)
+            throws NoWindException {
         Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = cachePerCompetitor.get(competitor, waitForLatest);
         double distanceInMeters = 0;
         int count = 0;
@@ -231,11 +289,11 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                                 }
                                 if (startAggregate == null) {
                                     startAggregate = new CrossTrackErrorSumAndNumberOfFixes(/* time point */ null,
-                                            /* distanceInMetersSumFromStart */ 0, /* fixCountFromStart */ 0);
+                                            /* absoluteDistanceInMetersSumFromStart */ 0, /* signedDistanceInMetersSumFromStart */ 0, /* fixCountFromStart */ 0);
                                 }
                                 CrossTrackErrorSumAndNumberOfFixes endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
                                 if (endAggregate != null) {
-                                    distanceInMeters += endAggregate.getDistanceInMetersSumFromStart() - startAggregate.getDistanceInMetersSumFromStart();
+                                    distanceInMeters += absoluteMetersRetriever.getDistanceInMetersSumFromStart(endAggregate) - absoluteMetersRetriever.getDistanceInMetersSumFromStart(startAggregate);
                                     count += endAggregate.getFixCountFromStart() - startAggregate.getFixCountFromStart();
                                     startAggregate = endAggregate;
                                 }
@@ -261,13 +319,16 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         final CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = cachePerCompetitor.get(competitor, /* waitForLatest */ false);
         final CrossTrackErrorSumAndNumberOfFixes lastCacheEntryBeforeFrom;
         lastCacheEntryBeforeFrom = competitorCacheEntry == null ? null : competitorCacheEntry.getLastFixBefore(from);
-        double distanceInMeters;
+        double absoluteDistanceInMeters;
+        double signedDistanceInMeters;
         int count;
         if (lastCacheEntryBeforeFrom != null) {
-            distanceInMeters = lastCacheEntryBeforeFrom.getDistanceInMetersSumFromStart();
+            absoluteDistanceInMeters = lastCacheEntryBeforeFrom.getAbsoluteDistanceInMetersSumFromStart();
+            signedDistanceInMeters = lastCacheEntryBeforeFrom.getSignedDistanceInMetersSumFromStart();
             count = lastCacheEntryBeforeFrom.getFixCountFromStart();
         } else {
-            distanceInMeters = 0;
+            absoluteDistanceInMeters = 0;
+            signedDistanceInMeters = 0;
             count = 0;
         }
         GPSFixTrack<Competitor, GPSFixMoving> track = owner.getTrack(competitor);
@@ -298,12 +359,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                     if (currentLeg != null && markPassingAtLegStart != null
                             && fix.getTimePoint().compareTo(markPassingAtLegStart.getTimePoint()) >= 0) {
                         TrackedLeg trackedLeg = owner.getTrackedLeg(currentLeg);
-                        Distance xte = owner.getTrackedLeg(trackedLeg.getLeg()).getCrossTrackError(fix.getPosition(),
-                                fix.getTimePoint());
+                        Distance xte = owner.getTrackedLeg(trackedLeg.getLeg()).getSignedCrossTrackError(fix.getPosition(), fix.getTimePoint());
                         if (xte != null) {
-                            distanceInMeters += xte.getMeters();
+                            signedDistanceInMeters += xte.getMeters();
+                            absoluteDistanceInMeters += Math.abs(xte.getMeters());
                             count++;
-                            CrossTrackErrorSumAndNumberOfFixes newCacheEntry = new CrossTrackErrorSumAndNumberOfFixes(fix.getTimePoint(), distanceInMeters, count);
+                            CrossTrackErrorSumAndNumberOfFixes newCacheEntry = new CrossTrackErrorSumAndNumberOfFixes(fix.getTimePoint(), absoluteDistanceInMeters,
+                                    signedDistanceInMeters, count);
                             result.add(newCacheEntry);
                         }
                     }
@@ -385,6 +447,27 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         }
     }
     
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        invalidate();
+    }
+
+    /**
+     * Invalidates all cache contents for all competitors from the beginning of time
+     */
+    private void invalidate() {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
+            cachePerCompetitor.triggerUpdate(competitor, null /* meaning: from the beginning of time */);
+        }
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        invalidate();
+    }
+
     @Override
     public String toString() {
         return "CrossTrackErrorCache for competitors "+cachePerCompetitor.keySet();

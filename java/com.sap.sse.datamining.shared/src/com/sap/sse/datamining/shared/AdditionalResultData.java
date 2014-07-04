@@ -1,0 +1,19 @@
+package com.sap.sse.datamining.shared;
+
+import java.io.Serializable;
+
+public interface AdditionalResultData extends Serializable {
+
+    public int getRetrievedDataAmount();
+
+    public int getFilteredDataAmount();
+
+    public double getCalculationTimeInSeconds();
+
+    public String getResultSignifier();
+
+    public Unit getUnit();
+
+    public int getValueDecimals();
+
+}

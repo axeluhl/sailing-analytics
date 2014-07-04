@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sse.common.Util;
 
 /**
  * Igtimi fixes come as isolated single fixes from separate sensors, and even if they are attached to the same device,
@@ -37,6 +38,8 @@ import com.sap.sailing.domain.tracking.Wind;
  *
  */
 public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
+    private static final Logger logger = Logger.getLogger(IgtimiFixTrackTest.class.getName());
+    
     @Test
     public void testFetchFixesIntoTracks() throws ParseException, ClientProtocolException, IllegalStateException, IOException, org.json.simple.parser.ParseException {
         setUp();
@@ -49,7 +52,9 @@ public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
         for (DataAccessWindow daw : daws) {
             deviceSerialNumbers.add(daw.getDeviceSerialNumber());
         }
+        logger.info("Retrieving resource data as tracks...");
         Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getResourceDataAsTracks(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
+        logger.info("Successfully retrieved resource data as tracks");
         assertFalse(data.isEmpty());
         Map<Type, DynamicTrack<Fix>> windSensorMap = data.get("DD-EE-AAHG");
         assertNotNull(windSensorMap);

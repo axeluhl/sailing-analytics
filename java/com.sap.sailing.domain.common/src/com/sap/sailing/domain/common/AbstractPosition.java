@@ -58,7 +58,13 @@ public class AbstractPosition implements Position {
 
     @Override
     public Distance getDistance(Position p) {
-        return new CentralAngleDistance(getCentralAngleRad(p));
+        final Distance result;
+        if (p == this || this.equals(p)) {
+            result = Distance.NULL;
+        } else {
+            result = new CentralAngleDistance(getCentralAngleRad(p));
+        }
+        return result;
     }
 
     @Override

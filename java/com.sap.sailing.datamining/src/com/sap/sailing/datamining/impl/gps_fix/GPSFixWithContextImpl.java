@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.impl.gps_fix;
 
 import com.sap.sailing.datamining.Clusters.WindStrength;
-import com.sap.sailing.datamining.data.GPSFixContext;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.WindStrengthCluster;
+import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -18,16 +18,28 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWithContext {
     private static final long serialVersionUID = -5551381302809417831L;
 
-    private GPSFixContext context;
+    private HasGPSFixContext context;
     private Wind wind;
 
     private boolean windHasBeenInitialized;
 
-    public GPSFixWithContextImpl(GPSFixMoving gpsFix, GPSFixContext context) {
+    public GPSFixWithContextImpl(GPSFixMoving gpsFix, HasGPSFixContext context) {
         super(copyPosition(gpsFix), copyTimePoint(gpsFix), copySpeed(gpsFix));
         this.context = context;
         
         windHasBeenInitialized= false;
+    }
+
+    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
+        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
+    }
+
+    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
+        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
+    }
+
+    private static Position copyPosition(GPSFixMoving gpsFix) {
+        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
     }
 
     @Override
@@ -101,18 +113,6 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         }
         
         return wind;
-    }
-
-    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
-        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
-    }
-
-    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
-        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
-    }
-
-    private static Position copyPosition(GPSFixMoving gpsFix) {
-        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
     }
 
 }

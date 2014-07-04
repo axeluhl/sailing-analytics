@@ -213,11 +213,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             throw ex;
         }
         replicatingFromMaster = master;
-        logger.info("Registered replica with master");
+        logger.info("Registered replica with master.");
         QueueingConsumer consumer = null;
         // logging exception here because it will not propagate
         // thru the client with all details
         try {
+            logger.info("Connecting to message queue " + master);
             consumer = master.getConsumer();
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "ERROR", ex);

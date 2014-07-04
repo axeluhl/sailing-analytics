@@ -6,37 +6,43 @@ package com.sap.sailing.gwt.ui.raceboard;
  *
  */
 public class RaceBoardViewConfiguration {
-    private boolean showLeaderboard; 
-    private boolean showWindChart; 
-    private boolean showCompetitorsChart;
-    private String activeCompetitorsFilterSetName;
-    private boolean canReplayDuringLiveRaces;
+    private final boolean showLeaderboard; 
+    private final boolean showWindChart; 
+    private final boolean showCompetitorsChart;
+    private final String activeCompetitorsFilterSetName;
+    private final boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
+    private final boolean showViewStreamlets;
+    private boolean showNavigationPanel;
     
-	public static final String PARAM_VIEW_MODE = "viewMode";
+    public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
+    public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
+    public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
 
     public RaceBoardViewConfiguration() {
-        showLeaderboard = true;
-        showWindChart = false;
-        showCompetitorsChart = false;
-        autoSelectMedia = false;
+        this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
+                /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false,
+        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, /* showNavigationPanel */true);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean canReplayDuringLiveRaces,
+            boolean autoSelectMedia, boolean showNavigationPanel) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
+        this.showViewStreamlets = showViewStreamlets;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
-		this.autoSelectMedia = autoSelectMedia;
+        this.autoSelectMedia = autoSelectMedia;
+        this.showNavigationPanel = showNavigationPanel;
     }
 
     public boolean isShowLeaderboard() {
@@ -45,6 +51,10 @@ public class RaceBoardViewConfiguration {
 
     public boolean isShowWindChart() {
         return showWindChart;
+    }
+
+    public boolean isShowViewStreamlets() {
+        return showViewStreamlets;
     }
 
     public boolean isShowCompetitorsChart() {
@@ -62,5 +72,9 @@ public class RaceBoardViewConfiguration {
     public boolean isAutoSelectMedia() {
 		return autoSelectMedia;
 	}
+
+    public boolean isShowNavigationPanel() {
+        return showNavigationPanel;
+    }
 
 }

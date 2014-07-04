@@ -6,18 +6,19 @@ import umontreal.iro.lecuyer.randvar.GeometricGen;
 import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.rng.RandomStream;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sse.common.Util;
 
 public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
@@ -48,11 +49,11 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     @Override
-    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+    public void generate(TimePoint start, TimePoint end, Duration step) {
         generate(start, end, step, windParameters.baseWindSpeed, windParameters.baseWindBearing);
     }
 
-    protected void generate(TimePoint start, TimePoint end, TimePoint step, double defaultSpeed, double defaultBearing) {
+    protected void generate(TimePoint start, TimePoint end, Duration step, double defaultSpeed, double defaultBearing) {
         super.generate(start, end, step);
         // TODO Check the defaults
         setDefaultWindSpeed(defaultSpeed);
@@ -67,8 +68,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
             return;
         }
 
-        int nrow = positions.length;
-        int ncol = positions[0].length;
+        int nrow = this.boundary.getResY() + 2*this.boundary.getBorderY();
+        int ncol = this.boundary.getResX() + 2*this.boundary.getBorderX();
 
         timeUnits = nrow + defaultTimeUnits;
         if (startTime != null && endTime != null) {
@@ -107,7 +108,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         int blastSize = (int) Math.min(getBlastSize(), windParameters.maxBlastSize);
         logger.fine("Blast Size:" + blastSize);
         int nrow = timeUnits;
-        int ncol = positions[0].length;
+        int ncol = this.boundary.getResX() + 2*this.boundary.getBorderX();
         int hSpanStart = Math.max(0, colIndex - blastSize / 2);
         int hSpanEnd = Math.min(colIndex + blastSize - blastSize / 2, ncol - 1);
         int vSpan = Math.min(rowIndex + blastSize, nrow - 1);
@@ -182,10 +183,10 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {
         Position p = timedPosition.getPosition();
-        Pair<Integer, Integer> positionIndex = getPositionIndex(p);
+        Util.Pair<Integer, Integer> positionIndex = getPositionIndex(p);
         if (positionIndex != null) {
-            int rowIndex = positionIndex.getA();
-            int colIndex = positionIndex.getB();
+            int rowIndex = positionIndex.getA() + this.boundary.getBorderY();
+            int colIndex = positionIndex.getB() + this.boundary.getBorderX();
             int timeIndex = 0;
             if (timedPosition.getTimePoint() != null) {
                 timeIndex = getTimeIndex(timedPosition.getTimePoint());

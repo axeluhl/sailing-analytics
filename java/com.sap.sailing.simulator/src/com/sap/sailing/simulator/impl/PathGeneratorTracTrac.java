@@ -20,9 +20,10 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -41,7 +42,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
     private RacingEventServiceImpl service = null;
     private TracTracAdapterFactory tracTracAdapterFactory;
-    private RacesHandle raceHandle = null;
+    private RaceHandle raceHandle = null;
     private URL raceURL = null;
     private URI liveURI = null;
     private URI storedURI = null;
@@ -53,7 +54,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     public PathGeneratorTracTrac(SimulationParameters parameters) {
 
         this.parameters = parameters;
-        this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE);
+        this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, null);
         this.tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
 
         this.legIndex = 0;

@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 

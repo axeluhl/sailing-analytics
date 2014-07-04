@@ -19,6 +19,14 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 
 public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Serializable {
     private static final long serialVersionUID = 4752330236765192592L;
@@ -100,6 +108,46 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
 
     @Override
     public void visit(RaceLogWindFixEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(DeviceCompetitorMappingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(DeviceMarkMappingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(DenoteForTrackingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(StartTrackingEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RevokeEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RegisterCompetitorEvent event) {
+        notifyOnAdd(event);
+    }
+    
+    @Override
+    public void visit(DefineMarkEvent event) {
+        notifyOnAdd(event);
+    }
+    
+    @Override
+    public void visit(CloseOpenEndedDeviceMappingEvent event) {
         notifyOnAdd(event);
     }
 }

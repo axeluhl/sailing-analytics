@@ -6,12 +6,12 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
@@ -19,6 +19,7 @@ import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.leaderboardedit.LeaderboardEditingPage;
 import com.sap.sailing.selenium.pages.leaderboardedit.LeaderboardTable;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.Util;
 
 public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String LEADERBOARD = "BMW Cup - J80";
@@ -70,7 +71,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         tracTracEvents.startTrackingForRace(trackableRace);
         
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(trackedRace);
+        trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(trackedRace);
     }
     

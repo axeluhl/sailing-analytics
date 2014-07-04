@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorCo
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class DeviceConfigurationDetailComposite extends Composite {
     
@@ -39,8 +39,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration);
     }
     
-    private static List<String> suggestedCourseAreaNames = Arrays.asList("Alpha", "Bravo", "Charly", "Delta", 
-            "Foxtrott", "Stadium", "Offshore");
     private static List<String> suggestedCourseNames = Arrays.asList("Upwind", "Downwind");
     
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -147,7 +145,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         overwriteRegattaConfigurationBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                markAsDrity(true);
+                markAsDirty(true);
                 editButton.setEnabled(event.getValue());
             }
         });
@@ -161,7 +159,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                     @Override
                     public void ok(RegattaConfigurationDTO newConfiguration) {
                         currentRegattaConfiguration = newConfiguration;
-                        markAsDrity(true);
+                        markAsDirty(true);
                     }
 
                     @Override
@@ -208,7 +206,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
-        allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(), suggestedCourseAreaNames);
+        allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(),
+                SuggestedCourseAreaNames.suggestedCourseAreaNames);
         allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
                 
@@ -244,7 +243,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         contentPanel.clear();
     }
     
-    private void markAsDrity(boolean dirty) {
+    private void markAsDirty(boolean dirty) {
         if (dirty && !(captionPanel.getTitle() == stringMessages.configuration())) {
             captionPanel.setCaptionText(stringMessages.configuration() + "* (CHANGED)");
         } else {
@@ -284,7 +283,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 new AsyncCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
-                markAsDrity(false);
+                markAsDirty(false);
             }
             
             @Override
@@ -297,14 +296,14 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private KeyUpHandler dirtyMarker = new KeyUpHandler() {
         @Override
         public void onKeyUp(KeyUpEvent event) {
-            markAsDrity(true);
+            markAsDirty(true);
         }
     };
     
     private ValueChangeHandler<List<String>> dirtyValueMarker = new ValueChangeHandler<List<String>>() {
         @Override
         public void onValueChange(ValueChangeEvent<List<String>> event) {
-            markAsDrity(true);
+            markAsDirty(true);
         }
     };
 

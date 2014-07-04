@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sse.common.Named;
 
 /**
  * Multiple devices may concurrently post to a single {@link RaceLog}. In this case it is important to understand

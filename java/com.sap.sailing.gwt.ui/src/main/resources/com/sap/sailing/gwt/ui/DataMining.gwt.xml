@@ -9,19 +9,32 @@
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  	<inherits name='com.google.gwt.maps.Maps' />
+	
+  	<!--  Bootstrap API -->
+	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
+	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
+  	
 	<!-- Other module inherits -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
     <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
-	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
+  	<inherits name="com.sap.sse.SSECommon" />
+    <inherits name="com.sap.sse.datamining.DataMiningDomain" />
+  	<inherits name="com.sap.sailing.domain.SailingDomain" />
+    <inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 
-	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
+	<entry-point class="com.sap.sailing.gwt.ui.datamining.client.DataMiningEntryPoint" />
 	
 	<!-- Specify the paths for translatable code -->
-	<extend-property name="locale" values="de" />
+<extend-property name="locale" values="de"/>
+  	<extend-property name="locale" values="ru"/>
 
-	<source path="client" />
+  	<source path='common'/>
+  	<source path="client" />
 	<source path="datamining" />
+	<source path="simulator" />
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />

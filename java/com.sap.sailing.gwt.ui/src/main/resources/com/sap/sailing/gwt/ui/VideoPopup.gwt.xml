@@ -3,15 +3,18 @@
 <module>
 	<stylesheet src="../reset.css" />
 	<stylesheet src="../VideoPopup.css" />
+
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
-        <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
-  	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
+	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  	<inherits name="com.sap.sse.SSECommon" />
 
-	<entry-point
-		class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
-	<extend-property name="locale" values="de" />
+  	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	
+	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
+
+<extend-property name="locale" values="de"/>
+	
 	<source path='client/media/popup' />
 	<source path='client/shared/media' />
 	<source path='client/media/shared' />

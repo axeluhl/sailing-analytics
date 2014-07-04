@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import com.sap.sailing.gwt.ui.simulator.util.*;
+
+import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
 
 public class WindGridColorPaletteTest {
 

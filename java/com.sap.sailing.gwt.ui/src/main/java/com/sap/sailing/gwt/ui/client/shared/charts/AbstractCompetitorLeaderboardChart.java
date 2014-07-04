@@ -32,9 +32,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -42,11 +39,13 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
@@ -151,7 +150,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
-            case REGATTA_TOTAL_POINTS:
+            case REGATTA_TOTAL_POINTS_SUM:
                 chart.getYAxis().setTickInterval(5.0);
                 chart.getYAxis().setReversed(false);
                 break;
@@ -159,6 +158,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 break;
         }
         chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
+        chart.ensureDebugId("CompetitorChart");
         final String unit = DetailTypeFormatter.getUnit(getSelectedDetailType());
         final String label = unit.isEmpty() ? "" : "[" + unit + "]";
         chart.getYAxis().setAxisTitleText(label);
@@ -223,20 +223,20 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 sailingService, leaderboardName, /* date */ null, selectedDetailType);
         
         asyncActionsExecutor.execute(getLeaderboardDataEntriesAction, LODA_LEADERBOARD_CHART_DATA_CATEGORY,
-                new AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>>() {
+                new AsyncCallback<List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>>>() {
                     @Override
-                    public void onSuccess(List<Triple<String, List<CompetitorDTO>, List<Double>>> result) {
+                    public void onSuccess(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result) {
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         setWidget(chart);
                         raceColumnNames.clear();
                         
-                        switch(selectedDetailType) {
+                        switch (selectedDetailType) {
                         case OVERALL_RANK:
                         case REGATTA_RANK:
                             fillTotalRanksSeries(result, chartSeries);
                             break;
-                        case REGATTA_TOTAL_POINTS:
+                        case REGATTA_TOTAL_POINTS_SUM:
                             fillTotalPointsSeries(result, chartSeries);
                             break;
                         default:
@@ -259,7 +259,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 });
     }
 
-    private void fillTotalRanksSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
             for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
@@ -268,7 +268,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        for (Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if(hasValidValues(dataValues)) {
@@ -298,7 +298,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
-    private void fillTotalPointsSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
+    private void fillTotalPointsSeries(
+            List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result,
+            List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
         for (Series series : competitorSeries.values()) {
@@ -308,11 +310,10 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }
         int raceColumnNumber = 0;
         int maxCompetitorCount = 0;
-        Map<CompetitorDTO, Double> sumTotalPointsMap = new HashMap<CompetitorDTO, Double>();
-        for (Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
             List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
-            if(hasValidValues(dataValues)) {
+            if (hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
                 maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
@@ -320,18 +321,13 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                     if (isCompetitorVisible(competitor)) {
                         Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
-                        if(dataValue != null) {
+                        if (dataValue != null) {
                             Double sumTotalPoints = dataValue;
-                            if(sumTotalPointsMap.containsKey(competitor)) {
-                                sumTotalPoints += sumTotalPointsMap.get(competitor);
-                            } 
-                            sumTotalPointsMap.put(competitor, sumTotalPoints);
                             series.addPoint(raceColumnNumber, sumTotalPoints, /* redraw */ false, /* shift */ false, /* animation */ false);
-                            if(sumTotalPoints > maxTotalPoints) {
+                            if (sumTotalPoints > maxTotalPoints) {
                                 maxTotalPoints = sumTotalPoints;
                             }
                         }
-                        
                         unusedSeries.remove(series);
                         if (!chartSeries.contains(series)) {
                             chart.addSeries(series);

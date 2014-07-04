@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sse.datamining.shared.components.AggregatorType;
+import com.sap.sse.datamining.shared.components.GrouperType;
 
 public interface QueryDefinition extends Serializable {
 
-    public String getLocaleName();
+    public String getLocaleInfoName();
 
     public GrouperType getGrouperType();
 

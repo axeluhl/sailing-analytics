@@ -21,9 +21,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -34,7 +31,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sse.common.Util;
 
 @Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
@@ -42,10 +39,8 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private SailMasterConnector connector;
 
     @Before
-    public void connect() throws InterruptedException {
-        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300,
-                swissTimingPersistence, /* canSendRequests */true);
+    public void connect() throws InterruptedException, ParseException {
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", "R2", "Women 470 Race 2", null /* boat class*/);
     }
     
     @After
@@ -67,17 +62,14 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetRaces() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        assertEquals(1, Util.size(races));
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         assertEquals("Women 470 Race 2", race.getDescription());
         assertEquals("W4702", race.getRaceID());
     }
 
     @Test
     public void testGetCourse() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         assertNotNull(course);
         Iterable<Mark> marks = course.getMarks();
@@ -86,8 +78,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetStartList() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         StartList startList = connector.getStartList(race.getRaceID());
         Iterable<Competitor> competitors = startList.getCompetitors();
         assertEquals(race.getRaceID(), startList.getRaceID());
@@ -96,24 +87,20 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
-        TimePoint startTime = connector.getStartTime(race.getRaceID());
+        TimePoint startTime = connector.getStartTime();
         assertNotNull(startTime);
     }
     
     @Test
     public void testGetClockAtMark() throws UnknownHostException, IOException, InterruptedException, ParseException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
-        List<Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
+        Race race = connector.getRace();
+        List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
         assertFalse(clockAtMark.isEmpty());
     }
     
     @Test
     public void testGetCurrentBoatSpeed() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             Speed currentBoatSpeed = connector.getCurrentBoatSpeed(race.getRaceID(), competitor.getBoatID());
             assertNotNull(currentBoatSpeed);
@@ -122,8 +109,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Iterator<Competitor> competitorIter = connector.getStartList(race.getRaceID()).getCompetitors().iterator();
         competitorIter.next();
         competitorIter.next();
@@ -142,8 +128,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetDistanceToMark() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             for (int i = 0; i < Util.size(course.getMarks()); i++) {
@@ -158,15 +143,14 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     
     @Test
     public void testGetMarkPassingTimes() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
+        Race race = connector.getRace();
         Course course = connector.getCourse(race.getRaceID());
         int numberOfMarks = Util.size(course.getMarks());
         Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();
         for (Competitor competitor : competitors) {
-            Map<Integer, Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
+            Map<Integer, com.sap.sse.common.Util.Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
             for (Integer markIndex : markPassingTimes.keySet()) {
-                Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
+                com.sap.sse.common.Util.Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
                 for (int i=0; i<numberOfMarks; i++) {
                     if (i != markIndex && markPassingTimes.containsKey(numberOfMarks)) {
                         if (markPassingTimes.get(i).getB() != null && rankAndTime.getB() != null) {
@@ -189,12 +173,12 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
-            List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            List<com.sap.sse.common.Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
     }
 
     @Override
     public void receivedClockAtMark(String raceID,
-            List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+            List<com.sap.sse.common.Util.Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
     }
 
     @Override
@@ -211,5 +195,10 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Override
     public void storedDataProgress(String raceID, double progress) {
+    }
+
+    @Override
+    public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees,
+            double windSpeedInKnots) {
     }
 }

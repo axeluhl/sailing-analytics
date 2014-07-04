@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
@@ -70,7 +70,7 @@ public class LeaderboardSettingsFactory {
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                         /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
-                        /*showAddedScores*/ false);
+                        /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -133,7 +133,7 @@ public class LeaderboardSettingsFactory {
                 namesOfRacesToShow, numberOfLastRacesToShow,
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
                 /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy,
-                /*showAddedScores*/ false);
+                /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false);
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
@@ -154,7 +154,8 @@ public class LeaderboardSettingsFactory {
 
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
-                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false);
+                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
+                /*showOverallRacesCompleted*/ false);
     }
     
     private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {

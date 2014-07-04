@@ -11,30 +11,32 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.PositionWithConfidence;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.ScalablePosition;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
+import com.sap.sailing.domain.common.confidence.HasConfidence;
+import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.confidence.impl.ScalableDoubleWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
-import com.sap.sailing.domain.confidence.ScalableValue;
-import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sailing.domain.confidence.impl.ScalableDoubleWithConfidence;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.tracking.impl.ScalableWind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
@@ -338,6 +340,20 @@ public class ConfidenceTest {
         HasConfidence<ScalablePosition, Position, TimePoint> average = averager.getAverage(list, null);
         assertEquals(0, average.getObject().getLatDeg(), 0.1);
         assertEquals(0, average.getObject().getLngDeg(), 0.1);
+    }
+    
+    @Test
+    public void testPositionBasedConfidence() {
+        // at 1000 meter distance, confidence should be .5; at distance 0, confidence shall be 1.
+        Weigher<Position> weigher = ConfidenceFactory.INSTANCE.createHyperbolicDistanceWeigher(new MeterDistance(1000));
+        Position p = new DegreePosition(12, 13);
+        assertEquals(1., weigher.getConfidence(p, p), 0.00000001);
+        Position p2 = p.translateGreatCircle(new DegreeBearingImpl(123), new MeterDistance(1000));
+        assertEquals(.5, weigher.getConfidence(p, p2), 0.00000001);
+        Position p3 = p.translateGreatCircle(new DegreeBearingImpl(123), new NauticalMileDistance(1000));
+        final double threshold = 0.001;
+        assertTrue("Expected confidence in 1000nm distance to be less than "+threshold+" but was "+weigher.getConfidence(p, p3),
+                weigher.getConfidence(p, p3) < threshold);
     }
     
     @Test

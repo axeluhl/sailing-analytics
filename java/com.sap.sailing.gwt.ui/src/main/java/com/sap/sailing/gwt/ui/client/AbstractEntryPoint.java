@@ -7,26 +7,18 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sse.gwt.ui.EntryPointUtils;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.async.PendingAjaxCallMarker;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.shared.DebugConstants;
 
-public abstract class AbstractEntryPoint extends EntryPointUtils implements EntryPoint, ErrorReporter, WindowSizeDetector {
-    /**
-     * <p>The attribute which is used for the debug id.</p>
-     */
-    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id"; //$NON-NLS-1$
-    
-    /**
-     * <p>The prefix which is used for the debug id.</p>
-     */
-    public static final String DEBUG_ID_PREFIX = ""; //$NON-NLS-1$
-    
+public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
@@ -34,21 +26,6 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
     protected UserAgentDetails userAgent;
     protected Label persistentAlertLabel;
     
-    /**
-     * Create a remote service proxy to talk to the server-side sailing service.
-     */
-    protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
-
-    /**
-     * Create a remote service proxy to talk to the server-side media service.
-     */
-    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-
-    /**
-     * Create a remote service proxy to talk to the server-side user management service.
-     */
-    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
-
     /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
@@ -63,8 +40,8 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
             TextResource script = bundle.ajaxSemaphoreJS();
             JavaScriptInjector.inject(script.getText());
             
-            DebugInfo.setDebugIdAttribute(DEBUG_ID_ATTRIBUTE, false);
-            DebugInfo.setDebugIdPrefix(DEBUG_ID_PREFIX);
+            DebugInfo.setDebugIdAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, false);
+            DebugInfo.setDebugIdPrefix(DebugConstants.DEBUG_ID_PREFIX);
         }
         doOnModuleLoad();
         if (DebugInfo.isDebugIdEnabled()) {
@@ -78,17 +55,8 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
-        
-        ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
-        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
-        ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
-        String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
-        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
-        userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
-    
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);

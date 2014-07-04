@@ -22,14 +22,13 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.AbstractTimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.SerializableComparator;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -42,6 +41,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A virtual wind track that computes and caches the wind bearing based on the boat tracks recorded in the tracked race
@@ -55,8 +56,8 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  * 
  * The estimation is integrated into the {@link WindTrackImpl} concepts by redefining the {@link #getInternalRawFixes()}
  * method such that it returns an {@link EstimatedWindFixesAsNavigableSet} object. It computes its values by asking back
- * to {@link #getEstimatedWindDirection(Position, TimePoint)} which first performs a cache look-up. In case of a cache
- * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint)}.
+ * to {@link #getEstimatedWindDirection(TimePoint)} which first performs a cache look-up. In case of a cache
+ * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(TimePoint)}.
  * <p>
  * 
  * Caching is done using the base class's {@link TrackImpl#fixes} field which is made accessible through
@@ -82,14 +83,22 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     private final NavigableSet<TimePoint> timePointsWithCachedNullResult;
     
-    /**
-     * Access to this cache is guarded by {@link #cacheLock}.
-     */
     private final NavigableSet<WindWithConfidence<TimePoint>> cache;
     
+    /**
+     * Access to {@link #cache} and {@link #timePointsWithCachedNullResult} and
+     * {@link #timePointsWithCachedNullResultFastContains} is guarded by this lock.
+     */
     private final NamedReentrantReadWriteLock cacheLock;
     
-    private final Weigher<TimePoint> weigher;
+    /**
+     * Access to {@link #scheduledRefreshInterval} is guarded by this lock. In particular, when a client
+     * holds this lock the client can be sure that {@link InvalidationInterval#isSet()} implies that a
+     * cache update is scheduled or already running.
+     */
+    private final NamedReentrantReadWriteLock scheduledRefreshIntervalLock;
+    
+    private final Weigher<Pair<Position, TimePoint>> weigher;
     
     /**
      * A copy of the {@link #timePointsWithCachedNullResult} contents offering fast contains checks.
@@ -106,7 +115,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     private static class InvalidationInterval implements Serializable {
         private static final long serialVersionUID = -6406690520919193690L;
+        /**
+         * Either both {@link #start} and {@link #end} are <code>null</code>, or both are non-<code>null</code>
+         */
         private WindWithConfidence<TimePoint> start;
+        /**
+         * Either both {@link #start} and {@link #end} are <code>null</code>, or both are non-<code>null</code>
+         */
         private TimePoint end;
         public InvalidationInterval() {
             super();
@@ -117,18 +132,38 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         public TimePoint getEnd() {
             return end;
         }
-        public synchronized void clear() {
+        public void clear() {
             start = null;
             end = null;
         }
-        public synchronized boolean isSet() {
+        public boolean isSet() {
             return start != null && end != null;
         }
-        public synchronized void set(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+        
+        /**
+         * Checks whether the interval starting at {@link #start} and ending at {@link #end} is fully contained in this
+         * interval. Neither of the two arguments is allowed to be <code>null</code>. The interval is contained in this
+         * interval if this interval {@link #isSet() is set} and this interval's {@link #getStart() start} is at or
+         * before <code>start</code> and this interval's {@link #getEnd() end} is at or after <code>end</code>.
+         */
+        public boolean contains(TimePoint start, TimePoint end) {
+            return isSet() && !getStart().getObject().getTimePoint().after(start) && !end.after(getEnd());
+        }
+        /**
+         * Neither of the two arguments is allowed to be <code>null</code>.
+         */
+        public void set(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+            assert startOfInvalidation != null;
+            assert endOfInvalidation != null;
             this.start = startOfInvalidation;
             this.end = endOfInvalidation;
         }
-        public synchronized void extend(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+        /**
+         * Neither of the two arguments is allowed to be <code>null</code>.
+         */
+        public void extend(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+            assert startOfInvalidation != null;
+            assert endOfInvalidation != null;
             if (startOfInvalidation.getObject().getTimePoint().compareTo(start.getObject().getTimePoint()) < 0) {
                 this.start = startOfInvalidation;
             }
@@ -136,11 +171,54 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 end = endOfInvalidation;
             }
         }
+        
+        /**
+         * Leaves this object unchanged. Returns a new {@link InvalidationInterval} object. If the interval defined by
+         * <code>start</code> and <code>end</code> does not exceed this interval, the resulting interval will have
+         * {@link #isSet()}<code>==false</code>. Otherwise, the resulting interval will contain all time ranges from
+         * <code>start</code> to <code>end</code> (inclusive) that are not in this interval. In particular, if
+         * <code>start</code>..<code>end</code> exceeds this interval on both ends, the resulting interval will start at
+         * <code>start</code> and end at <code>end</code>. If this interval has {@link #isSet()}<code>==false</code>,
+         * the resulting interval will range from <code>start</code> to <code>end</code>.
+         * 
+         * @param start must not be <code>null</code>
+         * @param end must not be <code>null</code>
+         */
+        public InvalidationInterval subtract(WindWithConfidence<TimePoint> start, TimePoint end) {
+            assert start != null;
+            assert end != null;
+            final InvalidationInterval result = new InvalidationInterval();
+            if (!isSet()) {
+                result.set(start, end);
+            } else {
+                final WindWithConfidence<TimePoint> newStart;
+                final TimePoint startTimePoint = getStart().getObject().getTimePoint();
+                if (start.getObject().getTimePoint().before(startTimePoint)) {
+                    newStart = start;
+                } else {
+                    // don't go beyond the end of time, avoiding overflow
+                    newStart = getDummyFixWithConfidence(getEnd().asMillis()==Long.MAX_VALUE?getEnd():getEnd().plus(1));
+                }
+                final TimePoint newEnd;
+                if (end.after(getEnd())) {
+                    newEnd = end;
+                } else {
+                    // avoid underflow
+                    newEnd = startTimePoint.asMillis()==0?startTimePoint:startTimePoint.minus(1);
+                }
+                if (!newStart.getObject().getTimePoint().after(newEnd)) {
+                    result.set(newStart, newEnd);
+                } // else, the resulting interval remains unset
+            }
+            return result;
+        }
     }
     
     /**
-     * {@link #scheduleCacheRefresh(WindWithConfidence, TimePoint)} synchronizes on this object before changing it
-     * and when actually invalidating the cache.
+     * {@link #scheduleCacheRefresh(WindWithConfidence, TimePoint)} synchronizes on this object before changing it and
+     * when actually invalidating the cache. When a querying thread holds at least the read lock of {@link #cacheLock}
+     * and the refresh interval it {@link InvalidationInterval#isSet() is set}, an invalidation is currently running or
+     * has been scheduled.
      */
     private final InvalidationInterval scheduledRefreshInterval;
 
@@ -171,11 +249,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                         return o1.getObject().getTimePoint().compareTo(o2.getObject().getTimePoint());
                     }
                 });
-        cacheLock = new NamedReentrantReadWriteLock(TrackBasedEstimationWindTrackImpl.class.getSimpleName()+" for race "+
-                trackedRace.getRace().getName(), /* fair */ false);
+        cacheLock = new NamedReentrantReadWriteLock(TrackBasedEstimationWindTrackImpl.class.getSimpleName()
+                + " cacheLock for race " + trackedRace.getRace().getName(), /* fair */false);
+        scheduledRefreshIntervalLock = new NamedReentrantReadWriteLock(
+                TrackBasedEstimationWindTrackImpl.class.getSimpleName() + " scheduledRefreshIntervalLock for race "
+                        + trackedRace.getRace().getName(), /* fair */false);
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
-        weigher = ConfidenceFactory.INSTANCE
-                .createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
+        weigher = new PositionAndTimePointWeigher(
+        /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         trackedRace.addListener(this); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
@@ -183,9 +264,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
     
     /**
-     * Synchronizes serialization on this object to avoid the cache being updated while being written.
+     * Uses the {@link #cacheLock} and {@link #scheduledRefreshIntervalLock} to make serialization on this object thread
+     * safe by avoiding the cache being updated while being written.
      */
-    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        LockUtil.lockForRead(scheduledRefreshIntervalLock);
         LockUtil.lockForRead(cacheLock);
         lockForRead();
         try {
@@ -193,6 +276,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         } finally {
             unlockAfterRead();
             LockUtil.unlockAfterRead(cacheLock);
+            LockUtil.unlockAfterRead(scheduledRefreshIntervalLock);
         }
     }
     
@@ -227,29 +311,22 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return cache;
     }
     
+    /**
+     * The caller must <em>not</em> hold the read lock of {@link #cacheLock} when calling this method (unless the caller
+     * also holds the corresponding write lock) because this method will acquire the corresponding write lock, and
+     * upgrading from a read lock to a write lock is not possible.
+     */
     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
         // can't use lockForWrite() here because caching can happen while holding the read lock, and the lock can't be
         // upgraded. But lockForRead() and synchronization will do the job because all invalidations lock the write lock,
         // and all contains() checks and get() calls use synchronization too.
         LockUtil.lockForWrite(cacheLock);
         try {
-            // synchronization necessary to protect writeObject from ConcurrentModificationException
-            synchronized (this) {
-                if (fix == null) {
-                    synchronized (timePointsWithCachedNullResult) {
-                        timePointsWithCachedNullResult.add(timePoint);
-                    }
-                    synchronized (timePointsWithCachedNullResultFastContains) {
-                        timePointsWithCachedNullResultFastContains.add(timePoint);
-                    }
-                } else {
-                    LockUtil.lockForWrite(cacheLock);
-                    try {
-                        cache.add(fix);
-                    } finally {
-                        LockUtil.unlockAfterWrite(cacheLock);
-                    }
-                }
+            if (fix == null) {
+                timePointsWithCachedNullResult.add(timePoint);
+                timePointsWithCachedNullResultFastContains.add(timePoint);
+            } else {
+                cache.add(fix);
             }
         } finally {
             LockUtil.unlockAfterWrite(cacheLock);
@@ -263,19 +340,29 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * will not be massively delayed by having to re-calculate the estimation over and over again.
      */
     private void scheduleCacheRefresh(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
-        LockUtil.lockForWrite(cacheLock);
+        final boolean alreadyContained;
+        LockUtil.lockForRead(scheduledRefreshIntervalLock);
         try {
-            if (!scheduledRefreshInterval.isSet()) {
-                // according to the invariant this implies [1]==null
-                scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
-                startSchedulerForCacheRefresh();
-            } else {
-                // this means that an invalidation is already scheduled; as long as we're synchronized on scheduledInvalidationInterval
-                // we can safely extend the interval; the invalidation won't start before we release the lock
-                scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
-            }
+            alreadyContained = scheduledRefreshInterval.contains(startOfInvalidation.getObject().getTimePoint(), endOfInvalidation);
         } finally {
-            LockUtil.unlockAfterWrite(cacheLock);
+            LockUtil.unlockAfterRead(scheduledRefreshIntervalLock);
+        }
+        if (!alreadyContained) {
+            LockUtil.lockForWrite(scheduledRefreshIntervalLock);
+            try {
+                if (!scheduledRefreshInterval.isSet()) {
+                    // according to the invariant this implies [1]==null
+                    scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
+                    startSchedulerForCacheRefresh();
+                } else {
+                    // this means that an invalidation or incremental refresh is already scheduled; as long as we're
+                    // synchronized on scheduledInvalidationInterval we can safely extend the interval; the invalidation
+                    // won't start before we release the lock
+                    scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
+            }
         }
     }
     
@@ -285,6 +372,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * running.
      */
     private void invalidateCache() {
+        LockUtil.lockForWrite(scheduledRefreshIntervalLock);
         LockUtil.lockForWrite(cacheLock);
         try {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
@@ -312,6 +400,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             scheduledRefreshInterval.clear();
         } finally {
             LockUtil.unlockAfterWrite(cacheLock);
+            LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
         }
     }
 
@@ -321,34 +410,40 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     private void refreshCacheIncrementally() {
         Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
         Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
+        final WindWithConfidence<TimePoint> refreshIntervalStart;
+        final TimePoint refreshIntervalEnd;
+        LockUtil.lockForRead(scheduledRefreshIntervalLock);
         LockUtil.lockForRead(cacheLock);
         try {
-            Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
-                    : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
-            Iterator<TimePoint> nullIter = (scheduledRefreshInterval.getStart() == null ? timePointsWithCachedNullResult
-                    : timePointsWithCachedNullResult.tailSet(scheduledRefreshInterval.getStart().getObject().getTimePoint(), /* inclusive */
+            refreshIntervalStart = scheduledRefreshInterval.getStart();
+            Iterator<WindWithConfidence<TimePoint>> iter = (refreshIntervalStart == null ? getCachedFixes()
+                    : getCachedFixes().tailSet(refreshIntervalStart, /* inclusive */true)).iterator();
+            Iterator<TimePoint> nullIter = (refreshIntervalStart == null ? timePointsWithCachedNullResult
+                    : timePointsWithCachedNullResult.tailSet(refreshIntervalStart.getObject().getTimePoint(), /* inclusive */
                     true)).iterator();
             WindWithConfidence<TimePoint> nextFixToRecalculate = null;
+            refreshIntervalEnd = scheduledRefreshInterval.getEnd();
             while (iter.hasNext() &&
-                    ((nextFixToRecalculate = iter.next()).getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
-                    scheduledRefreshInterval.getEnd() == null) {
+                    ((nextFixToRecalculate = iter.next()).getObject().getTimePoint().compareTo(refreshIntervalEnd) < 0) ||
+                    refreshIntervalEnd == null) {
                 windFixesToRecalculate.add(nextFixToRecalculate);
             }
             TimePoint nextNullResultToRecalculate = null;
             while (nullIter.hasNext() &&
-                    ((nextNullResultToRecalculate = nullIter.next()).compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
-                    scheduledRefreshInterval.getEnd() == null) {
+                    ((nextNullResultToRecalculate = nullIter.next()).compareTo(refreshIntervalEnd) < 0) ||
+                    refreshIntervalEnd == null) {
                 cachedNullResultsToRecalculate.add(nextNullResultToRecalculate);
             }
         } finally {
             LockUtil.unlockAfterRead(cacheLock);
+            LockUtil.unlockAfterRead(scheduledRefreshIntervalLock);
         }
         Set<TimePoint> nullRemovals = new HashSet<TimePoint>();
         Set<TimePoint> nullInsertions = new HashSet<TimePoint>();
         Map<TimePoint, WindWithConfidence<TimePoint>> cacheInsertions = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         for (TimePoint cachedNullResultToRecalculate : cachedNullResultsToRecalculate) {
             WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                    .getEstimatedWindDirectionWithConfidence(/* position */ null, cachedNullResultToRecalculate);
+                    .getEstimatedWindDirectionWithConfidence(cachedNullResultToRecalculate);
             if (replacementFix != null) {
                 nullRemovals.add(cachedNullResultToRecalculate);
                 cacheInsertions.put(cachedNullResultToRecalculate, replacementFix);
@@ -356,9 +451,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
         for (WindWithConfidence<TimePoint> windFixToRecalculate : windFixesToRecalculate) {
             TimePoint timePoint = windFixToRecalculate.getObject().getTimePoint();
-            Position position = windFixToRecalculate.getObject().getPosition();
             WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                    .getEstimatedWindDirectionWithConfidence(position, timePoint);
+                    .getEstimatedWindDirectionWithConfidence(timePoint);
             if (replacementFix == null) {
                 nullInsertions.add(timePoint);
             } else {
@@ -381,9 +475,21 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             for (Map.Entry<TimePoint, WindWithConfidence<TimePoint>> cacheInsertion : cacheInsertions.entrySet()) {
                 cache(cacheInsertion.getKey(), cacheInsertion.getValue());
             }
-            scheduledRefreshInterval.clear();
         } finally {
             LockUtil.unlockAfterWrite(cacheLock);
+        }
+        LockUtil.lockForWrite(scheduledRefreshIntervalLock);
+        try {
+            // now remove the interval for which the cache was refreshed; note that in between the interval may have been extended;
+            // for the extended part of the interval that hasn't been refreshed during this run, a new refresh needs to be
+            // requested
+            InvalidationInterval remainingRefreshInterval = scheduledRefreshInterval.subtract(refreshIntervalStart, refreshIntervalEnd);
+            scheduledRefreshInterval.clear();
+            if (remainingRefreshInterval.isSet()) {
+                scheduleCacheRefresh(remainingRefreshInterval.getStart(), remainingRefreshInterval.getEnd());
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(scheduledRefreshIntervalLock);
         }
     }
 
@@ -423,10 +529,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     /**
      * Looks up wind data in the {@link #getCachedFixes() cache} and the {@link #getTimePointsWithCachedNullResult()
      * null store} first. Only if nothing is found for the time point requested, the
-     * {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint) wind estimation algorithm} is used to compute
+     * {@link TrackedRace#getEstimatedWindDirection(TimePoint) wind estimation algorithm} is used to compute
      * it. The result will then be added to the cache.
      */
-    private WindWithConfidence<TimePoint> getEstimatedWindDirection(Position p, TimePoint timePoint) {
+    private WindWithConfidence<TimePoint> getEstimatedWindDirection(TimePoint timePoint) {
         WindWithConfidence<TimePoint> cachedFix = null;
         WindWithConfidence<TimePoint> result = null;
         final boolean nullResultCacheContains;
@@ -443,7 +549,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
         if (!nullResultCacheContains) {
             if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {
-                result = getTrackedRace().getEstimatedWindDirectionWithConfidence(p, timePoint);
+                result = getTrackedRace().getEstimatedWindDirectionWithConfidence(timePoint);
                 cache(timePoint, result);
             } else {
                 result = cachedFix;
@@ -452,15 +558,18 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return result;
     }
 
-    private WindWithConfidence<TimePoint> getDummyFixWithConfidence(TimePoint timePoint) {
+    private static WindWithConfidence<TimePoint> getDummyFixWithConfidence(TimePoint timePoint) {
         return new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint, defaultSpeedWithBearing), 0,
                 timePoint, /* useSpeed */false);
     }
 
     private boolean nullResultCacheContains(TimePoint timePoint) {
         assertReadLock();
-        synchronized (timePointsWithCachedNullResultFastContains) {
+        LockUtil.lockForRead(cacheLock);
+        try {
             return timePointsWithCachedNullResultFastContains.contains(timePoint);
+        } finally {
+            LockUtil.unlockAfterRead(cacheLock);
         }
     }
 
@@ -569,11 +678,21 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        clearCache();
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        clearCache();
+    }
+
+    @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated mark position. Ask it:
-        Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+        Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
@@ -588,7 +707,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * result type suggests it.
      */
     @Override
-    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         lockForRead();
         try {
             TimePoint floorTimePoint = virtualInternalRawFixes.floorToResolution(at);
@@ -600,13 +719,15 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             } else {
                 timePoint = virtualInternalRawFixes.ceilingToResolution(at);
             }
-            WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(p, timePoint);
+            WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(timePoint);
             // reduce confidence depending on how far *at* is away from the time point of the fix obtained
-            double confidenceMultiplier = weigher.getConfidence(timePoint, at);
-            WindWithConfidenceImpl<Pair<Position, TimePoint>> result = preResult == null ? null
-                    : new WindWithConfidenceImpl<Pair<Position, TimePoint>>(preResult.getObject(), confidenceMultiplier
+            double confidenceMultiplier = preResult == null ? 0 : weigher.getConfidence(
+                    new Pair<Position, TimePoint>(preResult.getObject().getPosition(), timePoint),
+                    new Pair<Position, TimePoint>(p, at));
+            WindWithConfidenceImpl<Util.Pair<Position, TimePoint>> result = preResult == null ? null
+                    : new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(preResult.getObject(), confidenceMultiplier
                             * preResult.getConfidence(),
-                    /* relativeTo */new Pair<Position, TimePoint>(p, at), preResult.useSpeed());
+                    /* relativeTo */new Util.Pair<Position, TimePoint>(p, at), preResult.useSpeed());
             return result;
         } finally {
             unlockAfterRead();
@@ -626,7 +747,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     /**
      * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
-     * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
+     * {@link TrackedRace#getEstimatedWindDirection(TimePoint)}. If not constrained
      * by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting at
      * {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
      * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from}
@@ -658,12 +779,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
 
         protected Wind getWind(Position p, TimePoint timePoint) {
-            final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(p, timePoint);
+            final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(timePoint);
             return estimatedWindDirectionWithConfidence == null ? null : estimatedWindDirectionWithConfidence.getObject();
         }
         
-        protected WindWithConfidence<TimePoint> getWindWithConfidence(Position p, TimePoint timePoint) {
-            return getTrack().getEstimatedWindDirection(p, timePoint);
+        protected WindWithConfidence<TimePoint> getWindWithConfidence(TimePoint timePoint) {
+            return getTrack().getEstimatedWindDirection(timePoint);
         }
 
         @Override

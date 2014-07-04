@@ -35,8 +35,8 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
-import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class IgtimiAccountsPanel extends FlowPanel {
 

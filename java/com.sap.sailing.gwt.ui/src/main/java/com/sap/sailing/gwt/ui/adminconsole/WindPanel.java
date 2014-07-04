@@ -50,22 +50,23 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Displays a table of currently tracked races. The user can configure whether a race
@@ -75,7 +76,7 @@ import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower, RaceSelectionChangeListener {
+public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower, RaceSelectionChangeListener {
 
     private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
 
@@ -252,6 +253,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         VerticalPanel contentPanel = new VerticalPanel();
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
+        final CheckBox correctByDeclination = new CheckBox(stringMessages.declinationCheckbox());
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
         final HTML resultReport = new HTML();
         importButton.addClickHandler(new ClickHandler() {
@@ -265,7 +267,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 }
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
-                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
+                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(),
+                            correctByDeclination.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorImportingIgtimiWind(caught.getMessage()));
@@ -290,6 +293,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 }
             }
         });
+        contentPanel.add(correctByDeclination);
         contentPanel.add(importButton);
         contentPanel.add(resultReport);
         return igtimiWindImportRootPanel;
@@ -571,7 +575,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private void showWindFixesList(RegattaAndRaceIdentifier selectedRace, RaceDTO raceDTO) {
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
+        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames,
+                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {

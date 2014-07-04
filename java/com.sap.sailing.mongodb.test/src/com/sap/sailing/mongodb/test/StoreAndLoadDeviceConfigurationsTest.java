@@ -17,10 +17,10 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sse.common.Util;
 
 public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
 

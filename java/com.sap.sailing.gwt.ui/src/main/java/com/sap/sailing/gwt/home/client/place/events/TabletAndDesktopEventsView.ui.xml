@@ -1,0 +1,35 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.events"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+	<ui:style>
+	    .eventsoverviewnavigation {
+			font-size: 16px;
+  			font-size: 1rem;
+  			margin: 1.875em 0;
+		}
+		.eventsoverviewnavigation_button {
+  			text-transform: uppercase;
+  			margin-right: 0.625em;
+		}
+	</ui:style>
+ 
+   	<g:HTMLPanel>
+		<div class="{style.eventsoverviewnavigation}">
+		  <div class="{res.mainCss.grid}">
+		    <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
+		        <g:Anchor ui:field="recentEventsLink" text="Recent Events" styleName="{res.mainCss.button} {style.eventsoverviewnavigation_button}" />
+		        <g:Anchor ui:field="upcomingEventsLink" text="Upcoming Schedule" styleName="{res.mainCss.button} {res.mainCss.buttoninactive} {style.eventsoverviewnavigation_button}" />
+	        </div>
+		  </div>
+		</div>
+
+   	    <p:recent.EventsOverviewRecent ui:field='recentEventsWidget'/>
+   	    <p:upcoming.EventsOverviewUpcoming ui:field='upcomingEventsWidget'/>
+   	    	    	    
+   	    <s:socialfooter.SocialFooter ui:field='socialFooter'/>
+	</g:HTMLPanel>
+   		
+</ui:UiBinder>    

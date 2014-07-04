@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.RenamableImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
+import com.sap.sse.common.Util;
 
 public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
@@ -76,7 +76,8 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
         }
-        fleetsInAscendingOrder = new ArrayList<Fleet>(fleetsByName.values());
+        fleetsInAscendingOrder = new ArrayList<Fleet>();
+        Util.addAll(fleets, fleetsInAscendingOrder);
         Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         this.raceColumns = myRaceColumns;

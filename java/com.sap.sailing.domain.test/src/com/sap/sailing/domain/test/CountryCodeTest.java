@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sse.common.Util;
 
 public class CountryCodeTest {
     private static final int NUMBER_OF_COUNTRY_CODES = 259;

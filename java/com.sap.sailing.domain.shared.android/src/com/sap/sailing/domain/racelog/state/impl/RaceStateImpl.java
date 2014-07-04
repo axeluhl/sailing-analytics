@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;

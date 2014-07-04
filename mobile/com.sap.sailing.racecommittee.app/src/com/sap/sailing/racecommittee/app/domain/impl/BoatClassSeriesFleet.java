@@ -4,8 +4,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sse.common.Util;
 
 public class BoatClassSeriesFleet {
 

@@ -9,16 +9,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AntHrm;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
+import com.sap.sse.common.Util;
 
 public class FixFactoryTest {
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+
     private static final String demoJson = "{\n"+
             "\"EA-AK-AAAG\": {\n"+
                 "\"1\": {\n"+
