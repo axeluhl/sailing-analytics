@@ -6,7 +6,7 @@
  
    	<g:HTMLPanel>
    	    <s:stage.Stage ui:field='stage'/>
-   	    <s:mainsponsors.MainSponsors ui:field='mainSponsors'/>
+   	    <!-- <s:mainsponsors.MainSponsors ui:field='mainSponsors'/> -->
    	    <s:mainevents.MainEvents ui:field='mainEvents'/>
    	    <s:mainmedia.MainMedia ui:field='mainMedia'/>
    	    <s:socialfooter.SocialFooter ui:field='socialFooter'/>
