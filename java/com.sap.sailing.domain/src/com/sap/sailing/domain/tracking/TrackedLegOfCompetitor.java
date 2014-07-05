@@ -43,12 +43,21 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
      * If the competitor hasn't started the leg yet, the full leg distance is returned.
-     * @param windPositionMode TODO
      * 
      * @throws NoWindException
      *             thrown in case no wind direction is known
      */
     Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode)}, only that a cache for wind and leg
+     * type / bearing can be passed.
+     * 
+     * @throws NoWindException
+     *             thrown in case no wind direction is known
+     */
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
@@ -118,6 +127,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * for crossing the lay line.
      */
     int getRank(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getRank(TimePoint)} with the additional option to provide a cache
+     * that can help avoid redundant calculations of wind and leg data.
+     */
+    int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
