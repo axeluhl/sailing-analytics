@@ -23,6 +23,7 @@ public class RegattaDTO extends NamedDTO {
     public UUID defaultCourseAreaUuid;
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
+    public boolean useStartTimeInference;
 
     public RegattaDTO() {}
 

@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -85,10 +84,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final boolean persistent;
     
     /**
+     * Defaults to <code>true</code>. See {@link Regatta#useStartTimeInference()}.
+     */
+    private boolean useStartTimeInference;
+  
+    /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
     public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, series, persistent, scoringScheme, id, courseArea);
+        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
     
     /**
@@ -105,16 +109,18 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this(raceLogStore, baseName, boatClass, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, Collections
                 .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), /* race column names */new ArrayList<String>(),
-                trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea);
+                trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
 
     /**
      * @param series
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
+     * @param useStartTimeInference TODO
      */
-    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
         super(getDefaultName(baseName, boatClass==null?null:boatClass.getName()));
+        this.useStartTimeInference = useStartTimeInference;
         this.id = id;
         this.raceLogStore = raceLogStore;
         races = new HashSet<RaceDefinition>();
@@ -418,6 +424,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public void setUseStartTimeInference(boolean useStartTimeInference) {
+        this.useStartTimeInference = useStartTimeInference;
+    }
+    
+    @Override
     public RegattaConfiguration getRegattaConfiguration() {
         return configuration;
     }
@@ -469,12 +480,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Event getEvent() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void removeSeries(Series series) {
         Series existingSeries = getSeriesByName(series.getName());
         if (existingSeries != null) {
@@ -497,6 +502,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 this.series = newSeriesList;
             }
         }   
+    }
+
+    @Override
+    public boolean useStartTimeInference() {
+        return useStartTimeInference;
     }
 
 }

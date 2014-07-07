@@ -975,9 +975,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public Regatta createRegatta(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
-                boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId);
+                boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
@@ -1000,12 +1000,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), series, persistent, scoringScheme, id, courseArea);
+                boatClassName), series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1186,7 +1186,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
                 .getBoatClass().getName(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId));
+                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -1600,12 +1600,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
-           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series) {
+           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
         if (newCourseArea != regatta.getDefaultCourseArea()) {
             regatta.setDefaultCourseArea(newCourseArea);
+        }
+        if (regatta.useStartTimeInference() != useStartTimeInference) {
+            regatta.setUseStartTimeInference(useStartTimeInference);
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);
         if (series != null) {

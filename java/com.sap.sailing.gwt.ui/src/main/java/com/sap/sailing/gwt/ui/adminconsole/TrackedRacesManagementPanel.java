@@ -96,19 +96,21 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-            if(selectedRaceDTO.trackedRace.startOfTracking != null) {
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.startOfTracking != null) {
                 raceDataGrid.setText(3, 1, dateFormatter.render(selectedRaceDTO.trackedRace.startOfTracking) + " "
                         + timeFormatter.render(selectedRaceDTO.trackedRace.startOfTracking));
             } else {
                 raceDataGrid.setText(3, 1, "");
             }
-            if(selectedRaceDTO.trackedRace.endOfTracking != null) {
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.endOfTracking != null) {
                 raceDataGrid.setText(4, 1, dateFormatter.render(selectedRaceDTO.trackedRace.endOfTracking) + " "
                         + timeFormatter.render(selectedRaceDTO.trackedRace.endOfTracking));
             } else {
                 raceDataGrid.setText(4, 1, "");
             }
-            raceDataGrid.setText(5, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
+            if (selectedRaceDTO.trackedRace != null) {
+                raceDataGrid.setText(5, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
+            }
         }
     }
 }

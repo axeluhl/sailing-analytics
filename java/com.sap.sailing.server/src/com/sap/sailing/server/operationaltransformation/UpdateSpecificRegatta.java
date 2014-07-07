@@ -14,17 +14,19 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final RegattaIdentifier regattaIdentifier;
     private final UUID newDefaultCourseAreaId;
     private final RegattaConfiguration newConfiguration;
+    private final boolean useStartTimeInference;
     
     public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, UUID newDefaultCourseAreaId,
-            RegattaConfiguration newConfiguration) {
+            RegattaConfiguration newConfiguration, boolean useStartTimeInference) {
         this.regattaIdentifier = regattaIdentifier;
         this.newDefaultCourseAreaId = newDefaultCourseAreaId;
         this.newConfiguration = newConfiguration;
+        this.useStartTimeInference = useStartTimeInference;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null, useStartTimeInference);
         return regatta;
     }
 

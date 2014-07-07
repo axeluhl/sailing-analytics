@@ -43,7 +43,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final Iterable<Series> series = Collections.emptyList();
         final UUID regattaId = UUID.randomUUID();
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         
         Thread.sleep(1000);
         
@@ -71,10 +71,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         UUID currentCourseAreaId = null;
         Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId);
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
         
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -82,7 +82,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -90,7 +90,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -98,7 +98,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test back to 'null'
         currentCourseAreaId = null;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -115,7 +115,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
         Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId);
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId, /* useStartTimeInference */ true);
         event = master.getEvent(event.getId());
         assertTrue(event.getRegattas().iterator().hasNext());
         assertEquals("Kiel Week 2012", event.getRegattas().iterator().next().getBaseName());
@@ -124,7 +124,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
         assertTrue(regattasInReplicatedEvent.hasNext());
         assertEquals("Kiel Week 2012", regattasInReplicatedEvent.next().getBaseName());
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null, useStartTimeInference));
     }
     
     @Test
@@ -140,10 +140,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         UUID currentCourseAreaId = null;
         Regatta masterRegatta = master.createRegatta("RR", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
-                true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId);
+                true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
         
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -152,7 +152,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         // Test for values
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, config));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, config, useStartTimeInference));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -184,7 +184,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Series medal = new SeriesImpl("Medal", /* isMedal */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -219,7 +219,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -262,7 +262,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -297,7 +297,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
         
         Regatta masterRegatta = master.createRegatta(eventName, boatClassName, UUID.randomUUID(), series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), masterCourseArea.getId());
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), masterCourseArea.getId(), /* useStartTimeInference */ true);
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertNotNull(replicatedEvent);

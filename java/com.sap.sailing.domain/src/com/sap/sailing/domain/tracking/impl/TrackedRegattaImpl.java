@@ -36,7 +36,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private transient Set<RaceListener> raceListeners;
-  
+
     public TrackedRegattaImpl(Regatta regatta) {
         super();
         this.regatta = regatta;

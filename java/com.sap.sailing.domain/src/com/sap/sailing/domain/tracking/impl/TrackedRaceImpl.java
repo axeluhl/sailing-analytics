@@ -591,8 +591,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // startTimeReceived; if so, return an adjusted, later start time.
                 // If no official start time was received, try to estimate the start time using the mark passings for
                 // the start line.
-                final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
-                if (firstWaypoint != null) {
+                final Waypoint firstWaypoint;
+                if (getTrackedRegatta().getRegatta().useStartTimeInference() && (firstWaypoint = getRace().getCourse().getFirstWaypoint()) != null) {
                     if (startTimeReceived != null) {
                         // plausibility check for start time received, based on start mark passings; if no boat started within
                         // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
