@@ -49,6 +49,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -593,6 +594,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
                 if (firstWaypoint != null) {
                     if (startTimeReceived != null) {
+                        // plausibility check for start time received, based on start mark passings; if no boat started within
+                        // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
+                        // received then the startTimeReceived is believed to be wrong
                         TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
                         if (timeOfFirstMarkPassing != null) {
                             long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
@@ -667,11 +671,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return timeOfFirstMarkPassing;
     }
 
+    /**
+     * Determines the largest group of competitors that started within a one-minute time period and returns the time
+     * point of the earliest start mark passing within that group.
+     */
     private TimePoint calculateStartOfRaceFromMarkPassings(NavigableSet<MarkPassing> markPassings,
             Iterable<Competitor> competitors) {
         TimePoint startOfRace = null;
         // Find the first mark passing within the largest cluster crossing the line within one minute.
-        final long ONE_MINUTE_IN_MILLIS = 60 * 1000;
         lockForRead(markPassings);
         try {
             if (markPassings != null) {
@@ -692,8 +699,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         startOfLargestGroupSoFar = currentMarkPassing;
                         largestStartGroupWithinOneMinuteSize = 1;
                     } else {
-                        if (currentMarkPassing.getTimePoint().asMillis()
-                                - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() <= ONE_MINUTE_IN_MILLIS) {
+                        if (candidateForStartOfLargestGroupSoFar.getTimePoint().until(currentMarkPassing.getTimePoint()).compareTo(Duration.ONE_MINUTE) <= 0) {
                             // currentMarkPassing is within one minute of candidateForStartOfLargestGroupSoFar; extend
                             // candidate group...
                             candiateGroupSize++;
@@ -704,14 +710,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             }
                         } else {
                             // currentMarkPassing is more than a minute after candidateForStartOfLargestGroupSoFar;
-                            // advance
-                            // candidateForStartOfLargestGroupSoFar and reduce group size counter, until
-                            // candidateForStartOfLargestGroupSoFar
-                            // is again within the one-minute interval; may catch up all the way to currentMarkPassing
-                            // if that was
-                            // more than a minute after its predecessor
-                            while (currentMarkPassing.getTimePoint().asMillis()
-                                    - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() > ONE_MINUTE_IN_MILLIS) {
+                            // advance candidateForStartOfLargestGroupSoFar and reduce group size counter, until
+                            // candidateForStartOfLargestGroupSoFar is again within the one-minute interval; may catch
+                            // up all the way to currentMarkPassing if that was more than a minute after its predecessor
+                            while (candidateForStartOfLargestGroupSoFar.getTimePoint().until(currentMarkPassing.getTimePoint()).compareTo(Duration.ONE_MINUTE) > 0) {
                                 candidateForStartOfLargestGroupSoFar = markPassings
                                         .higher(candidateForStartOfLargestGroupSoFar);
                                 candiateGroupSize--;
