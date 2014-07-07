@@ -74,7 +74,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
         
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -82,7 +82,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -90,7 +90,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -98,7 +98,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test back to 'null'
         currentCourseAreaId = null;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -124,7 +124,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
         assertTrue(regattasInReplicatedEvent.hasNext());
         assertEquals("Kiel Week 2012", regattasInReplicatedEvent.next().getBaseName());
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null, /* useStartTimeInference */ true));
     }
     
     @Test
@@ -143,7 +143,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
         
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -152,7 +152,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         // Test for values
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, config, useStartTimeInference));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, config, /* useStartTimeInference */ true));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
