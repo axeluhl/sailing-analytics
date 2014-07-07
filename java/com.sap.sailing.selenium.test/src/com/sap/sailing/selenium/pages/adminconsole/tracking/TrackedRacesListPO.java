@@ -211,7 +211,7 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status) {
-        waitForTrackedRaces(races, status, DEFAULT_WAIT_TIMEOUT);
+        waitForTrackedRaces(races, status, DEFAULT_WAIT_TIMEOUT_SECONDS);
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, Status status, int timeout) {
