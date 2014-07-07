@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
@@ -110,7 +111,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new TrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, "regatta", boatClass, null, null, "a", null));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, "regatta", boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         

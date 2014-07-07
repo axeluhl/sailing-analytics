@@ -41,10 +41,10 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public abstract class TrackBasedTest {
@@ -98,7 +98,7 @@ public abstract class TrackBasedTest {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, regattaName, boatClass, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
-        TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
+        TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
         MarkImpl left = new MarkImpl("Left lee gate buoy");
