@@ -42,7 +42,7 @@ public class EventRegattaSchedule extends Composite {
     }
     
     public void setRacesFromRegatta(RegattaDTO regatta, LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO regattaLeaderboard) {
-        regattaHeader.setData(regatta, leaderboardGroup, regattaLeaderboard);
+        regattaHeader.setData(leaderboardGroup, regattaLeaderboard);
         
         for(SeriesDTO series: regatta.series) {
             EventRegattaScheduleSeries eventRegattaScheduleSeries = new EventRegattaScheduleSeries(regattaLeaderboard, series, timerForClientServerOffset, pageNavigator); 
@@ -50,8 +50,11 @@ public class EventRegattaSchedule extends Composite {
         }
     }
 
-    public void setRacesFromFlexibleLeaderboard(StrippedLeaderboardDTO flexibleLeaderboard) {
-        
+    public void setRacesFromFlexibleLeaderboard(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO flexibleLeaderboard) {
+        regattaHeader.setData(leaderboardGroup, flexibleLeaderboard);
+
+        EventRegattaScheduleFleet eventRegattaScheduleFleet = new EventRegattaScheduleFleet(flexibleLeaderboard, timerForClientServerOffset, pageNavigator);
+        seriesListPanel.add(eventRegattaScheduleFleet);
     }
 
 }

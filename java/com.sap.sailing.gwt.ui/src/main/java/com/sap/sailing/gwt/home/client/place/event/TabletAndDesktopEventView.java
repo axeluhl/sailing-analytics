@@ -61,9 +61,24 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         initWidget(uiBinder.createAndBindUi(this));
         
         pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaSchedule, eventMedia, eventSchedule });
-        goToRegattas();
+        
+        int leaderboardsCount = 0;
+        int leaderboardsGroupCount = event.getLeaderboardGroups().size();
+        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+            leaderboardsCount += leaderboardGroup.getLeaderboards().size();
+        }
 
-        eventSponsors.setEventSponsors(event);
+        if(leaderboardsGroupCount == 0 || leaderboardsCount == 0) {
+            Window.alert("There is no further data available for this event.");
+        } else {
+            if(leaderboardsCount == 1) {
+                LeaderboardGroupDTO firstLeaderboardGroup = event.getLeaderboardGroups().get(0);
+                goToRegattaRaces(firstLeaderboardGroup, firstLeaderboardGroup.getLeaderboards().get(0));
+            } else {
+                goToRegattas();
+            }
+            eventSponsors.setEventSponsors(event);
+        }
     }
 
     @Override
@@ -97,7 +112,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             });
             break;
         case FlexibleLeaderboard:
-            eventRegattaSchedule.setRacesFromFlexibleLeaderboard(leaderboard);
+            eventRegattaSchedule.setRacesFromFlexibleLeaderboard(leaderboardGroup, leaderboard);
             eventHeader.setDataNavigationType("compact");
             setVisibleEventElement(eventRegattaSchedule);
             break;

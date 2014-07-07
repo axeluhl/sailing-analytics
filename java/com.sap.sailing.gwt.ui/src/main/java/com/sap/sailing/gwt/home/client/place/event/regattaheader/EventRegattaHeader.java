@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -46,7 +45,7 @@ public class EventRegattaHeader extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setData(RegattaDTO regatta, LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
+    public void setData(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
         
         boolean hasLiveRace = leaderboard.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
