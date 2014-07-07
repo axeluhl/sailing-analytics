@@ -615,6 +615,8 @@ public interface TrackedRace extends Serializable {
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
 
+    void addRaceAbortedListener(RaceAbortedListener listener);
+
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
      * <p>

@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -62,7 +63,7 @@ public class UpdateHandler {
         }
     }
 
-    protected URL buildUpdateURL(HashMap<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
+    protected URL buildUpdateURL(Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
         String serverUpdateURI = this.updateURI.toString();
         // make sure that the update URI always ends with a slash
         if (!serverUpdateURI.endsWith("/")) {

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
@@ -990,6 +992,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog rorRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onAbortedByRaceCommittee(Flags flag) {
         // TODO Auto-generated method stub
         
     }
