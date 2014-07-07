@@ -95,6 +95,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
      * consider the order of the boats not currently in this leg, too.
      */
     protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
+        return getCompetitorTracksOrderedByRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         List<TrackedLegOfCompetitor> rankedCompetitorList;
         synchronized (competitorTracksOrderedByRank) {
             rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
@@ -111,7 +115,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             // synchronized, usually by read-write locks, so there is no major difference in synchronization issues
             // an the asynchronous nature of how the data is being received
             // TODO See bug 469; competitors already disqualified may need to be ranked worst
-            Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
+            Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint, cache));
             rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
             synchronized (competitorTracksOrderedByRank) {
                 competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
@@ -127,7 +131,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     
     @Override
     public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
-        List<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
+        return getRanks(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        List<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint, cache);
         LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
         int i=1;
         for (TrackedLegOfCompetitor tloc : orderedTrackedLegsOfCompetitors) {
@@ -338,6 +347,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode);
         final Distance result;
         if (preResult.getMeters() >= 0) {

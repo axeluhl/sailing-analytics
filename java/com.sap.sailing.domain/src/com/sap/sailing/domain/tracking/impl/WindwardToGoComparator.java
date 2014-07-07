@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 
 /**
@@ -26,11 +27,13 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
     private final TrackedLeg trackedLeg;
     private final TimePoint timePoint;
     private final Map<TrackedLegOfCompetitor, Distance> wwdtgCache;
+    private final WindLegTypeAndLegBearingCache windAndLegTypeCache;
 
-    public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
+    public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         this.trackedLeg = trackedLeg;
         this.timePoint = timePoint;
         wwdtgCache = new HashMap<TrackedLegOfCompetitor, Distance>();
+        windAndLegTypeCache = cache;
     }
     
     @Override
@@ -80,7 +83,7 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
     private Distance getWindwardDistanceToGo(TrackedLegOfCompetitor o1) throws NoWindException {
         Distance result = wwdtgCache.get(o1);
         if (result == null) {
-            result = o1.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE);
+            result = o1.getWindwardDistanceToGo(timePoint, WindPositionMode.LEG_MIDDLE, windAndLegTypeCache);
             wwdtgCache.put(o1, result);
         }
         return result;

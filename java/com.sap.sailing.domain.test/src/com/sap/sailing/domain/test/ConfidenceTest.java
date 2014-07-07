@@ -349,7 +349,7 @@ public class ConfidenceTest {
         Position p = new DegreePosition(12, 13);
         assertEquals(1., weigher.getConfidence(p, p), 0.00000001);
         Position p2 = p.translateGreatCircle(new DegreeBearingImpl(123), new MeterDistance(1000));
-        assertEquals(.5, weigher.getConfidence(p, p2), 0.00000001);
+        assertEquals(.5, weigher.getConfidence(p, p2), 0.001); // somewhat more tolerant; using quick distance in weigher
         Position p3 = p.translateGreatCircle(new DegreeBearingImpl(123), new NauticalMileDistance(1000));
         final double threshold = 0.001;
         assertTrue("Expected confidence in 1000nm distance to be less than "+threshold+" but was "+weigher.getConfidence(p, p3),

@@ -4,6 +4,14 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.Weigher;
 
+/**
+ * Uses {@link Position#getQuickApproximateNauticalMileDistance(Position)} to come
+ * to a quick and reasonably fair weight for distances where the weight asymptotically
+ * decreases hyperbolically with distance. 
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class HyperbolicDistanceWeigher implements Weigher<Position> {
     private static final long serialVersionUID = 5521299690322077224L;
 
@@ -37,8 +45,8 @@ public class HyperbolicDistanceWeigher implements Weigher<Position> {
      */
     @Override
     public double getConfidence(Position fix, Position request) {
-        double x = fix.getDistance(request).getMeters();
-        double c = halfConfidence.getMeters();
+        double x = fix.getQuickApproximateNauticalMileDistance(request);
+        double c = halfConfidence.getNauticalMiles();
         double y = c;
         return c/(x+y);
     }
