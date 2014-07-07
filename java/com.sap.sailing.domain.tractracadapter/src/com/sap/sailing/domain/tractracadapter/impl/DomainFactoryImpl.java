@@ -519,16 +519,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
-
-                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
-                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                            raceDefinition.getId());
-                    trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-
-                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
-                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                            raceDefinition.getId());
-                    trackedRace.addStartTimeChangedListener(startTimeHandler);
+                    addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
+                            raceDefinition, trackedRace);
                     raceCache.put(raceId, raceDefinition);
                     raceCache.notifyAll();
                 } else {
@@ -544,6 +536,23 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return trackedRace;
         }
+    }
+
+    @Override
+    public void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) {
+        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore,
