@@ -13,10 +13,8 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
 
 public class EventEditDialog extends EventDialog {
-
-    public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, StringMessages stringConstants, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringConstants, otherExistingEvents), stringConstants, callback);
-
+    public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+        super(new EventParameterValidator(stringMessages, otherExistingEvents), stringMessages, event.getLeaderboardGroups(), callback);
         nameEntryField = createTextBox(event.getName());
         nameEntryField.setVisibleLength(50);
         descriptionEntryField = createTextArea(event.getDescription());
