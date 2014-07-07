@@ -18,7 +18,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -119,7 +118,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         TextColumn<SwissTimingReplayRaceDTO> raceNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
             @Override
             public String getValue(SwissTimingReplayRaceDTO object) {
-                return object.name;
+                return object.getName();
             }
         };
         TextColumn<SwissTimingReplayRaceDTO> raceStartTrackingColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
@@ -205,7 +204,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             @Override
             public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.name, t.race_id, t.rsc));
+                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
                 return strings;
             }
         };
@@ -258,7 +257,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         result.setComparator(nameColumn, new Comparator<SwissTimingReplayRaceDTO>() {
             @Override
             public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
-                return new NaturalComparator().compare(o1.name, o2.name);
+                return new NaturalComparator().compare(o1.getName(), o2.getName());
             }
         });
         result.setComparator(boatClassColumn, new Comparator<SwissTimingReplayRaceDTO>() {
@@ -338,30 +337,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         });
     }
 
-    private boolean checkBoatClassMatch(SwissTimingReplayRaceDTO swissTimingRaceRecord, RegattaDTO selectedRegatta) {
-        String boatClassName = swissTimingRaceRecord.boat_class;
-        if (boatClassName != null) {
-            if (selectedRegatta == null) {
-                if (swissTimingRaceRecord.hasRememberedRegatta) {
-                    return true;
-                }
-                
-                // in case no regatta has been selected we check if there would be a matching regatta
-                for (RegattaDTO regatta : getAvailableRegattas()) {
-                    if ((boatClassName == null && regatta.boatClass == null) ||
-                            (regatta.boatClass != null && boatClassName.equals(regatta.boatClass.getName()))) {
-                        return false;
-                    }
-                }
-            } else {
-                if (!boatClassName.equals(selectedRegatta.boatClass.getName())) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
@@ -370,40 +345,14 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
         
         // Check if the assigned regatta makes sense
-        List<SwissTimingReplayRaceDTO> racesWithNotMatchingBoatClasses = new ArrayList<SwissTimingReplayRaceDTO>();  
+        final List<SwissTimingReplayRaceDTO> selectedRaces = new ArrayList<>();  
         for (SwissTimingReplayRaceDTO replayRace : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(replayRace)) {
-                if (!checkBoatClassMatch(replayRace, selectedRegatta)) {
-                    racesWithNotMatchingBoatClasses.add(replayRace);
-                }
+                selectedRaces.add(replayRace);
             }
         }
-
-        if (racesWithNotMatchingBoatClasses.size() > 0) {
-            String warningText = "";
-            if (selectedRegatta != null) {
-                warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName());
-            } else {
-                warningText += stringMessages.regattaExistForSelectedBoatClass();
-            }
-            warningText += "\n\n";
-            warningText += stringMessages.races() + "\n";
-            for (SwissTimingReplayRaceDTO record : racesWithNotMatchingBoatClasses) {
-                warningText += record.name + "\n";
-            }
-
-            Window.alert(warningText);
-            return;
-        }
-        
-        final List<SwissTimingReplayRaceDTO> selectedRaces = new ArrayList<SwissTimingReplayRaceDTO>();
-        for (final SwissTimingReplayRaceDTO race : this.raceList.getList()) {
-            if (raceTable.getSelectionModel().isSelected(race)) {
-                selectedRaces.add(race);
-            }
-        }
-        sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
+        if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
+            sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
                 simulateWithStartTimeNow, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -416,6 +365,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         regattaRefresher.fillRegattas();
                     }
                 });
+        }
     }
 
     private void updateJsonUrlFromSelectedPreviousConfiguration() {

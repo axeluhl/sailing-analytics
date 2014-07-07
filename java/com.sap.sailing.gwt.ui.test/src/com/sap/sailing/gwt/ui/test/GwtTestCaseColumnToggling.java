@@ -76,7 +76,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             public void onSuccess(Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                 System.out.println("Listed races.");
                 for (TracTracRaceRecordDTO rr : result.getB()){
-                    if (rr.name.equals(TRACKED_RACE)){
+                    if (rr.getName().equals(TRACKED_RACE)){
                         rrDao = rr;
                     }
                 }
