@@ -77,7 +77,14 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             } else {
                 goToRegattas();
             }
-            eventSponsors.setEventSponsors(event);
+            if(event.getSponsorImageURLs() != null && event.getSponsorImageURLs().size() > 0) {
+                eventSponsors.setVisible(false);
+                eventSponsors.setEventSponsors(event.getSponsorImageURLs());
+            } else {
+                eventSponsors.setVisible(false);
+                eventSponsors.setEventSponsors(null);
+            }
+            
         }
     }
 
