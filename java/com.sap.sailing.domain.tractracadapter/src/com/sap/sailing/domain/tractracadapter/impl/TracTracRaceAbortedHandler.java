@@ -28,7 +28,7 @@ public class TracTracRaceAbortedHandler extends UpdateHandler implements RaceAbo
     @Override
     public void raceAborted(Flags flag) throws MalformedURLException, IOException {
         if (!isActive()) {
-            logger.info("Not sending course update to TracTrac because no URL has been provided.");
+            logger.info("Not sending race abort notification to TracTrac because no URL has been provided.");
             return;
         }
         final String raceStatus;

@@ -136,6 +136,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.invalidateStartTime();
         /* reset start time */
         trackedRace.onStartTimeChangedByRaceCommittee(null);
+        RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();
+        if (abortingFlag != null) {
+            // previous pass was aborted; notify TracTrac
+            trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
+        }
     }
 
     @Override
@@ -153,11 +158,4 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // add the wind fix to the race committee WindTrack
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
-
-    @Override
-    public void visit(RaceLogFlagEvent event) {
-        RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();
-        trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
-    }
-
 }
