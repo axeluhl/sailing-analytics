@@ -123,7 +123,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
         WebDriverWindow leaderboardWindow = manager.openNewWindow();
         
-        // Go to the administration console and link al 5 races
+        // Go to the administration console and link all 5 races
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(this.regatta.toString());
