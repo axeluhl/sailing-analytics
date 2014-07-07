@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -73,6 +75,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
+    private transient Set<RaceAbortedListener> raceAbortedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -80,8 +83,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
-        this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
-        this.startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
+        this.courseDesignChangedListeners = new HashSet<>();
+        this.startTimeChangedListeners = new HashSet<>();
+        this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -107,8 +111,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
-        courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
-        startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
+        courseDesignChangedListeners = new HashSet<>();
+        startTimeChangedListeners = new HashSet<>();
+        raceAbortedListeners = new HashSet<>();
     }
 
     /**
@@ -854,7 +859,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 startTimeChangedListener.startTimeChanged(newStartTime);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
+        }
+    }
+    
+    @Override
+    public void onAbortedByRaceCommittee(Flags flag) {
+        try {
+            for (RaceAbortedListener raceAbortedListener : raceAbortedListeners) {
+                raceAbortedListener.raceAborted(flag);
+            }
+        } catch (IOException e) {
+            logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
     }
 
@@ -862,6 +878,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
+    
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
+        this.raceAbortedListeners.add(listener);
+    }
+    
     /**
      * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
      */

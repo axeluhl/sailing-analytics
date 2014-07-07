@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -591,6 +592,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
         // TODO Auto-generated method stub
         
     }
