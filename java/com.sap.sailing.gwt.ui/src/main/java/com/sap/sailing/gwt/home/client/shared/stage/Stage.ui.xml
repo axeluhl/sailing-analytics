@@ -3,27 +3,51 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+	<ui:with field="media_res" type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.stage.StageResources" />
 	<g:HTMLPanel>
 		<!-- The main stage -->
-		<div style="background-image: url('images/home/banner-background.jpg')" class="{local_res.css.stage}">
-			<header class="{local_res.css.stage_header}">
-				<p class="{local_res.css.stage_header_subtitle}"><g:Label ui:field='subtitle' /></p>
-				<h2 class="{local_res.css.stage_header_title}"><g:Label ui:field='title' /></h2>
-				<div class="{local_res.css.stage_header_message}"><g:Label ui:field='message' /></div>
-			</header>
-			<div class="{local_res.css.stage_band}">
-				<div class="{res.mainCss.grid}">
-					<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-						<div class="{local_res.css.stage_band_message}"><span ui:field='regattaState' />&nbsp;-
-						</div>
-						<div class="{local_res.css.stage_band_name}"><span ui:field='actionMessage' /></div>
-						<button class="{res.mainCss.button} {local_res.css.stage_band_action}">
-							<ui:text from='{i18n.fullEventSchedule}'/>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
+<div class="{local_res.css.stage}">
+  <div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
+    <div class="{local_res.css.swiperwrapper}">
+      <div class="{local_res.css.stageteaser} {local_res.css.swiperslide}">
+        <div class="{local_res.css.stageteaser_background}">
+          <div style="background-image: url('images/home/banner-background.jpg')" class="{local_res.css.stageteaser_background_image}"></div>
+        </div>
+        <div class="{local_res.css.stageteaser_content}">
+          <header class="{local_res.css.stageteaser_content_header}">
+            <p class="{local_res.css.stageteaser_content_header_subtitle}"><span ui:field="subtitle" /></p>
+            <h2 class="{local_res.css.stageteaser_content_header_title}"><span ui:field="title" /></h2>
+            <div data-starttime="xxx" data-days="xxx" data-hours="xxx" data-minutes="xxx" data-seconds="xxx" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
+              <div class="{local_res.css.countdown_pane}">
+                <div class="{local_res.css.countdown_pane_count}"></div>
+                <div class="{local_res.css.countdown_pane_unit}"></div>
+              </div>
+              <div class="{local_res.css.countdown_pane}">
+                <div class="{local_res.css.countdown_pane_count}"></div>
+                <div class="{local_res.css.countdown_pane_unit}"></div>
+              </div>
+            </div>
+          </header>
+        </div>
+        <div data-bandcount="1" class="{local_res.css.stageteaser_content_band}">
+          <div class="{res.mainCss.grid}">
+            <div data-bandcount="xxx" class="{local_res.css.stageteaser_content_band_item} {res.mediaCss.columns}">
+              <div class="{local_res.css.stageteaser_content_band_text}">
+                <div class="{local_res.css.stageteaser_content_band_text_headline}"><span ui:field="bandTitle" /></div>
+                <div class="{local_res.css.stageteaser_content_band_text_name}"><span ui:field="bandSubtitle" /></div>
+              </div><a href="xxx" class="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}"><span ui:field="bandAction" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="{local_res.css.stage_progress}">
+    <div class="{local_res.css.stage_progress_bar}"></div>
+  </div>
+  <div class="{local_res.css.stage_controls} {local_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsprev}"></div>
+  <div class="{local_res.css.stage_controls} {local_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsnext}"></div>
+</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

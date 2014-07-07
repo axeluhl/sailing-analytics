@@ -11,14 +11,35 @@ public interface StageResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String countdown();
+        String countdown_pane();
+        String countdown_pane_count();
+        String countdown_pane_unit();
+        String stageteaser();
+        String stageteaser_background();
+        String stageteaser_background_image();
+        String stageteaser_content();
+        String stageteaser_content_header();
+        String stageteaser_content_headerhidden();
+        String stageteaser_content_header_subtitle();
+        String stageteaser_content_header_title();
+        String stageteaser_content_header_countdown();
+        String stageteaser_content_band();
+        String stageteaser_content_band_item();
+        String stageteaser_content_band_text();
+        String stageteaser_content_band_text_headline();
+        String stageteaser_content_band_text_name();
+        String stageteaser_content_band_action();
+        String swipercontainer();
+        String swiperwrapper();
+        String swiperslide();
+        String swiperwp8horizontal();
+        String swiperwp8vertical();
         String stage();
-        String stage_header();
-        String stage_header_subtitle();
-        String stage_header_title();
-        String stage_header_message();
-        String stage_band();
-        String stage_band_message();
-        String stage_band_name();
-        String stage_band_action();
+        String stage_teasers();
+        String media_slideshow_controls();
+        String stage_controls();
+        String stage_progress();
+        String stage_progress_bar();
     }
 }
