@@ -9,7 +9,7 @@
 
 <div class="{local_res.css.stageteaser} {local_res.css.swiperslide}">
   <div class="{local_res.css.stageteaser_background}">
-    <div style="background-image: url('images/home/banner-background.jpg')" class="{local_res.css.stageteaser_background_image}"></div>
+    <div ui:field="teaserImage" class="{local_res.css.stageteaser_background_image}" />
   </div>
   <div class="{local_res.css.stageteaser_content}">
     <header class="{local_res.css.stageteaser_content_header}">

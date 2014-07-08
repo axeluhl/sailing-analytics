@@ -16,8 +16,7 @@ public abstract class StageTeaser extends Composite {
     @UiField SpanElement title;
     @UiField DivElement countDown;
     @UiField HTMLPanel stageTeaserBandsPanel;
-
-    // <div data-starttime="{teaser.startTime}" data-days="{i18n.countdownDays}" data-hours="{i18n.countdownHours}" data-minutes="{i18n.countdownMinutes}" data-seconds="{i18n.countdownSeconds}" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
+    @UiField DivElement teaserImage;
 
     interface StageTeaserUiBinder extends UiBinder<Widget, StageTeaser> {
     }
@@ -27,5 +26,10 @@ public abstract class StageTeaser extends Composite {
     public StageTeaser(EventDTO event) {
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
+        String imageUrl = "http://static.sapsailing.com/ubilabsimages/Bundesliga2014/Bundesliga2014Regatta2_stagebackground.jpg";
+        String backgroundImage = "url(" + imageUrl + ")";
+
+        teaserImage.getStyle().setBackgroundImage(backgroundImage);
     }
 }
