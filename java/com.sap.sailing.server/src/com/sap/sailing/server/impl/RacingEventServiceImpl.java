@@ -1005,7 +1005,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+                boatClassName), series, persistent, scoringScheme, id, courseArea, useStartTimeInference);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
