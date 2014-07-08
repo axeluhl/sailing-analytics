@@ -1609,9 +1609,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
-            for (TrackedRace trackedRace : getTrackedRegatta(regatta).getTrackedRaces()) {
+            for (DynamicTrackedRace trackedRace : getTrackedRegatta(regatta).getTrackedRaces()) {
                 // the start times of the regatta's tracked races now have to be re-evaluated the next time they are queried
-                ((DynamicTrackedRace) trackedRace).invalidateStartTime();
+                trackedRace.invalidateStartTime();
             }
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);

@@ -118,7 +118,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public Iterable<TrackedRace> getTrackedRaces() {
+    public Iterable<? extends TrackedRace> getTrackedRaces() {
         return trackedRaces.values();
     }
 
