@@ -1081,20 +1081,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRaces(long)}. If the race definition
+     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRace(long)}. If the race definition
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
     private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
         Regatta regatta = raceHandle.getRegatta();
         if (regatta != null) {
-            for (RaceDefinition race : raceHandle.getRaces(timeoutInMilliseconds)) {
-                if (race != null) {
-                    getService().startTrackingWind(regatta, race, correctByDeclination);
-                } else {
-                    log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in regatta "
-                            + regatta.getName() + ". Aborting wait; no wind tracking for this race.");
-                }
+            RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
+            if (race != null) {
+                getService().startTrackingWind(regatta, race, correctByDeclination);
+            } else {
+                log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in regatta "
+                        + regatta.getName() + ". Aborting wait; no wind tracking for this race.");
             }
         }
     }
