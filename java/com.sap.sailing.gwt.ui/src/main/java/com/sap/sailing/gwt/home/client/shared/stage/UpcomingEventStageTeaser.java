@@ -11,11 +11,13 @@ public class UpcomingEventStageTeaser extends StageTeaser {
         title.setInnerText(event.getName());
         subtitle.setInnerText(event.venue.getName());
         
-        // EventDatesFormatterUtil.formatDateRangeWithYear(featuredEvent.startDate, featuredEvent.endDate))
-        
-        bandCount.setAttribute("data-bandcount", "2");
-        
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
+        countDown.setAttribute("data-starttime", "");
+        countDown.setAttribute("data-days", "3");
+        countDown.setAttribute("data-hours", "2");
+        countDown.setAttribute("data-minutes", "");
+        countDown.setAttribute("data-seconds", "");
+
+        bandCount.setAttribute("data-bandcount", "1");
         stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
     }
 

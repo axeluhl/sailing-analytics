@@ -46,14 +46,14 @@ public class StartActivity extends AbstractActivity {
         Date now = new Date();
         int currentYear = now.getYear();
         final int MAX_STAGE_EVENTS = 2;
-        final long TWO_WEEK_IN_MS = 1000 * 60 * 24 * 7;
+        final long TWO_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
         
         for(EventDTO event: events) {
             // ignore events with no start and end date
             if(event.startDate != null && event.endDate != null) {
                 if (now.after(event.startDate) && now.before(event.endDate)) {
                     featuredEvents.add(new Pair<StageEventType, EventDTO>(StageEventType.RUNNING, event));
-                } else if (event.endDate.after(now) && event.endDate.getTime() - now.getTime() < TWO_WEEK_IN_MS) {
+                } else if (event.startDate.after(now) && event.startDate.getTime() - now.getTime() < TWO_WEEK_IN_MS) {
                     upcomingSoonEvents.add(event);
                 } else if (event.endDate.before(now) && event.endDate.getYear() == currentYear) {
                     recentEventsOfSameYear.add(event);
@@ -67,6 +67,7 @@ public class StartActivity extends AbstractActivity {
         if(featuredEvents.size() < MAX_STAGE_EVENTS) {
             fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, popularEvents);
         }
+        // fallback for the case we did not find any events
         if(featuredEvents.size() < MAX_STAGE_EVENTS) {
             fillingUpEventsList(MAX_STAGE_EVENTS, featuredEvents, StageEventType.POPULAR, recentEventsOfSameYear);
         }

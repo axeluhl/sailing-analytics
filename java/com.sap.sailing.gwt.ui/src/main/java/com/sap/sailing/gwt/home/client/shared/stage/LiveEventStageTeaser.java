@@ -13,7 +13,6 @@ public class LiveEventStageTeaser extends StageTeaser {
         title.setInnerText(event.getName());
         subtitle.setInnerText(event.venue.getName());
         
-        // EventDatesFormatterUtil.formatDateRangeWithYear(featuredEvent.startDate, featuredEvent.endDate))
         countDown.getStyle().setDisplay(Display.NONE);
         countDown.getStyle().setVisibility(Visibility.HIDDEN);
         

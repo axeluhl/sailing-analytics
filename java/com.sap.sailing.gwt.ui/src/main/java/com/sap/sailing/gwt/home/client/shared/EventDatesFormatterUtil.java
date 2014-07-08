@@ -19,9 +19,9 @@ public class EventDatesFormatterUtil {
     public static String formatDateRangeWithYear(Date from, Date to) {
         String result = "";
         if(from.getMonth() == to.getMonth()) {
-            result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + " " + yearFormat.format(from);
+            result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + ", " + yearFormat.format(from);
         } else {
-            result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + " " + yearFormat.format(from);
+            result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + ", " + yearFormat.format(from);
         }
                 
         return result;

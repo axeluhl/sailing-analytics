@@ -15,7 +15,7 @@
     <header class="{local_res.css.stageteaser_content_header}">
       <p class="{local_res.css.stageteaser_content_header_subtitle}"><span ui:field="subtitle" /></p>
       <h2 class="{local_res.css.stageteaser_content_header_title}"><span ui:field="title" /></h2>
-      <div ui:field="countDown" data-starttime="xxx" data-days="xxx" data-hours="xxx" data-minutes="xxx" data-seconds="xxx" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
+      <div ui:field="countDown" data-starttime="" data-days="" data-hours="" data-minutes="" data-seconds="" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
         <div class="{local_res.css.countdown_pane}">
           <div class="{local_res.css.countdown_pane_count}"></div>
           <div class="{local_res.css.countdown_pane_unit}"></div>

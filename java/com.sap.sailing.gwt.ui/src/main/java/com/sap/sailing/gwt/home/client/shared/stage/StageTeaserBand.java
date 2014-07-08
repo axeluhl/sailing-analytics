@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class StageTeaserBand extends Composite {
@@ -33,8 +34,8 @@ public class StageTeaserBand extends Composite {
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        bandTitle.setInnerText("bandTitle");
-        bandSubtitle.setInnerText("bandSubtitle");
+        bandTitle.setInnerText(event.getName());
+        bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.startDate, event.endDate));
         
         actionLink.setText("Show event");
     }
