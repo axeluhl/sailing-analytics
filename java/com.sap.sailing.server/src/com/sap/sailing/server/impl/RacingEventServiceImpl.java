@@ -1609,6 +1609,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
+            for (TrackedRace trackedRace : getTrackedRegatta(regatta).getTrackedRaces()) {
+                // the start times of the regatta's tracked races now have to be re-evaluated the next time they are queried
+                ((DynamicTrackedRace) trackedRace).invalidateStartTime();
+            }
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);
         if (series != null) {
@@ -1624,7 +1628,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 }
             }
         }
-        mongoObjectFactory.storeRegatta(regatta);
+        if (regatta.isPersistent()) {
+            mongoObjectFactory.storeRegatta(regatta);
+        }
         return regatta;
     }
 
