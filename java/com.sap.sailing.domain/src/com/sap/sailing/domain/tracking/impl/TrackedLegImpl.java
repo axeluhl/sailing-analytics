@@ -308,6 +308,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+    }
+
+    @Override
     public void waypointsMayHaveChanges() {
         clearCaches();
     }

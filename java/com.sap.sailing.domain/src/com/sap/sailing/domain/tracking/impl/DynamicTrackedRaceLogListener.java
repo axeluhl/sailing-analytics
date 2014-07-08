@@ -133,7 +133,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogPassChangeEvent event) {
-        trackedRace.invalidateStartTime();
+        trackedRace.invalidateStartTime(); // this will notify RaceStateListeners in case the start time changes by the event
         /* reset start time */
         trackedRace.onStartTimeChangedByRaceCommittee(null);
         RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();

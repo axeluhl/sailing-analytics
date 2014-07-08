@@ -348,6 +348,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
 
         @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }

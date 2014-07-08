@@ -259,6 +259,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             getListeners().add(listener);
         }
     }
+    
+    @Override
+    public void invalidateStartTime() {
+        TimePoint oldStartOfRace = getStartOfRace();
+        super.invalidateStartTime();
+        TimePoint newStartOfRace = getStartOfRace();
+        if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+            notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
+        }
+    }
 
     @Override
     public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded,
@@ -366,6 +376,21 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.log(Level.SEVERE, "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", e);
+            }
+        }
+    }
+
+    private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.startOfRaceChanged(oldStartOfRace, newStartOfRace);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.log(Level.SEVERE, "notifyListenersStartOfRaceChanged(TimePoint, TimePoint)", e);
             }
         }
     }
@@ -556,6 +581,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
         MarkPassing oldStartMarkPassing = null;
+        TimePoint oldStartOfRace = getStartOfRace(); // getStartOfRace() may respond with a new result already after updating the mark passings
         boolean requiresStartTimeUpdate = true;
         final NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
         lockForRead(markPassingsForCompetitor);
@@ -630,11 +656,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         triggerManeuverCacheRecalculation(competitor);
         // update the race times like start, end and the leg times
         if (requiresStartTimeUpdate) {
+            TimePoint interimsStartOfRace = getStartOfRace();
             invalidateStartTime();
+            TimePoint newStartOfRace = getStartOfRace();
+            if (Util.equalsWithNull(interimsStartOfRace, newStartOfRace) && !Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+                // invalidateStartTime() will not have thrown a startOfRaceChanged event notification because it already saw the new
+                // start of race time; we have to throw the notification here:
+                notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
+            }
         }
         invalidateMarkPassingTimes();
         invalidateEndTime();
-
         // notify *after* all mark passings have been re-established; should avoid flicker
         notifyListeners(competitor, oldMarkPassings, markPassings);
     }
@@ -684,10 +716,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStartTimeReceived(TimePoint startTimeReceived) {
-        if ((startTimeReceived == null) != (getStartTimeReceived() == null)
-                || (startTimeReceived != null && !startTimeReceived.equals(getStartTimeReceived()))) {
+        if (!Util.equalsWithNull(startTimeReceived, getStartTimeReceived())) {
+            TimePoint oldStartOfRace = getStartOfRace();
             super.setStartTimeReceived(startTimeReceived);
             notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+            TimePoint newStartOfRace = getStartOfRace();
+            if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+                notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
+            }
         }
     }
 

@@ -1330,6 +1330,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         
         @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            // no action required; the update signaled by this call is implicit; for explicit updates
+            // see raceTimesChanged(TimePoint, TimePoint, TimePoint).
+        }
+
+        @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
             // no-op; the course change is replicated by the separate CourseChangeReplicator
         }
