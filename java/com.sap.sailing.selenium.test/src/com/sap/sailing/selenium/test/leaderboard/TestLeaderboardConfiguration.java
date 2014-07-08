@@ -110,7 +110,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
                     rank, equalTo(expectedRankForFindelJens[i]));
             adminConsoleWindow.switchToWindow();
         }
-        adminConsoleWindow.close();
     }
     
     @Test
@@ -143,7 +142,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         leaderboard.refresh();
         assertThat("Race names do not match after deletion of race 'R3'",
                 table.getRaceNames(), equalTo(Arrays.asList("R1", "R2", "R4", "R5")));
-        leaderboardWindow.close();
     }
     
     @Ignore("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
@@ -185,7 +183,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         List<String> races = table.getRaceNames();
         assertThat("Race names do not match after renaming race 'R1' to 'Q'",
                 races, equalTo(Arrays.asList("Q", "R2", "R3", "R4", "R5")));
-        leaderboardWindow.close();
     }
     
     private void configureLeaderboard() {
