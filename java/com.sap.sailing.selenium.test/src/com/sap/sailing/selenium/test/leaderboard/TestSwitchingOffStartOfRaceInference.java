@@ -46,6 +46,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private TrackableRaceDescriptor trackableRace;
     private TrackedRaceDescriptor trackedRace;
     private RaceDescriptor raceColumn;
+    private AdminConsolePage adminConsole;
     
     @Before
     public void setUp() {
@@ -54,7 +55,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
         this.raceColumn = new RaceDescriptor("R3", "Default", false, false, 0.0);
         clearState(getContextRoot());
-        configureRegattaAndLeaderboard();
+        adminConsole = configureRegattaAndLeaderboard();
     }
     
     @Test
@@ -74,7 +75,6 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         }
         adminConsoleWindow.switchToWindow();
         // Go to the administration console and unset the "useStartTimeInference" flag
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
         RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
         RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
@@ -89,7 +89,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardWindow.close();
     }
     
-    private void configureRegattaAndLeaderboard() {
+    private AdminConsolePage configureRegattaAndLeaderboard() {
         // Open the admin console for some configuration steps
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // Create a regatta with 1 series and 5 races as well as a leaderboard
@@ -112,5 +112,6 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
         leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
+        return adminConsole;
     }
 }
