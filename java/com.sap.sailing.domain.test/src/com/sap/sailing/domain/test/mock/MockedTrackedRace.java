@@ -474,7 +474,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public Iterable<TrackedRace> getTrackedRaces() {
+            public Iterable<DynamicTrackedRace> getTrackedRaces() {
                 // TODO Auto-generated method stub
                 return null;
             }

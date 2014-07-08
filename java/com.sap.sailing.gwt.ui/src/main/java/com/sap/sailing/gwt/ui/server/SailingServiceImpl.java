@@ -4236,7 +4236,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Regatta regatta : allRegattas) {
             DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
-                Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
                 for (TrackedRace trackedRace : trackedRaces) {
                     result.add((DynamicTrackedRace) trackedRace);
                 }
