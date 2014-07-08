@@ -21,7 +21,9 @@
   background-position: 0 0;
   background-repeat: no-repeat;
   cursor: pointer;
+  z-index: 10;
 }
+
 .media_slideshow_controlsnext,
 .media_slideshow_controlsprev {
   top: 50%;

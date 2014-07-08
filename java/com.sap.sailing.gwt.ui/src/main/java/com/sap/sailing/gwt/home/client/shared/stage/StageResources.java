@@ -37,7 +37,6 @@ public interface StageResources extends ClientBundle {
         String swiperwp8vertical();
         String stage();
         String stage_teasers();
-        String media_slideshow_controls();
         String stage_controls();
         String stage_progress();
         String stage_progress_bar();
