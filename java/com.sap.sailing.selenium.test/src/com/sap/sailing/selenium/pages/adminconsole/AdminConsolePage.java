@@ -178,6 +178,7 @@ public class AdminConsolePage extends HostPage {
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
     }
     
