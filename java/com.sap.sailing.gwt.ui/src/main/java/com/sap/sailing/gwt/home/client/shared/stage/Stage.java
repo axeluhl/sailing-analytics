@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
@@ -22,13 +23,14 @@ public class Stage extends Composite {
     private List<Pair<StageEventType, EventDTO>> featuredEvents;
 
     private List<StageTeaser> stageTeaserComposites;
-    private int indexOfVisibleStageTeaser;
 
     @UiField HTMLPanel stageElementsPanel;
     @UiField Anchor nextStageTeaserLink;
     @UiField Anchor prevStageTeaserLink;
 
     private StageTeaser stageTeaser;
+    
+    private Swiper swiper;
 
     private final PlaceNavigator placeNavigator;
     
@@ -44,9 +46,8 @@ public class Stage extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         stageTeaserComposites = new ArrayList<StageTeaser>();
-        indexOfVisibleStageTeaser = -1;
     }
-
+    
     public void setFeaturedEvents(List<Pair<StageEventType, EventDTO>> featuredEvents) {
         this.featuredEvents = featuredEvents;
         
@@ -63,35 +64,25 @@ public class Stage extends Composite {
                     break;
             }
             stageElementsPanel.add(stageTeaser);
-            stageTeaser.setVisible(false);
             stageTeaserComposites.add(stageTeaser);
-            
-            indexOfVisibleStageTeaser = 0;
-            stageTeaserComposites.get(indexOfVisibleStageTeaser).setVisible(true);
         }
+        
+        this.swiper = Swiper.createWithDefaultOptions(StageResources.INSTANCE.css().stage_teasers(), 
+                StageResources.INSTANCE.css().swiperwrapper(),
+                StageResources.INSTANCE.css().swiperslide());
     }
 
     @UiHandler("nextStageTeaserLink")
     public void nextStageTeaserLinkClicked(ClickEvent e) {
-        StageTeaser oldStageTeaser = stageTeaserComposites.get(indexOfVisibleStageTeaser);
-        indexOfVisibleStageTeaser = indexOfVisibleStageTeaser+1;
-        if(indexOfVisibleStageTeaser >= stageTeaserComposites.size()) {
-            indexOfVisibleStageTeaser = 0;
+        if (this.swiper != null) {
+            this.swiper.swipeNext();
         }
-        StageTeaser currentStageTeaser = stageTeaserComposites.get(indexOfVisibleStageTeaser);
-        oldStageTeaser.setVisible(false);
-        currentStageTeaser.setVisible(true);
     }
 
     @UiHandler("prevStageTeaserLink")
     public void prevStageTeaserLinkClicked(ClickEvent e) {
-        StageTeaser oldStageTeaser = stageTeaserComposites.get(indexOfVisibleStageTeaser);
-        indexOfVisibleStageTeaser = indexOfVisibleStageTeaser-1;
-        if(indexOfVisibleStageTeaser < 0) {
-            indexOfVisibleStageTeaser = stageTeaserComposites.size()-1;
+        if (this.swiper != null) {
+            this.swiper.swipePrev();
         }
-        StageTeaser currentStageTeaser = stageTeaserComposites.get(indexOfVisibleStageTeaser);
-        oldStageTeaser.setVisible(false);
-        currentStageTeaser.setVisible(true);
     }
 }
