@@ -21,6 +21,12 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
         return (DynamicTrackedRace) super.getTrackedRace(race);
     }
 
+    @SuppressWarnings("unchecked") // the tracked races of a dynamic tracked regatta are always DynamicTrackedRace objects; see also getTrackedRace(RaceDefinition)
+    @Override
+    public Iterable<DynamicTrackedRace> getTrackedRaces() {
+        return (Iterable<DynamicTrackedRace>) super.getTrackedRaces();
+    }
+
     @Override
     public DynamicTrackedRace getExistingTrackedRace(RaceDefinition race) {
         return (DynamicTrackedRace) super.getExistingTrackedRace(race);

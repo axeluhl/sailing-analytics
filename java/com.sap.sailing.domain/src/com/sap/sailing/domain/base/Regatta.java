@@ -128,7 +128,30 @@ public interface Regatta extends Named, WithID {
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
     
     /**
-     * @return the associated event. Can be null.
+     * When there is no race committee app in place and no operator is managing the race start times for this regatta,
+     * start times can optionally be inferred from the start mark passings by the {@link TrackedRace}s in this regatta.
+     * The default for this is <code>true</code>, particularly because the race committee app has not been used for all
+     * races, and start times need to be inferred for those.
+     * <p>
+     * 
+     * This option should only be set to <code>false</code> if the race log is maintained thorougly for this regatta,
+     * either by a well-working race committee app or by an on-shore operator using the administration console to enter
+     * start times for all races of this regatta consistently.
+     * <p>
+     * 
+     * Note that the effects of setting this option to <code>false</code> are severe when no start times are maintained.
+     * The races for which then no start time is entered will not be scored at all.
+     * <p>
+     * 
+     * A discussion of this subject can also be found at <a
+     * href="http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1994"
+     * >http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1994</a>.
      */
-    Event getEvent();
+    boolean useStartTimeInference();
+
+    /**
+     * Updates the flag deciding whether to use start time inference. See {@link #useStartTimeInference()}.
+     */
+    void setUseStartTimeInference(boolean useStartTimeInference);
+
 }

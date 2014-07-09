@@ -35,6 +35,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
                 null, callback);
+        ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
         
         nameEntryField.setEnabled(false);

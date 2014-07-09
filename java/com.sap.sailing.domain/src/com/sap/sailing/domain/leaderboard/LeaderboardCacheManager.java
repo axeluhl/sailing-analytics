@@ -106,6 +106,11 @@ public class LeaderboardCacheManager {
         }
 
         @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
             removeFromCache(leaderboard);
         }

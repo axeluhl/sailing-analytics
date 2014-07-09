@@ -35,7 +35,7 @@ public class PingMarkViaRaceLogTest {
         Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
         Regatta regatta = service.createRegatta("regatta", "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
-                false, new HighPoint(), UUID.randomUUID());
+                false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         
         MarkDTO mark = new MarkDTO("mark", "mark");

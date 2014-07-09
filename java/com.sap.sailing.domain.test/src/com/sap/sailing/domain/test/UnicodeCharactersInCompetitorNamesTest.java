@@ -65,8 +65,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "",
                         new DummyTrackedRegattaRegistry());
 
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next()
-                .getCompetitors();
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }

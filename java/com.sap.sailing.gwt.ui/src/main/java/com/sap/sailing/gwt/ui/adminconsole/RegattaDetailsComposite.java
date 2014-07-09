@@ -50,6 +50,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label boatClassName;
     private final Label scoringSystem;
     private final Label defaultCourseArea;
+    private final Label useStartTimeInference;
     private final Label configuration;
 
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
@@ -68,7 +69,7 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-        Grid grid = new Grid(5, 2);
+        Grid grid = new Grid(6, 2);
         vPanel.add(grid);
         
         regattaName = new Label();
@@ -86,15 +87,20 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
         
+        useStartTimeInference = new Label();
+        useStartTimeInference.ensureDebugId("UseStartTimeInferenceLabel");
+        grid.setWidget(3 , 0, new Label(stringMessages.useStartTimeInference() + ":"));
+        grid.setWidget(3 , 1, useStartTimeInference);
+        
         configuration = new Label();
         configuration.ensureDebugId("RacingProcedureLabel");
-        grid.setWidget(3, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(3, 1, configuration);
+        grid.setWidget(4, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
+        grid.setWidget(4, 1, configuration);
         
         scoringSystem = new Label();
         scoringSystem.ensureDebugId("ScoringSystemLabel");
-        grid.setWidget(4 , 0, new Label(stringMessages.scoringSystem() + ":"));
-        grid.setWidget(4 , 1, scoringSystem);
+        grid.setWidget(5 , 0, new Label(stringMessages.scoringSystem() + ":"));
+        grid.setWidget(5 , 1, scoringSystem);
         
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
@@ -108,7 +114,6 @@ public class RegattaDetailsComposite extends Composite {
         seriesListDataProvider = new ListDataProvider<SeriesDTO>();
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
-        
         initWidget(mainPanel);
     }
 
@@ -372,6 +377,7 @@ public class RegattaDetailsComposite extends Composite {
             regattaName.setText(regatta.getName());
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
+            useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {

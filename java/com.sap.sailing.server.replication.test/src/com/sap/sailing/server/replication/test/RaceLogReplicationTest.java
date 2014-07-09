@@ -344,7 +344,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID());
+                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true);
         return master.apply(addRegattaOperation);
     }
     

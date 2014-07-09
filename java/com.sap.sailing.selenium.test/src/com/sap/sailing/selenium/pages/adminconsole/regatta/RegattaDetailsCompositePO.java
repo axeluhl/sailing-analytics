@@ -51,48 +51,35 @@ public class RegattaDetailsCompositePO extends PageArea {
         return this.scoringSystemLabel.getText();
     }
     
-//    public void getSeries() {
-//        
-//    }
-    
     public SeriesEditDialogPO editSeries(String series) {
         DataEntryPO entry = findSeries(series);
-        
-        if(entry != null) {
+        if (entry != null) {
             WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
             action.click();
-            
             WebElement dialog = findElementBySeleniumId(this.driver, "SeriesEditDialog");
-            
             return new SeriesEditDialogPO(this.driver, dialog);
         }
-        
         return null;
     }
-    
+
     public void deleteSeries(String series) {
         DataEntryPO entry = findSeries(series);
-        
-        if(entry != null) {
+        if (entry != null) {
             WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
             removeAction.click();
-            
             ActionsHelper.acceptAlert(this.driver);
-            
-            //waitForAjaxRequests();
+            // waitForAjaxRequests();
         }
     }
     
     private DataEntryPO findSeries(String series) {
         CellTablePO<DataEntryPO> table = getSeriesTable();
-        
-        for(DataEntryPO entry : table.getEntries()) {
+        for (DataEntryPO entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
-            
-            if(series.equals(name))
-               return entry;
+            if (series.equals(name)) {
+                return entry;
+            }
         }
-        
         return null;
     }
     

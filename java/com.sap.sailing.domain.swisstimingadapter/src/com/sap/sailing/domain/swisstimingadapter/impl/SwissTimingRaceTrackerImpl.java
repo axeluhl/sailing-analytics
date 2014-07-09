@@ -170,7 +170,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             }
 
             @Override
-            public Set<RaceDefinition> getRaces() {
+            public RaceDefinition getRace() {
                 synchronized (this) {
                     while (race == null) {
                         try {
@@ -180,11 +180,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         }
                     }
                 }
-                return Collections.singleton(race);
+                return race;
             }
 
             @Override
-            public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
+            public RaceDefinition getRace(long timeoutInMilliseconds) {
                 long start = System.currentTimeMillis();
                 synchronized (this) {
                     RaceDefinition preResult = race;
@@ -200,11 +200,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                             interrupted = true;
                         }
                     }
-                    final Set<RaceDefinition> result;
+                    final RaceDefinition result;
                     if (preResult == null) {
-                        result = Collections.emptySet();
+                        result = null;
                     } else {
-                        result = Collections.singleton(preResult);
+                        result = preResult;
                     }
                     return result;
                 }

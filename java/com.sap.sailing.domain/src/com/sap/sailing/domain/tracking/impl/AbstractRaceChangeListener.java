@@ -17,6 +17,10 @@ import com.sap.sailing.domain.tracking.Wind;
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+    }
+
+    @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
     }
 

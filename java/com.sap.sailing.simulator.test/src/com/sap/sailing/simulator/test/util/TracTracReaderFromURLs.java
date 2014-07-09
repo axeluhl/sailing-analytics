@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -54,7 +53,6 @@ public class TracTracReaderFromURLs implements TracTracReader {
 
     @Override
     public List<TrackedRace> read() throws Exception {
-        // TODO Auto-generated method stub
         System.setProperty("mongo.port", mongoPortStr);
         System.setProperty("http.proxyHost", proxyHostStr);
         System.setProperty("http.proxyPort", proxyPortStr);
@@ -62,26 +60,18 @@ public class TracTracReaderFromURLs implements TracTracReader {
         final TracTracAdapterFactory tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         URI liveURI = new URI(liveURIStr);
         URI storedURI = new URI(storedURIStr);
-
         List<TrackedRace> racesList = new ArrayList<TrackedRace>();
-
         for (String paramURLStr : tracTracParamURLs) {
             URL paramURL = new URL(paramURLStr);
             RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
                     null, 60000);
-
             String regatta = raceHandle.getRegatta().getName();
-            Set<RaceDefinition> races = raceHandle.getRaces();
-
-            for (RaceDefinition r : races) {
-                RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
-                TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-                tr.waitUntilNotLoading();
-
-                racesList.add(tr);
-            }
+            RaceDefinition r = raceHandle.getRace();
+            RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
+            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
+            tr.waitUntilNotLoading();
+            racesList.add(tr);
         }
-
         return racesList;
     }
 

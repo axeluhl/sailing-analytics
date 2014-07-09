@@ -1,12 +1,9 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.event.IRace;
 
@@ -29,9 +26,8 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        Set<RaceDefinition> result = Collections.singleton(domainFactory.getAndWaitForRaceDefinition(tractracRace.getId()));
-        return result;
+    public RaceDefinition getRace() {
+        return domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
     }
     
     @Override
@@ -45,13 +41,13 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-        final Set<RaceDefinition> result;
+    public RaceDefinition getRace(long timeoutInMilliseconds) {
+        final RaceDefinition result;
         final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds);
         if (raceDefinition != null) { // may have time-outed
-            result = Collections.singleton(raceDefinition);
+            result = raceDefinition;
         } else {
-            result = Collections.emptySet();
+            result = null;
         }
         return result;
     }
