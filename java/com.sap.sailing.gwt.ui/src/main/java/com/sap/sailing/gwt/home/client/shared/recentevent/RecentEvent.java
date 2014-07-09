@@ -27,7 +27,7 @@ public class RecentEvent extends Composite {
 
     private EventBaseDTO event;
 
-    private final String defaultImageUrl = "http://static.sapsailing.com/newhome/default_event_photo.jpg";
+    private final String defaultImageUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_photo.jpg";
 
     interface RecentEventUiBinder extends UiBinder<Widget, RecentEvent> {
     }

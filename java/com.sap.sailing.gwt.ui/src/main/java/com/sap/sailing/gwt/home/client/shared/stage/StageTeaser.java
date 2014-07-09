@@ -18,6 +18,8 @@ public abstract class StageTeaser extends Composite {
     @UiField HTMLPanel stageTeaserBandsPanel;
     @UiField DivElement teaserImage;
 
+    private final static String DEFAULT_STAGE_IMAGE_URL = "http://static.sapsailing.com/ubilabsimages/default/default_stage_event_teaser.jpg"; 
+    
     interface StageTeaserUiBinder extends UiBinder<Widget, StageTeaser> {
     }
     
@@ -27,9 +29,9 @@ public abstract class StageTeaser extends Composite {
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        String imageUrl = "http://static.sapsailing.com/ubilabsimages/Bundesliga2014/Bundesliga2014Regatta2_stagebackground.jpg";
-        String backgroundImage = "url(" + imageUrl + ")";
+        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : DEFAULT_STAGE_IMAGE_URL;
 
+        String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
     }
 }
