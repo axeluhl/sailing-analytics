@@ -20,10 +20,8 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.media_slideshow}">
-        <div class="{local_res.css.media_slideshow_data}">
-            <g:HTMLPanel ui:field="photoThumbsPanel" />
-        </div>
-        <div ui:field="photoUrl" data-url="photoUrl" style="background-image: url('images/xxx')" class="{local_res.css.media_photo}"></div>
+        <div ui:field="photoUrlsData" class="{local_res.css.media_slideshow_data}"></div>
+        <div ui:field="currentPhotoUrl" data-url="photoUrl" style="background-image: url('images/xxx')" class="{local_res.css.media_photo}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsprev}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsnext}"></div>
       </div>
@@ -40,10 +38,8 @@
     </div>
   </div>
   <div class="{res.mainCss.grid} {res.mainCss.lightbox}">
-    <div class="{res.mainCss.lightbox_data}">
-        <g:HTMLPanel ui:field="videoThumbsPanel" />
-    </div>
-    <g:HTMLPanel ui:field="videoPanel" />
+    <div ui:field="videoLightBoxData" class="{res.mainCss.lightbox_data}"></div>
+    <g:HTMLPanel ui:field="videosPanel" />
   </div>
 </div>
     </g:HTMLPanel>

@@ -8,8 +8,8 @@
     <g:HTMLPanel>
 
 <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-  <figure data-src="videoFile" class="{local_res.css.videopreview} {res.mainCss.lightbox_item}"><img src="images/videoThumb"></img>
-    <figcaption><a href="videoLink" class="{local_res.css.videopreview_title}"><span ui:field="videoTitle" /></a>
+  <figure ui:field="videoFile" data-src="" class="{local_res.css.videopreview} {res.mainCss.lightbox_item}"><img ui:field="videoThumbImage" />
+    <figcaption><div class="{local_res.css.videopreview_title}"><span ui:field="videoTitle" /></div>
       <time><span ui:field="videoTime" /></time>
     </figcaption>
   </figure>
