@@ -9,15 +9,13 @@
 		<!-- The main stage -->
 <div class="{local_res.css.stage}">
   <div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
-    <div class="{local_res.css.swiperwrapper}">
-        <g:HTMLPanel ui:field="stageElementsPanel" />
-    </div>
+        <g:HTMLPanel ui:field="stageElementsPanel" styleName="{local_res.css.swiperwrapper}" />
   </div>
   <div class="{local_res.css.stage_progress}">
     <div class="{local_res.css.stage_progress_bar}"></div>
   </div>
-  <g:Anchor ui:field="nextStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsprev}"></g:Anchor>
-  <g:Anchor ui:field="prevStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsnext}"></g:Anchor>
+  <g:Anchor ui:field="prevStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsprev}"></g:Anchor>
+  <g:Anchor ui:field="nextStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsnext}"></g:Anchor>
 </div>
 	</g:HTMLPanel>
 </ui:UiBinder>
