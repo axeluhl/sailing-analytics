@@ -83,6 +83,12 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
     public double getAverageLatitudeDeg() {
         return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
     }
+    
+    @Override
+    public double getCosineOfAverageLatitude() {
+        return Math.cos(getAverageLatitudeDeg() / 180.0 * Math.PI);
+    }
+    
 
     private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {

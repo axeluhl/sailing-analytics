@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 public class Swarm implements TimeListener {
@@ -210,7 +211,7 @@ public class Swarm implements TimeListener {
                 // also, its particle.v field is updated based on its new position from the vector field
                 particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
-                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x;
+                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x / ((AverageLatitudeProvider) field).getCosineOfAverageLatitude();
                 particle.currentPosition = new DegreePosition(latDeg, lngDeg);
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
