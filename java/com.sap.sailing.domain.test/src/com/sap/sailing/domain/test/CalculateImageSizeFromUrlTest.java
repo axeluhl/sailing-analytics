@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -18,20 +17,15 @@ import org.junit.Test;
 public class CalculateImageSizeFromUrlTest {
 
     @Test
-    public void calculateImageSizeFromUrl(){
-        try {
-            int width = 350;
-            int height = 150;
-            Dimension size = calculate("http://placehold.it/"+width+"x"+height);
-            assertTrue(size.getWidth()==width);
-            assertTrue(size.getHeight()==height);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public void calculateImageSizeFromUrl() throws IOException {
+        int width = 350;
+        int height = 150;
+        Dimension size = calculate("http://placehold.it/" + width + "x" + height);
+        assertTrue(size.getWidth() == width);
+        assertTrue(size.getHeight() == height);
     }
-    
-    public Dimension calculate(String urlS) throws IOException{
+
+    public Dimension calculate(String urlS) throws IOException {
         ImageInputStream in = null;
         try {
             URL url = new URL(urlS);
@@ -47,11 +41,10 @@ public class CalculateImageSizeFromUrlTest {
                     reader.dispose();
                 }
             }
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } finally {
-            if (in != null) in.close();
+            if (in != null) {
+                in.close();
+            }
         }
         return null;
     }
