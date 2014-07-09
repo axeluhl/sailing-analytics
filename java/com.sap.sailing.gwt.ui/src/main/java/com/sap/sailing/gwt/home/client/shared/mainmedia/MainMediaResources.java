@@ -14,6 +14,7 @@ public interface MainMediaResources extends ClientBundle {
         String media();
         String media_photo();
         String media_slideshow();
+        String media_slideshow_data();
         String media_slideshow_controls();
         String media_slideshow_controlsnext();
         String media_slideshow_controlsprev();

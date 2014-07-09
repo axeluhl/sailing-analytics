@@ -1,20 +1,29 @@
-/**
- * Websites main media element
- */
 .media {
-  background: #f8f8f8;
-  font-size: 16px;
+  font-size: 15px;
   font-size: 1rem;
 }
 .media_photo {
   width: 100%;
   height: 100%;
+  -webkit-transition: margin 1s ease;
+  -moz-transition: margin 1s ease;
+  -o-transition: margin 1s ease;
+  -ms-transition: margin 1s ease;
+  transition: margin 1s ease;
+  position: absolute;
+  background-position: center center;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 .media_slideshow {
   position: relative;
   height: 550px;
   width: 830px;
   margin: 0 auto;
+  overflow: hidden;
+}
+.media_slideshow_data {
+  display: none;
 }
 .media_slideshow_controls {
   position: absolute;
@@ -23,7 +32,6 @@
   cursor: pointer;
   z-index: 10;
 }
-
 .media_slideshow_controlsnext,
 .media_slideshow_controlsprev {
   top: 50%;
@@ -65,9 +73,9 @@
   color: #fff;
 }
 .videopreview {
-  font-size: 16px;
+  font-size: 15px;
   font-size: 1rem;
-  margin-bottom: 2.5em;
+  margin-bottom: 2.666666666666667em;
   cursor: pointer;
 }
 .videopreview:before {
@@ -88,7 +96,11 @@
   background-size: contain;
 }
 .videopreview_title {
-  font-size: 1.375em;
+  font-size: 1.466666666666667em;
   font-weight: bold;
   margin: 0;
+  color: #fff;
+}
+.videopreview time {
+  display: block;
 }

@@ -6,22 +6,26 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
     <g:HTMLPanel>
+
+<!-- Partial for media like image and video-->
 <div class="{res.mainCss.mainsection} {local_res.css.media}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
-        <h3 class="{res.mainCss.mainsection_header_title}">Sailing loves Photography</h3>
-        <p>Get lost in the latest and most beautiful impressions from your favorite sailing event.</p>
+        <h3 class="{res.mainCss.mainsection_header_title}"><ui:text from='{i18n.mainMediaTitle}'/></h3>
+        <p><ui:text from='{i18n.mainMediaSubtitle}'/></p>
       </header>
     </div>
   </div>
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.media_slideshow}">
-        <div ui:field="photoImage" class="{local_res.css.media_photo}"></div>
+        <div class="{local_res.css.media_slideshow_data}">
+            <g:HTMLPanel ui:field="photoThumbsPanel" />
+        </div>
+        <div ui:field="photoUrl" data-url="photoUrl" style="background-image: url('images/xxx')" class="{local_res.css.media_photo}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsprev}"></div>
         <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsnext}"></div>
-        <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsfullsize}"></div>
       </div>
     </div>
   </div>
@@ -30,15 +34,16 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
-        <h3 class="{res.mainCss.mainsection_header_title}">Recent Video Entries</h3>
-        <p>Immerse yourself in the world of sailing and check out our latest events for more videos.</p>
+        <h3 class="{res.mainCss.mainsection_header_title}"><ui:text from='{i18n.mainMediaVideosTitle}'/></h3>
+        <p><ui:text from='{i18n.mainMediaVideosSubtitle}'/></p>
       </header>
     </div>
   </div>
-  <div class="{res.mainCss.grid}">
-      <s:mainmedia.RecentEventVideo ui:field='eventVideo1'/>
-      <s:mainmedia.RecentEventVideo ui:field='eventVideo2'/>
-      <s:mainmedia.RecentEventVideo ui:field='eventVideo3'/>
+  <div class="{res.mainCss.grid} {res.mainCss.lightbox}">
+    <div class="{res.mainCss.lightbox_data}">
+        <g:HTMLPanel ui:field="videoThumbsPanel" />
+    </div>
+    <g:HTMLPanel ui:field="videoPanel" />
   </div>
 </div>
     </g:HTMLPanel>

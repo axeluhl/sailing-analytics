@@ -29,17 +29,7 @@ public interface EventOverviewResources extends ClientBundle {
         String latestraceresults_detail_datetime();
         String columns();
         String latestraceresults_detail_wrapperimage();
-        String lightbox();
-        String lightbox_overlay();
-        String lightbox_overlayhidden();
-        String lightbox_content();
-        String lightbox_contenthidden();
-        String lightbox_content_enlargedimage();
-        String lightbox_content_enlargedimage_caption();
-        String lightbox_content_enlargedimage_close();
         String media_slideshow_controls();
-        String lightbox_data();
-        String lightbox_photo();
         String mediateaser();
         String mediateaser_title();
         String mediateaser_title_link();
