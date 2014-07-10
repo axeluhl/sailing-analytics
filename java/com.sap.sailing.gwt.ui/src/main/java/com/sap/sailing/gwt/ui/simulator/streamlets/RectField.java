@@ -10,9 +10,8 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
-import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 
-public class RectField implements VectorField, AverageLatitudeProvider {
+public class RectField implements VectorField {
 
     private final Vector[][] field;
 
@@ -171,16 +170,6 @@ public class RectField implements VectorField, AverageLatitudeProvider {
     @Override
     public double getParticleFactor() {
         return this.particleFactor;
-    }
-    
-    @Override
-    public double getAverageLatitudeDeg() {
-        return 0.0;
-    }
-    
-    @Override
-    public double getCosineOfAverageLatitude() {
-        return 1.0;
     }
     
 }

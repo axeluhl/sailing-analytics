@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 public class Swarm implements TimeListener {
@@ -48,6 +47,7 @@ public class Swarm implements TimeListener {
     private boolean swarmContinue = true;
     private Bounds visibleBoundsOfField;
     private Date timePoint;
+    private double cosineOfAverageLatitude;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
             VectorField vectorField, StreamletParameters streamletPars) {
@@ -58,6 +58,7 @@ public class Swarm implements TimeListener {
         timer.addTimeListener(this);
         this.parameters = streamletPars;
         timePoint = timer.getTime();
+        cosineOfAverageLatitude = 1.0; // default to equator
     }
 
     public void start(int animationIntervalMillis) {
@@ -142,6 +143,7 @@ public class Swarm implements TimeListener {
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         this.nParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
                 * this.parameters.swarmScale);
+        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatRad()+visibleBoundsOfField.getNorthEast().getLatRad())/2);
     };
 
     private void startLoop(final int animationIntervalMillis) {
@@ -211,7 +213,7 @@ public class Swarm implements TimeListener {
                 // also, its particle.v field is updated based on its new position from the vector field
                 particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                 double latDeg = particle.currentPosition.getLatDeg() + speed * particle.v.y;
-                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x / ((AverageLatitudeProvider) field).getCosineOfAverageLatitude();
+                double lngDeg = particle.currentPosition.getLngDeg() + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = new DegreePosition(latDeg, lngDeg);
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
