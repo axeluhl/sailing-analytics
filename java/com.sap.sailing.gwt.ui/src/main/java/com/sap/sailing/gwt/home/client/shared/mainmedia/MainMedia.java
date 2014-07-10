@@ -7,20 +7,28 @@ import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class MainMedia extends Composite {
+    
+    private static final MainMediaResources.LocalCss STYLES = MainMediaResources.INSTANCE.css(); 
+
     @UiField HTMLPanel videosPanel;
     @UiField DivElement videoLightBoxData;
+    
+    @UiField HTMLPanel mediaSlides;
 
-    @UiField DivElement photoUrlsData;
-    @UiField DivElement currentPhotoUrl;
+    private Swiper swiper;
     
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
@@ -59,14 +67,29 @@ public class MainMedia extends Composite {
             Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));  
         }
 
-        currentPhotoUrl.setAttribute("data-url", "#1");
-        String imagePath = "url(" + photoGalleryUrls.get(0) + ")";
-        currentPhotoUrl.getStyle().setBackgroundImage(imagePath);
-        
-        String slideShowData = "";
-        for(int i = 0; i < gallerySize; i++) {
-            slideShowData += photoGalleryUrls.get(0) + ",#" + (i+1) + ";";
+        for(String url : photoGalleryUrls) {
+            Image imageSlide = new Image(url);
+            imageSlide.addStyleName(STYLES.media_photo());
+            imageSlide.addStyleName(STYLES.media_swiperslide());
+            mediaSlides.add(imageSlide);
         }
-        photoUrlsData.setInnerText(slideShowData);
+        
+        this.swiper = Swiper.createWithDefaultOptions(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+
     }
+
+    @UiHandler("nextPictureLink")
+    public void nextStageTeaserLinkClicked(ClickEvent e) {
+        if (this.swiper != null) {
+            this.swiper.swipeNext();
+        }
+    }
+
+    @UiHandler("prevPictureLink")
+    public void prevStageTeaserLinkClicked(ClickEvent e) {
+        if (this.swiper != null) {
+            this.swiper.swipePrev();
+        }
+    }
+
 }

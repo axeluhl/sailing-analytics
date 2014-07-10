@@ -13,6 +13,8 @@ public final class Swiper extends JavaScriptObject {
     public static native Swiper createWithDefaultOptions(String containerClass, String wrapperClass, String slideClass) /*-{
         var options = {
           loop: true,
+          mode: 'horizontal',
+          centeredSlides: true,
 //          onSlideChangeStart: this.resetProgressbar,
 //          onTouchMoveStart: this.stopProgressbar,
 //          onTouchEnd: this.onProgress,

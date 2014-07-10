@@ -18,13 +18,11 @@
     </div>
   </div>
   <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-      <div class="{local_res.css.media_slideshow}">
-        <div ui:field="photoUrlsData" class="{local_res.css.media_slideshow_data}"></div>
-        <div ui:field="currentPhotoUrl" data-url="photoUrl" style="background-image: url('images/xxx')" class="{local_res.css.media_photo}"></div>
-        <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsprev}"></div>
-        <div class="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsnext}"></div>
-      </div>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.media_swipecontainer}">
+      <g:HTMLPanel ui:field="mediaSlides" styleName="{local_res.css.media_swipewrapper}">
+      </g:HTMLPanel>
+        <g:Anchor ui:field="prevPictureLink" styleName="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsprev}"/>
+        <g:Anchor ui:field="nextPictureLink" styleName="{local_res.css.media_slideshow_controls} {local_res.css.media_slideshow_controlsnext}"/>
     </div>
   </div>
 </div>
