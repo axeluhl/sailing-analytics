@@ -49,6 +49,15 @@
 						    cross the start line, a new start time would be inferred implicitly, showing scores in the leaderboard
 						    and starting to compute all sorts of metrics. To avoid this, uncheck the checkbox
 						    "Use start time inference from start mark passings" in the regatta create / edit dialog.</li>
+						    
+						<li>When creating a regatta in the administration console, the regatta name is now taken from the create
+						    dialog's "Name" field as-is and is no longer automatically extended by appending the boat class name
+						    in parentheses to the base name. This is important to know if you so far have created several regattas
+						    within the scope of the same event by simply providing the event name and the boat class name, relying
+						    on the administration console to extend the regatta name by the boat class name because now with this
+						    strategy your regattas would all be named the same. If you want to continue using some base name and
+						    see the boat class name after the base name in parentheses you will now have to add that to the "Name"
+						    field yourself, as in "Kieler Woche 2014 (470)".</li>
 					</ul>
 					
 					<h2 class="articleSubheadline">March 2014</h2>
