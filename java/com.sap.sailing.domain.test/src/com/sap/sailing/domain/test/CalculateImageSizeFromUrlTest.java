@@ -1,18 +1,25 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.junit.Test;
+
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.impl.EventImpl;
 
 public class CalculateImageSizeFromUrlTest {
 
@@ -47,5 +54,16 @@ public class CalculateImageSizeFromUrlTest {
             }
         }
         return null;
+    }
+    
+    @Test
+    public void testEventImageSize() throws MalformedURLException, InterruptedException, ExecutionException {
+        Event e = new EventImpl("Event Name", /* startDate */ null, /* endDate */ null, "Kiel", /* isPublic */ true, UUID.randomUUID());
+        int width = Math.max(10, (int) (200. * Math.random()));
+        int height = Math.max(10, (int) (100. * Math.random()));
+        URL imageURL = new URL("http://placehold.it/" + width + "x" + height);
+        e.addImageURL(imageURL);
+        Dimension expectedSize = new Dimension(width, height);
+        assertEquals(expectedSize, e.getImageSize(imageURL));
     }
 }
