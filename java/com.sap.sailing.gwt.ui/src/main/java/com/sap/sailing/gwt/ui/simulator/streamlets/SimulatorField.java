@@ -13,8 +13,9 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
+import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 
-public class SimulatorField implements VectorField {
+public class SimulatorField implements VectorField, AverageLatitudeProvider {
     private boolean swarmDebug = false;
 
     private Position rcStart;
@@ -282,4 +283,15 @@ public class SimulatorField implements VectorField {
     public double getParticleFactor() {
         return this.particleFactor;
     }
+    
+    @Override
+    public double getAverageLatitudeDeg() {
+        return 0.0;
+    }
+    
+    @Override
+    public double getCosineOfAverageLatitude() {
+        return 1.0;
+    }
+    
 }

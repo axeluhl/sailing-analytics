@@ -33,6 +33,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     
     public static interface AverageLatitudeProvider {
         double getAverageLatitudeDeg();
+        double getCosineOfAverageLatitude();
     }
     
     public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance,
