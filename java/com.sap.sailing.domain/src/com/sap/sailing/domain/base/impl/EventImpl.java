@@ -146,51 +146,59 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void addImageURL(URL imageURL) {
         super.addImageURL(imageURL);
-        imageSizeFetchers.remove(imageURL);
-        getOrCreateImageSizeCalculator(imageURL);
+        refreshImageSizeFetcher(imageURL);
+    }
+
+    private void refreshImageSizeFetcher(URL imageURL) {
+        if (imageURL != null) {
+            removeImageSizeFetcher(imageURL);
+            getOrCreateImageSizeCalculator(imageURL);
+        }
     }
 
     @Override
     public void removeImageURL(URL imageURL) {
         super.removeImageURL(imageURL);
-        imageSizeFetchers.remove(imageURL);
+        removeImageSizeFetcher(imageURL);
+    }
+
+    private void removeImageSizeFetcher(URL imageURL) {
+        if (imageURL != null) {
+            imageSizeFetchers.remove(imageURL);
+        }
     }
 
     @Override
     public void setImageURLs(Iterable<URL> imageURLs) {
         super.setImageURLs(imageURLs);
         for (URL imageURL : imageURLs) {
-            imageSizeFetchers.remove(imageURL);
-            getOrCreateImageSizeCalculator(imageURL);
+            refreshImageSizeFetcher(imageURL);
         }
     }
 
     @Override
     public void addSponsorImageURL(URL sponsorImageURL) {
         super.addSponsorImageURL(sponsorImageURL);
-        imageSizeFetchers.remove(sponsorImageURL);
-        getOrCreateImageSizeCalculator(sponsorImageURL);
+        refreshImageSizeFetcher(sponsorImageURL);
     }
 
     @Override
     public void removeSponsorImageURL(URL sponsorImageURL) {
         super.removeSponsorImageURL(sponsorImageURL);
-        imageSizeFetchers.remove(sponsorImageURL);
+        removeImageSizeFetcher(sponsorImageURL);
     }
 
     @Override
     public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
         super.setSponsorImageURLs(sponsorImageURLs);
         for (URL imageURL : sponsorImageURLs) {
-            imageSizeFetchers.remove(imageURL);
-            getOrCreateImageSizeCalculator(imageURL);
+            refreshImageSizeFetcher(imageURL);
         }
     }
 
     @Override
     public void setLogoImageURL(URL logoImageURL) {
         super.setLogoImageURL(logoImageURL);
-        imageSizeFetchers.remove(logoImageURL);
-        getOrCreateImageSizeCalculator(logoImageURL);
+        refreshImageSizeFetcher(logoImageURL);
     }
 }
