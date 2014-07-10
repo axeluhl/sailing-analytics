@@ -46,7 +46,7 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         regatta = racingEventService.createRegatta(regattaName, boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
         List<Competitor> competitors = createCompetitors(4);

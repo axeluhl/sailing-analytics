@@ -94,7 +94,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, UUID.randomUUID(), series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertTrue(master.getAllRegattas().iterator().hasNext());
         assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));

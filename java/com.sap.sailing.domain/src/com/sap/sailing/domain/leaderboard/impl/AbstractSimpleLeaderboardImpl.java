@@ -348,6 +348,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
 
         @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
@@ -1287,7 +1292,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         } else {
             result.discardThresholds = null;
         }
-        // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
+        // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep
+        // invalidating the ranks cache in TrackedLegImpl. Then problem then is that the sorting based on wind data is repeated for
+        // each competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
         // details are requested only once and pass them into getLeaderboardEntryDTO
         final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
@@ -1300,7 +1307,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         trackedRace.getRace().getCourse().lockForRead();
                         try {
                             for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache));
                             }
                         } finally {
                             trackedRace.getRace().getCourse().unlockAfterRead();
@@ -1679,7 +1686,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (legRanks != null) {
                 result.rank = legRanks.get(trackedLeg.getCompetitor());
             } else {
-                result.rank = trackedLeg.getRank(timePoint);
+                result.rank = trackedLeg.getRank(timePoint, cache);
             }
             result.started = trackedLeg.hasStartedLeg(timePoint);
             Speed velocityMadeGood;

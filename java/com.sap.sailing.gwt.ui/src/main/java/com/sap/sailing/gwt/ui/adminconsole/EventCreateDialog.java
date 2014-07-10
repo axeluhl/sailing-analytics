@@ -1,18 +1,20 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public class EventCreateDialog extends EventDialog {
 
     public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringConstants, existingEvents), stringConstants, callback);
-
+        super(new EventParameterValidator(stringConstants, existingEvents), stringConstants,
+                /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback);
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);
         descriptionEntryField = createTextArea(null);

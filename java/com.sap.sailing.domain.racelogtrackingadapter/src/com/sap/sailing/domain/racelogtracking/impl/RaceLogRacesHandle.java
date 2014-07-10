@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import java.util.Collections;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -22,12 +21,12 @@ public class RaceLogRacesHandle implements RaceHandle {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        return getRaces(-1);
+    public RaceDefinition getRace() {
+        return getRace(-1);
     }
 
     @Override
-    public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
+    public RaceDefinition getRace(long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
         Set<RaceDefinition> raceDefs = tracker.getRaces();
 
@@ -54,7 +53,7 @@ public class RaceLogRacesHandle implements RaceHandle {
                 }
             }
         }
-        return result == null ? null : Collections.singleton(result);
+        return result == null ? null : result;
     }
 
     @Override

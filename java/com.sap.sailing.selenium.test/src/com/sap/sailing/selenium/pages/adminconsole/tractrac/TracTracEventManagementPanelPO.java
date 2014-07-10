@@ -238,28 +238,22 @@ public class TracTracEventManagementPanelPO extends PageArea {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         List<DataEntryPO> entries = table.getEntries();
         Iterator<DataEntryPO> iterator = entries.iterator();
-        
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
-            
             String event = entry.getColumnContent(0);
             String race = entry.getColumnContent(1);
             String boatClass = entry.getColumnContent(2);
-            
             TrackableRaceDescriptor descriptor = new TrackableRaceDescriptor(event, race, boatClass);
-            
-            if(!races.contains(descriptor))
+            if (!races.contains(descriptor)) {
                 iterator.remove();
+            }
         }
-                
         table.selectEntries(entries);
-        
         this.startTrackingButton.click();
-        
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        
-        if(condition.apply(this.driver) == null)
+        if (condition.apply(this.driver) == null) {
             waitForAjaxRequests();
+        }
     }
     
     public TrackedRacesListPO getTrackedRacesList() {

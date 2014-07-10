@@ -172,14 +172,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return track.getMaximumSpeedOverGround(legStart.getTimePoint(), to);
     }
 
+    
     @Override
-    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
         if (hasFinishedLeg(timePoint)) {
             return Distance.NULL;
         } else {
             Distance result = null;
             for (Mark mark : getLeg().getTo().getMarks()) {
-                Distance d = getWindwardDistanceTo(mark, timePoint, windPositionMode);
+                Distance d = getWindwardDistanceTo(mark, timePoint, windPositionMode, cache);
                 if (result == null || d != null && d.compareTo(result) < 0) {
                     result = d;
                 }
@@ -188,13 +190,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
     }
 
+    @Override
+    public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getWindwardDistanceToGo(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+
     /**
      * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
      * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned.
+     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned. A
+     * cache for wind and leg type / bearing can be passed to avoid their redundant calculation during a single
+     * round-trip.
+     * 
+     * @throws NoWindException
      */
-    private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
+    private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
@@ -208,7 +220,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedMarkPosition == null) {
             return null;
         }
-        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at, windPositionMode);
+        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at, windPositionMode, cache);
     }
 
     /**
@@ -264,9 +276,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     @Override
     public int getRank(TimePoint timePoint) {
+        return getRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         int result = 0;
         if (hasStartedLeg(timePoint)) {
-            List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
+            List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint, cache);
             result = competitorTracksByRank.indexOf(this)+1;
         }
         return result;
@@ -363,6 +380,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getWindwardDistanceToOverallLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
         Competitor leader = getTrackedRace().getOverallLeader(timePoint);
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
@@ -384,14 +406,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
                             Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode);
+                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
                             result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
                             result = new MeterDistance(result.getMeters()
                                     + getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache)
                                             .getMeters());
                             break;
                         }

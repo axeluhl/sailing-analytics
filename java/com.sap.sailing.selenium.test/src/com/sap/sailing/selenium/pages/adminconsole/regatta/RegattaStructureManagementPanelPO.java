@@ -1,14 +1,11 @@
 package com.sap.sailing.selenium.pages.adminconsole.regatta;
 
-import java.util.List;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
 public class RegattaStructureManagementPanelPO extends PageArea {
@@ -47,30 +44,15 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         RegattaCreateDialogPO createRegattaDialog = startRegattaCreation();
         createRegattaDialog.setRegattaName(regatta.getName());
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
-        
         SeriesCreateDialogPO addSeriesDialog = createRegattaDialog.addSeries();
         addSeriesDialog.setSeriesName(DEFAULT_SERIES_NAME);
-        
         addSeriesDialog.pressOk();
-        
         // QUESTION: How do we handle an error (here or in the dialog)?
         createRegattaDialog.pressOk();
     }
     
-    public void removeRegatta(RegattaDescriptor regatta) {
-        // Select the regatta and click the remove button
-    }
-    
-    public void removeRegattas(List<RegattaDescriptor> regattas) {
-        // Select all regattas and click the remove button
-    }
-    
     public RegattaListCompositePO getRegattaList() {
         return new RegattaListCompositePO(this.driver, this.regattaList);
-    }
-    
-    public void selectRegatta(RegattaDescriptor regatta) {
-        
     }
     
     public RegattaDetailsCompositePO getRegattaDetails(RegattaDescriptor regatta) {
@@ -81,9 +63,9 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     }
     
     public RegattaDetailsCompositePO getRegattaDetails() {
-        if(this.regattaDetails.isDisplayed())
+        if (this.regattaDetails.isDisplayed()) {
             return new RegattaDetailsCompositePO(this.driver, this.regattaDetails);
-        
+        }
         return null;
     }
 }

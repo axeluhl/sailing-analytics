@@ -280,10 +280,6 @@ public interface Leaderboard extends LeaderboardBase {
     
     /**
      * Returns the total rank of the given competitor.
-     * @param competitor
-     * @param timePoint
-     * @return
-     * @throws NoWindException
      */
     int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 

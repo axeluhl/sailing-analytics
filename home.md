@@ -16,6 +16,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
+  * [[JMX Support|wiki/jmx]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
@@ -47,7 +48,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
-  * [[Kieler Woche 2014 event page|wiki/kielerwoche2014]]
+  * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
 
 ### Internal services (not related to wiki but useful)
 

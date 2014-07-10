@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.Util;
 
 public interface DynamicTrackedRace extends TrackedRace {
@@ -96,6 +97,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
     
     void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
+    
+    void onAbortedByRaceCommittee(Flags flag);
 
     void invalidateStartTime();
     

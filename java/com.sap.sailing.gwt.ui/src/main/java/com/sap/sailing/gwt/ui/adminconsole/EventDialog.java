@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -42,6 +43,12 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     protected StringListInlineEditorComposite imageURLList;
     protected StringListInlineEditorComposite videoURLList;
     protected StringListInlineEditorComposite sponsorImageURLList;
+    
+    /**
+     * Allows subclasses to "park" a set of associated leaderboard groups for re-attachment to the new {@link EventDTO} produced
+     * by {@link #getResult()}.
+     */
+    private final Iterable<LeaderboardGroupDTO> leaderboardGroups;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -105,10 +112,15 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
 
     }
 
-    public EventDialog(EventParameterValidator validator, StringMessages stringMessages,
+    /**
+     * @param leaderboardGroups even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
+     * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
+     */
+    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, Iterable<LeaderboardGroupDTO> leaderboardGroups,
             DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
+        this.leaderboardGroups = leaderboardGroups;
         this.stringMessages = stringMessages;
         final ValueChangeHandler<List<String>> valueChangeHandler = new ValueChangeHandler<List<String>>() {
             @Override
@@ -140,6 +152,9 @@ public abstract class EventDialog extends DataEntryDialog<EventDTO> {
     @Override
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
+        for (LeaderboardGroupDTO lg : leaderboardGroups) {
+            result.addLeaderboardGroup(lg);
+        }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
