@@ -270,7 +270,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
+    Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
      * @param series the series must not have any {@link RaceColumn}s yet

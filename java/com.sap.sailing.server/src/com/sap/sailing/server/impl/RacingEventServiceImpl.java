@@ -953,19 +953,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Regatta getOrCreateDefaultRegatta(String baseRegattaName, String boatClassName, Serializable id) {
-        String defaultRegattaName = RegattaImpl.getDefaultName(baseRegattaName, boatClassName);
-        Regatta result = regattasByName.get(defaultRegattaName);
+    public Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id) {
+        Regatta result = regattasByName.get(name);
         if (result == null) {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                     domainObjectFactory);
-            result = new RegattaImpl(
-                    raceLogStore,
-                    RegattaImpl.getDefaultName(baseRegattaName, boatClassName),
-                    getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
-                    this,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT),
-                    id, null);
+            result = new RegattaImpl(raceLogStore, name, getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
+                    this, getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
         }

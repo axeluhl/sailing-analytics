@@ -167,7 +167,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final UUID regattaId = UUID.randomUUID();
-        Regatta masterRegatta = master.getOrCreateDefaultRegatta(baseEventName, boatClassName, regattaId);
+        Regatta masterRegatta = master.getOrCreateDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, regattaId);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
