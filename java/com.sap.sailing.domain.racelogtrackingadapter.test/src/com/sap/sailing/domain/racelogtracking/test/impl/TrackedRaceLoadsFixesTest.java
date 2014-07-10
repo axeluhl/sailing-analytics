@@ -68,7 +68,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i+1000, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, "regatta", boatClass, null, null, "a", null));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         
@@ -110,7 +110,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, "regatta", boatClass, null, null, "a", null));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
                 EmptyWindStore.INSTANCE, store, 0, 0, 0);
         

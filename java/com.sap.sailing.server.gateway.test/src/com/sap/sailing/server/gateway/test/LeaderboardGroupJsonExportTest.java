@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -45,7 +46,7 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        regatta = racingEventService.createRegatta(regattaName, boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
+        regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);

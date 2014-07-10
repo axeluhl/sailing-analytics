@@ -2423,7 +2423,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     }
                     regatta = getService().createRegatta(
-                            replayRaceDTO.rsc,
+                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, boatClass.trim()),
                             boatClass.trim(),
                             RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                             Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,

@@ -274,9 +274,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * @param series the series must not have any {@link RaceColumn}s yet
-     * @param useStartTimeInference TODO
      */
-    Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference);
+    Regatta createRegatta(String regattaName, String boatClassName, Serializable id, Iterable<? extends Series> series,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
+            boolean useStartTimeInference);
     
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
 
@@ -445,11 +446,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
-     * @param useStartTimeInference TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
-    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+    Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, boolean useStartTimeInference);
 

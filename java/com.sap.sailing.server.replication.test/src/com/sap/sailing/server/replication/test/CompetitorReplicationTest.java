@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -69,7 +70,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         String boatClassName = "Kielzugvogel";
         Integer regattaId = 12345;
         Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, regattaId, series,
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";

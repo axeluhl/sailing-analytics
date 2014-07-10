@@ -961,7 +961,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     domainObjectFactory);
             result = new RegattaImpl(
                     raceLogStore,
-                    baseRegattaName,
+                    RegattaImpl.getDefaultName(baseRegattaName, boatClassName),
                     getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                     this,
                     getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT),
@@ -973,10 +973,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Regatta createRegatta(String baseRegattaName, String boatClassName, Serializable id,
+    public Regatta createRegatta(String fullRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, boolean useStartTimeInference) {
-        com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName,
+        com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(fullRegattaName,
                 boatClassName, id, series, persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -998,13 +998,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName,
+    public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, boolean useStartTimeInference) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
-        Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
+        Regatta regatta = new RegattaImpl(raceLogStore, fullRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), series, persistent, scoringScheme, id, courseArea, useStartTimeInference);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
@@ -1183,7 +1183,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regatta.getDefaultCourseArea() != null) {
             courseAreaId = regatta.getDefaultCourseArea().getId();
         }
-        replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
+        replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
                 .getBoatClass().getName(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
                 regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference()));
@@ -1230,7 +1230,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     regatta.addRaceColumnListener(raceLogReplicator);
                     regatta.addRaceColumnListener(raceLogScoringReplicator);
 
-                    replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null
+                    replicate(new AddDefaultRegatta(regatta.getName(), regatta.getBoatClass() == null ? null
                             : regatta.getBoatClass().getName(), regatta.getId()));
                     RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
                     for (RaceDefinition race : regatta.getAllRaces()) {
