@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -39,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements AverageLatitudeProvider {
+public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -59,13 +58,11 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
     
     private long latitudeCount;
     private double latitudeSum;
-    private double cosineOfAverageLatitude;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages) {
         super(map, zIndex);
-        cosineOfAverageLatitude = 1.0; // assuming "equator" as default
         this.scheduler = Scheduler.get();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -81,17 +78,10 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         getCanvas().getElement().setId("swarm-display");
     }
 
-    @Override
     public double getAverageLatitudeDeg() {
         return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
     }
     
-    @Override
-    public double getCosineOfAverageLatitude() {
-        return cosineOfAverageLatitude;
-    }
-    
-
     private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
@@ -104,7 +94,6 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         if (latitudeCount > 0) {
             windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
         }
-        cosineOfAverageLatitude = Math.cos(getAverageLatitudeDeg() / 180.0 * Math.PI);
     }
 
     public void startStreamlets() {
