@@ -161,7 +161,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final DomainFactory masterDomainFactory = master.getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName1 = "Test Race 1";
         final String raceName2 = "Test Race 2";
