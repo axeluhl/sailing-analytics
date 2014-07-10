@@ -60,6 +60,7 @@ public class EventImpl extends EventBaseImpl implements Event {
             leaderboardGroups = new ConcurrentLinkedQueue<>();
         }
         this.imageSizeFetchers = new ConcurrentHashMap<>();
+        this.executor = Executors.newCachedThreadPool();
     }
     
     @Override
