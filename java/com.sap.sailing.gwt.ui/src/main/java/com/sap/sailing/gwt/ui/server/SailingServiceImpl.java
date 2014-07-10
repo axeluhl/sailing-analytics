@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -180,6 +181,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -241,6 +243,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -2464,7 +2467,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint, String leaderboardGroupName, String leaderboardName) throws NoWindException {
+            TimePoint timePoint, String leaderboardGroupName, String leaderboardName, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Double result = null;
         Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
@@ -2480,7 +2483,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
                 if (trackedLeg != null) {
-                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT);
+                    Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint, WindPositionMode.EXACT, cache);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
                 }
                 break;
@@ -2492,7 +2495,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
                 if (trackedLeg != null) {
-                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE);
+                    result = trackedLeg.getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE, cache);
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -2503,7 +2506,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case RACE_RANK:
                 if (trackedLeg != null) {
-                    result = (double) trackedLeg.getRank(timePoint);
+                    result = (double) trackedLeg.getRank(timePoint, cache);
                 }
                 break;
             case REGATTA_RANK:
@@ -2531,7 +2534,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             case BEAT_ANGLE:
                 if (trackedLeg != null) {
-                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint);
+                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
                 }
                 break;
@@ -2555,7 +2558,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
-
+            final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
@@ -2572,8 +2575,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     try {
                                         for (MarkPassing markPassing : competitorMarkPassings) {
                                             MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                                            WindLegTypeAndLegBearingCache cache = cachesByTimePoint.get(time);
+                                            if (cache == null) {
+                                                cache = new LeaderboardDTOCalculationReuseCache(time);
+                                                cachesByTimePoint.put(time, cache);
+                                            }
                                             Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
-                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
+                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName, cache);
                                             if (competitorMarkPassingsData != null) {
                                                 markPassingsData.add(new com.sap.sse.common.Util.Triple<String, Date, Double>(markPassing
                                                         .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
@@ -2586,8 +2594,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 if (startTime != null && endTime != null) {
                                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
                                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                                        WindLegTypeAndLegBearingCache cache = cachesByTimePoint.get(time);
+                                        if (cache == null) {
+                                            cache = new LeaderboardDTOCalculationReuseCache(time);
+                                            cachesByTimePoint.put(time, cache);
+                                        }
                                         Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
-                                                competitor, time, leaderboardGroupName, leaderboardName);
+                                                competitor, time, leaderboardGroupName, leaderboardName, cache);
                                         if (competitorRaceData != null) {
                                             raceData.add(new com.sap.sse.common.Util.Pair<Date, Double>(time.asDate(), competitorRaceData));
                                         }

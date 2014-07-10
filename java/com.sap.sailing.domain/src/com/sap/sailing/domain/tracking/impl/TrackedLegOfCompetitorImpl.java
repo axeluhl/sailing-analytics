@@ -380,6 +380,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException {
+        return getWindwardDistanceToOverallLeader(timePoint, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
         Competitor leader = getTrackedRace().getOverallLeader(timePoint);
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
@@ -401,14 +406,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
                             Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode);
+                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
                             result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
                             result = new MeterDistance(result.getMeters()
                                     + getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache)
                                             .getMeters());
                             break;
                         }

@@ -1043,8 +1043,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             try {
                 if (rankedCompetitors == null) {
                     rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the
-                                                                           // write
-                                                                           // lock after updating the cache
+                                                                           // write lock after updating the cache
                     if (rankedCompetitors == null) {
                         RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
                         rankedCompetitors = new ArrayList<Competitor>();
