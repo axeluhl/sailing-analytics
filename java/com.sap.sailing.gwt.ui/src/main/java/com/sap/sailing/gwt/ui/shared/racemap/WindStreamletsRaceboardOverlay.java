@@ -59,11 +59,13 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
     
     private long latitudeCount;
     private double latitudeSum;
+    private double cosineOfAverageLatitude;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages) {
         super(map, zIndex);
+        cosineOfAverageLatitude = 1.0; // assuming "equator" as default
         this.scheduler = Scheduler.get();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -86,7 +88,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
     
     @Override
     public double getCosineOfAverageLatitude() {
-        return Math.cos(getAverageLatitudeDeg() / 180.0 * Math.PI);
+        return cosineOfAverageLatitude;
     }
     
 
@@ -102,6 +104,7 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         if (latitudeCount > 0) {
             windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
         }
+        cosineOfAverageLatitude = Math.cos(getAverageLatitudeDeg() / 180.0 * Math.PI);
     }
 
     public void startStreamlets() {
