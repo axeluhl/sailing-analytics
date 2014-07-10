@@ -842,18 +842,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException {
         Bearing beatAngle = null;
         Bearing projectToBearing;
-        if (cache.getLegType(getTrackedLeg(), at) != LegType.REACHING) {
-            Wind wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
-            if (wind == null) {
-                throw new NoWindException("Need at least wind direction to determine windward speed");
-            }
-            projectToBearing = wind.getBearing();
-        } else {
-            projectToBearing = cache.getLegBearing(getTrackedLeg(), at);
+        Wind wind = cache.getWind(getTrackedRace(), getCompetitor(), at);
+        if (wind == null) {
+            throw new NoWindException("Need at least wind direction to determine windward speed");
         }
+        projectToBearing = wind.getFrom();
         SpeedWithBearing speed = getSpeedOverGround(at);
         if (speed != null) {
-            beatAngle = projectToBearing.getDifferenceTo(speed.getBearing());
+            beatAngle = speed.getBearing().getDifferenceTo(projectToBearing);
         }
         return beatAngle;
     }
