@@ -106,6 +106,11 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     }
 
     private void scheduleWindDataRefresh() {
+        // initial update
+        updateWindSourcesToObserve();
+        updateWindField();
+        
+        // schedule delayed repeated updates
         scheduler.scheduleFixedPeriod(new RepeatingCommand() {
             @Override
             public boolean execute() {
@@ -146,8 +151,12 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
                 windInfoForRace.raceIsKnownToStartUpwind = result.raceIsKnownToStartUpwind;
                 windInfoForRace.windSourcesToExclude = result.windSourcesToExclude;
                 for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-                    if (!windInfoForRace.windTrackInfoByWindSource.containsKey(e.getKey()) &&
-                            !Util.contains(result.windSourcesToExclude, e.getKey()) && e.getKey().getType() != WindSourceType.COMBINED) {
+                            // generally exclude combined wind, course-based wind and racecommittee
+                            if (!windInfoForRace.windTrackInfoByWindSource.containsKey(e.getKey())
+                                    && !Util.contains(result.windSourcesToExclude, e.getKey())
+                                    && e.getKey().getType() != WindSourceType.COMBINED
+                                    && e.getKey().getType() != WindSourceType.COURSE_BASED
+                                    && e.getKey().getType() != WindSourceType.RACECOMMITTEE) {
                         windInfoForRace.windTrackInfoByWindSource.put(e.getKey(), e.getValue());
                     }
                 }
