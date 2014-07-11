@@ -28,7 +28,7 @@ public class EventRegattaScheduleSeries extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         seriesName.setInnerText(series.getName());
-        seriesDate.setInnerText("A Date of the series???");
+        seriesDate.setInnerText("Some series data");
 
         for(FleetDTO fleet: series.getFleets()) {
             EventRegattaScheduleFleet eventRegattaScheduleFleet = new EventRegattaScheduleFleet(leaderboard, series, fleet, timerForClientServerOffset, pageNavigator); 

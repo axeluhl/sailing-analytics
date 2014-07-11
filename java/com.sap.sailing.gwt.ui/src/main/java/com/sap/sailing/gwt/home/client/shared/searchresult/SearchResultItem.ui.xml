@@ -13,6 +13,7 @@
           </div>
           <div class="{local_res.css.searchresult_content_item_footer}">
               <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.searchresult_content_item_footer_link}" />
+              <span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="resultEventVenue" />
               <span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="resultEventDate" />
           </div>
         </div>

@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.home.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventPlace;
+import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
 import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
@@ -24,8 +26,27 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     @Override
-    public void goToEvent(String eventUuidAsString) {
-        placeController.goTo(new EventPlace(eventUuidAsString));
+    public void goToEvent(String eventUuidAsString, String baseUrl) {
+        if(baseUrl.contains("localhost") || baseUrl.contains("127.0.0.1")) {
+            placeController.goTo(new EventPlace(eventUuidAsString));
+        } else {
+            EventPlace eventPlace = new EventPlace(eventUuidAsString);
+            EventPlace.Tokenizer t = new Tokenizer();
+            String remoteEventUrl = baseUrl + "/gwt/Home.html#" + EventPlace.class.getSimpleName() + ":" + t.getToken(eventPlace);
+            Window.Location.replace(remoteEventUrl);
+        }
+    }
+
+    @Override
+    public void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl) {
+        if(baseUrl.contains("localhost") || baseUrl.contains("127.0.0.1")) {
+            placeController.goTo(new EventPlace(eventUuidAsString, leaderboardIdAsNameString));
+        } else {
+            EventPlace eventPlace = new EventPlace(eventUuidAsString);
+            EventPlace.Tokenizer t = new Tokenizer();
+            String remoteEventUrl = baseUrl + "/gwt/Home.html#" + EventPlace.class.getSimpleName() + ":" + t.getToken(eventPlace);
+            Window.Location.replace(remoteEventUrl);
+        }
     }
 
     @Override

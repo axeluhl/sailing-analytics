@@ -7,13 +7,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
@@ -50,14 +47,7 @@ public class RecentEvent extends Composite {
 
     @UiHandler("eventOverviewLink")
     public void goToEventPlace(ClickEvent e) {
-        if(event.getBaseURL().contains("localhost") || event.getBaseURL().contains("127.0.0.1")) {
-            navigator.goToEvent(event.id.toString());
-        } else {
-            EventPlace eventPlace = new EventPlace(event.id.toString());
-            EventPlace.Tokenizer t = new Tokenizer();
-            String remoteEventUrl = event.getBaseURL() + "/gwt/Home.html#" + EventPlace.class.getSimpleName() + ":" + t.getToken(eventPlace);
-            Window.Location.replace(remoteEventUrl);
-        }
+        navigator.goToEvent(event.id.toString(), event.getBaseURL());
     }
 
     private void updateUI() {

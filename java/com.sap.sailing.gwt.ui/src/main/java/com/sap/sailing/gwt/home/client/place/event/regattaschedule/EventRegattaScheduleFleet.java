@@ -38,8 +38,10 @@ public class EventRegattaScheduleFleet extends Composite {
         EventRegattaScheduleResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        fleetName.setInnerText(fleet.getName());
-        fleetDiv.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
+//        if(!fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
+//            fleetName.setInnerText(fleet.getName());
+//            fleetDiv.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
+//        }
         
         List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
         for(RaceColumnDTO raceColumn: racesOfFleet) {

@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -49,7 +50,8 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     
     private final SailingServiceAsync sailingService;
     
-    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, Timer timerForClientServerOffset) {
+    public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
+            Timer timerForClientServerOffset) {
         this.sailingService = sailingService;
         eventHeader = new EventHeader(event, this);
         eventRegattaList = new EventRegattaList(event, this);
@@ -62,6 +64,7 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         
         pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaSchedule, eventMedia, eventSchedule });
         
+
         int leaderboardsCount = 0;
         int leaderboardsGroupCount = event.getLeaderboardGroups().size();
         for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
@@ -69,11 +72,37 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         }
 
         if(leaderboardsGroupCount == 0 || leaderboardsCount == 0) {
-            Window.alert("There is no further data available for this event.");
+            Window.alert("There is no data available for this event.");
         } else {
-            if(leaderboardsCount == 1) {
-                LeaderboardGroupDTO firstLeaderboardGroup = event.getLeaderboardGroups().get(0);
-                goToRegattaRaces(firstLeaderboardGroup, firstLeaderboardGroup.getLeaderboards().get(0));
+
+            LeaderboardGroupDTO selectedLeaderboardGroup = null;
+            StrippedLeaderboardDTO selectedLeaderboard = null;
+
+            // find the preselected leaderboard (if one exist)
+            if (leaderboardName != null) {
+                for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+                    for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
+                        if (leaderboard.name.equals(leaderboardName)) {
+                            selectedLeaderboardGroup = leaderboardGroup;
+                            selectedLeaderboard = leaderboard;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // in case we only have one regatta/leaderboard we go directly to the 'races' page 
+            if(selectedLeaderboard == null && leaderboardsCount == 1) {
+                for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
+                    if(leaderboardGroup.getLeaderboards().size() > 0) {
+                        selectedLeaderboard = leaderboardGroup.getLeaderboards().get(0);
+                        selectedLeaderboardGroup = leaderboardGroup;
+                    }
+                }
+            }
+
+            if(selectedLeaderboard != null && selectedLeaderboardGroup != null) {
+                goToRegattaRaces(selectedLeaderboardGroup, selectedLeaderboard);
             } else {
                 goToRegattas();
             }

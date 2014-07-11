@@ -6,13 +6,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventPlace.Tokenizer;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
@@ -26,21 +23,28 @@ public class SearchResultItem extends Composite {
     @UiField Anchor regattaLink;
     @UiField SpanElement resultRegattaDetails;
     @UiField SpanElement resultEventDate;
+    @UiField SpanElement resultEventVenue;
     @UiField Anchor eventOverviewLink;
     
-    private final PlaceNavigator navigator;
+    private final PlaceNavigator placeNavigator;
     private LeaderboardSearchResultDTO searchResult;
 
     public SearchResultItem(PlaceNavigator navigator, LeaderboardSearchResultDTO searchResult) {
-        this.navigator = navigator;
+        this.placeNavigator = navigator;
         this.searchResult = searchResult;
         
         SearchResultResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     
-        regattaLink.setText(searchResult.getRegattaName());
-        resultRegattaDetails.setInnerText("I have no idea yet what to show here...");
+        String headlineLink = searchResult.getLeaderboardDisplayName();
+        if(headlineLink == null) {
+            headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult.getLeaderboardName();
+        }
+        
+        regattaLink.setText(headlineLink);
+//        resultRegattaDetails.setInnerText("I have no idea yet what to show here...");
         eventOverviewLink.setText(searchResult.getEvent().getName());
+        resultEventVenue.setInnerText(searchResult.getEvent().venue.getName());
         if(searchResult.getEvent().startDate != null) {
             resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(searchResult.getEvent().startDate, searchResult.getEvent().endDate));
         } else {
@@ -50,21 +54,13 @@ public class SearchResultItem extends Composite {
 
     @UiHandler("regattaLink")
     public void goToRegatta(ClickEvent e) {
-        Window.alert("Not implemented yet.");
+        EventBaseDTO event = searchResult.getEvent();
+        placeNavigator.goToRegattaOfEvent(event.id.toString(),  searchResult.getLeaderboardName(), searchResult.getBaseURL());
     }
 
     @UiHandler("eventOverviewLink")
     public void goToEventPlace(ClickEvent e) {
         EventBaseDTO event = searchResult.getEvent();
-        
-        if(searchResult.getBaseURL().contains("localhost") || searchResult.getBaseURL().contains("127.0.0.1")) {
-            navigator.goToEvent(event.id.toString());
-        } else {
-            EventPlace eventPlace = new EventPlace(event.id.toString());
-            EventPlace.Tokenizer t = new Tokenizer();
-            String remoteEventUrl = searchResult.getBaseURL() + "/gwt/Home.html#" + EventPlace.class.getSimpleName() + ":" + t.getToken(eventPlace);
-            Window.Location.replace(remoteEventUrl);
-        }
+        placeNavigator.goToEvent(event.id.toString(), searchResult.getBaseURL());
     }
-    
 }

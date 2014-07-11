@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.app;
 
+import java.util.List;
+
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -19,6 +21,7 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsori
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
 
@@ -36,8 +39,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public EventView createEventView(EventDTO event, Timer timerForClientServerOffset) {
-        return new TabletAndDesktopEventView(getSailingService(), event, timerForClientServerOffset);
+    public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset);
     }
 
     @Override

@@ -42,6 +42,6 @@ public class StageTeaserBand extends Composite {
     
     @UiHandler("actionLink")
     public void actionLinkClicked(ClickEvent e) {
-        placeNavigator.goToEvent(event.id.toString());
+        placeNavigator.goToEvent(event.id.toString(), event.getBaseURL());
     }
 }
