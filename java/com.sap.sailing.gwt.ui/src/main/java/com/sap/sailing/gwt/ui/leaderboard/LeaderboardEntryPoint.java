@@ -155,7 +155,18 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
-        ScrollPanel contentScrollPanel = new ScrollPanel();
+        ScrollPanel contentScrollPanel = new ScrollPanel() {
+            @Override
+            public void onResize() {
+                super.onResize();
+                if (isSmallWidth()) {
+                    final AbstractLeaderboardViewer leaderboardViewer = (AbstractLeaderboardViewer) getWidget();
+                    final LeaderboardPanel leaderboardPanel = leaderboardViewer.getLeaderboardPanel();
+                    int width = leaderboardPanel.getElement().getClientWidth();
+                    leaderboardPanel.setRaceColumnSelectionToLastNStrategy((width-500)/50);
+                }
+            }
+        };
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
