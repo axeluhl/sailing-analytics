@@ -13,7 +13,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
@@ -68,10 +68,11 @@ public class MainMedia extends Composite {
         }
 
         for(String url : photoGalleryUrls) {
-            Image imageSlide = new Image(url);
-            imageSlide.addStyleName(STYLES.media_photo());
-            imageSlide.addStyleName(STYLES.media_swiperslide());
-            mediaSlides.add(imageSlide);
+            SimplePanel imageContainer = new SimplePanel();
+            imageContainer.addStyleName(STYLES.media_swiperslide());
+            String image = "url(" + url + ")";
+            imageContainer.getElement().getStyle().setBackgroundImage(image);
+            mediaSlides.add(imageContainer);
         }
         
         this.swiper = Swiper.createWithDefaultOptions(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());

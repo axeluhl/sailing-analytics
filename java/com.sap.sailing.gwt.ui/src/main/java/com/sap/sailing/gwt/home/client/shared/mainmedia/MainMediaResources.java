@@ -15,7 +15,6 @@ public interface MainMediaResources extends ClientBundle {
         String media_swipecontainer();
         String media_swipewrapper();
         String media_swiperslide();
-        String media_photo();
         String media_slideshow_controls();
         String media_slideshow_controlsnext();
         String media_slideshow_controlsprev();
