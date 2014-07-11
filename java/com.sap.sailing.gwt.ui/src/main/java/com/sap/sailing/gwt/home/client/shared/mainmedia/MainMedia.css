@@ -3,8 +3,8 @@
   font-size: 1rem;
 }
 .media_swipecontainer {
-  height: 550px;
   width: 830px;
+  height: 550px;
   margin: 0 auto;
   overflow: hidden;
 }
