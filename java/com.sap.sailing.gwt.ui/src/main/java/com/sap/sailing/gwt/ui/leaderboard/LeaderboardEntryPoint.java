@@ -155,18 +155,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
-        ScrollPanel contentScrollPanel = new ScrollPanel() {
-            @Override
-            public void onResize() {
-                super.onResize();
-                if (isSmallWidth()) {
-                    final AbstractLeaderboardViewer leaderboardViewer = (AbstractLeaderboardViewer) getWidget();
-                    final LeaderboardPanel leaderboardPanel = leaderboardViewer.getLeaderboardPanel();
-                    int width = leaderboardPanel.getElement().getClientWidth();
-                    leaderboardPanel.setRaceColumnSelectionToLastNStrategy((width-500)/50);
-                }
-            }
-        };
+        ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
@@ -221,15 +210,16 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         Long refreshIntervalMillis = parameterMap.containsKey(PARAM_REFRESH_INTERVAL_MILLIS) ? Long
                 .valueOf(parameterMap.get(PARAM_REFRESH_INTERVAL_MILLIS).get(0)) : null;
         RaceColumnSelectionStrategies raceColumnSelectionStrategy;
-        if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-        } else {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-        }
         final Integer numberOfLastRacesToShow;
         if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
+            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
             numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(PARAM_NAME_LAST_N).get(0));
+        } else if (isSmallWidth()) {
+            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
+            int width = Window.getClientWidth();
+            numberOfLastRacesToShow = (width-275)/35;
         } else {
+            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
             numberOfLastRacesToShow = null;
         }
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
