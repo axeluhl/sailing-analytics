@@ -23,13 +23,12 @@ public class Header extends Composite {
     @UiField Anchor startPageLink;
     @UiField Anchor eventsPageLink;
     @UiField Anchor solutionsPageLink;
-    @UiField Anchor sponsoringPageLink;
+//    @UiField Anchor sponsoringPageLink;
     
     @UiField TextBox searchText;
     @UiField Button searchButton;
-    
-    private final List<Anchor> links;
 
+    private final List<Anchor> links;
     private final PlaceNavigator navigator;
 
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
@@ -41,7 +40,7 @@ public class Header extends Composite {
         this.navigator = navigator;
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink, sponsoringPageLink });
+        links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
         
         searchText.getElement().setAttribute("placeholder", "Search SAPSailing.com");
         searchText.addKeyPressHandler(new KeyPressHandler() {
@@ -70,10 +69,10 @@ public class Header extends Composite {
         navigator.goToSolutions();
     }
 
-    @UiHandler("sponsoringPageLink")
-    public void goToSponsoring(ClickEvent e) {
-        navigator.goToSponsoring();
-    }
+//    @UiHandler("sponsoringPageLink")
+//    public void goToSponsoring(ClickEvent e) {
+//        navigator.goToSponsoring();
+//    }
 
     @UiHandler("searchButton")
     void searchButtonClick(ClickEvent event) {
