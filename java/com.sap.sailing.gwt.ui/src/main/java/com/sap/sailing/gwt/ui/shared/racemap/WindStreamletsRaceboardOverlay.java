@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOAndDateWeigher.AverageLatitudeProvider;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -39,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements AverageLatitudeProvider {
+public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -79,11 +78,10 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay implements
         getCanvas().getElement().setId("swarm-display");
     }
 
-    @Override
     public double getAverageLatitudeDeg() {
         return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
     }
-
+    
     private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
