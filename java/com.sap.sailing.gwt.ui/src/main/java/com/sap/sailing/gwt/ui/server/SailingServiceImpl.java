@@ -3217,6 +3217,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) {
         List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
         Event event = getService().getEvent(eventId);
+        Map<Leaderboard, LeaderboardGroup> leaderboardWithLeaderboardGroups = new HashMap<Leaderboard, LeaderboardGroup>();
+        for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+            for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
+            }
+        }
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
@@ -3224,6 +3230,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
                         raceGroup.courseAreaIdAsString = courseArea.getId().toString();
                         raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
+                        if(leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
+                            raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard).getName(); 
+                        }
                         if (leaderboard instanceof RegattaLeaderboard) {
                             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                             for (Series series : regattaLeaderboard.getRegatta().getSeries()) {

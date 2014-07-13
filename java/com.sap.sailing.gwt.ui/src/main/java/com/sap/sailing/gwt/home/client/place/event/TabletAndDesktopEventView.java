@@ -9,7 +9,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -18,7 +17,7 @@ import com.sap.sailing.gwt.home.client.place.event.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.event.media.EventMedia;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverview;
 import com.sap.sailing.gwt.home.client.place.event.regattalist.EventRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaSchedule;
+import com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRaces;
 import com.sap.sailing.gwt.home.client.place.event.schedule.EventSchedule;
 import com.sap.sailing.gwt.home.client.shared.eventsponsors.EventSponsors;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -27,8 +26,8 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class TabletAndDesktopEventView extends Composite implements EventView, EventPageNavigator {
@@ -42,67 +41,56 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     @UiField(provided=true) EventSchedule eventSchedule;
     @UiField(provided=true) EventMedia eventMedia;
     @UiField(provided=true) EventRegattaList eventRegattaList;
-    @UiField(provided=true) EventRegattaSchedule eventRegattaSchedule;
+    @UiField(provided=true) EventRegattaRaces eventRegattaRaces;
     
     @UiField EventSponsors eventSponsors;
 
     private final List<Widget> pageElements;
-    
-    private final SailingServiceAsync sailingService;
+    private final Map<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>> leaderboardsWithLeaderboardGroup;
     
     public TabletAndDesktopEventView(SailingServiceAsync sailingService, EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName,   
             Timer timerForClientServerOffset) {
-        this.sailingService = sailingService;
+        leaderboardsWithLeaderboardGroup = new HashMap<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>>();
+        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
+            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+                leaderboardsWithLeaderboardGroup.put(leaderboard.name, new Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>(leaderboard, leaderboardGroup));
+            }
+        }
+        
         eventHeader = new EventHeader(event, this);
-        eventRegattaList = new EventRegattaList(event, this);
-        eventRegattaSchedule = new EventRegattaSchedule(event, timerForClientServerOffset, this);
+        eventRegattaList = new EventRegattaList(event, raceGroups, leaderboardsWithLeaderboardGroup, timerForClientServerOffset, this);
+        eventRegattaRaces = new EventRegattaRaces(event, timerForClientServerOffset, this);
         eventOverview = new EventOverview(event);
         eventSchedule = new EventSchedule(event);
         eventMedia = new EventMedia(event);
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaSchedule, eventMedia, eventSchedule });
-        
+        pageElements = Arrays.asList(new Widget[] { eventOverview, eventRegattaList, eventRegattaRaces, eventMedia, eventSchedule });
 
-        int leaderboardsCount = 0;
-        int leaderboardsGroupCount = event.getLeaderboardGroups().size();
-        for(LeaderboardGroupDTO leaderboardGroup: event.getLeaderboardGroups()) {
-            leaderboardsCount += leaderboardGroup.getLeaderboards().size();
-        }
-
-        if(leaderboardsGroupCount == 0 || leaderboardsCount == 0) {
+        int leaderboardsCount = raceGroups.size();
+        if(leaderboardsCount == 0) {
             Window.alert("There is no data available for this event.");
         } else {
-
-            LeaderboardGroupDTO selectedLeaderboardGroup = null;
-            StrippedLeaderboardDTO selectedLeaderboard = null;
+            RaceGroupDTO selectedRaceGroup = null;
 
             // find the preselected leaderboard (if one exist)
             if (leaderboardName != null) {
-                for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
-                    for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                        if (leaderboard.name.equals(leaderboardName)) {
-                            selectedLeaderboardGroup = leaderboardGroup;
-                            selectedLeaderboard = leaderboard;
-                            break;
-                        }
+                for (RaceGroupDTO raceGroup : raceGroups) {
+                    if(raceGroup.getName().equals(leaderboardName)) {
+                        selectedRaceGroup = raceGroup;
+                        break;
                     }
                 }
             }
 
-            // in case we only have one regatta/leaderboard we go directly to the 'races' page 
-            if(selectedLeaderboard == null && leaderboardsCount == 1) {
-                for (LeaderboardGroupDTO leaderboardGroup : event.getLeaderboardGroups()) {
-                    if(leaderboardGroup.getLeaderboards().size() > 0) {
-                        selectedLeaderboard = leaderboardGroup.getLeaderboards().get(0);
-                        selectedLeaderboardGroup = leaderboardGroup;
-                    }
-                }
+            // in case we only have one regatta/leaderboard we go directly to the 'races' page
+            if(selectedRaceGroup == null && leaderboardsCount == 1) {
+                selectedRaceGroup = raceGroups.get(0);
             }
 
-            if(selectedLeaderboard != null && selectedLeaderboardGroup != null) {
-                goToRegattaRaces(selectedLeaderboardGroup, selectedLeaderboard);
+            if(selectedRaceGroup != null) {
+                goToRegattaRaces(selectedRaceGroup, leaderboardsWithLeaderboardGroup.get(selectedRaceGroup.getName()).getA());
             } else {
                 goToRegattas();
             }
@@ -130,37 +118,10 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
     }
 
     @Override
-    public void goToRegattaRaces(final LeaderboardGroupDTO leaderboardGroup, final StrippedLeaderboardDTO leaderboard) {
-        switch (leaderboard.type) {
-        case RegattaLeaderboard:
-            sailingService.getRegattaByName(leaderboard.regattaName, new AsyncCallback<RegattaDTO>() {
-                @Override
-                public void onSuccess(RegattaDTO regatta) {
-                    eventRegattaSchedule.setRacesFromRegatta(regatta, leaderboardGroup, leaderboard);
-                    eventHeader.setDataNavigationType("compact");
-                    setVisibleEventElement(eventRegattaSchedule);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Shit happens");
-                }
-            });
-            break;
-        case FlexibleLeaderboard:
-            eventRegattaSchedule.setRacesFromFlexibleLeaderboard(leaderboardGroup, leaderboard);
-            eventHeader.setDataNavigationType("compact");
-            setVisibleEventElement(eventRegattaSchedule);
-            break;
-        case FlexibleMetaLeaderboard:
-            eventHeader.setDataNavigationType("compact");
-            setVisibleEventElement(eventRegattaSchedule);
-            break;
-        case RegattaMetaLeaderboard:
-            eventHeader.setDataNavigationType("compact");
-            setVisibleEventElement(eventRegattaSchedule);
-            break;
-        }
+    public void goToRegattaRaces(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
+        eventRegattaRaces.setRacesFromRaceGroup(raceGroup, leaderboard);
+        eventHeader.setDataNavigationType("compact");
+        setVisibleEventElement(eventRegattaRaces);
     }
 
     @Override
