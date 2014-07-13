@@ -265,7 +265,7 @@ figcaption {
 .lightbox_overlayhidden {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
+  filter: literal("alpha(opacity=0)");
 }
 .lightbox_content {
   position: fixed;
@@ -288,7 +288,7 @@ figcaption {
 .lightbox_contenthidden {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
+  filter: literal("alpha(opacity=0)");
 }
 .lightbox_content_enlargedimage {
   -webkit-transition: margin 0.7s linear;
