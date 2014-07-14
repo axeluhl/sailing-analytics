@@ -104,7 +104,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private JSONObject getLeaderboardJson(Leaderboard leaderboard, Util.Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) 
                     throws NoWindException, InterruptedException, ExecutionException {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePointAndResultStateAndMaxCompetitorsCount.getA(),
-                Collections.<String> emptyList(), /* addOverallDetails */ false, getService(), getService().getBaseDomainFactory());
+                Collections.<String> emptyList(), /* addOverallDetails */ false, getService(), getService().getBaseDomainFactory(),
+                /* fillNetPointsUncorrected */ false);
                
         TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
         ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();

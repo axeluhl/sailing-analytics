@@ -186,26 +186,29 @@ public class RegattaOverviewPanel extends SimplePanel {
         flexTable.setWidget(0, 0, eventVenueGrid);
         flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
+        final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
                 && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
-
         if (showLeaderboardButton) {
             leaderboardCheckBox = addLeaderboardEnablerButton();
             leaderboardCheckBox.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
-            leaderboardsTabPanel = new TabPanel();
-            leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
-            mainPanel.add(leaderboardsTabPanel);
         } else {
             leaderboardCheckBox = null;
-            leaderboardsTabPanel = null;
         }
-        
+
         HorizontalPanel refreshStartStopClockPanel = getRefreshStartStopClockPanel();
-        
         flexTable.setWidget(0, 1, refreshStartStopClockPanel);
         
         mainPanel.add(flexTable);
         mainPanel.add(regattaRaceStatesComponent);
+        
+        if (showLeaderboardButton) {
+            leaderboardsTabPanel = new TabPanel();
+            leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
+            leaderboardsTabPanel.setVisible(false);
+            mainPanel.add(leaderboardsTabPanel);
+        } else {
+            leaderboardsTabPanel = null;
+        }
         
         onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
     }
@@ -254,8 +257,13 @@ public class RegattaOverviewPanel extends SimplePanel {
                                             errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
                                     leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
                                 }
-                                leaderboardsTabPanel.setVisible(true);
-                                leaderboardsTabPanel.selectTab(0);
+                                if (!result.isEmpty()) {
+                                    leaderboardsTabPanel.setVisible(true);
+                                    leaderboardsTabPanel.selectTab(0);
+                                } else {
+                                    leaderboardCheckBox.setValue(false);
+                                    errorReporter.reportError("Error trying to load leaderboard. Either the event could not be associated to Regatta or there are no tracked races.");
+                                }
                             }
                             @Override
                             public void onFailure(Throwable caught) {

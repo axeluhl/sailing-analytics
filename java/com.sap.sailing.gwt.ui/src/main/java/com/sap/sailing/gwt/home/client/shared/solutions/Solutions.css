@@ -1,0 +1,142 @@
+/**
+ * The solutions page
+ */
+.solutions {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_nav {
+  border-bottom: 1px solid #ddd;
+}
+.solutions_nav_link {
+  display: inline-block;
+  padding: 0.9375em 0 0.6875em 0;
+  border-bottom: 0.25em solid transparent;
+  font-weight: 600;
+  color: #666;
+  margin-right: 0.3125em;
+}
+.solutions_nav_link:hover,
+.solutions_nav_link:focus {
+  border-bottom-color: #f0ab00;
+  text-decoration: none;
+  color: #333;
+}
+.solutions_nav_link:last-child {
+  margin-right: 0;
+}
+.solutions_content {
+  position: relative;
+  z-index: 2;
+}
+.solutions_content:nth-child\(odd\) {
+  background-color: #f8f8f8;
+}
+.solutions_content:nth-child\(even\) {
+  background-color: #fff;
+}
+.solutions_content .parallax {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+}
+.solutions_content .global-grid {
+  height: 100%;
+  padding: 3.125em 0;
+}
+.solutions_contentsap {
+  max-width: 82.5em;
+  margin: auto;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+  background-image: url("images/home/solutions-sap.png");
+}
+.solutions_contentsap .global-grid {
+  padding: 3.75em 0 4.0625em;
+}
+.solutions_contentrace {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contentrace .global-grid {
+  padding: 2.5em 0 10%;
+}
+.solutions_contentrace .parallax {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contentrace .parallax .background {
+  margin: auto;
+  height: 100%;
+  max-width: 82.5em;
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-race.png");
+  -webkit-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  background-position: center 18.75em;
+}
+.solutions_contentrace .parallax.noparallax .background {
+  background-position: center bottom;
+}
+.solutions_contentpost {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contentpost .global-grid {
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-post.png");
+  background-position: left center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+  padding: 1.5625em 0;
+}
+.solutions_contenttraining {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contenttraining .global-grid {
+  padding-top: 4.6875em;
+}
+.solutions_contenttraining .parallax {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contenttraining .parallax .background {
+  margin: auto;
+  height: 100%;
+  max-width: 75em;
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-training.png");
+  -webkit-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  background-position: center 12.5em;
+}
+.solutions_contenttraining .parallax.noparallax .background {
+  background-position: center 6.25em;
+}
+.solutions_contentsimulator {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.solutions_contentsimulator .global-grid {
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-simulator.png");
+  background-position: left center;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  background-size: 100%;
+  padding: 3.125em 0 3.125em;
+}
+.solutions_content_linkappstore {
+  display: inline-block;
+  margin-top: 2.5em;
+}

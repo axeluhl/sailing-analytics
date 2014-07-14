@@ -87,4 +87,9 @@ public enum CollectionNames {
      * Metadata for the GPSFixes, grouped by Device Identifier.
      */
     GPS_FIXES_METADATA,
+
+    /**
+     * URLs providing race results
+     */
+    RESULT_URLS,
 }

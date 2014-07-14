@@ -372,7 +372,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
-                    result = new RegattaImpl(raceLogStore, race.getName(), boatClass, trackedRegattaRegistry,
+                    result = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
                     regattaCache.put(key, result);
@@ -389,7 +389,8 @@ public class DomainFactoryImpl implements DomainFactory {
         for (IRaceCompetitor competitor : race.getRaceCompetitors()) {
             competitorClassList.add(competitor.getCompetitor().getCompetitorClass());
         }
-        Pair<String, BoatClass> defaultRegattaNameAndBoatClass = new Pair<String, BoatClass>(race.getName(), getDominantBoatClass(competitorClassList));
+        Pair<String, BoatClass> defaultRegattaNameAndBoatClass = new Pair<String, BoatClass>(race.getEvent().getName(),
+                getDominantBoatClass(competitorClassList));
         return defaultRegattaNameAndBoatClass;
     }
     
@@ -518,16 +519,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
-
-                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
-                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                            raceDefinition.getId());
-                    trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-
-                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
-                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                            raceDefinition.getId());
-                    trackedRace.addStartTimeChangedListener(startTimeHandler);
+                    addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
+                            raceDefinition, trackedRace);
                     raceCache.put(raceId, raceDefinition);
                     raceCache.notifyAll();
                 } else {
@@ -543,6 +536,23 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return trackedRace;
         }
+    }
+
+    @Override
+    public void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) {
+        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId());
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore,

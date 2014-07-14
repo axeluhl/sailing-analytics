@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -371,7 +372,7 @@ public interface TrackedRace extends Serializable {
      *         to determining the bearing. If in the future we have data about polar diagrams specific to boat classes,
      *         we may be able to also infer the wind speed from the boat tracks.
      */
-    Wind getEstimatedWindDirection(Position position, TimePoint timePoint);
+    Wind getEstimatedWindDirection(TimePoint timePoint);
 
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
@@ -380,6 +381,17 @@ public interface TrackedRace extends Serializable {
      * {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the <code>timePoint</code>
+     * requested.
+     * <p>
+     * This method outperforms {@link #getTack(Competitor, TimePoint)}, based on being passed an already calculated wind
+     * for the given time and competitor position as well as the competitors speed and course over ground.
+     * <p>
+     * This method will acquire the read lock for the competitor's track.
+     */
+    Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint);
 
     TrackedRegatta getTrackedRegatta();
 
@@ -460,7 +472,7 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -484,10 +496,11 @@ public interface TrackedRace extends Serializable {
             Iterable<WindSource> windSourcesToExclude);
 
     /**
-     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
-     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
+     * Same as {@link #getEstimatedWindDirection(TimePoint)}, but propagates the confidence of the wind
+     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result. The
+     * {@link Wind#getPosition() position} of all {@link Wind} fixes returned is <code>null</code>.
      */
-    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(TimePoint timePoint);
 
     /**
      * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals
@@ -505,11 +518,25 @@ public interface TrackedRace extends Serializable {
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
 
+    /**
+     * Same as {@link #getAverageAbsoluteCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind on leg and leg bearing is provided.
+     */
+    Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+    
     Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalyses) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
             throws NoWindException;
+
+    /**
+     * Same as {@link #getAverageSignedCrossTrackError(Competitor, TimePoint, boolean)}, only that a cache for leg type,
+     * wind direction and leg bearing is provided.
+     */
+    Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalyses,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
@@ -578,12 +605,17 @@ public interface TrackedRace extends Serializable {
     RaceLog getRaceLog(Serializable identifier);
     
     /**
-     * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
-     * @param listener the listener to operate with.
+     * A setter for the listener on course design changes suggested by one of the {@link RaceLog}s attached to this
+     * race. The listener is mostly part of the tracking provider adapter.
+     * 
+     * @param listener
+     *            the listener to operate with.
      */
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
+
+    void addRaceAbortedListener(RaceAbortedListener listener);
 
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
@@ -670,4 +702,5 @@ public interface TrackedRace extends Serializable {
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
     
     GPSFixStore getGPSFixStore();
+
 }

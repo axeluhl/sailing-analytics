@@ -1083,11 +1083,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Regatta loadRegatta(DBObject dbRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = null;
         if (dbRegatta != null) {
-            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            String name = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
             Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
             if (id == null) {
-                id = baseName + "("+boatClassName+")";
+                id = name;
             }
             BoatClass boatClass = null;
             if (boatClassName != null) {
@@ -1099,14 +1099,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database, serviceFinderFactory), 
                     this);
-            
             Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
             CourseArea courseArea = null;
             if (courseAreaId != null) {
                 UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
                 courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
-            
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsField(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 try {
@@ -1116,8 +1114,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            
-            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
+            Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            result = new RegattaImpl(raceLogStore, name, boatClass, series, /* persistent */true,
+                    loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
+                            : useStartTimeInference);
             result.setRegattaConfiguration(configuration);
         }
         return result;
@@ -1151,10 +1151,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries.get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
-        Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
+        List<Fleet> fleets = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
-        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns);
+        Series series = new SeriesImpl(name, isMedal, fleets, raceColumnNames, trackedRegattaRegistry);
         if (dbSeries.get(FieldNames.SERIES_DISCARDING_THRESHOLDS.name()) != null) {
             ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbSeries, FieldNames.SERIES_DISCARDING_THRESHOLDS);
             series.setResultDiscardingRule(resultDiscardingRule);
@@ -1172,11 +1172,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return series;
     }
 
-    /**
-     * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
-     * used in the {@link Series#getFleets()} collection.
-     */
-    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns) {
         List<String> result = new ArrayList<String>();
         for (Object o : dbRaceColumns) {
             DBObject dbRaceColumn = (DBObject) o;
@@ -1201,12 +1197,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {
-        Map<String, Fleet> result = new HashMap<String, Fleet>();
+    private List<Fleet> loadFleets(BasicDBList dbFleets) {
+        List<Fleet> result = new ArrayList<Fleet>();
         for (Object o : dbFleets) {
             DBObject dbFleet = (DBObject) o;
             Fleet fleet = loadFleet(dbFleet);
-            result.put(fleet.getName(), fleet);
+            result.add(fleet);
         }
         return result;
     }
@@ -1759,5 +1755,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return new PlaceHolderDeviceIdentifierSerializationHandler().deserialize(
                     stringRepresentation, deviceType, stringRepresentation);
         }
+    }
+
+    @Override
+    public Map<String, Set<URL>> loadResultUrls() {
+        Map<String, Set<URL>> resultUrls = new HashMap<>();
+        DBCollection resultUrlCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        for (DBObject dbObject : resultUrlCollection.find()) {
+            String providerName = (String) dbObject.get(FieldNames.RESULT_PROVIDERNAME.name());
+            String urlString = (String) dbObject.get(FieldNames.RESULT_URL.name());
+            URL url;
+            try {
+                url = new URL(urlString);
+            } catch (MalformedURLException e) {
+                logger.log(Level.SEVERE, "Failed to parse result Url String: " + urlString + ". Did not load url!");
+                continue;
+            }
+            if (!resultUrls.containsKey(providerName)) {
+                resultUrls.put(providerName, new HashSet<URL>());
+            }
+            Set<URL> set = resultUrls.get(providerName);
+            set.add(url);
+        }
+        return resultUrls;
     }
 }

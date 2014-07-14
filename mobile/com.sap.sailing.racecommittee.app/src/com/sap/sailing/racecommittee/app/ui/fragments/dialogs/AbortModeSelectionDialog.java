@@ -97,10 +97,10 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
         TimePoint now = MillisecondsTimePoint.now();
         RaceState state = getRaceState();
         if (this.abortFlag.equals(Flags.AP)) {
-            state.setAborted(now, true, additionalFlag);
+            state.setAborted(now, /* postponed */ true, additionalFlag);
             
         } else if (this.abortFlag.equals(Flags.NOVEMBER)) {
-            state.setAborted(now, false, additionalFlag);
+            state.setAborted(now, /* postponed */ false, additionalFlag);
         }
         state.setAdvancePass(now);
         this.dismiss();

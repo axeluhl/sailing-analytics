@@ -36,6 +36,7 @@
       <import plugin="org.apache.felix.gogo.command"/>
       <import plugin="org.apache.felix.gogo.runtime"/>
       <import plugin="org.apache.felix.gogo.shell"/>
+      <import plugin="org.eclipse.jetty.jmx"/>
    </requires>
 
    <plugin

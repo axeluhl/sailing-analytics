@@ -338,7 +338,7 @@ public interface StringMessages extends Messages {
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
     String maneuverTypesToShowWhenCompetitorIsClicked();
     String simulateWithStartTimeNow();
-    String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
+    String boatClassDoesNotMatchSelectedRegatta(String boatClass);
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
@@ -1043,5 +1043,17 @@ public interface StringMessages extends Messages {
     String eventOfficialWebsiteURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
+    String errorFetchingWindStreamletData(String message);
+    String showWindStreamletOverlay();
     String regattaNameMustNotContainSlashes();
+    String showNumberOfRacesScored();
+    String racesScored();
+    String racesScoredTooltip();
+    String showUncorrectedNetPoints();
+    String setStartTimeReceived();
+    String setStartTimeReceivedDescription();
+    String lastScoreCorrectionsTime();
+    String lastScoreCorrectionsComment();
+    String setTimeToNow();
+    String useStartTimeInference();
 }

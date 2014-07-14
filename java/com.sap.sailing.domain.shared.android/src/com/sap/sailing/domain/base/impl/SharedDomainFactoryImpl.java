@@ -124,6 +124,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public Nationality getOrCreateNationality(String threeLetterIOCCode) {
+        if (threeLetterIOCCode == null) {
+            threeLetterIOCCode = "   ";
+        }
         synchronized (nationalityCache) {
             Nationality result = nationalityCache.get(threeLetterIOCCode);
             if (result == null) {

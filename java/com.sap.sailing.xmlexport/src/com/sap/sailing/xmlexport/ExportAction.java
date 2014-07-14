@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 public abstract class ExportAction {
     private HttpServletRequest req;
@@ -175,7 +176,8 @@ public abstract class ExportAction {
         return result;
     }
     
-    public com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> getMaximumSpeedOverGround(Competitor competitor, TrackedRace trackedRace) {
+    public Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> getMaximumSpeedOverGround(Competitor competitor, TrackedRace trackedRace) {
+        Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor> result = null;
         com.sap.sse.common.Util.Pair<GPSFixMoving, Speed> speedWithGPSFix = null;
         TrackedLegOfCompetitor legOfCompetitorWhereSpeedHasBeenReached = null;
         if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
@@ -187,9 +189,10 @@ public abstract class ExportAction {
             }
             if (speedWithGPSFix != null) {
                 legOfCompetitorWhereSpeedHasBeenReached = trackedRace.getTrackedLeg(competitor, speedWithGPSFix.getA().getTimePoint());
+                result = new Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor>(speedWithGPSFix.getA(), speedWithGPSFix.getB(), legOfCompetitorWhereSpeedHasBeenReached);
             }
         }
-        return new com.sap.sse.common.Util.Triple<GPSFixMoving, Speed, TrackedLegOfCompetitor>(speedWithGPSFix.getA(), speedWithGPSFix.getB(), legOfCompetitorWhereSpeedHasBeenReached);
+        return result;
     }
 
     public Speed getAverageSpeedOverGround(Leaderboard leaderboard, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {

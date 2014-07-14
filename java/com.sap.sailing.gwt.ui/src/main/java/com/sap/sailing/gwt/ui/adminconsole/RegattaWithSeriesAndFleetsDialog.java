@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -30,6 +31,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     protected ListBox scoringSchemeListBox;
     protected ListBox courseAreaListBox;
     protected ListBox sailingEventsListBox;
+    protected CheckBox useStartTimeInferenceCheckBox;
 
     protected List<EventDTO> existingEvents;
 
@@ -39,24 +41,19 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
             String okButton, StringMessages stringMessages, Validator<RegattaDTO> validator,
             DialogCallback<RegattaDTO> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
-
         this.stringMessages = stringMessages;
-        
         this.regatta = regatta;
         this.existingEvents = existingEvents;
-
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
-
         boatClassEntryField = createTextBox(null);
         boatClassEntryField.ensureDebugId("BoatClassTextBox");
         boatClassEntryField.setVisibleLength(20);
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
-
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
@@ -66,14 +63,14 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
                 scoringSchemeListBox.setSelectedIndex(scoringSchemeListBox.getItemCount() - 1);
             }
         }
-
         sailingEventsListBox = createListBox(false);
         sailingEventsListBox.ensureDebugId("EventListBox");
-        
+        useStartTimeInferenceCheckBox = createCheckbox(stringMessages.useStartTimeInference());
+        useStartTimeInferenceCheckBox.ensureDebugId("UseStartTimeInferenceCheckBox");
+        useStartTimeInferenceCheckBox.setValue(regatta.useStartTimeInference);
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
-
         setupEventAndCourseAreaListBoxes(stringMessages);
     }
 
@@ -84,7 +81,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(5, 2);
+        Grid formGrid = new Grid(6, 2);
         panel.add(formGrid);
         formGrid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
@@ -96,6 +93,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         formGrid.setWidget(3, 1, sailingEventsListBox);
         formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
         formGrid.setWidget(4, 1, courseAreaListBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.useStartTimeInference() + ":"));
+        formGrid.setWidget(5, 1, useStartTimeInferenceCheckBox);
         setupAdditionalWidgetsOnPanel(panel);
         return panel;
     }
@@ -105,6 +104,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         regatta.setName(nameEntryField.getText());
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
         regatta.scoringScheme = getSelectedScoringSchemeType();
+        regatta.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         setCourseAreaInRegatta(regatta);
         return regatta;
     }
@@ -139,8 +139,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         return false;
     }
 
-    private void setupEventAndCourseAreaListBoxes(StringMessages stringConstants) {
-        sailingEventsListBox.addItem(stringConstants.selectSailingEvent());
+    private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
         for (EventDTO event : existingEvents) {
             sailingEventsListBox.addItem(event.getName());
             if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuid)) {

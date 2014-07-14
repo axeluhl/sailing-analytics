@@ -270,4 +270,12 @@ public interface DomainFactory {
 
     List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
 
+    /**
+     * When a tracked race has been created for tracking with the TracTrac adapter, change listeners have to be subscribed to
+     * the {@link TrackedRace} which will notify certain changes to the race's state to TracTrac. This includes the course layout,
+     * the start time and whether a race was aborted.
+     */
+    void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace);
+
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.confidence.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.scalablevalue.IsScalable;
 import com.sap.sailing.domain.common.scalablevalue.ScalableValue;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeedWithBearing;

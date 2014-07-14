@@ -6,14 +6,22 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.footer.FooterResources" />
     <g:HTMLPanel>
-<!-- Website footer-->
-<footer class="{local_res.css.sitefooter}">
-  <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
-      <div class="{local_res.css.sitefooter_copyright}">© 2014&nbsp;&nbsp;&nbsp;SAP Sailing Analytics</div>
-      <div class="{local_res.css.sitefooter_links}"><a href="" class="{local_res.css.sitefooter_links_link}">Legal Disclosure</a><a href="" class="{local_res.css.sitefooter_links_link}">Privacy</a></div>
-    </div>
-    <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">SAP Sailing offered in:<a class="{local_res.css.sitefooter_language_link}">Deutsch</a></div>
-  </div>
-</footer>    </g:HTMLPanel>
+		<!-- Website footer-->
+		<footer class="{local_res.css.sitefooter}">
+		  <div class="{res.mainCss.grid}">
+		    <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+		      <div class="{local_res.css.sitefooter_copyright}"><ui:text from='{i18n.footerCopyright}'/></div>
+		      <div class="{local_res.css.sitefooter_links}">
+		          <a href="http://www.sap.com/about/legal/impressum.html" target="_blank" class="{local_res.css.sitefooter_links_link}">
+		              <ui:text from='{i18n.footerLegal}'/>
+		          </a>
+		          <a href="http://www.sap.com/about/legal/privacy.html" target="_blank" class="{local_res.css.sitefooter_links_link}">
+		              <ui:text from='{i18n.footerPrivacy}'/>
+		          </a></div>
+		    </div>
+		    <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
+		        <ui:text from='{i18n.footerLanguage}'/>:<g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}"><span ui:field="currentLanguage" /></g:Anchor></div>
+		  </div>
+		</footer>
+	</g:HTMLPanel>
 </ui:UiBinder>

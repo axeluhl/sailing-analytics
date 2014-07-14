@@ -36,7 +36,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private transient Set<RaceListener> raceListeners;
-  
+
     public TrackedRegattaImpl(Regatta regatta) {
         super();
         this.regatta = regatta;
@@ -118,7 +118,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public Iterable<TrackedRace> getTrackedRaces() {
+    public Iterable<? extends TrackedRace> getTrackedRaces() {
         return trackedRaces.values();
     }
 

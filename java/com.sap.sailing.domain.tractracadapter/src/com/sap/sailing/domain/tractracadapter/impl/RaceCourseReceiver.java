@@ -182,7 +182,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             startTime = null;
         }
-        if (startTime != null) {
+        if (trackedRace != null && startTime != null) {
             trackedRace.setStartTimeReceived(startTime);
         }
         final TimePoint startTrackingTime;
@@ -196,7 +196,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             startTrackingTime = null;
         }
-        if (startTrackingTime != null) {
+        if (trackedRace != null && startTrackingTime != null) {
             trackedRace.setStartOfTrackingReceived(startTrackingTime);
         }
         final TimePoint endTrackingTime;
@@ -210,7 +210,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             endTrackingTime = null;
         }
-        if (endTrackingTime != null) {
+        if (trackedRace != null && endTrackingTime != null) {
             trackedRace.setEndOfTrackingReceived(endTrackingTime);
         }
     }
@@ -220,13 +220,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 windStore, EmptyGPSFixStore.INSTANCE, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
-        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI, 
-                tracTracUsername, tracTracPassword,
-                getTracTracEvent().getId(), race.getId());
-        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
-                tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
-        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace);
         if (!Activator.getInstance().isUseTracTracMarkPassings()) {
             new MarkPassingCalculator(trackedRace, true);
         }

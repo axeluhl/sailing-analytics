@@ -30,6 +30,10 @@
   min-height: 8.75em;
   position: relative;
 }
+.eventheader_intro_description {
+  font-size: 16px;
+  font-size: 1rem;
+}
 .eventheader_intro_logo {
   border: solid 5px #fff;
   -webkit-box-shadow: 0 0 5px rgba(204,204,204,0.25);
@@ -130,7 +134,7 @@
 }
 .eventnavigationcompactfloating {
   position: fixed;
-  top: -5em;
+  top: -10em;
   left: 0;
   right: 0;
   z-index: 5;

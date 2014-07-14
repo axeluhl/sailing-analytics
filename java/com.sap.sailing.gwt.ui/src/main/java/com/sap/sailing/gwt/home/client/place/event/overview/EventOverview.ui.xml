@@ -8,6 +8,7 @@
     <g:HTMLPanel>
 
 <!-- The overview page of an event-->
+			
 <!-- Ubilabs has to cut this page into partials 
 <div class="{local_res.css.eventoverview}">
   <div class="{res.mainCss.grid}">

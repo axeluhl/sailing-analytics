@@ -17,6 +17,10 @@ import com.sap.sailing.domain.tracking.Wind;
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+    }
+
+    @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
     }
 
@@ -58,6 +62,14 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
+    }
+
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
     }
     
 }

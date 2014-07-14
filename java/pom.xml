@@ -121,7 +121,7 @@
                     If so the IP of the host would be the same for all profiles.
 		-->
         <parameters.common>
-		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest
+		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.common>
 		<parameters.vm-settings>
           -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
@@ -161,16 +161,16 @@
             <id>no-debug.without-proxy</id>
             <properties>
                 <tycho.build.argLine>
-				  ${parameters.common} ${parameters.vm-settings}
-				</tycho.build.argLine>
+		  ${parameters.common} ${parameters.vm-settings}
+		</tycho.build.argLine>
             </properties>
         </profile>
         <profile>
             <id>debug.with-proxy</id>
             <properties>
                 <tycho.build.argLine>
-			      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
-				</tycho.build.argLine>
+		      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+		</tycho.build.argLine>
             </properties>
         </profile>
         <profile>
@@ -178,7 +178,7 @@
             <properties>
                 <tycho.build.argLine>
                   ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
-				</tycho.build.argLine>
+		</tycho.build.argLine>
             </properties>
         </profile>
     </profiles>

@@ -12,7 +12,12 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IsFinishedAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.IsInFinishingPhaseAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
@@ -46,6 +51,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
     private final IndividualRecallDisplayedFinder recallDisplayedFinder;
+    private final IndividualRecallRemovedFinder recallRemovedFinder;
+    private final FinishingTimeFinder finishingTimeFinder;
+    private final FinishedTimeFinder finishedTimeFinder;
     private final RaceLogEventVisitor raceLogListener;
 
     private boolean cachedIsIndividualRecallDisplayed;
@@ -67,6 +75,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
+        this.recallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
+        this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
+        this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -126,17 +137,34 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     public boolean isIndividualRecallDisplayed() {
         return cachedIsIndividualRecallDisplayed;
     }
+
+    @Override
+    public boolean isIndividualRecallDisplayed(TimePoint at) {
+        if (hasIndividualRecall()) {
+            return new IsIndividualRecallDisplayedAnalyzer(getRaceLog(), at).analyze();
+        }
+        return false;
+    }
+    
+    @Override
+    public TimePoint getIndividualRecallDisplayedTime() {
+        if (hasIndividualRecall()) {
+            return recallDisplayedFinder.analyze();
+        }
+        return null;
+    }
     
     @Override
     public TimePoint getIndividualRecallRemovalTime() {
+        TimePoint displayed = getIndividualRecallDisplayedTime();
         if (hasIndividualRecall()) {
-            if (isIndividualRecallDisplayed()) {
-                TimePoint displayTime = recallDisplayedFinder.analyze();
-                if (displayTime != null) {
-                    return displayTime.plus(individualRecallRemovalTimeout);
-                }
+            TimePoint removedEvent = recallRemovedFinder.analyze();
+            if (removedEvent != null && (displayed == null || removedEvent.after(displayed))) {
+                return removedEvent;
             }
-
+        }
+        if (displayed != null) {
+            return displayed.plus(individualRecallRemovalTimeout);
         }
         return null;
     }
@@ -177,18 +205,22 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected void update() {
         boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
+        
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
             if (cachedIsIndividualRecallDisplayed) {
                 changedListeners.onIndividualRecallDisplayed(this);
-                changedListeners.onActiveFlagsChanged(this);
                 rescheduleIndividualRecallTimeout(recallDisplayedFinder.analyze());
             } else {
                 changedListeners.onIndividualRecallRemoved(this);
-                changedListeners.onActiveFlagsChanged(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
-        }
+        }    
+        
+        // always call listeners for changed flag, as this does not only affect recall, but also
+        // changes start procedure, for which some text elements need to be updated
+        // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}
+        changedListeners.onActiveFlagsChanged(this);
     }
 
     private void rescheduleIndividualRecallTimeout(TimePoint displayTime) {
@@ -238,5 +270,23 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         if (scheduler != null) {
             scheduler.unscheduleAllEvents();
         }
+    }
+    
+    protected boolean isFinished(TimePoint at) {
+        IsFinishedAnalyzer analyzer = new IsFinishedAnalyzer(raceLog, finishedTimeFinder, at);
+        return analyzer.analyze();
+    }
+    
+    protected boolean isInFinishingPhase(TimePoint at) {
+        IsInFinishingPhaseAnalyzer analyzer = new IsInFinishingPhaseAnalyzer(raceLog, finishingTimeFinder, at);
+        return analyzer.analyze();
+    }
+    
+    protected TimePoint getFinishingTime() {
+        return finishingTimeFinder.analyze();
+    }
+    
+    protected TimePoint getFinishedTime() {
+        return finishedTimeFinder.analyze();
     }
 }

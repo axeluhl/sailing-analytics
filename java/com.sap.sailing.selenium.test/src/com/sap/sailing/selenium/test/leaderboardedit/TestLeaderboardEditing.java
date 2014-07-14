@@ -32,7 +32,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final TrackableRaceDescriptor TRACKABLE_RACE = new TrackableRaceDescriptor(
             BMW_CUP_REGATTA, BMW_CUP_RACE_8, BMW_CUP_BOAT_CLASS);
     private static final TrackedRaceDescriptor TRACKED_RACE = new TrackedRaceDescriptor(
-            BMW_CUP_RACE_8 + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
+            BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
     @Before
@@ -43,7 +43,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     @Test
     public void testSimpleLeaderboardEditing() {
         createNewLeaderboardLoadRaceAndLink(LEADERBOARD);
-        
         LeaderboardEditingPage page = LeaderboardEditingPage.goToPage(LEADERBOARD, getWebDriver(), getContextRoot());
         LeaderboardTable table = page.getLeaderboardTable();
         assertNotNull(table);
@@ -53,7 +52,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     
     private void createNewLeaderboardLoadRaceAndLink(String leaderboardName) {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
         createLeaderboard(leaderboardName, adminConsole);
         startTrackingRaceAndWait(adminConsole, BMW_CUP_JSON_URL, TRACKABLE_RACE, TRACKED_RACE, 30000 /* 30s timeout */);
         // now create two race columns
@@ -69,7 +67,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         tracTracEvents.listTrackableRaces(jsonUrl);
         tracTracEvents.setTrackSettings(false, true, false);
         tracTracEvents.startTrackingForRace(trackableRace);
-        
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
         trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
         trackedRacesList.stopTracking(trackedRace);

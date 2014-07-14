@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
     
     private ImageButton abortButton;
     private ImageButton finishedButton;
+    private Button resetCourseButton;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
         additionalInfoTextView = (TextView) getView().findViewById(R.id.race_finishing_additional_info);
         finishedButton = (ImageButton) getView().findViewById(R.id.race_finishing_finished);
         abortButton = (ImageButton) getView().findViewById(R.id.race_finishing_abort);
+        resetCourseButton = (Button) getView().findViewById(R.id.race_finishing_reset_course);
         
         finishedButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -57,6 +60,13 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
                 args.putString(AppConstants.FLAG_KEY, Flags.NOVEMBER.name());
                 fragment.setArguments(args);
                 fragment.show(getFragmentManager(), "dialogNovemberMode");
+            }
+        });
+        
+        resetCourseButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCourseDesignDialog();
             }
         });
         

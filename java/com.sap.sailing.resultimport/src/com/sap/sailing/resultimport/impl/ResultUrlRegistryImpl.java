@@ -2,18 +2,21 @@ package com.sap.sailing.resultimport.impl;
 
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 
 public class ResultUrlRegistryImpl implements ResultUrlRegistry {
-    private Map<String, Set<URL>> resultUrls;
+    private final Map<String, Set<URL>> resultUrls;
+    private final MongoObjectFactory mongoObjectFactory;
     
-    public ResultUrlRegistryImpl() {
-        resultUrls = new HashMap<String, Set<URL>>();
+    public ResultUrlRegistryImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) {
+        this.mongoObjectFactory = mongoObjectFactory;
+        resultUrls = domainObjectFactory.loadResultUrls();
     }
     
     @Override
@@ -24,6 +27,7 @@ public class ResultUrlRegistryImpl implements ResultUrlRegistry {
             resultUrls.put(resultProviderName, urlSet);
         }
         urlSet.add(url);
+        mongoObjectFactory.storeResultUrl(resultProviderName, url);
     }
 
     @Override
@@ -31,6 +35,7 @@ public class ResultUrlRegistryImpl implements ResultUrlRegistry {
         Set<URL> urlSet = resultUrls.get(resultProviderName);
         if(urlSet != null) {
             urlSet.remove(url);
+            mongoObjectFactory.removeResultUrl(resultProviderName, url);
         }
     }
 

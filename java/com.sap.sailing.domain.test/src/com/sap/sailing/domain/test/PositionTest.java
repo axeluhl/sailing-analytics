@@ -240,4 +240,56 @@ public class PositionTest {
     	assertEquals(p6.getDistanceToLine(p1, p4).getMeters(), p6.getDistance(p1).scale(-1).getMeters(), delta);
     	assertEquals(right.getDistanceToLine(p1, p6).getMeters(), right.getDistance(p1).getMeters(), delta);
     }
+    
+    @Test
+    public void testQuickApproximateDistance1() {
+        Position p1 = new DegreePosition(0, 0);
+        Position p2 = new DegreePosition(1, 0);
+        assertEquals(60., p1.getQuickApproximateNauticalMileDistance(p2), 0.001);
+    }
+
+    @Test
+    public void testQuickApproximateDistance2() {
+        Position p1 = new DegreePosition(0, 0);
+        Position p2 = new DegreePosition(0, 1);
+        assertEquals(60., p1.getQuickApproximateNauticalMileDistance(p2), 0.001);
+    }
+
+    @Test
+    public void testQuickApproximateDistanceDiagonalNearEquator() {
+        Position p1 = new DegreePosition(0, 0);
+        Position p2 = new DegreePosition(0.1, 0.1);
+        assertEquals(p1.getDistance(p2).getNauticalMiles(), p1.getQuickApproximateNauticalMileDistance(p2), 0.01 * p1.getDistance(p2).getNauticalMiles());
+    }
+
+    @Test
+    public void testQuickApproximateDistanceDiagonalFarFromEquator() {
+        Position p1 = new DegreePosition(49, 8);
+        Position p2 = new DegreePosition(50, 9);
+        assertEquals(p1.getDistance(p2).getNauticalMiles(), p1.getQuickApproximateNauticalMileDistance(p2), 0.01 * p1.getDistance(p2).getNauticalMiles());
+    }
+
+    @Test
+    public void testQuickApproximateLongDistanceDiagonalFarFromEquator() {
+        Position p1 = new DegreePosition(20, -4);
+        Position p2 = new DegreePosition(50, 9);
+        assertEquals(p1.getDistance(p2).getNauticalMiles(), p1.getQuickApproximateNauticalMileDistance(p2), 0.01 * p1.getDistance(p2).getNauticalMiles());
+    }
+    
+    @Test
+    public void performanceComparisonQuickAndFullDistance() {
+        Position p1 = new DegreePosition(20, -4);
+        Position p2 = new DegreePosition(50, 9);
+        long startFull = System.currentTimeMillis();
+        int numberOfExecutions = 1000000;
+        for (int i=0; i<numberOfExecutions; i++) {
+            p1.getDistance(p2);
+        }
+        long endFull = System.currentTimeMillis();
+        for (int i=0; i<numberOfExecutions; i++) {
+            p1.getQuickApproximateNauticalMileDistance(p2);
+        }
+        long endQuick = System.currentTimeMillis();
+        System.out.println("Full: "+(endFull-startFull)+"ms; Quick: "+(endQuick-endFull)+"ms");
+    }
 }

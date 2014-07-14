@@ -585,7 +585,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
         dbRegatta.put(FieldNames.REGATTA_ID.name(), regatta.getId());
         dbRegatta.put(FieldNames.SCORING_SCHEME_TYPE.name(), regatta.getScoringScheme().getType().name());
         if (regatta.getBoatClass() != null) {
@@ -605,7 +604,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             DBObject configurationObject = (DBObject) JSON.parse(json.toString());
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
-
+        dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
@@ -1224,5 +1223,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject();
         storeRaceLogIdentifier(identifier, query);
         getRaceLogCollection().remove(query);
+    }
+
+    @Override
+    public void storeResultUrl(String resultProviderName, URL url) {
+        DBCollection resultUrlsCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        DBObject query = new BasicDBObject(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
+        DBObject entry = new BasicDBObject(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName);
+        entry.put(FieldNames.RESULT_URL.name(), url.toString());
+        resultUrlsCollection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeResultUrl(String resultProviderName, URL url) {
+        DBCollection resultUrlsCollection = database.getCollection(CollectionNames.RESULT_URLS.name());
+        DBObject query = new BasicDBObjectBuilder().add(FieldNames.RESULT_PROVIDERNAME.name(), resultProviderName)
+                .add(FieldNames.RESULT_URL.name(), url.toString()).get();
+        resultUrlsCollection.remove(query);
     }
 }

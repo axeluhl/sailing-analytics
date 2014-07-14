@@ -132,7 +132,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         // anyway. When the tracked race then is loaded it is expected
         // to automatically be linked to the leaderboard column.
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
-                new RegattaNameAndRaceName("weym470may122011 (STG)", "weym470may122011")));
+                new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
         assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);
@@ -151,6 +151,14 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testRaceTimeReplication() throws InterruptedException, Exception {
         startTracking();
+        // now wait at least until the start of tracking time has been received on the master copy
+        boolean receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+                master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
+        while (!receivedStartAndEndOfTracking) { // relying on the Timeout rule for this test
+            Thread.sleep(10);
+            receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
+                    master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
+        }
         Thread.sleep(2000); // kept failing several times for a 1000ms timeout
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());

@@ -223,15 +223,16 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Color getColor(CompetitorDTO competitor) {
-        Color result = null;
+        final Color result;
         if (allCompetitors.contains(competitor)) {
             if (competitor.getColor() != null) {
                 result = competitor.getColor();
             } else {
                 result = competitorsColorMap.getColorByID(competitor); 
             }
+        } else {
+            result = null;
         }
-        
         return result;
     }
 

@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -71,8 +72,8 @@ public class CreateAndTrackWithRaceLogTest {
         author = service.getServerAuthor();
         Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
-        regatta = service.createRegatta("regatta", "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
-                false, new HighPoint(), UUID.randomUUID());
+        regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
+                false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactoryImpl.INSTANCE.getAdapter(DomainFactory.INSTANCE);
     }

@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.Bounds;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -47,11 +49,13 @@ public class SimulatorField implements VectorField {
 
     private final double[][][] data;
     private final String[] colorsForSpeeds;
-    private int step;
+    private final Date startTime;
+    private final Duration timeStep;
 
     public SimulatorField(WindFieldDTO windData, WindFieldGenParamsDTO windParams, StreamletParameters parameters) {
+        this.startTime = windParams.getStartTime();
+        this.timeStep = windParams.getTimeStep();
         this.colorsForSpeeds = createColorsForSpeeds();
-        this.step = 0;
         this.rcStart = new DegreePosition(windData.windData.rcStart.latDeg, windData.windData.rcStart.lngDeg);
         this.rcEnd = new DegreePosition(windData.windData.rcEnd.latDeg, windData.windData.rcEnd.lngDeg);
         this.resX = windData.windData.resX;
@@ -131,13 +135,14 @@ public class SimulatorField implements VectorField {
         return inBool;
     }
 
-    private Vector interpolate(Position p) {
+    private Vector interpolate(Position p, Date at) {
+        int step = (int) ((at.getTime() - startTime.getTime()) / timeStep.asMillis());
         Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
             GWT.log("interpolate: out of range: " + idx.xTop + "  " + idx.yTop);
         }
-        final double[][] dataAtStep = this.data[this.step];
+        final double[][] dataAtStep = this.data[step];
         double avgX = dataAtStep[idx.yBot][2 * idx.xBot] * (1 - idx.yMod) * (1 - idx.xMod)
                 + dataAtStep[idx.yTop][2 * idx.xBot] * idx.yMod * (1 - idx.xMod)
                 + dataAtStep[idx.yBot][2 * idx.xTop] * (1 - idx.yMod) * idx.xMod
@@ -150,33 +155,8 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public void setStep(int step) {
-        if (step < 0) {
-            this.step = 0;
-        } else if (step >= this.data.length) {
-            this.step = this.data.length - 1;
-        } else {
-            this.step = step;
-        }
-    }
-
-    @Override
-    public void nextStep() {
-        if (this.step < (this.data.length - 1)) {
-            this.step++;
-        }
-    }
-
-    @Override
-    public void prevStep() {
-        if (this.step > 0) {
-            this.step--;
-        }
-    }
-
-    @Override
-    public Vector getVector(Position p) {
-        return this.interpolate(p);
+    public Vector getVector(Position p, Date at) {
+        return this.interpolate(p, at);
     }
 
     private Index getIndex(Position p) {
@@ -228,17 +208,12 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public double getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public double motionScale(int zoomLevel) {
+    public double getMotionScale(int zoomLevel) {
         return this.motionFactor * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
 
     @Override
-    public double particleWeight(Position p, Vector v) {
+    public double getParticleWeight(Position p, Vector v) {
         return v == null ? 0 : (v.length() / this.maxLength + 0.1);
     }
 
@@ -275,7 +250,7 @@ public class SimulatorField implements VectorField {
     }
 
     @Override
-    public double lineWidth(double speed) {
+    public double getLineWidth(double speed) {
         /*
          * absolute linewidth speed == 12kn => linewidth 1.5 speed == 24kn => linewidth 3.0 speed == 6kn => linewidth
          * 0.75
@@ -307,4 +282,5 @@ public class SimulatorField implements VectorField {
     public double getParticleFactor() {
         return this.particleFactor;
     }
+    
 }

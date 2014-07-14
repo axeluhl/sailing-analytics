@@ -130,7 +130,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                return object.raceName;
+                return object.getName();
             }
         };
 
@@ -271,7 +271,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 List<String> strings = new ArrayList<>();
                 strings.add(t.regattaName);
                 strings.add(t.seriesName);
-                strings.add(t.raceName);
+                strings.add(t.getName());
                 strings.add(t.raceStatus);
                 strings.add(t.boatClass);
                 strings.add(t.gender);
@@ -318,7 +318,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return new NaturalComparator().compare(o1.raceName,  o2.raceName);
+                return new NaturalComparator().compare(o1.getName(),  o2.getName());
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDTO>() {
@@ -443,7 +443,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
-        sailingService.trackWithSwissTiming(
+        
+        // Check if the assigned regatta makes sense
+        if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
+            sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
@@ -458,6 +461,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         regattaRefresher.fillRegattas();
                     }
                 });
+        }
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {

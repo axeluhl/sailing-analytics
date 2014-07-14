@@ -2,11 +2,8 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class TracTracRaceRecordDTO implements IsSerializable {
+public class TracTracRaceRecordDTO extends AbstractRaceRecordDTO {
     public String regattaName;
-    public String name;
     public String jsonURL;
     public String id;
     public Date trackingStartTime;
@@ -18,10 +15,9 @@ public class TracTracRaceRecordDTO implements IsSerializable {
     public TracTracRaceRecordDTO() {}
     
     public TracTracRaceRecordDTO(String id, String regattaName, String name, Date trackingStartTime,
-            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String jsonUrl) {
-        super();
+            Date trackingEndTime, Date raceStartTime, Iterable<String> boatClassNames, String status, String jsonUrl, boolean hasRememberedRegatta) {
+        super(name, hasRememberedRegatta);
         this.regattaName = regattaName;
-        this.name = name;
         this.id = id;
         this.trackingStartTime = trackingStartTime;
         this.trackingEndTime = trackingEndTime;
@@ -32,7 +28,12 @@ public class TracTracRaceRecordDTO implements IsSerializable {
     }
     
     @Override
+    public Iterable<String> getBoatClassNames() {
+        return boatClassNames;
+    }
+
+    @Override
     public String toString() {
-        return "Race "+name+" ("+trackingStartTime+" "+raceStatus+")";
+        return "Race "+getName()+" ("+trackingStartTime+" "+raceStatus+")";
     }
 }

@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sse.common.Util;
 
 /**
