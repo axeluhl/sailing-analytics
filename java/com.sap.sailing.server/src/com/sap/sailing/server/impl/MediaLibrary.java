@@ -91,7 +91,7 @@ class MediaLibrary {
      * performance gain.
      * 
      * Actually, efficient lookup of overlapping intervals is supposed to be performed using an interval tree, e.g.
-     * http://thekevindolan.com/2010/02/interval-tree/
+     * http://en.wikipedia.org/wiki/Interval_tree.
      * 
      * However, considering the expected low number of media entries and the expected high rate of cache hits doesn't
      * justify providing a dedicated interval tree implementation (given that there's none readily available).
