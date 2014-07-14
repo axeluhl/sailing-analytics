@@ -15,12 +15,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 class MediaLibrary {
 
@@ -68,9 +67,7 @@ class MediaLibrary {
      */
     private final ConcurrentMap<Interval, Set<MediaTrack>> cacheByInterval = new ConcurrentHashMap<Interval, Set<MediaTrack>>();
 
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Lock readLock = lock.readLock();
-    private final Lock writeLock = lock.writeLock();
+    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */ false);
 
 //    /**
 //     * Sort in reverse order of start time! For equal start times compare dbId to distinguish different instances.
@@ -112,7 +109,7 @@ class MediaLibrary {
         if (startTime != null) {
 
             Interval interval = new Interval(startTime, endTime);
-            readLock.lock();
+            LockUtil.lockForRead(lock);
             try {
                 Set<MediaTrack> cachedMediaTracks = cacheByInterval.get(interval);
                 if (cachedMediaTracks == null) {
@@ -134,7 +131,7 @@ class MediaLibrary {
                 }
 
             } finally {
-                readLock.unlock();
+                LockUtil.unlockAfterRead(lock);
             }
         }
         // else
@@ -152,65 +149,65 @@ class MediaLibrary {
     }
 
     void addMediaTracks(Collection<MediaTrack> mediaTracks) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
                 this.mediaTracksByDbId.put(mediaTrack, mediaTrack);
                 updateCache_Add(mediaTrack);
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void deleteMediaTrack(MediaTrack mediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack deletedMediaTrack = mediaTracksByDbId.remove(mediaTrack);
             updateCache_Remove(deletedMediaTrack);
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void titleChanged(MediaTrack changedMediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.title = changedMediaTrack.title;
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void urlChanged(MediaTrack changedMediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.url = changedMediaTrack.url;
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void mimeTypeChanged(MediaTrack changedMediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.mimeType = changedMediaTrack.mimeType;
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void startTimeChanged(MediaTrack changedMediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
@@ -218,12 +215,12 @@ class MediaLibrary {
                 updateCache_Change(mediaTrack);
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
     void durationChanged(MediaTrack changedMediaTrack) {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
@@ -231,7 +228,7 @@ class MediaLibrary {
                 updateCache_Change(mediaTrack);
             }
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
@@ -273,20 +270,20 @@ class MediaLibrary {
      * Returns a non-live copy of the media tracks
      */
     Collection<MediaTrack> allTracks() {
-        readLock.lock();
+        LockUtil.lockForRead(lock);
         try {
             return new ArrayList<MediaTrack>(mediaTracksByDbId.values());
         } finally {
-            readLock.unlock();
+            LockUtil.unlockAfterRead(lock);
         }
     }
 
     void serialize(ObjectOutputStream stream) throws IOException {
-        readLock.lock();
+        LockUtil.lockForRead(lock);
         try {
             stream.writeObject(new ArrayList<MediaTrack>(mediaTracksByDbId.values()));
         } finally {
-            readLock.unlock();
+            LockUtil.unlockAfterRead(lock);
         }
     }
 
@@ -296,12 +293,12 @@ class MediaLibrary {
     }
 
     public void clear() {
-        writeLock.lock();
+        LockUtil.lockForWrite(lock);
         try {
             mediaTracksByDbId.clear();
             cacheByInterval.clear();
         } finally {
-            writeLock.unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
