@@ -116,10 +116,12 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
         scheduler.scheduleFixedPeriod(new RepeatingCommand() {
             @Override
             public boolean execute() {
-                updateWindSourcesToObserve();
+                updateWindSourcesToObserve(/* runWhenDone */ null);
                 return visible;
             }
         }, CHECK_WIND_SOURCE_INTERVAL_IN_MILLIS);
+        // Now run things once, first updating the wind sources, then grabbing the wind from those sources:
+        updateWindSourcesToObserve(new Runnable() { @Override public void run() { updateWindField(); } });
     }
 
     private void stopStreamlets() {
@@ -133,8 +135,9 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
      * not yet observed (contained in the keys of {@link #windInfoForRace}'s
      * {@link WindInfoForRaceDTO#windTrackInfoByWindSource windTrackInfoByWindSource} map, the wind source is added to that map
      * unless it's the {@link WindSourceType#COMBINED} wind source or the wind source is marked as excluded.
+     * @param runWhenDone TODO
      */
-    private void updateWindSourcesToObserve() {
+    private void updateWindSourcesToObserve(final Runnable runWhenDone) {
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -150,6 +153,9 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
                             !Util.contains(result.windSourcesToExclude, e.getKey()) && e.getKey().getType() != WindSourceType.COMBINED) {
                         windInfoForRace.windTrackInfoByWindSource.put(e.getKey(), e.getValue());
                     }
+                }
+                if (runWhenDone != null) {
+                    runWhenDone.run();
                 }
             }
         }));
