@@ -217,7 +217,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         } else if (isSmallWidth()) {
             raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
             int width = Window.getClientWidth();
-            numberOfLastRacesToShow = (width-275)/35;
+            numberOfLastRacesToShow = (width-275)/40;
         } else {
             raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
             numberOfLastRacesToShow = null;
