@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -135,7 +135,6 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
      * not yet observed (contained in the keys of {@link #windInfoForRace}'s
      * {@link WindInfoForRaceDTO#windTrackInfoByWindSource windTrackInfoByWindSource} map, the wind source is added to that map
      * unless it's the {@link WindSourceType#COMBINED} wind source or the wind source is marked as excluded.
-     * @param runWhenDone TODO
      */
     private void updateWindSourcesToObserve(final Runnable runWhenDone) {
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
@@ -162,41 +161,48 @@ public class WindStreamletsRaceboardOverlay extends FullCanvasOverlay {
     }
     
     private void updateWindField() {
-        Date beginningOfTime = null;
-        Date endOfTime = null;
+        Date timeOfLastFixOfSource = null;
+        Set<String> windSourceTypeNames = new HashSet<>();
         for (final Entry<WindSource, WindTrackInfoDTO> e : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             if (!Util.contains(windInfoForRace.windSourcesToExclude, e.getKey())) {
-                final Date timeOfLastFixOfSource = (e.getValue().windFixes != null && !e.getValue().windFixes.isEmpty())
-                        ? new Date(e.getValue().windFixes.get(e.getValue().windFixes.size()-1).measureTimepoint+1)
-                        : beginningOfTime;
-                GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource, endOfTime,
-                        RESOLUTION_IN_MILLIS, Arrays.asList(new String[] { e.getKey().getType().name() }), /* onlyUpToNewestEvent */ true);
-                asyncActionsExecutor.execute(getWind, LODA_WIND_STREAMLET_DATA_CATEGORY+" "+e.getKey().name(), new MarkedAsyncCallback<>(
-                        new AsyncCallback<WindInfoForRaceDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                            }
-
-                            @Override
-                            public void onSuccess(WindInfoForRaceDTO result) {
-                                updateAverageLatitudeDeg(result);
-                                // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max confidences
-                                if (e.getValue().windFixes == null) {
-                                    e.getValue().windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
-                                } else {
-                                    e.getValue().windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
-                                }
-                                if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > e.getValue().maxWindConfidence) {
-                                    e.getValue().maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
-                                }
-                                if (result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence < e.getValue().minWindConfidence) {
-                                    e.getValue().minWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence;
-                                }
-                            }
-                        }));
+                windSourceTypeNames.add(e.getKey().getType().name());
+                if (e.getValue().windFixes != null && !e.getValue().windFixes.isEmpty()) {
+                    // TODO this should better be a per wind source time range; furthermore, only real fixes should be requested / transmitted
+                    timeOfLastFixOfSource = new Date(
+                            e.getValue().windFixes.get(e.getValue().windFixes.size() - 1).measureTimepoint + 1);
+                }
             }
         }
+        GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource,
+                /* endOfTime */ null, RESOLUTION_IN_MILLIS, windSourceTypeNames, /* onlyUpToNewestEvent */ true);
+        asyncActionsExecutor.execute(getWind, LODA_WIND_STREAMLET_DATA_CATEGORY,
+                new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(WindInfoForRaceDTO result) {
+                        updateAverageLatitudeDeg(result);
+                        // merge the new wind fixes into the existing WindInfoForRaceDTO structure, updating min/max
+                        // confidences
+                        for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
+                            WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
+                            if (windTrackForSource.windFixes == null) {
+                                windTrackForSource.windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
+                            } else {
+                                windTrackForSource.windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                            }
+                            if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                windTrackForSource.maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
+                            }
+                            if (result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence < windTrackForSource.minWindConfidence) {
+                                windTrackForSource.minWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence;
+                            }
+                        }
+                    }
+                }));
     }
 
     @Override
