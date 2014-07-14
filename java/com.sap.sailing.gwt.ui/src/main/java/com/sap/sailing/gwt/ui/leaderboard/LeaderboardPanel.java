@@ -483,7 +483,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         }));
     }
 
-    private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
+    void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
         if (timer.getPlayState() != Timer.PlayStates.Playing) {
             // wait for the first update and adjust leaderboard once the race times have been received

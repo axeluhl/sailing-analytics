@@ -277,7 +277,7 @@ public class WindTest {
                 new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
         final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
-                new RegattaImpl(EmptyRaceLogStore.INSTANCE, "Test Regatta", boatClass,
+                new RegattaImpl(EmptyRaceLogStore.INSTANCE, RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
                 /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),

@@ -6,13 +6,17 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 public class QuickRankDTO implements IsSerializable {
     public CompetitorDTO competitor;
     public int rank;
-    public int legNumber;
+    
+    /**
+     * The {@link #competitor}'s leg number, starting with 1 for the first leg
+     */
+    public int legNumberOneBased;
 
     public QuickRankDTO() {}
     
-    public QuickRankDTO(CompetitorDTO competitorDTO, int rank, int legNumber) {
+    public QuickRankDTO(CompetitorDTO competitorDTO, int rank, int legNumberOneBased) {
         this.competitor = competitorDTO;
         this.rank = rank;
-        this.legNumber = legNumber;
+        this.legNumberOneBased = legNumberOneBased;
     }
 }

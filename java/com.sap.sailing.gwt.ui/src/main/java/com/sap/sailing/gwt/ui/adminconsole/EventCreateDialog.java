@@ -2,10 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -23,10 +21,11 @@ public class EventCreateDialog extends EventDialog {
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         venueEntryField = createTextBox(null);
         venueEntryField.setVisibleLength(35);
-        startDateBox = createDateBox(12);
-        startDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT))); 
-        endDateBox = createDateBox(12);
-        endDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT)));
+        final Date now = new Date();
+        startDateBox = createDateTimeBox(now);
+        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(now);
+        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         officialWebsiteURLEntryField = createTextBox(null);
         officialWebsiteURLEntryField.setVisibleLength(50);
         logoImageURLEntryField = createTextBox(null);

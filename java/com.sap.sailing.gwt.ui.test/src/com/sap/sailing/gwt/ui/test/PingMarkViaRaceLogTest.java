@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -34,7 +35,7 @@ public class PingMarkViaRaceLogTest {
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
-        Regatta regatta = service.createRegatta("regatta", "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
+        Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true);
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         

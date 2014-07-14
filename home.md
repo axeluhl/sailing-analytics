@@ -44,6 +44,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Theses (Bachelor, Master, ...)|wiki/theses]]
+  * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]

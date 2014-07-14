@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -55,8 +56,9 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
             WindStore windStore, GPSFixStore gpsFixStore) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
-            regatta = service.getOrCreateDefaultRegatta("RaceLog-tracking default Regatta", boatClass.getName(),
-                    UUID.randomUUID());
+            regatta = service.getOrCreateDefaultRegatta(
+                    RegattaImpl.getDefaultName("RaceLog-tracking default Regatta", boatClass.getName()),
+                    boatClass.getName(), UUID.randomUUID());
         }
         if (regatta == null) {
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
