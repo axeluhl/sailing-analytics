@@ -133,6 +133,7 @@ public class FixesAndTails {
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
+        // TODO consider binary search to find beginning of interesting segment faster
         for (Iterator<GPSFixDTO> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
             GPSFixDTO fix = fixIter.next();
             if (!fix.timepoint.before(to)) {
