@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,9 +83,11 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             Connection rabbitConnection = new ConnectionFactory().newConnection();
             Channel channel = rabbitConnection.createChannel();
             RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
-                    /* queueName */ "initialLoad-for-"+req.getRemoteHost(), /* syncAfterTimeout */ false);
+                    /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
+                    /* syncAfterTimeout */ false);
             PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
-            br.println(ros.getQueueName().getBytes());
+            br.println(ros.getQueueName());
+            br.flush();
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new CountingOutputStream(
                     ros, /* log every megabyte */1024l * 1024l, Level.INFO,
                     "HTTP output for initial load for " + req.getRemoteHost()));
