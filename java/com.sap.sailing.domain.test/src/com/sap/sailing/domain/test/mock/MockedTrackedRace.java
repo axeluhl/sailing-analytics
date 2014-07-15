@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -33,6 +32,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
@@ -54,8 +55,8 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -370,12 +371,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public String getBaseName() {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-
-                    @Override
                     public Iterable<? extends Series> getSeries() {
                         // TODO Auto-generated method stub
                         return null;
@@ -453,9 +448,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Event getEvent() {
+                    public boolean useStartTimeInference() {
                         // TODO Auto-generated method stub
-                        return null;
+                        return false;
                     }
 
                     @Override
@@ -463,11 +458,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public void setUseStartTimeInference(boolean useStartTimeInference) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
             @Override
-            public Iterable<TrackedRace> getTrackedRaces() {
+            public Iterable<DynamicTrackedRace> getTrackedRaces() {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -989,6 +990,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onAbortedByRaceCommittee(Flags flag) {
         // TODO Auto-generated method stub
         
     }

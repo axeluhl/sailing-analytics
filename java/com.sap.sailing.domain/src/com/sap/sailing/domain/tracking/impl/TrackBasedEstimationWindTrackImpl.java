@@ -671,6 +671,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
         }
     }
+    
+    @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+        // no action required; we're calculating based on each competitor's individual start time, not the start of race
+    }
 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {

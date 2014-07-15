@@ -1083,11 +1083,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Regatta loadRegatta(DBObject dbRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = null;
         if (dbRegatta != null) {
-            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            String name = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
             Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
             if (id == null) {
-                id = baseName + "("+boatClassName+")";
+                id = name;
             }
             BoatClass boatClass = null;
             if (boatClassName != null) {
@@ -1099,14 +1099,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database, serviceFinderFactory), 
                     this);
-            
             Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
             CourseArea courseArea = null;
             if (courseAreaId != null) {
                 UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
                 courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
-            
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsField(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 try {
@@ -1116,8 +1114,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            
-            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
+            Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            result = new RegattaImpl(raceLogStore, name, boatClass, series, /* persistent */true,
+                    loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
+                            : useStartTimeInference);
             result.setRegattaConfiguration(configuration);
         }
         return result;

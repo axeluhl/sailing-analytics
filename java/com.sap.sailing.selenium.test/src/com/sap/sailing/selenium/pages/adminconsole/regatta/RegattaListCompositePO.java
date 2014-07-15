@@ -9,11 +9,8 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO.SortingOrder;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
@@ -130,15 +127,23 @@ public class RegattaListCompositePO extends PageArea {
     
     public void removeRegatta(RegattaDescriptor regatta) {
         DataEntryPO entry = findRegatta(regatta);
-        
-        if(entry != null) {
+        if (entry != null) {
             WebElement action = ActionsHelper.findRemoveAction(entry.getWebElement());
             action.click();
-            
             waitForAjaxRequests();
-            
             ActionsHelper.acceptAlert(this.driver);
         }
+    }
+    
+    public RegattaEditDialogPO editRegatta(RegattaDescriptor regatta) {
+        DataEntryPO entry = findRegatta(regatta);
+        if (entry != null) {
+            WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
+            action.click();
+            WebElement dialog = findElementBySeleniumId(this.driver, "RegattaWithSeriesAndFleetsEditDialog");
+            return new RegattaEditDialogPO(this.driver, dialog);
+        }
+        return null;
     }
     
     private DataEntryPO findRegatta(RegattaDescriptor regatta) {

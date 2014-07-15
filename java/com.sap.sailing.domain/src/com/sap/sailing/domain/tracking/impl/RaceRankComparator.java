@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -44,11 +45,12 @@ public class RaceRankComparator implements Comparator<Competitor> {
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
+        LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
             if (trackedLegOfCompetitor != null) {
                 windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint,
-                        WindPositionMode.LEG_MIDDLE));
+                        WindPositionMode.LEG_MIDDLE, cache));
             }
         }
     }

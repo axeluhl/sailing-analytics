@@ -115,28 +115,21 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public List<String> getLegsNames() {
-
         this.intializeRaceHandle();
-
         List<String> result = new ArrayList<String>();
-
-        for (RaceDefinition race : this.raceHandle.getRaces()) {
-            for (Leg leg : race.getCourse().getLegs()) {
-                result.add(leg.toString());
-            }
-            break;
+        RaceDefinition race = this.raceHandle.getRace();
+        for (Leg leg : race.getCourse().getLegs()) {
+            result.add(leg.toString());
         }
-
         return result;
     }
 
     @Override
     public Path getPath() {
-
         this.intializeRaceHandle();
 
         // getting the first race
-        RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
+        RaceDefinition raceDef = this.raceHandle.getRace();
         Regatta regatta = this.raceHandle.getRegatta();
 
         TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
@@ -184,11 +177,9 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public Path getPathPolyline(Distance maxDistance) {
-
         this.intializeRaceHandle();
-
-        // getting the first race
-        RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
+        // getting the race
+        RaceDefinition raceDef = this.raceHandle.getRace();
         Regatta regatta = this.raceHandle.getRegatta();
 
         TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
@@ -252,20 +243,12 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     public List<String> getComeptitorsNames() {
-
         this.intializeRaceHandle();
-
         List<String> result = new ArrayList<String>();
-
-        for (RaceDefinition race : this.raceHandle.getRaces()) {
-            for (Competitor competitor : race.getCompetitors()) {
-                result.add(competitor.getName() + ", " + competitor.getBoat().getName());
-            }
-
-            break;
+        RaceDefinition race = this.raceHandle.getRace();
+        for (Competitor competitor : race.getCompetitors()) {
+            result.add(competitor.getName() + ", " + competitor.getBoat().getName());
         }
-
         return result;
-
     }
 }

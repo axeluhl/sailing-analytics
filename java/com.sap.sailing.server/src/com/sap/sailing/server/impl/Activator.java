@@ -1,5 +1,6 @@
 package com.sap.sailing.server.impl;
 
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -7,6 +8,9 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -21,6 +25,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMong
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sse.common.Util;
@@ -39,6 +44,8 @@ public class Activator implements BundleActivator {
     private final boolean clearPersistentCompetitors;
     
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
+
+    private ObjectName mBeanName;
 
     public Activator() {
         clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
@@ -72,7 +79,11 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(GPSFixMongoHandler.class,
                         new GPSFixMovingMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
                                 racingEventService.getDomainObjectFactory()), properties));
-        
+        // Add an MBean for the service to the JMX bean server:
+        RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        mBeanName = new ObjectName("com.sap.sailing:type=RacingEventService");
+        mbs.registerMBean(mbean, mBeanName);
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }
@@ -95,5 +106,7 @@ public class Activator implements BundleActivator {
             reg.unregister();
         }
         registrations.clear();
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        mbs.unregisterMBean(mBeanName);
     }
 }

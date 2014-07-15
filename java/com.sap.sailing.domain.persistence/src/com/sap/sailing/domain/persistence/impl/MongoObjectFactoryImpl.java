@@ -585,7 +585,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
         dbRegatta.put(FieldNames.REGATTA_ID.name(), regatta.getId());
         dbRegatta.put(FieldNames.SCORING_SCHEME_TYPE.name(), regatta.getScoringScheme().getType().name());
         if (regatta.getBoatClass() != null) {
@@ -605,7 +604,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             DBObject configurationObject = (DBObject) JSON.parse(json.toString());
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
-
+        dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 

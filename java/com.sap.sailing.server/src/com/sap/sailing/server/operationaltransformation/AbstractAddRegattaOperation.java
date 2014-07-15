@@ -6,19 +6,19 @@ import com.sap.sailing.domain.base.Regatta;
 
 public abstract class AbstractAddRegattaOperation extends AbstractRacingEventServiceOperation<Regatta> {
     private static final long serialVersionUID = 4596134166642095364L;
-    private final String baseRegattaName;
+    private final String regattaName;
     private final String boatClassName;
     private final Serializable id;
     
     public AbstractAddRegattaOperation(String regattaName, String boatClassName, Serializable id) {
         super();
-        this.baseRegattaName = regattaName;
+        this.regattaName = regattaName;
         this.boatClassName = boatClassName;
         this.id = id;
     }
 
-    protected String getBaseRegattaName() {
-        return baseRegattaName;
+    protected String getRegattaName() {
+        return regattaName;
     }
 
     protected String getBoatClassName() {

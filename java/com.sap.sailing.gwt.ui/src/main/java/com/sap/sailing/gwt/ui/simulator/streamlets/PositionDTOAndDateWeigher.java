@@ -4,13 +4,12 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sse.common.Util;
 
 /**
- * A weigher that uses a {@link Position} and a {@link TimePoint} to compute a confidence based on time and space
+ * A weigher that uses a {@link PositionDTO} and a {@link Date} to compute a confidence based on space and time
  * distance. If the <code>fix</code> or the <code>request</code> parameter in a call to
  * {@link #getConfidence(com.sap.sse.common.Util.Pair, com.sap.sse.common.Util.Pair)} have a <code>null</code>
  * {@link Position} then no distance-based confidence is considered, and only the time difference is taken into account.
@@ -33,6 +32,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     
     public static interface AverageLatitudeProvider {
         double getAverageLatitudeDeg();
+        double getCosineOfAverageLatitude();
     }
     
     public PositionDTOAndDateWeigher(long halfConfidenceAfterMilliseconds, Distance halfConfidenceDistance,
@@ -43,7 +43,7 @@ public class PositionDTOAndDateWeigher implements Weigher<Util.Pair<PositionDTO,
     }
 
     private double getCosineOfAverageLatitude() {
-        return Math.cos(averageLatitudeDegProvider.getAverageLatitudeDeg()/180.*Math.PI);
+        return averageLatitudeDegProvider.getCosineOfAverageLatitude();
     }
     
     @Override

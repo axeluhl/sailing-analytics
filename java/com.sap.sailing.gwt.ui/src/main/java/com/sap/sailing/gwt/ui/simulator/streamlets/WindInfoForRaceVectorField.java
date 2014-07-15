@@ -47,6 +47,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
     private final Weigher<Pair<PositionDTO, Date>> weigher;
     private double averageLatitudeDeg;
+    private double averageLatitudeCosine;
     
     private final Comparator<WindDTO> windByMeasureTimePointComparator = new Comparator<WindDTO>() {
         @Override
@@ -68,11 +69,17 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     public void setAverageLatitudeDeg(double averageLatitudeDeg) {
         this.averageLatitudeDeg = averageLatitudeDeg;
+        this.averageLatitudeCosine = Math.cos(averageLatitudeDeg/180.0*Math.PI);
     }
     
     @Override
     public double getAverageLatitudeDeg() {
         return averageLatitudeDeg;
+    }
+    
+    @Override
+    public double getCosineOfAverageLatitude() {
+        return averageLatitudeCosine;
     }
 
     @Override
@@ -88,7 +95,10 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         double knotSpeedSumScaledByConfidence = 0;
         final BearingWithConfidenceCluster<Pair<PositionDTO, Date>> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
+            /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
+                continue;
+            }*/
+           if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
                 if (timewiseClosestFixForWindSource != null) {
                     Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(

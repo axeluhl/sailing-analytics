@@ -151,11 +151,10 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     public void unlinkRace(RaceDescriptor race) {
         DataEntryPO entry = findRace(race);
-        
-        if(entry != null) {
+        if (entry != null) {
             WebElement action = ActionsHelper.findUnlinkRaceAction(entry.getWebElement());
-            
             action.click();
+            waitForAjaxRequests(); // unlinking update the leaderboard details table; wait for callback to finish
         }
     }
     
@@ -175,12 +174,11 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
         DataEntryPO raceRow = findRace(race);
         DataEntryPO trackingRow = findTracking(tracking);
-        
         if(raceRow == null || trackingRow == null) {
         }
-        
         raceRow.select();
         trackingRow.select();
+        waitForAjaxRequests(); // the selection will update elements of the cell table; wait until the callback has been received
     }
     
     private DataEntryPO findRace(RaceDescriptor race) {

@@ -1056,4 +1056,5 @@ public interface StringMessages extends Messages {
     String lastScoreCorrectionsTime();
     String lastScoreCorrectionsComment();
     String setTimeToNow();
+    String useStartTimeInference();
 }

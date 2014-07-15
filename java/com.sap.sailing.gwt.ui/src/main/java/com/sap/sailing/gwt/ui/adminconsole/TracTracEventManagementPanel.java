@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -15,7 +17,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -44,7 +45,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -294,7 +294,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.add(t.name);
+                strings.add(t.getName());
                 strings.add(t.regattaName);
                 if (t.boatClassNames != null) {
                     for (String boatClassName : t.boatClassNames) {
@@ -326,7 +326,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         TextColumn<TracTracRaceRecordDTO> raceNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
             @Override
             public String getValue(TracTracRaceRecordDTO object) {
-                return object.name;
+                return object.getName();
             }
         };
         raceNameColumn.setSortable(true);
@@ -399,7 +399,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
-                return new NaturalComparator().compare(o1.name, o2.name);
+                return new NaturalComparator().compare(o1.getName(), o2.getName());
             }
         });
         result.setComparator(boatClassColumn, new Comparator<TracTracRaceRecordDTO>() {
@@ -520,95 +520,48 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 }));
     }
 
-    private boolean checkBoatClassMatch(TracTracRaceRecordDTO tracTracRecord, RegattaDTO selectedRegatta) {
-        Iterable<String> boatClassNames = tracTracRecord.boatClassNames;
-        if (boatClassNames != null && Util.size(boatClassNames) > 0) {
-            String tracTracBoatClassName = boatClassNames.iterator().next();
-            if (selectedRegatta == null) {
-                if (tracTracRecord.hasRememberedRegatta) {
-                    return true;
-                }
-                
-                // in case no regatta has been selected we check if there would be a matching regatta
-                for (RegattaDTO regatta : getAvailableRegattas()) {
-                    if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
-                            (regatta.boatClass != null && tracTracBoatClassName.equalsIgnoreCase(regatta.boatClass.getName()))) {
-                        return false;
-                    }
-                }
-            } else {
-                if (!tracTracBoatClassName.equals(selectedRegatta.boatClass.getName())) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    
     private void trackSelectedRaces(boolean trackWind, boolean correctWind, final boolean simulateWithStartTimeNow) {
         String liveURI = liveURITextBox.getValue();
         String storedURI = storedURITextBox.getValue();
         String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
         String tractracUsername = tractracUsernameTextBox.getValue();
         String tractracPassword = tractracPasswordTextBox.getValue();
-        RegattaDTO selectedRegatta = getSelectedRegatta();
+        RegattaDTO selectedRegatta = getSelectedRegatta(); // null meaning "Default Regatta" selection
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
-        // Check if the assigned regatta makes sense
+        // Check if the assigned regatta makes sense; the following cases need to be distinguished:
+        //  - non-default regatta explicitly selected: check that boat class matches; disallow loading when there is a mismatch
+        //  - "Default Regatta" selected: if race was assigned to a regatta before, use that without further checks;
+        //                                otherwise, warn user if a "persistent" regatta with the same boat class already exists
+        //                                because it may be an accidental omission to select that regatta for loading
         List<TracTracRaceRecordDTO> allRaces = raceList.getList();
-        List<TracTracRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<TracTracRaceRecordDTO>();
         SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
-        
+        final Set<TracTracRaceRecordDTO> selectedRaces = new LinkedHashSet<>();
         for (TracTracRaceRecordDTO race : allRaces) {
-            if (selectionModel.isSelected(race)) {
-                if (!checkBoatClassMatch(race, selectedRegatta))
-                    racesWithNotMatchingBoatClasses.add(race);
-            }
-        }
-        if (racesWithNotMatchingBoatClasses.size() > 0) {
-            StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
-            if (selectedRegatta != null) {
-                builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName()));
-            } else {
-                builder.append(stringMessages.regattaExistForSelectedBoatClass());
-            }
-            builder.append("\n\n");
-            builder.append(stringMessages.races());
-            builder.append("\n");
-            for (TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
-                builder.append(record.name);
-                builder.append("\n");
-            }
-            
-            Window.alert(builder.toString());
-            return;
-        }
-        
-        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();
-        for (final TracTracRaceRecordDTO race : raceList.getList()) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
             }
         }
-        sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind, 
-                simulateWithStartTimeNow, tractracUsername, tractracPassword, new MarkedAsyncCallback<Void>(
-                        new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                reportError("Error trying to register races " + selectedRaces + " for tracking: "
-                                        + caught.getMessage() + ". Check live/stored URI syntax.");
-                            }
-        
-                            @Override
-                            public void onSuccess(Void result) {
-                                TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
-                            }
-                        }));
-    }
+        if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
+            sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
+                    courseDesignUpdateURI, trackWind, correctWind, simulateWithStartTimeNow, tractracUsername,
+                    tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            reportError("Error trying to register races " + selectedRaces + " for tracking: "
+                                    + caught.getMessage() + ". Check live/stored URI syntax.");
+                        }
 
+                        @Override
+                        public void onSuccess(Void result) {
+                            TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
+                        }
+                    }));
+        }
+    }
+    
     private void updatePanelFromSelectedStoredConfiguration() {
         int index = connectionsHistoryListBox.getSelectedIndex();
 

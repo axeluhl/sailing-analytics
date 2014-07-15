@@ -220,13 +220,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 windStore, EmptyGPSFixStore.INSTANCE, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
-        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI, 
-                tracTracUsername, tracTracPassword,
-                getTracTracEvent().getId(), race.getId());
-        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
-                tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
-        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace);
         if (!Activator.getInstance().isUseTracTracMarkPassings()) {
             new MarkPassingCalculator(trackedRace, true);
         }

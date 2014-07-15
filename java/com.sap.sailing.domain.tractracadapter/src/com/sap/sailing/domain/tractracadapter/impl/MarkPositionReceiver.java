@@ -43,9 +43,6 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     private final IRace tractracRace;
     final IControlPointPositionListener listener;
 
-    /**
-     * @param tractracRace TODO
-     */
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);

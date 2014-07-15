@@ -32,6 +32,15 @@ public interface RaceChangeListener extends CourseListener {
     void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
     void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived);
+    
+    /**
+     * Fired when the {@link TrackedRace#getStartOfRace() start of race} time point has changed for the tracked race
+     * observed by this listener. There can be several reasons for this to happen, among them the setting of the start
+     * time by the race committee app, or receiving a new start time from the tracking provider, or receiving a new
+     * start mark passing with start time inference enabled, or a switch of the flag determining whether start mark
+     * passing-based start time inference is active or not.
+     */
+    void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace);
 
     void delayToLiveChanged(long delayToLiveInMillis);
 

@@ -154,60 +154,48 @@ public class AdminConsolePage extends HostPage {
     private WebElement goToTab(String label, final String id) {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
-        
         ScrollDirection direction = getScrollDirection(tab);
-        
-        if(direction != null) {
+        if (direction != null) {
             WebElement scroller = this.tabPanel.findElement(direction.getBy());
-            
-            while(!tab.isDisplayed() && scroller.isDisplayed()) {
+            while (!tab.isDisplayed() && scroller.isDisplayed()) {
                 scrollAndWait(scroller);
             }
-            
-            
-            
             // Workaround for "Offset within element cannot be scrolled into view: (-1, 5)".
             // We try to scroll one more time to make the tab completely visible
             //
             // TODO: Create a bug report for this!
             int tabIndex = (direction == ScrollDirection.Left ? getFirstVisibleTabIndex() : getLastVisibleTabIndex());
-            
             if(scroller.isDisplayed() && getTabIndex(tab) == tabIndex) {
                 scrollAndWait(scroller);
             }
-                
         }
-        
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         Actions actions = new Actions(this.driver);
         actions.moveToElement(tab, determineOffsetForClick(tab), 5);
         actions.click();
         actions.perform();
-        
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
-        
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
     }
     
     private ScrollDirection getScrollDirection(WebElement tab) {
         int tabIndex = getTabIndex(tab);
-        
-        if(tabIndex < getFirstVisibleTabIndex())
+        if (tabIndex < getFirstVisibleTabIndex()) {
             return ScrollDirection.Left;
-        
-        if(tabIndex > getLastVisibleTabIndex())
+        }
+        if (tabIndex > getLastVisibleTabIndex()) {
             return ScrollDirection.Rigth;
-        
+        }
         return null;
     }
     
     private void scrollAndWait(WebElement scroller) {
         WebElement arrow = scroller.findElement(By.tagName("img"));
         arrow.click();
-        
         // TODO: Find a better solution with ImplicitWait
         try {
             Thread.sleep(500L);
@@ -220,34 +208,31 @@ public class AdminConsolePage extends HostPage {
     }
     
     private int getFirstVisibleTabIndex() {
-        for(int i = 0; i <= this.tabs.size() - 1; i++) {
-            if(this.tabs.get(i).isDisplayed()) {
+        for (int i = 0; i <= this.tabs.size() - 1; i++) {
+            if (this.tabs.get(i).isDisplayed()) {
                 return i;
             }
         }
-        
         return -1;
     }
     
     private int getLastVisibleTabIndex() {
-        for(int i = this.tabs.size() - 1; i >= 0; i--) {
-            if(this.tabs.get(i).isDisplayed()) {
+        for (int i = this.tabs.size() - 1; i >= 0; i--) {
+            if (this.tabs.get(i).isDisplayed()) {
                 return i;
             }
         }
-        
         return -1;
     }
-    
+
     private int determineOffsetForClick(WebElement tab) {
         int tabIndex = getTabIndex(tab);
-        
-        if(tabIndex == getFirstVisibleTabIndex())
+        if (tabIndex == getFirstVisibleTabIndex()) {
             return -1;
-        
-        if(tabIndex == getLastVisibleTabIndex())
+        }
+        if (tabIndex == getLastVisibleTabIndex()) {
             return +1;
-        
+        }
         return tab.getSize().width / 2;
     }
 }
