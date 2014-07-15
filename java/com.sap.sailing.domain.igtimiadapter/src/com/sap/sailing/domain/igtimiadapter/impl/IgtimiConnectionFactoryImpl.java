@@ -509,6 +509,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
                 return o1Score - o2Score;
             }
         });
+        logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
     }
 
