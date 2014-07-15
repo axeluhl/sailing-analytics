@@ -1083,11 +1083,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Regatta loadRegatta(DBObject dbRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = null;
         if (dbRegatta != null) {
-            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            String name = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
             Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
             if (id == null) {
-                id = baseName + "("+boatClassName+")";
+                id = name;
             }
             BoatClass boatClass = null;
             if (boatClassName != null) {
@@ -1115,7 +1115,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
             Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
-            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference==null?true:useStartTimeInference);
+            result = new RegattaImpl(raceLogStore, name, boatClass, series, /* persistent */true,
+                    loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
+                            : useStartTimeInference);
             result.setRegattaConfiguration(configuration);
         }
         return result;

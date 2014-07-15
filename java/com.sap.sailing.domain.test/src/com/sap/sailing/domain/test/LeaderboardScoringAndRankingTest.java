@@ -1158,7 +1158,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(medalSeries);
         }
 
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false, scoringScheme, "123", null);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, series, /* persistent */ false, scoringScheme, "123", null);
         return regatta;
     }
     
@@ -1222,7 +1222,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             Series finalSeries = new SeriesImpl("After", /* isMedal */false, afterFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(finalSeries);
         }
-        Regatta regatta = new RegattaImpl("Test Regatta",DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false),
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;

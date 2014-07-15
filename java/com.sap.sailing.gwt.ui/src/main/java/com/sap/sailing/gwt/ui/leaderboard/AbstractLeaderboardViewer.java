@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.player.Timer;
  */
 public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected final StringMessages stringMessages;
+    private final LeaderboardPanel leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -39,14 +40,19 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
 
     public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages, boolean hideToolbar) {
+            Timer timer, StringMessages stringMessages, boolean hideToolbar, LeaderboardPanel leaderboardPanel) {
         this.competitorSelectionProvider = competitorSelectionProvider;
+        this.leaderboardPanel = leaderboardPanel;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
         this.hideToolbar = hideToolbar;
     }
     
+    public LeaderboardPanel getLeaderboardPanel() {
+        return leaderboardPanel;
+    }
+
     protected FlowPanel createViewerPanel() {
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");

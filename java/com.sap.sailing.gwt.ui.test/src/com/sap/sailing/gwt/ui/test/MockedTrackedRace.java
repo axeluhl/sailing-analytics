@@ -371,12 +371,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public String getBaseName() {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-
-                    @Override
                     public Iterable<? extends Series> getSeries() {
                         // TODO Auto-generated method stub
                         return null;

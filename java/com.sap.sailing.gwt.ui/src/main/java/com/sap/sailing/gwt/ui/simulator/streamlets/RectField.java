@@ -171,4 +171,5 @@ public class RectField implements VectorField {
     public double getParticleFactor() {
         return this.particleFactor;
     }
+    
 }

@@ -42,7 +42,7 @@ public class RegattaStructureManagementPanelPO extends PageArea {
      */
     public void createRegatta(RegattaDescriptor regatta) {
         RegattaCreateDialogPO createRegattaDialog = startRegattaCreation();
-        createRegattaDialog.setRegattaName(regatta.getName());
+        createRegattaDialog.setRegattaName(regatta.getName()+" ("+regatta.getBoatClass()+")");
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
         SeriesCreateDialogPO addSeriesDialog = createRegattaDialog.addSeries();
         addSeriesDialog.setSeriesName(DEFAULT_SERIES_NAME);

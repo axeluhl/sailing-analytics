@@ -91,8 +91,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
+    public RegattaImpl(String name, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, name, boatClass, series, persistent, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
     }
     
     /**
@@ -105,8 +105,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(raceLogStore, baseName, boatClass, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+    public RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+        this(raceLogStore, name, boatClass, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, Collections
                 .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), /* race column names */new ArrayList<String>(),
                 trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea, /* useStartTimeInference */ true);
@@ -116,10 +116,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * @param series
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
-     * @param useStartTimeInference TODO
      */
-    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
-        super(getDefaultName(baseName, boatClass==null?null:boatClass.getName()));
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String name, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference) {
+        super(name);
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
         this.raceLogStore = raceLogStore;
@@ -154,24 +153,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                     new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
     }
 
-    public static String getDefaultName(String baseName, String boatClassName) {
-        return baseName+(boatClassName==null?"":" ("+boatClassName+")");
-    }
-    
     @Override
     public Serializable getId() {
         return id;
     }
 
-    @Override
-    public String getBaseName() {
-        String result;
-        if (boatClass == null) {
-            result = getName();
-        } else {
-            result = getName().substring(0, getName().length()-boatClass.getName().length()-3); // remove tralining boat class name and " (" and ")"
-        }
-        return result;
+    public static String getDefaultName(String baseName, String boatClassName) {
+        return baseName+(boatClassName==null?"":" ("+boatClassName+")");
     }
     
     @Override

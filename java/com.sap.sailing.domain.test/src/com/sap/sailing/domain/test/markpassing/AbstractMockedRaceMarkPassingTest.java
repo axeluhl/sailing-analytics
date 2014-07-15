@@ -63,10 +63,11 @@ public class AbstractMockedRaceMarkPassingTest {
         Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
         Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);
         Waypoint w3 = new WaypointImpl(cp, PassingInstruction.Line);
-        Regatta r = new RegattaImpl("regatta", new BoatClassImpl("boat", true), Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
+        final BoatClassImpl boatClass = new BoatClassImpl("boat", true);
+        Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", Arrays.asList(w1, w2, w3));
-        RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(bob));
+        RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, boatClass, Arrays.asList(bob));
         trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(r), race, new ArrayList<Sideline>(), new EmptyWindStore(), EmptyGPSFixStore.INSTANCE, 0, 10000, 10000);
         trackedRace.setStartTimeReceived(new MillisecondsTimePoint(System.currentTimeMillis() - 120000));
         List<MillisecondsTimePoint> tps = Arrays.asList(new MillisecondsTimePoint(System.currentTimeMillis()), new MillisecondsTimePoint(System.currentTimeMillis() - 30000),

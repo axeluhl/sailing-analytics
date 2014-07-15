@@ -204,7 +204,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public void setReggataForTracking(String regatta) {
         Select select = new Select(this.availableRegattasListBox);
-        
         select.selectByValue(regatta);
     }
     

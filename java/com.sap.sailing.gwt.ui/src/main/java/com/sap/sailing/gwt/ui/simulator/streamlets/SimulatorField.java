@@ -282,4 +282,5 @@ public class SimulatorField implements VectorField {
     public double getParticleFactor() {
         return this.particleFactor;
     }
+    
 }
