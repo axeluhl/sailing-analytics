@@ -51,4 +51,10 @@ public class CountingOutputStream extends FilterOutputStream {
         super.write(b, off, len);
         count(len);
     }
+    
+    @Override
+    public void close() throws IOException {
+        super.close();
+        log();
+    }
 }

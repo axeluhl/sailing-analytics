@@ -88,9 +88,10 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
             br.println(ros.getQueueName());
             br.flush();
-            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new CountingOutputStream(
+            final CountingOutputStream countingOutputStream = new CountingOutputStream(
                     ros, /* log every megabyte */1024l * 1024l, Level.INFO,
-                    "HTTP output for initial load for " + req.getRemoteHost()));
+                    "HTTP output for initial load for " + req.getRemoteHost());
+            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
             ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
             try {
                 getService().serializeForInitialReplication(oos);
@@ -101,7 +102,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace(resp.getWriter());
             }
-            ros.close();
+            countingOutputStream.close();
             break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
