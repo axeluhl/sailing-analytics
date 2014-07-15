@@ -45,7 +45,7 @@ public class EventDTO extends EventBaseDTO {
         leaderboardGroups.add(leaderboardGroup);
     }
     
-    public Iterable<LeaderboardGroupDTO> getLeaderboardGroups() {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
         return leaderboardGroups;
     }
     

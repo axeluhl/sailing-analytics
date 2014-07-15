@@ -74,4 +74,5 @@
 	<source path='ui/actions' />
 	<source path='ui/simulator' />
 	<source path='home' />
+	<source path='idangerous' />
 </module>

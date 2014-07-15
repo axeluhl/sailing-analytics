@@ -6,14 +6,13 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
     <g:HTMLPanel>
-    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-    <figure class="{local_res.css.videopreview}"><img ui:field="eventVideoPreviewImage" />
-        <figcaption>
-          <p class="{local_res.css.videopreview_title}"><span ui:field="eventName" /></p>
-          <div><span ui:field="eventVideoLength" /></div>
-          <div><g:Anchor ui:field="eventMediaPageLink" styleName="{res.mainCss.button}" href="javascript:;">Show More</g:Anchor></div>
-        </figcaption>
-      </figure>
-     </div>
+
+<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
+  <figure ui:field="videoFile" data-src="" class="{local_res.css.videopreview} {res.mainCss.lightbox_item}"><img ui:field="videoThumbImage" />
+    <figcaption><div class="{local_res.css.videopreview_title}"><span ui:field="videoTitle" /></div>
+      <time><span ui:field="videoTime" /></time>
+    </figcaption>
+  </figure>
+</div>
     </g:HTMLPanel>
 </ui:UiBinder>

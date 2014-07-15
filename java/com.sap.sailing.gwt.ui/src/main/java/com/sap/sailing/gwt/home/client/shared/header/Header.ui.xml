@@ -19,9 +19,10 @@
 							styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" href="javascript:;"/>
 						<g:Anchor ui:field="solutionsPageLink"
 							styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" href="javascript:;"/>
+						<!-- 
 						<g:Anchor ui:field="sponsoringPageLink"
-							styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;">
-						</g:Anchor>
+							styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;" />
+						 -->
 				          <div class="{local_res.css.search}">
 				            <g:Button ui:field="searchButton" text="Search" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
 				            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />

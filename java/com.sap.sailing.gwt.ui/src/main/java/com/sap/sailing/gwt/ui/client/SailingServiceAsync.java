@@ -84,6 +84,9 @@ public interface SailingServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
+    void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
+
+
     /**
      * The string returned in the callback's pair is the common event name
      * @param listHiddenRaces 
@@ -479,7 +482,7 @@ public interface SailingServiceAsync {
     void getBuildVersion(AsyncCallback<String> callback);
 
     void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
-    
+
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,

@@ -47,6 +47,12 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
+/**
+ * The media selector is used as an {@link AsyncCallback} that receives a collection of {@link MediaTrack}s in case the
+ * call was successful. This could, e.g., be a call to
+ * {@link MediaServiceAsync#getMediaTracksForRace(RegattaAndRaceIdentifier, AsyncCallback)}. When the call returns the
+ * track collection, the UI is updated accordingly.
+ */
 public class MediaSelector implements PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
 
@@ -82,7 +88,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.user = user;
-		this.autoSelectMedia = autoSelectMedia;
+        this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
@@ -91,7 +97,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
         manageMediaButton = new Button();
         manageMediaButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 if (mediaSelectionDialog.isShowing()) {
@@ -288,7 +293,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         
         toggleMediaButton.setValue(autoSelectMedia);
         if (autoSelectMedia) {
-        	playDefault();
+            playDefault();
         }
     }
 

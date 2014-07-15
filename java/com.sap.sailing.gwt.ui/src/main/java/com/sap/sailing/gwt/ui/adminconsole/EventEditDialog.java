@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -23,10 +20,10 @@ public class EventEditDialog extends EventDialog {
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         venueEntryField = createTextBox(event.venue.getName());
         venueEntryField.setVisibleLength(35);
-        startDateBox = createDateBox(event.startDate, 12);
-        startDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT))); 
-        endDateBox = createDateBox(event.endDate, 12);
-        endDateBox.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT))); 
+        startDateBox = createDateTimeBox(event.startDate);
+        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(event.endDate);
+        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
         id = event.id;

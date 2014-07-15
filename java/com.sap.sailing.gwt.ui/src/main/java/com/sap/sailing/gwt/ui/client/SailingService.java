@@ -97,6 +97,8 @@ public interface SailingService extends RemoteService {
     
     List<RegattaDTO> getRegattas();
 
+    RegattaDTO getRegattaByName(String regattaName);
+
     List<EventDTO> getEvents() throws Exception;
 
     List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws Exception;

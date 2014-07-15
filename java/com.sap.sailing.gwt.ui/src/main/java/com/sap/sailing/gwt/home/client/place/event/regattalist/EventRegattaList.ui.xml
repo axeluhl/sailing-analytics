@@ -7,8 +7,7 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattalist.EventRegattaListResources" />
     <g:HTMLPanel>
 		<div class="{local_res.css.eventregattalist}">
-		    <g:HTMLPanel ui:field="regattaListItemPanel">
-			</g:HTMLPanel>
+		    <g:HTMLPanel ui:field="regattaListItemPanel" />
 		</div>
     </g:HTMLPanel>
 </ui:UiBinder>

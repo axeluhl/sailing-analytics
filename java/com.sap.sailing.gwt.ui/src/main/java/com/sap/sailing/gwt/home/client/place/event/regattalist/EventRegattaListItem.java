@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.place.event.regattalist;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,22 +24,16 @@ public class EventRegattaListItem extends Composite {
 
     @UiField SpanElement regattaName;
     @UiField SpanElement leaderboardGroupName;
-
     @UiField SpanElement competitorsCount;
-    @UiField SpanElement boatDesign; 
-    @UiField SpanElement scoringSystem; 
-    @UiField SpanElement averageWind; 
-    @UiField SpanElement plannedRacesCount; 
-    @UiField SpanElement regattaSeriesName; 
-
+    @UiField SpanElement regattaPhase;
     @UiField DivElement isLiveElement; 
     @UiField Anchor regattaRacesLink;
     
     @SuppressWarnings("unused")
     private RegattaDTO regatta;
     
-    private final LeaderboardGroupDTO leaderboardGroup;
     private final StrippedLeaderboardDTO leaderboard;
+    private final LeaderboardGroupDTO leaderboardGroup;
     private final EventPageNavigator pageNavigator;
     
     public EventRegattaListItem(EventPageNavigator pageNavigator, LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO leaderboard) {
@@ -49,23 +44,24 @@ public class EventRegattaListItem extends Composite {
         EventRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        updateUI();
+        regattaName.setInnerText(leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name);
+        leaderboardGroupName.setInnerText(leaderboardGroup.getName());
+        
+        if(leaderboard.rows != null) {
+            competitorsCount.setInnerText(String.valueOf(leaderboard.rows.size()));
+        } else {
+            competitorsCount.getStyle().setVisibility(Visibility.HIDDEN);
+        }
     }
 
     @UiHandler("regattaRacesLink")
     public void goToRegattaRaces(ClickEvent e) {
-        pageNavigator.goToRegattaRaces(leaderboard);
+        pageNavigator.goToRegattaRaces(leaderboardGroup, leaderboard);
+    }
+    
+    @UiHandler("leaderboardLink")
+    public void goToLeaderboard(ClickEvent e) {
+        pageNavigator.openLeaderboardViewer(leaderboardGroup, leaderboard);
     }
 
-    private void updateUI() {
-        regattaName.setInnerText(leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name);
-        leaderboardGroupName.setInnerText(leaderboardGroup.getName());
-        
-        competitorsCount.setInnerText("XYZ");
-        boatDesign.setInnerText("XYZ");
-        scoringSystem.setInnerText("XYZ");
-        averageWind.setInnerText("XYZ");
-        plannedRacesCount.setInnerText("XYZ");
-        regattaSeriesName.setInnerText("ABC");
-    }
 }
