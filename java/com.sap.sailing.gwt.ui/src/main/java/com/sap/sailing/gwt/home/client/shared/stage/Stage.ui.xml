@@ -3,27 +3,19 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+	<ui:with field="media_res" type="com.sap.sailing.gwt.home.client.shared.mainmedia.MainMediaResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.stage.StageResources" />
 	<g:HTMLPanel>
 		<!-- The main stage -->
-		<div style="background-image: url('images/home/banner-background.jpg')" class="{local_res.css.stage}">
-			<header class="{local_res.css.stage_header}">
-				<p class="{local_res.css.stage_header_subtitle}"><g:Label ui:field='subtitle' /></p>
-				<h2 class="{local_res.css.stage_header_title}"><g:Label ui:field='title' /></h2>
-				<div class="{local_res.css.stage_header_message}"><g:Label ui:field='message' /></div>
-			</header>
-			<div class="{local_res.css.stage_band}">
-				<div class="{res.mainCss.grid}">
-					<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-						<div class="{local_res.css.stage_band_message}"><span ui:field='regattaState' />&nbsp;-
-						</div>
-						<div class="{local_res.css.stage_band_name}"><span ui:field='actionMessage' /></div>
-						<button class="{res.mainCss.button} {local_res.css.stage_band_action}">
-							<ui:text from='{i18n.fullEventSchedule}'/>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
+<div class="{local_res.css.stage}">
+  <div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
+        <g:HTMLPanel ui:field="stageElementsPanel" styleName="{local_res.css.swiperwrapper}" />
+  </div>
+  <div class="{local_res.css.stage_progress}">
+    <div class="{local_res.css.stage_progress_bar}"></div>
+  </div>
+  <g:Anchor ui:field="prevStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsprev}"></g:Anchor>
+  <g:Anchor ui:field="nextStageTeaserLink" styleName="{local_res.css.stage_controls} {media_res.css.media_slideshow_controls} {media_res.css.media_slideshow_controlsnext}"></g:Anchor>
+</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

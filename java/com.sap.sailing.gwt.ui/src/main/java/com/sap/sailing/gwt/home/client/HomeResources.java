@@ -42,6 +42,18 @@ public interface HomeResources extends ClientBundle {
         String mainsection_header();
         String mainsection_header_title();
         String mainsection_navigation();
+        
+        String lightbox();
+        String lightbox_overlay();
+        String lightbox_overlayhidden();
+        String lightbox_content();
+        String lightbox_contenthidden();
+        String lightbox_content_enlargedimage();
+        String lightbox_content_enlargedimage_caption();
+        String lightbox_content_enlargedimage_close();
+        String lightbox_data();
+        String lightbox_photo();
+        String lightbox_item();
     }
     
     @Shared 

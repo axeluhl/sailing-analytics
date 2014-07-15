@@ -25,7 +25,8 @@
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSAPHeadline}'/></h2>
         <p><ui:text from='{i18n.solutionsSAPText1}'/></p>
-        <p><ui:text from='{i18n.solutionsSAPText2}'/></p><a href="#" class="{res.mainCss.button}">Read More</a>
+        <p><ui:text from='{i18n.solutionsSAPText2}'/></p>
+        <!-- <a href="#" class="{res.mainCss.button}">Read More</a>  -->
       </div>
     </div>
   </div>
@@ -36,7 +37,8 @@
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsRaceHeadline}'/></h2>
-        <p><ui:text from='{i18n.solutionsRaceText}'/></p><a href="#" class="{res.mainCss.button}">Start Tour</a>
+        <p><ui:text from='{i18n.solutionsRaceText}'/></p>
+        <!--  <a href="#" class="{res.mainCss.button}">Start Tour</a>  -->
       </div>
     </div>
   </div>
@@ -66,7 +68,8 @@
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
         <h2><ui:text from='{i18n.solutionsSimulatorHeadline}'/></h2>
-        <p><ui:text from='{i18n.solutionsSimulatorText}'/></p><a href="#" class="{res.mainCss.button}">Learn More</a>
+        <p><ui:text from='{i18n.solutionsSimulatorText}'/></p>
+        <!--  <a href="#" class="{res.mainCss.button}">Learn More</a>  -->
       </div>
     </div>
   </div>

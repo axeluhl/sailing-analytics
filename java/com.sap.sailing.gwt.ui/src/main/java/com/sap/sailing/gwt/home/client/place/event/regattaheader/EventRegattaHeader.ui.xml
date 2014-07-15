@@ -8,43 +8,47 @@
     <g:HTMLPanel>
 
 <!-- The regatta header contains basic regatta information and the regatta navigation-->
-<!-- A view, introducing a regatta-->
-<!-- 
 <div class="{local_res.css.eventregattaheader}">
+
   <div class="{local_res.css.regatta}">
     <div class="{res.mainCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <div class="{local_res.css.regatta_intro}"><img src="images/{regatta.image}" alt="{regatta.name}" height="140" width="140" class="{local_res.css.regatta_intro_image}"></img>
-          <div class="{local_res.css.regatta_intro_header}"><img src="images/{regatta.logo}" alt="" class="{local_res.css.regatta_intro_header_logo}"></img>
-            <h3 class="{local_res.css.regatta_intro_header_name}">{regatta.name}</h3>
-            <div class="{local_res.css.regatta_intro_header_labels}">{#if regatta.isLive}
-              <div data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>{/if regatta.isLive}{#if regatta.series}
-              <div data-labeltype="{regatta.series.id}" class="{res.mainCss.label}">{regatta.series.name}</div>{/if regatta.series}
+          <div class="{local_res.css.regatta_intro}"><img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140" class="{local_res.css.regatta_intro_image}"></img>
+          <div class="{local_res.css.regatta_intro_header}">
+              <g:Anchor ui:field="regattaRacesLink">
+	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName" /></h3>
+	              <div ui:field="isLiveDiv" data-labeltype="" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
+              </g:Anchor>
+            <div class="{local_res.css.regatta_intro_header_labels}">
+              <div data-labeltype="ess" class="{res.mainCss.label}"><span ui:field="leaderboardGroupName" /></div>
             </div>
           </div>
+          <div class="{local_res.css.regatta_intro_meta}">Phase
+            <div class="{local_res.css.regatta_intro_meta_scoring}"><span ui:field="regattaPhase" />
+            </div>
+            <div class="{local_res.css.regatta_intro_meta_leaderboardlink}">
+                <g:Anchor ui:field="leaderboardLink">Leaderboard</g:Anchor>
+			</div>
+          </div>
           <div class="{local_res.css.regatta_intro_races}">
-            <div data-finished="{race.finished}" class="{local_res.css.regatta_intro_races_race}"></div>
+            <div data-finished="race.finished" class="{local_res.css.regatta_intro_races_race}"></div>
           </div>
           <div class="{local_res.css.regatta_intro_details}">
             <div class="{local_res.css.regatta_intro_details_item}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><span class="{local_res.css.regatta_intro_details_item_value}">{regatta.racesCount}</span>&nbsp;<ui:text from='{i18n.regattaIntroContentRaces}'/></div>
-              <div class="{local_res.css.regatta_intro_details_item_sub}"><span class="{local_res.css.regatta_intro_details_item_value}">{regatta.competitorsCount}</span>&nbsp;<ui:text from='{i18n.regattaIntroContentCompetitors}'/></div>
+              <div class="{local_res.css.regatta_intro_details_item_sub}">&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}"><span ui:field="competitorsCount" /></span></div>
             </div>
-            <div class="{local_res.css.regatta_intro_details_item} {local_res.css.regatta_intro_details_itemhideoncompact}">
-              <div class="{local_res.css.regatta_intro_details_item_sub}">{feature}
-              </div>
-            </div>
-            <div class="{local_res.css.regatta_intro_details_item} {local_res.css.regatta_intro_details_itemhideoncompact}"><ui:text from='{i18n.regattaIntroContentCourse}'/>:&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.course}</span></div>
-            <div class="{local_res.css.regatta_intro_details_item}"><ui:text from='{i18n.lastUpdate}'/>:&nbsp;<span class="{local_res.css.regatta_intro_details_item_value}">{regatta.lastUpdate}</span></div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </div>
+<!-- 
 <div class="{local_res.css.regattanavigation}">
   <div class="{res.mainCss.grid}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="event-regatta-schedule.html" class="{local_res.css.regattanavigation_link}"><ui:text from='{i18n.eventRegattaHeaderRaceSchedule}'/></a><a href="event-regatta-leaderboard.html" class="{local_res.css.regattanavigation_link}"><ui:text from='{i18n.eventRegattaHeaderLeaderboard}'/></a></div>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="event-regatta-schedule.html" class="{local_res.css.regattanavigation_link}"><ui:text from='{i18n.eventRegattaHeaderRaceSchedule}'/></a>
+    </div>
   </div>
 </div>
  -->

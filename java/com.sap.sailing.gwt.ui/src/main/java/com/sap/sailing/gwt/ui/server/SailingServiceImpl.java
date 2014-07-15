@@ -736,10 +736,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RegattaDTO> getRegattas() throws IllegalArgumentException {
+    public List<RegattaDTO> getRegattas() {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
             result.add(convertToRegattaDTO(regatta));
+        }
+        return result;
+    }
+
+    @Override
+    public RegattaDTO getRegattaByName(String regattaName) {
+        RegattaDTO result = null;
+        if (regattaName != null && !regattaName.isEmpty()) {
+            Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+            if (regatta != null) {
+                result = convertToRegattaDTO(regatta);
+            }
         }
         return result;
     }
@@ -1865,8 +1877,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(dateAsTimePoint)) {
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
                     if (trackedLeg != null) {
-                        int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
-                        QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumber);
+                        int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                        QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumberOneBased);
                         result.add(quickRankDTO);
                     }
                     rank++;

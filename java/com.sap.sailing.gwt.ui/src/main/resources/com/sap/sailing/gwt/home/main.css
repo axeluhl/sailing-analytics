@@ -238,3 +238,101 @@ figcaption {
 .mainsection_navigation {
   text-align: center;
 }
+
+.lightbox {
+  font-size: 16px;
+  font-size: 1rem;
+}
+.lightbox_overlay {
+  font-size: 16px;
+  font-size: 1rem;
+  background: #000;
+  opacity: 0.7;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+  filter: literal("alpha(opacity=70)");
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2000;
+  -webkit-transition: opacity 0.3s ease;
+  -moz-transition: opacity 0.3s ease;
+  -o-transition: opacity 0.3s ease;
+  -ms-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+.lightbox_overlayhidden {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+.lightbox_content {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+  top: 0;
+  left: 0;
+  z-index: 2001;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-transition: opacity 0.3s ease;
+  -moz-transition: opacity 0.3s ease;
+  -o-transition: opacity 0.3s ease;
+  -ms-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+.lightbox_contenthidden {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+.lightbox_content_enlargedimage {
+  -webkit-transition: margin 0.7s linear;
+  -moz-transition: margin 0.7s linear;
+  -o-transition: margin 0.7s linear;
+  -ms-transition: margin 0.7s linear;
+  transition: margin 0.7s linear;
+  display: inline-block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+.lightbox_content_enlargedimage_caption {
+  text-align: center;
+  color: #f6f9fc;
+  font-weight: 700;
+}
+.lightbox_content_enlargedimage_close {
+  display: inline-block;
+  background-image: url("images/home/x_lightbox.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 1.25em;
+  height: 0;
+  overflow: hidden;
+  padding-top: 1.25em;
+  position: absolute;
+  top: 1.25em;
+  right: 1.25em;
+  cursor: pointer;
+  z-index: 2003;
+}
+/**
+.lightbox_content .media_slideshow_controls {
+  z-index: 2002;
+}
+*/
+
+.lightbox_data {
+  display: none;
+}
+.lightbox_photo {
+  cursor: pointer;
+}
+
+.lightbox_item {
+}

@@ -20,7 +20,7 @@
 		          </a></div>
 		    </div>
 		    <div class="{res.mediaCss.small4} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
-		        <ui:text from='{i18n.footerLanguage}'/>:<g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}"><span ui:field="currentLanguage" /></g:Anchor></div>
+		        <ui:text from='{i18n.footerLanguage}'/>:<g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" /></div>
 		  </div>
 		</footer>
 	</g:HTMLPanel>

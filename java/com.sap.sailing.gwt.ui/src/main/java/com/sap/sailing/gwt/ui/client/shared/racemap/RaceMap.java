@@ -782,6 +782,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
     
+    /**
+     * Returns a pair whose first component is the leg number (one-based) of the competitor returned as the second component.
+     */
     private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getLeadingVisibleCompetitorInfo(Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
@@ -789,7 +792,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         for (QuickRankDTO quickRank : quickRanks) {
             if (Util.contains(competitorsToShow, quickRank.competitor)) {
                 leadingCompetitorDTO = quickRank.competitor;
-                legOfLeaderCompetitor = quickRank.legNumber;
+                legOfLeaderCompetitor = quickRank.legNumberOneBased;
                 return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }

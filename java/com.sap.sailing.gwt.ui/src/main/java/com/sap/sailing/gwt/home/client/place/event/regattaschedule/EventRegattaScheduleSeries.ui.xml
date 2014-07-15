@@ -1,0 +1,15 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources" />
+    <g:HTMLPanel>
+		<div class="{local_res.css.eventregattaschedule_series}">
+		  <h3 class="{local_res.css.eventregattaschedule_series_name}"><span ui:field="seriesName" /></h3>
+			<span class="{local_res.css.eventregattaschedule_series_date}"><span ui:field="seriesDate" /></span>
+			<g:HTMLPanel ui:field="fleetsListPanel" />
+		</div>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -271,9 +271,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return filterSets;
     }
     
+    /**
+     * Adds the media selector drop down and fills it with media for the current race.
+     * NOTE:
+     * Media selector will NOT listen and react to changes of the start time during a race board session.
+     * This case and its consequences are considered negligible.
+     * Consequently, media selector will also NOT react on media added newly during a race board session.
+     */
     private void addMediaSelectorToNavigationMenu() {
         MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
-//      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
