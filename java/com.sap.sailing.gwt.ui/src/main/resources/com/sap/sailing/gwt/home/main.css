@@ -178,13 +178,13 @@ figcaption {
   text-transform: uppercase;
   vertical-align: middle;
 }
-.label[data-labeltype='ess'] {
+.label[data-labeltype='group1'] {
   background-color: #a71724;
 }
-.label[data-labeltype='worldcup'] {
+.label[data-labeltype='group2'] {
   background-color: #c79242;
 }
-.label[data-labeltype='bundesliga'] {
+.label[data-labeltype='group3'] {
   background-color: #005fa7;
 }
 .morelink {

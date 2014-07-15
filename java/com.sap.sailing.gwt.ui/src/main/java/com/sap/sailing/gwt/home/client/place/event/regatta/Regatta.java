@@ -34,13 +34,15 @@ public class Regatta extends Composite {
     private final EventPageNavigator pageNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
+
+    @SuppressWarnings("unused")
     private LeaderboardGroupDTO leaderboardGroup;
 
     @UiField SpanElement regattaName1;
     @UiField SpanElement regattaName2;
-    @UiField SpanElement leaderboardGroupName;
+    @UiField DivElement leaderboardGroupName;
     @UiField SpanElement scheduledStart;
-    @UiField HTMLPanel regattaPhasesPanel;
+    @UiField DivElement regattaPhasesPanel;
     @UiField SpanElement competitorsCount;
     @UiField SpanElement racesCount;
     @UiField SpanElement trackedRacesCount;
@@ -100,6 +102,7 @@ public class Regatta extends Composite {
         regattaName2.setInnerText(regattaDisplayName);
         if(raceGroup.leaderboardGroupName != null) {
             leaderboardGroupName.setInnerText(raceGroup.leaderboardGroupName);
+            leaderboardGroupName.setAttribute("data-labeltype", "group1");
         } else {
             leaderboardGroupName.getStyle().setDisplay(Display.NONE);
         }
@@ -119,7 +122,7 @@ public class Regatta extends Composite {
     private void setRegattaProgress() {
         for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
             RegattaPhase regattaPhase = new RegattaPhase(series); 
-            regattaPhasesPanel.add(regattaPhase);
+            regattaPhasesPanel.appendChild(regattaPhase.getElement());
         }
     }
 

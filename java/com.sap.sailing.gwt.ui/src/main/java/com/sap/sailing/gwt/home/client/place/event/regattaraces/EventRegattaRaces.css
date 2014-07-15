@@ -48,7 +48,7 @@
   height: 3.333333333333333em;
   padding: 0.333333333333333em;
   background-color: #008fcc;
-  background-image: url("../images/fleet-icon.png");
+  background-image: url("images/home/fleet-icon.png");
   background-position: center 4px;
   background-repeat: no-repeat;
   font-size: 12px;
@@ -78,7 +78,7 @@
   left: 0.666666666666667em;
   width: 1.733333333333333em;
   height: 1.733333333333333em;
-  background-image: url("../images/race-features-icons.png");
+  background-image: url("images/home/race-features-icons.png");
   -webkit-background-size: auto 200%;
   -moz-background-size: auto 200%;
   background-size: auto 200%;
@@ -204,7 +204,7 @@
 .eventregattarace_actiondisabled:hover {
   background-color: transparent;
 }
-[class*="event-regatta-race__feature__"] {
+[class*="eventregattarace_feature_"] {
   position: relative;
   top: 50%;
   -webkit-transform: translate(0, -50%);
@@ -216,12 +216,12 @@
   width: 1.733333333333333em;
   height: 1.733333333333333em;
   margin-right: 0.666666666666667em;
-  background-image: url("../images/race-features-icons.png");
+  background-image: url("images/home/race-features-icons.png");
   -webkit-background-size: auto 200%;
   -moz-background-size: auto 200%;
   background-size: auto 200%;
 }
-[class*="event-regatta-race__feature__"]:last-of-type {
+[class*="eventregattarace_feature_"]:last-of-type {
   margin-right: 0;
 }
 .eventregattarace_feature_gps {
@@ -238,4 +238,31 @@
 }
 .eventregattarace_feature_unavailable {
   background-position-y: 100%;
+}
+.regattanavigation {
+  font-size: 15px;
+  font-size: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+.regattanavigation_link {
+  display: inline-block;
+  margin-right: 2em;
+  padding: 1em 0 0.733333333333333em 0;
+  border-bottom: 0.266666666666667em solid transparent;
+  font-weight: 600;
+  color: #666;
+}
+.regattanavigation_link:hover,
+.regattanavigation_link:focus {
+  border-bottom-color: #ddd;
+  text-decoration: none;
+  color: #333;
+}
+.regattanavigation_linkactive {
+  border-bottom-color: #f0ab00;
+}
+.regattanavigation_linkactive:hover,
+.regattanavigation_linkactive:focus {
+  border-bottom-color: #d89a00;
 }

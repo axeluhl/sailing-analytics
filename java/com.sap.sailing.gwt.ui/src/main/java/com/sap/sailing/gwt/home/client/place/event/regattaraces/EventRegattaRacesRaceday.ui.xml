@@ -4,11 +4,12 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.eventregattaraces.EventRegattaRacesRacedayResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
     <g:HTMLPanel>
 
-<div class="{local_res.css.eventregattaraces_phase_day}">{race.date}</div>
-<div class="{local_res.css.eventregattaraces_phase_races}"><s:eventRegattaRaces.EventRegattaRacesRace ui:field='race'></s>
+<div class="{local_res.css.eventregattaraces_phase_day}"><span ui:field="raceDayDate" /></div>
+<div class="{local_res.css.eventregattaraces_phase_races}">
+    <g:HTMLPanel ui:field="racesPanel" />
 </div>
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -4,12 +4,9 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.eventregattaraces.EventRegattaRacesFleetResources" />
-    <g:HTMLPanel>
-
-<div data-fleetcolor='{"r":"{fleet.color.r}","g":"{fleet.color.g}","b":"{fleet.color.b}"}' class="{local_res.css.eventregattaraces_phase_fleet}">
-  <div style="background-color: [object Object]" class="{local_res.css.eventregattaraces_phase_fleet_count}"></div>
-  <div class="{local_res.css.eventregattaraces_phase_fleet_name}">{fleet.name}</div>
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
+<div class="{local_res.css.eventregattaraces_phase_fleet}">
+  <div ui:field="fleetCountAndColor" class="{local_res.css.eventregattaraces_phase_fleet_count}"></div>
+  <div class="{local_res.css.eventregattaraces_phase_fleet_name}"><span ui:field="fleetName" /></div>
 </div>
-    </g:HTMLPanel>
 </ui:UiBinder>

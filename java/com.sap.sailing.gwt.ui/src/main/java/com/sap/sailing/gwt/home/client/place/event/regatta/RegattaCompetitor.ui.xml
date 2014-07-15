@@ -5,8 +5,12 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regatta.RegattaResources" />
-    <g:HTMLPanel>
-
+    <ui:style>
+    .panel {
+      display: inline-block;
+    }
+  	</ui:style>
+    <g:HTMLPanel styleName="{style.panel}">
 <div class="{local_res.css.regatta_intro_results_competitor}">
     <span ui:field="competitorRank" />.&nbsp;<span ui:field="competitorNationality" />&nbsp;-&nbsp;<span class="{local_res.css.regatta_intro_results_competitor_name}"><span ui:field="competitorName" /></span>&nbsp;-&nbsp;<span ui:field="competitorTotalPoints" /><ui:text from='{i18n.regattaPts}'/>
 </div>

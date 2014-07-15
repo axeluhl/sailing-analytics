@@ -48,5 +48,7 @@ public interface EventRegattaRacesResources extends ClientBundle {
         String eventregattarace_feature_video();
         String eventregattarace_feature_audio();
         String eventregattarace_feature_unavailable();
+        String regattanavigation_link();
+        String regattanavigation_linkactive();
     }
 }

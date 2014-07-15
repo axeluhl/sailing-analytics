@@ -12,7 +12,7 @@
 <div class="{local_res.css.regattanavigation}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <g:HTMLPanel ui:field="regattaSeriesNavigationPanel" />
+        <g:HTMLPanel ui:field="regattaPhasesNavigationPanel" />
     </div>
   </div>
 </div>
@@ -25,7 +25,7 @@
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemvideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
         <div class="{local_res.css.eventregattaraces_legend_item} {local_res.css.eventregattaraces_legend_itemaudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
       </div>
-      <g:HTMLPanel ui:field="regattaSeriesPanel" />
+      <g:HTMLPanel ui:field="regattaPhasesPanel" />
     </div>
   </div>
 </div>

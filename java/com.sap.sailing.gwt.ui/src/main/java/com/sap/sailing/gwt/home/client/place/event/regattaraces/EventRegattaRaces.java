@@ -8,9 +8,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
-import com.sap.sailing.gwt.home.client.place.event.regattaschedule.EventRegattaScheduleResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -21,8 +21,8 @@ public class EventRegattaRaces extends Composite {
     }
 
     @UiField(provided=true) Regatta regatta;
-    @UiField HTMLPanel regattaSeriesNavigationPanel;   
-    @UiField HTMLPanel regattaSeriesPanel;   
+    @UiField HTMLPanel regattaPhasesNavigationPanel;   
+    @UiField HTMLPanel regattaPhasesPanel;   
     
     @SuppressWarnings("unused")
     private final EventDTO event;
@@ -37,28 +37,21 @@ public class EventRegattaRaces extends Composite {
         
         regatta = new Regatta(event, false, timerForClientServerOffset, pageNavigator);
         
-        EventRegattaScheduleResources.INSTANCE.css().ensureInjected();
+        EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     public void setRacesFromRaceGroup(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
         regatta.setData(raceGroup, leaderboard, null);
+        
+        int regattaPhases = raceGroup.getSeries().size();
+        if(regattaPhases > 1) {
+            for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
+                EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, series, timerForClientServerOffset, pageNavigator); 
+                regattaPhasesPanel.add(regattaPhase);
+            }
+        } else {
+            
+        }
     }
-
-//    public void setRacesFromRegatta(RegattaDTO regattaDTO, LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO regattaLeaderboard) {
-//        regatta.setData(leaderboardGroup, regattaLeaderboard);
-//        
-//        for(SeriesDTO series: regattaDTO.series) {
-//            EventRegattaScheduleSeries eventRegattaScheduleSeries = new EventRegattaScheduleSeries(regattaLeaderboard, series, timerForClientServerOffset, pageNavigator); 
-//            regattaSeriesPanel.add(eventRegattaScheduleSeries);
-//        }
-//    }
-//
-//    public void setRacesFromFlexibleLeaderboard(LeaderboardGroupDTO leaderboardGroup, StrippedLeaderboardDTO flexibleLeaderboard) {
-//        regatta.setData(leaderboardGroup, flexibleLeaderboard);
-//
-//        EventRegattaScheduleFleet eventRegattaScheduleFleet = new EventRegattaScheduleFleet(flexibleLeaderboard, timerForClientServerOffset, pageNavigator);
-//        regattaSeriesPanel.add(eventRegattaScheduleFleet);
-//    }
-//
 }

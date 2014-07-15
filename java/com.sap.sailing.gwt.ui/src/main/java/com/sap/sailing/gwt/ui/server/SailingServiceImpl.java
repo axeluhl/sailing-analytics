@@ -801,18 +801,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Fleet fleet : series.getFleets()) {
             fleets.add(baseDomainFactory.convertToFleetDTO(fleet));
         }
-        List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
-        for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
-            raceColumnDTO.setName(raceColumn.getName());
-            raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
-            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
-            raceColumns.add(raceColumnDTO);
-        }
+        List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
                         series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring());
         return result;
+    }
+
+    private List<RaceColumnDTO> convertToRaceColumnDTOs(Iterable<? extends RaceColumn> raceColumns) {
+        List<RaceColumnDTO> raceColumnDTOs = new ArrayList<RaceColumnDTO>();
+        for (RaceColumn raceColumn : raceColumns) {
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
+            raceColumnDTO.setName(raceColumn.getName());
+            raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
+            raceColumnDTOs.add(raceColumnDTO);
+        }
+        return raceColumnDTOs;
     }
     
     private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
@@ -3242,12 +3247,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
                                     seriesDTO.getFleets().add(fleetDTO);
                                 }
+                                seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
                             }
                         } else {
                             RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
                             raceGroup.getSeries().add(seriesDTO);
                             FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
                             seriesDTO.getFleets().add(fleetDTO);
+                            seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
                         }
                         raceGroups.add(raceGroup);
                     }
