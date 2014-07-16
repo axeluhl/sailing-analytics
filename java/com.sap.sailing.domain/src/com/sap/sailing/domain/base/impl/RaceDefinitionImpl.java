@@ -1,8 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -13,7 +12,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private static final long serialVersionUID = -1900955198751393727L;
     private final Course course;
-    private final Iterable<Competitor> competitors;
+    private final LinkedHashMap<Serializable, Competitor> competitorsById;
     private final BoatClass boatClass;
     private final Serializable id;
     
@@ -26,11 +25,10 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         assert name != null;
         
         this.course = course;
-        Set<Competitor> competitorsAsLinkedHashSet = new LinkedHashSet<Competitor>();
+        this.competitorsById = new LinkedHashMap<>();
         for (Competitor competitor : competitors) {
-            competitorsAsLinkedHashSet.add(competitor);
+            competitorsById.put(competitor.getId(), competitor);
         }
-        this.competitors = competitorsAsLinkedHashSet;
         this.boatClass = boatClass;
         this.id = id;
     }
@@ -47,7 +45,12 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
 
     @Override
     public Iterable<Competitor> getCompetitors() {
-        return competitors;
+        return competitorsById.values();
+    }
+
+    @Override
+    public Competitor getCompetitorById(Serializable competitorID) {
+        return competitorsById.get(competitorID);
     }
 
     @Override
