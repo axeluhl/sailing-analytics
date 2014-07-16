@@ -22,6 +22,8 @@ public interface MainMediaResources extends ClientBundle {
         String mediavideos();
         String mainsection_header_title();
         String videopreview();
+        String videopreview_videocontainer();
+        String videopreview_videocontainer_video();
         String videopreview_title();
     }
 }
