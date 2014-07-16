@@ -5,7 +5,7 @@ GAnalytics Account: gmsponsorship@gmail.com <br/>
 GAnalytics PW: <br/>
 <br/>
 GAnalytics Tracking ID: **UA-52789785-1**<br/> 
-
+<br/> 
 **track events (clicks on links):**<br/> 
 insert onClick() method for each link <br/> 
 Syntax: _onClick="_gaq.push(['_trackEvent', category, action, label])_ <br/> 
