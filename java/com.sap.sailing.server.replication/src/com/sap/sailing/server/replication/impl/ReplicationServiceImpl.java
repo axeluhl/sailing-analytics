@@ -144,6 +144,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * are likely to be sent per message transmitted, reducing overhead but correspondingly increasing latency.
      */
     private final long TRANSMISSION_DELAY_MILLIS = 100;
+    
+    /**
+     * Defines at which message size in bytes the message will be sent regardless the {@link #TRANSMISSION_DELAY_MILLIS}.
+     */
+    private final int TRIGGER_MESSAGE_SIZE_IN_BYTES = 1024*1024;
 
     /**
      * Counts the messages sent out by this replicator
@@ -283,36 +288,26 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             }
             outboundObjectBuffer.writeObject(bytes);
             outboundBufferClasses.add(operation.getClass());
-            if (sendingTask == null) {
-                sendingTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        logger.fine("Running timer task to send "+outboundBufferClasses.size()+" operations in one message");
-                        final byte[] bytesToSend;
-                        final List<Class<?>> classesOfOperationsToSend;
-                        synchronized (outboundBufferMonitor) {
-                            logger.fine("Preparing "+outboundBufferClasses.size()+" operations for sending to RabbitMQ exchange");
+            if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
+                logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
+                        + "B which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES);
+                flushBufferToRabbitMQ();
+            } else {
+                if (sendingTask == null) {
+                    sendingTask = new TimerTask() {
+                        @Override
+                        public void run() {
                             try {
-                                outboundObjectBuffer.close();
-                            } catch (IOException e) {
-                                logger.log(Level.SEVERE, "Error trying to replicate "+outboundBufferClasses.size()+" operations", e);
+                                sendingTask = null;
+                                logger.fine("Running timer task, flushing buffer");
+                                flushBufferToRabbitMQ();
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "Exception while trying to replicate operations", e);
                             }
-                            bytesToSend = outboundBuffer.toByteArray();
-                            classesOfOperationsToSend = outboundBufferClasses;
-                            outboundBuffer = null;
-                            outboundObjectBuffer = null;
-                            outboundBufferClasses = null;
-                            sendingTask = null;
                         }
-                        try {
-                            broadcastOperations(bytesToSend, classesOfOperationsToSend);
-                            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" operations to broadcaster");
-                        } catch (Exception e) {
-                            logger.log(Level.SEVERE, "Error trying to replicate "+classesOfOperationsToSend.size()+" operations", e);
-                        }
-                    }
-                };
-                timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
+                    };
+                    timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
+                }
             }
             if (++messageCount % 10000l == 0) {
                 logger.info("Handled "+messageCount+" messages for replication. Current outbound replication queue size: "+outboundBufferClasses.size());
@@ -504,6 +499,37 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     @Override
     public UUID getServerIdentifier() {
         return serverUUID;
+    }
+
+    /**
+     * Obtains the monitor on {@link #outboundBufferMonitor}, copies the references to the buffers, nulls out
+     * the buffers, then releases the monitor and broadcasts the buffer.
+     */
+    private void flushBufferToRabbitMQ() {
+        logger.fine("Running timer task, trying to acquire monitor");
+        final byte[] bytesToSend;
+        final List<Class<?>> classesOfOperationsToSend;
+        synchronized (outboundBufferMonitor) {
+            logger.fine("Preparing "+outboundBufferClasses.size()+" operations for sending to RabbitMQ exchange");
+            try {
+                outboundObjectBuffer.close();
+                logger.fine("Sucessfully closed ObjectOutputStream");
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error trying to replicate "+outboundBufferClasses.size()+" operations", e);
+            }
+            bytesToSend = outboundBuffer.toByteArray();
+            logger.fine("Successfully produced bytesToSend array of length "+bytesToSend.length);
+            classesOfOperationsToSend = outboundBufferClasses;
+            outboundBuffer = null;
+            outboundObjectBuffer = null;
+            outboundBufferClasses = null;
+        }
+        try {
+            broadcastOperations(bytesToSend, classesOfOperationsToSend);
+            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" operations to broadcaster");
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error trying to replicate "+classesOfOperationsToSend.size()+" operations", e);
+        }
     }
 
 }
