@@ -457,8 +457,7 @@ public class FixesAndTails {
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
-                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
-                fromDate = timepointOfLastKnownFix;
+                fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
                 overlap = true;
             } else {
                 fromDate = tailstart;
