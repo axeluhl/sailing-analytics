@@ -447,6 +447,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
+                    // TODO For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
+                    // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
+                    // boat positions at newTime with zero tail length; and another one fetching everything else.
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY, new AsyncCallback<RaceMapDataDTO>() {
