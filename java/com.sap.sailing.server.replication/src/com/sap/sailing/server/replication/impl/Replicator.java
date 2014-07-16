@@ -108,6 +108,7 @@ public class Replicator implements Runnable {
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         long messageCount = 0;
+        long operationCount = 0;
         Field _queue;
         try {
             _queue = QueueingConsumer.class.getDeclaredField("_queue");
@@ -143,6 +144,10 @@ public class Replicator implements Runnable {
                             .getRacingEventService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
                                     new ByteArrayInputStream(serializedOperation));
                     RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                    operationCount++;
+                    if (operationCount % 10000l == 0) {
+                        logger.info("Received "+operationCount+" operations so far");
+                    }
                     applyOrQueue(operation);
                 }
             } catch (ConsumerCancelledException cce) {
