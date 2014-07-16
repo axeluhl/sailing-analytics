@@ -1,4 +1,5 @@
 **_Bug 2043_**
+
 Google Analytics Tracking ID: **UA-52789785-1**
 GAnalytics Account: gmsponsorship@gmail.com 
 GAnalytics PW: 
@@ -19,7 +20,7 @@ We need to embed the following code in our HTML entry point documents:
 
 > </script> 
 
-**track Events (Click on Links): **
+**track Events (Click on Links):**
 insert onClick() method for each link 
 e.g. 
 > <a href="#" onClick="_gaq.push(['_trackEvent', 'Videos', 'Play', 'Baby\'s First Birthday']);">Play</a> 
