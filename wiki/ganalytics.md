@@ -6,7 +6,7 @@ GAnalytics PW: <br/>
 
 **track Events (Click on Links):**<br/> 
 insert onClick() method for each link <br/> 
-Syntax: onClick="_gaq.push(['_trackEvent', category, action, label]) <br/> 
+Syntax: _onClick="_gaq.push(['_trackEvent', category, action, label])_ <br/> 
 see also: https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide
 
 **track page load time:**<br/> 
