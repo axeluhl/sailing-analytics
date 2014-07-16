@@ -147,6 +147,10 @@ public class ReplicationPanel extends FlowPanel {
         AddReplicationDialog dialog = new AddReplicationDialog(null,
                 new DialogCallback<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>>() {
                     @Override
+                    /**
+                     * @param masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber a triple containing the RabbitMQ exchange hostname, the servlet hostname and the RabbitMQ exchange name,
+                     * followed by the RabbitMQ messaging port and the servlet port
+                     */
                     public void ok(final Util.Triple<Util.Triple<String, String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
                         registeredMasters.removeRow(0);
                         registeredMasters.insertRow(0);
@@ -163,7 +167,7 @@ public class ReplicationPanel extends FlowPanel {
                                 addButton.setEnabled(true);
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
                                         masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(), e.getMessage()));
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(), e.getMessage()));
                                 updateReplicaList();
                             }
 
@@ -286,7 +290,9 @@ public class ReplicationPanel extends FlowPanel {
     
     /**
      * A text entry dialog with ok/cancel button and configurable validation rule. Subclasses may provide a redefinition for
-     * {@link #getAdditionalWidget()} to add a widget below the text field, e.g., for capturing additional data.
+     * {@link #getAdditionalWidget()} to add a widget below the text field, e.g., for capturing additional data. The result of
+     * this dialog is a triple containing the RabbitMQ exchange hostname, the servlet hostname and the RabbitMQ exchange name,
+     * followed by the RabbitMQ messaging port and the servlet port.
      * 
      * @author Axel Uhl (d043530)
      *
