@@ -293,8 +293,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         oos.close();
         // copy serialized operations into message
         if (masterChannel != null) {
+            final int queueMessageSize = buf.size();
             masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
-            replicationInstancesManager.log(classes);
+            replicationInstancesManager.log(classes,queueMessageSize);
         }
     }
 
@@ -422,7 +423,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
         return replicationInstancesManager.getNumberOfMessagesSent(replica);
     }
-
+    
+    @Override
+    public long getNumberOfBytesSent(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getNumberOfBytesSent(replica);
+    }
+    
+    @Override 
+    public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getAverageNumberOfBytesPerMessage(replica);
+    }
+    
     @Override
     public void stopToReplicateFromMaster() throws IOException {
         ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();

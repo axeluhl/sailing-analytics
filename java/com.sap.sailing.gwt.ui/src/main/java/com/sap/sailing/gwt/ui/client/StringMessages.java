@@ -1058,4 +1058,6 @@ public interface StringMessages extends Messages {
     String setTimeToNow();
     String useStartTimeInference();
     String numberOfQueueMessagesSent();
+    String totalSize();
+    String averageMessageSize();
 }

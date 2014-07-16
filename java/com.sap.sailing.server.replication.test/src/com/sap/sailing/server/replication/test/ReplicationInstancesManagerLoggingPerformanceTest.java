@@ -33,7 +33,7 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
     public void testLoggingPerformance() {
         final int count = 10000000;
         for (int i=0; i<count; i++) {
-            replicationInstanceManager.log(Collections.<Class<?>>singletonList(operation.getClass()));
+            replicationInstanceManager.log(Collections.<Class<?>>singletonList(operation.getClass()), 0l);
         }
         assertEquals(count, replicationInstanceManager.getStatistics(replica).get(operation.getClass()).intValue());
         assertEquals(1.0, replicationInstanceManager.getAverageNumberOfOperationsPerMessage(replica), 0.0000001);
@@ -43,7 +43,7 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
     public void testLoggingAverages() {
         final int count = 1000;
         for (int i=0; i<count; i++) {
-            replicationInstanceManager.log(Arrays.asList(new Class<?>[] { operation.getClass(), operation.getClass() }));
+            replicationInstanceManager.log(Arrays.asList(new Class<?>[] { operation.getClass(), operation.getClass() }), 0l);
         }
         assertEquals(2*count, replicationInstanceManager.getStatistics(replica).get(operation.getClass()).intValue());
         assertEquals(2.0, replicationInstanceManager.getAverageNumberOfOperationsPerMessage(replica), 0.0000001);

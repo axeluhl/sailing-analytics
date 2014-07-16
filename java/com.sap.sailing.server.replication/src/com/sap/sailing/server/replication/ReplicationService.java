@@ -70,4 +70,8 @@ public interface ReplicationService {
     Channel createMasterChannel() throws IOException, ConnectException;
 
     long getNumberOfMessagesSent(ReplicaDescriptor replica);
+
+    long getNumberOfBytesSent(ReplicaDescriptor replica);
+
+    double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica);
 }

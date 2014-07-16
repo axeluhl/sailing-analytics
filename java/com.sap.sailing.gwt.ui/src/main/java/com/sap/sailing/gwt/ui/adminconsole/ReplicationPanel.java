@@ -224,6 +224,14 @@ public class ReplicationPanel extends FlowPanel {
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.numberOfQueueMessagesSent()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getNumberOfMessagesSent()));
                     i++;
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageMessageSize()));
+                    registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageMessageSizeInBytes()));
+                    i++;
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.totalSize()));
+                    registeredReplicas.setWidget(i, 2, new Label(""+replica.getNumberOfBytesSent()+"b ("+replica.getNumberOfBytesSent()/1000.0+"kb)"));
+                    i++;
                     for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
                         registeredReplicas.insertRow(i);
                         registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
