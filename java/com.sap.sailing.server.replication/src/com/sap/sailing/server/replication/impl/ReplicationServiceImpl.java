@@ -33,8 +33,6 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.util.BuildVersion;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -91,12 +89,34 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private Thread replicatorThread;
     
     /**
+     * Used to synchronize write access and replacements of {@link #outboundBuffer}, {@link #outboundObjectBuffer} and
+     * {@link #outboundBufferClasses} when the timer scoops up the messages to send.
+     */
+    private final Object outboundBufferMonitor = "";
+    
+    /**
      * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the overhead,
      * several operations can be serialized into a single message. The actual serialization of the buffer happens after a short duration
-     * has passed since the last sending, managed by a {@link Timer}. Writers need to synchronize on this buffer. This includes the
-     * addition of an operation to the buffer as well as the atomic sending and clearing.
+     * has passed since the last sending, managed by a {@link Timer}. Writers need to synchronize on {@link #outboundBufferMonitor}
+     * which protects all of {@link #outboundBuffer}, {@link #outboundObjectBuffer} and {@link #outboundBufferClasses} which
+     * are replaced or cleared when the timer scoops up the currently buffered operations to send them out.
      */
-    private final List<Pair<Class<?>, byte[]>> outboundBuffer;
+    private ByteArrayOutputStream outboundBuffer;
+
+    /**
+     * An object output stream that writes to {@link #outboundBuffer}. Operations are serialized into this stream until the timer
+     * acquires the {@link #outboundBufferMonitor}, closes the stream and transmits the contents of {@link #outboundBuffer} as a
+     * RabbitMQ message. While still holding the monitor, the timer task creates a new {@link #outboundBuffer} and a new
+     * {@link #outboundObjectBuffer} wrapping the {@link #outboundBuffer}.
+     */
+    private ObjectOutputStream outboundObjectBuffer;
+    
+    /**
+     * Remembers the classes of the operations serialized into {@link #outboundObjectBuffer}. The list of classes in this list
+     * matches with the sequence of objects written to {@link #outboundObjectBuffer} as long as the {@link #outboundBufferMonitor}
+     * is being held.
+     */
+    private List<Class<?>> outboundBufferClasses;
     
     /**
      * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
@@ -151,7 +171,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.exchangeHost = exchangeHost;
         replicator = null;
         serverUUID = UUID.randomUUID();
-        outboundBuffer = new ArrayList<>();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
         
     }
@@ -249,30 +268,47 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
      */
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
+        // need to write the operations one by one, making sure the ObjectOutputStream always writes
+        // identical objects again if required because they may have changed state in between
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(operation);
         oos.close();
         final byte[] bytes = bos.toByteArray();
-        synchronized (outboundBuffer) {
-            outboundBuffer.add(new Pair<Class<?>, byte[]>(operation.getClass(), bytes));
+        synchronized (outboundBufferMonitor) {
+            if (outboundBuffer == null) {
+                outboundBuffer = new ByteArrayOutputStream();
+                outboundObjectBuffer = new ObjectOutputStream(outboundBuffer);
+                outboundBufferClasses = new ArrayList<>();
+            }
+            outboundObjectBuffer.writeObject(bytes);
+            outboundBufferClasses.add(operation.getClass());
             if (sendingTask == null) {
                 sendingTask = new TimerTask() {
                     @Override
                     public void run() {
-                        logger.fine("Running timer task to send "+outboundBuffer.size()+" messages");
-                        final Iterable<Pair<Class<?>, byte[]>> listToSend;
-                        synchronized (outboundBuffer) {
-                            logger.fine("Copying "+outboundBuffer.size()+" messages to new list");
-                            listToSend = new ArrayList<>(outboundBuffer);
-                            outboundBuffer.clear();
+                        logger.fine("Running timer task to send "+outboundBufferClasses.size()+" operations in one message");
+                        final byte[] bytesToSend;
+                        final List<Class<?>> classesOfOperationsToSend;
+                        synchronized (outboundBufferMonitor) {
+                            logger.fine("Preparing "+outboundBufferClasses.size()+" operations for sending to RabbitMQ exchange");
+                            try {
+                                outboundObjectBuffer.close();
+                            } catch (IOException e) {
+                                logger.log(Level.SEVERE, "Error trying to replicate "+outboundBufferClasses.size()+" operations", e);
+                            }
+                            bytesToSend = outboundBuffer.toByteArray();
+                            classesOfOperationsToSend = outboundBufferClasses;
+                            outboundBuffer = null;
+                            outboundObjectBuffer = null;
+                            outboundBufferClasses = null;
                             sendingTask = null;
                         }
                         try {
-                            broadcastOperations(listToSend);
-                            logger.fine("Successfully handed "+Util.size(listToSend)+" messages to broadcaster");
+                            broadcastOperations(bytesToSend, classesOfOperationsToSend);
+                            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" messages to broadcaster");
                         } catch (Exception e) {
-                            logger.log(Level.SEVERE, "Error trying to replicate the following operations: "+listToSend, e);
+                            logger.log(Level.SEVERE, "Error trying to replicate "+classesOfOperationsToSend.size()+" operations", e);
                         }
                     }
                 };
@@ -284,25 +320,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         }
     }
     
-    private void broadcastOperations(Iterable<Pair<Class<?>, byte[]>> listToSend) throws IOException {
-        logger.fine("broadcasting "+Util.size(listToSend)+" operations");
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(buf);
-        List<Class<?>> classes = new ArrayList<>();
-        List<byte[]> byteArrays = new ArrayList<>();
-        for (Pair<Class<?>, byte[]> op : listToSend) {
-            classes.add(op.getA());
-            byteArrays.add(op.getB());
-        }
-        oos.writeObject(byteArrays);
-        oos.close();
-        // copy serialized operations into message
+    private void broadcastOperations(byte[] bytesToSend, List<Class<?>> classesOfOperationsToSend) throws IOException {
+        logger.fine("broadcasting "+classesOfOperationsToSend.size()+" operations as "+bytesToSend.length+" bytes");
         if (masterChannel != null) {
-            final int queueMessageSize = buf.size();
-            logger.fine("buffer to broadcast has "+queueMessageSize+" bytes ("+(queueMessageSize/1024/1024)+"MB)");
-            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
-            logger.fine("successfully published "+queueMessageSize+" bytes");
-            replicationInstancesManager.log(classes,queueMessageSize);
+            logger.fine("buffer to broadcast has "+bytesToSend.length+" bytes ("+(bytesToSend.length/1024/1024)+"MB)");
+            long startTime = System.currentTimeMillis();
+            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bytesToSend);
+            logger.fine("successfully published "+bytesToSend.length+" bytes, taking "+(System.currentTimeMillis()-startTime)+"ms");
+            replicationInstancesManager.log(classesOfOperationsToSend, bytesToSend.length);
         }
     }
 

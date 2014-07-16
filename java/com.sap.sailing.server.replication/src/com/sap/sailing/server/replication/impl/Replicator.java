@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -139,18 +140,23 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
                         .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
-                @SuppressWarnings("unchecked")
-                Iterable<byte[]> byteArrays = (Iterable<byte[]>) ois.readObject();
-                for (byte[] serializedOperation : byteArrays) {
-                    ObjectInputStream operationOIS = racingEventServiceTracker
-                            .getRacingEventService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
-                                    new ByteArrayInputStream(serializedOperation));
-                    RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
-                    operationCount++;
-                    if (operationCount % 10000l == 0) {
-                        logger.info("Received "+operationCount+" operations so far");
+                int operationsInMessage = 0;
+                try {
+                    while (true) {
+                        byte[] serializedOperation = (byte[]) ois.readObject();
+                        ObjectInputStream operationOIS = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
+                                .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(serializedOperation));
+                        RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                        operationCount++;
+                        operationsInMessage++;
+                        if (operationCount % 10000l == 0) {
+                            logger.info("Received " + operationCount + " operations so far");
+                        }
+                        applyOrQueue(operation);
                     }
-                    applyOrQueue(operation);
+                } catch (EOFException eof) {
+                    logger.fine("Reached EOF on replication message after having read "+operationsInMessage+" operations");
+                    // reached EOF; expected
                 }
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");
