@@ -131,6 +131,17 @@ public class ReplicationInstancesManager {
         }
         return result;
     }
+    
+    public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
+        final long result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            result = messageCount.longValue();
+        } else {
+            result = 0l;
+        }
+        return result;
+    }
 
     public void removeAll() {
         replicationCounts.clear();

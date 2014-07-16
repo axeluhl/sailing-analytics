@@ -72,5 +72,9 @@ public class ReplicaDescriptor implements Serializable {
             return false;
         return true;
     }
+    
+    public String toString() {
+        return ""+uuid+": "+ipAddress+" ("+additionalInformation+")";
+    }
 
 }

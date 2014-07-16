@@ -68,4 +68,6 @@ public interface ReplicationService {
     UUID getServerIdentifier();
 
     Channel createMasterChannel() throws IOException, ConnectException;
+
+    long getNumberOfMessagesSent(ReplicaDescriptor replica);
 }

@@ -1057,4 +1057,5 @@ public interface StringMessages extends Messages {
     String lastScoreCorrectionsComment();
     String setTimeToNow();
     String useStartTimeInference();
+    String numberOfQueueMessagesSent();
 }
