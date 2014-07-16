@@ -13,3 +13,6 @@ It might take a day, until the results are available on the dashboard (it will a
 
 **track page load time:**<br/> 
 see: https://developers.google.com/analytics/devguides/collection/gajs/methods/gaJSApiBasicConfiguration#_gat.GA_Tracker_._trackPageview 
+
+**useful information:** <br/>
+https://developers.google.com/analytics/devguides/collection/gajs/
