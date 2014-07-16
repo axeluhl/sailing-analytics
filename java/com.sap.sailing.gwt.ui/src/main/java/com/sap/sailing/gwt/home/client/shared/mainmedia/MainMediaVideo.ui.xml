@@ -8,9 +8,12 @@
     <g:HTMLPanel>
 
 <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
-  <figure ui:field="videoFile" data-src="" class="{local_res.css.videopreview} {res.mainCss.lightbox_item}"><img ui:field="videoThumbImage" />
-    <figcaption><div class="{local_res.css.videopreview_title}"><span ui:field="videoTitle" /></div>
-      <time><span ui:field="videoTime" /></time>
+  <figure class="{local_res.css.videopreview}">
+    <div class="{local_res.css.videopreview_videocontainer}">
+      <iframe ui:field="youtubeEmbed" frameborder="0" class="{local_res.css.videopreview_videocontainer_video} allowfullscreen"></iframe>
+    </div>
+    <figcaption>
+        <span ui:field="videoTitle" class="{local_res.css.videopreview_title}" />
     </figcaption>
   </figure>
 </div>

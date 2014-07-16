@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
+import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class MainMedia extends Composite {
@@ -44,22 +45,23 @@ public class MainMedia extends Composite {
 
     public void setRecentEvents(List<EventDTO> recentEvents) {
         List<String> photoGalleryUrls = new ArrayList<String>();
-        String lightBoxData = "";
         
         int videoCounter = 0;
         for(EventDTO event: recentEvents) {
             photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
             
             if(event.getVideoURLs().size() > 0 && videoCounter < 3) {
-                MainMediaVideo video = new MainMediaVideo(event);
-                lightBoxData += video.getDataForLightBox();  
-                videosPanel.add(video);
-                videoCounter++;
+                String eventName = event.getName();
+                String youtubeUrl = event.getVideoURLs().get(0);
+                String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
+                if (youtubeId != null && !youtubeId.trim().isEmpty()) {
+                    MainMediaVideo video = new MainMediaVideo(eventName, youtubeId);
+                    videosPanel.add(video);
+                    videoCounter++;
+                }
             }
         }
 
-        videoLightBoxData.setInnerText(lightBoxData);
-        
         // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
         int gallerySize = photoGalleryUrls.size();
         Random random = new Random(gallerySize);  
