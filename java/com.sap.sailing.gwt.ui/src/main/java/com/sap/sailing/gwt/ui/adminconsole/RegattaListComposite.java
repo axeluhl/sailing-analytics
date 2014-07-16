@@ -96,7 +96,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
-                string.add(t.boatClass.getName());
+                if (t.boatClass != null) {
+                    string.add(t.boatClass.getName());
+                }
                 return string;
             }
         };

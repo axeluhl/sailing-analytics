@@ -1,15 +1,21 @@
 package com.sap.sailing.server.replication.impl;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +33,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -48,7 +55,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private final ReplicationInstancesManager replicationInstancesManager;
     
-    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final RacingEventService localService;
     
@@ -82,45 +89,100 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private Replicator replicator;
     private Thread replicatorThread;
     
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
-        this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        racingEventServiceTracker = getRacingEventServiceTracker();
-        racingEventServiceTracker.open();
-        localService = null;
-        this.exchangeName = exchangeName;
-        this.exchangeHost = exchangeHost;
-        replicator = null;
-        serverUUID = UUID.randomUUID();
-        logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
-    }
-
-    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
-        return new ServiceTracker<RacingEventService, RacingEventService>(
-                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
-    }
+    /**
+     * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the overhead,
+     * several operations can be serialized into a single message. The actual serialization of the buffer happens after a short duration
+     * has passed since the last sending, managed by a {@link Timer}. Writers need to synchronize on this buffer. This includes the
+     * addition of an operation to the buffer as well as the atomic sending and clearing.
+     */
+    private final List<Pair<Class<?>, byte[]>> outboundBuffer;
     
     /**
-     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using
-     * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
-     * @param exchangeName the name of the exchange to which replicas can bind
+     * Used to schedule the sending of all operations in {@link #outboundBuffer} using the {@link #sendingTask}.
      */
-    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
-            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
+    private final Timer timer;
+    
+    /**
+     * Sends all operations in {@link #outboundBuffer}. When holding the monitor of {@link #outboundBuffer},
+     * the following rules hold:
+     * 
+     * <ul>
+     *   <li>if <code>null</code>, adding an operation to {@link #outboundBuffer} needs to create and assign a new timer that
+     *       schedules a sending task.
+     *   </li>
+     *   <li>if not <code>null</code>, an operation added to {@link #outboundBuffer} is guaranteed to be sent by the timer
+     *   </li>
+     * </ul>
+     * 
+     */
+    private TimerTask sendingTask;
+    
+    /**
+     * Defines for how many milliseconds the {@link #timer} will wait since the first operation has been added to an empty
+     * {@link #outboundBuffer} until it carries out the actual transmission task. The longer this duration, the more operations
+     * are likely to be sent per message transmitted, reducing overhead but correspondingly increasing latency.
+     */
+    private final long TRANSMISSION_DELAY_MILLIS = 100;
+
+    /**
+     * Counts the messages sent out by this replicator
+     */
+    private long messageCount;
+    
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
+        this(exchangeName, exchangeHost, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
+    }
+    
+    private ReplicationServiceImpl(String exchangeName, String exchangeHost,
+            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService,
+            boolean createRacingEventServiceTracker) throws IOException {
+        timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
         this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>(); // XXX why is this a map? there should be only one connection to a master
+        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        if (createRacingEventServiceTracker) {
+            racingEventServiceTracker = getRacingEventServiceTracker();
+            racingEventServiceTracker.open();
+        } else {
+            racingEventServiceTracker = null;
+        }
         this.localService = localService;
         this.exchangeName = exchangeName;
         this.exchangeHost = exchangeHost;
         replicator = null;
         serverUUID = UUID.randomUUID();
+        outboundBuffer = new ArrayList<>();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
+        
+    }
+
+    /**
+     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using an OSGi
+     * service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
+     * 
+     * @param exchangeName
+     *            the name of the exchange to which replicas can bind
+     */
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
+            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
+        this(exchangeName, exchangeHost, replicationInstancesManager, localService, /* create RacingEventServiceTracker */ false);
     }
     
-    private Channel createMasterChannel(String exchangeName, String exchangeHost) throws IOException {
+    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
+        return new ServiceTracker<RacingEventService, RacingEventService>(
+                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
+    }
+    
+    private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
+        Channel result = createMasterChannel();
+        result.exchangeDeclare(exchangeName, "fanout");
+        logger.info("Created fanout exchange "+exchangeName+" successfully.");
+        return result;
+    }
+
+    @Override
+    public Channel createMasterChannel() throws IOException, ConnectException {
         final ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(exchangeHost); // ...and use default port
-        
         Channel result = null;
         try {
             result = connectionFactory.newConnection().createChannel();
@@ -129,9 +191,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             logger.severe("Could not connect to messaging queue on " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
             throw ex;
         }
-        
-        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
-        result.exchangeDeclare(exchangeName, "fanout");
+        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort());
         return result;
     }
 
@@ -152,11 +212,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             addAsListenerToRacingEventService();
             synchronized (this) {
                 if (masterChannel == null) {
-                    masterChannel = createMasterChannel(exchangeName, exchangeHost);
+                    masterChannel = createMasterChannelAndDeclareFanoutExchange();
                 }
             }
         }
         replicationInstancesManager.registerReplica(replica);
+        logger.info("Registered replica " + replica);
     }
     
     private void addAsListenerToRacingEventService() {
@@ -165,6 +226,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
 
     @Override
     public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
+        logger.info("Unregistering replica " + replica);
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
@@ -181,15 +243,59 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         getRacingEventService().removeOperationExecutionListener(this);
     }
 
-    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
-        // serialize operation into message
+    /**
+     * Schedules a single operation for broadcast. The operation is added to {@link #outboundBuffer}, and if not already scheduled,
+     * a {@link #timer} is created and scheduled to send in {@link #TRANSMISSION_DELAY_MILLIS} milliseconds.
+     */
+    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(operation);
         oos.close();
+        final byte[] bytes = bos.toByteArray();
+        synchronized (outboundBuffer) {
+            outboundBuffer.add(new Pair<Class<?>, byte[]>(operation.getClass(), bytes));
+            if (sendingTask == null) {
+                sendingTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        final Iterable<Pair<Class<?>, byte[]>> listToSend;
+                        synchronized (outboundBuffer) {
+                            listToSend = new ArrayList<>(outboundBuffer);
+                            outboundBuffer.clear();
+                            sendingTask = null;
+                        }
+                        try {
+                            broadcastOperations(listToSend);
+                        } catch (IOException e) {
+                            logger.log(Level.SEVERE, "Error trying to replicate the following operations: "+listToSend, e);
+                        }
+                    }
+                };
+                timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
+            }
+            if (++messageCount % 10000l == 0) {
+                logger.info("Handled "+messageCount+" messages for replication. Current outbound replication queue size: "+outboundBuffer.size());
+            }
+        }
+    }
+    
+    private void broadcastOperations(Iterable<Pair<Class<?>, byte[]>> listToSend) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(buf);
+        List<Class<?>> classes = new ArrayList<>();
+        List<byte[]> byteArrays = new ArrayList<>();
+        for (Pair<Class<?>, byte[]> op : listToSend) {
+            classes.add(op.getA());
+            byteArrays.add(op.getB());
+        }
+        oos.writeObject(byteArrays);
+        oos.close();
+        // copy serialized operations into message
         if (masterChannel != null) {
-            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bos.toByteArray());
-            replicationInstancesManager.log(operation);
+            final int queueMessageSize = buf.size();
+            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
+            replicationInstancesManager.log(classes,queueMessageSize);
         }
     }
 
@@ -234,8 +340,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
+        String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
+        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
         final RacingEventService racingEventService = getRacingEventService();
-        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(is));
+        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(
+                rabbitInputStreamProvider.getInputStream()));
         logger.info("Starting to receive initial load");
         racingEventService.initiallyFillFrom(ois);
         logger.info("Done receiving initial load");
@@ -283,6 +392,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         }
     }
 
+    /**
+     * {@link #broadcastOperation(RacingEventServiceOperation) Broadcasts} the <code>operation</code> to all registered
+     * replicas by publishing it to the fan-out exchange.
+     */
     @Override
     public <T> void executed(RacingEventServiceOperation<T> operation) {
         try {
@@ -300,7 +413,27 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
-
+    
+    @Override
+    public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor) {
+        return replicationInstancesManager.getAverageNumberOfOperationsPerMessage(replicaDescriptor);
+    }
+    
+    @Override
+    public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getNumberOfMessagesSent(replica);
+    }
+    
+    @Override
+    public long getNumberOfBytesSent(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getNumberOfBytesSent(replica);
+    }
+    
+    @Override 
+    public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getAverageNumberOfBytesPerMessage(replica);
+    }
+    
     @Override
     public void stopToReplicateFromMaster() throws IOException {
         ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();
