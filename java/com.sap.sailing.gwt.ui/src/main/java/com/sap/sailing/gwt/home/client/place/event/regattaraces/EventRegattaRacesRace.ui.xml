@@ -5,15 +5,15 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
-    <g:HTMLPanel>
-
 <div class="{local_res.css.eventregattarace}">
   <div ui:field="fleetColor" class="{local_res.css.eventregattarace_fleetindicator}"></div>
   <!-- race name  -->
   <div class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_name}">
       <span ui:field="raceName" class="{local_res.css.eventregattarace_nameshort}"></span>
+      <!-- 
       <ui:text from='{i18n.eventRegattaRaceRace}'/><span ui:field="raceName2" /><br></br>
       <span ui:field="raceState" />&nbsp;<span ui:field="raceTime" />
+       -->
   </div>
   <!-- race state  if race.isScheduled and race.isTracked -->
   <div ui:field="raceFlagDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_flag}">
@@ -44,12 +44,11 @@
       <ui:text from='{i18n.eventRegattaRaceNotTracked}'/>
   </div>
   <div ui:field="watchRaceDiv" class="{local_res.css.eventregattarace_action}">
-      <g:Anchor ui:field="watchRaceLink" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></g:Anchor>
+      <a ui:field="watchRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_watch}"><ui:text from='{i18n.eventRegattaRaceWatch}'/></a>
   </div>
   <div ui:field="analyzeRaceDiv" class="{local_res.css.eventregattarace_action}">
-      <g:Anchor ui:field="analyzeRaceLink" styleName="{res.mainCss.button} {local_res.css.eventregattarace_action_analyze}"><ui:text from='{i18n.eventRegattaRaceAnalyse}'/></g:Anchor>
+      <a ui:field="analyzeRaceLink" class="{res.mainCss.button} {local_res.css.eventregattarace_action_analyze}"><ui:text from='{i18n.eventRegattaRaceAnalyse}'/></a>
   </div>
 </div>
-    </g:HTMLPanel>
 </ui:UiBinder>
 

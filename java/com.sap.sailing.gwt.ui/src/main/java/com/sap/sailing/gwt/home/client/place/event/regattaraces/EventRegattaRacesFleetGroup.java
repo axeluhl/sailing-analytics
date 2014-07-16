@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -24,7 +24,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
     }
 
     @UiField DivElement fleetsPanel;
-    @UiField HTMLPanel racesFleetPanel;
+    @UiField DivElement racesFleetPanel;
     
     public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
@@ -38,11 +38,26 @@ public class EventRegattaRacesFleetGroup extends Composite {
             for(RaceColumnDTO raceColumn: racesOfFleet) {
                 RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
                 EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
-                racesFleetPanel.add(race);
+                racesFleetPanel.appendChild(race.getElement());
             }
         }
     }
-    
+
+    public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+        EventRegattaRacesResources.INSTANCE.css().ensureInjected();
+        initWidget(uiBinder.createAndBindUi(this));
+        
+        fleetsPanel.getStyle().setDisplay(Display.NONE);
+        
+        FleetDTO defaultFleet = series.getFleets().get(0);
+        List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, defaultFleet);
+        for(RaceColumnDTO raceColumn: racesOfFleet) {
+            RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
+            EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, defaultFleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
+            racesFleetPanel.appendChild(race.getElement());
+        }
+    }
+
     private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet) {
         List<RaceColumnDTO> racesColumnsOfFleet = new ArrayList<RaceColumnDTO>();
         for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
