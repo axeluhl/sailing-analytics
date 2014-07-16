@@ -1,8 +1,9 @@
-**_Bug 2043_**
+##Bug 2043 <br/> 
 
-Google Analytics Tracking ID: **UA-52789785-1**
-###GAnalytics Account: gmsponsorship@gmail.com 
-###GAnalytics PW: 
+Google Analytics Tracking ID: **UA-52789785-1**<br/> 
+
+GAnalytics Account: gmsponsorship@gmail.com 
+GAnalytics PW: 
 
 **code for standard tracking (page view counter):**
 We need to embed the following code in our HTML entry point documents:
