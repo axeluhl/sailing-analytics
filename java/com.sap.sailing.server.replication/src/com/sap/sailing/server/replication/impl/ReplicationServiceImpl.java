@@ -306,7 +306,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                         }
                         try {
                             broadcastOperations(bytesToSend, classesOfOperationsToSend);
-                            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" messages to broadcaster");
+                            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" operations to broadcaster");
                         } catch (Exception e) {
                             logger.log(Level.SEVERE, "Error trying to replicate "+classesOfOperationsToSend.size()+" operations", e);
                         }
