@@ -217,6 +217,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             }
         }
         replicationInstancesManager.registerReplica(replica);
+        logger.info("Registered replica " + replica);
     }
     
     private void addAsListenerToRacingEventService() {
@@ -225,6 +226,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
 
     @Override
     public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
+        logger.info("Unregistering replica " + replica);
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
@@ -291,8 +293,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         oos.close();
         // copy serialized operations into message
         if (masterChannel != null) {
+            final int queueMessageSize = buf.size();
             masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
-            replicationInstancesManager.log(classes);
+            replicationInstancesManager.log(classes,queueMessageSize);
         }
     }
 
@@ -415,7 +418,22 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getAverageNumberOfOperationsPerMessage(replicaDescriptor);
     }
-
+    
+    @Override
+    public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getNumberOfMessagesSent(replica);
+    }
+    
+    @Override
+    public long getNumberOfBytesSent(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getNumberOfBytesSent(replica);
+    }
+    
+    @Override 
+    public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
+        return replicationInstancesManager.getAverageNumberOfBytesPerMessage(replica);
+    }
+    
     @Override
     public void stopToReplicateFromMaster() throws IOException {
         ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();

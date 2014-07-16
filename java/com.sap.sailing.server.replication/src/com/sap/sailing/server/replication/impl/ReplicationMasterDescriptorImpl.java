@@ -134,6 +134,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         } catch (Exception ex) {
             // ignore any exception during abort. close can yield a broad
             // number of exceptions that we don't want to know or to log.
+            ex.printStackTrace();
         }
     }
 

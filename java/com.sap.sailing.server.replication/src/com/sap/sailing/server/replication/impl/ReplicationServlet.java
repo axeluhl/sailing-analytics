@@ -26,6 +26,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sse.common.CountingOutputStream;
 
 /**
  * As the response to any type of <code>GET</code> request, sends a serialized copy of the {@link RacingEventService} to

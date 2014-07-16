@@ -36,6 +36,11 @@ public class ReplicationInstancesManager {
     private final Map<ReplicaDescriptor, Long> totalMessageCount;
     
     /**
+     * Contains the size of all messages sent over
+     */
+    private final Map<ReplicaDescriptor, Long> totalQueueMessagesRawSizeInBytes;
+    
+    /**
      * The descriptor of the replication master
      */
     private ReplicationMasterDescriptor replicationMasterDescriptor;
@@ -45,6 +50,7 @@ public class ReplicationInstancesManager {
         replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends RacingEventServiceOperation<?>>,Integer>>();
         totalMessageCount = new HashMap<>();
         totalNumberOfOperations = new HashMap<>();
+        totalQueueMessagesRawSizeInBytes = new HashMap<ReplicaDescriptor, Long>();
     }
     
     /**
@@ -81,7 +87,7 @@ public class ReplicationInstancesManager {
      * 
      * @see #getStatistics
      */
-    public void log(List<Class<?>> classes) {
+    public void log(List<Class<?>> classes, long sizeOfQueueMessageInBytes) {
         for (ReplicaDescriptor replica : getReplicaDescriptors()) {
             Map<Class<? extends RacingEventServiceOperation<?>>, Integer> counts = replicationCounts.get(replica);
             if (counts == null) {
@@ -109,11 +115,27 @@ public class ReplicationInstancesManager {
                 totalMessages = 0l;
             }
             totalMessageCount.put(replica, ++totalMessages);
+            Long totalQueueMessagesSizeInBytes = totalQueueMessagesRawSizeInBytes.get(replica);
+            if (totalQueueMessagesSizeInBytes == null) {
+                totalQueueMessagesSizeInBytes = 0l;
+            }
+            totalQueueMessagesRawSizeInBytes.put(replica, totalQueueMessagesSizeInBytes+sizeOfQueueMessageInBytes);
         }
     }
     
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replica) {
         return replicationCounts.get(replica);
+    }
+    
+    public long getNumberOfBytesSent(ReplicaDescriptor replica) {
+        final long result;
+        Long totalQueueMessageSize = totalQueueMessagesRawSizeInBytes.get(replica);
+        if (totalQueueMessageSize == null) {
+            result = 0l;
+        } else {
+            result = totalQueueMessageSize.longValue();
+        }
+        return result;
     }
     
     public double getAverageNumberOfOperationsPerMessage(ReplicaDescriptor replica) {
@@ -128,6 +150,33 @@ public class ReplicationInstancesManager {
             }
         } else {
             result = 0;
+        }
+        return result;
+    }
+    
+    public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
+        final double result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            Long messageSizeInTotal = totalQueueMessagesRawSizeInBytes.get(replica);
+            if (messageSizeInTotal == null) {
+                result = 0;
+            } else {
+                result = ((double) messageSizeInTotal)/(double) messageCount;
+            }
+        } else {
+            result = 0;
+        }
+        return result;
+    }
+    
+    public long getNumberOfMessagesSent(ReplicaDescriptor replica) {
+        final long result;
+        Long messageCount = totalMessageCount.get(replica);
+        if (messageCount != null) {
+            result = messageCount.longValue();
+        } else {
+            result = 0l;
         }
         return result;
     }
