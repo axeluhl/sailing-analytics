@@ -315,7 +315,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
             }
             if (++messageCount % 10000l == 0) {
-                logger.info("Handled "+messageCount+" messages for replication. Current outbound replication queue size: "+outboundBuffer.size());
+                logger.info("Handled "+messageCount+" messages for replication. Current outbound replication queue size: "+outboundBufferClasses.size());
             }
         }
     }
