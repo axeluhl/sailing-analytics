@@ -116,14 +116,16 @@ public class Replicator implements Runnable {
         } catch (Exception e) {
             _queue = null;
         }
+        final boolean logsFine = logger.isLoggable(Level.FINE);
         while (!isBeingStopped()) {
            try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
                 if (_queue != null) {
-                    if (messageCount % 10000l == 0) {
+                    if (logsFine || messageCount % 10l == 0) {
                         try {
-                            logger.info("Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                            logger.log(messageCount%10l==0 ? Level.INFO : Level.FINE,
+                                    "Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
                         } catch (Exception e) {
                             // it didn't work; but it's a log message only...
                             logger.info("Received another 10000 replication messages");

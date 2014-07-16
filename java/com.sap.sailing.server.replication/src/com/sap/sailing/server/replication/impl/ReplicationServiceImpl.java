@@ -33,6 +33,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -259,15 +260,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 sendingTask = new TimerTask() {
                     @Override
                     public void run() {
+                        logger.fine("Running timer task to send "+outboundBuffer.size()+" messages");
                         final Iterable<Pair<Class<?>, byte[]>> listToSend;
                         synchronized (outboundBuffer) {
+                            logger.fine("Copying "+outboundBuffer.size()+" messages to new list");
                             listToSend = new ArrayList<>(outboundBuffer);
                             outboundBuffer.clear();
                             sendingTask = null;
                         }
                         try {
                             broadcastOperations(listToSend);
-                        } catch (IOException e) {
+                            logger.fine("Successfully handed "+Util.size(listToSend)+" messages to broadcaster");
+                        } catch (Exception e) {
                             logger.log(Level.SEVERE, "Error trying to replicate the following operations: "+listToSend, e);
                         }
                     }
@@ -281,6 +285,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
     
     private void broadcastOperations(Iterable<Pair<Class<?>, byte[]>> listToSend) throws IOException {
+        logger.fine("broadcasting "+Util.size(listToSend)+" operations");
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(buf);
         List<Class<?>> classes = new ArrayList<>();
@@ -294,7 +299,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         // copy serialized operations into message
         if (masterChannel != null) {
             final int queueMessageSize = buf.size();
+            logger.fine("buffer to broadcast has "+queueMessageSize+" bytes ("+(queueMessageSize/1024/1024)+"MB)");
             masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, buf.toByteArray());
+            logger.fine("successfully published "+queueMessageSize+" bytes");
             replicationInstancesManager.log(classes,queueMessageSize);
         }
     }
