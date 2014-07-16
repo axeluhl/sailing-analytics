@@ -17,7 +17,7 @@ We need to embed the following code in our HTML entry point documents:<br/>
 >   ga('create', 'UA-52789785-1', 'auto');
 >   ga('send', 'pageview');
 
-> </script> 
+> </script> <br/> 
 
 **track Events (Click on Links):**<br/> 
 insert onClick() method for each link <br/> 
