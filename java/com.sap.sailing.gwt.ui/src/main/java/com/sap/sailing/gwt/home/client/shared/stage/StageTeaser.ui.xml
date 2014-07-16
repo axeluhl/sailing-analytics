@@ -17,14 +17,14 @@
 				<h2 class="{local_res.css.stageteaser_content_header_title}">
 					<span ui:field="title" />
 				</h2>
-				<div ui:field="countDown" data-starttime="" data-days="" data-hours="" data-minutes="" data-seconds="" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
-					<div class="{local_res.css.countdown_pane}">
-						<div class="{local_res.css.countdown_pane_count}"></div>
-						<div class="{local_res.css.countdown_pane_unit}"></div>
+				<div ui:field="countdown" class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
+					<div ui:field="countdownMajor" class="{local_res.css.countdown_pane}">
+						<div ui:field="countdownMajorValue" class="{local_res.css.countdown_pane_count}"></div>
+						<div ui:field="countdownMajorUnit" class="{local_res.css.countdown_pane_unit}"></div>
 					</div>
-					<div class="{local_res.css.countdown_pane}">
-						<div class="{local_res.css.countdown_pane_count}"></div>
-						<div class="{local_res.css.countdown_pane_unit}"></div>
+					<div ui:field="countdownMinor" class="{local_res.css.countdown_pane}">
+						<div ui:field="countdownMinorValue" class="{local_res.css.countdown_pane_count}"></div>
+						<div ui:field="countdownMinorUnit" class="{local_res.css.countdown_pane_unit}"></div>
 					</div>
 				</div>
 			</header>

@@ -13,8 +13,8 @@ public class LiveEventStageTeaser extends StageTeaser {
         title.setInnerText(event.getName());
         subtitle.setInnerText(event.venue.getName());
         
-        countDown.getStyle().setDisplay(Display.NONE);
-        countDown.getStyle().setVisibility(Visibility.HIDDEN);
+        countdown.getStyle().setDisplay(Display.NONE);
+        countdown.getStyle().setVisibility(Visibility.HIDDEN);
         
         bandCount.setAttribute("data-bandcount", "2");
         
