@@ -78,6 +78,10 @@ public interface TextMessages extends Messages {
     String eventRegattaRaceFinished();
     String eventRegattaRaceStarted();
     String eventRegattaRaceScheduled();
+    String eventRegattaRaceRace();
+    String eventRegattaRaceWind();
+    String eventRegattaRaceWinner();
+    String eventRegattaRaceLeader();
     String eventRegattaRacesLegendGps();
     String eventRegattaRacesLegendWind();
     String eventRegattaRacesLegendVideo();

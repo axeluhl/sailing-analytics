@@ -36,7 +36,8 @@ public class EventRegattaRacesFleetGroup extends Composite {
             
             List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
             for(RaceColumnDTO raceColumn: racesOfFleet) {
-                EventRegattaRacesRace race = new EventRegattaRacesRace(fleet, raceColumn, pageNavigator);
+                RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
+                EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
                 racesFleetPanel.add(race);
             }
         }
