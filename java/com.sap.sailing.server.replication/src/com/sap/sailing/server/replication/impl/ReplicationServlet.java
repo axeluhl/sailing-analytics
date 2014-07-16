@@ -21,8 +21,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -73,6 +71,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter(ACTION);
+        logger.info("Received replication request, action is "+action);
         switch (Action.valueOf(action)) {
         case REGISTER:
             registerClientWithReplicationService(req, resp);
@@ -81,8 +80,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            Connection rabbitConnection = new ConnectionFactory().newConnection();
-            Channel channel = rabbitConnection.createChannel();
+            Channel channel = getReplicationService().createMasterChannel();
             RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                     /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
                     /* syncAfterTimeout */ false);
