@@ -123,6 +123,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * are likely to be sent per message transmitted, reducing overhead but correspondingly increasing latency.
      */
     private final long TRANSMISSION_DELAY_MILLIS = 100;
+
+    /**
+     * Counts the messages sent out by this replicator
+     */
+    private long messageCount;
     
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this(exchangeName, exchangeHost, replicationInstancesManager, /* localService */ null, /* create RacingEventServiceTracker */ true);
@@ -266,6 +271,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                     }
                 };
                 timer.schedule(sendingTask, TRANSMISSION_DELAY_MILLIS);
+            }
+            if (++messageCount % 10000l == 0) {
+                logger.info("Handled "+messageCount+" messages for replication. Current outbound replication queue size: "+outboundBuffer.size());
             }
         }
     }
