@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 jar=`find plugins -name 'com.sap.sailing.expeditionconnector_*.jar' | sort | tail -1`
 echo Using JAR file $jar
 java -cp "$jar" -Djava.util.logging.config.file=udpmirrorLog.properties com.sap.sailing.expeditionconnector.UDPMirror $*

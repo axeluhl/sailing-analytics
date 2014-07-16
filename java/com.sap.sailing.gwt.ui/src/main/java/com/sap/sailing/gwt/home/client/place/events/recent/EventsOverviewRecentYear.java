@@ -49,7 +49,7 @@ public class EventsOverviewRecentYear extends Composite {
             recentEventsTeaserPanel.add(recentEvent);
         }
         isContentVisible = true;
-        
+     
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

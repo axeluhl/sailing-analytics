@@ -52,7 +52,7 @@ public class EventActivity extends AbstractActivity {
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Shit happens");
+                        Window.alert("Shit happens at getRegattaStructureForEvent()");
                     }
                 });
             }
