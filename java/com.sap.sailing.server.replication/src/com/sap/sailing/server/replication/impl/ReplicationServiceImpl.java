@@ -506,7 +506,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * the buffers, then releases the monitor and broadcasts the buffer.
      */
     private void flushBufferToRabbitMQ() {
-        logger.fine("Running timer task, trying to acquire monitor");
+        logger.fine("Trying to acquire monitor");
         final byte[] bytesToSend;
         final List<Class<?>> classesOfOperationsToSend;
         synchronized (outboundBufferMonitor) {
