@@ -96,7 +96,7 @@ public class Countdown {
                 minor = time;
             }
         }
-        if (secondsRemaining > 0) {
+        if (secondsRemaining >= 0) {
             Time time = new Time(secondsRemaining, Unit.SECONDS);
             if (major == null) {
                 major = time;
