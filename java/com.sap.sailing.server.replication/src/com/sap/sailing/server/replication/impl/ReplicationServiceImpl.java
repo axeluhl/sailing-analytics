@@ -287,17 +287,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 sendingTask = new TimerTask() {
                     @Override
                     public void run() {
-                        logger.fine("Running timer task to send "+outboundBufferClasses.size()+" operations in one message");
+                        logger.fine("Running timer task, trying to acquire monitor");
                         final byte[] bytesToSend;
                         final List<Class<?>> classesOfOperationsToSend;
                         synchronized (outboundBufferMonitor) {
                             logger.fine("Preparing "+outboundBufferClasses.size()+" operations for sending to RabbitMQ exchange");
                             try {
                                 outboundObjectBuffer.close();
+                                logger.fine("Sucessfully closed ObjectOutputStream");
                             } catch (IOException e) {
                                 logger.log(Level.SEVERE, "Error trying to replicate "+outboundBufferClasses.size()+" operations", e);
                             }
                             bytesToSend = outboundBuffer.toByteArray();
+                            logger.fine("Successfully produced bytesToSend array of length "+bytesToSend.length);
                             classesOfOperationsToSend = outboundBufferClasses;
                             outboundBuffer = null;
                             outboundObjectBuffer = null;

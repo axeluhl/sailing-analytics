@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,6 +24,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.util.ByteArrayOutputStreamWithVisibleBuffer;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
 
@@ -119,12 +119,6 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
         return startTimeFormat;
     }
 
-    private static class ByteArrayOutputStreamWithVisibleBuffer extends ByteArrayOutputStream {
-        public byte[] getBuffer() {
-            return buf;
-        }
-    }   
-    
     @Override
     public void loadRaceData(String link, SwissTimingReplayListener replayListener) {
         final URL raceDataUrl;
