@@ -216,6 +216,10 @@ public class ReplicationPanel extends FlowPanel {
                     });
                     registeredReplicas.setWidget(i, 2, removeReplicaButton);
                     i++;
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageNumberOfOperationsPerMessage()));
+                    registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageNumberOfOperationsPerMessage()));
+                    i++;
                     for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
                         registeredReplicas.insertRow(i);
                         registeredReplicas.setWidget(i, 1, new Label(e.getKey()));

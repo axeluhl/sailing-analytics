@@ -1,5 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,8 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
-import static org.junit.Assert.assertFalse;
-
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -39,6 +40,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.Activator;
+import com.sap.sailing.server.replication.impl.RabbitOutputStream;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
@@ -165,6 +167,7 @@ public abstract class AbstractServerReplicationTest {
     }
     
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
+        protected static final int INITIAL_LOAD_PACKAGE_SIZE = 1024*1024;
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
@@ -214,10 +217,15 @@ public abstract class AbstractServerReplicationTest {
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
-                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(s.getOutputStream());
+                                Channel channel = masterReplicationService.createMasterChannel();
+                                RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                                        /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
+                                pw.println(ros.getQueueName());
+                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
                                 final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
                                 master.serializeForInitialReplication(oos);
                                 gzipOutputStream.finish();
+                                ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;
                             }

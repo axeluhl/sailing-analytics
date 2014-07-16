@@ -62,15 +62,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public synchronized QueueingConsumer getConsumer() throws IOException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(getMessagingHostname());
-        int port = getMessagingPort();
-        if (port != 0) {
-            connectionFactory.setPort(port);
-        }
-        Connection connection = connectionFactory.newConnection();
-        Channel channel = connection.createChannel();
-        
+        Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already
          * been created by the master server.
@@ -115,6 +107,19 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         channel.basicConsume(queueName, /* auto-ack */ true, consumer);
         this.consumer = consumer;
         return consumer;
+    }
+
+    @Override
+    public Channel createChannel() throws IOException {
+        ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost(getMessagingHostname());
+        int port = getMessagingPort();
+        if (port != 0) {
+            connectionFactory.setPort(port);
+        }
+        Connection connection = connectionFactory.newConnection();
+        Channel channel = connection.createChannel();
+        return channel;
     }
     
     @Override
