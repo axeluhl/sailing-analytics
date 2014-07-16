@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -283,7 +284,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         synchronized (outboundBufferMonitor) {
             if (outboundBuffer == null) {
                 outboundBuffer = new ByteArrayOutputStream();
-                outboundObjectBuffer = new ObjectOutputStream(outboundBuffer);
+                GZIPOutputStream zipper = new GZIPOutputStream(outboundBuffer);
+                outboundObjectBuffer = new ObjectOutputStream(zipper);
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(bytes);

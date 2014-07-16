@@ -15,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
@@ -139,7 +140,8 @@ public class Replicator implements Runnable {
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
-                        .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
+                        .createObjectInputStreamResolvingAgainstThisFactory(
+                                new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
                 int operationsInMessage = 0;
                 try {
                     while (true) {
