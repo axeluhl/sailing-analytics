@@ -54,16 +54,25 @@ public class AdminConsolePage extends HostPage {
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
     
+    private static final String TRACTRAC_EVENTS_TAB_PARENT_LABEL = "Tracking Provider";
+    private static final String TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER = "TrackingProviderPanel";
+    
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
+    
+    private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_PARENT_IDENTIFIER = "RacesPanel"; //$NON-NLS-1$
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
     
-    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER = "LeaderboardPanel"; //$NON-NLS-1$
+    
+    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboards"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration"; //$NON-NLS-1$
     
-    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard groups"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
     
     /**
@@ -122,21 +131,25 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the TracTracEvents tab.
      */
     public TracTracEventManagementPanelPO goToTracTracEvents() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER);
         return new TracTracEventManagementPanelPO(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
                 TRACTRAC_EVENTS_TAB_IDENTIFIER));
     }
     
     public TrackedRacesManagementPanelPO goToTrackedRaces() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER);
         return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
                 TRACKED_RACES_TAB_IDENTIFIER));
     }
     
     public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
+        goToTab(LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL, LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER);
         return new LeaderboardConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
     }
     
     public LeaderboardGroupConfigurationPanelPO goToLeaderboardGroupConfiguration() {
+        goToTab(LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL, LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER);
         return new LeaderboardGroupConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER));
     }
