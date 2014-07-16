@@ -1009,8 +1009,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     protected boolean add(FixType fix) {
         final boolean result;
+        final boolean firstFixInTrack;
         lockForWrite();
         try {
+            firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix);
             invalidateValidityAndDistanceCaches(fix);
         } finally {
@@ -1034,7 +1036,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
         }
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-            listener.gpsFixReceived(fix, getTrackedItem());
+            listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
         }
         return result;
     }

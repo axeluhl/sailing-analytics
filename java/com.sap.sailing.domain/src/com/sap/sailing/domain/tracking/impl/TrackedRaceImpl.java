@@ -2487,7 +2487,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
 
         @Override
-        public void gpsFixReceived(GPSFix fix, Mark mark) {
+        public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
             clearDirectionFromStartToNextMarkCache();
         }
 
