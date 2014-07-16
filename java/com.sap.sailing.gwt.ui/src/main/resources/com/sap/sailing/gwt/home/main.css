@@ -178,13 +178,13 @@ figcaption {
   text-transform: uppercase;
   vertical-align: middle;
 }
-.label[data-labeltype='ess'] {
+.label[data-labeltype='group1'] {
   background-color: #a71724;
 }
-.label[data-labeltype='worldcup'] {
+.label[data-labeltype='group2'] {
   background-color: #c79242;
 }
-.label[data-labeltype='bundesliga'] {
+.label[data-labeltype='group3'] {
   background-color: #005fa7;
 }
 .morelink {
@@ -265,7 +265,7 @@ figcaption {
 .lightbox_overlayhidden {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
+  filter: literal("alpha(opacity=0)");
 }
 .lightbox_content {
   position: fixed;
@@ -288,7 +288,7 @@ figcaption {
 .lightbox_contenthidden {
   opacity: 0;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
+  filter: literal("alpha(opacity=0)");
 }
 .lightbox_content_enlargedimage {
   -webkit-transition: margin 0.7s linear;
