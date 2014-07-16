@@ -1,9 +1,9 @@
 #Bug 2043 <br/> 
-
-Google Analytics Tracking ID: **UA-52789785-1**<br/> 
 http://www.google.com/intl/en/analytics/ <br/>
 GAnalytics Account: gmsponsorship@gmail.com <br/> 
 GAnalytics PW: <br/>
+<br/>
+Google Analytics Tracking ID: **UA-52789785-1**<br/> 
 
 **track events (clicks on links):**<br/> 
 insert onClick() method for each link <br/> 
