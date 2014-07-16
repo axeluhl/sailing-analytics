@@ -18,11 +18,10 @@ We need to embed the following code in our HTML entry point documents:<br/>
 >   ga('send', 'pageview');
 
 > </script> <br/> 
-
 **track Events (Click on Links):**<br/> 
 insert onClick() method for each link <br/> 
 e.g. 
-> <a href="#" onClick="_gaq.push(['_trackEvent', 'Videos', 'Play', 'Baby\'s First Birthday']);">Play</a> 
+> <a href="#" onClick="_gaq.push(['_trackEvent', 'Videos', 'Play', 'Baby\'s First Birthday']);">Play</a> <br/> 
 https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide
 
 **track page load time:**<br/> 
