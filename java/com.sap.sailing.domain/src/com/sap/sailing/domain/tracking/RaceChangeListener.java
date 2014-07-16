@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.WindSource;
 public interface RaceChangeListener extends CourseListener {
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor);
     
-    void markPositionChanged(GPSFix fix, Mark mark);
+    void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack);
     
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.

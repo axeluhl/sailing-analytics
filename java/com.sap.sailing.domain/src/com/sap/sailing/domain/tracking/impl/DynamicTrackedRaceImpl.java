@@ -212,20 +212,20 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     /**
      * In addition to creating the track which is performed by the superclass implementation, this implementation registers
-     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark) notifies the listeners}
+     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean) notifies the listeners}
      * about updates. The {@link #updated(TimePoint)} method is <em>not</em> called with the mark fix's time point because
      * mark fixes may be received also from marks that don't belong to this race.
      */
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
-        DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
+        final DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
         result.addListener(new GPSTrackListener<Mark, GPSFix>() {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Mark mark) {
+            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
                 triggerManeuverCacheRecalculationForAllCompetitors();
-                notifyListeners(fix, mark);
+                notifyListeners(fix, mark, firstFixInTrack);
             }
 
             @Override
@@ -306,8 +306,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     GPSFixTrack<Mark, GPSFix> markTrack = getOrCreateTrack(mark);
                     markTrack.lockForRead();
                     try {
+                        boolean firstInTrack = true;
                         for (GPSFix fix : markTrack.getRawFixes()) {
-                            listener.markPositionChanged(fix, mark);
+                            listener.markPositionChanged(fix, mark, firstInTrack);
+                            firstInTrack = false;
                         }
                     } finally {
                         markTrack.unlockAfterRead();
@@ -437,14 +439,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
-    private void notifyListeners(GPSFix fix, Mark mark) {
+    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
         }
         for (RaceChangeListener listener : listeners) {
             try {
-                listener.markPositionChanged(fix, mark);
+                listener.markPositionChanged(fix, mark, firstInTrack);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
@@ -800,7 +802,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
+    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);

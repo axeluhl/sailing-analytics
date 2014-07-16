@@ -40,7 +40,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         queue.add(new Util.Pair<Object, GPSFix>(mark, fix));
     }
 

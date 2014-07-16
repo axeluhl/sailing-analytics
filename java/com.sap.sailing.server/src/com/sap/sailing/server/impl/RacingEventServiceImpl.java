@@ -163,6 +163,8 @@ import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExistingTrack;
+import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
@@ -1370,8 +1372,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark) {
-            replicate(new RecordMarkGPSFix(getRaceIdentifier(), mark, fix));
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+            final RecordMarkGPSFix operation;
+            if (firstInTrack) {
+                operation = new RecordMarkGPSFixForNewMarkTrack(getRaceIdentifier(), mark, fix);
+            } else {
+                operation = new RecordMarkGPSFixForExistingTrack(getRaceIdentifier(), mark, fix);
+            }
+            replicate(operation);
         }
 
         @Override

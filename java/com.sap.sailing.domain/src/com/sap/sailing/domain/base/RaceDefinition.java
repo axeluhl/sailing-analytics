@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sse.common.Named;
 
@@ -21,4 +23,6 @@ public interface RaceDefinition extends Named, WithID {
     Course getCourse();
 
     Iterable<Competitor> getCompetitors();
+
+    Competitor getCompetitorById(Serializable competitorID);
 }
