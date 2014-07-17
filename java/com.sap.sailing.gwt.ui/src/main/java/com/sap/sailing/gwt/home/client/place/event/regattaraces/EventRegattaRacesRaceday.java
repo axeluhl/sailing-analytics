@@ -20,12 +20,13 @@ public class EventRegattaRacesRaceday extends Composite {
     @UiField SpanElement raceDayDate;
     @UiField HTMLPanel racesPanel;
     
-    private final Timer timerForClientServerOffset;
-    private final EventPageNavigator pageNavigator;
+    // TODO will be used soon:
+//    private final Timer timerForClientServerOffset;
+//    private final EventPageNavigator pageNavigator;
 
     public EventRegattaRacesRaceday(RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
-        this.timerForClientServerOffset = timerForClientServerOffset;
-        this.pageNavigator = pageNavigator;
+//        this.timerForClientServerOffset = timerForClientServerOffset;
+//        this.pageNavigator = pageNavigator;
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

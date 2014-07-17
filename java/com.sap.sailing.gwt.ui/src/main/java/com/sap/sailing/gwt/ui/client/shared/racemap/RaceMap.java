@@ -451,10 +451,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
                     // boat positions at newTime with zero tail length; and another one fetching everything else.
                     GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
-                    asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
-                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
-                    // next, do the full thing; being the later call, if request throttling kicks in, the later call supersedes the earlier call which may get dropped then
-                    requestID = ++boatPositionRequestIDCounter;
+                    if (getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping != null) {
+                        asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
+                                getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                        requestID = ++boatPositionRequestIDCounter;
+                    }
+                    // next, do the full thing; being the later call, if request throttling kicks in, the later call
+                    // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
@@ -533,8 +536,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 toTimes.put(e.getKey(), newTime);
             }
         }
-        GetRaceMapDataAction result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
+        final GetRaceMapDataAction result;
+        if (!fromTimes.isEmpty()) {
+            result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
                 race, newTime, fromTimes, toTimes, /* extrapolate */true);
+        } else {
+            result = null;
+        }
         return result;
     }
 
