@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.common.client;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Duration;
@@ -12,7 +11,7 @@ import com.sap.sailing.gwt.ui.common.client.Countdown.Unit;
 
 import static org.junit.Assert.*;
 
-import static org.hamcrest.Matchers.*; 
+import static org.hamcrest.Matchers.*;
 
 public class CountdownTest {
     
