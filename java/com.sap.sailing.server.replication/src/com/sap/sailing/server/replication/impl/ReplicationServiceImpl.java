@@ -317,6 +317,49 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         }
     }
     
+    /**
+     * Obtains the monitor on {@link #outboundBufferMonitor}, copies the references to the buffers, nulls out
+     * the buffers, then releases the monitor and broadcasts the buffer.
+     */
+    private void flushBufferToRabbitMQ() {
+        logger.fine("Running timer task, trying to acquire monitor");
+        final byte[] bytesToSend;
+        final List<Class<?>> classesOfOperationsToSend;
+        final boolean doSend;
+        synchronized (outboundBufferMonitor) {
+            if (outboundBuffer != null) {
+                logger.fine("Preparing " + outboundBufferClasses.size() + " operations for sending to RabbitMQ exchange");
+                try {
+                    outboundObjectBuffer.close();
+                    logger.fine("Sucessfully closed ObjectOutputStream");
+                } catch (IOException e) {
+                    logger.log(Level.SEVERE, "Error trying to replicate " + outboundBufferClasses.size()
+                            + " operations", e);
+                }
+                bytesToSend = outboundBuffer.toByteArray();
+                logger.fine("Successfully produced bytesToSend array of length " + bytesToSend.length);
+                classesOfOperationsToSend = outboundBufferClasses;
+                doSend = true;
+                outboundBuffer = null;
+                outboundObjectBuffer = null;
+                outboundBufferClasses = null;
+            } else {
+                logger.fine("No buffer set; probably two timer tasks were scheduled concurrently. No problem, just not sending this time around.");
+                doSend = false;
+                bytesToSend = null;
+                classesOfOperationsToSend = null;
+            }
+        }
+        if (doSend) {
+            try {
+                broadcastOperations(bytesToSend, classesOfOperationsToSend);
+                logger.fine("Successfully handed " + classesOfOperationsToSend.size() + " operations to broadcaster");
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to replicate " + classesOfOperationsToSend.size() + " operations", e);
+            }
+        }
+    }
+
     private void broadcastOperations(byte[] bytesToSend, List<Class<?>> classesOfOperationsToSend) throws IOException {
         logger.fine("broadcasting "+classesOfOperationsToSend.size()+" operations as "+bytesToSend.length+" bytes");
         if (masterChannel != null) {
@@ -501,37 +544,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     @Override
     public UUID getServerIdentifier() {
         return serverUUID;
-    }
-
-    /**
-     * Obtains the monitor on {@link #outboundBufferMonitor}, copies the references to the buffers, nulls out
-     * the buffers, then releases the monitor and broadcasts the buffer.
-     */
-    private void flushBufferToRabbitMQ() {
-        logger.fine("Running timer task, trying to acquire monitor");
-        final byte[] bytesToSend;
-        final List<Class<?>> classesOfOperationsToSend;
-        synchronized (outboundBufferMonitor) {
-            logger.fine("Preparing "+outboundBufferClasses.size()+" operations for sending to RabbitMQ exchange");
-            try {
-                outboundObjectBuffer.close();
-                logger.fine("Sucessfully closed ObjectOutputStream");
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "Error trying to replicate "+outboundBufferClasses.size()+" operations", e);
-            }
-            bytesToSend = outboundBuffer.toByteArray();
-            logger.fine("Successfully produced bytesToSend array of length "+bytesToSend.length);
-            classesOfOperationsToSend = outboundBufferClasses;
-            outboundBuffer = null;
-            outboundObjectBuffer = null;
-            outboundBufferClasses = null;
-        }
-        try {
-            broadcastOperations(bytesToSend, classesOfOperationsToSend);
-            logger.fine("Successfully handed "+classesOfOperationsToSend.size()+" operations to broadcaster");
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error trying to replicate "+classesOfOperationsToSend.size()+" operations", e);
-        }
     }
 
 }
