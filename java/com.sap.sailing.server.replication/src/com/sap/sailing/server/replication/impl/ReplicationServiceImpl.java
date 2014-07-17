@@ -292,7 +292,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             outboundBufferClasses.add(operation.getClass());
             if (outboundBuffer.size() > TRIGGER_MESSAGE_SIZE_IN_BYTES) {
                 logger.info("Triggering replication because buffer holds " + outboundBuffer.size()
-                        + "B which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES);
+                        + " bytes which exceeds trigger size " + TRIGGER_MESSAGE_SIZE_IN_BYTES+" bytes");
                 flushBufferToRabbitMQ();
             } else {
                 if (sendingTask == null) {
@@ -322,7 +322,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * the buffers, then releases the monitor and broadcasts the buffer.
      */
     private void flushBufferToRabbitMQ() {
-        logger.fine("Running timer task, trying to acquire monitor");
+        logger.fine("Trying to acquire monitor");
         final byte[] bytesToSend;
         final List<Class<?>> classesOfOperationsToSend;
         final boolean doSend;
