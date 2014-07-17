@@ -17,7 +17,7 @@
   float: left;
 }
 .logotitle {
-  display: inline;
+  display: none;
   height: 4.333333333333333em;
   line-height: 4.333333333333333em;
   color: #f6f9fc;
