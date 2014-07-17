@@ -1,4 +1,4 @@
-**Bug 2043 <br/> **
+# Introducing Google Analytics (Bug 2043)
 
 GAnalytics Homepage: http://www.google.com/intl/en/analytics/ <br/>
 GAnalytics Account: gmsponsorship@gmail.com <br/> 
