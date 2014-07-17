@@ -24,9 +24,9 @@ public class EventsOverviewRecentYear extends Composite {
 
     @UiField SpanElement year;
     @UiField SpanElement eventsCount;
-    @UiField SpanElement countriesCount;
-    @UiField SpanElement sailorsCount;
-    @UiField SpanElement trackedRacesCount;
+//    @UiField SpanElement countriesCount;
+//    @UiField SpanElement sailorsCount;
+//    @UiField SpanElement trackedRacesCount;
     @UiField HTMLPanel recentEventsTeaserPanel;
     @UiField HTMLPanel contentDiv;
     @UiField HTMLPanel headerDiv;
@@ -39,9 +39,9 @@ public class EventsOverviewRecentYear extends Composite {
         
         this.year.setInnerText(String.valueOf(year));
         this.eventsCount.setInnerText(String.valueOf(events.size()));
-        this.countriesCount.setInnerText("tbd.");
-        this.sailorsCount.setInnerText("tbd.");
-        this.trackedRacesCount.setInnerText("tbd.");
+//        this.countriesCount.setInnerText("tbd.");
+//        this.sailorsCount.setInnerText("tbd.");
+//        this.trackedRacesCount.setInnerText("tbd.");
         
         for(EventBaseDTO eventDTO: events) {
             RecentEvent recentEvent = new RecentEvent(navigator);
