@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.gwt.ui.common.client.Countdown;
 import com.sap.sailing.gwt.ui.common.client.Countdown.CountdownListener;
-import com.sap.sailing.gwt.ui.common.client.Countdown.Time;
+import com.sap.sailing.gwt.ui.common.client.Countdown.RemainingTime;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public abstract class StageTeaser extends Composite {
@@ -52,7 +52,7 @@ public abstract class StageTeaser extends Composite {
             CountdownListener countdownListener = new CountdownListener() {
                 
                 @Override
-                public void changed(Time major, Time minor) {
+                public void changed(RemainingTime major, RemainingTime minor) {
                     updateCountdown(major, minor);
                 }
 
@@ -61,7 +61,7 @@ public abstract class StageTeaser extends Composite {
         }
     }
 
-    private void updateCountdown(Time major, Time minor) {
+    private void updateCountdown(RemainingTime major, RemainingTime minor) {
         if (major == null && minor == null) {
             countdownMajorValue.setInnerHTML(null);
             countdownMajorUnit.setInnerHTML(null);

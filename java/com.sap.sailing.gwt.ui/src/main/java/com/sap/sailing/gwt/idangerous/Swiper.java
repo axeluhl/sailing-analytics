@@ -10,9 +10,9 @@ public final class Swiper extends JavaScriptObject {
     
     protected Swiper() {};
     
-    public static native Swiper createWithDefaultOptions(String containerClass, String wrapperClass, String slideClass) /*-{
+    public static native Swiper createWithDefaultOptions(String containerClass, String wrapperClass, String slideClass, boolean loop) /*-{
         var options = {
-          loop: true,
+          loop: loop,
           wrapperClass: wrapperClass,
           slideClass: slideClass
         };

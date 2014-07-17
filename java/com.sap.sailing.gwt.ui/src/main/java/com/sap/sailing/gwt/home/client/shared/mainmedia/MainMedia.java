@@ -77,7 +77,7 @@ public class MainMedia extends Composite {
             mediaSlides.add(imageContainer);
         }
         
-        this.swiper = Swiper.createWithDefaultOptions(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+        this.swiper = Swiper.createWithDefaultOptions(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide(), true);
 
     }
 

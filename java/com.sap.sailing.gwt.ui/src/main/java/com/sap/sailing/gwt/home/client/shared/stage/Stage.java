@@ -69,7 +69,7 @@ public class Stage extends Composite {
         
         this.swiper = Swiper.createWithDefaultOptions(StageResources.INSTANCE.css().stage_teasers(), 
                 StageResources.INSTANCE.css().swiperwrapper(),
-                StageResources.INSTANCE.css().swiperslide());
+                StageResources.INSTANCE.css().swiperslide(), false);
     }
 
     @UiHandler("nextStageTeaserLink")
