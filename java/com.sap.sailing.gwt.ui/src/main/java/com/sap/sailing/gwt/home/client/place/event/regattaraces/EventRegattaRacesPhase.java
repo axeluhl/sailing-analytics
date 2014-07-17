@@ -1,34 +1,32 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EventRegattaRacesPhase extends Composite {
+public class EventRegattaRacesPhase extends UIObject {
     private static EventRegattaRacesPhaseUiBinder uiBinder = GWT.create(EventRegattaRacesPhaseUiBinder.class);
 
-    interface EventRegattaRacesPhaseUiBinder extends UiBinder<Widget, EventRegattaRacesPhase> {
+    interface EventRegattaRacesPhaseUiBinder extends UiBinder<DivElement, EventRegattaRacesPhase> {
     }
 
     @UiField SpanElement phaseName;
-    @UiField HTMLPanel fleetGroupsPanel;
+    @UiField DivElement fleetGroupsPanel;
 
     public EventRegattaRacesPhase(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+        setElement(uiBinder.createAndBindUi(this));
         
         phaseName.setInnerText(series.getName());
         
@@ -40,18 +38,18 @@ public class EventRegattaRacesPhase extends Composite {
                     List<FleetDTO> fleetsToShow = new ArrayList<FleetDTO>();
                     fleetsToShow.add(fleet);
                     EventRegattaRacesFleetGroup fleetGroup = new EventRegattaRacesFleetGroup(leaderboard, series, fleetsToShow, timerForClientServerOffset, pageNavigator); 
-                    fleetGroupsPanel.add(fleetGroup);
+                    fleetGroupsPanel.appendChild(fleetGroup.getElement());
                 }
             } else {
                 // unordered fleets are NOT splitted into different fleet groups -> e.g. Blue, Yellow
                 List<FleetDTO> fleetsToShow = new ArrayList<FleetDTO>(series.getFleets());
                 EventRegattaRacesFleetGroup fleetGroup = new EventRegattaRacesFleetGroup(leaderboard, series, fleetsToShow, timerForClientServerOffset, pageNavigator); 
-                fleetGroupsPanel.add(fleetGroup);
+                fleetGroupsPanel.appendChild(fleetGroup.getElement());
             }
         } else {
             // single fleet
-            EventRegattaRacesFleetGroup fleetGroup = new EventRegattaRacesFleetGroup(leaderboard, series, Collections.<FleetDTO>emptyList(), timerForClientServerOffset, pageNavigator); 
-            fleetGroupsPanel.add(fleetGroup);
+            EventRegattaRacesFleetGroup fleetGroup = new EventRegattaRacesFleetGroup(leaderboard, series, timerForClientServerOffset, pageNavigator); 
+            fleetGroupsPanel.appendChild(fleetGroup.getElement());
         }
     }
     

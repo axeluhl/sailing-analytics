@@ -7,8 +7,10 @@ public class EventPlace extends AbstractBasePlace {
     private final String eventUuidAsString;
     private final String leaderboardIdAsNameString;
     
-    public EventPlace(String eventUuidAsString) {
-        this(eventUuidAsString, null);
+    public EventPlace(String url) {
+        super(url);
+        eventUuidAsString = getParameter("eventId");
+        leaderboardIdAsNameString = getParameter("leaderboardName");
     }
 
     public EventPlace(String eventUuidAsString, String leaderboardIdAsNameString) {

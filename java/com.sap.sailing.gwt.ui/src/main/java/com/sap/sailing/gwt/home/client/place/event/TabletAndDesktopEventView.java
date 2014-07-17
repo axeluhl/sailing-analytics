@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.Timer;
@@ -103,6 +104,11 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
             }
             
         }
+    }
+
+    @Override
+    public void updateEventRaceStates(List<RegattaOverviewEntryDTO> racesStateEntries) {
+        
     }
 
     @Override

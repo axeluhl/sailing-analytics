@@ -8,28 +8,32 @@
 	<g:HTMLPanel>
 		<header class="{local_res.css.siteheader}">
 		  <div class="{res.mainCss.grid}">
-		    <div class="{res.mediaCss.small3} {res.mediaCss.columns}">
-				<g:Image resource="{local_res.logo}" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
+		    <div class="{res.mediaCss.small2} {res.mediaCss.large3} {res.mediaCss.columns}">
+				<g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
+				<p class="{local_res.css.logotitle}">Sailing Analytics</p>
 		    </div>
-		    <div class="{res.mediaCss.small9} {res.mediaCss.columns}">
-   					<nav class="{local_res.css.sitenavigation}">
-						<g:Anchor ui:field="startPageLink"
-							styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" href="javascript:;"/>
-						<g:Anchor ui:field="eventsPageLink"
-							styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" href="javascript:;"/>
-						<g:Anchor ui:field="solutionsPageLink"
-							styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" href="javascript:;"/>
-						<!-- 
-						<g:Anchor ui:field="sponsoringPageLink"
-							styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;" />
-						 -->
-				          <div class="{local_res.css.search}">
-				            <g:Button ui:field="searchButton" text="Search" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
-				            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
-				          </div>
-					</nav>
-				</div>
-			</div>
+		    
+		    <div class="{res.mediaCss.small9} {res.mediaCss.medium7} {res.mediaCss.large6} {res.mediaCss.columns}">
+				<nav class="{local_res.css.sitenavigation}">
+					<g:Anchor ui:field="startPageLink"
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.home}" href="javascript:;"/>
+					<g:Anchor ui:field="eventsPageLink"
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" href="javascript:;"/>
+					<g:Anchor ui:field="solutionsPageLink"
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" href="javascript:;"/>
+					<!-- 
+					<g:Anchor ui:field="sponsoringPageLink"
+						styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" href="javascript:;" />
+					 -->
+				</nav>
+		    </div>
+		    <span class="{local_res.css.sitenavigation_search} {res.mediaCss.small1} {res.mediaCss.medium3} {res.mediaCss.columns}">
+	          <div class="{local_res.css.search}">
+	            <g:Button ui:field="searchButton" text="Search" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
+	            <g:TextBox ui:field="searchText" styleName="{local_res.css.search_textfield}" />
+	          </div>		        
+      		</span>
+		  </div>
 		</header>
 	</g:HTMLPanel>
 </ui:UiBinder>

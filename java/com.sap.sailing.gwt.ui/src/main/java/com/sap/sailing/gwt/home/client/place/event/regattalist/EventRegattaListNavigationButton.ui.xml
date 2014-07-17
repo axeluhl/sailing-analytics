@@ -4,9 +4,5 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
-    <g:HTMLPanel>
-	<div ui:field="fleetsPanel" class="{local_res.css.eventregattaraces_phase_fleets}"></div>
-    <div ui:field="racesFleetPanel" class="{local_res.css.eventregattaraces_phase_races}"></div>
-</g:HTMLPanel>
+	<a ui:field="regattaGroupLink" class="{res.mainCss.navbar_button}"></a>
 </ui:UiBinder>

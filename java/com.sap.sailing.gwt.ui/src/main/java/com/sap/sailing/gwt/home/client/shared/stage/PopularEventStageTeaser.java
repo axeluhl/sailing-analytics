@@ -13,11 +13,11 @@ public class PopularEventStageTeaser extends StageTeaser {
         title.setInnerText(event.getName());
         subtitle.setInnerText(event.venue.getName());
         
-        countDown.getStyle().setDisplay(Display.NONE);
-        countDown.getStyle().setVisibility(Visibility.HIDDEN);
+        countdown.getStyle().setDisplay(Display.NONE);
+        countdown.getStyle().setVisibility(Visibility.HIDDEN);
         
         bandCount.setAttribute("data-bandcount", "1");
         
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.add(new NoActionStageTeaserBand(event, placeNavigator));
     }
 }
