@@ -1281,12 +1281,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent)
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent, boolean includeCombinedWindForAllLegMiddles)
                     throws NoWindException {
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent */ true);
+                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent */ true, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
@@ -1298,9 +1298,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
      *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
      *            trackedRace.getTimePointOfNewestEvent()}.
+     * @param includeCombinedWindForAllLegMiddles
+     *            if <code>true</code>, the result will return non-<code>null</code> results for calls to
+     *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
      */
     private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, TrackedRace trackedRace, boolean onlyUpToNewestEvent) {
+            Collection<String> windSourceTypeNames, TrackedRace trackedRace, boolean onlyUpToNewestEvent,
+            boolean includeCombinedWindForAllLegMiddles) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
@@ -1315,49 +1319,73 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-            windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
+            final WindSource combinedWindSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(combinedWindSource);
             for (WindSource windSource : windSourcesToDeliver) {
                 // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
-                    WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
+                    WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
+                            numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource,
+                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) { return null; }});
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
-                    windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
-                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
-                            .getMillisecondsOverWhichToAverageWind();
-                    TimePoint timePoint = from;
-                    Double minWindConfidence = 2.0;
-                    Double maxWindConfidence = -1.0;
-                    for (int i = 0; i < numberOfFixes && (!onlyUpToNewestEvent ||
-                            (newestEvent != null && timePoint.before(newestEvent))); i++) {
-                        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
-                        if (averagedWindWithConfidence != null) {
-                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
-                                logger.finest("Found averaged wind: " + averagedWindWithConfidence);
-                            }
-                            double confidence = averagedWindWithConfidence.getConfidence();
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
-                            windDTO.confidence = confidence;
-                            windTrackInfoDTO.windFixes.add(windDTO);
-                            if (confidence < minWindConfidence) {
-                                minWindConfidence = confidence;
-                            }
-                            if (confidence > maxWindConfidence) {
-                                maxWindConfidence = confidence;
-                            }
-                        } else {
-                            if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
-                                logger.finest("Did NOT find any averaged wind for timepoint " + timePoint + " and tracked race " + trackedRace.getRaceIdentifier().getRaceName());
-                            }
-                        }
-                        timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
-                    }
-                    windTrackInfoDTO.minWindConfidence = minWindConfidence; 
-                    windTrackInfoDTO.maxWindConfidence = maxWindConfidence; 
+                }
+            }
+            if (includeCombinedWindForAllLegMiddles) {
+                int zeroBasedLegNumber = 0;
+                for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                    WindTrackInfoDTO windTrackInfoForLegMiddle = createWindTrackInfoDTO(from, millisecondsStepWidth,
+                            numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, combinedWindSource,
+                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) { return trackedLeg.getMiddleOfLeg(at); }});
+                    result.addWindOnLegMiddle(zeroBasedLegNumber, windTrackInfoForLegMiddle);
+                    zeroBasedLegNumber++;
                 }
             }
         }
         return result;
+    }
+
+    private interface PositionAtTimeProvider {
+        Position getPosition(TimePoint at);
+    }
+    
+    private WindTrackInfoDTO createWindTrackInfoDTO(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
+            TrackedRace trackedRace, boolean onlyUpToNewestEvent, TimePoint newestEvent, WindSource windSource,
+            PositionAtTimeProvider positionProvider) {
+        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+        WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
+        windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
+        windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
+        TimePoint timePoint = from;
+        Double minWindConfidence = 2.0;
+        Double maxWindConfidence = -1.0;
+        for (int i = 0; i < numberOfFixes && (!onlyUpToNewestEvent ||
+                (newestEvent != null && timePoint.before(newestEvent))); i++) {
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence =
+                    windTrack.getAveragedWindWithConfidence(positionProvider.getPosition(timePoint), timePoint);
+            if (averagedWindWithConfidence != null) {
+                if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                    logger.finest("Found averaged wind: " + averagedWindWithConfidence);
+                }
+                double confidence = averagedWindWithConfidence.getConfidence();
+                WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
+                windDTO.confidence = confidence;
+                windTrackInfoDTO.windFixes.add(windDTO);
+                if (confidence < minWindConfidence) {
+                    minWindConfidence = confidence;
+                }
+                if (confidence > maxWindConfidence) {
+                    maxWindConfidence = confidence;
+                }
+            } else {
+                if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                    logger.finest("Did NOT find any averaged wind for timepoint " + timePoint + " and tracked race " + trackedRace.getRaceIdentifier().getRaceName());
+                }
+            }
+            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
+        }
+        windTrackInfoDTO.minWindConfidence = minWindConfidence; 
+        windTrackInfoDTO.maxWindConfidence = maxWindConfidence;
+        return windTrackInfoDTO;
     }
 
     /**
@@ -1383,7 +1411,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
                 result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes,
-                        windSourceTypeNames, trackedRace, onlyUpToNewestEvent);
+                        windSourceTypeNames, trackedRace, onlyUpToNewestEvent, /* includeCombinedWindForAllLegMiddles */ false);
             }
         }
         return result;

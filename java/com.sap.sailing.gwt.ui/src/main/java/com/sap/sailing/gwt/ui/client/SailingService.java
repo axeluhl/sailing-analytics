@@ -127,7 +127,8 @@ public interface SailingService extends RemoteService {
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind);
 
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent) throws NoWindException;
+            int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
+            boolean includeCombinedWindForAllLegMiddles) throws NoWindException;
 
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
             Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent);
