@@ -1,4 +1,4 @@
-#Bug 2043 <br/> 
+**Bug 2043 <br/> **
 
 GAnalytics Homepage: http://www.google.com/intl/en/analytics/ <br/>
 GAnalytics Account: gmsponsorship@gmail.com <br/> 
@@ -7,8 +7,8 @@ GAnalytics PW: <br/>
 GAnalytics Tracking ID: **UA-52789785-1** (to make tracking possible for the webpage the tracking code has to be embeedded in the html code)<br/> 
 <br/> 
 **track events (clicks on links):**<br/> 
-1. for event tracking please embed the following javascript-code in the html code of the web page to create the object _gaq 
-When calling method _gaq.push(['_setAccount', 'UA-XXXXX-X'])  please use the specific ganalytics tracking code as param
+1. for event tracking please embed the following javascript-code in the html code of the web page to create the object _gaq <br/>
+When calling method _gaq.push(['_setAccount', 'UA-XXXXX-X'])  please use the specific ganalytics tracking code as param<br/>
 
 Coding:
 <script type="text/javascript">
@@ -23,22 +23,22 @@ Coding:
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 
-</script>
+</script><br/>
 
 2. to embed tracking for hyperlinks use the onClick() method for each link <br/> 
 Syntax: <a href="#" onClick="_gaq.push(['_trackEvent', category, action, label]) <br/> 
 
-definition of params:
-•	category (required)
-The name you supply for the group of objects you want to track.
-•	action (required)
-A string that is uniquely paired with each category, and commonly used to define the type of user interaction for the web object.
-•	label (optional)
-An optional string to provide additional dimensions to the event data.
-•	value (optional)
-An integer that you can use to provide numerical data about the user event.
-•	non-interaction (optional)
-A boolean that when set to true, indicates that the event hit will not be used in bounce-rate calculation.
+definition of params:<br/>
+•	category (required)<br/>
+The name you supply for the group of objects you want to track.<br/>
+•	action (required)<br/>
+A string that is uniquely paired with each category, and commonly used to define the type of user interaction for the web object.<br/>
+•	label (optional)<br/>
+An optional string to provide additional dimensions to the event data.<br/>
+•	value (optional)<br/>
+An integer that you can use to provide numerical data about the user event.<br/>
+•	non-interaction (optional)<br/>
+A boolean that when set to true, indicates that the event hit will not be used in bounce-rate calculation.<br/>
 
 see also: https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide <br/>
 
