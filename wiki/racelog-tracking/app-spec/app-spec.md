@@ -14,11 +14,11 @@ The _SAP Sailing Analytics_ use tracking data to allow users to analyze sailing 
 
 We believe that the Sailing Analytics's functionality can benefit sailors not only at large sailing events, but for many more occasions. Among other devices, smartphones can serve as a source of tracking data, and sailors can define their own training races or even club regattas, so that they can then analyze their tracks. This would shift the Sailing Analytics from being a fully-provided event solution to a (possibly freely) availabe online tool that sailors can use whenever they want. One can see how this idea has the potential to make the Sailing Analytics and all the work that has been put into them so far more visible and accessible, ultimately transforming it into a tool every sailor knows and loves to use.
 
-Plenty of thought has been put into adapting the existing software on the backend side, yet the smartphone tier has recieved far less attention so far. To bring the idea to life the technical backend is vital, but an intuitive, easy-to-use - "sexy" - smartphone app has the highest impact on how the overall solution comes across to the end user - the sailor.
+Plenty of thought has been put into adapting the existing software on the backend side, yet the smartphone tier has received far less attention so far. To bring the idea to life the technical backend is vital, but an intuitive, easy-to-use - "sexy" - smartphone app has the highest impact on how the overall solution comes across to the end user - the sailor.
 
 Obviously, the base functionality of such an app is to provide a service that gathers positional data and transmits it to our backend. The more challenging part however lies in reducing the interaction that currently experts perform through the _AdminConsole_ (a web-based administrative interface) to the minimal and intuitive subset that end users want to perform.
 
-This document details out what is still missing both on server and smartphone side, aiming to serve as a specification for the furhter implementation. As the app plays such a crucial part in the overall story, and as it has recieved so little attention so far, one possibility is to outsource its design and implementation, so that the the document also serves as a high-level requirements specification.
+This document details out what is still missing both on server and smartphone side, aiming to serve as a specification for the furhter implementation. As the app plays such a crucial part in the overall story, and as it has received so little attention so far, one possibility is to outsource its design and implementation, so that the the document also serves as a high-level requirements specification.
 
 Missing parts and requirements are summarized at the end of a section with the following color-coding:
 
@@ -36,7 +36,7 @@ First an overview of the current status is given, which is focussed mainly on th
 ## Status Quo
 On the server side, the necessary parts to enable smartphone tracking have been implemented. This section gives a short overview of what is possible right now.
 
-### Recieving and storing Tracking Data
+### Receiving and storing Tracking Data
 So far, the Sailing Analytics did not store any competitor or tracking data. Rather, only the regatta structure was persistently defined, and all other information was provided by the tracking provider. We have begun digressing from this concept in the interest of enabling smartphone tracking.
 
 Along these lines, one of the major extensions is storing tracking data. GPS fixes can now be added to the so-called _GPSFixStore_ at any time. A _DeviceIdentifier_ is stored with every fix which identifies the device that generated the fix. An exemplary servlet exists that can process ``HTTP POST`` requests containing a JSON representation of the DeviceIdentifier and multiple GPSFixes. For the final app different alternatives with less protocol overhead should be explored. Options might include websockets or direct socket communication (possibly UDP datagrams in a fire-and forget style, which would require application level handling of lost data).
