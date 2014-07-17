@@ -2491,7 +2491,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
             switch (dataType) {
-            case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                 if (track != null) {
                     SpeedWithBearing speedOverGround = track.getEstimatedSpeed(timePoint);

@@ -1061,4 +1061,6 @@ public interface StringMessages extends Messages {
     String totalSize();
     String averageMessageSize();
     String totalNumberOfOperations();
+    String currentOrAverageSpeedOverGroundInKnotsTooltip();
+    String currentOrAverageSpeedOverGroundInKnots();
 }
