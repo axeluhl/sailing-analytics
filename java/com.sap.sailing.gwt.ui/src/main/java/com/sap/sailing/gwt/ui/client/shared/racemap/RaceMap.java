@@ -101,6 +101,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -445,10 +446,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (race != null) {
                     final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
-                    final int requestID = ++boatPositionRequestIDCounter;
+                    int requestID = ++boatPositionRequestIDCounter;
                     // TODO bug2026: For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
                     // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
                     // boat positions at newTime with zero tail length; and another one fetching everything else.
+                    GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
+                    asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
+                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                    // next, do the full thing; being the later call, if request throttling kicks in, the later call supersedes the earlier call which may get dropped then
+                    requestID = ++boatPositionRequestIDCounter;
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
@@ -502,6 +508,34 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
         }
+    }
+
+    /**
+     * We assume that overlapping segments usually don't require a lot of loading time as the most typical case will be to update a longer
+     * tail with a few new fixes that were received since the last time tick. Non-overlapping position requests typically occur for the
+     * first request when no fix at all is known for the competitor yet, and when the user has radically moved the time slider to some
+     * other time such that given the current tail length setting the new tail segment does not overlap with the old one, requiring a full
+     * load of the entire tail data for that competitor.<p>
+     * 
+     * For the non-overlapping requests, this method creates a separate request which only loads boat positions, quick ranks, sidelines and
+     * mark positions for the zero-length interval at <code>newTime</code>, assuming that this will work fairly fast and in particular in
+     * O(1) time regardless of tail length, compared to fetching the entire tail for all competitors.
+     */
+    private GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(
+            Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
+            RegattaAndRaceIdentifier race, Date newTime) {
+        Map<CompetitorDTO, Date> fromTimes = new HashMap<>();
+        Map<CompetitorDTO, Date> toTimes = new HashMap<>();
+        for (Map.Entry<CompetitorDTO, Boolean> e : fromAndToAndOverlap.getC().entrySet()) {
+            if (!e.getValue()) {
+                // no overlap; add competitor to request
+                fromTimes.put(e.getKey(), newTime);
+                toTimes.put(e.getKey(), newTime);
+            }
+        }
+        GetRaceMapDataAction result = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(),
+                race, newTime, fromTimes, toTimes, /* extrapolate */true);
+        return result;
     }
 
     private AsyncCallback<RaceMapDataDTO> getRaceMapDataCallback(

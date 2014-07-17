@@ -1486,8 +1486,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Iterator<GPSFixMoving> fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
                         while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
-                            if (fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
-                                if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                            if (fix.getTimePoint().before(toTimePointExcluding)) {
+                                if (logger.isLoggable(Level.FINEST)) {
                                     logger.finest(""+competitor.getName()+": " + fix);
                                 }
                                 fixes.add(fix);
@@ -1514,7 +1514,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
-                        while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
+                        while (fix != null && (fix.getTimePoint().before(toTimePointExcluding) ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
                             Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
                             final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
