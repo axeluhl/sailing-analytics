@@ -1,7 +1,5 @@
 # Tracking a Race using the RaceLog
 
-![walkthrough](walkthrough/01_regatta.png)
-
 [[walkthrough/01_regatta.png]]
 
 ***
