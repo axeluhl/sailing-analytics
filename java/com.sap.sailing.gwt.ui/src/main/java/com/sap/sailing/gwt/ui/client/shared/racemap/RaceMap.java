@@ -447,6 +447,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
+                    // TODO For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
+                    // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
+                    // boat positions at newTime with zero tail length; and another one fetching everything else.
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true);
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY, new AsyncCallback<RaceMapDataDTO>() {
@@ -1508,9 +1511,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     double factorForBefore = 1-factorForAfter;
                     PositionDTO betweenPosition = new PositionDTO(factorForBefore*fixBefore.position.latDeg + factorForAfter*fixAfter.position.latDeg,
                             factorForBefore*fixBefore.position.lngDeg + factorForAfter*fixAfter.position.lngDeg);
-                    double betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
-                            multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
-                            multiply(factorForAfter)).divide(1).getDegrees();
+                    final double betweenBearing;
+                    if (fixBefore.speedWithBearing == null) {
+                        if (fixAfter.speedWithBearing == null) {
+                            betweenBearing = 0;
+                        } else {
+                            betweenBearing = fixAfter.speedWithBearing.bearingInDegrees;
+                        }
+                    } else if (fixAfter.speedWithBearing == null) {
+                        betweenBearing = fixBefore.speedWithBearing.bearingInDegrees;
+                    } else {
+                        betweenBearing = new ScalableBearing(new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees)).
+                                multiply(factorForBefore).add(new ScalableBearing(new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).
+                                        multiply(factorForAfter)).divide(1).getDegrees();
+                    }
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
                             factorForBefore*fixBefore.speedWithBearing.speedInKnots + factorForAfter*fixAfter.speedWithBearing.speedInKnots,
                             betweenBearing);

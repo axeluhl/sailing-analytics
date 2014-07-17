@@ -1049,6 +1049,7 @@ public interface StringMessages extends Messages {
     String showNumberOfRacesScored();
     String racesScored();
     String racesScoredTooltip();
+    String averageNumberOfOperationsPerMessage();
     String showUncorrectedNetPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
@@ -1056,4 +1057,10 @@ public interface StringMessages extends Messages {
     String lastScoreCorrectionsComment();
     String setTimeToNow();
     String useStartTimeInference();
+    String numberOfQueueMessagesSent();
+    String totalSize();
+    String averageMessageSize();
+    String totalNumberOfOperations();
+    String currentOrAverageSpeedOverGroundInKnotsTooltip();
+    String currentOrAverageSpeedOverGroundInKnots();
 }

@@ -41,6 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -126,10 +127,10 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -163,6 +164,8 @@ import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExistingTrack;
+import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
@@ -171,6 +174,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
@@ -410,6 +414,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.mongoObjectFactory = mongoObjectFactory;
         this.mediaDB = mediaDb;
         this.competitorStore = competitorStore;
+        this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
+            @Override
+            public void competitorUpdated(Competitor competitor) {
+                replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(),
+                        competitor.getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality()));
+            }
+        });
         this.windStore = windStore;
         this.dataImportLock = new DataImportLockWithProgress();
         
@@ -1370,8 +1381,14 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark) {
-            replicate(new RecordMarkGPSFix(getRaceIdentifier(), mark, fix));
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+            final RecordMarkGPSFix operation;
+            if (firstInTrack) {
+                operation = new RecordMarkGPSFixForNewMarkTrack(getRaceIdentifier(), mark, fix);
+            } else {
+                operation = new RecordMarkGPSFixForExistingTrack(getRaceIdentifier(), mark, fix);
+            }
+            replicate(operation);
         }
 
         @Override
