@@ -3,6 +3,10 @@
 Integrating smartphones into the _Sailing Analytics_ has long been talked about, and some effort has been invested on the server side to implement this idea. So far, the smartphone side of things has received substantially less attention, even though it is probably the most essential part when it comes to making the solution desirable for sailors. The missing parts on both sides and a high-level specification for the app are presented here.
 
 ## Table of Contents
+[[_TOC_]]
+
+<!-- Gollumn and python-markdown have a differnt syntax for the TOC :( -->
+
 [TOC]
 
 ## A lengthier Introduction
@@ -27,7 +31,7 @@ Missing parts and requirements are summarized at the end of a section with the f
 !!! both
     Requirements involving both the smartphone and server tier.
 
-**TODO: give overview of further structure**
+First an overview of the current status is given, which is focussed mainly on the server side. However, certain requirements relevant for the app are already mentioned along the way. Then the focus shifts to use-cases, to provide a description of how the app and smartphone tracking as a whole should perform from the viewpoint of a user, with less technical details and without regarding server-side constraints and issues. Finally, further technical issues are discussed for the app, such as an enumeration of the pros and cons of a native vs. hybrid solution.
 
 ## Status Quo
 On the server side, the necessary parts to enable smartphone tracking have been implemented. This section gives a short overview of what is possible right now.
