@@ -16,10 +16,9 @@ public class LiveEventStageTeaser extends StageTeaser {
         countdown.getStyle().setDisplay(Display.NONE);
         countdown.getStyle().setVisibility(Visibility.HIDDEN);
         
-        bandCount.setAttribute("data-bandcount", "2");
+        bandCount.setAttribute("data-bandcount", "1");
         
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.add(new LiveStageTeaserBand(event, placeNavigator));
     }
 
 }

@@ -12,7 +12,6 @@ public class UpcomingEventStageTeaser extends StageTeaser {
         subtitle.setInnerText(event.venue.getName());
         
         bandCount.setAttribute("data-bandcount", "1");
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.add(new NoActionStageTeaserBand(event, placeNavigator));
     }
-
 }
