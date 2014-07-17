@@ -7,25 +7,20 @@ GAnalytics PW: <br/>
 GAnalytics Tracking ID: **UA-52789785-1** (to make tracking possible for the webpage the tracking code has to be embeedded in the html code)<br/> 
 <br/> 
 **track events (clicks on links):**<br/> 
-1. for event tracking please embed the following javascript-code in the html code of the web page to create the object _gaq <br/>
+* 1. for event tracking please embed the following javascript-code in the html code of the web page to create the object _gaq <br/>
 When calling method _gaq.push(['_setAccount', 'UA-XXXXX-X'])  please use the specific ganalytics tracking code as param<br/>
-
-Coding:
+Coding:<br/>
 <script type="text/javascript">
-
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-XXXXX-X']);
   _gaq.push(['_trackPageview']);
-
   (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';              
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 </script><br/>
 
-2. to embed tracking for hyperlinks use the onClick() method for each link <br/> 
+ * * * 2. to embed tracking for hyperlinks use the onClick() method for each link <br/> 
 Syntax: <a href="#" onClick="_gaq.push(['_trackEvent', category, action, label]) <br/> 
 
 definition of params:<br/>
