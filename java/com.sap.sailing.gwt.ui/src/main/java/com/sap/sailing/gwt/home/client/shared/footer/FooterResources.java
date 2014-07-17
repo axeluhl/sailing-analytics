@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.shared.footer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 
 public interface FooterResources extends ClientBundle {
     public static final FooterResources INSTANCE = GWT.create(FooterResources.class);
@@ -10,6 +11,13 @@ public interface FooterResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/client/shared/footer/Footer.css")
     LocalCss css();
 
+    public interface MinWidth25emCss extends LocalCss {
+    }
+
+    @Source("com/sap/sailing/gwt/home/client/shared/footer/FooterMedium.css")
+    MinWidth25emCss mediumCss();
+
+    @Shared
     public interface LocalCss extends CssResource {
         String sitefooter();
         String sitefooter_copyright();
