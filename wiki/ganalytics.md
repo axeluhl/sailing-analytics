@@ -20,7 +20,7 @@ Coding:<br/>
   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 </script><br/>
 
- * * * 2. to embed tracking for hyperlinks use the onClick() method for each link <br/> 
+*2. to embed tracking for hyperlinks use the onClick() method for each link <br/> 
 Syntax: <a href="#" onClick="_gaq.push(['_trackEvent', category, action, label]) <br/> 
 
 definition of params:<br/>
