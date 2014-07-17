@@ -27,7 +27,10 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         this.course = course;
         this.competitorsById = new LinkedHashMap<>();
         for (Competitor competitor : competitors) {
-            competitorsById.put(competitor.getId(), competitor);
+            Competitor competitorWithEqualID = competitorsById.put(competitor.getId(), competitor);
+            if (competitorWithEqualID != null && competitorWithEqualID != competitor) {
+                throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
+            }
         }
         this.boatClass = boatClass;
         this.id = id;
