@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.client.shared.footer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.CssResource.Shared;
 
 public interface FooterResources extends ClientBundle {
@@ -13,7 +14,7 @@ public interface FooterResources extends ClientBundle {
 
     public interface MinWidth25emCss extends LocalCss {
     }
-
+@NotStrict
     @Source("com/sap/sailing/gwt/home/client/shared/footer/FooterMedium.css")
     MinWidth25emCss mediumCss();
 
