@@ -863,103 +863,104 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
                 com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorWithOneBasedLegNumber(competitorsToShow);
-                // get wind at middle of leg for leading visible competitor
-                WindTrackInfoDTO windDataForLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(visibleLeaderInfo.getA()-1);
-                if (windDataForLegMiddle != null && !windDataForLegMiddle.windFixes.isEmpty()) {
-                    // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
-                    // don't show anything
-                    GPSFixDTO lastBoatFix = null;
-                    boolean isVisibleLeaderInfoComplete = false;
-                    boolean isLegTypeKnown = false;
-                    if (visibleLeaderInfo != null && visibleLeaderInfo.getA() > 0
-                            && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
-                        isVisibleLeaderInfoComplete = true;
-                        LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
-                        if (legInfoDTO.legType != null) {
-                            isLegTypeKnown = true;
-                        }
-                        lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
+                // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
+                // don't show anything
+                GPSFixDTO lastBoatFix = null;
+                boolean isVisibleLeaderInfoComplete = false;
+                boolean isLegTypeKnown = false;
+                WindTrackInfoDTO windDataForLegMiddle = null;
+                if (visibleLeaderInfo != null
+                        && visibleLeaderInfo.getA() > 0
+                        && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()
+                        // get wind at middle of leg for leading visible competitor
+                        && (windDataForLegMiddle = lastCombinedWindTrackInfoDTO
+                                .getCombinedWindOnLegMiddle(visibleLeaderInfo.getA() - 1)) != null
+                        && !windDataForLegMiddle.windFixes.isEmpty()) {
+                    isVisibleLeaderInfoComplete = true;
+                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    if (legInfoDTO.legType != null) {
+                        isLegTypeKnown = true;
                     }
-                    if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
-                        LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
-                        double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
-                                                              // area of the map; bug 616
-                        double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass()
-                                .getHullLengthInMeters() / 1000.; // one hull length
-                        // implement and use Position.translateRhumb()
-                        double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
-                        LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg,
-                                lastBoatFix.position.lngDeg);
-                        LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
-                                distanceFromBoatPositionInKm);
-                        final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
-                        double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
-                        double rotatedBearingDeg1 = 0.0;
-                        double rotatedBearingDeg2 = 0.0;
-                        switch (legInfoDTO.legType) {
-                        case UPWIND:
-                        case DOWNWIND: {
-                            rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                            if (rotatedBearingDeg1 >= 360.0) {
-                                rotatedBearingDeg1 -= 360.0;
-                            }
-                            rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                            if (rotatedBearingDeg2 < 0.0) {
-                                rotatedBearingDeg2 += 360.0;
-                            }
+                    lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
+                }
+                if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
+                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
+                                                          // area of the map; bug 616
+                    double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass()
+                            .getHullLengthInMeters() / 1000.; // one hull length
+                    // implement and use Position.translateRhumb()
+                    double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
+                    LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
+                    LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
+                            distanceFromBoatPositionInKm);
+                    final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
+                    double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
+                    double rotatedBearingDeg1 = 0.0;
+                    double rotatedBearingDeg2 = 0.0;
+                    switch (legInfoDTO.legType) {
+                    case UPWIND:
+                    case DOWNWIND: {
+                        rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
+                        if (rotatedBearingDeg1 >= 360.0) {
+                            rotatedBearingDeg1 -= 360.0;
                         }
-                            break;
-                        case REACHING: {
-                            rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                            if (rotatedBearingDeg1 >= 360.0) {
-                                rotatedBearingDeg1 -= 360.0;
-                            }
-                            rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                            if (rotatedBearingDeg2 < 0.0) {
-                                rotatedBearingDeg2 += 360.0;
-                            }
+                        rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
+                        if (rotatedBearingDeg2 < 0.0) {
+                            rotatedBearingDeg2 += 360.0;
                         }
-                            break;
-                        }
-                        LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                                rotatedBearingDeg1, advantageLineLengthInKm / 2.0);
-                        LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                                rotatedBearingDeg2, advantageLineLengthInKm / 2.0);
-
-                        if (advantageLine == null) {
-                            PolylineOptions options = PolylineOptions.newInstance();
-                            options.setClickable(true);
-                            options.setGeodesic(true);
-                            options.setStrokeColor("#000000");
-                            options.setStrokeWeight(1);
-                            options.setStrokeOpacity(0.5);
-
-                            advantageLine = Polyline.newInstance(options);
-                            MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
-                            pointsAsArray.insertAt(0, advantageLinePos1);
-                            pointsAsArray.insertAt(1, advantageLinePos2);
-                            advantageLine.setPath(pointsAsArray);
-
-                            advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
-                                    bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
-                            advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
-                            advantageLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                                @Override
-                                public void onEvent(MouseOutMapEvent event) {
-                                    map.setTitle("");
-                                }
-                            });
-                            advantageLine.setMap(map);
-                        } else {
-                            advantageLine.getPath().removeAt(1);
-                            advantageLine.getPath().removeAt(0);
-                            advantageLine.getPath().insertAt(0, advantageLinePos1);
-                            advantageLine.getPath().insertAt(1, advantageLinePos2);
-                            advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
-                            advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
-                        }
-                        drawAdvantageLine = true;
                     }
+                        break;
+                    case REACHING: {
+                        rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
+                        if (rotatedBearingDeg1 >= 360.0) {
+                            rotatedBearingDeg1 -= 360.0;
+                        }
+                        rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
+                        if (rotatedBearingDeg2 < 0.0) {
+                            rotatedBearingDeg2 += 360.0;
+                        }
+                    }
+                        break;
+                    }
+                    LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg1,
+                            advantageLineLengthInKm / 2.0);
+                    LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg2,
+                            advantageLineLengthInKm / 2.0);
+
+                    if (advantageLine == null) {
+                        PolylineOptions options = PolylineOptions.newInstance();
+                        options.setClickable(true);
+                        options.setGeodesic(true);
+                        options.setStrokeColor("#000000");
+                        options.setStrokeWeight(1);
+                        options.setStrokeOpacity(0.5);
+
+                        advantageLine = Polyline.newInstance(options);
+                        MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
+                        pointsAsArray.insertAt(0, advantageLinePos1);
+                        pointsAsArray.insertAt(1, advantageLinePos2);
+                        advantageLine.setPath(pointsAsArray);
+
+                        advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
+                                bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
+                        advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
+                        advantageLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                            @Override
+                            public void onEvent(MouseOutMapEvent event) {
+                                map.setTitle("");
+                            }
+                        });
+                        advantageLine.setMap(map);
+                    } else {
+                        advantageLine.getPath().removeAt(1);
+                        advantageLine.getPath().removeAt(0);
+                        advantageLine.getPath().insertAt(0, advantageLinePos1);
+                        advantageLine.getPath().insertAt(1, advantageLinePos2);
+                        advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
+                        advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
+                    }
+                    drawAdvantageLine = true;
                 }
             }
             if (!drawAdvantageLine) {
