@@ -209,7 +209,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel, boolean showMapControls) {
         // create the default leaderboard and select the right race
-        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages, showMapControls);
+        RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), selectedRaceIdentifier);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
@@ -234,10 +235,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
-
         addCompetitorsFilterControl(viewControlsPanel);
-
-        addMediaSelectorToNavigationMenu();   
+        addMediaSelectorToNavigationMenu();
     }
  
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
@@ -272,9 +271,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return filterSets;
     }
     
+    /**
+     * Adds the media selector drop down and fills it with media for the current race.
+     * NOTE:
+     * Media selector will NOT listen and react to changes of the start time during a race board session.
+     * This case and its consequences are considered negligible.
+     * Consequently, media selector will also NOT react on media added newly during a race board session.
+     */
     private void addMediaSelectorToNavigationMenu() {
         MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
-//      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);

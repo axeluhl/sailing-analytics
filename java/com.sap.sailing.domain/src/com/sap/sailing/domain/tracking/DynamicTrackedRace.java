@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
+import com.sap.sailing.domain.common.racelog.Flags;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -94,6 +95,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
     
     void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
+    
+    void onAbortedByRaceCommittee(Flags flag);
 
     void invalidateStartTime();
     

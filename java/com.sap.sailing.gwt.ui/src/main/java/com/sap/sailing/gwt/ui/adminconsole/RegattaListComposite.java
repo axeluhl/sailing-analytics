@@ -96,7 +96,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
-                string.add(t.boatClass.getName());
+                if (t.boatClass != null) {
+                    string.add(t.boatClass.getName());
+                }
                 return string;
             }
         };
@@ -231,7 +233,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
         sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuid,
-                editedRegatta.configuration, new MarkedAsyncCallback<Void>(
+                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

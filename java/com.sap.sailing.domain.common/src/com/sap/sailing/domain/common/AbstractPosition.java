@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
@@ -64,6 +65,17 @@ public class AbstractPosition implements Position {
             result = new CentralAngleDistance(getCentralAngleRad(p));
         }
         return result;
+    }
+    
+    @Override
+    public double getQuickApproximateNauticalMileDistance(Position p) {
+        double latDeg = getLatDeg();
+        double pLatDeg = p.getLatDeg();
+        final double latDiffDeg = Math.abs(latDeg - pLatDeg);
+        double cosineOfAverageLatitude = Math.cos((latDeg+pLatDeg)/2./180.*Math.PI);
+        final double normalizedLngDiffDeg = cosineOfAverageLatitude * Math.abs(getLngDeg() - p.getLngDeg());
+        // One degree of latitude or one degree of longitude at the equator each correspond to 60 nautical miles.
+        return Math.sqrt(latDiffDeg*latDiffDeg + normalizedLngDiffDeg*normalizedLngDiffDeg) * 60.;
     }
 
     @Override
@@ -161,6 +173,18 @@ public class AbstractPosition implements Position {
         return result;
     }
 
+    @Override
+    public Position getLocalCoordinates(Position localOrigin, Bearing localEquatorBearing) {
+    	return this.getTargetCoordinates(localOrigin, localEquatorBearing, new DegreePosition(0.0, 0.0), new DegreeBearingImpl(90.0));
+    }
+
+    @Override
+    public Position getTargetCoordinates(Position localOrigin, Bearing localEquatorBearing, Position targetOrigin, Bearing targetEquatorBearing) {
+    	Bearing localBearing = localEquatorBearing.getDifferenceTo(localOrigin.getBearingGreatCircle(this));
+    	Distance localDistance = this.getDistance(localOrigin);
+    	return targetOrigin.translateGreatCircle(targetEquatorBearing.add(localBearing), localDistance);
+    }
+  
     @Override
     public String toString() {
         return "(" + getLatDeg() + "," + getLngDeg() + ")";

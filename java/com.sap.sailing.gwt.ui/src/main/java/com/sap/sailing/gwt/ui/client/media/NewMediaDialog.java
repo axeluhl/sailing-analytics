@@ -8,8 +8,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -18,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
@@ -131,7 +130,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     protected void updateFromUrl() {
         String url = urlBox.getValue();
         
-        String youtubeId = extractYoutubeId(url);
+        String youtubeId = YoutubeApi.getIdByUrl(url);
         
         if (youtubeId != null) {
             mediaTrack.url = youtubeId;
@@ -162,19 +161,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
         }
         
         refreshUI();
-    }
-
-    private String extractYoutubeId(String url) {
-         RegExp YOUTUBE_ID_REGEX = RegExp.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]*).*"); // from http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url, mantish Mar 4 at 15:33
-         RegExp HTTP_FTP_REGEX = RegExp.compile("^(http|ftp).*"); // starting with http, https or ftp
-         MatchResult match = YOUTUBE_ID_REGEX.exec(url);
-         if ((match != null) && (match.getGroupCount() == 3)) {
-             return match.getGroup(2);
-         } else if (HTTP_FTP_REGEX.exec(url) == null) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
-             return url;
-         } else {
-             return null; // --> plain http, https or ftp URL --> no youtube 
-         }
     }
 
     protected void setUiEnabled(boolean isEnabled) {

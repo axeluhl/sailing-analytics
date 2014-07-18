@@ -58,10 +58,14 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         return regatta;
     }
     
-    private Regatta createRegattaWithoutRaceColumns(final String regattaBaseName, BoatClass boatClass, boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
+    private Regatta createRegattaWithoutRaceColumns(final String regattaBaseName, BoatClass boatClass,
+            boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
         List<Series> series = createSeriesForTestRegatta();
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
-        Regatta regatta = new RegattaImpl(raceLogStore, regattaBaseName, boatClass, series, persistent, scoringScheme, "123", courseArea);
+        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
+                domainObjectFactory);
+        Regatta regatta = new RegattaImpl(raceLogStore, RegattaImpl.getDefaultName(regattaBaseName,
+                boatClass == null ? null : boatClass.getName()), boatClass, series, persistent, scoringScheme, "123",
+                courseArea, /* useStartTimeInference */true);
         return regatta;
     }
 

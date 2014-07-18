@@ -22,13 +22,13 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.AbstractTimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.SerializableComparator;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -42,6 +42,7 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A virtual wind track that computes and caches the wind bearing based on the boat tracks recorded in the tracked race
@@ -55,8 +56,8 @@ import com.sap.sse.common.Util;
  * 
  * The estimation is integrated into the {@link WindTrackImpl} concepts by redefining the {@link #getInternalRawFixes()}
  * method such that it returns an {@link EstimatedWindFixesAsNavigableSet} object. It computes its values by asking back
- * to {@link #getEstimatedWindDirection(Position, TimePoint)} which first performs a cache look-up. In case of a cache
- * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint)}.
+ * to {@link #getEstimatedWindDirection(TimePoint)} which first performs a cache look-up. In case of a cache
+ * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(TimePoint)}.
  * <p>
  * 
  * Caching is done using the base class's {@link TrackImpl#fixes} field which is made accessible through
@@ -97,7 +98,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private final NamedReentrantReadWriteLock scheduledRefreshIntervalLock;
     
-    private final Weigher<TimePoint> weigher;
+    private final Weigher<Pair<Position, TimePoint>> weigher;
     
     /**
      * A copy of the {@link #timePointsWithCachedNullResult} contents offering fast contains checks.
@@ -254,8 +255,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 TrackBasedEstimationWindTrackImpl.class.getSimpleName() + " scheduledRefreshIntervalLock for race "
                         + trackedRace.getRace().getName(), /* fair */false);
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
-        weigher = ConfidenceFactory.INSTANCE
-                .createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
+        weigher = new PositionAndTimePointWeigher(
+        /* halfConfidenceAfterMilliseconds */WindTrack.WIND_HALF_CONFIDENCE_TIME_MILLIS, WindTrack.WIND_HALF_CONFIDENCE_DISTANCE);
         trackedRace.addListener(this); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
@@ -442,7 +443,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         Map<TimePoint, WindWithConfidence<TimePoint>> cacheInsertions = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         for (TimePoint cachedNullResultToRecalculate : cachedNullResultsToRecalculate) {
             WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                    .getEstimatedWindDirectionWithConfidence(/* position */ null, cachedNullResultToRecalculate);
+                    .getEstimatedWindDirectionWithConfidence(cachedNullResultToRecalculate);
             if (replacementFix != null) {
                 nullRemovals.add(cachedNullResultToRecalculate);
                 cacheInsertions.put(cachedNullResultToRecalculate, replacementFix);
@@ -450,9 +451,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
         for (WindWithConfidence<TimePoint> windFixToRecalculate : windFixesToRecalculate) {
             TimePoint timePoint = windFixToRecalculate.getObject().getTimePoint();
-            Position position = windFixToRecalculate.getObject().getPosition();
             WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                    .getEstimatedWindDirectionWithConfidence(position, timePoint);
+                    .getEstimatedWindDirectionWithConfidence(timePoint);
             if (replacementFix == null) {
                 nullInsertions.add(timePoint);
             } else {
@@ -529,10 +529,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     /**
      * Looks up wind data in the {@link #getCachedFixes() cache} and the {@link #getTimePointsWithCachedNullResult()
      * null store} first. Only if nothing is found for the time point requested, the
-     * {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint) wind estimation algorithm} is used to compute
+     * {@link TrackedRace#getEstimatedWindDirection(TimePoint) wind estimation algorithm} is used to compute
      * it. The result will then be added to the cache.
      */
-    private WindWithConfidence<TimePoint> getEstimatedWindDirection(Position p, TimePoint timePoint) {
+    private WindWithConfidence<TimePoint> getEstimatedWindDirection(TimePoint timePoint) {
         WindWithConfidence<TimePoint> cachedFix = null;
         WindWithConfidence<TimePoint> result = null;
         final boolean nullResultCacheContains;
@@ -549,7 +549,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
         if (!nullResultCacheContains) {
             if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {
-                result = getTrackedRace().getEstimatedWindDirectionWithConfidence(p, timePoint);
+                result = getTrackedRace().getEstimatedWindDirectionWithConfidence(timePoint);
                 cache(timePoint, result);
             } else {
                 result = cachedFix;
@@ -671,6 +671,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
         }
     }
+    
+    @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+        // no action required; we're calculating based on each competitor's individual start time, not the start of race
+    }
 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
@@ -688,7 +693,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated mark position. Ask it:
@@ -719,9 +724,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             } else {
                 timePoint = virtualInternalRawFixes.ceilingToResolution(at);
             }
-            WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(p, timePoint);
+            WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(timePoint);
             // reduce confidence depending on how far *at* is away from the time point of the fix obtained
-            double confidenceMultiplier = weigher.getConfidence(timePoint, at);
+            double confidenceMultiplier = preResult == null ? 0 : weigher.getConfidence(
+                    new Pair<Position, TimePoint>(preResult.getObject().getPosition(), timePoint),
+                    new Pair<Position, TimePoint>(p, at));
             WindWithConfidenceImpl<Util.Pair<Position, TimePoint>> result = preResult == null ? null
                     : new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(preResult.getObject(), confidenceMultiplier
                             * preResult.getConfidence(),
@@ -745,7 +752,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     /**
      * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
-     * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
+     * {@link TrackedRace#getEstimatedWindDirection(TimePoint)}. If not constrained
      * by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting at
      * {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
      * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from}
@@ -777,12 +784,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
 
         protected Wind getWind(Position p, TimePoint timePoint) {
-            final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(p, timePoint);
+            final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(timePoint);
             return estimatedWindDirectionWithConfidence == null ? null : estimatedWindDirectionWithConfidence.getObject();
         }
         
-        protected WindWithConfidence<TimePoint> getWindWithConfidence(Position p, TimePoint timePoint) {
-            return getTrack().getEstimatedWindDirection(p, timePoint);
+        protected WindWithConfidence<TimePoint> getWindWithConfidence(TimePoint timePoint) {
+            return getTrack().getEstimatedWindDirection(timePoint);
         }
 
         @Override

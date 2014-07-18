@@ -15,6 +15,9 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
  *
  */
 public interface CompetitorStore extends CompetitorFactory {
+    public interface CompetitorUpdateListener {
+        void competitorUpdated(Competitor competitor);
+    }
     
     /**
      * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
@@ -62,4 +65,12 @@ public interface CompetitorStore extends CompetitorFactory {
     Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
+    
+    /**
+     * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called
+     * for any competitor in this store.
+     */
+    void addCompetitorUpdateListener(CompetitorUpdateListener listener);
+    
+    void removeCompetitorUpdateListener(CompetitorUpdateListener listener);
 }

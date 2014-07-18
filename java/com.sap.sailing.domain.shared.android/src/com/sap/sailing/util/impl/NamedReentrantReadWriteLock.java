@@ -11,6 +11,23 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sse.common.Named;
 
+/**
+ * To be used in conjunction with {@link LockUtil}. Provides additional naming
+ * for locks which is helpful in the tracing that {@link LockUtil} provides.
+ * Use as in
+ * <pre>
+ *      NamedReentrantReadWriteLock lock = ...;
+ *      LockUtil.lockForRead(lock);
+ *      try {
+ *          // do something while holding the lock
+ *      } finally {
+ *          LockUtil.unlockAfterRead(lock);
+ *      }
+ * </pre>
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implements Named {
     private static final long serialVersionUID = 2906084982209339774L;
     private final String name;

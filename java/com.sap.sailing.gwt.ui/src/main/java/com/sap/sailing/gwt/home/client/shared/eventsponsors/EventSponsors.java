@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class EventSponsors extends Composite {
     private static EventSponsorsPanelUiBinder uiBinder = GWT.create(EventSponsorsPanelUiBinder.class);
@@ -28,15 +27,17 @@ public class EventSponsors extends Composite {
         eventSponsorComposites = new ArrayList<EventSponsor>();
     }
     
-    public void setEventSponsors(EventBaseDTO event) {
+    public void setEventSponsors(List<String> sponsorImageUrls) {
         sponsorsPlaceholder.clear();
         eventSponsorComposites.clear();
 
-        for (String sponsorImageUrl : event.getSponsorImageURLs()) {
-            EventSponsor eventSponor = new EventSponsor(null /* name */, sponsorImageUrl, null /* link */);
+        if(sponsorImageUrls != null) {
+            for (String sponsorImageUrl : sponsorImageUrls) {
+                EventSponsor eventSponor = new EventSponsor(null /* name */, sponsorImageUrl, null /* link */);
 
-            eventSponsorComposites.add(eventSponor);
-            sponsorsPlaceholder.add(eventSponor);
+                eventSponsorComposites.add(eventSponor);
+                sponsorsPlaceholder.add(eventSponor);
+            }
         }
     }
 }

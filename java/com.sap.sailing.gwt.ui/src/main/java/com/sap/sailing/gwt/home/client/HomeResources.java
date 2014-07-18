@@ -26,9 +26,14 @@ public interface HomeResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/large.css")
     MinWidth50emCss largeCss();
 
+    @Shared 
     public interface MainCss extends CssResource {
         String grid();
         String stackenblochen();
+        String wrapper();
+        String navbar();
+        String navbar_button();
+        String navbar_buttonactive();
         String button();
         String buttoninactive();
         String buttonrefresh();
@@ -41,6 +46,17 @@ public interface HomeResources extends ClientBundle {
         String mainsection_header();
         String mainsection_header_title();
         String mainsection_navigation();
+        String lightbox();
+        String lightbox_overlay();
+        String lightbox_overlayhidden();
+        String lightbox_content();
+        String lightbox_contenthidden();
+        String lightbox_content_enlargeditem();
+        String lightbox_content_enlargeditem_caption();
+        String lightbox_content_enlargeditem_close();
+        String media_slideshow_controls();
+        String lightbox_data();
+        String lightbox_item();
     }
     
     @Shared 

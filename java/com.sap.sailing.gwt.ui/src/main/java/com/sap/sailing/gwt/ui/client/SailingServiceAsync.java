@@ -84,6 +84,9 @@ public interface SailingServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
+    void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
+
+
     /**
      * The string returned in the callback's pair is the common event name
      * @param listHiddenRaces 
@@ -139,6 +142,9 @@ public interface SailingServiceAsync {
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
+     * @param windSourceTypeNames
+     *            if <code>null</code>, information from all wind sources is returned; otherwise, information only from
+     *            the sources listed in this parameter by name are returned
      * @param onlyUpToNewestEvent
      *            if <code>true</code>, no wind data will be returned for time points later than
      *            {@link TrackedRace#getTimePointOfNewestEvent() trackedRace.getTimePointOfNewestEvent()}. This is
@@ -168,10 +174,13 @@ public interface SailingServiceAsync {
      *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
      *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
      *            trackedRace.getTimePointOfNewestEvent()}.
+     * @param includeCombinedWindForAllLegMiddles
+     *            if <code>true</code>, the result will return non-<code>null</code> results for calls to
+     *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
      */
     void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
-            AsyncCallback<WindInfoForRaceDTO> callback);
+            boolean includeCombinedWindForAllLegMiddles, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 
@@ -380,7 +389,7 @@ public interface SailingServiceAsync {
 
     void createRegatta(String regattaName, String boatClassName,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -454,7 +463,8 @@ public interface SailingServiceAsync {
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid,
+            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
 
     /**
      * @param detailType
@@ -475,7 +485,7 @@ public interface SailingServiceAsync {
     void getBuildVersion(AsyncCallback<String> callback);
 
     void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
-    
+
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,

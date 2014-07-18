@@ -26,4 +26,8 @@ public class BetterDateTimeBox extends DateTimeBox {
         return $wnd.jQuery(boxElement).data('datetimepicker').picker[0];
     }-*/;
 
+    @Override
+    public com.github.gwtbootstrap.client.ui.TextBox getBox() {
+        return super.getBox();
+    }
 }

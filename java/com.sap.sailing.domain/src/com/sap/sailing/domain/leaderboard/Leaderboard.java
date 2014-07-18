@@ -280,10 +280,6 @@ public interface Leaderboard extends LeaderboardBase {
     
     /**
      * Returns the total rank of the given competitor.
-     * @param competitor
-     * @param timePoint
-     * @return
-     * @throws NoWindException
      */
     int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
@@ -451,7 +447,15 @@ public interface Leaderboard extends LeaderboardBase {
             TimePoint timePoint) throws NoWindException;
 
     /**
-     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the result of  TODO
+     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when total points are to be computed for more than one column for the same
+     * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
+     * once and not again for each column (which would lead to quadratic effort).
+     * 
+     * @param discardedRaceColumns
+     *            expected to be the result of what we would get if we called {@link #getResultDiscardingRule()}.
+     *            {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, Iterable, TimePoint)
+     *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns) throws NoWindException;

@@ -5,7 +5,10 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.events.recent.EventsOverviewRecentResources" />
-    <g:HTMLPanel ui:field="htmlPanel">
-		<!-- The whole content will be created dynamically -->
+    <g:HTMLPanel>
+		<!-- The events main content-->
+		<div class="{local_res.css.eventsoverviewrecent}">
+		    <g:HTMLPanel ui:field="recentEventsPerYearPanel" />
+		</div>
     </g:HTMLPanel>
 </ui:UiBinder>

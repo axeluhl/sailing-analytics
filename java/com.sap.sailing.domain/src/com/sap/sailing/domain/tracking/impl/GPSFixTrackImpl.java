@@ -17,11 +17,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -30,14 +28,17 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
+import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
+import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.common.confidence.HasConfidence;
+import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -1008,8 +1009,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     protected boolean add(FixType fix) {
         final boolean result;
+        final boolean firstFixInTrack;
         lockForWrite();
         try {
+            firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix);
             invalidateValidityAndDistanceCaches(fix);
         } finally {
@@ -1033,7 +1036,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
         }
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-            listener.gpsFixReceived(fix, getTrackedItem());
+            listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
         }
         return result;
     }

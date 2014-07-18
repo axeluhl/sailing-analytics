@@ -47,7 +47,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * @throws NoWindException
      *             thrown in case no wind direction is known
      */
-    Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode)}, only that a cache for wind and leg
+     * type / bearing can be passed.
+     * 
+     * @throws NoWindException
+     *             thrown in case no wind direction is known
+     */
+    Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode legMiddle,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
@@ -119,16 +129,38 @@ public interface TrackedLegOfCompetitor extends Serializable {
     int getRank(TimePoint timePoint);
 
     /**
+     * Same as {@link #getRank(TimePoint)} with the additional option to provide a cache
+     * that can help avoid redundant calculations of wind and leg data.
+     */
+    int getRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
+
+    /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
+     * @param windPositionMode TODO
      */
-    Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
+    Double getGapToLeaderInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
     
     /**
-     * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
-     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint)}.
+     * Same as {@link #getGapToLeaderInSeconds(TimePoint)}, only that a cache for wind and leg type data is used.
      */
-    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint) throws NoWindException;
+    Double getGapToLeaderInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
+     * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
+     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint, WindPositionMode)}.
+     * @param windPositionMode TODO
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getGapToLeaderInSeconds(TimePoint, Competitor)}, only that an additional cache is used
+     * to avoid redundant evaluations of leg types and wind field information across various calculations that
+     * all can use the same basic information.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
+            WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     
@@ -147,12 +179,26 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>, returns the VMG value for this time point. If the competitor has already finished the
      * leg, the VMG at the time when the competitor finished the leg is returned.
      */
-    Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;
+    Speed getVelocityMadeGood(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
+     * is passed.
+     */
+    Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache)
+            throws NoWindException;
+
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
-    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
+    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getEstimatedTimeToNextMarkInSeconds(TimePoint, WindPositionMode)}, only that a cache for leg type calculation is passed.
+     */
+    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -171,10 +217,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * 
      * If the leg is neither an {@link LegType#UPWIND upwind} nor a {@link LegType#DOWNWIND downwind} leg, the geometric
      * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
-     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint) distance to go} which is
+     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance to go} which is
      * used for ranking.
      */
-    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+
+    /**
+     * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}, only that a cache for leg type
+     * calculation is passed.
+     */
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a
@@ -205,7 +258,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TrackedLeg getTrackedLeg();
 
     /**
-     * Computes the angle between the competitors direction and the wind.
+     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
+     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
+     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
      */
     Bearing getBeatAngle(TimePoint at) throws NoWindException;
+
+    /**
+     * Same as {@link #getBeatAngle}, only that additionally a cache is provided that can allow the method to use
+     * cached wind and leg type values.
+     */
+    Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
+     * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
+     * use already computed values for wind and leg type, potentially also updating the cache as it goes.
+     */
+    Speed getAverageVelocityMadeGood(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
 }

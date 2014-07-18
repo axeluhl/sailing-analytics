@@ -7,6 +7,9 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 public interface DynamicTrackedRegatta extends TrackedRegatta {
 
     DynamicTrackedRace getTrackedRace(RaceDefinition race);
+    
+    @Override
+    Iterable<DynamicTrackedRace> getTrackedRaces();
 
     /**
      * Non-blocking call that returns <code>null</code> if no tracking information currently exists

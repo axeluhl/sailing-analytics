@@ -69,7 +69,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(final GPSFix fix, final Mark mark) {
+    public void markPositionChanged(final GPSFix fix, final Mark mark, boolean firstInTrack) {
         queue.add(new StorePositionUpdateStrategy() {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,

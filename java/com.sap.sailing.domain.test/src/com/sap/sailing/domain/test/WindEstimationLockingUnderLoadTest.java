@@ -17,7 +17,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
@@ -82,7 +81,7 @@ public class WindEstimationLockingUnderLoadTest {
         RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
         when(result.getRace()).thenReturn(mockedRaceDefinition);
         when(mockedRaceDefinition.getName()).thenReturn("Test Race");
-        when(result.getEstimatedWindDirectionWithConfidence((Position) any(), (TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
+        when(result.getEstimatedWindDirectionWithConfidence((TimePoint) any())).thenAnswer(new Answer<WindWithConfidence<TimePoint>>() {
                  public WindWithConfidence<TimePoint> answer(InvocationOnMock invocation) {
                      return randomWindOrNull();
                  }

@@ -15,10 +15,12 @@ import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FixedMarkPassingsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
@@ -48,6 +50,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
+    private AbortingFlagFinder abortingFlagFinder;
 
     private FixedMarkPassingsFinder fixedPassingsFinder;
     private SuppressedMarkPassingsFinder suppressedPassingsFinder;
@@ -68,6 +71,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             trackedRace.invalidateEndTime();
             courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             startTimeFinder = new StartTimeFinder(raceLog);
+            abortingFlagFinder = new AbortingFlagFinder(raceLog);
             initializeWindTrack(raceLog);
             analyze();
             if (markPassingUpdateListener != null) {
@@ -184,9 +188,14 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogPassChangeEvent event) {
-        trackedRace.invalidateStartTime();
+        trackedRace.invalidateStartTime(); // this will notify RaceStateListeners in case the start time changes by the event
         /* reset start time */
         trackedRace.onStartTimeChangedByRaceCommittee(null);
+        RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();
+        if (abortingFlag != null) {
+            // previous pass was aborted; notify TracTrac
+            trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
+        }
     }
 
     @Override
@@ -204,7 +213,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // add the wind fix to the race committee WindTrack
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
-
     @Override
     public void visit(FixedMarkPassingEvent event) {
         if (markPassingUpdateListener != null) {

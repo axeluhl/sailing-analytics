@@ -178,9 +178,9 @@ public abstract class EventBaseImpl implements EventBase {
     }
     
     @Override
-    public void addSponsorImageURL(URL SponsorImageURL) {
-        if (!sponsorImageURLs.contains(SponsorImageURL)) {
-            sponsorImageURLs.add(SponsorImageURL);
+    public void addSponsorImageURL(URL sponsorImageURL) {
+        if (!sponsorImageURLs.contains(sponsorImageURL)) {
+            sponsorImageURLs.add(sponsorImageURL);
         }
     }
 

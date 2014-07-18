@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaName;
@@ -87,7 +88,7 @@ public class WindByRaceLogTest {
         raceColumn = service.apply(leaderboardColumnOperation);
         
         final String baseRegattaName = "Test Event";
-        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(baseRegattaName, boatClassName, UUID.randomUUID());
+        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseRegattaName, boatClassName), boatClassName, UUID.randomUUID());
         Regatta regatta = service.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
