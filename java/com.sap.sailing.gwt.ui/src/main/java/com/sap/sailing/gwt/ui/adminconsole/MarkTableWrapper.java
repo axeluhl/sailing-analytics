@@ -45,7 +45,7 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
         TextColumn<MarkDTO> markTypeColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO mark) {
-                return mark.type.toString();
+                return mark.type == null ? "" : mark.type.toString();
             }
         };
         table.addColumn(markTypeColumn, stringMessages.type());
