@@ -20,7 +20,8 @@ public enum AdminConsoleFeatures {
     MANAGE_SAILING_SERVER_INSTANCES (UserRoles.administrator),
     MANAGE_REPLICATION (UserRoles.administrator),
     MANAGE_MASTERDATA_IMPORT (UserRoles.administrator),
-    MANAGE_DEVICE_CONFIGURATION (UserRoles.eventmanager, UserRoles.administrator);
+    MANAGE_DEVICE_CONFIGURATION (UserRoles.eventmanager, UserRoles.administrator),
+    MANAGE_MARKPASSINGS (UserRoles.eventmanager, UserRoles.administrator);
     
     private UserRoles[] enabledRoles;
     

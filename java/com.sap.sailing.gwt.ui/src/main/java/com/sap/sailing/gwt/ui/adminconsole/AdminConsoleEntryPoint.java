@@ -203,6 +203,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 stringMessages, this);
         addToTabPanel(tabPanel, user, deviceConfigurationUserPanel, stringMessages.deviceConfiguration(), AdminConsoleFeatures.MANAGE_DEVICE_CONFIGURATION);
 
+        final MarkPassingsPanel markPassingsPanel = new MarkPassingsPanel(sailingService, this, this, stringMessages);
+        regattasDisplayers.add(markPassingsPanel);
+        addToTabPanel(tabPanel, user, markPassingsPanel, stringMessages.markPassings(), AdminConsoleFeatures.MANAGE_MARKPASSINGS);
+        
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
