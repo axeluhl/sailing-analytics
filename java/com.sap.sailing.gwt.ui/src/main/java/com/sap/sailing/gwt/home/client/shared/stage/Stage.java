@@ -67,9 +67,19 @@ public class Stage extends Composite {
             stageTeaserComposites.add(stageTeaser);
         }
         
-        this.swiper = Swiper.createWithDefaultOptions(StageResources.INSTANCE.css().stage_teasers(), 
+        this.swiper = Swiper.createWithoutLoopOption(StageResources.INSTANCE.css().stage_teasers(), 
                 StageResources.INSTANCE.css().swiperwrapper(),
-                StageResources.INSTANCE.css().swiperslide(), false);
+                StageResources.INSTANCE.css().swiperslide(), new Swiper.PageChangeListener() {
+                    
+                    @Override
+                    public void pageChanged(int newPageIndex, int pageCount) {
+                        boolean isFirstSlide = newPageIndex == 0;
+                        boolean isLastSlide = newPageIndex == pageCount - 1;
+                        nextStageTeaserLink.setVisible(!isLastSlide);
+                        prevStageTeaserLink.setVisible(!isFirstSlide);
+                    }
+                });
+        prevStageTeaserLink.setVisible(false);
     }
 
     @UiHandler("nextStageTeaserLink")
