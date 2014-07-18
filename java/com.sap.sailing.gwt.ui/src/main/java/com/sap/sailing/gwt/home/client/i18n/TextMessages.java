@@ -19,6 +19,10 @@ public interface TextMessages extends Messages {
     String countdownHours();
     String countdownMinutes();
     String countdownSeconds();
+    String countdownDay();
+    String countdownHour();
+    String countdownMinute();
+    String countdownSecond();
     String live();
     String finished();
     String watchNow();
@@ -158,4 +162,5 @@ public interface TextMessages extends Messages {
     String solutionsSimulatorNav();
     String solutionsSimulatorHeadline();
     String solutionsSimulatorText();
+
 }

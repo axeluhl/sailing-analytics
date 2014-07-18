@@ -72,7 +72,7 @@ public abstract class StageTeaser extends Composite {
         } else {
             if (major != null) {
                 countdownMajorValue.setInnerHTML(String.valueOf(major.value));
-                countdownMajorUnit.setInnerHTML(String.valueOf(major.unit));
+                countdownMajorUnit.setInnerHTML(String.valueOf(major.unitI18n()));
             } else {
                 countdownMajorValue.setInnerHTML(null);
                 countdownMajorUnit.setInnerHTML(null);
@@ -81,7 +81,7 @@ public abstract class StageTeaser extends Composite {
             }
             if (minor != null) {
                 countdownMinorValue.setInnerHTML(String.valueOf(minor.value));
-                countdownMinorUnit.setInnerHTML(String.valueOf(minor.unit));
+                countdownMinorUnit.setInnerHTML(String.valueOf(minor.unitI18n()));
             } else {
                 countdownMinorValue.setInnerHTML(null);
                 countdownMinorUnit.setInnerHTML(null);
