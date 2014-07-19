@@ -112,7 +112,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             raceLogs.remove(raceLog);
             fixedPassingsFinder = new FixedMarkPassingsFinder(raceLog);
             suppressedPassingsFinder = new SuppressedMarkPassingsFinder(raceLog);
-            removeMarkPassings();
+            removeMarkPassingEvents();
         }
     }
 
@@ -129,7 +129,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         }
     }
 
-    private void removeMarkPassings() {
+    private void removeMarkPassingEvents() {
         for (Pair<Competitor, Integer> pair : suppressedPassingsFinder.analyze()) {
             markPassingUpdateListener.removeSuppressedPassing(pair.getA());
         }
