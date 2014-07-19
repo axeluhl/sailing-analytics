@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -41,4 +43,13 @@ public abstract class StageTeaserBand extends Composite {
     public EventDTO getEvent() {
         return event;
     }
+    
+    @UiHandler("actionLink")
+    public void actionLinkClicked(ClickEvent e) {
+        actionLinkClicked();
+    }
+    
+    protected void actionLinkClicked() {
+    }
+    
 }
