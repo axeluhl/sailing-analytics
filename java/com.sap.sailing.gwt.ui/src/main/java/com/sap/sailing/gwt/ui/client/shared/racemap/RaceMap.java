@@ -451,7 +451,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     int requestID = ++boatPositionRequestIDCounter;
-                    // TODO bug2026: For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
+                    // For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
                     // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
                     // boat positions at newTime with zero tail length; and another one fetching everything else.
                     GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
