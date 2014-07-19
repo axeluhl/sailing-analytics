@@ -64,7 +64,7 @@ public class MediaDBImpl implements MediaDB {
         try {
             dbVideos.insert(dbMediaTrack);
         } catch (MongoException.DuplicateKey e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Duplicate key '" + dbId + "' caused an error when importing media (title: '" + title + "')", e);
         }
     }
 
