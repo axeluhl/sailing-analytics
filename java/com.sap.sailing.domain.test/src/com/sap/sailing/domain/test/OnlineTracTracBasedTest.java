@@ -114,7 +114,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         },
                 /* trackedRegattaRegistry */null,
                 /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
+                getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, receiverTypes)) {
             receivers.add(r);
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {

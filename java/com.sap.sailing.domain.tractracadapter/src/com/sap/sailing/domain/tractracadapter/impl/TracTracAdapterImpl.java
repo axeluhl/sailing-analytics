@@ -54,7 +54,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI,
                         /* startOfTracking */null,
-                        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false,
+                        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, /* ignoreTracTracMarkPassings */ false,
                         raceLogStore, tracTracUsername, tracTracPassword, raceStatus), timeoutInMilliseconds);
     }
 
@@ -62,13 +62,13 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     public RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
             URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, RaceLogStore raceLogStore,
-            long timeoutInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, 
+            long timeoutInMilliseconds, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, String tracTracUsername, 
             String tracTracPassword, String raceStatus) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                        simulateWithStartTimeNow, raceLogStore, tracTracUsername, tracTracPassword, raceStatus),
+                        simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore, tracTracUsername, tracTracPassword, raceStatus),
                 timeoutInMilliseconds);
     }
 

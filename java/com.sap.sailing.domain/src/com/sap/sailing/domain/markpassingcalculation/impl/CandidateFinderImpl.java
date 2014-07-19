@@ -736,9 +736,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 Position starboardPosition = race.getOrCreateTrack(startBoardMark).getEstimatedPosition(t, false);
                 if (portPosition != null && starboardPosition != null) {
                     b = portPosition.getBearingGreatCircle(starboardPosition);
+                    result.add(new Util.Pair<Position, Bearing>(portPosition, b));
                 }
             }
-            result.add(new Util.Pair<Position, Bearing>(portPosition, b));
         } else if (instruction == PassingInstruction.Gate) {
             Position before = race.getApproximatePosition(race.getTrackedLegFinishingAt(w).getLeg().getFrom(), t);
             Position after = race.getApproximatePosition(race.getTrackedLegStartingAt(w).getLeg().getTo(), t);
