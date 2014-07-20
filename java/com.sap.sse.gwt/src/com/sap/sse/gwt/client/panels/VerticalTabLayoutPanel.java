@@ -1,18 +1,3 @@
-/*
- * Copyright 2009 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
@@ -49,62 +34,15 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A panel that represents a tabbed set of pages, each of which contains another
+ * A panel that represents a vertical tabbed set of pages, each of which contains another
  * widget. Its child widgets are shown as the user selects the various tabs
  * associated with them. The tabs can contain arbitrary text, HTML, or widgets.
- *
- * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
- * </p>
- *
- * <h3>CSS Style Rules</h3>
- * <dl>
- * <dt>.gwt-VerticalTabLayoutPanel
- * <dd>the panel itself
- * <dt>.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTabs
- * <dd>the tab bar element
- * <dt>.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTab
- * <dd>an individual tab
- * <dt>.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelTabInner
- * <dd>an element nested in each tab (useful for styling)
- * <dt>.gwt-VerticalTabLayoutPanel .gwt-VerticalTabLayoutPanelContent
- * <dd>applied to all child content widgets
- * </dl>
- *
- * <h3>Use in UiBinder Templates</h3>
- * <p>
- * A VerticalTabLayoutPanel element in a {@link com.google.gwt.uibinder.client.UiBinder
- * UiBinder} template must have a <code>barHeight</code> attribute with a double
- * value, and may have a <code>barUnit</code> attribute with a
- * {@link com.google.gwt.dom.client.Style.Unit Style.Unit} value.
- * <code>barUnit</code> defaults to PX.
- * <p>
- * The children of a VerticalTabLayoutPanel element are laid out in &lt;g:tab>
- * elements. Each tab can have one widget child and one of two types of header
- * elements. A &lt;g:header> element can hold html, or a &lt;g:customHeader>
- * element can hold a widget. (Note that the tags of the header elements are
- * not capitalized. This is meant to signal that the head is not a runtime
- * object, and so cannot have a <code>ui:field</code> attribute.)
- * <p>
- * For example:<pre>
- * &lt;g:TabLayoutPanel barUnit='EM' barHeight='3'>
- *  &lt;g:tab>
- *    &lt;g:header size='7'>&lt;b>HTML&lt;/b> header&lt;/g:header>
- *    &lt;g:Label>able&lt;/g:Label>
- *  &lt;/g:tab>
- *  &lt;g:tab>
- *    &lt;g:customHeader size='7'>
- *      &lt;g:Label>Custom header&lt;/g:Label>
- *    &lt;/g:customHeader>
- *    &lt;g:Label>baker&lt;/g:Label>
- *  &lt;/g:tab>
- * &lt;/g:TabLayoutPanel>
- * </pre>
+ * 
+ * Mostly copied from {@link TabLayoutPanel}.
  */
 public class VerticalTabLayoutPanel extends ResizeComposite implements HasWidgets,
     ProvidesResize, IndexedPanel.ForIsWidget, AnimatedLayout,

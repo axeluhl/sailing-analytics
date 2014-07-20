@@ -54,7 +54,7 @@ public class AdminConsolePage extends HostPage {
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
     
-    private static final String TRACTRAC_EVENTS_TAB_PARENT_LABEL = "Tracking Provider";
+    private static final String TRACTRAC_EVENTS_TAB_PARENT_LABEL = "Connectors";
     private static final String TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER = "TrackingProviderPanel";
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$

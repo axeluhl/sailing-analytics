@@ -1063,4 +1063,5 @@ public interface StringMessages extends Messages {
     String totalNumberOfOperations();
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
+    String connectors();
 }

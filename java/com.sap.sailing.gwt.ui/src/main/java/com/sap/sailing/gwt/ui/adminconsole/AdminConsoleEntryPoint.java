@@ -116,31 +116,38 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
 
-        final TabLayoutPanel trackingTabPanel = new TabLayoutPanel(2.5, Unit.EM);
-        trackingTabPanel.ensureDebugId("TrackingProviderPanel");
-        tabPanel.add(trackingTabPanel, "Tracking Provider");
+        final TabLayoutPanel connectorsTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        connectorsTabPanel.ensureDebugId("TrackingProviderPanel");
+        tabPanel.add(connectorsTabPanel, stringMessages.connectors());
 
         AbstractEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService,
                 this, this, stringMessages);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
-        addToTabPanel(trackingTabPanel, user, tractracEventManagementPanel, stringMessages.tracTracEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(connectorsTabPanel, user, tractracEventManagementPanel, stringMessages.tracTracEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(tractracEventManagementPanel);
 
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
                 sailingService, this, this, stringMessages);
-        addToTabPanel(trackingTabPanel, user, swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(connectorsTabPanel, user, swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
                 sailingService, this, this, stringMessages);
-        addToTabPanel(trackingTabPanel, user, swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
+        addToTabPanel(connectorsTabPanel, user, swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), AdminConsoleFeatures.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
                 sailingService, this, this, this, stringMessages);
-        addToTabPanel(trackingTabPanel, user, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking(), AdminConsoleFeatures.MANAGE_RACELOG_TRACKING);
+        addToTabPanel(connectorsTabPanel, user, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking(), AdminConsoleFeatures.MANAGE_RACELOG_TRACKING);
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
+
+        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
+        igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
+        addToTabPanel(connectorsTabPanel, user, igtimiAccountsPanel, stringMessages.igtimiAccounts(), AdminConsoleFeatures.MANAGE_IGTIMI_ACCOUNTS);
+        
+        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
+        addToTabPanel(connectorsTabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
 
         final TabLayoutPanel racesTabPanel = new TabLayoutPanel(2.5, Unit.EM);
         racesTabPanel.ensureDebugId("RacesPanel");
@@ -185,13 +192,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService,
                 this, eventManagementPanel, this, this);
         addToTabPanel(advancedTabPanel, user, masterDataImportPanel, stringMessages.masterDataImportPanel(), AdminConsoleFeatures.MANAGE_MASTERDATA_IMPORT);
-
-        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
-        igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
-        addToTabPanel(advancedTabPanel, user, igtimiAccountsPanel, stringMessages.igtimiAccounts(), AdminConsoleFeatures.MANAGE_IGTIMI_ACCOUNTS);
-        
-        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(sailingService, this, stringMessages);
-        addToTabPanel(advancedTabPanel, user, resultImportUrlsManagementPanel, stringMessages.resultImportUrls(), AdminConsoleFeatures.MANAGE_RESULT_IMPORT_URLS);
 
         RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, stringMessages);
         addToTabPanel(advancedTabPanel, user, sailingServerInstancesManagementPanel, stringMessages.sailingServers(), AdminConsoleFeatures.MANAGE_SAILING_SERVER_INSTANCES);
@@ -238,7 +238,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
 
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(" ("+stringMessages.releaseNotes()+")").toSafeHtml(), "/release_notes_admin.html");
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
         sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
