@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
     private Set<RegattasDisplayer> regattasDisplayers;
@@ -96,7 +97,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         dockPanel.addNorth(topInformationPanel, 2.5);
 
-        final TabLayoutPanel tabPanel = new TabLayoutPanel(2.5, Unit.EM);
+        final VerticalTabLayoutPanel tabPanel = new VerticalTabLayoutPanel(2.5, Unit.EM);
         tabPanel.ensureDebugId("AdministrationTabs");
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
@@ -247,6 +248,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         dockPanel.add(tabPanel);
     }
 
+    private void addToTabPanel(VerticalTabLayoutPanel tabPanel, UserDTO user, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
+        if(user != null && isUserInRole(user, feature.getEnabledRoles())) {
+            ScrollPanel scrollPanel = new ScrollPanel();
+            scrollPanel.add(panelToAdd);
+            panelToAdd.setSize("90%", "90%");
+            tabPanel.add(scrollPanel, tabTitle, false);
+        }
+    }
+    
     private void addToTabPanel(TabLayoutPanel tabPanel, UserDTO user, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
         if(user != null && isUserInRole(user, feature.getEnabledRoles())) {
             ScrollPanel scrollPanel = new ScrollPanel();
