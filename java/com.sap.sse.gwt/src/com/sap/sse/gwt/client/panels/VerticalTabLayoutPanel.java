@@ -231,8 +231,6 @@ public class VerticalTabLayoutPanel extends ResizeComposite implements HasWidget
   private static final String TAB_STYLE = "gwt-VerticalTabLayoutPanelTab";
   private static final String TAB_INNER_STYLE = "gwt-VerticalTabLayoutPanelTabInner";
 
-  private static final int BIG_ENOUGH_TO_NOT_WRAP = 16384;
-
   private final VerticalTabLayoutPanelResources resources = GWT.create(VerticalTabLayoutPanelResources.class);
 
   private final TabbedDeckLayoutPanel deckPanel = new TabbedDeckLayoutPanel();

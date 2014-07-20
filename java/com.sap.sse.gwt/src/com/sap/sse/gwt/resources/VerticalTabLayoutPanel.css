@@ -1,6 +1,6 @@
 @external gwt-VerticalTabLayoutPanel;
 .gwt-VerticalTabLayoutPanel {
-	margin-left: 30px;
+	margin-left: 5px;
 }
 .gwt-VerticalTabLayoutPanel>div {
     position: static !important;

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -81,22 +82,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     private void createUI(UserDTO user) {
         BetterDateTimeBox.initialize();
         
-        RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
-        rootPanel.add(dockPanel);
-
-        DockPanel topInformationPanel = new DockPanel();
-        topInformationPanel.setSize("100%", "95%");
-        UserStatusPanel userStatusPanel = new UserStatusPanel(user);
-        userStatusPanel.ensureDebugId("UserStatus");
-        topInformationPanel.add(userStatusPanel, DockPanel.WEST);
-        topInformationPanel.add(persistentAlertLabel, DockPanel.CENTER);
-        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
-        topInformationPanel.add(releaseNotesLink, DockPanel.EAST);
-        topInformationPanel.setCellHorizontalAlignment(releaseNotesLink, HasHorizontalAlignment.ALIGN_RIGHT);
-
-        dockPanel.addNorth(topInformationPanel, 2.5);
-
         final VerticalTabLayoutPanel tabPanel = new VerticalTabLayoutPanel(2.5, Unit.EM);
         tabPanel.ensureDebugId("AdministrationTabs");
         regattasDisplayers = new HashSet<>();
@@ -238,14 +223,33 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 }
             }
         });
+        
         fillRegattas();
         fillLeaderboardGroups();
         fillLeaderboards();
 
+        DockPanel informationPanel = new DockPanel();
+        informationPanel.setSize("100%", "95%");
+        informationPanel.setSpacing(10);
+        UserStatusPanel userStatusPanel = new UserStatusPanel(user);
+        userStatusPanel.ensureDebugId("UserStatus");
+        informationPanel.add(userStatusPanel, DockPanel.WEST);
+        informationPanel.add(persistentAlertLabel, DockPanel.CENTER);
+
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
-        dockPanel.addSouth(sysinfoPanel, 2.0);
+
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(" ("+stringMessages.releaseNotes()+")").toSafeHtml(), "/release_notes_admin.html");
+        sysinfoPanel.add(releaseNotesLink);
+        informationPanel.add(sysinfoPanel, DockPanel.EAST);
+        informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+        
+        RootLayoutPanel rootPanel = RootLayoutPanel.get();
+        DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
+
+        dockPanel.addSouth(informationPanel, 2.5);
         dockPanel.add(tabPanel);
+        rootPanel.add(dockPanel);
     }
 
     private void addToTabPanel(VerticalTabLayoutPanel tabPanel, UserDTO user, Panel panelToAdd, String tabTitle, AdminConsoleFeatures feature) {
