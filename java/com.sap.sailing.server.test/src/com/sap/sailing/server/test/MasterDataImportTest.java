@@ -573,9 +573,8 @@ public class MasterDataImportTest {
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
-
+        regatta.addRace(trackedRace.getRace()); // make sure the competitor is serialized together with the regatta
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-
         // Serialize
         List<String> groupNamesToExport = new ArrayList<String>();
         groupNamesToExport.add(group.getName());

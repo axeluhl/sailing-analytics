@@ -39,6 +39,19 @@
 				<div class="innerContent">
 					<h2 class="articleSubheadline">July 2014</h2>
 					<ul class="bulletList">
+					    <li>Replication has become much more robust and efficient. The initial load which used to be sent in a
+					        single huge (although compressed) stream of data from the master to the replica(s) was hard to get
+					        transmitted in the face of flaky and slow network connections. We've changed this: now the initial
+					        load is transmitted as a sequence of messages using a message broker infrastructure. If a single
+					        message doesn't arrive, it will be re-sent until it got through. The messages are buffered for several
+					        minutes, so the initial load transmission can even survive and recover from severe network outages.<p>
+					        
+					        For the incremental replication process, we added compression, making the transmission more bandwidth-efficient
+					        and therefore quicker and leaner. In addition, we've cleaned up the protocol a little, avoiding the
+					        sending of redundant data, adding to the effects of compression. Replicating five live races with
+					        approximately 40 to 50 competitors each, with four active wind measurement units each, requires approximately
+					        30kB/s of network bandwidth between master and replica.
+					    </li>
 					    <li>Events now have lots of new attributes, particularly start/end date and multimedia content URLs</li>
 					    
 						<li>Regattas can now be edited to <em>not</em> perform start time inference based on start mark passings.

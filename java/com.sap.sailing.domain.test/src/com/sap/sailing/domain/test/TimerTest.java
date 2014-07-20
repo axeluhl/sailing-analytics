@@ -29,18 +29,20 @@ public class TimerTest {
             }
         };
         t.schedule(taskThrowingException, 1l);
-        Thread.sleep(10);
-        final boolean[] result = new boolean[1];
         try {
-            t.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    synchronized (result) {
-                        result[0] = true;
-                        result.notifyAll();
+            for (int i = 0; i < 100; i++) {
+                Thread.sleep(10);
+                final boolean[] result = new boolean[1];
+                t.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (result) {
+                            result[0] = true;
+                            result.notifyAll();
+                        }
                     }
-                }
-            }, 1l);
+                }, 1l);
+            }
             fail("Expected IllegalStateException because task terminating abnormally cancels the timer");
         } catch (IllegalStateException e) {
             // expected

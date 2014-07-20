@@ -1,7 +1,7 @@
 .column,
 .columns {
   float: left;
-  padding: 0 0.9375rem;
+  padding: 0 1rem;
   position: relative;
   width: 100%;
 }
@@ -11,48 +11,6 @@
   height: auto;
   ms-interpolation-mode: bicubic;
 }
-
-.column,
-.columns {
-  float: left;
-  padding: 0 0.9375rem;
-  position: relative;
-  width: 100%;
-}
-.column img,
-.columns img {
-  max-width: 100%;
-  height: auto;
-  ms-interpolation-mode: bicubic;
-}
-
-.column.smallcentered,
-.columns.smallcentered {
-}
-.column.smalluncentered,
-.columns.smalluncentered {
-}
-
-.column.mediumcentered,
-.columns.mediumcentered {
-  margin-left: auto;
-  margin-right: auto;
-  float: none;
-}
-.column.mediumuncentered,
-.columns.mediumuncentered {
-  margin-left: 0;
-  margin-right: 0;
-  float: left !important;
-}
-
-.column.largecentered,
-.columns.largecentered {
-}
-.column.largeuncentered,
-.columns.largeuncentered {
-}
-
 .small1 {
   width: 8.3333333333333%;
 }
@@ -142,6 +100,27 @@
 }
 .hideonlarge {
   display: inherit !important;
+}
+.column.smallcentered,
+.columns.smallcentered {
+  margin-left: auto;
+  margin-right: auto;
+  float: none;
+}
+.column.smalluncentered,
+.columns.smalluncentered {
+  margin-left: 0;
+  margin-right: 0;
+  float: left !important;
+}
+
+.largecentered {
+}
+.largeuncentered {
+}
+.mediumcentered {
+}
+.mediumuncentered {
 }
 
 .medium1 {

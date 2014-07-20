@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.home.client.place.event.regatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.UIObject;
 
-public class RegattaPhaseRace {
+public class RegattaPhaseRace extends UIObject {
     private static RegattaPhaseRaceUiBinder uiBinder = GWT.create(RegattaPhaseRaceUiBinder.class);
 
     interface RegattaPhaseRaceUiBinder extends UiBinder<DivElement, RegattaPhaseRace> {
@@ -14,17 +14,10 @@ public class RegattaPhaseRace {
 
     @UiField DivElement raceStatus;
     
-    private DivElement root;
-    
     public RegattaPhaseRace() {
         RegattaResources.INSTANCE.css().ensureInjected();
-        root = uiBinder.createAndBindUi(this);
+        setElement(uiBinder.createAndBindUi(this));
         
         raceStatus.setAttribute("data-status", "raceStatus");
     }
-    
-    public Element getElement() {
-        return root;
-      }
-
 }

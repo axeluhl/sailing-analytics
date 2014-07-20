@@ -11,7 +11,6 @@ public interface EventRegattaRacesResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
-        String regattanavigation();
         String eventregattaraces();
         String eventregattaraces_phase();
         String eventregattaraces_phase_name();
@@ -39,15 +38,20 @@ public interface EventRegattaRacesResources extends ClientBundle {
         String eventregattarace_leader_name();
         String eventregattarace_features();
         String eventregattarace_legs();
+        String eventregattarace_features_list();
+        String eventregattarace_legs_list();
         String eventregattarace_legs_leg();
         String eventregattarace_action();
-        String eventregattarace_actionwatch();
+        String eventregattarace_action_watch();
+        String eventregattarace_action_analyze();
         String eventregattarace_actiondisabled();
-        String eventregattarace_feature_gps();
-        String eventregattarace_feature_wind();
-        String eventregattarace_feature_video();
-        String eventregattarace_feature_audio();
-        String eventregattarace_feature_unavailable();
+        String eventregattarace_feature();
+        String eventregattarace_featuregps();
+        String eventregattarace_featurewind();
+        String eventregattarace_featurevideo();
+        String eventregattarace_featureaudio();
+        String eventregattarace_featureunavailable();
+        String regattanavigation();
         String regattanavigation_link();
         String regattanavigation_linkactive();
     }
