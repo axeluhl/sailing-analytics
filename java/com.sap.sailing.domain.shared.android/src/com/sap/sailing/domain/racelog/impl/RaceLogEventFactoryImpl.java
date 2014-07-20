@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,8 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -267,5 +270,11 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
             RaceLogEventAuthor author, int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
         return new CloseOpenEndedDeviceMappingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint,
                 UUID.randomUUID(), passId, deviceMappingEventId, closingTimePoint);
+    }
+
+    @Override
+    public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint,
+            RaceLogEventAuthor author, int currentPassId) {
+        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), currentPassId);
     }
 }

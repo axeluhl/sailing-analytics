@@ -8,6 +8,7 @@ import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
@@ -138,5 +139,11 @@ public interface RaceState extends ReadonlyRaceState {
      * Enters a new wind fix for this race.
      */
     void setWindFix(TimePoint now, Wind wind);
+    
+    /**
+     * Marks this race state with a new {@link AdditionalScoringInformationEvent} or revokes
+     * an already existing one.
+     */
+    void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable);
 
 }

@@ -8,11 +8,14 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureFactory;
@@ -156,6 +159,22 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void setWindFix(TimePoint timePoint, Wind wind) {
         raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind));
+    }
+
+    @Override
+    public void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable) {
+        if (enable) {
+            raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, author, raceLog.getCurrentPassId()));
+        } else {
+            final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze();
+            if (event != null) {
+                try {
+                    raceLog.revokeEvent(author, event);
+                } catch (NotRevokableException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }

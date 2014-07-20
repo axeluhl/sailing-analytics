@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -38,6 +40,17 @@ public class ESSStartphaseRaceFragment extends BaseStartphaseRaceFragment<ESSRac
                 getRaceState().forceNewStartTime(now, now.plus(1*60*1000));
             }
         });
+        resetTimeButton.setVisibility(View.INVISIBLE);
+        toggleGroupRacing = (ToggleButton) getView().findViewById(R.id.toggle_group_race_mode);
+        toggleGroupRacing.setVisibility(View.VISIBLE);
+        toggleGroupRacing.setChecked(false);
+        toggleGroupRacing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/isChecked);
+            }
+        });
+                
     }
         
 }

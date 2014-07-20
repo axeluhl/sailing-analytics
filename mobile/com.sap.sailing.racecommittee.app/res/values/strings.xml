@@ -254,4 +254,7 @@
 	<string name="race_reset_course">Reset course</string>
 	
 	<string name="no_course_active">No course active</string>
+	<string name="toggle_group_race_mode">Group Race?</string>
+	<string name="toggle_group_race_mode_off">No Group Racing</string>
+	<string name="toggle_group_race_mode_on">Group Racing</string>
 </resources>
