@@ -31,7 +31,7 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
 
     @Override
     public ScoringSchemeType getType() {
-        return ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN;
+        return ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT;
     }
 
     @Override

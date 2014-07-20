@@ -129,7 +129,13 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                 Object requestObject = JSONValue.parseWithException(requestBody.toString());
                 JSONObject requestJsonObject = Helpers.toJSONObjectSafe(requestObject);
                 logger.fine("JSON requestObject is: " + requestObject.toString());
-                RaceLogEvent logEvent = deserializer.deserialize(requestJsonObject);
+                RaceLogEvent logEvent = null;
+                try {
+                    logEvent = deserializer.deserialize(requestJsonObject);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    throw ex;
+                }
                 logger.fine("JSON is deserialized to a RaceLogEvent");
                 Iterable<RaceLogEvent> eventsToSendBackToClient = raceLog.add(logEvent, clientUuid);
                 sendResponse(response, clientUuid, raceLog, eventsToSendBackToClient);

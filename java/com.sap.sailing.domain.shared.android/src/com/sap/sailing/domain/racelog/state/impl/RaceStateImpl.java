@@ -163,10 +163,12 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     @Override
     public void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable) {
+        final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze();
         if (enable) {
-            raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, author, raceLog.getCurrentPassId()));
+            if (event == null) {
+                raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, author, raceLog.getCurrentPassId()));
+            }
         } else {
-            final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze();
             if (event != null) {
                 try {
                     raceLog.revokeEvent(author, event);
