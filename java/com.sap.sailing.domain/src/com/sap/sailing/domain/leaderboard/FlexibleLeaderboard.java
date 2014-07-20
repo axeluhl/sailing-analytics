@@ -58,9 +58,8 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded;
      *            ignored if the column named <code>columnName</code> already exists
-     * @param fleets
-     *            the fleets to add to the {@link RaceColumn} created. If no fleets are specified, a single default
-     *            fleet will be assigned to the race column created.
+     * @param fleet
+     *            the fleet to link the race to when the {@link RaceColumn} is created.
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
