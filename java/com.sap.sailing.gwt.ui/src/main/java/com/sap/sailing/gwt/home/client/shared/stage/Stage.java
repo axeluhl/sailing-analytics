@@ -14,13 +14,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class Stage extends Composite {
     
     @SuppressWarnings("unused")
-    private List<Pair<StageEventType, EventDTO>> featuredEvents;
+    private List<Pair<StageEventType, EventBaseDTO>> featuredEvents;
 
     private List<StageTeaser> stageTeaserComposites;
 
@@ -48,10 +48,10 @@ public class Stage extends Composite {
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
     
-    public void setFeaturedEvents(List<Pair<StageEventType, EventDTO>> featuredEvents) {
+    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
         this.featuredEvents = featuredEvents;
         
-        for(Pair<StageEventType, EventDTO> typeAndEvent: featuredEvents) {
+        for(Pair<StageEventType, EventBaseDTO> typeAndEvent: featuredEvents) {
             switch (typeAndEvent.getA()) {
                 case POPULAR:
                     stageTeaser = new PopularEventStageTeaser(typeAndEvent.getB(), placeNavigator);
@@ -67,9 +67,24 @@ public class Stage extends Composite {
             stageTeaserComposites.add(stageTeaser);
         }
         
-        this.swiper = Swiper.createWithDefaultOptions(StageResources.INSTANCE.css().stage_teasers(), 
+        this.swiper = Swiper.createWithoutLoopOption(StageResources.INSTANCE.css().stage_teasers(), 
                 StageResources.INSTANCE.css().swiperwrapper(),
-                StageResources.INSTANCE.css().swiperslide(), false);
+                StageResources.INSTANCE.css().swiperslide(), new Swiper.PageChangeListener() {
+                    
+                    @Override
+                    public void pageChanged(int newPageIndex, int pageCount) {
+                        boolean isFirstSlide = newPageIndex == 0;
+                        boolean isLastSlide = newPageIndex == pageCount - 1;
+                        nextStageTeaserLink.setVisible(!isLastSlide);
+                        prevStageTeaserLink.setVisible(!isFirstSlide);
+                    }
+                });
+        if (featuredEvents.size() <= 1) {
+            prevStageTeaserLink.setVisible(false);
+            nextStageTeaserLink.setVisible(false);
+        } else {
+            prevStageTeaserLink.setVisible(false);
+        }
     }
 
     @UiHandler("nextStageTeaserLink")

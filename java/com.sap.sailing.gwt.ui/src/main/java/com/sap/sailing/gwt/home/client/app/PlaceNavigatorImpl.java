@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
     private final static String SAPSAILING_DOMAIN = "www.sapsailing.com"; 
+    private final static String NEW_HOME_TEST_DOMAIN = "newhome.sapsailing.com"; 
     
     protected PlaceNavigatorImpl(PlaceController placeController) {
         super();
@@ -24,66 +25,75 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToHome() {
-        gotoPlace(new StartPlace(), new StartPlace.Tokenizer());
+        gotoPlace(Window.Location.getHostName(), new StartPlace(), new StartPlace.Tokenizer());
     }
 
     @Override
     public void goToEvent(String eventUuidAsString, String baseUrl) {
         EventPlace eventPlace = new EventPlace(eventUuidAsString, null);
-        if(isLocationOnLocalhost() || baseUrl.contains(SAPSAILING_DOMAIN)) {
-            placeController.goTo(eventPlace);
-        } else {
-            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
-            Window.Location.replace(remoteEventUrl);
-        }
+        gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
+        
+        
+//        if(isLocationOnLocalhost(baseUrl) || !baseUrl.contains(SAPSAILING_DOMAIN)) {
+//            placeController.goTo(eventPlace);
+//        } else {
+//            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
+//            Window.Location.replace(remoteEventUrl);
+//        }
     }
 
     @Override
     public void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl) {
         EventPlace eventPlace = new EventPlace(eventUuidAsString, leaderboardIdAsNameString);
-        if(isLocationOnLocalhost() || baseUrl.contains(SAPSAILING_DOMAIN)) {
-            placeController.goTo(eventPlace);
-        } else {
-            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
-            Window.Location.replace(remoteEventUrl);
-        }
+        gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
+        
+//        if(isLocationOnLocalhost(baseUrl) || baseUrl.contains(SAPSAILING_DOMAIN)) {
+//            placeController.goTo(eventPlace);
+//        } else {
+//            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
+//            Window.Location.replace(remoteEventUrl);
+//        }
     }
 
     @Override
     public void goToSearchResult(String searchQuery) {
-        gotoPlace(new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
+        gotoPlace(Window.Location.getHostName(), new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
     }
 
     @Override
     public void goToEvents() {
-        gotoPlace(new EventsPlace(), new EventsPlace.Tokenizer());
+        gotoPlace(Window.Location.getHostName(), new EventsPlace(), new EventsPlace.Tokenizer());
     }
 
     @Override
     public void goToAboutUs() {
-        gotoPlace(new AboutUsPlace(), new AboutUsPlace.Tokenizer());
+        gotoPlace(new AboutUsPlace());
     }
 
     @Override
     public void goToContact() {
-        gotoPlace(new ContactPlace(), new ContactPlace.Tokenizer());
+        gotoPlace(new ContactPlace());
     }
 
     @Override
     public void goToSolutions() {
-        gotoPlace(new SolutionsPlace(), new SolutionsPlace.Tokenizer());
+        gotoPlace(new SolutionsPlace());
     }
 
     @Override
     public void goToSponsoring() {
-        gotoPlace(new SponsoringPlace(), new SponsoringPlace.Tokenizer());
+        gotoPlace(new SponsoringPlace());
     }
 
-    private <T extends Place> void gotoPlace(T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        if(isLocationOnLocalhost() || isLocationOnSapSailingCom()) {
+    private <T extends Place> void gotoPlace(T destinationPlace) {
+        placeController.goTo(destinationPlace); 
+    }
+    
+    private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        if(isLocationOnLocalhost(baseUrl) || isLocationOnSapSailingCom(baseUrl) || isLocationOnNewHomeTest(baseUrl)) {
             placeController.goTo(destinationPlace); 
         } else {
-            String homeUrl = buildRemotePlaceUrl("http://" + SAPSAILING_DOMAIN, destinationPlace, tokenizer);
+            String homeUrl = buildRemotePlaceUrl(baseUrl, destinationPlace, tokenizer);
             Window.Location.replace(homeUrl);
         }
     }
@@ -91,12 +101,16 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return baseUrl + "/gwt/Home.html#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
     }
-    
-    private boolean isLocationOnSapSailingCom() {
-        return Window.Location.getHostName().contains(SAPSAILING_DOMAIN);
+
+    private boolean isLocationOnNewHomeTest(String urlToCheck) {
+        return urlToCheck.contains(NEW_HOME_TEST_DOMAIN);
     }
 
-    private boolean isLocationOnLocalhost() {
-        return Window.Location.getHostName().contains("localhost") || Window.Location.getHostName().contains("127.0.0.1");
+    private boolean isLocationOnSapSailingCom(String urlToCheck) {
+        return urlToCheck.contains(SAPSAILING_DOMAIN);
+    }
+
+    private boolean isLocationOnLocalhost(String urlToCheck) {
+        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1");
     }
 }
