@@ -380,7 +380,8 @@ public interface StringMessages extends Messages {
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
-    String scoringSchemeWinnerGetsFive();    
+    String scoringSchemeWinnerGetsFive();
+    String scoringSchemeWinnerGetsFiveIgnoringRaceCount();
     String scoringSchemeWinnerGetsSix();
     String scoringSystem();
     String createFlexibleLeaderboard();
