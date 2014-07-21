@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -166,7 +168,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze();
         if (enable) {
             if (event == null) {
-                raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, author, raceLog.getCurrentPassId()));
+                raceLog.add(factory.createAdditionalScoringInformationEvent(timePoint, UUID.randomUUID(), author, raceLog.getCurrentPassId()));
             }
         } else {
             if (event != null) {
@@ -177,6 +179,12 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
                 }
             }
         }
+    }
+    
+    @Override
+    public boolean isAdditionalScoringInformationEnabled() {
+        final AdditionalScoringInformationEvent event = new AdditionalScoringInformationFinder(raceLog).analyze();
+        return event != null;
     }
 
 }
