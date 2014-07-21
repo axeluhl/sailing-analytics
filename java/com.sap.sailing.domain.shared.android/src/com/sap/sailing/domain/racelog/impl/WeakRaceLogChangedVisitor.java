@@ -34,6 +34,8 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
                         visitor.removeListener();
                     } catch (InterruptedException e) {
                         logger.log(Level.SEVERE, "Error trying to clean weak reference", e);
+                    } catch (Exception e2) {
+                        logger.severe("Shouldn't have gotten here. Continuing...");
                     }
                 }
             }
@@ -46,6 +48,7 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
     public WeakRaceLogChangedVisitor(RaceLog removeFromThisRaceLogWhenListenerNoLongerStronglyReferenced, RaceLogChangedListener listener) {
         this.removeFromThisRaceLogWhenListenerNoLongerStronglyReferenced = removeFromThisRaceLogWhenListenerNoLongerStronglyReferenced;
         listenerRef = new WeakReference<RaceLogChangedListener>(listener, queue);
+        referenceToVisitor.put(listenerRef, this);
     }
     
     @Override
