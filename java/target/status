@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # source variables
 . `pwd`/env.sh

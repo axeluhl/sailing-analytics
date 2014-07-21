@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 MONGO_VERSION=2.6.2
 cd plugins
 jar xvf com.mongodb.driver_${MONGO_VERSION}.jar lib/
