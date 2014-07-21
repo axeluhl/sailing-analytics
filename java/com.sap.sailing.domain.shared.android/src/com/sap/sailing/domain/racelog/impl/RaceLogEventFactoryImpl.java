@@ -273,8 +273,8 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint,
+    public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id,
             RaceLogEventAuthor author, int currentPassId) {
-        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), currentPassId);
+        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id, Collections.<Competitor>emptyList(), currentPassId);
     }
 }
