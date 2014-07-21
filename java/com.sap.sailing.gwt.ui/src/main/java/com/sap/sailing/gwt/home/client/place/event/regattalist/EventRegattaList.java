@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -24,7 +27,10 @@ public class EventRegattaList extends Composite {
     interface EventRegattaHeaderUiBinder extends UiBinder<Widget, EventRegattaList> {
     }
 
+    @UiField DivElement regattaGroupsNavigationPanel;
+    @UiField DivElement regattaListNavgiationDiv;
     @UiField HTMLPanel regattaListItemPanel;
+    @UiField AnchorElement allRegattasLink;
 
     public EventRegattaList(EventDTO event, List<RaceGroupDTO> raceGroups,
             Map<String, Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO>> leaderboardsWithLeaderboardGroup,
@@ -32,6 +38,8 @@ public class EventRegattaList extends Composite {
         EventRegattaListResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
+        regattaListNavgiationDiv.getStyle().setDisplay(Display.NONE);
+        
         for (RaceGroupDTO raceGroup: raceGroups) {
             Regatta regatta = new Regatta(event, true, timerForClientServerOffset, pageNavigator);
             Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO> leaderboardWithLeaderboardGroup = leaderboardsWithLeaderboardGroup.get(raceGroup.getName());

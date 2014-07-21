@@ -79,7 +79,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove.
      */
     @Override
-    public void gpsFixReceived(FixType fix, ItemType item) {
+    public void gpsFixReceived(FixType fix, ItemType item, boolean firstFixInTrack) {
         // find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
         Util.Pair<TimePoint, TimePoint> invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
         LockUtil.lockForWrite(lock);

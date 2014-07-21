@@ -210,7 +210,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
-        
+        jsonLeaderboard.put("higherScoreIsBetter", leaderboard.isHigherScoreBetter());
         jsonLeaderboard.put("scoringComment", leaderboard.getComment());
         Date lastUpdateTimepoint = leaderboard.getTimePointOfLastCorrectionsValidity();
         jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.getTime(): null);

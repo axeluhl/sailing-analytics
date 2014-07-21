@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private static final long serialVersionUID = -4198298775476586931L;
     private final Map<Serializable, Competitor> competitorCache;
     private final Map<String, Competitor> competitorsByIdAsString;
+    private transient Set<CompetitorUpdateListener> listeners;
     
     /**
      * The competitors contained in this map will have their changeable properties
@@ -43,13 +45,25 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorsByIdAsString = new HashMap<String, Competitor>();
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        listeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        listeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
     }
     
+    @Override
+    public void addCompetitorUpdateListener(CompetitorUpdateListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeCompetitorUpdateListener(CompetitorUpdateListener listener) {
+        listeners.remove(listener);
+    }
+
     private Competitor createCompetitor(Serializable id, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
         Competitor result = new CompetitorImpl(id, name, displayColor, team, boat);
         addNewCompetitor(id, result);
@@ -177,6 +191,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 weakCompetitorDTOCache.remove(competitor);
             } finally {
                 LockUtil.unlockAfterWrite(lock);
+            }
+        }
+        synchronized (listeners) {
+            for (CompetitorUpdateListener listener : listeners) {
+                listener.competitorUpdated(competitor);
             }
         }
         return competitor;

@@ -24,7 +24,9 @@ public class EventRegattaRacesFleet {
         root = uiBinder.createAndBindUi(this);
         
         fleetName.setInnerText(fleet.getName());
-        fleetCountAndColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
+        if(fleet.getColor() != null) {
+            fleetCountAndColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
+        }
         fleetCountAndColor.setInnerText("tbd.");
     }
     

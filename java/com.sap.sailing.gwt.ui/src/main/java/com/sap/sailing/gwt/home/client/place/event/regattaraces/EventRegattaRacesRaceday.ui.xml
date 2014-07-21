@@ -7,7 +7,7 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
     <g:HTMLPanel>
 
-<div class="{local_res.css.eventregattaraces_phase_day}"><span ui:field="raceDayDate" /></div>
+<div ui:field="raceDayDate" class="{local_res.css.eventregattaraces_phase_day}"></div>
 <div class="{local_res.css.eventregattaraces_phase_races}">
     <g:HTMLPanel ui:field="racesPanel" />
 </div>

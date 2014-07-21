@@ -33,6 +33,7 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.currentOrAverageSpeedOverGroundInKnots();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
@@ -265,7 +266,7 @@ public class DetailTypeFormatter {
         case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.raceAverageSpeedInKnotsTooltip();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-            return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+            return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
         case RACE_DISTANCE_TO_LEADER_IN_METERS:

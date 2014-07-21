@@ -11,14 +11,7 @@ public class UpcomingEventStageTeaser extends StageTeaser {
         title.setInnerText(event.getName());
         subtitle.setInnerText(event.venue.getName());
         
-        countDown.setAttribute("data-starttime", event.startDate.toString());
-        countDown.setAttribute("data-days", "");
-        countDown.setAttribute("data-hours", "");
-        countDown.setAttribute("data-minutes", "");
-        countDown.setAttribute("data-seconds", "");
-
         bandCount.setAttribute("data-bandcount", "1");
-        stageTeaserBandsPanel.add(new StageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.add(new NoActionStageTeaserBand(event, placeNavigator));
     }
-
 }

@@ -60,7 +60,7 @@ public class GetWindInfoAction implements AsyncAction<WindInfoForRaceDTO> {
         switch (callVariant) {
         case Variant1:
             sailingService.getAveragedWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames,
-                    onlyUpToNewestEvent, callback);
+                    onlyUpToNewestEvent, /* includeCombinedWindForAllLegMiddles */ true, callback);
             break;
         case Variant2:
             sailingService.getAveragedWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames,

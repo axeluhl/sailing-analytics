@@ -1060,4 +1060,7 @@ public interface StringMessages extends Messages {
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();
+    String totalNumberOfOperations();
+    String currentOrAverageSpeedOverGroundInKnotsTooltip();
+    String currentOrAverageSpeedOverGroundInKnots();
 }

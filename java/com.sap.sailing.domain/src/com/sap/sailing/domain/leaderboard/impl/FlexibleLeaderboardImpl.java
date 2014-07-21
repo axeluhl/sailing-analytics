@@ -13,8 +13,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -39,7 +37,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements FlexibleLeaderboard {
     private static Logger logger = Logger.getLogger(FlexibleLeaderboardImpl.class.getName());
 
-    protected static final Fleet defaultFleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
+    protected static final DefaultFleetImpl defaultFleet = new DefaultFleetImpl();
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
@@ -96,24 +94,25 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
-        FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */ false, fleet);
-        column.setTrackedRace(fleet, race); // triggers listeners because this object was registered above as race column listener on the column
+    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
+        FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */false);
+        column.setTrackedRace(defaultFleet, race); // triggers listeners because this object was registered above as
+                                                   // race column listener on the column
         return column;
     }
 
     @Override
-    public FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
-        return addRaceColumn(name, medalRace, /* logAlreadyExistingColumn */ true, fleets);
+    public FlexibleRaceColumn addRaceColumn(String name, boolean medalRace) {
+        return addRaceColumn(name, medalRace, /* logAlreadyExistingColumn */true);
     }
     
-    private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn, Fleet... fleets) {
+    private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
             final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
             logger.severe(msg);
         } else {
-            column = createRaceColumn(name, medalRace, fleets);
+            column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);
             races.add(column);
             column.setRaceLogInformation(
@@ -159,17 +158,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
     }
 
-    protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnImpl(
-                column, 
-                medalRace, 
-                turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
+    protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {
+        return new RaceColumnImpl(column, medalRace);
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
         Iterable<Fleet> theFleets;
         if (fleets == null || fleets.length == 0) {
-            theFleets = Collections.singleton(defaultFleet);
+            Fleet defaultfleetCasted = defaultFleet;
+            theFleets = Collections.singleton(defaultfleetCasted);
         } else {
             theFleets = Arrays.asList(fleets);
         }

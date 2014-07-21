@@ -5,11 +5,8 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
-    <g:HTMLPanel>
-
 <div class="{local_res.css.eventregattaraces_phase}">
   <h3 id="phaseName" class="{local_res.css.eventregattaraces_phase_name}"><span ui:field="phaseName" /></h3>
-  <g:HTMLPanel ui:field="fleetGroupsPanel" />
+  <div ui:field="fleetGroupsPanel" />
 </div>
-    </g:HTMLPanel>
 </ui:UiBinder>

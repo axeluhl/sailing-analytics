@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -35,6 +36,8 @@ public class Footer extends Composite {
         localeAndLanguages.put("de", "Deutsch");
         
         FooterResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 25em) { "+FooterResources.INSTANCE.mediumCss().getText()+"}");
+
         initWidget(uiBinder.createAndBindUi(this));
         
         updateUI();
