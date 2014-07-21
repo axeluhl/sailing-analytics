@@ -1844,4 +1844,215 @@ public class MasterDataImportTest {
         Assert.assertEquals(factor, metaColumn.getFactor());
 
     }
+
+    @Test
+    public void testMasterDataImportWithFlexibleLeaderboard() throws MalformedURLException, IOException,
+            InterruptedException, ClassNotFoundException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        UUID courseAreaUUID = UUID.randomUUID();
+
+        List<String> raceColumnNames = new ArrayList<String>();
+        String raceColumnName = "T1";
+        raceColumnNames.add(raceColumnName);
+        raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
+
+        List<Series> series = new ArrayList<Series>();
+        List<Fleet> fleets = new ArrayList<Fleet>();
+        String testFleet1Name = "testFleet1";
+        FleetImpl testFleet1 = new FleetImpl(testFleet1Name);
+        fleets.add(testFleet1);
+        fleets.add(new FleetImpl("testFleet2"));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        UUID regattaUUID = UUID.randomUUID();
+        Regatta regatta = sourceService.createRegatta(
+                RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, regattaUUID,
+                series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        double factor = 3.0;
+        series.get(0).getRaceColumnByName(raceColumnName).setFactor(factor);
+
+        int[] discardRule = { 1, 2, 3, 4 };
+        ScoringScheme scoringScheme = new LowPoint();
+        String flexLeaderboardName = "FlexName";
+        FlexibleLeaderboard leaderboard = sourceService.addFlexibleLeaderboard(flexLeaderboardName, "TestFlex",
+                discardRule,
+                scoringScheme, courseAreaUUID);
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboard.getName());
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(UUID.randomUUID(), TEST_GROUP_NAME, "testGroupDesc",
+                false, leaderboardNames, null, null);
+
+
+        // Set tracked Race with competitors
+        List<Competitor> competitors = new ArrayList<Competitor>();
+        UUID competitorUUID = UUID.randomUUID();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
+        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
+                "Oberhoschy"));
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+                "Der Lennart halt");
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
+        BoatClass boatClass = new BoatClassImpl("H16", true);
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
+        competitors.add(competitor);
+        UUID competitorToSuppressUUID = UUID.randomUUID();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
+        sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
+                "segelt auch mit"));
+        DynamicPerson coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+                "Bester Coach");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2,
+                boat2);
+        competitors.add(competitorToSuppress);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
+
+        leaderboard.addRace(trackedRace, raceColumnName, false);
+        RaceColumn raceColumnOnLeaderboard = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumnOnLeaderboard.setFactor(3.0);
+
+        // Set log event
+        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+        TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
+        TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        raceColumnOnLeaderboard.getRaceLog(defaultFleet).add(logEvent);
+        Position p = new DegreePosition(3, 3);
+        Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
+        RaceLogWindFixEvent windEvent = factory.createWindFixEvent(logTimePoint2, author, UUID.randomUUID(),
+                new ArrayList<Competitor>(), 2, wind);
+        raceColumnOnLeaderboard.getRaceLog(defaultFleet).add(windEvent);
+        storedLogUUIDs.add(logEvent.getId());
+        storedLogUUIDs.add(windEvent.getId());
+
+        // Set score correction
+        double scoreCorrection = 12.0;
+        leaderboard.getScoreCorrection().correctScore(competitor, raceColumnOnLeaderboard, scoreCorrection);
+        MaxPointsReason maxPointsReason = MaxPointsReason.DNS;
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumnOnLeaderboard, maxPointsReason);
+
+        // Set carried Points
+        double carriedPoints = 2.0;
+        leaderboard.setCarriedPoints(competitor, carriedPoints);
+
+        // Set suppressed competitor
+        leaderboard.setSuppressed(competitorToSuppress, true);
+
+        // Set display name
+        String nickName = "Angie";
+        leaderboard.setDisplayName(competitorToSuppress, nickName);
+
+        // Serialize
+        List<String> groupNamesToExport = new ArrayList<String>();
+        groupNamesToExport.add(group.getName());
+
+        RacingEventService destService;
+        DomainFactory domainFactory;
+        MasterDataResource resource = new MasterDataResource();
+        MasterDataResource spyResource = spyResource(resource, sourceService);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        UUID randomUUID = UUID.randomUUID();
+        InputStream inputStream = null;
+        try {
+            streamingOutput.write(os);
+            os.flush();
+            // Delete all data above from the database, to allow recreating all of it on target server
+            deleteAllDataFromDatabase();
+            // Import in new service
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            domainFactory = destService.getBaseDomainFactory();
+            inputStream = new ByteArrayInputStream(os.toByteArray());
+
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            os.close();
+            inputStream.close();
+        }
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
+
+        Assert.assertNotNull(creationCount);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(flexLeaderboardName);
+        Assert.assertNotNull(leaderboardOnTarget);
+
+        RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumns().iterator().next();
+        Fleet defaultFleetOnTarget = raceColumnOnTarget.getFleets().iterator().next();
+        Assert.assertNotNull(raceColumnOnTarget);
+        Assert.assertNull(raceColumnOnTarget.getTrackedRace(defaultFleetOnTarget));
+
+        Regatta regattaOnTarget = destService.createRegatta(
+                RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, regattaUUID,
+                series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */true);
+
+        raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget,
+                new DummyTrackedRace(
+                competitors, regattaOnTarget, null));
+
+        Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
+        Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
+        Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
+        competitorsCreatedOnTarget.add(competitorOnTarget);
+
+        Assert.assertEquals(defaultFleetOnTarget, leaderboardOnTarget.getFleet(null));
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
+
+        raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget, trackedRaceForTarget);
+
+        Assert.assertEquals(factor, raceColumnOnTarget.getFactor());
+
+        // Check for score corrections
+        Assert.assertEquals(
+                scoreCorrection,
+                leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
+                        raceColumnOnTarget));
+        Assert.assertEquals(
+                maxPointsReason,
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget,
+                        MillisecondsTimePoint.now()));
+
+        // Check for carried points
+        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+
+        // Check for suppressed competitor
+        Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
+        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(
+                competitorToSuppressUUID);
+        Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
+                .next());
+
+        // Check for competitor display name
+        Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
+
+        // Check for race log event
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(defaultFleetOnTarget).getFirstRawFixAtOrAfter(logTimePoint));
+        Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(defaultFleetOnTarget)
+                .getFirstRawFixAtOrAfter(logTimePoint).getId());
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(defaultFleetOnTarget).getFirstFixAtOrAfter(logTimePoint2));
+        Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(defaultFleetOnTarget)
+                .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
+
+        // Check for persisting of race log events:
+        RacingEventService dest2 = new RacingEventServiceImplMock();
+        Leaderboard lb2 = dest2.getLeaderboardByName(flexLeaderboardName);
+        RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
+        RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleets().iterator().next());
+        Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
+    }
+
 }

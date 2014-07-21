@@ -519,8 +519,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
 
                 RaceColumn raceColumn = result.addRaceColumn(columnName,
-                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()),
-                        fleets.toArray(new Fleet[0]));
+                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
                 for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
                     raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
                 }
