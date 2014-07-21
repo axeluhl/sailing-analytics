@@ -79,7 +79,12 @@ public class Stage extends Composite {
                         prevStageTeaserLink.setVisible(!isFirstSlide);
                     }
                 });
-        prevStageTeaserLink.setVisible(false);
+        if (featuredEvents.size() <= 1) {
+            prevStageTeaserLink.setVisible(false);
+            nextStageTeaserLink.setVisible(false);
+        } else {
+            prevStageTeaserLink.setVisible(false);
+        }
     }
 
     @UiHandler("nextStageTeaserLink")
