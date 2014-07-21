@@ -33,6 +33,16 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
                 return competitors;
             }
             @Override
+            public Competitor getCompetitorById(Serializable competitorID) {
+                for (Competitor competitor : competitors) {
+                    if (competitorID.equals(competitor.getId())) {
+                        return competitor;
+                    }
+                }
+                return null;
+            }
+
+            @Override
             public BoatClass getBoatClass() {
                 return null;
             }

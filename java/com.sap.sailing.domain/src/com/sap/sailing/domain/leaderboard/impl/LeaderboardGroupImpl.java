@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,6 +33,10 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
      */
     public LeaderboardGroupImpl(String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
         this(UUID.randomUUID(), name, description, displayGroupsInReverseOrder, leaderboards);
+    }
+    
+    private synchronized void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
     }
 
     /**

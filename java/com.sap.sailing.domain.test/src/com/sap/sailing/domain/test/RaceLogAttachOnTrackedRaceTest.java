@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -11,7 +10,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -76,18 +74,15 @@ public class RaceLogAttachOnTrackedRaceTest {
     }
     
     @Test
-    public void testAttachSpecificFleets() {
-        Fleet[] fleets = new Fleet[] { new FleetImpl("A"), new FleetImpl("B") };
-        Fleet aFleet = fleets[0];
-        Fleet bFleet = fleets[1];
-        RaceColumn column = leaderboard.addRaceColumn("R1", false, fleets);
+    public void testAttachToDefaultFleet() {
+        RaceColumn column = leaderboard.addRaceColumn("R1", false);
         
         TrackedRace trackedRace = new MyMockedTrackedRace();
         
-        column.setTrackedRace(aFleet, trackedRace);
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        column.setTrackedRace(defaultFleet, trackedRace);
         
-        assertSame(column.getRaceLog(aFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(aFleet)));
-        assertNotSame(column.getRaceLog(bFleet), trackedRace.getRaceLog(column.getRaceIdentifier(bFleet)));
+        assertSame(column.getRaceLog(defaultFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(defaultFleet)));
     }
     
     @Test

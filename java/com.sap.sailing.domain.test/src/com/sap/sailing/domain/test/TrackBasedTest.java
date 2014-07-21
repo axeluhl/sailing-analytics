@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -59,7 +60,7 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                 new NationalityImpl("NED"),

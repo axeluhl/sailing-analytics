@@ -33,7 +33,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
     }
 
     @Override

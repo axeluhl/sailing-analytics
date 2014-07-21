@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
@@ -87,7 +89,6 @@ public class Replicator implements Runnable {
      *            them directly.
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
-     * @param baseDomainFactory TODO
      */
     public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer, DomainFactory baseDomainFactory) {
         this.queue = new ArrayList<RacingEventServiceOperation<?>>();
@@ -98,14 +99,18 @@ public class Replicator implements Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a serialized
-     * {@link RacingEventServiceOperation}, and applies it to the {@link RacingEventService} which is obtained from the
-     * service tracker passed to this replicator at construction time.
+     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's an
+     * {@link Iterable} of serialized {@link RacingEventServiceOperation} objects, and applies it to the
+     * {@link RacingEventService} which is obtained from the service tracker passed to this replicator at construction
+     * time.
+     * 
+     * @see ReplicationServiceImpl#executed(RacingEventServiceOperation)
      */
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         long messageCount = 0;
+        long operationCount = 0;
         Field _queue;
         try {
             _queue = QueueingConsumer.class.getDeclaredField("_queue");
@@ -113,17 +118,16 @@ public class Replicator implements Runnable {
         } catch (Exception e) {
             _queue = null;
         }
-        while (true) {
-            if (isBeingStopped()) {
-                break;
-            }
-            try {
+        final boolean logsFine = logger.isLoggable(Level.FINE);
+        while (!isBeingStopped()) {
+           try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
                 if (_queue != null) {
-                    if (messageCount % 10000l == 0) {
+                    if (logsFine || messageCount % 10l == 0) {
                         try {
-                            logger.info("Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                            logger.log(messageCount%10l==0 ? Level.INFO : Level.FINE,
+                                    "Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
                         } catch (Exception e) {
                             // it didn't work; but it's a log message only...
                             logger.info("Received another 10000 replication messages");
@@ -136,9 +140,26 @@ public class Replicator implements Runnable {
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
-                        .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
-                RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
-                applyOrQueue(operation);
+                        .createObjectInputStreamResolvingAgainstThisFactory(
+                                new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
+                int operationsInMessage = 0;
+                try {
+                    while (true) {
+                        byte[] serializedOperation = (byte[]) ois.readObject();
+                        ObjectInputStream operationOIS = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
+                                .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(serializedOperation));
+                        RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                        operationCount++;
+                        operationsInMessage++;
+                        if (operationCount % 10000l == 0) {
+                            logger.info("Received " + operationCount + " operations so far");
+                        }
+                        applyOrQueue(operation);
+                    }
+                } catch (EOFException eof) {
+                    logger.fine("Reached EOF on replication message after having read "+operationsInMessage+" operations");
+                    // reached EOF; expected
+                }
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");
                 break;
@@ -150,12 +171,10 @@ public class Replicator implements Runnable {
                 if (isBeingStopped()) {
                     break;
                 }
-                
                 if (sse.isInitiatedByApplication()) {
                     logger.severe("Application shut down messaging queue for " + this.toString());
                     break;
                 }
-                
                 logger.info(sse.getMessage());
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
@@ -193,7 +212,6 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
-        
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     
@@ -248,7 +266,11 @@ public class Replicator implements Runnable {
         for (Iterator<RacingEventServiceOperation<?>> i=queue.iterator(); i.hasNext(); ) {
             RacingEventServiceOperation<?> operation = i.next();
             i.remove();
-            apply(operation);
+            try {
+                apply(operation);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error applying queued, replicated operation "+operation+". Continuing with next queued operation.", e);
+            }
         }
         assert queue.isEmpty();
         notifyAll();

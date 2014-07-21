@@ -62,15 +62,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public synchronized QueueingConsumer getConsumer() throws IOException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(getMessagingHostname());
-        int port = getMessagingPort();
-        if (port != 0) {
-            connectionFactory.setPort(port);
-        }
-        Connection connection = connectionFactory.newConnection();
-        Channel channel = connection.createChannel();
-        
+        Channel channel = createChannel();
         /*
          * Connect a queue to the given exchange that has already
          * been created by the master server.
@@ -116,6 +108,19 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         this.consumer = consumer;
         return consumer;
     }
+
+    @Override
+    public Channel createChannel() throws IOException {
+        ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost(getMessagingHostname());
+        int port = getMessagingPort();
+        if (port != 0) {
+            connectionFactory.setPort(port);
+        }
+        Connection connection = connectionFactory.newConnection();
+        Channel channel = connection.createChannel();
+        return channel;
+    }
     
     @Override
     public synchronized void stopConnection() {
@@ -129,6 +134,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         } catch (Exception ex) {
             // ignore any exception during abort. close can yield a broad
             // number of exceptions that we don't want to know or to log.
+            ex.printStackTrace();
         }
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.impl;
+package com.sap.sailing.util.impl;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -6,6 +6,12 @@ import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Stream decorator that counts the bytes sent through an {@link OutputStream}. Logs
+ * that number in configurable way using a {@link Logger}.
+ * 
+ * @author Axel Uhl
+ */
 public class CountingOutputStream extends FilterOutputStream {
     private static final Logger logger = Logger.getLogger(CountingOutputStream.class.getName());
     
@@ -37,7 +43,7 @@ public class CountingOutputStream extends FilterOutputStream {
     }
 
     private void log() {
-        logger.log(level, "wrote "+count+" bytes to "+name);
+        logger.log(level, "wrote "+count+" bytes "+(count>1000?"("+count/1000+" kB)":"")+" to "+name);
     }
     
     @Override
@@ -50,5 +56,11 @@ public class CountingOutputStream extends FilterOutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         super.write(b, off, len);
         count(len);
+    }
+    
+    @Override
+    public void close() throws IOException {
+        super.close();
+        log();
     }
 }

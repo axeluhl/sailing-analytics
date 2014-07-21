@@ -19,6 +19,7 @@ public class EventRegattaRacesRaceday extends Composite {
     @UiField HTMLPanel racesPanel;
 
     public EventRegattaRacesRaceday(RaceGroupSeriesDTO series) {
+//    private final EventPageNavigator pageNavigator;
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
