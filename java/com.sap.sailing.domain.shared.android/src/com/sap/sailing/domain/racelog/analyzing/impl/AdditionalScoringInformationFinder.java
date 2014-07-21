@@ -13,7 +13,7 @@ public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<Addition
     @Override
     protected AdditionalScoringInformationEvent performAnalysis() {
         AdditionalScoringInformationEvent result = null;
-        for (RaceLogEvent event : getAllEventsDescending()) {
+        for (RaceLogEvent event : getRaceLog().getUnrevokedEventsDescending()) {
             if (event instanceof AdditionalScoringInformationEvent) {
                 AdditionalScoringInformationEvent scoringEvent = (AdditionalScoringInformationEvent) event;
                 result = scoringEvent;
