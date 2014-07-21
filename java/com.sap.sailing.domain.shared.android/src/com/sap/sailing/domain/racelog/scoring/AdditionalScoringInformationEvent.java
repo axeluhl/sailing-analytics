@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.scoring;
 
+import com.sap.sailing.domain.racelog.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.Revokable;
 
@@ -10,6 +11,6 @@ import com.sap.sailing.domain.racelog.Revokable;
  * 
  * @author Simon Marcel Pamies
  */
-public interface AdditionalScoringInformationEvent extends RaceLogEvent, Revokable {
+public interface AdditionalScoringInformationEvent extends RaceLogEvent, Revokable, InvalidatesLeaderboardCache {
     
 }
