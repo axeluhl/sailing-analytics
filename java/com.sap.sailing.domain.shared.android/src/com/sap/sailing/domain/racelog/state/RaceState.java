@@ -146,4 +146,6 @@ public interface RaceState extends ReadonlyRaceState {
      */
     void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable);
 
+    boolean isAdditionalScoringInformationEnabled();
+
 }
