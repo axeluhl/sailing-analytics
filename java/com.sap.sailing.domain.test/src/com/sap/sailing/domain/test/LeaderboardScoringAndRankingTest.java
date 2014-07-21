@@ -805,23 +805,20 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
         FlexibleLeaderboard leaderboardHighPoint10Or8AndLastBreaksTie = new FlexibleLeaderboardImpl("Test ESS Highpoint 10Or8AndLastBreaksTie", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
                 new HighPointFirstGets10Or8AndLastBreaksTie(), null);
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */ false,
-                leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */ false);
         assertTrue(leaderboardHighPoint10Or8AndLastBreaksTie.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[3], later)) < 0); // c0 better than c3
         assertEquals(10, leaderboardHighPoint10Or8AndLastBreaksTie.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(1), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R2", /* medalRace */ false, 
-                leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R2", /* medalRace */ false);
         assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         RaceLog raceLogForRace2 = leaderboardHighPoint10Or8AndLastBreaksTie.getRaceColumnByName("R2").getRaceLog(leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
         raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R3", /* medalRace */ false, 
-                leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R3", /* medalRace */ false);
         assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
