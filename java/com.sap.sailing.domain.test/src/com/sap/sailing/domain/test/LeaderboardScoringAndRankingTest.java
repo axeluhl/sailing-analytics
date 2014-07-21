@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -53,7 +54,9 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -820,6 +823,18 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R3", /* medalRace */ false, 
                 leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
         assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
+        AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
+        AdditionalScoringInformationEvent event = finder.analyze();
+        assert event != null;
+        try {
+            raceLogForRace2.revokeEvent(new RaceLogEventAuthorImpl("Plopp", 1), event);
+        } catch (NotRevokableException e) {
+            e.printStackTrace();
+        }
+        event = finder.analyze();
+        assert event == null;
+        assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
     }
 
