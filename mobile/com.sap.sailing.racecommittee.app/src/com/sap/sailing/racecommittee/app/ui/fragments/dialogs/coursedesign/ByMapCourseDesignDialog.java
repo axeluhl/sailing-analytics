@@ -383,9 +383,9 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     }
 
     private BitmapDescriptor getImageForMark(PositionedMark mark) {
-        if (mark.getType().equals(MarkType.BUOY)) {
+        if (MarkType.BUOY.equals(mark.getType())) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
-        } else if (mark.getType().equals(MarkType.FINISHBOAT)) {
+        } else if (MarkType.FINISHBOAT.equals(mark.getType())) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish_big);
         } else
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);

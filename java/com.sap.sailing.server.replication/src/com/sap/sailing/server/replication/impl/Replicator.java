@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
@@ -108,6 +110,7 @@ public class Replicator implements Runnable {
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         long messageCount = 0;
+        long operationCount = 0;
         Field _queue;
         try {
             _queue = QueueingConsumer.class.getDeclaredField("_queue");
@@ -115,14 +118,16 @@ public class Replicator implements Runnable {
         } catch (Exception e) {
             _queue = null;
         }
+        final boolean logsFine = logger.isLoggable(Level.FINE);
         while (!isBeingStopped()) {
            try {
                 Delivery delivery = consumer.nextDelivery();
                 messageCount++;
                 if (_queue != null) {
-                    if (messageCount % 10000l == 0) {
+                    if (logsFine || messageCount % 10l == 0) {
                         try {
-                            logger.info("Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
+                            logger.log(messageCount%10l==0 ? Level.INFO : Level.FINE,
+                                    "Inbound replication queue size: "+((BlockingQueue<?>) _queue.get(consumer)).size());
                         } catch (Exception e) {
                             // it didn't work; but it's a log message only...
                             logger.info("Received another 10000 replication messages");
@@ -135,15 +140,25 @@ public class Replicator implements Runnable {
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
-                        .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
-                @SuppressWarnings("unchecked")
-                Iterable<byte[]> byteArrays = (Iterable<byte[]>) ois.readObject();
-                for (byte[] serializedOperation : byteArrays) {
-                    ObjectInputStream operationOIS = racingEventServiceTracker
-                            .getRacingEventService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
-                                    new ByteArrayInputStream(serializedOperation));
-                    RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
-                    applyOrQueue(operation);
+                        .createObjectInputStreamResolvingAgainstThisFactory(
+                                new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage)));
+                int operationsInMessage = 0;
+                try {
+                    while (true) {
+                        byte[] serializedOperation = (byte[]) ois.readObject();
+                        ObjectInputStream operationOIS = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
+                                .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(serializedOperation));
+                        RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) operationOIS.readObject();
+                        operationCount++;
+                        operationsInMessage++;
+                        if (operationCount % 10000l == 0) {
+                            logger.info("Received " + operationCount + " operations so far");
+                        }
+                        applyOrQueue(operation);
+                    }
+                } catch (EOFException eof) {
+                    logger.fine("Reached EOF on replication message after having read "+operationsInMessage+" operations");
+                    // reached EOF; expected
                 }
             } catch (ConsumerCancelledException cce) {
                 logger.info("Consumer has been shut down properly.");

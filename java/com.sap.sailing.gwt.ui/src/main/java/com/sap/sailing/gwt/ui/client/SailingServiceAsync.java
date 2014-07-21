@@ -174,10 +174,13 @@ public interface SailingServiceAsync {
      *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
      *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
      *            trackedRace.getTimePointOfNewestEvent()}.
+     * @param includeCombinedWindForAllLegMiddles
+     *            if <code>true</code>, the result will return non-<code>null</code> results for calls to
+     *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
      */
     void getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames, boolean onlyUpToNewestEvent,
-            AsyncCallback<WindInfoForRaceDTO> callback);
+            boolean includeCombinedWindForAllLegMiddles, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
 

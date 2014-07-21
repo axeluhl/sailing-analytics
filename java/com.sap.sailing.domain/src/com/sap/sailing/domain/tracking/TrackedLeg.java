@@ -102,4 +102,10 @@ public interface TrackedLeg extends Serializable {
      */
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException;
 
+    /**
+     * The middle (traveling half the length) of the course middle line, connecting the center of gravity of the leg's start
+     * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     */
+    Position getMiddleOfLeg(TimePoint at);
+
 }

@@ -1,4 +1,4 @@
-package com.sap.sse.common;
+package com.sap.sailing.util.impl;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class CountingOutputStream extends FilterOutputStream {
     }
 
     private void log() {
-        logger.log(level, "wrote "+count+" bytes"+(count>1000?"("+count/1000+" kbytes)":"")+" to "+name);
+        logger.log(level, "wrote "+count+" bytes "+(count>1000?"("+count/1000+" kB)":"")+" to "+name);
     }
     
     @Override

@@ -29,7 +29,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToEvent(String eventUuidAsString, String baseUrl) {
-        EventPlace eventPlace = new EventPlace(eventUuidAsString);
+        EventPlace eventPlace = new EventPlace(eventUuidAsString, null);
         if(isLocationOnLocalhost() || baseUrl.contains(SAPSAILING_DOMAIN)) {
             placeController.goTo(eventPlace);
         } else {
