@@ -22,5 +22,9 @@ public class AdditionalScoringInformationEventImpl extends RaceLogEventImpl impl
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
     }
-
+    
+    @Override
+    public String getShortInfo() {
+        return "UUID: " + getId();
+    }
 }
