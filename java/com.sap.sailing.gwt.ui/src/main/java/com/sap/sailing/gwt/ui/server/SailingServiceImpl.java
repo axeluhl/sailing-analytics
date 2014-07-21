@@ -3180,6 +3180,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.setDescription(event.getDescription());
         eventDTO.setOfficialWebsiteURL(event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         eventDTO.setLogoImageURL(event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
+        for(URL url: event.getSponsorImageURLs()) {
+            eventDTO.addSponsorImageURL(url.toString());
+        }
+        for(URL url: event.getImageURLs()) {
+            eventDTO.addImageURL(url.toString());
+        }
+        for(URL url: event.getVideoURLs()) {
+            eventDTO.addVideoURL(url.toString());
+        }
     }
     
     private EventDTO convertToEventDTO(Event event) {

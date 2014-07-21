@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class MainMedia extends Composite {
     
@@ -43,11 +43,11 @@ public class MainMedia extends Composite {
         
     }
 
-    public void setRecentEvents(List<EventDTO> recentEvents) {
+    public void setRecentEvents(List<EventBaseDTO> recentEvents) {
         List<String> photoGalleryUrls = new ArrayList<String>();
         
         int videoCounter = 0;
-        for(EventDTO event: recentEvents) {
+        for(EventBaseDTO event: recentEvents) {
             photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
             
             if(event.getVideoURLs().size() > 0 && videoCounter < 3) {

@@ -14,13 +14,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.idangerous.Swiper;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class Stage extends Composite {
     
     @SuppressWarnings("unused")
-    private List<Pair<StageEventType, EventDTO>> featuredEvents;
+    private List<Pair<StageEventType, EventBaseDTO>> featuredEvents;
 
     private List<StageTeaser> stageTeaserComposites;
 
@@ -48,10 +48,10 @@ public class Stage extends Composite {
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
     
-    public void setFeaturedEvents(List<Pair<StageEventType, EventDTO>> featuredEvents) {
+    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
         this.featuredEvents = featuredEvents;
         
-        for(Pair<StageEventType, EventDTO> typeAndEvent: featuredEvents) {
+        for(Pair<StageEventType, EventBaseDTO> typeAndEvent: featuredEvents) {
             switch (typeAndEvent.getA()) {
                 case POPULAR:
                     stageTeaser = new PopularEventStageTeaser(typeAndEvent.getB(), placeNavigator);
