@@ -485,43 +485,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             
             result = new FlexibleLeaderboardImpl(raceLogStore, (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME
                     .name()), resultDiscardingRule, scoringScheme, courseArea);
-            // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage
-            // them here:
-            Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
+            // For a FlexibleLeaderboard, there should be only the default fleet for any race column
             for (Object dbRaceColumnAsObject : dbRaceColumns) {
                 BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
+                String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
+
+                RaceColumn raceColumn = result.addRaceColumn(columnName,
+                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
+
                 Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
-                RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+                RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(result.getFleet(null).getName());
+                if (defaultFleetRaceIdentifier == null) {
+                    // Backward compatibility
+                    defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+                }
                 if (defaultFleetRaceIdentifier != null) {
                     Fleet defaultFleet = result.getFleet(null);
                     if (defaultFleet != null) {
-                        raceIdentifiers.put(defaultFleet.getName(), defaultFleetRaceIdentifier);
+
+                        raceColumn.setRaceIdentifier(defaultFleet, defaultFleetRaceIdentifier);
                     } else {
                         // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
                         logger.warning("Discarding RaceIdentifier " + defaultFleetRaceIdentifier
                                 + " for default fleet for leaderboard " + result.getName()
                                 + " because no default fleet was found in leaderboard");
                     }
-                    raceIdentifiers.remove(null);
-                }
-                List<Fleet> fleets = new ArrayList<Fleet>();
-                for (String fleetName : raceIdentifiers.keySet()) {
-                    Fleet fleet = fleetsByName.get(fleetName);
-                    if (fleet == null) {
-                        fleet = new FleetImpl(fleetName);
-                        fleetsByName.put(fleetName, fleet);
-                    }
-                    fleets.add(fleet);
-                }
-                if (fleets.isEmpty()) {
-                    fleets.add(result.getFleet(null));
-                }
-                String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-
-                RaceColumn raceColumn = result.addRaceColumn(columnName,
-                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-                for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
-                    raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
                 }
 
             }
