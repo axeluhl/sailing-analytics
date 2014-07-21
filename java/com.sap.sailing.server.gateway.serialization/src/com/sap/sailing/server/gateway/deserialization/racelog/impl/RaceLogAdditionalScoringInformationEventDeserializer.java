@@ -20,6 +20,6 @@ public class RaceLogAdditionalScoringInformationEventDeserializer extends BaseRa
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return factory.createAdditionalScoringInformationEvent(timePoint, author, passId);
+        return factory.createAdditionalScoringInformationEvent(timePoint, id, author, passId);
     }
 }
