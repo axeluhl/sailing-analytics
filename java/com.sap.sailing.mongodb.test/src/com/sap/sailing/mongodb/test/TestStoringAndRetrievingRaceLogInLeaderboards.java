@@ -85,8 +85,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
         leaderboard = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        Fleet defaultFleet = leaderboard.getFleet(null);
-        leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
+        leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
     }
 
     private void addAndStoreRaceLogEvent(FlexibleLeaderboard leaderboard, String raceColumnName, RaceLogEvent event) {
@@ -130,7 +129,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         db.getLastError(); // sync DB
         leaderboard.removeRaceColumn(raceColumnName);
         db.getLastError(); // sync DB
-        leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
+        leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
         // now assert that the race log is empty because the column was removed and so should have been the race log
         RaceLog loadedRaceLog = leaderboard.getRaceColumnByName(raceColumnName).getRaceLog(leaderboard.getRaceColumnByName(raceColumnName).getFleets().iterator().next());
         loadedRaceLog.lockForRead();
@@ -173,7 +172,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         } finally {
             reloadedRenamedRaceLog.unlockAfterRead();
         }
-        leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
+        leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
         mongoObjectFactory.storeLeaderboard(leaderboard);
         // now assert that the race log is empty because the renamed column's persistent race log is expected to have
         // been removed

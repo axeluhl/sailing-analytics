@@ -199,6 +199,7 @@ public class ImportMasterDataOperation extends
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
+                toState.updateStoredLeaderboard(leaderboard);
             }
 
         }

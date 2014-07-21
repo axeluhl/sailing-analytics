@@ -35,35 +35,32 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
     void moveRaceColumnDown(String name);
 
     /**
-     * Adds a new {@link RaceColumn} that has no {@link TrackedRace} associated yet to this leaderboard.
+     * Adds a new {@link RaceColumn} that has no {@link TrackedRace} associated yet to this leaderboard. The default
+     * fleet will be used.
      * 
      * @param name
-     *            the name for the new race column such that none of the columns in {@link #getRaceColumns()}
-     *            has that name yet; otherwise, an message will be logged, no race column will be added and
-     *            the existing column will be returned for robustness reasons
+     *            the name for the new race column such that none of the columns in {@link #getRaceColumns()} has that
+     *            name yet; otherwise, an message will be logged, no race column will be added and the existing column
+     *            will be returned for robustness reasons
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded
-     * @param fleets
-     *            the fleets to add to the {@link RaceColumn} created. If no fleets are specified, a single default
-     *            fleet will be assigned to the race column created.
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets);
+    RaceColumn addRaceColumn(String name, boolean medalRace);
     
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceColumn} with name <code>columnName</code> already exists
      * in this leaderboard, <code>race</code> is {@link RaceColumn#setTrackedRace(Fleet, TrackedRace) set as its tracked
      * race} and <code>medalRace</code> is ignored. Otherwise, a new {@link RaceColumn} column, with <code>race</code>
-     * as its tracked race, is created and added to this leaderboard.
+     * as its tracked race, is created and added to this leaderboard. The default fleet will be used.
+     * 
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded;
      *            ignored if the column named <code>columnName</code> already exists
-     * @param fleet
-     *            the fleet to link the race to when the {@link RaceColumn} is created.
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet);
+    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
 
     void removeRaceColumn(String columnName);
 
