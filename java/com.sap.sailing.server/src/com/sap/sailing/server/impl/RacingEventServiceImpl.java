@@ -664,8 +664,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (leaderboard != null) {
             if (leaderboard instanceof FlexibleLeaderboard) {
                 // uses the default fleet as the single fleet for the new column
-                RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
-                        leaderboard.getFleet(null));
+                RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace);
                 updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                 return result;
             } else {
@@ -1308,8 +1307,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     .get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
             if (defaultLeaderboard != null) {
                 String columnName = trackedRace.getRace().getName();
-                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false,
-                        defaultLeaderboard.getFleet(null));
+                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false);
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
