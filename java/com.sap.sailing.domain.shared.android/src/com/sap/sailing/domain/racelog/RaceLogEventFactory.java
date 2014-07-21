@@ -119,5 +119,5 @@ public interface RaceLogEventFactory {
     CloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
             Serializable deviceMappingEventId, TimePoint closingTimePoint);
 
-    AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, RaceLogEventAuthor author, int currentPassId);
+    AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id, RaceLogEventAuthor author, int currentPassId);
 }
