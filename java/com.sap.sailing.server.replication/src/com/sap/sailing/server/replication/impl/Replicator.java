@@ -266,7 +266,11 @@ public class Replicator implements Runnable {
         for (Iterator<RacingEventServiceOperation<?>> i=queue.iterator(); i.hasNext(); ) {
             RacingEventServiceOperation<?> operation = i.next();
             i.remove();
-            apply(operation);
+            try {
+                apply(operation);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error applying queued, replicated operation "+operation+". Continuing with next queued operation.", e);
+            }
         }
         assert queue.isEmpty();
         notifyAll();

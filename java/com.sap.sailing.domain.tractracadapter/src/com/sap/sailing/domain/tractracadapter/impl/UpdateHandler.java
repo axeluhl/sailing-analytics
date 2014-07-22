@@ -57,6 +57,7 @@ public class UpdateHandler {
         this.raceId = raceId;
         this.updateDeserializer = new UpdateResponseDeserializer();
         if (updateURI != null && !updateURI.toString().equals("")) {
+            logger.info("Activating TracTrac update handler "+this+" for race with ID "+raceId);
             this.active = true;
         } else {
             this.active = false;

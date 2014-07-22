@@ -445,11 +445,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
-        LockUtil.lockForWrite(getSerializationLock());
+        // obtain the course's read lock because a course change during serialization could lead to
+        // trackedLegs being inconsistent with getRace().getCourse().getLegs()
+        getRace().getCourse().lockForRead();
         try {
-            s.defaultWriteObject();
+            LockUtil.lockForWrite(getSerializationLock());
+            try {
+                s.defaultWriteObject();
+            } finally {
+                LockUtil.unlockAfterWrite(getSerializationLock());
+            }
         } finally {
-            LockUtil.unlockAfterWrite(getSerializationLock());
+            getRace().getCourse().unlockAfterRead();
         }
     }
 
@@ -1588,6 +1595,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // expecting to hold the course's write lock
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(getSerializationLock());
         try {
