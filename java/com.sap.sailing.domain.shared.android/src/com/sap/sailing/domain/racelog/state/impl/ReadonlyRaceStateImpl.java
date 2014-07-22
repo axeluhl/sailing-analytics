@@ -22,7 +22,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
+import com.sap.sailing.domain.racelog.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
@@ -105,10 +105,15 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private Wind cachedWindFix;
 
     private ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureFactory procedureFactory) {
-        this(raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
+        this(raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
     }
 
-    protected ReadonlyRaceStateImpl(RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory) {
+    /**
+     * @param update
+     *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
+     *            changes.
+     */
+    protected ReadonlyRaceStateImpl(RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory, boolean update) {
         this.raceLog = raceLog;
         this.procedureFactory = procedureFactory;
         this.changedListeners = new RaceStateChangedListeners();
@@ -128,9 +133,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.cachedRacingProcedureType = determineInitialProcedureType();
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
-
-        this.raceLog.addListener(new RaceLogChangedVisitor(this));
-
+        // TODO bug 2083: make sure the listener registration is "weak" in the sense that it is removed when this race state is no longer strongly referenced
+        this.raceLog.addListener(new WeakRaceLogChangedVisitor(this.raceLog, this));
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();

@@ -51,7 +51,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     private RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
-        super(raceLog, analyzersClock, procedureFactory);
+        super(raceLog, analyzersClock, procedureFactory, /* update */ true);
         this.author = author;
         this.factory = eventFactory;
     }

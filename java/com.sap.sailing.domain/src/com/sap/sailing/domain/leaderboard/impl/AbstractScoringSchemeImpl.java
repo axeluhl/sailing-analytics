@@ -128,7 +128,6 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      */
     @Override
     public int compareByBetterScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
-        assert o1Scores.size() == o2Scores.size();
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Double> o1NetScores = new ArrayList<>();
@@ -147,6 +146,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
             result = pureScoreComparator.compare(o1Iter.next(), o2Iter.next());
+        }
+        if (o1Iter.hasNext() != o2Iter.hasNext()) {
+            // if, as may be allowed by some scoring scheme variants, competitors with different numbers of scored races are compared
+            // and are equal for all races of the competitor who scored fewer races, the competitor who scored more races is preferred
+            result = o1Iter.hasNext() ? -1 : 1;
         }
         return result;
     }
