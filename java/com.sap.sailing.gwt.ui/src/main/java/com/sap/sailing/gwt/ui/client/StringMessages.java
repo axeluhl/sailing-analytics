@@ -126,6 +126,7 @@ public interface StringMessages extends Messages {
     String errorWhileTryingToSetWindSourceForRace();
     String inEvent();
     String to();
+    String toSide();
     String showEstimatedWind();
     String timing();
     String raceDetailsToShow();
