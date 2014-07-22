@@ -902,6 +902,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
+        logger.info("Start time of race "+getRace().getName()+" updated by race committee to "+newStartTime);
         try {
             for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
                 startTimeChangedListener.startTimeChanged(newStartTime);
