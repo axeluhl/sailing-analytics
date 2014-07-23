@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -26,7 +29,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -37,6 +42,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.tracking.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -55,12 +61,17 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
@@ -800,39 +811,80 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
 
     @Test
     public void testAdditionalScoreInformationLeadsToChangedScoreForOneColumn() throws NoWindException {
+        TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
+        Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE , "Dummy", new BoatClassImpl("Extreme40", false), trackedRegattaRegistry, new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345", new CourseAreaImpl("Humba", UUID.randomUUID()));
+        trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
         Competitor[] competitors = createCompetitors(10).toArray(new Competitor[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
         FlexibleLeaderboard leaderboardHighPoint10Or8AndLastBreaksTie = new FlexibleLeaderboardImpl("Test ESS Highpoint 10Or8AndLastBreaksTie", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
                 new HighPointFirstGets10Or8AndLastBreaksTie(), null);
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */ false);
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors), dummyRegatta), "R1", /* medalRace */ false);
         assertTrue(leaderboardHighPoint10Or8AndLastBreaksTie.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[3], later)) < 0); // c0 better than c3
         assertEquals(10, leaderboardHighPoint10Or8AndLastBreaksTie.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(9), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(1), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R2", /* medalRace */ false);
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors), dummyRegatta), "R2", /* medalRace */ false);
         assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         RaceLog raceLogForRace2 = leaderboardHighPoint10Or8AndLastBreaksTie.getRaceColumnByName("R2").getRaceLog(leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
-        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0));
-        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.UNKNOWN));
+        assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R3", /* medalRace */ false);
+        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(16), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
+        assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
+        leaderboardHighPoint10Or8AndLastBreaksTie.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors), dummyRegatta), "R3", /* medalRace */ false);
         assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(25), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
-        AdditionalScoringInformationEvent event = finder.analyze();
+        AdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
         assert event != null;
         try {
             raceLogForRace2.revokeEvent(new RaceLogEventAuthorImpl("Plopp", 1), event);
         } catch (NotRevokableException e) {
             e.printStackTrace();
         }
-        event = finder.analyze();
+        event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
         assert event == null;
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
+        RaceState raceStateForRace2 = RaceStateImpl.create(raceLogForRace2, new RaceLogEventAuthorImpl("Simon", 1));
+        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(10000)), /*enable*/false, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
+        LeaderboardDTO leaderboardDTO  = null;
+        try {
+            leaderboardDTO = leaderboardHighPoint10Or8AndLastBreaksTie.getLeaderboardDTO(later.plus(Duration.ONE_HOUR), Collections.<String>emptyList(), false, trackedRegattaRegistry, DomainFactory.INSTANCE, false);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        assert leaderboardDTO != null;
+        assertEquals(30.0, leaderboardDTO.rows.get(leaderboardDTO.competitors.get(0)).totalPoints, 0.000000000001);
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(20000)), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        try {
+            leaderboardDTO = leaderboardHighPoint10Or8AndLastBreaksTie.getLeaderboardDTO(later.plus(Duration.ONE_HOUR), Collections.<String>emptyList(), false, trackedRegattaRegistry, DomainFactory.INSTANCE, false);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        assertEquals(28.0, leaderboardDTO.rows.get(leaderboardDTO.competitors.get(0)).totalPoints, 0.000000000001);
+        assertEquals(25.0, leaderboardDTO.rows.get(leaderboardDTO.competitors.get(1)).totalPoints, 0.000000000001);
     }
 
     @Test

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
@@ -274,7 +275,8 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id,
-            RaceLogEventAuthor author, int currentPassId) {
-        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id, Collections.<Competitor>emptyList(), currentPassId);
+            RaceLogEventAuthor author, int currentPassId, AdditionalScoringInformationType informationType) {
+        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id, Collections.<Competitor>emptyList(), currentPassId,
+                informationType);
     }
 }

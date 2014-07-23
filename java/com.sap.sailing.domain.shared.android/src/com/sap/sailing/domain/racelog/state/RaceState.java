@@ -9,6 +9,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
@@ -144,8 +145,8 @@ public interface RaceState extends ReadonlyRaceState {
      * Marks this race state with a new {@link AdditionalScoringInformationEvent} or revokes
      * an already existing one.
      */
-    void setAdditionalScoringInformationEnabled(TimePoint timePoint, boolean enable);
+    void setAdditionalScoringInformationEnabled(TimePoint creationTimePoint, boolean enable, AdditionalScoringInformationType informationType);
 
-    boolean isAdditionalScoringInformationEnabled();
+    boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
 
 }

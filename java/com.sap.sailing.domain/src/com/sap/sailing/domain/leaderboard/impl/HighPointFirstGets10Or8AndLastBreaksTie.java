@@ -11,6 +11,7 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.analyzing.impl.AdditionalScoringInformationFinder;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
 import com.sap.sse.common.Util;
 
 /**
@@ -50,12 +51,19 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
         for (Fleet fleet : raceColumn.getFleets()) {
             RaceLog raceLog = raceColumn.getRaceLog(fleet);
             AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLog);
-            AdditionalScoringInformationEvent event = finder.analyze();
-            if (event != null) {
-                if (rank == 0) {
-                    result = null;
-                } else {
-                    result = Math.max(getMinimumScoreFromRank(), (double) (SCORE_FOR_WINNER_IF_OVERWRITTEN - rank + 1));
+            List<AdditionalScoringInformationEvent> events = finder.analyze();
+            for (AdditionalScoringInformationEvent event : events) {
+                if (event != null && event.getType() == AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE) {
+                    if (rank == 0) {
+                        result = null;
+                    } else {
+                        result = Math.max(getMinimumScoreFromRank(), (double) (SCORE_FOR_WINNER_IF_OVERWRITTEN - rank + 1));
+                        
+                        // the list returned from finder has newest first - if we find an event
+                        // that matches the type that we want then we can stop as it is the newest
+                        // unrevoked that has been stored
+                        break;
+                    }
                 }
             }
         }

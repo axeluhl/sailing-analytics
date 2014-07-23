@@ -171,7 +171,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // it can happen that the event that has been revoked is not yet loaded - as we assume
             // that race log events never get removed we can safely continue and assume that
             // the event will be loaded later
-            logger.warning("RevokeEvent for "+revokeEvent.getShortInfo()+" added, that refers to non-existent event to be revoked. Could also happen that the revoke event is before the event to be revoked. Check the times.");
+            logger.warning("RevokeEvent for "+revokeEvent.getShortInfo()+" added, that refers to non-existent event to be revoked. Could also happen that the revoke event is before the event to be revoked.");
         } else {
             if (! (revokedEvent instanceof Revokable)) {
                 throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");

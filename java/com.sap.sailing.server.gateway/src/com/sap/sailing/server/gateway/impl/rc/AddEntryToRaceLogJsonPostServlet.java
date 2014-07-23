@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.impl.rc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -133,7 +134,7 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                 try {
                     logEvent = deserializer.deserialize(requestJsonObject);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    logger.log(Level.SEVERE, "De-Serialization failed: "+ex.getMessage(), ex);
                     throw ex;
                 }
                 logger.fine("JSON is deserialized to a RaceLogEvent");

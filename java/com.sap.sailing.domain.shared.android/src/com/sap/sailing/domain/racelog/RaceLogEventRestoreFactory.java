@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventRestoreFactoryImpl;
 import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -93,5 +94,6 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             TimePoint logicalTimePoint, Serializable pId, int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint);
 
     AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId);
+            TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
+            AdditionalScoringInformationType informationType);
 }
