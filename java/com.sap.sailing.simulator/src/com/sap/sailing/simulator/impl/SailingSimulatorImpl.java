@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -79,7 +79,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         LOGGER.info("showOpportunist: "+this.simulationParameters.showOpportunist());        
 
         if (gridArea != null) {
-            Boundary bd = new RectangularBoundary(gridArea[0], gridArea[1], 0.1);
+            Grid bd = new CurvedGrid(gridArea[0], gridArea[1]);
 
             // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
@@ -103,7 +103,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             }
 
             wf.setBoundary(bd);
-            Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1], gridRes[2], gridRes[3]);
+            Position[][] positionGrid = bd.generatePositions(gridRes[0], gridRes[1], gridRes[2], gridRes[3]);
             wf.setPositionGrid(positionGrid);
             wf.generate(wf.getStartTime(), wf.getEndTime(), wf.getTimeStep());
         }

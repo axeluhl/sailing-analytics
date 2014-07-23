@@ -219,7 +219,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         if (Math.abs(bearHeightSide) > 170.0) {
             vrtSide = (this.upwindLeg ? +1.0 : -1.0);
         }
-        double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*100.0)/100.0;
+        double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*200.0)/200.0;
 
         /*if (vrtDist > tgtHeight) {
         // scale last step so that vrtDist ~ tgtHeight
@@ -244,7 +244,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         }
         // calculate horizontal distance as distance of height-position to current position
         //double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
-        double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
+        double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*200.0)/200.0;
 
         //System.out.println(""+hrzDist+", "+vrtDist+", "+pathPos.getPosition().getLatDeg()+", "+pathPos.getPosition().getLngDeg()+", "+posHeight.getLatDeg()+", "+posHeight.getLngDeg());
 
