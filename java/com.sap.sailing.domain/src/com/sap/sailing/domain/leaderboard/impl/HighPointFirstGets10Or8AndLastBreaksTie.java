@@ -51,19 +51,12 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
         for (Fleet fleet : raceColumn.getFleets()) {
             RaceLog raceLog = raceColumn.getRaceLog(fleet);
             AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLog);
-            List<AdditionalScoringInformationEvent> events = finder.analyze();
-            for (AdditionalScoringInformationEvent event : events) {
-                if (event != null && event.getType() == AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE) {
-                    if (rank == 0) {
-                        result = null;
-                    } else {
-                        result = Math.max(getMinimumScoreFromRank(), (double) (SCORE_FOR_WINNER_IF_OVERWRITTEN - rank + 1));
-                        
-                        // the list returned from finder has newest first - if we find an event
-                        // that matches the type that we want then we can stop as it is the newest
-                        // unrevoked that has been stored
-                        break;
-                    }
+            AdditionalScoringInformationEvent event = finder.analyze(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+            if (event != null) {
+                if (rank == 0) {
+                    result = null;
+                } else {
+                    result = Math.max(getMinimumScoreFromRank(), (double) (SCORE_FOR_WINNER_IF_OVERWRITTEN - rank + 1));
                 }
             }
         }
