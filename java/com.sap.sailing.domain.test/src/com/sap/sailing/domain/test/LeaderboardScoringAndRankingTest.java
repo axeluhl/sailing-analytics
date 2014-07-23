@@ -835,7 +835,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        raceLogForRace2.add(new AdditionalScoringInformationEventImpl(now, new RaceLogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(16), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
@@ -844,25 +844,25 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(new Double(25), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         AdditionalScoringInformationFinder finder = new AdditionalScoringInformationFinder(raceLogForRace2);
-        AdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        AdditionalScoringInformationEvent event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event != null;
         try {
             raceLogForRace2.revokeEvent(new RaceLogEventAuthorImpl("Plopp", 1), event);
         } catch (NotRevokableException e) {
             e.printStackTrace();
         }
-        event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        event = finder.analyze(/*filterBy*/AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assert event == null;
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         RaceState raceStateForRace2 = RaceStateImpl.create(raceLogForRace2, new RaceLogEventAuthorImpl("Simon", 1));
-        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
-        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
-        assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
+        assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         assertEquals(new Double(28), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(10000)), /*enable*/false, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
-        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(10000)), /*enable*/false, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
+        assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         LeaderboardDTO leaderboardDTO  = null;
@@ -875,7 +875,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         assert leaderboardDTO != null;
         assertEquals(30.0, leaderboardDTO.rows.get(leaderboardDTO.competitors.get(0)).totalPoints, 0.000000000001);
-        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(20000)), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+        raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND.plus(20000)), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         try {
             leaderboardDTO = leaderboardHighPoint10Or8AndLastBreaksTie.getLeaderboardDTO(later.plus(Duration.ONE_HOUR), Collections.<String>emptyList(), false, trackedRegattaRegistry, DomainFactory.INSTANCE, false);
         } catch (InterruptedException e) {

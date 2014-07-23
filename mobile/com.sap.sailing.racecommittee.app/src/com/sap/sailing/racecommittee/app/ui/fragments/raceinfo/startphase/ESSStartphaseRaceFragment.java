@@ -44,11 +44,11 @@ public class ESSStartphaseRaceFragment extends BaseStartphaseRaceFragment<ESSRac
         resetTimeButton.setVisibility(View.INVISIBLE);
         toggleGroupRacing = (ToggleButton) getView().findViewById(R.id.toggle_group_race_mode);
         toggleGroupRacing.setVisibility(View.VISIBLE);
-        toggleGroupRacing.setChecked(getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE));
+        toggleGroupRacing.setChecked(getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         toggleGroupRacing.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/isChecked, AdditionalScoringInformationType.MAX_POINTS_DIMINISH_MAX_SCORE);
+                getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/isChecked, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
             }
         });
     }

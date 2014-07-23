@@ -7,7 +7,7 @@ public enum AdditionalScoringInformationType {
      * maximum number of points is lowered. The concrete amount is
      * decided by the scoring scheme.
      */
-    MAX_POINTS_DIMINISH_MAX_SCORE,
+    MAX_POINTS_DECREASE_MAX_SCORE,
     
     /**
      * Unknown information scoring type - should not be used except
