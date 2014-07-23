@@ -35,9 +35,11 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 
 # Host and port where RabbitMQ is running 
+# queue name is the name of the exchange queue
 # (port is normally something like 5672)
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
+REPLICATE_MASTER_QUEUE_NAME=
 
 # Automatic build and test configuration
 DEPLOY_TO=server
