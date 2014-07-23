@@ -22,10 +22,10 @@
           <div class="{res.mainCss.grid}">
             <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
 	          <g:Anchor ui:field="regattaNameWithLink">
-	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName1" /></h3>
+	              <h3 ui:field="regattaName1" class="{local_res.css.regatta_intro_header_name} {local_res.css.regatta_intro_header_namelink}" />
 	          </g:Anchor>
 	          <g:HTMLPanel ui:field="regattaNameDiv">
-	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName2" /></h3>
+	              <h3 ui:field="regattaName2" class="{local_res.css.regatta_intro_header_name}"></h3>
 	          </g:HTMLPanel>
               <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
               <div ui:field="isFinishedDiv" data-labeltype="finished" class="{res.mainCss.label}"><ui:text from='{i18n.finished}'/></div>
@@ -42,7 +42,7 @@
             </div>
           </div>
         </div>
-        <div class="{local_res.css.regatta_intro_phases}">
+        <div ui:field="regattaPhasesInfoDiv" class="{local_res.css.regatta_intro_phases}">
             <div ui:field="regattaPhasesPanel" />
             <div class="{local_res.css.regatta_intro_phases_leaderboardlink}">
                 <g:Anchor ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></g:Anchor>

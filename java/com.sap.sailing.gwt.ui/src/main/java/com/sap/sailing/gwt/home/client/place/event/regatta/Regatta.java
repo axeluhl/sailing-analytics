@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event.regatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -38,11 +39,13 @@ public class Regatta extends Composite {
     @SuppressWarnings("unused")
     private LeaderboardGroupDTO leaderboardGroup;
 
-    @UiField SpanElement regattaName1;
-    @UiField SpanElement regattaName2;
+    @UiField HeadingElement regattaName1;
+    @UiField HeadingElement regattaName2;
     @UiField DivElement leaderboardGroupName;
     @UiField SpanElement scheduledStart;
     @UiField DivElement regattaPhasesPanel;
+    @UiField DivElement regattaPhasesInfoDiv;
+    
     @UiField SpanElement competitorsCount;
     @UiField SpanElement racesCount;
     @UiField SpanElement trackedRacesCount;
@@ -95,6 +98,7 @@ public class Regatta extends Composite {
         boolean isFinished = !hasLiveRace;
         if(!isFinished) {
             isFinishedDiv.getStyle().setDisplay(Display.NONE);
+            isFinishedDiv2.getStyle().setDisplay(Display.NONE);
         }
         
         String regattaDisplayName = leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name;
@@ -115,14 +119,17 @@ public class Regatta extends Composite {
         racesCount.setInnerText("tbd");
         trackedRacesCount.setInnerText("tbd");
         
-//        regattaPhasesPanel.add(xxx);
         setRegattaProgress();
     }
     
     private void setRegattaProgress() {
-        for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
-            RegattaPhase regattaPhase = new RegattaPhase(series); 
-            regattaPhasesPanel.appendChild(regattaPhase.getElement());
+        if(raceGroup.getSeries().size() == 0) {
+            regattaPhasesInfoDiv.getStyle().setDisplay(Display.NONE);
+        } else {
+            for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
+                RegattaPhase regattaPhase = new RegattaPhase(series); 
+                regattaPhasesPanel.appendChild(regattaPhase.getElement());
+            }
         }
     }
 
