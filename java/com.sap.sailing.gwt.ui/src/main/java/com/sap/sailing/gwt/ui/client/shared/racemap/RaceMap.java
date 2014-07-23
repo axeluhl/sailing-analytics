@@ -883,7 +883,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                     lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
-                if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
+                if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
                     LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
                                                           // area of the map; bug 616
