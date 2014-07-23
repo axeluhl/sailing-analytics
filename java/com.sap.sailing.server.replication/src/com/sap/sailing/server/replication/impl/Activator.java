@@ -32,7 +32,7 @@ public class Activator implements BundleActivator {
         defaultContext = bundleContext;
         String exchangeName = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_NAME);
         String exchangeHost = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_HOST);
-        String queueName 	= System.getProperty(REPLICATE_MASTER_QUEUE_NAME);
+        String queueName    = System.getProperty(REPLICATE_MASTER_QUEUE_NAME);
         if (exchangeName == null) {
             if (System.getenv(REPLICATION_CHANNEL) == null && queueName == null) {
                 exchangeName = "sapsailinganalytics";
