@@ -219,7 +219,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         if (Math.abs(bearHeightSide) > 170.0) {
             vrtSide = (this.upwindLeg ? +1.0 : -1.0);
         }
-        double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*200.0)/200.0;
+        double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*1000.0)/1000.0;
 
         /*if (vrtDist > tgtHeight) {
         // scale last step so that vrtDist ~ tgtHeight
@@ -244,7 +244,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         }
         // calculate horizontal distance as distance of height-position to current position
         //double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
-        double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*200.0)/200.0;
+        double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*1000.0)/1000.0;
 
         //System.out.println(""+hrzDist+", "+vrtDist+", "+pathPos.getPosition().getLatDeg()+", "+pathPos.getPosition().getLngDeg()+", "+posHeight.getLatDeg()+", "+posHeight.getLngDeg());
 
@@ -555,7 +555,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'R').getA();
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
-        double hrzBinSize = (tstDist1 + tstDist2)/3.0; // horizontal bin size in meters
+        double hrzBinSize = (tstDist1 + tstDist2)/6.0; // horizontal bin size in meters
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }
@@ -609,7 +609,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
                     if ((curPath.vrt > 0.0)) {
                         //logger.info("\ntPath: " + curPath.path + "\n      Time: " + (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int)Math.round(Math.floor( (curPath.hrz + hrzBinSize/2.0) / hrzBinSize ));
-                        if ((Math.abs(curBin) <= 1)) {
+                        if ((Math.abs(curBin) <= 2)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }
