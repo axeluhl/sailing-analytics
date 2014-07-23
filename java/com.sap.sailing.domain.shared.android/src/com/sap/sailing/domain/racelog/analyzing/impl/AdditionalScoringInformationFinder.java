@@ -33,7 +33,7 @@ public class AdditionalScoringInformationFinder extends RaceLogAnalyzer<List<Add
      */
     public AdditionalScoringInformationEvent analyze(AdditionalScoringInformationType filterBy) {
         AdditionalScoringInformationEvent result = null;
-        final List<AdditionalScoringInformationEvent> allUnrevokedEventsFromNewestToOldest = performAnalysis();
+        final List<AdditionalScoringInformationEvent> allUnrevokedEventsFromNewestToOldest = analyze();
         for (AdditionalScoringInformationEvent event : allUnrevokedEventsFromNewestToOldest) {
             if (event != null && event.getType() == filterBy) {
                 result = event;
