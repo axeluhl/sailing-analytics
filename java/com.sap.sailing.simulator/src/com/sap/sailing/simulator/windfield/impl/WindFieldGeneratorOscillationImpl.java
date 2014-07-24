@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -32,7 +32,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     
     private static Logger logger = Logger.getLogger(WindFieldGeneratorOscillationImpl.class.getName());
 
-    public WindFieldGeneratorOscillationImpl(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorOscillationImpl(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
 
