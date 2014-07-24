@@ -32,7 +32,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double blastSizeProbability = 70;
     private double blastEdgeProbability = 30;
     private double blastBearingMean = 0;
-    private double blastBearingVar = 8;
+    private double blastBearingVar = 6;
     private double defaultWindSpeed = 0;
     private double defaultWindBearing = 0;
     private SpeedWithBearing defaultSpeedWithBearing;
@@ -164,8 +164,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         //System.out.println("blast speed mean: "+bSpeedMean+" var: "+bSpeedVar);
         //return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
         RandomStream speedStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SPEED.name());
-        return NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar);
-
+        return Math.max(0.5*bSpeedMean, Math.min(1.5*bSpeedMean, NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar)));
     }
 
     private int getBlastSize() {
@@ -177,8 +176,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double getBlastAngle() {
         //return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
         RandomStream bearingStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.BEARING.name());
-        return NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar);
-
+        return Math.max(-1.5*blastBearingVar, Math.min(1.5*blastBearingVar, NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar)));
     }
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {

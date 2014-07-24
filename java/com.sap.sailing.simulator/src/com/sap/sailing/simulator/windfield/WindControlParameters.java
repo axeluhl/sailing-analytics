@@ -140,7 +140,7 @@ public class WindControlParameters implements Serializable {
         
         blastProbability = 25.0;
         maxBlastSize = 1.0;
-        blastWindSpeed = 120.0;
+        blastWindSpeed = 100.0;
         blastWindSpeedVar = 10.0;
         
         if (blastRandomStreamManager == null || !resetBlastRandomStream) {
