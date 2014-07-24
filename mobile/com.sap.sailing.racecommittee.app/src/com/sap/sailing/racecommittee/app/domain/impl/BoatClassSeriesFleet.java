@@ -12,6 +12,7 @@ public class BoatClassSeriesFleet {
     private BoatClass boatClass;
     private SeriesBase series;
     private int seriesOrder;
+    private int fleetOrder;
     private Fleet fleet;
     
     private static BoatClass getBoatClassForRace(ManagedRace managedRace) {
@@ -29,10 +30,15 @@ public class BoatClassSeriesFleet {
         this.boatClass = getBoatClassForRace(race);
         this.series = race.getSeries();
         this.seriesOrder = getSeriesIndex(race, series);
+        this.fleetOrder = getFleetIndex(series.getFleets(), race.getFleet());
         this.fleet = race.getFleet();
     }
 
-    public String getBoatClassName() {
+    private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
+    	return Util.indexOf(fleets, fleet);
+	}
+
+	public String getBoatClassName() {
         return boatClass.getName();
     }
 
@@ -86,6 +92,7 @@ public class BoatClassSeriesFleet {
         result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((series == null) ? 0 : series.hashCode());
         result = prime * result + seriesOrder;
+        result = prime * result + fleetOrder;
         return result;
     }
 
@@ -115,7 +122,13 @@ public class BoatClassSeriesFleet {
             return false;
         if (seriesOrder != other.seriesOrder)
             return false;
+        if (fleetOrder != other.fleetOrder)
+            return false;
         return true;
     }
+
+	public int getFleetOrder() {
+		return fleetOrder;
+	}
     
 }
