@@ -20,7 +20,7 @@ public class BoatClassSeriesDataFleetComparator implements Comparator<BoatClassS
             if (result == 0) {
                 result = nameComparator.compare(left.getSeriesName(), right.getSeriesName());
                 if (result == 0) {
-                    result = Integer.valueOf(left.getFleetOrdering()).compareTo(right.getFleetOrdering());
+                    result = Integer.valueOf(left.getFleetOrder()).compareTo(right.getFleetOrder());
                     if (result == 0) {
                         result = nameComparator.compare(left.getFleetName(), right.getFleetName());
                     }

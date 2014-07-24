@@ -220,7 +220,7 @@ public class SimulatorField implements VectorField {
     private String[] createColorsForSpeeds() {
         String[] colors = new String[256];
         double alphaMin = 0.0;
-        double alphaMax = 1.0;
+        double alphaMax = 0.9;
         int greyValue = 255;
         for (int i = 0; i < 256; i++) {
             colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + ","
