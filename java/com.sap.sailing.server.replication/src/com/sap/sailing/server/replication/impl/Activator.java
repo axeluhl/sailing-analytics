@@ -22,7 +22,6 @@ public class Activator implements BundleActivator {
     public static final String REPLICATE_MASTER_SERVLET_PORT = "replicate.master.servlet.port";
     public static final String REPLICATE_MASTER_QUEUE_HOST = "replicate.master.queue.host";
     public static final String REPLICATE_MASTER_QUEUE_PORT = "replicate.master.queue.port";
-    public static final String REPLICATE_MASTER_QUEUE_NAME = "replicate.master.queue.name";
 
     private ReplicationInstancesManager replicationInstancesManager;
     
@@ -32,12 +31,11 @@ public class Activator implements BundleActivator {
         defaultContext = bundleContext;
         String exchangeName = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_NAME);
         String exchangeHost = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_HOST);
-        String queueName    = System.getProperty(REPLICATE_MASTER_QUEUE_NAME);
         if (exchangeName == null) {
-            if (System.getenv(REPLICATION_CHANNEL) == null && queueName == null) {
+            if (System.getenv(REPLICATION_CHANNEL) == null) {
                 exchangeName = "sapsailinganalytics";
-            } else if (queueName != null ){
-            	exchangeName = queueName; 
+            } else {
+                exchangeName = System.getenv(REPLICATION_CHANNEL);
             }
         }
         if (exchangeHost == null) {
