@@ -35,10 +35,10 @@ public class BoatClassSeriesFleet {
     }
 
     private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
-    	return Util.indexOf(fleets, fleet);
-	}
+        return Util.indexOf(fleets, fleet);
+    }
 
-	public String getBoatClassName() {
+    public String getBoatClassName() {
         return boatClass.getName();
     }
 
@@ -127,8 +127,8 @@ public class BoatClassSeriesFleet {
         return true;
     }
 
-	public int getFleetOrder() {
-		return fleetOrder;
-	}
-    
+    public int getFleetOrder() {
+        return fleetOrder;
+    }
+
 }
