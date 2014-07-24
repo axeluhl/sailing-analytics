@@ -113,7 +113,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         //
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind3 genTreeGrow = new PathGeneratorTreeGrowWind3(this.simulationParameters);
+        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(this.simulationParameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);

@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind3;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -62,7 +62,7 @@ public class TreeGrowTest {
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowWind3 treeGrow = new PathGeneratorTreeGrowWind3(param);
+        PathGeneratorTreeGrowWind treeGrow = new PathGeneratorTreeGrowWind(param);
 
         Path path = treeGrow.getPath();
 
