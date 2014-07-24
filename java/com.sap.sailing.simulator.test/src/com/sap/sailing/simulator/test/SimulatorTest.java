@@ -20,7 +20,7 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
+import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -43,8 +43,8 @@ public class SimulatorTest {
         course.add(end);
         PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
         
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        Position[][] positions = bd.extractGrid(10, 10, 0, 0);
+        RectangularGrid bd = new RectangularGrid(start, end);
+        Position[][] positions = bd.generatePositions(10, 10, 0, 0);
         Bearing windBear = end.getBearingGreatCircle(start);
         WindControlParameters windParameters = new WindControlParameters(12.0, windBear.getDegrees());
         WindFieldGenerator wf = new WindFieldGeneratorBlastImpl(bd, windParameters);

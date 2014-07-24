@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
+import com.sap.sailing.simulator.impl.RectangularGrid;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
@@ -51,11 +51,11 @@ public class WindFieldGeneratorTest {
         course.add(end);
 
         WindControlParameters windParameters = new WindControlParameters(3, 180);
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        RectangularGrid bd = new RectangularGrid(start, end);
         WindFieldGeneratorImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
-        Position[][] positions = bd.extractGrid(hSteps, vSteps, 0, 0);
+        Position[][] positions = bd.generatePositions(hSteps, vSteps, 0, 0);
         assert (positions.length*positions[0].length == hSteps * vSteps);
         int index = 0;
         for (int i = 0; i < positions.length; ++i) {
@@ -63,7 +63,7 @@ public class WindFieldGeneratorTest {
                 logger.info("P" + ++index + ":" + positions[i][j]);
             }
         }
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
+        wf.setPositionGrid(bd.generatePositions(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         assertNotNull("Position Grid is not null", positionGrid);
         assertEquals("Position Grid Number of Rows", vSteps, positionGrid.length);
@@ -91,13 +91,13 @@ public class WindFieldGeneratorTest {
         windParameters.frequency = 0.375;
         windParameters.amplitude = 20.0;
 
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        RectangularGrid bd = new RectangularGrid(start, end);
         WindFieldGeneratorOscillationImpl wf = new WindFieldGeneratorOscillationImpl(bd, windParameters);
       
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
+        wf.setPositionGrid(bd.generatePositions(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         Duration timeStep = new MillisecondsDurationImpl(30 * 1000);
@@ -235,12 +235,12 @@ public class WindFieldGeneratorTest {
         windParameters.blastWindSpeed = 0.0;
         windParameters.blastWindSpeedVar = 0.0;
 
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        RectangularGrid bd = new RectangularGrid(start, end);
         WindFieldGeneratorCombined wf = new WindFieldGeneratorCombined(bd, windParameters);
         int hSteps = 30;
         int vSteps = 15;
 
-        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps, 0, 0));
+        wf.setPositionGrid(bd.generatePositions(hSteps, vSteps, 0, 0));
         Position[][] positionGrid = wf.getPositionGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         Duration timeStep = new MillisecondsDurationImpl(30 * 1000);
