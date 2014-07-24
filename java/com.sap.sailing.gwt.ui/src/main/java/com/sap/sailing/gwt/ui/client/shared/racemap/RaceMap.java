@@ -1587,7 +1587,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                         multiply(factorForAfter)).divide(1).getDegrees();
                     }
                     SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
-                            factorForBefore*fixBefore.speedWithBearing.speedInKnots + factorForAfter*fixAfter.speedWithBearing.speedInKnots,
+                            factorForBefore*(fixBefore.speedWithBearing==null?0:fixBefore.speedWithBearing.speedInKnots) +
+                            factorForAfter*(fixAfter.speedWithBearing==null?0:fixAfter.speedWithBearing.speedInKnots),
                             betweenBearing);
                     result = new GPSFixDTO(date, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
                             closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
