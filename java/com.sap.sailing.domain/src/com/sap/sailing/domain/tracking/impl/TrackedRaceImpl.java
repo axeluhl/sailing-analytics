@@ -1378,7 +1378,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
                             Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
                             if (firstLegStart != null && firstLegEnd != null) {
-                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
                                         firstLegEnd.getBearingGreatCircle(firstLegStart)));
                             } else {
                                 result = null;

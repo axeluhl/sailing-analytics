@@ -7,13 +7,13 @@ import java.io.Serializable;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 
 public interface WindFieldGenerator extends WindField, Serializable {
     
     public WindControlParameters getWindParameters();
 
-    public void setBoundary(Boundary boundary);
+    public void setBoundary(Grid boundary);
 
     public void setPositionGrid(Position[][] positions);
     
