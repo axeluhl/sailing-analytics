@@ -42,9 +42,10 @@ public class EventRegattaList extends Composite {
         for (RaceGroupDTO raceGroup: raceGroups) {
             Regatta regatta = new Regatta(event, true, timerForClientServerOffset, pageNavigator);
             Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO> leaderboardWithLeaderboardGroup = leaderboardsWithLeaderboardGroup.get(raceGroup.getName());
-            regatta.setData(raceGroup, leaderboardWithLeaderboardGroup != null ? leaderboardWithLeaderboardGroup.getA() : null,
-                    leaderboardWithLeaderboardGroup != null ? leaderboardWithLeaderboardGroup.getB() : null);
-            regattaListItemsDiv.appendChild(regatta.getElement());
+            if(leaderboardWithLeaderboardGroup != null) {
+                regatta.setData(raceGroup, leaderboardWithLeaderboardGroup.getA(), leaderboardWithLeaderboardGroup.getB());
+                regattaListItemsDiv.appendChild(regatta.getElement());
+            }
         }
     }
 }
