@@ -55,7 +55,9 @@ public class EventRegattaRaces extends Composite {
                 regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
             }
         } else {
-            
+            RaceGroupSeriesDTO raceGroupSeriesDTO = raceGroup.getSeries().get(0);
+            EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, timerForClientServerOffset, pageNavigator); 
+            regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
         }
     }
 }
