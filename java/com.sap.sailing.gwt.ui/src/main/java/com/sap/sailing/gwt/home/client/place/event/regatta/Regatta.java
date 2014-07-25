@@ -12,7 +12,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -21,10 +22,10 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class Regatta extends UIObject {
+public class Regatta extends Composite {
     private static RegattaUiBinder uiBinder = GWT.create(RegattaUiBinder.class);
 
-    interface RegattaUiBinder extends UiBinder<DivElement, Regatta> {
+    interface RegattaUiBinder extends UiBinder<Widget, Regatta> {
     }
 
     @SuppressWarnings("unused")
@@ -75,7 +76,7 @@ public class Regatta extends UIObject {
 //        competitorWithRank3 = new RegattaCompetitor(3, null);
         
         RegattaResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
 
         if(isNavigatable) {
             regattaDiv.setAttribute("data-rendermode", "link");

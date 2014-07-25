@@ -8,9 +8,7 @@
     <g:HTMLPanel ui:field="rootPanel">
 
 <!-- The races of races for a day-->
-<!-- 
 <s:regatta.Regatta ui:field="regatta" />
- -->
 <div class="{local_res.css.regattanavigation}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
