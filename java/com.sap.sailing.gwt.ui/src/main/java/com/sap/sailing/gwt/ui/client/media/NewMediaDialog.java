@@ -147,13 +147,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
                 String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
         
-                try {
-                    mediaTrack.mimeType = MimeType.valueOf(fileEnding);
-                } catch (IllegalArgumentException e) {
-                    // ignore. TODO: Somehow put it into the error message.
-                    // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
-                    mediaTrack.mimeType = null;
-                }
+                mediaTrack.mimeType = MimeType.byName(fileEnding);
             } else {
                 mediaTrack.title = mediaTrack.url;
                 mediaTrack.mimeType = null;

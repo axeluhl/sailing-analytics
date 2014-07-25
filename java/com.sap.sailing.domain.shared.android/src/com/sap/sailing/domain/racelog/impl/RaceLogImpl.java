@@ -153,7 +153,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             RevokeEvent revokeEvent = (RevokeEvent) newEvent;
             try {
                 checkIfSuccessfullyRevokes(revokeEvent);
-
                 lockForWrite();
                 revokedEventIds.add(revokeEvent.getRevokedEventId());
                 unlockAfterWrite();
@@ -169,15 +168,20 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         unlockAfterRead();
 
         if (revokedEvent == null) {
-            throw new NotRevokableException("RevokeEvent added, that refers to non-existent event to be revoked");
-        }
+            // it can happen that the event that has been revoked is not yet loaded - as we assume
+            // that race log events never get removed we can safely continue and assume that
+            // the event will be loaded later
+            logger.warning("RevokeEvent for "+revokeEvent.getShortInfo()+" added, that refers to non-existent event to be revoked. Could also happen that the revoke event is before the event to be revoked.");
+        } else {
+            if (! (revokedEvent instanceof Revokable)) {
+                throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
+            }
 
-        if (! (revokedEvent instanceof Revokable)) {
-            throw new NotRevokableException("RevokeEvent trying to revoke non-revokable event");
-        }
-
-        if (getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) <= 0) {
-            throw new NotRevokableException("RevokeEvent does not have sufficient priority");
+            // make sure to compare only author priorities - assuming that revoke events are
+            // independent of passes and times
+            if (revokeEvent.getAuthor().compareTo(revokedEvent.getAuthor()) < 0) {
+                throw new NotRevokableException("RevokeEvent does not have sufficient priority");
+            }
         }
     }
 
@@ -301,7 +305,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             try {
                 for (RaceLogEvent event : getRawFixes()) {
                     if (event instanceof RevokeEvent) {
-                        revokedEventIds.add(event.getId());
+                        revokedEventIds.add(((RevokeEvent)event).getRevokedEventId());
                     }
                 }
             } finally {
