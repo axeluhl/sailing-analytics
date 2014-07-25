@@ -10,7 +10,7 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.regatta_intro}">
-          <a ui:field="regattaImageWithLink">
+          <a href="javascript:;" ui:field="regattaImageWithLink">
 	          <img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140"  class="{local_res.css.regatta_intro_image}"></img>
           </a>
           <div ui:field="regattaImageWithoutLink">
@@ -19,7 +19,7 @@
         <div class="{local_res.css.regatta_intro_header}">
           <div class="{res.mainCss.grid}">
             <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
-	          <a ui:field="regattaNameWithLink">
+	          <a href="javascript:;" ui:field="regattaNameWithLink">
 	              <h3 ui:field="regattaName1" class="{local_res.css.regatta_intro_header_name} {local_res.css.regatta_intro_header_namelink}" />
 	          </a>
 	          <div ui:field="regattaNameWithoutLink">
@@ -43,7 +43,7 @@
         <div ui:field="regattaPhasesInfoDiv" class="{local_res.css.regatta_intro_phases}">
             <div ui:field="regattaPhasesPanel" />
             <div class="{local_res.css.regatta_intro_phases_leaderboardlink}">
-                <a ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></a>
+                <a href="javascript:;" ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></a>
 			</div>
         </div>
         <div ui:field="isScheduledDiv" class="{local_res.css.regatta_intro_scheduled}">

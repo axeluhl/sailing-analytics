@@ -80,7 +80,6 @@ public class Regatta extends UIObject {
         if(isNavigatable) {
             regattaDiv.setAttribute("data-rendermode", "link");
             regattaImageWithoutLink.getStyle().setDisplay(Display.NONE);
-            
             regattaNameWithoutLink.getStyle().setDisplay(Display.NONE);
         } else {
             regattaImageWithLink.getStyle().setDisplay(Display.NONE);
@@ -162,17 +161,5 @@ public class Regatta extends UIObject {
                 pageNavigator.goToRegattaRaces(raceGroup, leaderboard);
             }
         });
-
-        
     }
-    
-//    
-//    @UiHandler("regattaImageWithLink")
-//    public void goToRegattaRaces(ClickEvent e) {
-//        pageNavigator.goToRegattaRaces(raceGroup, leaderboard);
-//    }
-//
-//    @UiHandler("regattaNameWithLink")
-//    public void goToRegattaRaces2(ClickEvent e) {
-//    }
 }
