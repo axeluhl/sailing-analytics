@@ -1006,4 +1006,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

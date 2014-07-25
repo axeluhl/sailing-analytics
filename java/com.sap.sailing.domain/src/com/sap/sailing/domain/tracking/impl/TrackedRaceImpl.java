@@ -3086,4 +3086,29 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public GPSFixStore getGPSFixStore() {
     	return gpsFixStore;
     }
+
+    @Override
+    public Position getCenterOfCourse(TimePoint at) {
+        int count = 0;
+        ScalablePosition sum = null;
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            if (waypointPosition != null) {
+                ScalablePosition p = new ScalablePosition(waypointPosition);
+                if (sum == null) {
+                    sum = p;
+                } else {
+                    sum = sum.add(p);
+                }
+            }
+        }
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
+        }
+        return result;
+    }
+    
 }

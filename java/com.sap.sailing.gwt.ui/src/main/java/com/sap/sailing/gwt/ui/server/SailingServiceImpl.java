@@ -1302,7 +1302,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
      */
     private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, TrackedRace trackedRace, boolean onlyUpToNewestEvent,
+            Collection<String> windSourceTypeNames, final TrackedRace trackedRace, boolean onlyUpToNewestEvent,
             boolean includeCombinedWindForAllLegMiddles) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
@@ -1320,12 +1320,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
             final WindSource combinedWindSource = new WindSourceImpl(WindSourceType.COMBINED);
             windSourcesToDeliver.add(combinedWindSource);
-            for (WindSource windSource : windSourcesToDeliver) {
+            for (final WindSource windSource : windSourcesToDeliver) {
                 // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
                             numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource,
-                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) { return null; }});
+                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) {
+                                return windSource == combinedWindSource ? trackedRace.getCenterOfCourse(at) : null;
+                            }});
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
