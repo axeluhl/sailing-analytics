@@ -1287,10 +1287,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return shortTimeWindCache.getWind(p, at);
-    }
-    
-    Wind getWindUncached(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());
     }
 
@@ -1335,6 +1331,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude) {
+        return shortTimeWindCache.getWindWithConfidence(p, at, windSourcesToExclude);
+    }
+    
+    public WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidenceUncached(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<com.sap.sse.common.Util.Pair<Position, TimePoint>> weigher = new PositionAndTimePointWeigher(

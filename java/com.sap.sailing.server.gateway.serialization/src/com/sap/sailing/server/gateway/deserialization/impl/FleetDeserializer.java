@@ -10,23 +10,21 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 
 public class FleetDeserializer implements JsonDeserializer<Fleet> {
+    private JsonDeserializer<Color> colorDeserializer;
 
-	private JsonDeserializer<Color> colorDeserializer;
-	
-	public FleetDeserializer(JsonDeserializer<Color> colorDeserializer) {
-		this.colorDeserializer = colorDeserializer;
-	}
+    public FleetDeserializer(JsonDeserializer<Color> colorDeserializer) {
+        this.colorDeserializer = colorDeserializer;
+    }
 
-	public Fleet deserialize(JSONObject object)
-			throws JsonDeserializationException {
-		Color color = null;
-		if (object.containsKey(FleetJsonSerializer.FIELD_COLOR)) {
-			color = colorDeserializer.deserialize(Helpers.getNestedObjectSafe(object, FleetJsonSerializer.FIELD_COLOR));
-		}
-		String name = object.get(FleetJsonSerializer.FIELD_NAME).toString();
-		Number ordering = (Number) object.get(FleetJsonSerializer.FIELD_ORDERING);
-		
-		return new FleetImpl(name, ordering.intValue(), color);
-	}
-	
+    public Fleet deserialize(JSONObject object) throws JsonDeserializationException {
+        Color color = null;
+        if (object.containsKey(FleetJsonSerializer.FIELD_COLOR)) {
+            color = colorDeserializer.deserialize(Helpers.getNestedObjectSafe(object, FleetJsonSerializer.FIELD_COLOR));
+        }
+        String name = object.get(FleetJsonSerializer.FIELD_NAME).toString();
+        Number ordering = (Number) object.get(FleetJsonSerializer.FIELD_ORDERING);
+
+        return new FleetImpl(name, ordering.intValue(), color);
+    }
+
 }
