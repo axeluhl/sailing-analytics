@@ -33,7 +33,9 @@
               <div class="{local_res.css.regatta_intro_header_details}">
                 <div class="{local_res.css.regatta_intro_header_details_item}"><ui:text from='{i18n.regattaCompetitors}'/>&nbsp;<span class="{local_res.css.regatta_intro_header_details_item_value}"><span ui:field="competitorsCount" /></span></div>
                 <div class="{local_res.css.regatta_intro_header_details_item}"><ui:text from='{i18n.regattaRaces}'/>&nbsp;<span class="{local_res.css.regatta_intro_header_details_item_value}"><span ui:field="racesCount" /></span></div>
+                <!-- 
                 <div class="{local_res.css.regatta_intro_header_details_item}"><ui:text from='{i18n.regattaTracked}'/>&nbsp;<span class="{local_res.css.regatta_intro_header_details_item_value}"><span ui:field="trackedRacesCount" /></span></div>
+                 -->
                 <div class="{local_res.css.regatta_intro_header_details_item}">
                   <div ui:field="leaderboardGroupName" data-labeltype="" class="{local_res.css.regatta_intro_header_details_label} {res.mainCss.label}"></div>
                 </div>
@@ -47,19 +49,19 @@
                 <a href="javascript:;" ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></a>
 			</div>
         </div>
+        <!-- 
         <div ui:field="isScheduledDiv" class="{local_res.css.regatta_intro_scheduled}">
             <ui:text from='{i18n.regattaRegattaStarts}'/>:&nbsp;<span ui:field="scheduledStart" />
         </div>
         <div ui:field="isFinishedDiv2" class="{local_res.css.regatta_intro_results}">
-            <!-- 
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank1" />
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank2" />
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank3" />
-             -->
         </div>
         <table ui:field="isLiveDiv2" class="{local_res.css.regatta_intro_fleets}">
             <div ui:field="liveRaceInfosPerFleetPanel" />
         </table>
+		-->
       </div>
     </div>
   </div>
