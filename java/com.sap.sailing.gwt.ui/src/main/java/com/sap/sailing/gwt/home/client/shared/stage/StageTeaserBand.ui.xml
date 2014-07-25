@@ -5,15 +5,11 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.stage.StageResources" />
-    <g:HTMLPanel>
-
 <div class="{local_res.css.stageteaser_content_band_item} {res.mediaCss.columns}">
   <div class="{local_res.css.stageteaser_content_band_text}">
     <div class="{local_res.css.stageteaser_content_band_text_headline}"><span ui:field="bandTitle" /></div>
     <div class="{local_res.css.stageteaser_content_band_text_name}"><span ui:field="bandSubtitle" /></div>
   </div>
-  <g:Anchor ui:field="actionLink" styleName="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
+  <a href="javascript:;" ui:field="actionLink" class="{res.mainCss.button} {local_res.css.stageteaser_content_band_action}" />
 </div>
-
-</g:HTMLPanel>
 </ui:UiBinder>

@@ -18,7 +18,7 @@ public class LiveEventStageTeaser extends StageTeaser {
         
         bandCount.setAttribute("data-bandcount", "1");
         
-        stageTeaserBandsPanel.add(new LiveStageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.getElement().appendChild(new LiveStageTeaserBand(event, placeNavigator).getElement());
     }
 
 }
