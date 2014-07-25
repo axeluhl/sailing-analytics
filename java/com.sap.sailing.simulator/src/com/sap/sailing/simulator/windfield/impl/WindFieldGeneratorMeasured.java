@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
@@ -30,7 +30,7 @@ public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implement
     //        super();
     //    }
 
-    public WindFieldGeneratorMeasured(Boundary boundary, WindControlParameters windParameters) {
+    public WindFieldGeneratorMeasured(Grid boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
 

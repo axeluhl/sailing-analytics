@@ -1,7 +1,7 @@
 package com.sap.sailing.simulator.windfield.impl;
 
 
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
@@ -9,7 +9,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 public class WindFieldGeneratorFactoryImpl implements WindFieldGeneratorFactory {
 
     @Override
-    public WindFieldGenerator createWindFieldGenerator(String patternName, Boundary boundary,
+    public WindFieldGenerator createWindFieldGenerator(String patternName, Grid boundary,
             WindControlParameters windParameters) {
         if (patternName.equals("BLASTS")) {
             return new WindFieldGeneratorBlastImpl(boundary, windParameters);

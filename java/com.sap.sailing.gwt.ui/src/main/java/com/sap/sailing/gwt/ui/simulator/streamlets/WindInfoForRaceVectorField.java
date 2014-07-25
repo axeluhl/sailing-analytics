@@ -156,7 +156,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public double getMotionScale(int zoomLevel) {
         // This implementation is copied from SimulatorField, hoping it does something useful in combination with
         // the Swarm implementation.
-        return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+        return 0.05 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
     
     @Override
@@ -170,7 +170,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public double getLineWidth(double speed) {
-        return 3.*speed/MAX_WIND_SPEED_IN_KNOTS;
+        return 1.2;
     }
 
     @Override
@@ -180,7 +180,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
 
     @Override
     public double getParticleFactor() {
-        return 1.0;
+        return 0.5;
     }
 
     /**
@@ -188,7 +188,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public String getColor(double speed) {
-        return "rgba(255,255,255,"+Math.min(255, Math.round(255.*speed/MAX_WIND_SPEED_IN_KNOTS))+")";
+        return "rgba(255,255,255,"+Math.min(1.0, 0.4+0.8*speed/MAX_WIND_SPEED_IN_KNOTS)+")";
     }
 
 }
