@@ -20,13 +20,15 @@ public class EventRegattaRaces extends Composite {
     interface EventRegattaRacesUiBinder extends UiBinder<Widget, EventRegattaRaces> {
     }
 
-    @UiField(provided=true) Regatta regatta;
+//    @UiField(provided=true) Regatta regatta;
     @UiField HTMLPanel regattaPhasesNavigationPanel;   
-    @UiField HTMLPanel regattaPhasesPanel;   
+    @UiField HTMLPanel regattaPhasesPanel;
+    @UiField HTMLPanel rootPanel;
     
     @SuppressWarnings("unused")
     private final EventDTO event;
-    
+
+    private final Regatta regatta;
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
 
@@ -39,6 +41,8 @@ public class EventRegattaRaces extends Composite {
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
+        rootPanel.getElement().appendChild(regatta.getElement());
     }
     
     public void setRacesFromRaceGroup(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {

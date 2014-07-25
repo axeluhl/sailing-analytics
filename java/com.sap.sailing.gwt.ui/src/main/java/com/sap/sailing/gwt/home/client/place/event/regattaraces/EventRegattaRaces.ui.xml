@@ -5,10 +5,12 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaraces.EventRegattaRacesResources" />
-    <g:HTMLPanel>
+    <g:HTMLPanel ui:field="rootPanel">
 
 <!-- The races of races for a day-->
+<!-- 
 <s:regatta.Regatta ui:field="regatta" />
+ -->
 <div class="{local_res.css.regattanavigation}">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">

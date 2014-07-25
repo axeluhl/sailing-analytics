@@ -103,8 +103,8 @@ figcaption {
 .stackenblochen .stackenblochen {
   width: auto;
   max-width: none;
-  margin-left: -1rem;
-  margin-right: -1rem;
+  margin-left: literal("-1rem");
+  margin-right: literal("-1rem");
 }
 
 .navbar {
