@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog;
 
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -51,4 +52,6 @@ public interface RaceLogEventVisitor {
     public void visit(DefineMarkEvent event);
     
     public void visit(CloseOpenEndedDeviceMappingEvent event);
+
+    public void visit(AdditionalScoringInformationEvent additionalScoringInformation);
 }

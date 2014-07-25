@@ -27,7 +27,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
     @UiField SocialFooter socialFooter;
-
+    
     public TabletAndDesktopStartView(PlaceNavigator navigator) {
         stage = new Stage(navigator);
 //        mainSponsors = new MainSponsors(navigator);
@@ -40,6 +40,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     @Override
     public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
         stage.setFeaturedEvents(featuredEvents);
+        mainMedia.setFeaturedEvents(featuredEvents);
     }
 
     @Override
@@ -47,4 +48,5 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         mainEvents.setRecentEvents(recentEvents);
         mainMedia.setRecentEvents(recentEvents);
     }
+
 }

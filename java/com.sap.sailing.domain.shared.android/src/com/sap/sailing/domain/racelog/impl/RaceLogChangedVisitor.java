@@ -14,4 +14,5 @@ public class RaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
     protected void notifyListenerAboutEventAdded(RaceLogEvent event) {
         listener.eventAdded(event);
     }
+
 }

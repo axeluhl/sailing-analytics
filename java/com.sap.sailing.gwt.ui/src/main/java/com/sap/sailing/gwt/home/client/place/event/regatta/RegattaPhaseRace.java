@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 
 public class RegattaPhaseRace extends UIObject {
     private static RegattaPhaseRaceUiBinder uiBinder = GWT.create(RegattaPhaseRaceUiBinder.class);
@@ -14,10 +15,10 @@ public class RegattaPhaseRace extends UIObject {
 
     @UiField DivElement raceStatus;
     
-    public RegattaPhaseRace() {
+    public RegattaPhaseRace(RaceColumnDTO raceColumn) {
         RegattaResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
-        raceStatus.setAttribute("data-status", "raceStatus");
+        raceStatus.setAttribute("data-status", "finished");
     }
 }

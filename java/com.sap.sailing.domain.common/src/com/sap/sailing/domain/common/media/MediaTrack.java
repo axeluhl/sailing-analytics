@@ -28,6 +28,15 @@ public class MediaTrack implements Serializable {
         public String toString() {
             return mediaType.name() + '/' + mediaSubType.toString();
         }
+
+        public static MimeType byName(String mimeTypeName) {
+            try {
+                return MimeType.valueOf(mimeTypeName);
+            } catch (IllegalArgumentException ex) {
+                return null;
+            }
+        }
+        
     }
     
     public enum MediaType {

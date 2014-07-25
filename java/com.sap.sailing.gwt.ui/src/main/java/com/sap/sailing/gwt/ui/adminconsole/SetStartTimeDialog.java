@@ -100,7 +100,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     private Widget createInputPanel() {
         Grid content = new Grid(5, 2);
         timeBox = createDateTimeBox(new Date());
-        timeBox.setFormat("dd/mm/yyyy hh:ii");
+        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
         

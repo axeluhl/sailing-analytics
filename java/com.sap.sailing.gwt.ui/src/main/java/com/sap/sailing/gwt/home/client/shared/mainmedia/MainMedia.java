@@ -16,9 +16,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
 import com.sap.sailing.gwt.idangerous.Swiper;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.common.Util.Pair;
 
 public class MainMedia extends Composite {
     
@@ -30,6 +32,7 @@ public class MainMedia extends Composite {
     @UiField HTMLPanel mediaSlides;
 
     private Swiper swiper;
+    private int videoCounter;
     
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
@@ -37,28 +40,28 @@ public class MainMedia extends Composite {
     private static MainMediaUiBinder uiBinder = GWT.create(MainMediaUiBinder.class);
 
     public MainMedia(PlaceNavigator navigator) {
+        videoCounter = 0;
         
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
+    }
+
+    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
+        for(Pair<StageEventType, EventBaseDTO> featuredEventTypeAndEvent: featuredEvents) {
+            if(featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && videoCounter < 3) {
+                addVideoToVideoPanel(featuredEventTypeAndEvent.getB());
+            }
+        }
     }
 
     public void setRecentEvents(List<EventBaseDTO> recentEvents) {
         List<String> photoGalleryUrls = new ArrayList<String>();
         
-        int videoCounter = 0;
         for(EventBaseDTO event: recentEvents) {
             photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
-            
+
             if(event.getVideoURLs().size() > 0 && videoCounter < 3) {
-                String eventName = event.getName();
-                String youtubeUrl = event.getVideoURLs().get(0);
-                String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
-                if (youtubeId != null && !youtubeId.trim().isEmpty()) {
-                    MainMediaVideo video = new MainMediaVideo(eventName, youtubeId);
-                    videosPanel.add(video);
-                    videoCounter++;
-                }
+                addVideoToVideoPanel(event);
             }
         }
 
@@ -78,7 +81,35 @@ public class MainMedia extends Composite {
         }
         
         this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+    }
 
+    private void addVideoToVideoPanel(EventBaseDTO event) {
+        String youtubeUrl = getRandomVideoURL(event);
+        String eventName = event.getName();
+        String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
+        if (youtubeId != null && !youtubeId.trim().isEmpty()) {
+            MainMediaVideo video = new MainMediaVideo(eventName, youtubeId);
+            videosPanel.add(video);
+            videoCounter++;
+        }
+    }
+    
+    private String getRandomVideoURL(EventBaseDTO event) {
+        String result = null;
+        int videosCount = event.getVideoURLs().size();
+        if(videosCount > 0) {
+            if(videosCount == 1) {
+                result = event.getVideoURLs().get(0);
+            } else {
+                List<String> videoUrls = new ArrayList<String>(event.getVideoURLs());
+                Random random = new Random(videosCount);  
+                for(int i = 0; i < videosCount; i++) {  
+                    Collections.swap(videoUrls, i, random.nextInt(videosCount));  
+                }
+                result = videoUrls.get(0);
+            }                
+        }
+        return result;
     }
 
     @UiHandler("nextPictureLink")
@@ -94,5 +125,4 @@ public class MainMedia extends Composite {
             this.swiper.swipePrev();
         }
     }
-
 }
