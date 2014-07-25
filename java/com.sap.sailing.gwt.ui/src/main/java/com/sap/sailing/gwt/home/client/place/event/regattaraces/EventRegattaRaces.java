@@ -22,11 +22,12 @@ public class EventRegattaRaces extends Composite {
 
     @UiField(provided=true) Regatta regatta;
     @UiField HTMLPanel regattaPhasesNavigationPanel;   
-    @UiField HTMLPanel regattaPhasesPanel;   
+    @UiField HTMLPanel regattaPhasesPanel;
+    @UiField HTMLPanel rootPanel;
     
     @SuppressWarnings("unused")
     private final EventDTO event;
-    
+
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
 
@@ -51,7 +52,9 @@ public class EventRegattaRaces extends Composite {
                 regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
             }
         } else {
-            
+            RaceGroupSeriesDTO raceGroupSeriesDTO = raceGroup.getSeries().get(0);
+            EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, timerForClientServerOffset, pageNavigator); 
+            regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
         }
     }
 }

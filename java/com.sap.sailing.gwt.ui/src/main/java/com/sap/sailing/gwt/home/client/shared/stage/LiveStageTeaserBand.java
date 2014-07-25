@@ -1,14 +1,12 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class LiveStageTeaserBand extends StageTeaserBand {
 
-    public LiveStageTeaserBand(EventDTO event, PlaceNavigator placeNavigator) {
+    public LiveStageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getName());
@@ -18,9 +16,9 @@ public class LiveStageTeaserBand extends StageTeaserBand {
         actionLink.setText("Show event");
     }
 
-    @UiHandler("actionLink")
-    public void actionLinkClicked(ClickEvent e) {
-        EventDTO event = getEvent();
+    @Override
+    public void actionLinkClicked() {
+        EventBaseDTO event = getEvent();
         getPlaceNavigator().goToEvent(event.id.toString(), event.getBaseURL());
     }
 }
