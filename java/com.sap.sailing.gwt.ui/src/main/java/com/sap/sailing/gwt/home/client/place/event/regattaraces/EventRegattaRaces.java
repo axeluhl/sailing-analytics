@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -39,6 +40,7 @@ public class EventRegattaRaces extends Composite {
         regatta = new Regatta(event, false, timerForClientServerOffset, pageNavigator);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 25em) { "+EventRegattaRacesResources.INSTANCE.mediumCss().getText()+"}");
         initWidget(uiBinder.createAndBindUi(this));
     }
     

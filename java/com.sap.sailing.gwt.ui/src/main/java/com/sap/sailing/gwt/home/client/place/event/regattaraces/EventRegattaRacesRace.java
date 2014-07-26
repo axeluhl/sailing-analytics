@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -29,9 +30,9 @@ public class EventRegattaRacesRace extends UIObject {
 
     @UiField DivElement fleetColor;
     @UiField SpanElement raceName;
-//    @UiField SpanElement raceName2;
-//    @UiField SpanElement raceState;
-//    @UiField SpanElement raceTime;
+    @UiField SpanElement raceName2;
+    @UiField SpanElement raceState;
+    @UiField SpanElement raceTime;
     @UiField SpanElement averageRaceWind;
     
     @UiField DivElement raceNotTrackedDiv;
@@ -57,7 +58,7 @@ public class EventRegattaRacesRace extends UIObject {
     
     // local_res.css.eventregattarace_featureunavailable
     
-//    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
+    private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
 //    private final TextMessages textMessages = GWT.create(TextMessages.class);
     
     private final StrippedLeaderboardDTO leaderboard;
@@ -86,7 +87,7 @@ public class EventRegattaRacesRace extends UIObject {
         }
         
         raceName.setInnerText(raceColumn.getName());
-//        raceName2.setInnerText(raceColumn.getName());
+        raceName2.setInnerText(raceColumn.getName());
 
         registerEvents();
         updateUI();    
@@ -116,7 +117,7 @@ public class EventRegattaRacesRace extends UIObject {
         RaceDTO race = raceColumn.getRace(fleet);
         if(race != null && race.trackedRace != null) {
             simpleRaceState = isLive() ? SimpleRaceStates.TRACKED_AND_LIVE : SimpleRaceStates.TRACKED_AND_NOT_LIVE; 
-//            String startOfTrackingTime = raceTimeFormat.format(race.trackedRace.startOfTracking);
+            String startOfTrackingTime = raceTimeFormat.format(race.trackedRace.startOfTracking);
         }
         return simpleRaceState;
     }
