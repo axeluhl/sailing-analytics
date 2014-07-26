@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +40,7 @@ public class TrackedRaceCenterTest {
     private Mark mark2;
     private Waypoint wp1;
     private Waypoint wp2;
+    private Course course;
     private DynamicGPSFixTrack<Mark, GPSFix> mark1Track;
     private DynamicGPSFixTrack<Mark, GPSFix> mark2Track;
     private DynamicTrackedRaceImpl trackedRace;
@@ -50,7 +52,7 @@ public class TrackedRaceCenterTest {
         when(trackedRace.getApproximatePosition(Matchers.any(Waypoint.class), Matchers.any(TimePoint.class))).thenCallRealMethod();
         RaceDefinition race = mock(RaceDefinition.class);
         when(trackedRace.getRace()).thenReturn(race);
-        Course course = mock(Course.class);
+        course = mock(Course.class);
         when(race.getCourse()).thenReturn(course);
         mark1 = new MarkImpl("1");
         mark2 = new MarkImpl("2");
@@ -73,5 +75,25 @@ public class TrackedRaceCenterTest {
         Position center = trackedRace.getCenterOfCourse(now);
         assertEquals(15, center.getLatDeg(), 0.00001);
         assertEquals(10, center.getLngDeg(), 0.00001);
+    }
+
+    @Test
+    public void testTriangle() {
+        Mark mark3 = new MarkImpl("3");
+        Waypoint wp3 = new WaypointImpl(mark3);
+        when(course.getWaypoints()).thenReturn(Arrays.asList(new Waypoint[] { wp1, wp2, wp3 }));
+        DynamicGPSFixTrackImpl<Mark> mark3Track = new DynamicGPSFixTrackImpl<Mark>(mark3, /* millisecondsOverWhichToAverage */ 10);
+        when(trackedRace.getOrCreateTrack(mark3)).thenReturn(mark3Track);
+
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        Position mark1Pos = new DegreePosition(0, 0);
+        mark1Track.add(new GPSFixImpl(mark1Pos, now));
+        Position mark2Pos = new DegreePosition(0, 10);
+        mark2Track.add(new GPSFixImpl(mark2Pos, now));
+        Position mark3Pos = new DegreePosition(10, 5);
+        mark3Track.add(new GPSFixImpl(mark3Pos, now));
+        Position center = trackedRace.getCenterOfCourse(now);
+        assertTrue(2 < center.getLatDeg() && center.getLatDeg() < 8);
+        assertEquals(5, center.getLngDeg(), 0.00001);
     }
 }
