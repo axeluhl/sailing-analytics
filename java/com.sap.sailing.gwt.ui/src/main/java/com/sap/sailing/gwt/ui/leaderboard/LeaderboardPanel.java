@@ -299,6 +299,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceTimesInfoProviderListener raceTimesInfoProviderListener;
     
+    /**
+     * Used to set the focus to avoid undesirable table scolling
+     */
+    private final Anchor dummyFocusElement;
+    
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -1501,6 +1506,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+        this.dummyFocusElement = new Anchor("");
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1572,6 +1578,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
                 updateLeaderboard(getLeaderboard());
+                // now "blur" the selected leaderboard element because it seems to cause the cell table to scroll to its top;
+                // see bug 2093.
+                dummyFocusElement.setFocus(true);
+                dummyFocusElement.getElement().focus();
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
@@ -1655,6 +1665,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
+        contentPanel.add(dummyFocusElement); // ensure dummy element is part of the DOM
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
