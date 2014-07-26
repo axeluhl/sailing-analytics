@@ -1578,10 +1578,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
                 updateLeaderboard(getLeaderboard());
-                // now "blur" the selected leaderboard element because it seems to cause the cell table to scroll to its top;
-                // see bug 2093.
-                dummyFocusElement.setFocus(true);
-                dummyFocusElement.getElement().focus();
+                blurFocusedElementAfterSelectionChange();
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
@@ -2735,5 +2732,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     protected Timer getTimer() {
         return timer;
+    }
+
+    /**
+     * 
+     */
+    protected void blurFocusedElementAfterSelectionChange() {
+        // now "blur" the selected leaderboard element because it seems to cause the cell table to scroll to its top;
+        // see bug 2093.
+        dummyFocusElement.setFocus(true);
+        dummyFocusElement.getElement().focus();
     }
 }
