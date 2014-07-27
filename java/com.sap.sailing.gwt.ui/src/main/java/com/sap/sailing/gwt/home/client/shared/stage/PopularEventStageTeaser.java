@@ -18,6 +18,6 @@ public class PopularEventStageTeaser extends StageTeaser {
         
         bandCount.setAttribute("data-bandcount", "1");
         
-        stageTeaserBandsPanel.add(new NoActionStageTeaserBand(event, placeNavigator));
+        stageTeaserBandsPanel.getElement().appendChild(new NoActionStageTeaserBand(event, placeNavigator).getElement());
     }
 }
