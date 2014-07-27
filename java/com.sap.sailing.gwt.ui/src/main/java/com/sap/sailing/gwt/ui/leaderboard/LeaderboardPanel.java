@@ -17,6 +17,8 @@ import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -2751,5 +2753,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         // see bug 2093.
         dummyFocusElement.setFocus(true);
         dummyFocusElement.getElement().focus();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                dummyFocusElement.setFocus(true);
+                dummyFocusElement.getElement().focus();
+            }
+        });
     }
 }
