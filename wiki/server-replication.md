@@ -103,27 +103,27 @@ Steps to get it working:
 * The LTE router ( _192.168.1.1_ ) should have DHCP and NS activated. Dhcp was within range _XXX.XXX.1.2 - XXX.XXX.1.49_ and our local replica machine had a static ip address of _XXX.XXX.1.50_. Please make sure, that the ip address is outside of the dhcp range. For a better setup we should think of using the local replica server for dhcp and ns services.
 * Setup networking (to your needs) on the local replica machine as follows:
 
-**/etc/networking/interfaces**
-<pre>
-auto eth0
-iface eth0 inet static
+ **/etc/networking/interfaces**
+ <pre>
+ auto eth0
+ iface eth0 inet static
 	address 192.168.1.50
 	netmask 255.255.255.0
 	gateway 192.168.1.1
-</pre>
-**/etc/hosts**
-<pre>
-127.0.0.1	localhost
-127.0.0.1	tw2014 tw2014.sapsailing.com
-192.168.1.50	tw2014 tw2014.sapsailing.com
-</pre>
-* For rewriting the URLs and Ports to the fitting Spectator URL when entering the URL we need a Apache installed (apt-get install apache2) and set up like on our sapsailing.com server. Please check 000-macros.conf, 001-events.conf and 000-main.conf and set it up as you need for the event. They need to be in the config dir of apache (/etc/apache2/mods-enabled and /etc/apache2/sites-enabled)
+ </pre>
+ **/etc/hosts**
+ <pre>
+ 127.0.0.1	localhost
+ 127.0.0.1	tw2014 tw2014.sapsailing.com
+ 192.168.1.50	tw2014 tw2014.sapsailing.com
+ </pre>
+* For rewriting the URLs and Ports to the fitting spectator URL when entering the URL we need an Apache installed (apt-get install apache2) and set up like on our sapsailing.com server. Please check 000-macros.conf, 001-events.conf and 000-main.conf and set it up as you need for the event. They need to be in the config dir of apache (/etc/apache2/mods-enabled and /etc/apache2/sites-enabled)
 * For better remote administration of the local replica, set up and autossh tunnel to trac@sapsailing.com and put it into rc.local for autostarting, e.g. as the following:
 <pre>
 autossh -M 20009 -f -N -L 1337:127.0.0.1:22 -i SSHKEY trac@sapsailing.com
 </pre>
 * Set up automatic replication in env.sh of the analystics server and start the server (not with root!) with startscript ~/servers/server/start
-* On all Cube computers add the folling batch file to the windows task scheduling for a check every minute. The script switches hosts to local replica if available. Before the script can work, you have to edit host file manully and add the required hostnames: e.g. 192.168.1.50	tw2014.sapsailing.com. You also need to replace find and replace to the required ip addresses. Please note that all this would not be needed, if we would use the replica server also for dhcp and ns, so it makes really sense to set this up.
+* On all Cube computers add the follwing batch file to the windows task scheduling for a check every minute. The script switches hosts to local replica if available. Before the script can work, you have to edit host file manully and add the required hostnames: e.g. <pre>192.168.1.50	tw2014.sapsailing.com</pre> You also need to replace "find" and "replace" to the required ip addresses. Please note that all this would not be needed, if we would use the replica server also for dhcp and ns, so it makes really sense to set this up.
 <pre>
 @echo off
 @setlocal enableextensions enabledelayedexpansion
