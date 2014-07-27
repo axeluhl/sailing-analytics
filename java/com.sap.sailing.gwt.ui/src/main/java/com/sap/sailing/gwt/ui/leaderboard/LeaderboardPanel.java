@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -303,7 +304,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * Used to set the focus to avoid undesirable table scolling
      */
     private final Anchor dummyFocusElement;
-    
+
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -1566,6 +1567,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
+        leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
+                boolean isClick = "click".equals(event.getNativeEvent().getType());
+                if (isClick) {
+                    blurFocusedElementAfterSelectionChange();
+                }
+            }
+        });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
@@ -1578,7 +1588,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
                 updateLeaderboard(getLeaderboard());
-                blurFocusedElementAfterSelectionChange();
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
