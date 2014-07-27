@@ -296,6 +296,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         case DNS:
         case DNC:
         case OCS:
+        case BFD:
             result = true;
             break;
         default:

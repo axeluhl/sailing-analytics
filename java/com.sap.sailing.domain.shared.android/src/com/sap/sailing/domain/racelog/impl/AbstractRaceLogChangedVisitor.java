@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -124,5 +125,10 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     @Override
     public void visit(CloseOpenEndedDeviceMappingEvent event) {
         notifyListenerAboutEventAdded(event);
+    }
+    
+    @Override
+    public void visit(AdditionalScoringInformationEvent additionalScoringInformation) {
+        notifyListenerAboutEventAdded(additionalScoringInformation);
     }
 }

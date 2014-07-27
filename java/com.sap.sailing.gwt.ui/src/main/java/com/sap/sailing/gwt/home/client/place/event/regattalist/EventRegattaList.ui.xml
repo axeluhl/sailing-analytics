@@ -16,7 +16,7 @@
       </div>
     </div>
   </div>
-  <g:HTMLPanel ui:field="regattaListItemPanel" />
+  <div ui:field="regattaListItemsDiv" />
 </div>        
     </g:HTMLPanel>
 </ui:UiBinder>

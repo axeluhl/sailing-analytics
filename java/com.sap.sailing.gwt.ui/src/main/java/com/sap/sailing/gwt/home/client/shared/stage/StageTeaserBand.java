@@ -2,13 +2,15 @@ package com.sap.sailing.gwt.home.client.shared.stage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -22,9 +24,9 @@ public abstract class StageTeaserBand extends Composite {
     @UiField Anchor actionLink;
 
     private final PlaceNavigator placeNavigator;
-    private final EventDTO event;
+    private final EventBaseDTO event;
     
-    public StageTeaserBand(EventDTO event, PlaceNavigator placeNavigator) {
+    public StageTeaserBand(EventBaseDTO event, PlaceNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         
@@ -38,7 +40,16 @@ public abstract class StageTeaserBand extends Composite {
         return placeNavigator;
     }
 
-    public EventDTO getEvent() {
+    public EventBaseDTO getEvent() {
         return event;
     }
+    
+    @UiHandler("actionLink")
+    public void actionLinkClicked(ClickEvent e) {
+        actionLinkClicked();
+    }
+    
+    protected void actionLinkClicked() {
+    }
+    
 }

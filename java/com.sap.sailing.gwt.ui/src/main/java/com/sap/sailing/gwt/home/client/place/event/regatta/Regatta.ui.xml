@@ -6,27 +6,26 @@
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regatta.RegattaResources" />
     <g:HTMLPanel>
-
 <!-- A view, introducing a regatta-->
-<div class="{local_res.css.regatta}">
+<div ui:field="regattaDiv" class="{local_res.css.regatta}" data-labeltype="">
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <div class="{local_res.css.regatta_intro}">
-          <g:Anchor ui:field="regattaImageWithLink">
+          <a href="javascript:;" ui:field="regattaImageWithLink">
 	          <img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140"  class="{local_res.css.regatta_intro_image}"></img>
-          </g:Anchor>
-          <g:HTMLPanel ui:field="regattaImage">
+          </a>
+          <div ui:field="regattaImageWithoutLink">
 	          <img src="images/home/regatta-boatclass_sample.png" alt="" height="140" width="140"  class="{local_res.css.regatta_intro_image}"></img>
-          </g:HTMLPanel>
+          </div>
         <div class="{local_res.css.regatta_intro_header}">
           <div class="{res.mainCss.grid}">
             <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
-	          <g:Anchor ui:field="regattaNameWithLink">
-	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName1" /></h3>
-	          </g:Anchor>
-	          <g:HTMLPanel ui:field="regattaNameDiv">
-	              <h3 class="{local_res.css.regatta_intro_header_name}"><span ui:field="regattaName2" /></h3>
-	          </g:HTMLPanel>
+	          <a href="javascript:;" ui:field="regattaNameWithLink">
+	              <h3 ui:field="regattaName1" class="{local_res.css.regatta_intro_header_name} {local_res.css.regatta_intro_header_namelink}" />
+	          </a>
+	          <div ui:field="regattaNameWithoutLink">
+	              <h3 ui:field="regattaName2" class="{local_res.css.regatta_intro_header_name}"></h3>
+	          </div>
               <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
               <div ui:field="isFinishedDiv" data-labeltype="finished" class="{res.mainCss.label}"><ui:text from='{i18n.finished}'/></div>
             </div>
@@ -42,22 +41,24 @@
             </div>
           </div>
         </div>
-        <div class="{local_res.css.regatta_intro_phases}">
+        <div ui:field="regattaPhasesInfoDiv" class="{local_res.css.regatta_intro_phases}">
             <div ui:field="regattaPhasesPanel" />
             <div class="{local_res.css.regatta_intro_phases_leaderboardlink}">
-                <g:Anchor ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></g:Anchor>
+                <a href="javascript:;" ui:field="leaderboardLink"><ui:text from='{i18n.leaderBoard}'/></a>
 			</div>
         </div>
         <div ui:field="isScheduledDiv" class="{local_res.css.regatta_intro_scheduled}">
             <ui:text from='{i18n.regattaRegattaStarts}'/>:&nbsp;<span ui:field="scheduledStart" />
         </div>
         <div ui:field="isFinishedDiv2" class="{local_res.css.regatta_intro_results}">
+            <!-- 
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank1" />
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank2" />
             <s:regatta.RegattaCompetitor ui:field="competitorWithRank3" />
+             -->
         </div>
         <table ui:field="isLiveDiv2" class="{local_res.css.regatta_intro_fleets}">
-            <g:HTMLPanel ui:field="liveRaceInfosPerFleetPanel" />
+            <div ui:field="liveRaceInfosPerFleetPanel" />
         </table>
       </div>
     </div>

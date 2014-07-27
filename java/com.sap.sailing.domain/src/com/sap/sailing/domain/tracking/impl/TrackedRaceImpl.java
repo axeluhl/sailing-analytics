@@ -475,7 +475,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
+        crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
+        triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
     }

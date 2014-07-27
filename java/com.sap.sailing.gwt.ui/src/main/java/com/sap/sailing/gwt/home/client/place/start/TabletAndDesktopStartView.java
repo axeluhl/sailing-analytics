@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.home.client.shared.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.client.shared.socialfooter.SocialFooter;
 import com.sap.sailing.gwt.home.client.shared.stage.Stage;
 import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
@@ -27,7 +27,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
     @UiField SocialFooter socialFooter;
-
+    
     public TabletAndDesktopStartView(PlaceNavigator navigator) {
         stage = new Stage(navigator);
 //        mainSponsors = new MainSponsors(navigator);
@@ -38,13 +38,15 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     }
 
     @Override
-    public void setFeaturedEvents(List<Pair<StageEventType, EventDTO>> featuredEvents) {
+    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
         stage.setFeaturedEvents(featuredEvents);
+        mainMedia.setFeaturedEvents(featuredEvents);
     }
 
     @Override
-    public void setRecentEvents(List<EventDTO> recentEvents) {
+    public void setRecentEvents(List<EventBaseDTO> recentEvents) {
         mainEvents.setRecentEvents(recentEvents);
         mainMedia.setRecentEvents(recentEvents);
     }
+
 }
