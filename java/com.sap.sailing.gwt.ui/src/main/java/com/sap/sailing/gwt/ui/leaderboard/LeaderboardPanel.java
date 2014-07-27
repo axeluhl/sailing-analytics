@@ -17,6 +17,8 @@ import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -304,6 +306,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * Used to set the focus to avoid undesirable table scolling
      */
     private final Anchor dummyFocusElement;
+    private int blurInOnSelectionChanged;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1572,6 +1575,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
                 boolean isClick = "click".equals(event.getNativeEvent().getType());
                 if (isClick) {
+                    blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work reliably
                     blurFocusedElementAfterSelectionChange();
                 }
             }
@@ -1588,6 +1592,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
                 updateLeaderboard(getLeaderboard());
+                if (blurInOnSelectionChanged > 0) {
+                    blurInOnSelectionChanged--;
+                    blurFocusedElementAfterSelectionChange();
+                }
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
@@ -2728,13 +2736,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     public void removeAllListeners() {
-        if(raceTimesInfoProviderListener != null) {
+        if (raceTimesInfoProviderListener != null) {
             getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
         }
-        if(raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
-            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener((LastNRacesColumnSelection) raceColumnSelection);
+        if (raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(
+                    (LastNRacesColumnSelection) raceColumnSelection);
         }
-        if(timer != null) {
+        if (timer != null) {
             timer.removeTimeListener(this);
         }
     }
@@ -2743,12 +2752,20 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return timer;
     }
 
-    /**
-     * 
-     */
     protected void blurFocusedElementAfterSelectionChange() {
         // now "blur" the selected leaderboard element because it seems to cause the cell table to scroll to its top;
         // see bug 2093.
+        blur();
+        final ScheduledCommand blurCommand = new ScheduledCommand() {
+            @Override
+            public void execute() {
+                blur();
+            }
+        };
+        Scheduler.get().scheduleDeferred(blurCommand);
+    }
+
+    private void blur() {
         dummyFocusElement.setFocus(true);
         dummyFocusElement.getElement().focus();
     }
