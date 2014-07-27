@@ -27,60 +27,54 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.leftComponent = leftComponent;
         this.rightComponent = rightComponent;
         this.components = components;
-
         leftScrollPanel = new ScrollPanel();
         leftScrollPanel.add(leftComponent.getEntryWidget());
-
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
         splitLayoutPanel = new SplitLayoutPanel();
         mainPanel.add(splitLayoutPanel);
-        
-        for(Component<?> component: components) {
-            if(component.isVisible())
+        for (Component<?> component : components) {
+            if (component.isVisible()) {
                 splitLayoutPanel.addSouth(component.getEntryWidget(), 200);
+            }
         }
-        
         savedSplitPosition = 500;
         splitLayoutPanel.addWest(leftScrollPanel, savedSplitPosition);
         splitLayoutPanel.add(rightComponent.getEntryWidget());
     }
 
     public void forceLayout() {
-        if(leftComponent.isVisible() && !rightComponent.isVisible()) {
+        if (leftComponent.isVisible() && !rightComponent.isVisible()) {
             // the leaderboard is visible, but not the map
-            if(isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
+            if (isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
                 splitLayoutPanel.remove(rightComponent.getEntryWidget());
             }
-        }
-        else if(!leftComponent.isVisible() && rightComponent.isVisible()) {
+        } else if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
-            if(isWidgetInSplitPanel(leftScrollPanel))
+            if (isWidgetInSplitPanel(leftScrollPanel))
                 splitLayoutPanel.remove(leftScrollPanel);
-        }
-        else if(leftComponent.isVisible() && rightComponent.isVisible()) {
+        } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            if(!isWidgetInSplitPanel(leftScrollPanel) || !isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
-                if(!isWidgetInSplitPanel(leftScrollPanel))
+            if (!isWidgetInSplitPanel(leftScrollPanel) || !isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
+                if (!isWidgetInSplitPanel(leftScrollPanel))
                     splitLayoutPanel.insertWest(leftScrollPanel, savedSplitPosition, rightComponent.getEntryWidget());
                 else
                     splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
             }
+        } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
-        else if(!leftComponent.isVisible() && !rightComponent.isVisible()) {
-        }
-        
-        for(Component<?> component: components) {
+
+        for (Component<?> component : components) {
             boolean isComponentInSplitPanel = isWidgetInSplitPanel(component.getEntryWidget());
-            if(component.isVisible()) {
-                if(!isComponentInSplitPanel) {
+            if (component.isVisible()) {
+                if (!isComponentInSplitPanel) {
                     splitLayoutPanel.insertSouth(component.getEntryWidget(), 200, splitLayoutPanel.getWidget(0));
                 }
             } else {
-                if(isComponentInSplitPanel)
+                if (isComponentInSplitPanel)
                     splitLayoutPanel.remove(component.getEntryWidget());
             }
-        }        
+        }
         splitLayoutPanel.forceLayout();
     }
 
