@@ -918,5 +918,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 suppressedCompetitorsShown.getList().add(suppressedCompetitor);
             }
         }
+    }
+
+    /**
+     * When editing, scrolling is not really an issue because usually the editable version is not used in live mode. But when
+     * clicking the "Edit" button in a previously de-selected row, we still want the score to get the selection and the focus.
+     * So turn off any focus/blur magic for this subclass.
+     */
+    @Override
+    protected void blurFocusedElementAfterSelectionChange() {
     }   
+
 }
