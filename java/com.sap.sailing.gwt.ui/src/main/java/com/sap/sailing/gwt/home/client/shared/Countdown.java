@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.common.client;
+package com.sap.sailing.gwt.home.client.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
@@ -97,7 +97,7 @@ public class Countdown {
      * @param zeroDate
      * @param countdownListener
      */
-    Countdown(TimePoint zeroDate, CountdownListener countdownListener, boolean dontSchedule) {
+    public Countdown(TimePoint zeroDate, CountdownListener countdownListener, boolean dontSchedule) {
         this.zeroDate = zeroDate;
         this.countdownListener = countdownListener;
         update();
