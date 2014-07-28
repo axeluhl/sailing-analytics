@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,11 +34,14 @@ public class EventRegattaRaces extends Composite {
 
     private final Timer timerForClientServerOffset;
     private final EventPageNavigator pageNavigator;
+    private final List<EventRegattaRacesPhase> phaseElements;
 
     public EventRegattaRaces(EventDTO event, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;
+        
+        phaseElements = new ArrayList<EventRegattaRacesPhase>();
         
         regatta = new Regatta(event, false, timerForClientServerOffset, pageNavigator);
         
@@ -45,6 +51,10 @@ public class EventRegattaRaces extends Composite {
     }
     
     public void setRacesFromRaceGroup(RaceGroupDTO raceGroup, StrippedLeaderboardDTO leaderboard) {
+        // clear all existing child elements first
+        regattaPhasesPanel.getElement().removeAllChildren();
+        phaseElements.clear();
+       
         regatta.setData(raceGroup, leaderboard, null);
         
         int regattaPhases = raceGroup.getSeries().size();
@@ -52,11 +62,13 @@ public class EventRegattaRaces extends Composite {
             for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
                 EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, series, timerForClientServerOffset, pageNavigator); 
                 regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
+                phaseElements.add(regattaPhase);
             }
         } else {
             RaceGroupSeriesDTO raceGroupSeriesDTO = raceGroup.getSeries().get(0);
             EventRegattaRacesPhase regattaPhase = new EventRegattaRacesPhase(leaderboard, raceGroupSeriesDTO, timerForClientServerOffset, pageNavigator); 
             regattaPhasesPanel.getElement().appendChild(regattaPhase.getElement());
+            phaseElements.add(regattaPhase);
         }
     }
 }

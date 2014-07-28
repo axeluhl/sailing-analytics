@@ -5,7 +5,9 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -64,6 +66,7 @@ public class EventRegattaRacesRace extends UIObject {
     private final StrippedLeaderboardDTO leaderboard;
     private final FleetDTO fleet;
     private final RaceColumnDTO raceColumn;
+    private final RaceDTO race;
     private final EventPageNavigator pageNavigator;
     private final Timer timerForClientServerOffset;
 
@@ -75,6 +78,7 @@ public class EventRegattaRacesRace extends UIObject {
         this.raceColumn = raceColumn;
         this.pageNavigator = pageNavigator;
         this.timerForClientServerOffset = timerForClientServerOffset;
+        race = raceColumn.getRace(fleet);
         
         EventRegattaRacesResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
@@ -114,10 +118,8 @@ public class EventRegattaRacesRace extends UIObject {
     private SimpleRaceStates getSimpleRaceState() {
         SimpleRaceStates simpleRaceState = SimpleRaceStates.NOT_TRACKED;
         
-        RaceDTO race = raceColumn.getRace(fleet);
         if(race != null && race.trackedRace != null) {
             simpleRaceState = isLive() ? SimpleRaceStates.TRACKED_AND_LIVE : SimpleRaceStates.TRACKED_AND_NOT_LIVE; 
-            String startOfTrackingTime = raceTimeFormat.format(race.trackedRace.startOfTracking);
         }
         return simpleRaceState;
     }
@@ -141,12 +143,40 @@ public class EventRegattaRacesRace extends UIObject {
                 showElement(watchRaceDiv);
                 showElement(raceLeaderDiv);
                 showElement(legProgressDiv);
+
                 break;
             case TRACKED_AND_NOT_LIVE:
                 showElement(analyzeRaceDiv);
                 showElement(raceWinnerDiv);
                 showElement(raceFeaturesDiv);
+                
+                updateRaceFeatures();
                 break;
+        }
+    }
+
+    private void updateRaceFeatures() {
+        String startOfTrackingTime = raceTimeFormat.format(race.trackedRace.startOfTracking);
+        raceTime.setInnerText(startOfTrackingTime);
+        if(race.trackedRace.hasGPSData) {
+            featureGPS.getStyle().setBorderColor("red");
+            featureGPS.getStyle().setBorderStyle(BorderStyle.SOLID);
+            featureGPS.getStyle().setBorderWidth(1, Unit.PX);
+        }
+        if(race.trackedRace.hasMeasuredWindData) {
+            featureWind.getStyle().setBorderColor("red");
+            featureWind.getStyle().setBorderStyle(BorderStyle.SOLID);
+            featureWind.getStyle().setBorderWidth(1, Unit.PX);
+        }
+        if(race.trackedRace.hasVideoData) {
+            featureVideo.getStyle().setBorderColor("red");
+            featureVideo.getStyle().setBorderStyle(BorderStyle.SOLID);
+            featureVideo.getStyle().setBorderWidth(1, Unit.PX);
+        }
+        if(race.trackedRace.hasAudioData) {
+            featureAudio.getStyle().setBorderColor("red");
+            featureAudio.getStyle().setBorderStyle(BorderStyle.SOLID);
+            featureAudio.getStyle().setBorderWidth(1, Unit.PX);
         }
     }
     
@@ -161,7 +191,6 @@ public class EventRegattaRacesRace extends UIObject {
     }
 
     private void openRaceViewer() {
-        RaceDTO race = raceColumn.getRace(fleet);
         if(race != null && race.trackedRace != null) {
             pageNavigator.openRaceViewer(leaderboard, race);
         }

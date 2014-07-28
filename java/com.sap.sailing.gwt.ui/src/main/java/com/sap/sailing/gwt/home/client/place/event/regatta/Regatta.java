@@ -1,12 +1,14 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -33,7 +35,8 @@ public class Regatta extends Composite {
     private final EventPageNavigator pageNavigator;
     private StrippedLeaderboardDTO leaderboard;
     private RaceGroupDTO raceGroup;
-
+    private final List<RegattaPhase> phasesElements;
+    
     @SuppressWarnings("unused")
     private LeaderboardGroupDTO leaderboardGroup;
 
@@ -45,9 +48,9 @@ public class Regatta extends Composite {
     @UiField DivElement regattaPhasesPanel;
     @UiField DivElement regattaPhasesInfoDiv;
     
-    @UiField SpanElement competitorsCount;
+//    @UiField SpanElement competitorsCount;
     @UiField SpanElement racesCount;
-//    @UiField SpanElement trackedRacesCount;
+    @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
 //    @UiField TableElement isLiveDiv2;
     @UiField DivElement isFinishedDiv;
@@ -69,6 +72,8 @@ public class Regatta extends Composite {
         this.event = event;
         this.timerForClientServerOffset = timerForClientServerOffset;
         this.pageNavigator = pageNavigator;
+        
+        phasesElements = new ArrayList<RegattaPhase>();
         
 //        competitorWithRank1 = new RegattaCompetitor(1, null);
 //        competitorWithRank2 = new RegattaCompetitor(2, null);
@@ -115,30 +120,31 @@ public class Regatta extends Composite {
             leaderboardGroupName.getStyle().setDisplay(Display.NONE);
         }
         
-        if(leaderboard.rows != null) {
-            competitorsCount.setInnerText(String.valueOf(leaderboard.rows.size()));
-        } else {
-            competitorsCount.getStyle().setVisibility(Visibility.HIDDEN);
-        }
-        setRegattaProgress();
+//        if(leaderboard.rows != null) {
+//            competitorsCount.setInnerText(String.valueOf(leaderboard.rows.size()));
+//        } else {
+//            competitorsCount.getStyle().setVisibility(Visibility.HIDDEN);
+//        }
+        setRegattaProgress(leaderboard);
     }
     
-    private void setRegattaProgress() {
-        int racesCounter = 0;
-//        int trackedRacesCounter = 0;
-
+    private void setRegattaProgress(StrippedLeaderboardDTO leaderboard) {
+        // clear first 
+        regattaPhasesPanel.removeAllChildren();
+        phasesElements.clear();
+        
         if(raceGroup.getSeries().size() == 0) {
             regattaPhasesInfoDiv.getStyle().setDisplay(Display.NONE);
         } else {
             for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
-                racesCounter += series.getRaceColumns().size();
                 RegattaPhase regattaPhase = new RegattaPhase(series); 
                 regattaPhasesPanel.appendChild(regattaPhase.getElement());
+                phasesElements.add(regattaPhase);
             }
         }
         
-        racesCount.setInnerText(String.valueOf(racesCounter));
-        // trackedRacesCount.setInnerText(String.valueOf(trackedRacesCounter));
+        racesCount.setInnerText(String.valueOf(leaderboard.getRaceColumnsCount()));
+        trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
 
     private void registerEvents() {
