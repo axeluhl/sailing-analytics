@@ -144,20 +144,22 @@ public class EventRegattaRacesRace extends UIObject {
                 showElement(raceLeaderDiv);
                 showElement(legProgressDiv);
 
+                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+
                 break;
             case TRACKED_AND_NOT_LIVE:
                 showElement(analyzeRaceDiv);
                 showElement(raceWinnerDiv);
                 showElement(raceFeaturesDiv);
                 
+                raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
                 updateRaceFeatures();
+
                 break;
         }
     }
 
     private void updateRaceFeatures() {
-        String startOfTrackingTime = raceTimeFormat.format(race.trackedRace.startOfTracking);
-        raceTime.setInnerText(startOfTrackingTime);
         if(race.trackedRace.hasGPSData) {
             featureGPS.getStyle().setBorderColor("red");
             featureGPS.getStyle().setBorderStyle(BorderStyle.SOLID);
