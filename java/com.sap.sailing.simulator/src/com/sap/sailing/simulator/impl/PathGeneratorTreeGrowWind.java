@@ -226,7 +226,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             TimePoint prevTime = path.pos.getTimePoint();
             double heightFrac = path.vrt / (path.vrt - vrtDist);
             Position newPos = prevPos.translateGreatCircle(prevPos.getBearingGreatCircle(pathPos.getPosition()), prevPos.getDistance(pathPos.getPosition()).scale(heightFrac));
-            long newTimeMillis = Math.round((prevTime.asMillis() + (pathPos.getTimePoint().asMillis() - prevTime.asMillis()) * heightFrac)/1000.0)*1000;
+            long newTimeMillis = Math.round((prevTime.asMillis() + (pathPos.getTimePoint().asMillis() - prevTime.asMillis()) * heightFrac)/2000.0)*2000;
             TimePoint newTime = new MillisecondsTimePoint(newTimeMillis);
             pathPos = new TimedPositionImpl(newTime, newPos);
             reachedEnd = true;
