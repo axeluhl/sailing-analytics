@@ -25,44 +25,29 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
 
     @Override
     public void goToHome() {
-        gotoPlace(Window.Location.getHostName(), new StartPlace(), new StartPlace.Tokenizer());
+        gotoPlace(getLocationURL(), new StartPlace(), new StartPlace.Tokenizer());
     }
 
     @Override
     public void goToEvent(String eventUuidAsString, String baseUrl) {
         EventPlace eventPlace = new EventPlace(eventUuidAsString, null);
         gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
-        
-        
-//        if(isLocationOnLocalhost(baseUrl) || !baseUrl.contains(SAPSAILING_DOMAIN)) {
-//            placeController.goTo(eventPlace);
-//        } else {
-//            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
-//            Window.Location.replace(remoteEventUrl);
-//        }
     }
 
     @Override
     public void goToRegattaOfEvent(String eventUuidAsString, String leaderboardIdAsNameString, String baseUrl) {
         EventPlace eventPlace = new EventPlace(eventUuidAsString, leaderboardIdAsNameString);
         gotoPlace(baseUrl, eventPlace, new EventPlace.Tokenizer());
-        
-//        if(isLocationOnLocalhost(baseUrl) || baseUrl.contains(SAPSAILING_DOMAIN)) {
-//            placeController.goTo(eventPlace);
-//        } else {
-//            String remoteEventUrl = buildRemotePlaceUrl(baseUrl, eventPlace, new EventPlace.Tokenizer());
-//            Window.Location.replace(remoteEventUrl);
-//        }
     }
 
     @Override
     public void goToSearchResult(String searchQuery) {
-        gotoPlace(Window.Location.getHostName(), new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
+        gotoPlace(getLocationURL(), new SearchResultPlace(searchQuery), new SearchResultPlace.Tokenizer());
     }
 
     @Override
     public void goToEvents() {
-        gotoPlace(Window.Location.getHostName(), new EventsPlace(), new EventsPlace.Tokenizer());
+        gotoPlace(getLocationURL(), new EventsPlace(), new EventsPlace.Tokenizer());
     }
 
     @Override
@@ -96,6 +81,10 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
             String homeUrl = buildRemotePlaceUrl(baseUrl, destinationPlace, tokenizer);
             Window.Location.replace(homeUrl);
         }
+    }
+
+    private String getLocationURL() {
+        return Window.Location.getProtocol() + "//" + Window.Location.getHost();
     }
     
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
