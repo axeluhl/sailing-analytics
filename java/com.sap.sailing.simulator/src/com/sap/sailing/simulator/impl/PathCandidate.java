@@ -26,7 +26,7 @@ public class PathCandidate implements Comparable<PathCandidate> {
     @Override
     // sort descending by time, -#turns, width
     public int compareTo(PathCandidate other) {
-        if (this.pos.getTimePoint().asMillis() == other.pos.getTimePoint().asMillis()) {
+        if (Math.abs(this.pos.getTimePoint().asMillis() - other.pos.getTimePoint().asMillis()) <= 1000) {
             if (this.trn == other.trn) {
                 if (Math.abs(this.hrz) == Math.abs(other.hrz)) {
                     return 0;
