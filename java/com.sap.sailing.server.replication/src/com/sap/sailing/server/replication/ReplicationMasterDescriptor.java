@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 
 /**
@@ -40,4 +41,9 @@ public interface ReplicationMasterDescriptor {
     void stopConnection();
 
     String getMessagingHostname();
+
+    /**
+     * @return a RabbitMQ channel created with the replication connectivity parameters defined by this descriptor
+     */
+    Channel createChannel() throws IOException;
 }

@@ -51,6 +51,7 @@ public class ShortTimeWindCache {
             synchronized (order) {
                 if (order.isEmpty()) {
                     cancel();
+                    timer.cancel();
                     timer = null;
                 }
             }

@@ -223,6 +223,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
 
     /**
+     * Same as {@link #getWindwardDistanceToOverallLeader(TimePoint, WindPositionMode)}, only that a cache for leg type
+     * calculation is passed.
+     */
+    Distance getWindwardDistanceToOverallLeader(TimePoint timePoint, WindPositionMode windPositionMode,
+            WindLegTypeAndLegBearingCache cache) throws NoWindException;
+
+    /**
      * Computes the average absolute cross track error for this leg. The cross track error for each fix is taken to be a
      * positive number, thereby ignoring whether the competitor was left or right of the course middle line. If you
      * provide this method with a {@link TimePoint} greater than the time the mark passing of the leg end mark has
@@ -251,7 +258,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
     TrackedLeg getTrackedLeg();
 
     /**
-     * Computes the angle between the competitors direction and the wind.
+     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
+     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
+     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
      */
     Bearing getBeatAngle(TimePoint at) throws NoWindException;
 

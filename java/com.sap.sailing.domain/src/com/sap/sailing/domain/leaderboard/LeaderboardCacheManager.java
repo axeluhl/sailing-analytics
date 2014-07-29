@@ -70,7 +70,7 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             removeFromCache(leaderboard);
         }
 
@@ -102,6 +102,11 @@ public class LeaderboardCacheManager {
 
         @Override
         public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             removeFromCache(leaderboard);
         }
 

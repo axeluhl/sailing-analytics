@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -99,6 +101,9 @@ public class ImportMasterDataOperation extends
             createWindTracks(toState);
             toState.getDataImportLock().getProgress(importOperationId).setResult(creationCount);
             return creationCount;
+        } catch (Exception e) {
+            logger.severe("Error during execution of ImportMasterDataOperation");
+            throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             toState.getDataImportLock().unlock();
         }
@@ -194,6 +199,7 @@ public class ImportMasterDataOperation extends
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
+                toState.updateStoredLeaderboard(leaderboard);
             }
 
         }
@@ -404,6 +410,20 @@ public class ImportMasterDataOperation extends
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /**
+     * in order to restore all listeners we need to initialize the regatta after the whole object graph has been
+     * restored. This applies to all replicas that receive this operation "over the wire".
+     * 
+     * Fixes bug2023
+     */
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        for (Regatta regatta : masterData.getAllRegattas()) {
+            RegattaImpl regattaImpl = (RegattaImpl) regatta;
+            regattaImpl.initializeSeriesAfterDeserialize();
+        }
     }
 
 }

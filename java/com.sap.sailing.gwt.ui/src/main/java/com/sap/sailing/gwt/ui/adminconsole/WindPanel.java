@@ -576,7 +576,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames,
-                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, new AsyncCallback<WindInfoForRaceDTO>() {
+                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {

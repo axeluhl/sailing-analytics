@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -73,6 +75,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
+    private transient Set<RaceAbortedListener> raceAbortedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -80,8 +83,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
-        this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
-        this.startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
+        this.courseDesignChangedListeners = new HashSet<>();
+        this.startTimeChangedListeners = new HashSet<>();
+        this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -107,8 +111,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
-        courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
-        startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
+        courseDesignChangedListeners = new HashSet<>();
+        startTimeChangedListeners = new HashSet<>();
+        raceAbortedListeners = new HashSet<>();
     }
 
     /**
@@ -207,20 +212,20 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     /**
      * In addition to creating the track which is performed by the superclass implementation, this implementation registers
-     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark) notifies the listeners}
+     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean) notifies the listeners}
      * about updates. The {@link #updated(TimePoint)} method is <em>not</em> called with the mark fix's time point because
      * mark fixes may be received also from marks that don't belong to this race.
      */
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
-        DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
+        final DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
         result.addListener(new GPSTrackListener<Mark, GPSFix>() {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Mark mark) {
+            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
                 triggerManeuverCacheRecalculationForAllCompetitors();
-                notifyListeners(fix, mark);
+                notifyListeners(fix, mark, firstFixInTrack);
             }
 
             @Override
@@ -252,6 +257,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addListener(RaceChangeListener listener) {
         synchronized (getListeners()) {
             getListeners().add(listener);
+        }
+    }
+    
+    @Override
+    public void invalidateStartTime() {
+        TimePoint oldStartOfRace = getStartOfRace();
+        super.invalidateStartTime();
+        TimePoint newStartOfRace = getStartOfRace();
+        if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+            notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
         }
     }
 
@@ -291,8 +306,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     GPSFixTrack<Mark, GPSFix> markTrack = getOrCreateTrack(mark);
                     markTrack.lockForRead();
                     try {
+                        boolean firstInTrack = true;
                         for (GPSFix fix : markTrack.getRawFixes()) {
-                            listener.markPositionChanged(fix, mark);
+                            listener.markPositionChanged(fix, mark, firstInTrack);
+                            firstInTrack = false;
                         }
                     } finally {
                         markTrack.unlockAfterRead();
@@ -365,6 +382,21 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.startOfRaceChanged(oldStartOfRace, newStartOfRace);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.log(Level.SEVERE, "notifyListenersStartOfRaceChanged(TimePoint, TimePoint)", e);
+            }
+        }
+    }
+
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
@@ -407,14 +439,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
-    private void notifyListeners(GPSFix fix, Mark mark) {
+    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
         }
         for (RaceChangeListener listener : listeners) {
             try {
-                listener.markPositionChanged(fix, mark);
+                listener.markPositionChanged(fix, mark, firstInTrack);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
@@ -549,89 +581,106 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
-        Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
-        MarkPassing oldStartMarkPassing = null;
-        boolean requiresStartTimeUpdate = true;
-        final NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
-        lockForRead(markPassingsForCompetitor);
+        LockUtil.lockForRead(getSerializationLock()); // keep serializer from reading the mark passings collections
         try {
-            for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
-                if (oldStartMarkPassing == null) {
-                    oldStartMarkPassing = oldMarkPassing;
-                }
-                oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
-            }
-        } finally {
-            unlockAfterRead(markPassingsForCompetitor);
-        }
-        final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassingsForCompetitor);
-        TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
-        // Make sure that clearMarkPassings and the re-adding of the mark passings are non-interruptible by readers.
-        // Note that the write lock for the mark passings in order per waypoint is obtained inside clearMarkPassings(...)
-        // as well as inside the subsequent for-loop. It is important to always first obtain the mark passings lock for the competitor
-        // mark passings before obtaining the lock for the mark passings in order for the waypoint to avoid deadlocks.
-        LockUtil.lockForWrite(markPassingsLock);
-        try {
-            clearMarkPassings(competitor);
-            for (MarkPassing markPassing : markPassings) {
-                // try to find corresponding old start mark passing
-                if (oldStartMarkPassing != null
-                        && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
-                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
-                            && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
-                        requiresStartTimeUpdate = false;
+            Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
+            MarkPassing oldStartMarkPassing = null;
+            TimePoint oldStartOfRace = getStartOfRace(); // getStartOfRace() may respond with a new result already after
+                                                         // updating the mark passings
+            boolean requiresStartTimeUpdate = true;
+            final NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
+            lockForRead(markPassingsForCompetitor);
+            try {
+                for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
+                    if (oldStartMarkPassing == null) {
+                        oldStartMarkPassing = oldMarkPassing;
                     }
+                    oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
                 }
-                if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
-                    StringBuilder courseWaypointsWithID = new StringBuilder();
-                    boolean first = true;
-                    for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            courseWaypointsWithID.append(" -> ");
+            } finally {
+                unlockAfterRead(markPassingsForCompetitor);
+            }
+            final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassingsForCompetitor);
+            TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
+            // Make sure that clearMarkPassings and the re-adding of the mark passings are non-interruptible by readers.
+            // Note that the write lock for the mark passings in order per waypoint is obtained inside
+            // clearMarkPassings(...) as well as inside the subsequent for-loop. It is important to always first obtain the mark passings lock
+            // for the competitor mark passings before obtaining the lock for the mark passings in order for the waypoint to avoid
+            // deadlocks.
+            LockUtil.lockForWrite(markPassingsLock);
+            try {
+                clearMarkPassings(competitor);
+                for (MarkPassing markPassing : markPassings) {
+                    // try to find corresponding old start mark passing
+                    if (oldStartMarkPassing != null
+                            && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
+                        if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
+                                && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                            requiresStartTimeUpdate = false;
                         }
-                        courseWaypointsWithID.append(courseWaypoint.toString());
-                        courseWaypointsWithID.append(" (ID=");
-                        courseWaypointsWithID.append(courseWaypoint.getId());
-                        courseWaypointsWithID.append(")");
                     }
-                    logger.severe("Received mark passing " + markPassing + " for race " + getRace()
-                            + " for waypoint ID" + markPassing.getWaypoint().getId()
-                            + " but the waypoint does not exist in course " + courseWaypointsWithID);
-                } else {
-                    markPassingsForCompetitor.add(markPassing);
+                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                        StringBuilder courseWaypointsWithID = new StringBuilder();
+                        boolean first = true;
+                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                courseWaypointsWithID.append(" -> ");
+                            }
+                            courseWaypointsWithID.append(courseWaypoint.toString());
+                            courseWaypointsWithID.append(" (ID=");
+                            courseWaypointsWithID.append(courseWaypoint.getId());
+                            courseWaypointsWithID.append(")");
+                        }
+                        logger.severe("Received mark passing " + markPassing + " for race " + getRace()
+                                + " for waypoint ID" + markPassing.getWaypoint().getId()
+                                + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                    } else {
+                        markPassingsForCompetitor.add(markPassing);
+                    }
+                    Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
+                            .getWaypoint());
+                    final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
+                    LockUtil.lockForWrite(markPassingsLock2);
+                    try {
+                        // The mark passings of competitor have been removed by the call to
+                        // clearMarkPassings(competitor) above
+                        // from both, the collection that holds the mark passings by waypoint and the one that holds the
+                        // mark passings per competitor; so we can simply add here:
+                        markPassingsInOrderForWaypoint.add(markPassing);
+                    } finally {
+                        LockUtil.unlockAfterWrite(markPassingsLock2);
+                    }
+                    if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                        timePointOfLatestEvent = markPassing.getTimePoint();
+                    }
                 }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
-                        .getWaypoint());
-                final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
-                LockUtil.lockForWrite(markPassingsLock2);
-                try {
-                    // The mark passings of competitor have been removed by the call to clearMarkPassings(competitor) above
-                    // from both, the collection that holds the mark passings by waypoint and the one that holds the
-                    // mark passings per competitor; so we can simply add here:
-                    markPassingsInOrderForWaypoint.add(markPassing);
-                } finally {
-                    LockUtil.unlockAfterWrite(markPassingsLock2);
-                }
-                if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                    timePointOfLatestEvent = markPassing.getTimePoint();
+            } finally {
+                LockUtil.unlockAfterWrite(markPassingsLock);
+            }
+            updated(timePointOfLatestEvent);
+            triggerManeuverCacheRecalculation(competitor);
+            // update the race times like start, end and the leg times
+            if (requiresStartTimeUpdate) {
+                TimePoint interimsStartOfRace = getStartOfRace();
+                invalidateStartTime();
+                TimePoint newStartOfRace = getStartOfRace();
+                if (Util.equalsWithNull(interimsStartOfRace, newStartOfRace)
+                        && !Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+                    // invalidateStartTime() will not have thrown a startOfRaceChanged event notification because it
+                    // already saw the new
+                    // start of race time; we have to throw the notification here:
+                    notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
                 }
             }
+            invalidateMarkPassingTimes();
+            invalidateEndTime();
+            // notify *after* all mark passings have been re-established; should avoid flicker
+            notifyListeners(competitor, oldMarkPassings, markPassings);
         } finally {
-            LockUtil.unlockAfterWrite(markPassingsLock);
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
-        updated(timePointOfLatestEvent);
-        triggerManeuverCacheRecalculation(competitor);
-        // update the race times like start, end and the leg times
-        if (requiresStartTimeUpdate) {
-            invalidateStartTime();
-        }
-        invalidateMarkPassingTimes();
-        invalidateEndTime();
-
-        // notify *after* all mark passings have been re-established; should avoid flicker
-        notifyListeners(competitor, oldMarkPassings, markPassings);
     }
 
     @Override
@@ -679,10 +728,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStartTimeReceived(TimePoint startTimeReceived) {
-        if ((startTimeReceived == null) != (getStartTimeReceived() == null)
-                || (startTimeReceived != null && !startTimeReceived.equals(getStartTimeReceived()))) {
+        if (!Util.equalsWithNull(startTimeReceived, getStartTimeReceived())) {
+            TimePoint oldStartOfRace = getStartOfRace();
             super.setStartTimeReceived(startTimeReceived);
             notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+            TimePoint newStartOfRace = getStartOfRace();
+            if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
+                notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
+            }
         }
     }
 
@@ -759,7 +812,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
+    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
@@ -849,12 +902,24 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
+        logger.info("Start time of race "+getRace().getName()+" updated by race committee to "+newStartTime);
         try {
             for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
                 startTimeChangedListener.startTimeChanged(newStartTime);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
+        }
+    }
+    
+    @Override
+    public void onAbortedByRaceCommittee(Flags flag) {
+        try {
+            for (RaceAbortedListener raceAbortedListener : raceAbortedListeners) {
+                raceAbortedListener.raceAborted(flag);
+            }
+        } catch (IOException e) {
+            logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
     }
 
@@ -862,6 +927,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
+    
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
+        this.raceAbortedListeners.add(listener);
+    }
+    
     /**
      * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
      */

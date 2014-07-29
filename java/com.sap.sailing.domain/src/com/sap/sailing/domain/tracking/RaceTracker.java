@@ -16,7 +16,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
  * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
  * tracker yet. Through the {@link RaceHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
- * {@link RaceHandle#getRaces() blocking get} for the races tracked by this tracker.
+ * {@link RaceHandle#getRace() blocking get} for the race tracked by this tracker.
  * <p>
  * 
  * The data received by the tracker is usually fed into {@link TrackedRace} objects that {@link TrackedRace#getRace()

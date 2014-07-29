@@ -28,6 +28,9 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationEvent;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -177,5 +180,12 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
             Serializable deviceMappingEventId, TimePoint closingTimePoint) {
         return new CloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, pId, passId,
                 deviceMappingEventId, closingTimePoint);
+    }
+
+    @Override
+    public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint createdAt,
+            RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
+            AdditionalScoringInformationType informationType) {
+        return new AdditionalScoringInformationEventImpl(createdAt, author, logicalTimePoint, pId, competitors, passId, informationType);
     }
 }

@@ -397,7 +397,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
         Collections.shuffle(shuffledCompetitors);
@@ -455,7 +455,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     /**
      * Invalidates all cache contents for all competitors from the beginning of time
      */
-    private void invalidate() {
+    public void invalidate() {
         final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
         Collections.shuffle(shuffledCompetitors);
         for (Competitor competitor : shuffledCompetitors) {

@@ -1,6 +1,7 @@
 package com.sap.sailing.server.masterdata;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -40,36 +43,37 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sse.common.Util;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
     private Regatta regatta;
-    private String raceName = "DummyRace";
-    private Serializable raceId;
-    private Iterable<? extends Competitor> competitors = new HashSet<Competitor>();
 
     public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta) {
-        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta, EmptyWindStore.INSTANCE, -1);
-        this.competitors  = competitors;
+        this(competitors, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
+                regatta.getBoatClass(), competitors));
+    }
+    
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
+            RaceDefinition race) {
+        super(race, trackedRegatta, EmptyWindStore.INSTANCE, -1);
         this.regatta = regatta;
     }
     
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
-        super(new RaceDefinitionImpl(raceName, null, null, new HashSet<Competitor>()), null, EmptyWindStore.INSTANCE, -1);
-        this.raceName = raceName;
-        this.raceId = raceId;
+        super(new RaceDefinitionImpl(raceName, new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
+                /* boatClass */ null, new HashSet<Competitor>()), null, EmptyWindStore.INSTANCE, -1);
     }
 
     @Override
     public RaceDefinition getRace() {
-        return new RaceDefinitionImpl(raceName, null, null, competitors, raceId);
+        return race;
     }
 
     @Override
@@ -289,7 +293,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public TrackedRegatta getTrackedRegatta() {
-        return new TrackedRegattaImpl(regatta);
+        return new DynamicTrackedRegattaImpl(regatta);
     }
 
     @Override
@@ -591,6 +595,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
         // TODO Auto-generated method stub
         
     }

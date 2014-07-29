@@ -26,15 +26,12 @@ public class TestLeaderboardCreation extends AbstractSeleniumTest {
     @Test
     public void testCreateFlexibleLeaderboardWithDuplicateName() {
         FlexibleLeaderboardCreateDialogPO dialog;
-        
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-
         dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
         dialog.setName("Humba Humba");
         assertTrue(dialog.isOkButtonEnabled());
         dialog.pressOk();
-
         dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
         dialog.setName("Humba Humba");
         assertFalse(dialog.isOkButtonEnabled());

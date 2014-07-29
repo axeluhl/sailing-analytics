@@ -397,7 +397,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
-     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * speed of zero knots. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
      * <code>true</code>.
      * 
      * @param at
@@ -614,6 +614,8 @@ public interface TrackedRace extends Serializable {
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
+
+    void addRaceAbortedListener(RaceAbortedListener listener);
 
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.

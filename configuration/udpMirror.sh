@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export JAVA_HOME=/home/trac/jdk1.7.0_02
 jar=`find plugins -name 'com.sap.sailing.expeditionconnector_*.jar' | sort | tail -1`
 echo Using JAR file $jar

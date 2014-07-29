@@ -37,6 +37,47 @@
 				</ul>				
 				<h2 class="articleHeadline">Administration</h2>
 				<div class="innerContent">
+					<h2 class="articleSubheadline">July 2014</h2>
+					<ul class="bulletList">
+					    <li>Replication has become much more robust and efficient. The initial load which used to be sent in a
+					        single huge (although compressed) stream of data from the master to the replica(s) was hard to get
+					        transmitted in the face of flaky and slow network connections. We've changed this: now the initial
+					        load is transmitted as a sequence of messages using a message broker infrastructure. If a single
+					        message doesn't arrive, it will be re-sent until it got through. The messages are buffered for several
+					        minutes, so the initial load transmission can even survive and recover from severe network outages.<p>
+					        
+					        For the incremental replication process, we added compression, making the transmission more bandwidth-efficient
+					        and therefore quicker and leaner. In addition, we've cleaned up the protocol a little, avoiding the
+					        sending of redundant data, adding to the effects of compression. Replicating five live races with
+					        approximately 40 to 50 competitors each, with four active wind measurement units each, requires approximately
+					        30kB/s of network bandwidth between master and replica.
+					    </li>
+					    <li>Events now have lots of new attributes, particularly start/end date and multimedia content URLs</li>
+					    
+						<li>Regattas can now be edited to <em>not</em> perform start time inference based on start mark passings.
+						    Usually, when no start time is set by the race committee app or by the tracking provider or manually
+						    through the administration console, the start time is inferred from the mark passings for the start
+						    line. However, this can lead to unpleasant effects when the race committee aborts or postpones a race
+						    and doesn't set a new start time for some period of time. When during this period one or more boats
+						    cross the start line, a new start time would be inferred implicitly, showing scores in the leaderboard
+						    and starting to compute all sorts of metrics. To avoid this, uncheck the checkbox
+						    "Use start time inference from start mark passings" in the regatta create / edit dialog.</li>
+						    
+						<li>When creating a regatta in the administration console, the regatta name is now taken from the create
+						    dialog's "Name" field as-is and is no longer automatically extended by appending the boat class name
+						    in parentheses to the base name. This is important to know if you so far have created several regattas
+						    within the scope of the same event by simply providing the event name and the boat class name, relying
+						    on the administration console to extend the regatta name by the boat class name because now with this
+						    strategy your regattas would all be named the same. If you want to continue using some base name and
+						    see the boat class name after the base name in parentheses you will now have to add that to the "Name"
+						    field yourself, as in "Kieler Woche 2014 (470)". With this change, you can avoid having special
+						    characters such as "/" in the regatta name which used to be a problem in particular for RESTful web services
+						    that use the regatta name as a URL element. Boat classes such as "B/one" and "J/70" traditionally
+						    had issues with this. Now, the regatta can simply be named "My Event (J70)" instead, and web service
+						    access is hassle-free. The boat class can still be called "J/70" which can be useful if the result
+						    management tool or the tracking partner spells it that way.</li>
+					</ul>
+					
 					<h2 class="articleSubheadline">March 2014</h2>
 					<ul class="bulletList">
 						<li>XML export of leaderboards now also taking into account competitors that haven't sailed a race but got a score</li>

@@ -1,6 +1,5 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -11,7 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -20,8 +18,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -74,9 +72,9 @@ public class RaceTrackerTest {
                 .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
                         /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         logger.info("Calling raceHandle.getRaces()");
-        Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
-        logger.info("Obtained races: "+races);
-        assertTrue(!races.isEmpty());
+        RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
+        logger.info("Obtained race: "+race);
+        assertNotNull(race);
         // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
@@ -112,9 +110,8 @@ public class RaceTrackerTest {
     @Test
     public void testInitialization() throws InterruptedException {
         logger.entering(getClass().getName(), "testInitialization");
-        Set<RaceDefinition> races = raceHandle.getRaces();
-        assertNotNull(races);
-        assertFalse(races.isEmpty());
+        RaceDefinition race = raceHandle.getRace();
+        assertNotNull(race);
         assertNotNull(getTrackedRace(raceHandle.getTrackedRegatta()));
         logger.exiting(getClass().getName(), "testInitialization");
     }

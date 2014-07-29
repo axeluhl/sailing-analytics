@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -42,11 +44,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sse.common.Util;
 
 /**
@@ -61,6 +64,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private static final long serialVersionUID = 2708044935347796930L;
     private final TimePoint startTime;
     private final List<Competitor> competitorsFromBestToWorst;
+    private final Regatta regatta;
     private RaceDefinition race;
 
     /**
@@ -69,7 +73,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
      *            mocked tracked race
      */
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
-        super();
+        this(startTime, competitorsFromBestToWorst, null);
+    }
+    
+    public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst, Regatta regatta) {
+        this.regatta = regatta;
         this.startTime = startTime;
         // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
         this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
@@ -327,8 +335,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public TrackedRegatta getTrackedRegatta() {
-        // TODO Auto-generated method stub
-        return null;
+        return new DynamicTrackedRegattaImpl(regatta);
     }
 
     @Override
@@ -642,6 +649,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addRaceAbortedListener(RaceAbortedListener listener) {
         // TODO Auto-generated method stub
         
     }

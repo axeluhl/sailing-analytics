@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -54,7 +55,7 @@ import com.sap.sse.common.Util;
  */
 public class CompetitorReplicationTest extends AbstractServerReplicationTest {
     /**
-     * Add a tracked race to the master that includes a competitor; check that the competiotr was properly replicated to
+     * Add a tracked race to the master that includes a competitor; check that the competitor was properly replicated to
      * the replica's {@link CompetitorStore}. Afterwards, use the {@link UpdateCompetitor} operation on the master to
      * perform an explicit update; ensure that the update arrived on the replica. Then execute an
      * {@link AllowCompetitorResetToDefaults} operation on the master, afterwards update the competitor on the master,
@@ -69,8 +70,8 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         String boatClassName = "Kielzugvogel";
         Integer regattaId = 12345;
         Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, regattaId, series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
         Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(

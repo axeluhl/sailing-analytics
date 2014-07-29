@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
@@ -88,7 +89,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta regatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta regatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(regatta, seriesName, raceColumnName, fleetName);
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, regatta);
@@ -101,7 +102,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta masterRegatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
@@ -115,7 +116,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta masterRegatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
@@ -140,7 +141,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta masterRegatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
@@ -154,7 +155,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta masterRegatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
         masterLog.add(raceLogEvent);
@@ -235,7 +236,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
-        Regatta masterRegatta = setupRegatta(regattaName, seriesName, fleetName, BOAT_CLASS_NAME_49er);
+        Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
         masterLog.add(raceLogEvent);
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
@@ -344,7 +345,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID());
+                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true);
         return master.apply(addRegattaOperation);
     }
     

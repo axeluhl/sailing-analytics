@@ -10,9 +10,11 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
@@ -34,6 +36,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
+    private AbortingFlagFinder abortingFlagFinder;
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
@@ -49,6 +52,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             trackedRace.invalidateEndTime();
             courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             startTimeFinder = new StartTimeFinder(raceLog);
+            abortingFlagFinder = new AbortingFlagFinder(raceLog);
             initializeWindTrack(raceLog);
             analyze();
         }
@@ -111,7 +115,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
     
     private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
-        /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
+        /* start time will be set by StartTimeFinder in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
         
         TimePoint startTime = startTimeFinder.analyze();
@@ -129,9 +133,14 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogPassChangeEvent event) {
-        trackedRace.invalidateStartTime();
+        trackedRace.invalidateStartTime(); // this will notify RaceStateListeners in case the start time changes by the event
         /* reset start time */
         trackedRace.onStartTimeChangedByRaceCommittee(null);
+        RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();
+        if (abortingFlag != null) {
+            // previous pass was aborted; notify TracTrac
+            trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
+        }
     }
 
     @Override
@@ -149,5 +158,4 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         // add the wind fix to the race committee WindTrack
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
-
 }

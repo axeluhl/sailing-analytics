@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -45,17 +44,12 @@ public class TracTracWriter {
             RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
                     null, 60000);
             String regatta = raceHandle.getRegatta().getName();
-            Set<RaceDefinition> races = raceHandle.getRaces();
-
+            RaceDefinition r = raceHandle.getRace();
             List<TrackedRace> racesList = new ArrayList<TrackedRace>();
-
-            for (RaceDefinition r : races) {
-                RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
-                TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-                tr.waitUntilNotLoading();
-
-                racesList.add(tr);
-            }
+            RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
+            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
+            tr.waitUntilNotLoading();
+            racesList.add(tr);
             System.out.println("start writing");
             // TODO: naming convention
             FileOutputStream f_os = new FileOutputStream(regatta + "race name" + ".data");

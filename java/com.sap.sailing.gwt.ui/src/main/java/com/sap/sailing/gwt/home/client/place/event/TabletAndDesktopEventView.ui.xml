@@ -9,7 +9,7 @@
 		<p:header.EventHeader ui:field='eventHeader'/>
 		<p:overview.EventOverview ui:field='eventOverview'/>
 		<p:regattalist.EventRegattaList ui:field='eventRegattaList'/>
-		<p:regattaschedule.EventRegattaSchedule ui:field='eventRegattaSchedule'/>
+		<p:regattaraces.EventRegattaRaces ui:field='eventRegattaRaces'/>
 		<p:schedule.EventSchedule ui:field='eventSchedule'/>
 		<p:media.EventMedia ui:field='eventMedia'/>
 		<s:eventsponsors.EventSponsors ui:field='eventSponsors'/>

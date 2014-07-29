@@ -91,3 +91,69 @@ These encompass leaderboard and leaderboard group creation and manipulation, inc
 Paralllel operations
 
 These encompass the receiving of raw sensor data. The order in which this data is re-played doesn't matter. The data is time-stamped, and its history is not rewritten (as maybe the case for the mark passings or for the race tracking start/finish times). Applying these operations to a replica is idempotent, so serializing an initial state doesn't need to be synchronized with the receiving of such data. Duplicate application of these operations to a server doesn't do any harm.
+
+
+### Replication in SAP Cube
+This section will describe, how a working local replica can be set up at the SAP Cube.
+The setup at the Travemünder Woche 2014 was done by Steffen Wagner as it follows:
+
+LTE router --> gigabit switch --> cube computers (dhcp) && local replica machine (with e.g. Ubuntu 14.04 LTS & a version of the analytics suite installed)
+
+Steps to get it working:
+* The LTE router ( _192.168.1.1_ ) should have DHCP and NS activated. Dhcp was within range _XXX.XXX.1.2 - XXX.XXX.1.49_ and our local replica machine had a static ip address of _XXX.XXX.1.50_. Please make sure, that the ip address is outside of the dhcp range. For a better setup we should think of using the local replica server for dhcp and ns services.
+* Setup networking (to your needs) on the local replica machine as follows:
+
+ **/etc/networking/interfaces**
+ <pre>
+ auto eth0
+ iface eth0 inet static
+	address 192.168.1.50
+	netmask 255.255.255.0
+	gateway 192.168.1.1
+ </pre>
+ **/etc/hosts**
+ <pre>
+ 127.0.0.1	localhost
+ 127.0.0.1	tw2014 tw2014.sapsailing.com
+ 192.168.1.50	tw2014 tw2014.sapsailing.com
+ </pre>
+* For rewriting the URLs and Ports to the fitting spectator URL when entering the URL we need an Apache installed (apt-get install apache2) and set up like on our sapsailing.com server. Please check 000-macros.conf, 001-events.conf and 000-main.conf and set it up as you need for the event. They need to be in the config dir of apache (/etc/apache2/mods-enabled and /etc/apache2/sites-enabled)
+* For better remote administration of the local replica, set up and autossh tunnel to trac@sapsailing.com and put it into rc.local for autostarting, e.g. as the following:
+<pre>
+autossh -M 20009 -f -N -L 1337:127.0.0.1:22 -i SSHKEY trac@sapsailing.com
+</pre>
+* Set up automatic replication in env.sh of the analystics server and start the server (not with root!) with startscript ~/servers/server/start
+* On all Cube computers add the follwing batch file to the windows task scheduling for a check every minute. The script switches hosts to local replica if available. Before the script can work, you have to edit host file manully and add the required hostnames: e.g. <pre>192.168.1.50	tw2014.sapsailing.com</pre> You also need to replace "find" and "replace" to the required ip addresses. Please note that all this would not be needed, if we would use the replica server also for dhcp and ns, so it makes really sense to set this up.
+<pre>
+@echo off
+@setlocal enableextensions enabledelayedexpansion
+REM Set a variable for the Windows hosts file location
+set "hostpath=%systemroot%\system32\drivers\etc"
+set "hostfile=hosts"
+REM Make the hosts file writable
+attrib -r -s -h "%hostpath%\%hostfile%"
+ping -n 1 -w 1000 -l 2000 192.168.1.50
+REM if local replica is available
+IF %ERRORLEVEL% == 0 (
+   REM set the string you wish to find
+   set find=54.229.94.254
+   REM set the string you wish to replace with
+   set replace=192.168.1.50
+REM if local replica is not available
+) ELSE (
+   REM set ring you wish to find
+   set find=192.168.1.50
+   REM set the string you wish to replace with
+   set replace=54.229.94.254
+)	
+for /f "delims=" %%a in ('type "%hostpath%\%hostfile%"') do (
+set "string=%%a"
+set "string=!string:%find%=%replace%!"
+>> "newfile.txt" echo !string!
+)
+move /y "newfile.txt" "%hostpath%\%hostfile%"
+REM Make the hosts file un-writable - not necessary.
+REM attrib +r "%hostpath%\%hostfile%"
+echo hostfile done.
+</pre>
+* If server should be shut down, then first stop replication manually in the backend and then call ~/servers/server/stop. If everything works fine, then the Cube computers should recognize, that the replica machine is not available anymore and then switch to the real sapsailing host.

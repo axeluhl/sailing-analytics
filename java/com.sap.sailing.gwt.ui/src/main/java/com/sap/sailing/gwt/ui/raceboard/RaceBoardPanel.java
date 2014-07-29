@@ -95,11 +95,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
-    /**
-     * The offset when scrolling with the menu entry anchors (in the top right corner).
-     */
-    private int scrollOffset;
-
     private final List<ComponentViewer> componentViewers;
     private final FlowPanel componentControlsPanel;
     private final FlowPanel viewControlsPanel;
@@ -145,7 +140,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.timer = timer;
-        this.scrollOffset = 0;        
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -271,9 +265,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return filterSets;
     }
     
+    /**
+     * Adds the media selector drop down and fills it with media for the current race.
+     * NOTE:
+     * Media selector will NOT listen and react to changes of the start time during a race board session.
+     * This case and its consequences are considered negligible.
+     * Consequently, media selector will also NOT react on media added newly during a race board session.
+     */
     private void addMediaSelectorToNavigationMenu() {
         MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
-//      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
@@ -558,19 +558,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return errorReporter;
     }
     
-    public int getScrollOffset() {
-        return scrollOffset;
-    }
-    
-    /**
-     * Sets the offset, when scrolling with the menu entry anchors (in the top right corner).<br />
-     * Only the absolute value of <code>scrollOffset</code> will be used.
-     * @param scrollOffset The new scrolling offset. <b>Only</b> the absolute value will be used.
-     */
-    public void setScrollOffset(int scrollOffset) {
-        this.scrollOffset = Math.abs(scrollOffset);
-    }
-
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();

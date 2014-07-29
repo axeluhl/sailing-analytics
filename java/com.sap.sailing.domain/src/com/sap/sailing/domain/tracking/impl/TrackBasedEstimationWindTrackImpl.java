@@ -671,6 +671,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
         }
     }
+    
+    @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+        // no action required; we're calculating based on each competitor's individual start time, not the start of race
+    }
 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
@@ -688,7 +693,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated mark position. Ask it:

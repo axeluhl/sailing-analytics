@@ -97,6 +97,27 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         return imageURLs;
     }
 
+    public String getStageImageURL() {
+        String result = null;
+        for(String imageUrl: imageURLs) {
+            if(imageUrl.contains("stage") || imageUrl.contains("STAGE")) {
+                result = imageUrl;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public List<String> getPhotoGalleryImageURLs() {
+        List<String> result = new ArrayList<String>();
+        for(String imageUrl: imageURLs) {
+            if(!imageUrl.contains("stage") && !imageUrl.contains("STAGE")) {
+                result.add(imageUrl);
+            }
+        }
+        return result;
+    }
+
     public List<String> getVideoURLs() {
         return videoURLs;
     }

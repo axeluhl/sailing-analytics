@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source `pwd`/env.sh
 DATE_OF_EXECUTION=`date`

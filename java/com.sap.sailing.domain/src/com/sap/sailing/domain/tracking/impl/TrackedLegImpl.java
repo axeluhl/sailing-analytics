@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,8 +33,8 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
@@ -45,7 +47,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private final Map<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private transient Map<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -56,7 +58,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
         trackedRace.addListener(this);
-        competitorTracksOrderedByRank = new HashMap<TimePoint, List<TrackedLegOfCompetitor>>();
+        competitorTracksOrderedByRank = new HashMap<>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        competitorTracksOrderedByRank = new HashMap<>();
     }
     
     @Override
@@ -114,7 +121,6 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             // race may be updated while calculation is going on, but each individual calculation is properly
             // synchronized, usually by read-write locks, so there is no major difference in synchronization issues
             // an the asynchronous nature of how the data is being received
-            // TODO See bug 469; competitors already disqualified may need to be ranked worst
             Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint, cache));
             rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
             synchronized (competitorTracksOrderedByRank) {
@@ -198,11 +204,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
      * of the first mark at the beginning of the leg and moving half way to the first mark of leg's end. If either of
      * the mark positions cannot be determined, <code>null</code> is returned.
      */
+    @Override
     public Position getMiddleOfLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getFrom().getMarks().iterator().next()).getEstimatedPosition(at, false);
-        Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getTo().getMarks().iterator().next()).getEstimatedPosition(at, false);
+        Position approximateLegStartPosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
+        Position approximateLegEndPosition = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
         final Position middleOfLeg;
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             middleOfLeg = null;
@@ -217,12 +222,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return middleOfLeg;
     }
     
-    public Position getEffectiveWindPosition(Callable<Position> positionProvider, TimePoint at, WindPositionMode mode) {
+    public Position getEffectiveWindPosition(Callable<Position> exactPositionProvider, TimePoint at, WindPositionMode mode) {
         final Position effectivePosition;
         switch (mode) {
         case EXACT:
             try {
-                effectivePosition = positionProvider.call();
+                effectivePosition = exactPositionProvider.call();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -285,7 +290,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
         clearCaches();
     }
 
@@ -305,6 +310,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
+    }
+
+    @Override
+    public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
     }
 
     @Override

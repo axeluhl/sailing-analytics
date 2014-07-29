@@ -63,7 +63,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
             ctx.setLineWidth(1.0);
             ctx.setFillStyle(grayTransparentColor);
-            if(competitorColor != null) {
+            if (competitorColor != null) {
                 ctx.setStrokeStyle(competitorColor.getAsHtml());
             } else {
                 ctx.setStrokeStyle("#888888");

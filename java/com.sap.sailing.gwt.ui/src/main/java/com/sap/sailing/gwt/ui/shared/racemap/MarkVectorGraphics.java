@@ -54,7 +54,8 @@ public class MarkVectorGraphics {
     }
 
     protected void drawMark(Context2d ctx, boolean isSelected, String color) {
-        switch(type) {
+        final MarkType markType = type==null ? MarkType.BUOY : type;
+        switch(markType) {
             case BUOY:
                 if(shape != null) {
                     if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {

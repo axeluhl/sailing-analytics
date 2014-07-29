@@ -73,5 +73,7 @@
 	<source path='ui/shared' />
 	<source path='ui/actions' />
 	<source path='ui/simulator' />
+	<source path='ui/regattaoverview' />
 	<source path='home' />
+	<source path='idangerous' />
 </module>

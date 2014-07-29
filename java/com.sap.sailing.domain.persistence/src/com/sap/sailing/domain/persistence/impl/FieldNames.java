@@ -26,6 +26,7 @@ public enum FieldNames {
     REGATTA_BASE_NAME,
     REGATTA_SERIES,
     REGATTA_REGATTA_CONFIGURATION,
+    REGATTA_USE_START_TIME_INFERENCE,
     SERIES_NAME,
     SERIES_IS_MEDAL,
     SERIES_STARTS_WITH_ZERO_SCORE,
@@ -110,5 +111,8 @@ public enum FieldNames {
     FROM_MILLIS, TO_MILLIS,
 
     // Result Import url fields
-    RESULT_PROVIDERNAME, RESULT_URL
+    RESULT_PROVIDERNAME, RESULT_URL, 
+    
+    // type of additional scoring information
+    RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE
 }

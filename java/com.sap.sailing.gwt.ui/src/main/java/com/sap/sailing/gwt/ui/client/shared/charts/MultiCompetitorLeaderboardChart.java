@@ -48,6 +48,6 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.competitorCharts();
+        return stringMessages.showCharts();
     }
 }

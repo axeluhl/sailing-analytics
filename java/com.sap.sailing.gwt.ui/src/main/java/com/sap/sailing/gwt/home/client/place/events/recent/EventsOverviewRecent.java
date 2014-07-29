@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.DateUtil;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvents;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class EventsOverviewRecent extends Composite {
@@ -25,13 +24,13 @@ public class EventsOverviewRecent extends Composite {
 
     private final PlaceNavigator navigator;
 
-    @UiField HTMLPanel htmlPanel;
+    @UiField HTMLPanel recentEventsPerYearPanel;
     
-    private final Map<Integer, RecentEvents> recentEventsComposites;
+    private final Map<Integer, EventsOverviewRecentYear> recentEventsComposites;
     
     public EventsOverviewRecent(PlaceNavigator navigator) {
         this.navigator = navigator;
-        recentEventsComposites = new HashMap<Integer, RecentEvents>();
+        recentEventsComposites = new HashMap<Integer, EventsOverviewRecentYear>();
         
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -39,26 +38,33 @@ public class EventsOverviewRecent extends Composite {
 
     public void updateEvents(Map<Integer, List<EventBaseDTO>> recentEventsOrderedByYear) {
         // remove old widgets
-        htmlPanel.clear();
+        recentEventsPerYearPanel.clear();
         recentEventsComposites.clear();
 
         // recent events of this year
         Date now = new Date();
         int currentYear = DateUtil.getYear(now);
+        boolean oneYearIsExpanded = false;
         
         if(recentEventsOrderedByYear.get(currentYear) != null) {
-            RecentEvents recentEvents = new RecentEvents(navigator);
-            recentEvents.setEvents(recentEventsOrderedByYear.get(currentYear), null);
-            htmlPanel.add(recentEvents);
-            recentEventsComposites.put(currentYear, recentEvents);
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear, recentEventsOrderedByYear.get(currentYear),  navigator);
+            recentEventsPerYearPanel.add(recentEventsOfOneYear);
+            recentEventsComposites.put(currentYear, recentEventsOfOneYear);
+            recentEventsOfOneYear.showContent();
+            oneYearIsExpanded = true;
         }
         currentYear--;
         while (currentYear > 2010) {
             if(recentEventsOrderedByYear.get(currentYear) != null) {
-                RecentEvents recentEvents = new RecentEvents(navigator);
-                recentEvents.setEvents(recentEventsOrderedByYear.get(currentYear), String.valueOf(currentYear));
-                htmlPanel.add(recentEvents);
-                recentEventsComposites.put(currentYear, recentEvents);
+                EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(currentYear, recentEventsOrderedByYear.get(currentYear), navigator);
+                recentEventsPerYearPanel.add(recentEventsOfOneYear);
+                recentEventsComposites.put(currentYear, recentEventsOfOneYear);
+                if(oneYearIsExpanded == true) {
+                    recentEventsOfOneYear.hideContent();
+                } else {
+                    recentEventsOfOneYear.showContent();
+                    oneYearIsExpanded = true;
+                }
             }            
             currentYear--;
         }

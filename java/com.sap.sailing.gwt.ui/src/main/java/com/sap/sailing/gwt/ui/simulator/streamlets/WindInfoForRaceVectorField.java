@@ -47,6 +47,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private final Bounds infiniteBounds = new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180));
     private final Weigher<Pair<PositionDTO, Date>> weigher;
     private double averageLatitudeDeg;
+    private double averageLatitudeCosine;
     
     private final Comparator<WindDTO> windByMeasureTimePointComparator = new Comparator<WindDTO>() {
         @Override
@@ -68,11 +69,17 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     public void setAverageLatitudeDeg(double averageLatitudeDeg) {
         this.averageLatitudeDeg = averageLatitudeDeg;
+        this.averageLatitudeCosine = Math.cos(averageLatitudeDeg/180.0*Math.PI);
     }
     
     @Override
     public double getAverageLatitudeDeg() {
         return averageLatitudeDeg;
+    }
+    
+    @Override
+    public double getCosineOfAverageLatitude() {
+        return averageLatitudeCosine;
     }
 
     @Override
@@ -88,7 +95,10 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         double knotSpeedSumScaledByConfidence = 0;
         final BearingWithConfidenceCluster<Pair<PositionDTO, Date>> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
+            /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
+                continue;
+            }*/
+           if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue().windFixes, at);
                 if (timewiseClosestFixForWindSource != null) {
                     Pair<PositionDTO, Date> fix = new Pair<>(timewiseClosestFixForWindSource.position, new Date(
@@ -146,7 +156,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public double getMotionScale(int zoomLevel) {
         // This implementation is copied from SimulatorField, hoping it does something useful in combination with
         // the Swarm implementation.
-        return 0.07 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
+        return 0.05 * Math.pow(1.6, Math.min(1.0, 6.0 - zoomLevel));
     }
     
     @Override
@@ -160,7 +170,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public double getLineWidth(double speed) {
-        return 3.*speed/MAX_WIND_SPEED_IN_KNOTS;
+        return 1.2;
     }
 
     @Override
@@ -170,7 +180,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
 
     @Override
     public double getParticleFactor() {
-        return 1.0;
+        return 0.5;
     }
 
     /**
@@ -178,7 +188,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
      */
     @Override
     public String getColor(double speed) {
-        return "rgba(255,255,255,"+Math.min(255, Math.round(255.*speed/MAX_WIND_SPEED_IN_KNOTS))+")";
+        return "rgba(255,255,255,"+Math.min(1.0, 0.4+0.8*speed/MAX_WIND_SPEED_IN_KNOTS)+")";
     }
 
 }

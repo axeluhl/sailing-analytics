@@ -136,6 +136,8 @@ import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.scoring.AdditionalScoringInformationType;
+import com.sap.sailing.domain.racelog.scoring.impl.AdditionalScoringInformationEventImpl;
 import com.sap.sailing.domain.racelog.tracking.CloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -485,44 +487,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             
             result = new FlexibleLeaderboardImpl(raceLogStore, (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME
                     .name()), resultDiscardingRule, scoringScheme, courseArea);
-            // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage
-            // them here:
-            Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
+            // For a FlexibleLeaderboard, there should be only the default fleet for any race column
             for (Object dbRaceColumnAsObject : dbRaceColumns) {
                 BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
+                String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
+
+                RaceColumn raceColumn = result.addRaceColumn(columnName,
+                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
+
                 Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
-                RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+                RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(result.getFleet(null).getName());
+                if (defaultFleetRaceIdentifier == null) {
+                    // Backward compatibility
+                    defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+                }
                 if (defaultFleetRaceIdentifier != null) {
                     Fleet defaultFleet = result.getFleet(null);
                     if (defaultFleet != null) {
-                        raceIdentifiers.put(defaultFleet.getName(), defaultFleetRaceIdentifier);
+
+                        raceColumn.setRaceIdentifier(defaultFleet, defaultFleetRaceIdentifier);
                     } else {
                         // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
                         logger.warning("Discarding RaceIdentifier " + defaultFleetRaceIdentifier
                                 + " for default fleet for leaderboard " + result.getName()
                                 + " because no default fleet was found in leaderboard");
                     }
-                    raceIdentifiers.remove(null);
-                }
-                List<Fleet> fleets = new ArrayList<Fleet>();
-                for (String fleetName : raceIdentifiers.keySet()) {
-                    Fleet fleet = fleetsByName.get(fleetName);
-                    if (fleet == null) {
-                        fleet = new FleetImpl(fleetName);
-                        fleetsByName.put(fleetName, fleet);
-                    }
-                    fleets.add(fleet);
-                }
-                if (fleets.isEmpty()) {
-                    fleets.add(result.getFleet(null));
-                }
-                String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-
-                RaceColumn raceColumn = result.addRaceColumn(columnName,
-                        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()),
-                        fleets.toArray(new Fleet[0]));
-                for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
-                    raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
                 }
 
             }
@@ -1083,11 +1072,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Regatta loadRegatta(DBObject dbRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = null;
         if (dbRegatta != null) {
-            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            String name = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
             Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
             if (id == null) {
-                id = baseName + "("+boatClassName+")";
+                id = name;
             }
             BoatClass boatClass = null;
             if (boatClassName != null) {
@@ -1099,14 +1088,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database, serviceFinderFactory), 
                     this);
-            
             Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
             CourseArea courseArea = null;
             if (courseAreaId != null) {
                 UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
                 courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
-            
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsField(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 try {
@@ -1116,8 +1103,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            
-            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
+            Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            result = new RegattaImpl(raceLogStore, name, boatClass, series, /* persistent */true,
+                    loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
+                            : useStartTimeInference);
             result.setRegattaConfiguration(configuration);
         }
         return result;
@@ -1347,6 +1336,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(CloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(AdditionalScoringInformationEventImpl.class.getSimpleName())) {
+            return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1430,6 +1421,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
         return raceLogEventFactory.createCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId,
                 deviceMappingEventId, closingTimePoint);
+    }
+
+    private RaceLogEvent loadRaceLogAdditionalScoringInformationEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        AdditionalScoringInformationType informationType = AdditionalScoringInformationType.valueOf(dbObject.get(FieldNames.RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE.name()).toString());
+        return raceLogEventFactory.createAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, competitors, passId, informationType);
     }
 
     private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
