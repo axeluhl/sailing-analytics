@@ -38,11 +38,10 @@ public class EventsOverviewUpcoming extends Composite {
         upcomingEventComposites.clear();
 
         for(EventBaseDTO event: events) {
-            UpcomingEvent upcomingEvent = new UpcomingEvent(navigator);
+            UpcomingEvent upcomingEvent = new UpcomingEvent(event, navigator);
             
-            upcomingEvent.setEvent(event);
             upcomingEventComposites.add(upcomingEvent);
-            eventsPlaceholder.add(upcomingEvent);
+            eventsPlaceholder.getElement().appendChild(upcomingEvent.getElement());
         }
     }
 

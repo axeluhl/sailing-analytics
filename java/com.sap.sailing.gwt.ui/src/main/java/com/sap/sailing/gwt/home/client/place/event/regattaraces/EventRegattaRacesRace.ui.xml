@@ -10,10 +10,8 @@
   <!-- race name  -->
   <div class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_name}">
       <span ui:field="raceName" class="{local_res.css.eventregattarace_nameshort}"></span>
-      <!-- 
-      <ui:text from='{i18n.eventRegattaRaceRace}'/><span ui:field="raceName2" /><br></br>
+      <ui:text from='{i18n.eventRegattaRaceRace}'/>&nbsp;<span ui:field="raceName2" /><br></br>
       <span ui:field="raceState" />&nbsp;<span ui:field="raceTime" />
-       -->
   </div>
   <!-- race state  if race.isScheduled and race.isTracked -->
   <div ui:field="raceFlagDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_flag}">

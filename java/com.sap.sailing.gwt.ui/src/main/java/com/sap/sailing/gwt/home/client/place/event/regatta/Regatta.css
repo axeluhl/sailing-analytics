@@ -102,6 +102,7 @@
   background-color: #ccc;
   height: 0.666666666666667em;
   width: 1.333333333333333em;
+  margin-right: 3px;
 }
 .regatta_intro_phases_phase_races_race[data-status='live'] {
   background-color: #f00;
