@@ -161,6 +161,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.TimeRangeImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -955,6 +956,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TrackedRaceDTO trackedRaceDTO = null; 
             if (trackedRace != null) {
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+                trackedRaceDTO.hasVideoData = false;
+                trackedRaceDTO.hasAudioData = false;
+                Collection<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
+                for(MediaTrack track: mediaTracksForRace) {
+                    switch(track.mimeType.mediaType) {
+                    case audio:
+                        trackedRaceDTO.hasAudioData = true;
+                        break;
+                    case video:
+                        trackedRaceDTO.hasVideoData = true;
+                        break;
+                    }
+                }
             }
             RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()),
                     trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));

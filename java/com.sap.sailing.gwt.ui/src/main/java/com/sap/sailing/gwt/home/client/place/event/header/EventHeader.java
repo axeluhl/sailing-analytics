@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -46,6 +47,7 @@ public class EventHeader extends Composite {
     @UiField SpanElement eventDescription;
     @UiField SpanElement venueName;
     @UiField SpanElement eventWebsite;
+    @UiField DivElement isLiveDiv;
     
     @UiField ImageElement eventLogo;
     @UiField ImageElement eventLogo2;
@@ -73,6 +75,8 @@ public class EventHeader extends Composite {
 //        setActiveLink(links2, overviewLink2);
 //        setActiveLink(links3, overviewLink3);
 
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+        
         setDataNavigationType("normal");
         updateUI();
     }

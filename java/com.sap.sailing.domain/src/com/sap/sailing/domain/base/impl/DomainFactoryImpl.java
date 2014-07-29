@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -143,6 +144,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
         trackedRaceDTO.hasWindData = trackedRace.hasWindData();
         trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        trackedRaceDTO.hasMeasuredWindData = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION)) != 0; 
         trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
         return trackedRaceDTO;
     }

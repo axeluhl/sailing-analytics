@@ -15,11 +15,19 @@ public class EventDatesFormatterUtil {
     private final static DateTimeFormat monthFormat = DateTimeFormat.getFormat("MMMM");
     private final static DateTimeFormat yearFormat = DateTimeFormat.getFormat("yyyy");
 
+    private final static int ONE_DAY = 24 * 60 * 60 * 1000; 
+
     @SuppressWarnings("deprecation")
     public static String formatDateRangeWithYear(Date from, Date to) {
         String result = "";
         if(from.getMonth() == to.getMonth()) {
-            result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + ", " + yearFormat.format(from);
+            // same month
+            if(from.getDay() == to.getDay() && to.getTime() - to.getTime() <= ONE_DAY) {
+                // same day
+                result = monthFormat.format(from) + " " + dayFormat.format(from) + ", " + yearFormat.format(from);
+            } else {
+                result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + ", " + yearFormat.format(from);
+            }
         } else {
             result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + ", " + yearFormat.format(from);
         }
@@ -31,7 +39,13 @@ public class EventDatesFormatterUtil {
     public static String formatDateRangeWithoutYear(Date from, Date to) {
         String result = "";
         if(from.getMonth() == to.getMonth()) {
-            result =  monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to);
+            // same month
+            if(from.getDay() == to.getDay() && to.getTime() - to.getTime() <= ONE_DAY) {
+                // same day
+                result =  monthFormat.format(from) + " " + dayFormat.format(from);
+            } else {
+                result =  monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to);
+            }
         } else {
             result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to);
         }
