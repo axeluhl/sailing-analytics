@@ -33,6 +33,14 @@ public class EventDTO extends EventBaseDTO {
         regattas = new ArrayList<RegattaDTO>();
     }
     
+    public boolean isRunning() {
+        return getCurrentServerTime().after(startDate) && getCurrentServerTime().before(endDate);
+    }
+
+    public boolean isFinished() {
+        return getCurrentServerTime().after(endDate);
+    }
+
     private void initCurrentServerTime() {
         currentServerTime = new Date();
     }

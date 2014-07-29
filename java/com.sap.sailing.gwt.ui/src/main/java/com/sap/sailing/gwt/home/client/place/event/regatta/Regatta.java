@@ -48,7 +48,8 @@ public class Regatta extends Composite {
     @UiField DivElement regattaPhasesPanel;
     @UiField DivElement regattaPhasesInfoDiv;
     
-//    @UiField SpanElement competitorsCount;
+    @UiField SpanElement competitorsCount;
+    @UiField DivElement competitorsCountDiv;
     @UiField SpanElement racesCount;
     @UiField SpanElement trackedRacesCount;
     @UiField DivElement isLiveDiv;
@@ -120,11 +121,11 @@ public class Regatta extends Composite {
             leaderboardGroupName.getStyle().setDisplay(Display.NONE);
         }
         
-//        if(leaderboard.rows != null) {
-//            competitorsCount.setInnerText(String.valueOf(leaderboard.rows.size()));
-//        } else {
-//            competitorsCount.getStyle().setVisibility(Visibility.HIDDEN);
-//        }
+        if(leaderboard.competitorsCount > 0) {
+            competitorsCount.setInnerText(String.valueOf(leaderboard.competitorsCount));
+        } else {
+            competitorsCountDiv.getStyle().setDisplay(Display.NONE);
+        }
         setRegattaProgress(leaderboard);
     }
     
