@@ -16,7 +16,10 @@
 
  **alternatively**
 
- 2.1. Change default UA [HowToGeek](http://www.howtogeek.com/113439/how-to-change-your-browsers-user-agent-without-installing-any-extensions/)
+ 2.1. Change default UA [HowToGeek](http://www.howtogeek.com/113439/how-to-change-your-browsers-user-agent-without-installing-any-extensions/) to the one of a Samsung Galaxy Note Tablet with Chrome: 
+<pre>
+Mozilla/5.0 (Linux; Android 4.1.2; GT-N8000 Build/JZO54K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.166 Safari/537.36 OPR/20.0.1396.73172
+</pre>
 
 #### Installation Keyboard & Setup
 
