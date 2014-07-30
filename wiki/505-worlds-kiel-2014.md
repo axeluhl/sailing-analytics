@@ -6,7 +6,7 @@
 
 1. [ Firefox 32 Beta for best touch support - Download & Install ](https://www.mozilla.org/de/firefox/channel/#beta)
 
-2. User Firefox Addon OR set default UA of Firefox
+2. User Agent Firefox Addon OR set default UA of Firefox
  
  2.1. [ Firefox Addon User Agent Switcher 0.7.3 - Install](https://addons.mozilla.org/en-US/firefox/addon/user-agent-switcher/)
 
