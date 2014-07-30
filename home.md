@@ -51,6 +51,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
+  * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
 
 ### Internal services (not related to wiki but useful)
 
