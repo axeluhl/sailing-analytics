@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -130,7 +130,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
     public Path getPath() {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
+        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
         WindFieldGenerator windField = this.parameters.getWindField();
         PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
@@ -162,7 +162,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         }
 
         // generate grid positions using sgridh and sgridv
-        Position[][] sailGrid = boundary.extractGrid(spatialGridsizeHorizontal, spatialGridsizeVertical, 0, 0);
+        Position[][] sailGrid = boundary.generatePositions(spatialGridsizeHorizontal, spatialGridsizeVertical, 0, 0);
 
         // optimization grid indexes:
         // vertical steps: 0, ..., v-1

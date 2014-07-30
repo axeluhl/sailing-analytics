@@ -475,7 +475,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
+        crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
+        triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
     }
@@ -1378,7 +1380,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
                             Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
                             if (firstLegStart != null && firstLegEnd != null) {
-                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
                                         firstLegEnd.getBearingGreatCircle(firstLegStart)));
                             } else {
                                 result = null;

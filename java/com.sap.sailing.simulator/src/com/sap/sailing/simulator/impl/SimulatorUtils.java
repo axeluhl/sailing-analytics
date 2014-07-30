@@ -373,7 +373,7 @@ public class SimulatorUtils {
         Map<String, Path> paths = new HashMap<String, Path>();
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind3 genTreeGrow = new PathGeneratorTreeGrowWind3(parameters);
+        PathGeneratorTreeGrowWind genTreeGrow = new PathGeneratorTreeGrowWind(parameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);

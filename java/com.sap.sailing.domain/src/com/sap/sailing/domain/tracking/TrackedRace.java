@@ -397,7 +397,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
-     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * speed of zero knots. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
      * <code>true</code>.
      * 
      * @param at

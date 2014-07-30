@@ -3254,15 +3254,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false));
         }
-        for (URL imageURL : event.getImageURLs()) {
-            eventDTO.addImageURL(imageURL.toString());
-        }
-        for (URL videoURL : event.getVideoURLs()) {
-            eventDTO.addVideoURL(videoURL.toString());
-        }
-        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
-            eventDTO.addSponsorImageURL(sponsorImageURL.toString());
-        }
         return eventDTO;
     }
 

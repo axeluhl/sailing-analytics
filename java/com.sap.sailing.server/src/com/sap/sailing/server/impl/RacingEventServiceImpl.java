@@ -558,7 +558,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private void loadMediaLibary() {
         Collection<DBMediaTrack> allDBMediaTracks = mediaDB.loadAllMediaTracks();
         for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
-            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.valueOf(dbMediaTrack.mimeType) : null;
+            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.byName(dbMediaTrack.mimeType) : null;
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
                     dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
             mediaTrackAdded(mediaTrack);
