@@ -14,7 +14,7 @@
 
  2.3. Set UA: Tools -> Default User Agent -> Mobile Devices -> Browsers -> Firefox Fennec 10.0.1
 
-** alternatively**
+**alternatively**
 
   2.1. Change default UA [HowToGeek](http://www.howtogeek.com/113439/how-to-change-your-browsers-user-agent-without-installing-any-extensions/)
 
