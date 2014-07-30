@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.BoatHullType;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -35,8 +36,14 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     private final long approximateManeuverDurationInMilliseconds;
 
     private final boolean typicallyStartsUpwind;
+    
+    private final String displayName;
 
     private final Distance hullLength;
+    
+    private final Distance hullBeam;
+    
+    private final BoatHullType hullType;
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         super(name);
@@ -46,7 +53,23 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         hullLength = name.toLowerCase().contains("extreme") && name.contains("40")
                 ? new MeterDistance(40*12*2.54/100)
                 : new MeterDistance(5); // a good average for the olympic classes...
+        this.displayName = null;
+        this.hullBeam = null;
+        this.hullType = null;
     }
+    
+    // return new BoatClassImpl(boatClassName, typicallyStartsUpwind, displayName, hullLengthInMeter, hullBeamInMeter, hullType);
+    
+    public BoatClassImpl(String name, boolean typicallyStartsUpwind, String displayName, 
+            double hullLengthInMeter, double hullBeamInMeter, BoatHullType hullType) {
+        super(name);
+        this.typicallyStartsUpwind = typicallyStartsUpwind;     
+        this.displayName = displayName;
+        this.hullLength = new MeterDistance(hullLengthInMeter);
+        this.hullBeam = new MeterDistance(hullBeamInMeter);
+        this.hullType = hullType;
+        approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
+    }    
 
     @Override
     public long getApproximateManeuverDurationInMilliseconds() {
@@ -108,6 +131,18 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public BoatClass resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateBoatClass(getName(), typicallyStartsUpwind());
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public Distance getHullBeam() {
+        return hullBeam;
+    }
+
+    public BoatHullType getHullType() {
+        return hullType;
     }
 
 }

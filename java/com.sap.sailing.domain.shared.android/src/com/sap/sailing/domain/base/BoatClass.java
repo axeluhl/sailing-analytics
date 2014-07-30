@@ -39,7 +39,11 @@ public interface BoatClass extends Named, IsManagedBySharedDomainFactory {
     boolean typicallyStartsUpwind();
     
     Distance getHullLength();
-
+    
+    Distance getHullBeam();
+    
+    BoatHullType getHullType();
+    
     /**
      * Downwind leg-based wind estimations are inherently less confident than upwind leg-based estimations because
      * jibing angles vary more greatly from boat to boat than tacking angles.
