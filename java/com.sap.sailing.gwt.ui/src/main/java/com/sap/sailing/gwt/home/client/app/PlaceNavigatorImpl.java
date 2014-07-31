@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
-    private final static String SAPSAILING_DOMAIN = "www.sapsailing.com"; 
+    private final static String DEFAULT_SAPSAILING_SERVER = "dev.sapsailing.com"; // www.sapsailing.com 
     
     protected PlaceNavigatorImpl(PlaceController placeController) {
         super();
@@ -74,17 +74,15 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        Window.alert("BaseURL: " + baseUrl);
-        if(isLocationOnLocalhost(baseUrl) || isLocationOnSapSailingCom(baseUrl)) {
+        if(isLocationOnLocalhost(baseUrl) || isLocationOnDefaultSapSailingServer(baseUrl)) {
             placeController.goTo(destinationPlace); 
         } else {
-            String homeUrl = buildRemotePlaceUrl(baseUrl, destinationPlace, tokenizer);
+            String homeUrl = buildRemotePlaceUrl(DEFAULT_SAPSAILING_SERVER, destinationPlace, tokenizer);
             Window.Location.replace(homeUrl);
         }
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
-        Window.alert("BaseURL: " + baseUrl + ", isOnRemoteServer: " + isOnRemoteServer);
         if(isLocationOnLocalhost(baseUrl) || !isOnRemoteServer) {
             placeController.goTo(destinationPlace); 
         } else {
@@ -94,17 +92,15 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private String getLocationURL() {
-        String locationUrl = Window.Location.getProtocol() + "//" + Window.Location.getHostName();
-        Window.alert("LocationURL: " + locationUrl);
-        return locationUrl;
+        return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
     }
     
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
         return baseUrl + "/gwt/Home.html#" + destinationPlace.getClass().getSimpleName() + ":" + tokenizer.getToken(destinationPlace);
     }
 
-    private boolean isLocationOnSapSailingCom(String urlToCheck) {
-        return urlToCheck.contains(SAPSAILING_DOMAIN);
+    private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
+        return urlToCheck.contains(DEFAULT_SAPSAILING_SERVER);
     }
 
     private boolean isLocationOnLocalhost(String urlToCheck) {
