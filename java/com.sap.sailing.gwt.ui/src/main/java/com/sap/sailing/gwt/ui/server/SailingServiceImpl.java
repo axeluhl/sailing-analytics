@@ -3038,6 +3038,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Event event : getService().getAllEvents()) {
             EventDTO eventDTO = convertToEventDTO(event);
             eventDTO.setBaseURL(requestBaseURL);
+            eventDTO.setIsOnRemoteServer(false);
             result.add(eventDTO);
         }
         return result;
@@ -3059,6 +3060,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (EventBase remoteEvent : remoteEvents) {
                     EventBaseDTO remoteEventDTO = convertToEventDTO(remoteEvent);
                     remoteEventDTO.setBaseURL(baseURL);
+                    remoteEventDTO.setIsOnRemoteServer(true);
                     result.add(remoteEventDTO);
                 }
             }
@@ -4769,24 +4771,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (serverNameOrNullForMain == null) {
             Result<LeaderboardSearchResult> searchResult = getService().search(query);
             for (LeaderboardSearchResult hit : searchResult.getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, getRequestBaseURL()));
+                result.add(createLeaderboardSearchResultDTO(hit, getRequestBaseURL(), false));
             }
         } else {
             RemoteSailingServerReference remoteRef = getService().getRemoteServerReferenceByName(serverNameOrNullForMain);
             for (LeaderboardSearchResultBase hit : getService().searchRemotely(serverNameOrNullForMain, query).getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, remoteRef.getURL()));
+                result.add(createLeaderboardSearchResultDTO(hit, remoteRef.getURL(), true));
             }
         }
         return result;
     }
 
-    private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL) {
+    private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL,
+            boolean isOnRemoteServer) {
         ArrayList<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
         for (LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
             LeaderboardGroupBaseDTO leaderboardGroupDTO = convertToLeaderboardGroupBaseDTO(lgb);
             leaderboardGroups.add(leaderboardGroupDTO);
         }
-        return new LeaderboardSearchResultDTO(baseURL.toString(), leaderboardSearchResult.getLeaderboard().getName(),
+        return new LeaderboardSearchResultDTO(baseURL.toString(), isOnRemoteServer, leaderboardSearchResult.getLeaderboard().getName(),
                 leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
                 leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
                 leaderboardGroups);

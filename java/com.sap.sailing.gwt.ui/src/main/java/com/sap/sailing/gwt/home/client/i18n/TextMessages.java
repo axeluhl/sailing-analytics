@@ -20,7 +20,8 @@ public interface TextMessages extends Messages {
     String officalEventWebsite();
     String leg();
     String leader();
-    String winner();
+    String races();
+    String showEvent();
     
     String countdownDays();
     String countdownHours();
