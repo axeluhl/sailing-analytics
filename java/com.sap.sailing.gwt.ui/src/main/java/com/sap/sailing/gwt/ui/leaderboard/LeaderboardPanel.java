@@ -17,6 +17,8 @@ import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -43,6 +45,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -299,6 +302,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceTimesInfoProviderListener raceTimesInfoProviderListener;
     
+    /**
+     * Used to set the focus to avoid undesirable table scolling
+     */
+    private final Anchor dummyFocusElement;
+    private int blurInOnSelectionChanged;
+
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -1501,6 +1510,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+        this.dummyFocusElement = new Anchor("");
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1560,6 +1570,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
+        leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
+                boolean isClick = "click".equals(event.getNativeEvent().getType());
+                if (isClick) {
+                    blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work reliably
+                    blurFocusedElementAfterSelectionChange();
+                }
+            }
+        });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
@@ -1572,6 +1592,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
                 updateLeaderboard(getLeaderboard());
+                if (blurInOnSelectionChanged > 0) {
+                    blurInOnSelectionChanged--;
+                    blurFocusedElementAfterSelectionChange();
+                }
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
@@ -1655,6 +1679,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
+        contentPanel.add(dummyFocusElement); // ensure dummy element is part of the DOM
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
@@ -2711,18 +2736,37 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     public void removeAllListeners() {
-        if(raceTimesInfoProviderListener != null) {
+        if (raceTimesInfoProviderListener != null) {
             getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
         }
-        if(raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
-            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener((LastNRacesColumnSelection) raceColumnSelection);
+        if (raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(
+                    (LastNRacesColumnSelection) raceColumnSelection);
         }
-        if(timer != null) {
+        if (timer != null) {
             timer.removeTimeListener(this);
         }
     }
 
     protected Timer getTimer() {
         return timer;
+    }
+
+    protected void blurFocusedElementAfterSelectionChange() {
+        // now "blur" the selected leaderboard element because it seems to cause the cell table to scroll to its top;
+        // see bug 2093.
+        blur();
+        final ScheduledCommand blurCommand = new ScheduledCommand() {
+            @Override
+            public void execute() {
+                blur();
+            }
+        };
+        Scheduler.get().scheduleDeferred(blurCommand);
+    }
+
+    private void blur() {
+        dummyFocusElement.setFocus(true);
+        dummyFocusElement.getElement().focus();
     }
 }

@@ -30,4 +30,9 @@ public class RevokeEventImpl extends RaceLogEventImpl implements RevokeEvent {
     public Serializable getRevokedEventId() {
         return revokedEventId;
     } 
+    
+    @Override
+    public String getShortInfo() {
+      return super.getShortInfo() + "Revoked: " + revokedEventId;
+    }                
 }

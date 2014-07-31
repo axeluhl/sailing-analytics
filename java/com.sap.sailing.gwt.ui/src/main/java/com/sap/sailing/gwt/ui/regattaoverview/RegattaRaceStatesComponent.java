@@ -752,16 +752,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getWaypointNameLabel(WaypointDTO waypointDTO) {
         String result = waypointDTO.getName();
-        result += (waypointDTO.passingInstructions == null) ? "" : ", to " + getPassingInstructionsAsText(waypointDTO.passingInstructions);
+        result += (waypointDTO.passingInstructions == null) ? "" : "," + getPassingInstructionsAsText(waypointDTO.passingInstructions);
         return result;
     }
 
     private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
         case Port:
-            return stringMessages.portSide();
+            return stringMessages.toSide() + " " + stringMessages.portSide();
         case Starboard:
-            return stringMessages.starboardSide();
+            return stringMessages.toSide() + " " + stringMessages.starboardSide();
         case Gate:
             return stringMessages.gate();
         case Line:

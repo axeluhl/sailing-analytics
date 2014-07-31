@@ -17,6 +17,23 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
  
 ********************************************
+************* TracAPI 3.0.2 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+1) New features
+
+ - The IRacesListener.updateRace() event is thrown when the live delay for a race has changed. The IRace.getLiveDelay() method
+ returns the new value.
+
+2) Bugs
+
+ - The events IRacesListener.abandonRace() and IRacesListener.startTracking() have been reviewed. Now they are always sent
+ when the races are updated either using the event manager or using the external JSON service "update_race_status"
+ - The controls are not updated when they are retrieved a second time from a parameters file. The library always returns 
+ the first control thas was read the first time.   
+ 
+********************************************
 ************* TracAPI 3.0.1 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation

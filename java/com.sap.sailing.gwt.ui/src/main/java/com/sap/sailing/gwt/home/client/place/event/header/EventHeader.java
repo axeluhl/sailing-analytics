@@ -4,6 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -37,7 +39,8 @@ public class EventHeader extends Composite {
 //    @UiField Anchor regattasLink3;
 //    @UiField Anchor scheduleLink3;
 //    @UiField Anchor mediaLink3;
-
+      @UiField Anchor officalWebsiteLink;
+      
     @UiField DivElement eventHeaderWrapperDiv;
     @UiField SpanElement eventName;
     @UiField SpanElement eventName2;
@@ -45,7 +48,8 @@ public class EventHeader extends Composite {
     @UiField SpanElement eventDate;
     @UiField SpanElement eventDescription;
     @UiField SpanElement venueName;
-    @UiField SpanElement eventWebsite;
+    @UiField DivElement isLiveDiv;
+    @UiField DivElement isFinishedDiv;
     
     @UiField ImageElement eventLogo;
     @UiField ImageElement eventLogo2;
@@ -64,6 +68,8 @@ public class EventHeader extends Composite {
         this.pageNavigator = pageNavigator;
         
         EventHeaderResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
+        
         initWidget(uiBinder.createAndBindUi(this));
 
 //        links1 = Arrays.asList(new Anchor[] { overviewLink, regattasLink, scheduleLink, mediaLink });
@@ -73,6 +79,12 @@ public class EventHeader extends Composite {
 //        setActiveLink(links2, overviewLink2);
 //        setActiveLink(links3, overviewLink3);
 
+        if(event.isRunning()) {
+            isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        } else if (event.isFinished()) {
+            isLiveDiv.getStyle().setDisplay(Display.NONE);
+        }
+        
         setDataNavigationType("normal");
         updateUI();
     }
@@ -92,7 +104,7 @@ public class EventHeader extends Composite {
             eventDescription.setInnerHTML(event.getDescription());
         }
         if(event.getOfficialWebsiteURL() != null) {
-            eventWebsite.setInnerHTML(event.getOfficialWebsiteURL());
+            officalWebsiteLink.setHref(event.getOfficialWebsiteURL());
         }
         
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;

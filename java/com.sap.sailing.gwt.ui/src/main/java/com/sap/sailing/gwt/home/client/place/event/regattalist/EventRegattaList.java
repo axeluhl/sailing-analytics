@@ -10,7 +10,6 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
 import com.sap.sailing.gwt.home.client.place.event.regatta.Regatta;
@@ -29,7 +28,7 @@ public class EventRegattaList extends Composite {
 
     @UiField DivElement regattaGroupsNavigationPanel;
     @UiField DivElement regattaListNavgiationDiv;
-    @UiField HTMLPanel regattaListItemPanel;
+    @UiField DivElement regattaListItemsDiv;
     @UiField AnchorElement allRegattasLink;
 
     public EventRegattaList(EventDTO event, List<RaceGroupDTO> raceGroups,
@@ -43,9 +42,10 @@ public class EventRegattaList extends Composite {
         for (RaceGroupDTO raceGroup: raceGroups) {
             Regatta regatta = new Regatta(event, true, timerForClientServerOffset, pageNavigator);
             Pair<StrippedLeaderboardDTO, LeaderboardGroupDTO> leaderboardWithLeaderboardGroup = leaderboardsWithLeaderboardGroup.get(raceGroup.getName());
-            regatta.setData(raceGroup, leaderboardWithLeaderboardGroup != null ? leaderboardWithLeaderboardGroup.getA() : null,
-                    leaderboardWithLeaderboardGroup != null ? leaderboardWithLeaderboardGroup.getB() : null);
-            regattaListItemPanel.add(regatta);
+            if(leaderboardWithLeaderboardGroup != null) {
+                regatta.setData(raceGroup, leaderboardWithLeaderboardGroup.getA(), leaderboardWithLeaderboardGroup.getB());
+                regattaListItemsDiv.appendChild(regatta.getElement());
+            }
         }
     }
 }

@@ -1,9 +1,11 @@
-package com.sap.sailing.gwt.ui.common.client;
+package com.sap.sailing.gwt.home.client.shared;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.gwt.home.client.i18n.TextMessages;
 
 /**
  * A countdown notifying about changes in the two most significant time units. I.e. days+hours or hours+minutes or minutes+seconds or seconds only.
@@ -24,6 +26,7 @@ public class Countdown {
     public enum Unit {DAYS, HOURS, MINUTES, SECONDS}
     
     public static class RemainingTime {
+        private static TextMessages i18n = GWT.create(TextMessages.class);
         public RemainingTime(long value, Unit unit) {
             this.value = value;
             this.unit = unit;
@@ -31,6 +34,38 @@ public class Countdown {
         public final long value;
         public final Unit unit;
         
+        public String unitI18n() {
+            if (value == 1) {
+                switch (unit) {
+                case DAYS:
+                    return i18n.countdownDay();
+                case HOURS:
+                    return i18n.countdownHour();
+                case MINUTES:
+                    return i18n.countdownMinute();
+                case SECONDS:
+                    return i18n.countdownSecond();
+                default:
+                    return "UNKNOWN";
+
+                }
+            } else {
+                switch (unit) {
+                case DAYS:
+                    return i18n.countdownDays();
+                case HOURS:
+                    return i18n.countdownHours();
+                case MINUTES:
+                    return i18n.countdownMinutes();
+                case SECONDS:
+                    return i18n.countdownSeconds();
+                default:
+                    return "UNKNOWN";
+                }
+
+            }
+        }
+
         public static boolean equal(RemainingTime t1, RemainingTime t2) {
             if (t1 == null) {
                 if (t2 == null) {
@@ -62,7 +97,7 @@ public class Countdown {
      * @param zeroDate
      * @param countdownListener
      */
-    Countdown(TimePoint zeroDate, CountdownListener countdownListener, boolean dontSchedule) {
+    public Countdown(TimePoint zeroDate, CountdownListener countdownListener, boolean dontSchedule) {
         this.zeroDate = zeroDate;
         this.countdownListener = countdownListener;
         update();

@@ -111,5 +111,8 @@ public enum FieldNames {
     FROM_MILLIS, TO_MILLIS,
 
     // Result Import url fields
-    RESULT_PROVIDERNAME, RESULT_URL
+    RESULT_PROVIDERNAME, RESULT_URL, 
+    
+    // type of additional scoring information
+    RACE_LOG_ADDITIONAL_SCORING_INFORMATION_TYPE
 }

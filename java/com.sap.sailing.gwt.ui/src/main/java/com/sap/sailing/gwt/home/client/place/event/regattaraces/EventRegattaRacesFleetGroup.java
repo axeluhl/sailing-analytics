@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.regattaraces;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.client.place.event.EventPageNavigator;
+import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -24,6 +26,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
     }
 
     @UiField DivElement fleetsPanel;
+    @UiField DivElement racesFromToDate;
     @UiField DivElement racesFleetPanel;
     
     public EventRegattaRacesFleetGroup(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, List<FleetDTO> fleetsToShow, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
@@ -33,13 +36,8 @@ public class EventRegattaRacesFleetGroup extends Composite {
         for(FleetDTO fleet: fleetsToShow) {
             EventRegattaRacesFleet eventRegattaRacesFleet = new EventRegattaRacesFleet(fleet);
             fleetsPanel.appendChild(eventRegattaRacesFleet.getElement());
-            
-            List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
-            for(RaceColumnDTO raceColumn: racesOfFleet) {
-                RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
-                EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
-                racesFleetPanel.appendChild(race.getElement());
-            }
+
+            updateFleetRacesUI(leaderboard, series, fleet, timerForClientServerOffset, pageNavigator);
         }
     }
 
@@ -48,13 +46,36 @@ public class EventRegattaRacesFleetGroup extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         fleetsPanel.getStyle().setDisplay(Display.NONE);
-        
+
         FleetDTO defaultFleet = series.getFleets().get(0);
-        List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, defaultFleet);
+        updateFleetRacesUI(leaderboard, series, defaultFleet, timerForClientServerOffset, pageNavigator);
+    }
+
+    private void updateFleetRacesUI(StrippedLeaderboardDTO leaderboard, RaceGroupSeriesDTO series, FleetDTO fleet, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
+        Date fromDate = null;
+        Date toDate = null;
+
+        List<RaceColumnDTO> racesOfFleet = getRacesOfFleet(leaderboard, series, fleet);
         for(RaceColumnDTO raceColumn: racesOfFleet) {
             RaceColumnDTO raceColumnFromLeaderboard = leaderboard.getRaceColumnByName(raceColumn.getName());
-            EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, defaultFleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
+            EventRegattaRacesRace race = new EventRegattaRacesRace(leaderboard, fleet, raceColumnFromLeaderboard, timerForClientServerOffset, pageNavigator);
             racesFleetPanel.appendChild(race.getElement());
+            
+            Date startDate = raceColumnFromLeaderboard.getStartDate(fleet);
+            if(startDate != null) {
+                if(fromDate == null || startDate.before(fromDate)) {
+                    fromDate = startDate;
+                }
+                if(toDate == null || startDate.after(toDate)) {
+                    toDate = startDate;
+                }
+            }
+        }
+        if(fromDate != null && toDate != null) {
+            racesFromToDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(fromDate, toDate));
+        } else {
+            // no single race with a date
+            racesFromToDate.getStyle().setDisplay(Display.NONE);
         }
     }
 

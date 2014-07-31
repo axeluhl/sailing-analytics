@@ -14,11 +14,17 @@
       <div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
         <div class="{local_res.css.eventheader_intro}"><img ui:field='eventLogo' alt="" height="140" width="140" class="{local_res.css.eventheader_intro_logo}"></img>
           <h3 class="{local_res.css.eventheader_intro_name}"><span ui:field='eventName' /></h3>
-          <div data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
+          <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
+          <div ui:field="isFinishedDiv" data-labeltype="finished" class="{res.mainCss.label}"><ui:text from='{i18n.finished}'/></div>
           <div class="{local_res.css.eventheader_intro_details}">
             <div class="{local_res.css.eventheader_intro_details_item}"><span ui:field='eventDate'/></div>
-            <div class="{local_res.css.eventheader_intro_details_item}"><img src="images/location-icon.png" class="{local_res.css.locationicon}"></img><span ui:field='venueName' />
-            </div><a href="http://" target="_blank" class="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}"><span ui:field='eventWebsite' /></a>
+            <div class="{local_res.css.eventheader_intro_details_item}">
+                <img src="images/location-icon.png" class="{local_res.css.locationicon}"></img>
+                <span ui:field='venueName' />
+            </div>
+           	<g:Anchor ui:field="officalWebsiteLink" href="javascript:;" target="_blank" styleName="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}">
+           	    <ui:text from='{i18n.officalEventWebsite}'/>
+           	</g:Anchor>
           </div>
           <div class="{local_res.css.eventheader_intro"><span ui:field='eventDescription'/></div>
         </div>
@@ -31,10 +37,12 @@
   <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
         <div class="{res.mediaCss.columns}">
-            <g:Anchor ui:field="regattasLink">
+            <g:Anchor href="javascript:;" ui:field="regattasLink">
               	<img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
 			</g:Anchor>
-            <g:Anchor ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}"><span ui:field='eventName2' /></g:Anchor>
+            <g:Anchor href="javascript:;" ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
+                <span ui:field='eventName2' />
+            </g:Anchor>
       </div>
     </div>
   </div>
