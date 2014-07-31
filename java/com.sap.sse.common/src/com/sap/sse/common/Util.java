@@ -239,7 +239,7 @@ public class Util {
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
      * immediately returns <code>false</code>.
      */
-    public static <T> boolean contains(Iterable<T> ts, T t) {
+    public static <T> boolean contains(Iterable<T> ts, Object t) {
         if (ts == null) {
             return false;
         }

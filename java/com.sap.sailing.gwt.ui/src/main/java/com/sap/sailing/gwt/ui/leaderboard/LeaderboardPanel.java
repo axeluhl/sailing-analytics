@@ -88,6 +88,8 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
@@ -1501,7 +1503,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
+                /* showCompetitorSearchBox */ false, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -1509,7 +1511,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
-            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+            boolean showCompetitorSearchBox, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.dummyFocusElement = new Anchor("");
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -1677,6 +1679,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
+        }
+        if (showCompetitorSearchBox) {
+            contentPanel.add(new CompetitorSearchTextBox(competitorSelectionProvider, stringMessages));
         }
         contentPanel.add(getLeaderboardTable());
         contentPanel.add(dummyFocusElement); // ensure dummy element is part of the DOM
@@ -2730,7 +2735,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         updateLeaderboard(getLeaderboard());
     }
-    
+
+    @Override
+    public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
+            FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
+        // nothing to do; if the list of filtered competitors has changed, a separate call to filteredCompetitorsListChanged will occur
+    }
+
     public RaceColumnSelection getRaceColumnSelection() {
         return raceColumnSelection;
     }

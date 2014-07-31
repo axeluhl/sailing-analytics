@@ -22,8 +22,8 @@ public class CompetitorsFilterSets {
 
     public FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> findFilterSetByName(String filterSetName) {
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> result = null;
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets) {
-            if(filterSet.getName().equals(filterSetName)) {
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets) {
+            if (filterSet.getName().equals(filterSetName)) {
                 result = filterSet;
                 break;
             }
@@ -32,8 +32,8 @@ public class CompetitorsFilterSets {
     }
     
     public void setActiveFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> newActiveFilterSet) {
-        if(newActiveFilterSet != null) {
-            if(filterSets.contains(newActiveFilterSet)) {
+        if (newActiveFilterSet != null) {
+            if (filterSets.contains(newActiveFilterSet)) {
                 this.activeFilterSet = newActiveFilterSet;
             }
         } else {
