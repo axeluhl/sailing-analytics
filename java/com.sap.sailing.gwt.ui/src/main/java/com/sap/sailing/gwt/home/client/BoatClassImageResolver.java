@@ -12,9 +12,51 @@ public class BoatClassImageResolver {
     
     static {
         boatClassIconsMap = new HashMap<String, ImageResource>();
-
-        boatClassIconsMap.put(BoatClassMasterdata._49ER.getDisplayName(), imageResources._49erIcon());
         
+        boatClassIconsMap.put(BoatClassMasterdata._2_4M.getDisplayName(), imageResources._2_4mIcon());
+        boatClassIconsMap.put(BoatClassMasterdata._29ER.getDisplayName(), imageResources._29erIcon());
+        boatClassIconsMap.put(BoatClassMasterdata._420.getDisplayName(), imageResources._420Icon());
+        boatClassIconsMap.put(BoatClassMasterdata._470.getDisplayName(), imageResources._470Icon());
+        boatClassIconsMap.put(BoatClassMasterdata._49ERFX.getDisplayName(), imageResources._49erFXIcon());
+        boatClassIconsMap.put(BoatClassMasterdata._49ER.getDisplayName(), imageResources._49erIcon());
+        boatClassIconsMap.put(BoatClassMasterdata._5O5.getDisplayName(), imageResources._505mIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.A_CAT.getDisplayName(), imageResources.A_CatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ALBIN_EXPRESS.getDisplayName(), imageResources.AlbinExpressIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.B_ONE.getDisplayName(), imageResources.BOne());
+        boatClassIconsMap.put(BoatClassMasterdata.CONTENDER.getDisplayName(), imageResources.ContenderIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.DRAGON_INT.getDisplayName(), imageResources.DragonIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.EUROPE_INT.getDisplayName(), imageResources.EuropeIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.EXTREME_40.getDisplayName(), imageResources.Extreme40Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.F_16.getDisplayName(), imageResources.F16Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.F_18.getDisplayName(), imageResources.F18Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.FINN.getDisplayName(), imageResources.FinnIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FLYING_DUTCHMAN.getDisplayName(), imageResources.FlyingDutchmanIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FOLKBOAT.getDisplayName(), imageResources.FolkBoatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.H_BOAT.getDisplayName(), imageResources.H_BoatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.HOBIE_16.getDisplayName(), imageResources.HobieIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.HOBIE_TIGER.getDisplayName(), imageResources.HobieIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.HOBIE_WILD_CAT.getDisplayName(), imageResources.HobieIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.J24.getDisplayName(), imageResources.J24Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.J70.getDisplayName(), imageResources.J70Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.J80.getDisplayName(), imageResources.J80Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.LASER_SB3.getDisplayName(), imageResources.LaserSB3Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.LASER_INT.getDisplayName(), imageResources.LaserIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.LASER_4_7.getDisplayName(), imageResources.LaserIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.LASER_RADIAL.getDisplayName(), imageResources.LaserIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.MELGES_24.getDisplayName(), imageResources.Melges24Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.MINI_TRANSAT.getDisplayName(), imageResources.MiniTransatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.MUSTO_SKIFF.getDisplayName(), imageResources.MustoSkiffIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.OK.getDisplayName(), imageResources.OKIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.OPTIMIST.getDisplayName(), imageResources.OptimistIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.PLATU_25.getDisplayName(), imageResources.Platu25Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.RS_X.getDisplayName(), imageResources.RSXIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.SONAR.getDisplayName(), imageResources.SonarIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.STAR.getDisplayName(), imageResources.StarIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.STREAMLINE.getDisplayName(), imageResources.StreamlineIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.SWAN_45.getDisplayName(), imageResources.Swan45Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.X_99.getDisplayName(), imageResources.X99Icon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
