@@ -74,6 +74,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        Window.alert("BaseURL: " + baseUrl);
         if(isLocationOnLocalhost(baseUrl) || isLocationOnSapSailingCom(baseUrl)) {
             placeController.goTo(destinationPlace); 
         } else {
@@ -83,6 +84,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private <T extends Place> void gotoPlace(String baseUrl, boolean isOnRemoteServer, T destinationPlace, PlaceTokenizer<T> tokenizer) {
+        Window.alert("BaseURL: " + baseUrl + ", isOnRemoteServer: " + isOnRemoteServer);
         if(isLocationOnLocalhost(baseUrl) || !isOnRemoteServer) {
             placeController.goTo(destinationPlace); 
         } else {
@@ -92,7 +94,9 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private String getLocationURL() {
-        return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
+        String locationUrl = Window.Location.getProtocol() + "//" + Window.Location.getHostName();
+        Window.alert("LocationURL: " + locationUrl);
+        return locationUrl;
     }
     
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
