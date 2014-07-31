@@ -137,6 +137,9 @@ public class SimulatorField implements VectorField {
 
     private Vector interpolate(Position p, Date at) {
         int step = (int) ((at.getTime() - startTime.getTime()) / timeStep.asMillis());
+        if (step >= this.data.length) {
+            step = this.data.length - 1;
+        }
         Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {

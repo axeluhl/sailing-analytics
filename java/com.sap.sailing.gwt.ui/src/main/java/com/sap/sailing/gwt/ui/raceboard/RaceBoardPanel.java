@@ -417,13 +417,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private CompetitorsFilterSets loadCompetitorsFilterSets() {
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             try {
                 String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                     CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                     JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if(value.isObject() != null) {
+                    if (value.isObject() != null) {
                         result = deserializer.deserialize((JSONObject) value);
                     }
                 }
