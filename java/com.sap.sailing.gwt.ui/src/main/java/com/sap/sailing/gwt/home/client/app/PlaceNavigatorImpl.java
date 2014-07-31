@@ -84,7 +84,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     private String getLocationURL() {
-        return Window.Location.getProtocol() + "//" + Window.Location.getHost();
+        return Window.Location.getProtocol() + "//" + Window.Location.getHostName();
     }
     
     private  <T extends Place> String buildRemotePlaceUrl(String baseUrl, T destinationPlace, PlaceTokenizer<T> tokenizer) {
