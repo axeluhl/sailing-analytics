@@ -138,7 +138,7 @@ public class Regatta extends Composite {
             regattaPhasesInfoDiv.getStyle().setDisplay(Display.NONE);
         } else {
             for(RaceGroupSeriesDTO series: raceGroup.getSeries()) {
-                RegattaPhase regattaPhase = new RegattaPhase(series); 
+                RegattaPhase regattaPhase = new RegattaPhase(series, leaderboard, timerForClientServerOffset); 
                 regattaPhasesPanel.appendChild(regattaPhase.getElement());
                 phasesElements.add(regattaPhase);
             }

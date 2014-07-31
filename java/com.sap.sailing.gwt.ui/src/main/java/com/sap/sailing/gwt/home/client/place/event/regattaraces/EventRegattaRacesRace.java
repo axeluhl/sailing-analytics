@@ -5,9 +5,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -160,25 +158,17 @@ public class EventRegattaRacesRace extends UIObject {
     }
 
     private void updateRaceFeatures() {
-        if(race.trackedRace.hasGPSData) {
-            featureGPS.getStyle().setBorderColor("red");
-            featureGPS.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureGPS.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasGPSData) {
+            featureGPS.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasMeasuredWindData) {
-            featureWind.getStyle().setBorderColor("red");
-            featureWind.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureWind.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasMeasuredWindData) {
+            featureWind.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasVideoData) {
-            featureVideo.getStyle().setBorderColor("red");
-            featureVideo.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureVideo.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasVideoData) {
+            featureVideo.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
-        if(race.trackedRace.hasAudioData) {
-            featureAudio.getStyle().setBorderColor("red");
-            featureAudio.getStyle().setBorderStyle(BorderStyle.SOLID);
-            featureAudio.getStyle().setBorderWidth(1, Unit.PX);
+        if(!race.trackedRace.hasAudioData) {
+            featureAudio.addClassName(EventRegattaRacesResources.INSTANCE.css().eventregattarace_featureunavailable());
         }
     }
     
