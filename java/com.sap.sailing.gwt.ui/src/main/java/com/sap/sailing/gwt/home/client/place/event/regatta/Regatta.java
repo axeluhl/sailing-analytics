@@ -41,8 +41,8 @@ public class Regatta extends Composite {
     private LeaderboardGroupDTO leaderboardGroup;
 
     @UiField DivElement regattaDiv;
-    @UiField HeadingElement regattaName1;
-    @UiField HeadingElement regattaName2;
+    @UiField HeadingElement regattaNameHeading1;
+    @UiField HeadingElement regattaNameHeading2;
     @UiField DivElement leaderboardGroupName;
 //  @UiField SpanElement scheduledStart;
     @UiField DivElement regattaPhasesPanel;
@@ -66,8 +66,7 @@ public class Regatta extends Composite {
     @UiField DivElement regattaImageWithoutLink;
     @UiField AnchorElement regattaImageWithLink;
 
-    @UiField DivElement regattaNameWithoutLink;
-    @UiField AnchorElement regattaNameWithLink;
+    @UiField AnchorElement regattaNameLink;
 
     public Regatta(EventDTO event, boolean isNavigatable, Timer timerForClientServerOffset, EventPageNavigator pageNavigator) {
         this.event = event;
@@ -86,10 +85,10 @@ public class Regatta extends Composite {
         if(isNavigatable) {
             regattaDiv.setAttribute("data-rendermode", "link");
             regattaImageWithoutLink.getStyle().setDisplay(Display.NONE);
-            regattaNameWithoutLink.getStyle().setDisplay(Display.NONE);
+            regattaNameHeading2.getStyle().setDisplay(Display.NONE);
         } else {
             regattaImageWithLink.getStyle().setDisplay(Display.NONE);
-            regattaNameWithLink.getStyle().setDisplay(Display.NONE);
+            regattaNameLink.getStyle().setDisplay(Display.NONE);
         }
         
         registerEvents();
@@ -112,8 +111,8 @@ public class Regatta extends Composite {
         }
         
         String regattaDisplayName = leaderboard.displayName != null ? leaderboard.displayName : leaderboard.name;
-        regattaName1.setInnerText(regattaDisplayName);
-        regattaName2.setInnerText(regattaDisplayName);
+        regattaNameHeading1.setInnerText(regattaDisplayName);
+        regattaNameHeading2.setInnerText(regattaDisplayName);
         if(raceGroup.leaderboardGroupName != null) {
             leaderboardGroupName.setInnerText(raceGroup.leaderboardGroupName);
             leaderboardGroupName.setAttribute("data-labeltype", "group1");
@@ -165,8 +164,8 @@ public class Regatta extends Composite {
             }
         });
 
-        Event.sinkEvents(regattaNameWithLink, Event.ONCLICK);
-        Event.setEventListener(regattaNameWithLink, new EventListener() {
+        Event.sinkEvents(regattaNameLink, Event.ONCLICK);
+        Event.setEventListener(regattaNameLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
                 pageNavigator.goToRegattaRaces(raceGroup, leaderboard);

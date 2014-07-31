@@ -958,6 +958,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
                 trackedRaceDTO.hasVideoData = false;
                 trackedRaceDTO.hasAudioData = false;
+                if(r.getCourse() != null) {
+                    trackedRaceDTO.totalLegsCount = r.getCourse().getLegs().size();
+                    TrackedLeg currentLeg = trackedRace.getCurrentLeg(MillisecondsTimePoint.now());
+                    if(currentLeg != null) {
+                        trackedRaceDTO.currentLegNo = r.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom());
+                    } else {
+                        trackedRaceDTO.currentLegNo = 0;
+                    }
+                }
                 Collection<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
                 for(MediaTrack track: mediaTracksForRace) {
                     switch(track.mimeType.mediaType) {

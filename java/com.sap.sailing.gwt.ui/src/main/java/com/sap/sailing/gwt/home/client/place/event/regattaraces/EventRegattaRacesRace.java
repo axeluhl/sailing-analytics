@@ -56,10 +56,10 @@ public class EventRegattaRacesRace extends UIObject {
     @UiField DivElement featureAudio;
     @UiField DivElement featureVideo;
     
-    // local_res.css.eventregattarace_featureunavailable
+    @UiField SpanElement currentLegNo;
+    @UiField SpanElement totalLegsCount;
     
     private final DateTimeFormat raceTimeFormat = DateTimeFormat.getFormat("EEE, h:mm a");
-//    private final TextMessages textMessages = GWT.create(TextMessages.class);
     
     private final StrippedLeaderboardDTO leaderboard;
     private final FleetDTO fleet;
@@ -82,7 +82,7 @@ public class EventRegattaRacesRace extends UIObject {
         setElement(uiBinder.createAndBindUi(this));
 
         allConditionalElements = new Element[] {raceWinnerDiv, raceLeaderDiv, watchRaceDiv, analyzeRaceDiv, raceNotTrackedDiv,
-                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv };
+                raceFeaturesDiv, legProgressDiv, raceFlagDiv, windStatusDiv, currentLegNo, totalLegsCount };
 
         if(fleet.getColor() != null) {
             fleetColor.getStyle().setBackgroundColor(fleet.getColor().getAsHtml());
@@ -141,8 +141,12 @@ public class EventRegattaRacesRace extends UIObject {
                 showElement(watchRaceDiv);
                 showElement(raceLeaderDiv);
                 showElement(legProgressDiv);
+                showElement(currentLegNo);
+                showElement(totalLegsCount);
 
                 raceTime.setInnerText(raceTimeFormat.format(race.startOfRace));
+                currentLegNo.setInnerText(String.valueOf(race.trackedRace.currentLegNo));
+                totalLegsCount.setInnerText(String.valueOf(race.trackedRace.totalLegsCount));
 
                 break;
             case TRACKED_AND_NOT_LIVE:

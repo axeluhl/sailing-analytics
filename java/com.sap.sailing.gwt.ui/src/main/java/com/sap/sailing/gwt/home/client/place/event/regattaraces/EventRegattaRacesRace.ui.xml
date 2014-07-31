@@ -27,7 +27,7 @@
   <div ui:field="raceLeaderDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_leader}">
       Leader:<br></br> - &nbsp;<span ui:field="raceLeader" class="{local_res.css.eventregattarace_leader_name}"></span>
   </div>
-  <div ui:field="legProgressDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_legs}">Leg (race.leg of race.totalLegs):
+  <div ui:field="legProgressDiv" class="{local_res.css.eventregattarace_details} {local_res.css.eventregattarace_legs}"><ui:text from='{i18n.leg}'/>&nbps;<span ui:field="currentLegNo" />/<span ui:field="totalLegsCount" />
     <div class="{local_res.css.eventregattarace_legs_list}">
       <div data-status="r" class="{local_res.css.eventregattarace_legs_leg}"></div>
     </div>
