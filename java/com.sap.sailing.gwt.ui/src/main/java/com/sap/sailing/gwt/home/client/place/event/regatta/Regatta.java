@@ -143,7 +143,7 @@ public class Regatta extends Composite {
             }
         }
         
-        racesCount.setInnerText(String.valueOf(leaderboard.getRaceColumnsCount()));
+        racesCount.setInnerText(String.valueOf(leaderboard.getRacesCount()));
         trackedRacesCount.setInnerText(String.valueOf(leaderboard.getTrackedRacesCount()));
     }
 

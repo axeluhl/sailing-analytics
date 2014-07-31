@@ -93,7 +93,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         this.racesPerFleet.put(fleet, race);
     }
     
-    public Iterable<FleetDTO> getFleets() {
+    public List<FleetDTO> getFleets() {
         return fleets;
     }
     
