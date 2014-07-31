@@ -306,17 +306,18 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
-            for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
-               if(filter instanceof LeaderboardFilterContext) {
-                   ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
-               }
-               if(filter instanceof SelectedRaceFilterContext) {
-                   ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
-               }
-               if(filter instanceof CompetitorSelectionProviderFilterContext) {
-                   ((CompetitorSelectionProviderFilterContext) filter).setCompetitorSelectionProvider(competitorSelectionModel);
-               }
+        for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : filterSets.getFilterSets()) {
+            for (Filter<CompetitorDTO> filter : filterSet.getFilters()) {
+                if (filter instanceof LeaderboardFilterContext) {
+                    ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
+                }
+                if (filter instanceof SelectedRaceFilterContext) {
+                    ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
+                }
+                if (filter instanceof CompetitorSelectionProviderFilterContext) {
+                    ((CompetitorSelectionProviderFilterContext) filter)
+                            .setCompetitorSelectionProvider(competitorSelectionModel);
+                }
             }
         }
     }
@@ -324,19 +325,19 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
-        if(activeFilterSet != null) {
+        if (activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
-            if(filterSets.getFilterSets().size() == 0) {
+            if (filterSets.getFilterSets().size() == 0) {
                 lastActiveCompetitorFilterSet = null;
             }
         }
-        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
-        
-        if(lastActiveCompetitorFilterSet != null) {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle + " (" + lastActiveCompetitorFilterSet.getName() + ")");
+        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue */);
+        if (lastActiveCompetitorFilterSet != null) {
+            competitorsFilterCheckBox.setText(competitorsFilterTitle + " (" + lastActiveCompetitorFilterSet.getName()
+                    + ")");
         } else {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle);            
+            competitorsFilterCheckBox.setText(competitorsFilterTitle);
         }
     }
     
