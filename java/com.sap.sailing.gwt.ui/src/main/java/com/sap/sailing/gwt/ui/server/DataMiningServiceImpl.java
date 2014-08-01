@@ -87,7 +87,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinitionDeprecated queryDefinition) throws Exception {
         @SuppressWarnings("unchecked") // TODO Fix after the data mining has been cleaned
-        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(queryDefinition, getRacingEventService(), getDataMiningServer().getFunctionProvider());
+        Query<ResultType> query = (Query<ResultType>) DataMiningFactory.createQuery(getRacingEventService(), queryDefinition, getDataMiningServer().getFunctionProvider());
         return query.run();
     }
     

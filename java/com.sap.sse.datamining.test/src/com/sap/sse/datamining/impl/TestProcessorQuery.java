@@ -98,38 +98,41 @@ public class TestProcessorQuery {
      * their length, extracts the cross sum and aggregates these as sum.
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
-        ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
+        final ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor,
-                dataSource, stringMessages, Locale.ENGLISH);
-        
-        Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = Arrays.asList(query.getResultReceiver());
-        Processor<GroupedDataEntry<Double>> sumAggregator =
-                new ParallelGroupedDoubleDataSumAggregationProcessor(executor, aggregationResultReceivers);
-        
-        Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        Function<Double> getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
-        Processor<GroupedDataEntry<Number>> crossSumExtractor = new ParallelGroupedElementsValueExtractionProcessor<Number, Double>(
-                executor, Arrays.asList(sumAggregator), getCrossSumFunction);
+                dataSource, stringMessages, Locale.ENGLISH) {
+            @Override
+            protected Processor<Iterable<Number>> createFirstProcessor() {
+                Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = Arrays.asList(/*query*/ this.getResultReceiver());
+                Processor<GroupedDataEntry<Double>> sumAggregator =
+                        new ParallelGroupedDoubleDataSumAggregationProcessor(executor, aggregationResultReceivers);
+                
+                Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
+                Function<Double> getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
+                Processor<GroupedDataEntry<Number>> crossSumExtractor = new ParallelGroupedElementsValueExtractionProcessor<Number, Double>(
+                        executor, Arrays.asList(sumAggregator), getCrossSumFunction);
 
-        Collection<Function<?>> dimensions = new ArrayList<>();
-        Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
-        dimensions.add(getLengthFunction);
-        Processor<Number> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
-        
-        FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
-            @Override
-            public boolean matches(Number element) {
-                return element.getValue() >= 10;
+                Collection<Function<?>> dimensions = new ArrayList<>();
+                Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
+                dimensions.add(getLengthFunction);
+                Processor<Number> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
+                
+                FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
+                    @Override
+                    public boolean matches(Number element) {
+                        return element.getValue() >= 10;
+                    }
+                };
+                Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+                    @Override
+                    protected Iterable<Number> retrieveData(Iterable<Number> element) {
+                        return element;
+                    }
+                };
+                
+                return filteringRetrievalProcessor;
             }
         };
-        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractSimpleFilteringRetrievalProcessor<Iterable<Number>, Number>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
-            @Override
-            protected Iterable<Number> retrieveData(Iterable<Number> element) {
-                return element;
-            }
-        };
-        
-        query.setFirstProcessor(filteringRetrievalProcessor);
         return query;
     }
 
@@ -155,29 +158,33 @@ public class TestProcessorQuery {
     @Test(timeout=2000)
     public void testQueryTimeouting() throws TimeoutException {
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
-        Processor<Double> resultReceiver = new Processor<Double>() {
+                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH) {
             @Override
-            public void processElement(Double element) {
-                receivedElementOrFinished = true;
-            }
-            @Override
-            public void onFailure(Throwable failure) {
-            }
-            @Override
-            public void finish() throws InterruptedException {
-                receivedElementOrFinished = true;
-            }
-            @Override
-            public void abort() {
-                receivedAbort = true;
-            }
-            @Override
-            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-                return additionalDataBuilder;
+            protected Processor<Iterable<Number>> createFirstProcessor() {
+                Processor<Double> resultReceiver = new Processor<Double>() {
+                    @Override
+                    public void processElement(Double element) {
+                        receivedElementOrFinished = true;
+                    }
+                    @Override
+                    public void onFailure(Throwable failure) {
+                    }
+                    @Override
+                    public void finish() throws InterruptedException {
+                        receivedElementOrFinished = true;
+                    }
+                    @Override
+                    public void abort() {
+                        receivedAbort = true;
+                    }
+                    @Override
+                    public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                        return additionalDataBuilder;
+                    }
+                };
+                return new BlockingProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000);
             }
         };
-        query.setFirstProcessor(new BlockingProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000));
         
         try {
             query.run(500, TimeUnit.MILLISECONDS);
@@ -193,10 +200,14 @@ public class TestProcessorQuery {
 
     @Test
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
+        final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
-        String keyValue = "Sum";
-        query.setFirstProcessor(createSumBuildingProcessor(query, keyValue));
+                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH) {
+            @Override
+            protected Processor<Iterable<Number>> createFirstProcessor() {
+                return createSumBuildingProcessor(/*query*/ this, keyValue);
+            }
+        };
         
         Map<GroupKey, Double> expectedResult = new HashMap<>();
         expectedResult.put(new GenericGroupKey<String>(keyValue), 10358.0);

@@ -12,6 +12,8 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.QueryDefinition;
@@ -23,27 +25,32 @@ public final class DataMiningFactory {
     }
     
     // TODO Delete, after the deprecated components have been removed
-    public static <DataSourceType, ElementType> Query<Double> createQuery(QueryDefinitionDeprecated queryDefinition, DataSourceType dataSource, FunctionProvider functionProvider) {
-        return createQuery(QueryDefinitionConverter.convertDeprecatedQueryDefinition(queryDefinition), dataSource, functionProvider);
+    public static <DataSourceType, ElementType> Query<Double> createQuery(DataSourceType dataSource, QueryDefinitionDeprecated queryDefinition, FunctionProvider functionProvider) {
+        return createQuery(dataSource, QueryDefinitionConverter.convertDeprecatedQueryDefinition(queryDefinition), functionProvider);
     }
 
     // TODO Make public, after the deprecated components have been removed
-    private static <DataSourceType, ElementType> Query<Double> createQuery(QueryDefinition queryDefinition, DataSourceType dataSource, FunctionProvider functionProvider) {
-        ProcessorQuery<Double, DataSourceType> query = ProcessorFactory.createProcessorQuery(dataSource, queryDefinition.getLocaleInfoName());
-        Processor<GroupedDataEntry<Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(query, queryDefinition.getAggregatorType());
-        
-        @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
-        Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getExtractionFunction());
-        Processor<GroupedDataEntry<ElementType>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
-        
-        List<Function<?>> dimensionsToGroupBy = getDimensionsToGroupBy(queryDefinition, functionProvider);
-        Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor(extractionProcessor, dimensionsToGroupBy);
-        
-        SailingDataRetrievalLevels dataRetrievalLevel = calculateDataRetrievalLevel(extractionFunction);
-        Processor<DataSourceType> firstRetrievalProcessor = SailingDataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection(), functionProvider);
-        
-        query.setFirstProcessor(firstRetrievalProcessor);
-        return query;
+    private static <DataSourceType, ElementType> Query<Double> createQuery(DataSourceType dataSource, final QueryDefinition queryDefinition, final FunctionProvider functionProvider) {
+        return new ProcessorQuery<Double, DataSourceType>(DataMiningActivator.getExecutor(), dataSource,
+                DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(queryDefinition.getLocaleInfoName())) {
+            
+            @Override
+            protected Processor<DataSourceType> createFirstProcessor() {
+                Processor<GroupedDataEntry<Double>> aggregationProcessor = ProcessorFactory.createAggregationProcessor(/*query*/ this, queryDefinition.getAggregatorType());
+                
+                @SuppressWarnings("unchecked") // TODO Clean, after the deprecated components have been removed
+                Function<Double> extractionFunction = (Function<Double>) functionProvider.getFunctionForDTO(queryDefinition.getExtractionFunction());
+                Processor<GroupedDataEntry<ElementType>> extractionProcessor = ProcessorFactory.createExtractionProcessor(aggregationProcessor, extractionFunction);
+                
+                List<Function<?>> dimensionsToGroupBy = getDimensionsToGroupBy(queryDefinition, functionProvider);
+                Processor<ElementType> groupingProcessor = ProcessorFactory.createGroupingProcessor(extractionProcessor, dimensionsToGroupBy);
+                
+                SailingDataRetrievalLevels dataRetrievalLevel = calculateDataRetrievalLevel(extractionFunction);
+                Processor<DataSourceType> firstRetrievalProcessor = SailingDataRetrieverFactory.createRetrievalProcessorChain(dataRetrievalLevel, groupingProcessor, queryDefinition.getFilterSelection(), functionProvider);
+                return firstRetrievalProcessor;
+            }
+            
+        };
     }
 
     private static List<Function<?>> getDimensionsToGroupBy(QueryDefinition queryDefinition, FunctionProvider functionProvider) {

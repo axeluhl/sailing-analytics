@@ -23,14 +23,14 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
-public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
+public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
     
     private static final Logger LOGGER = Logger.getLogger(ProcessorQuery.class.getSimpleName());
     
     private final DataSourceType dataSource;
-    private Processor<DataSourceType> firstProcessor;
+    private final Processor<DataSourceType> firstProcessor;
 
-    private Executor executor;
+    private final Executor executor;
     private final ProcessResultReceiver resultReceiver;
     
     private final DataMiningStringMessages stringMessages;
@@ -45,12 +45,12 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;
+
         resultReceiver = new ProcessResultReceiver();
+        firstProcessor = createFirstProcessor();
     }
     
-    public void setFirstProcessor(Processor<DataSourceType> firstProcessor) {
-        this.firstProcessor = firstProcessor;
-    }
+    protected abstract Processor<DataSourceType> createFirstProcessor();
 
     @Override
     public QueryResult<AggregatedType> run() {

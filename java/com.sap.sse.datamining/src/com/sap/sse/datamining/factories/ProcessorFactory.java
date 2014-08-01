@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -23,16 +22,6 @@ import com.sap.sse.datamining.shared.components.AggregatorType;
 public class ProcessorFactory {
     
     private ProcessorFactory() {
-    }
-    
-    /**
-     * Creates a ProcessorQuery with the given data source.<br />
-     * The {@link DataMiningActivator} will be used to get the missing objects for the construction (like
-     * the executor or the string messages).
-     */
-    public static <AggregatedType, DataSourceType> ProcessorQuery<AggregatedType, DataSourceType> createProcessorQuery(DataSourceType dataSource, String localeInfoName) {
-        return new ProcessorQuery<AggregatedType, DataSourceType>(DataMiningActivator.getExecutor(), dataSource,
-                DataMiningActivator.getStringMessages(), DataMiningStringMessages.Util.getLocaleFor(localeInfoName));
     }
     
     /**
