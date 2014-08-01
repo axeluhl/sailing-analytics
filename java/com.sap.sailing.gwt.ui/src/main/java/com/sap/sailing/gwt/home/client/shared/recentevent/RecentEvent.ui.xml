@@ -5,14 +5,6 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.home.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.home.client.HomeResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.recentevent.RecentEventResources" />
-    <!-- 
-    <ui:style>
-.img-fixedsize-temp {
-	width: 370px;
-	height: auto;
-}
-    </ui:style>
-     -->
     <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {res.mediaCss.columns}">
 	    <div class="{local_res.css.eventteasercontainer}">
 	        <a href="javascript:;" ui:field="eventOverviewLink" class="{local_res.css.eventteaser}">

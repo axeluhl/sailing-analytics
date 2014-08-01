@@ -7,6 +7,8 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -54,7 +56,22 @@ public class RecentEvent extends UIObject {
     }
     
     private void updateUI() {
-        eventName.setInnerText(event.getName());
+        String name = event.getName();
+        
+        if(name.contains(" - ")) {
+            String[] splittedName = name.split(" - ");
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            for(int i = 0; i < splittedName.length; i++) {
+                builder.appendEscaped(splittedName[i]);
+                if(i != splittedName.length-1) {
+                    builder.appendHtmlConstant("<br/>");
+                }
+            }
+            eventName.setInnerSafeHtml(builder.toSafeHtml()); 
+        } else {
+            eventName.setInnerText(name);
+        }
+        
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
         
