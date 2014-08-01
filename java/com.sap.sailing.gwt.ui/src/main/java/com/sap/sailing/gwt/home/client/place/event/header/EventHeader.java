@@ -88,6 +88,22 @@ public class EventHeader extends Composite {
         setDataNavigationType("normal");
         updateUI();
     }
+
+    public EventHeader(EventDTO event) {
+        this.event = event;
+        this.pageNavigator = null;
+        
+        EventHeaderResources.INSTANCE.css().ensureInjected();
+        StyleInjector.injectAtEnd("@media (min-width: 50em) { "+EventHeaderResources.INSTANCE.largeCss().getText()+"}");
+        
+        initWidget(uiBinder.createAndBindUi(this));
+        
+        isFinishedDiv.getStyle().setDisplay(Display.NONE);
+        isLiveDiv.getStyle().setDisplay(Display.NONE);
+        
+        setDataNavigationType("normal");
+        updateUI();
+    }
     
     public void setDataNavigationType(String dataNavigationType) {
         eventHeaderWrapperDiv.setAttribute("data-navigationtype", dataNavigationType);
@@ -105,6 +121,8 @@ public class EventHeader extends Composite {
         }
         if(event.getOfficialWebsiteURL() != null) {
             officalWebsiteLink.setHref(event.getOfficialWebsiteURL());
+        } else {
+            officalWebsiteLink.setVisible(false);
         }
         
         String logoUrl = event.getLogoImageURL() != null ? event.getLogoImageURL() : defaultLogoUrl;
