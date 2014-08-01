@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
@@ -32,7 +33,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         this(hasMultiSelection, null);
     }
 
-    public CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
+    private CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorsFilterSet = competitorsFilterSet;
@@ -243,7 +244,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
+        FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet = this.competitorsFilterSet;
         this.competitorsFilterSet = competitorsFilterSet;
+        if (!Util.equalsWithNull(competitorsFilterSet, oldFilterSet)) {
+            for (CompetitorSelectionChangeListener listener : listeners) {
+                listener.filterChanged(oldFilterSet, competitorsFilterSet);
+            }
+        }
         for (CompetitorSelectionChangeListener listener : listeners) {
             listener.filteredCompetitorsListChanged(getFilteredCompetitors());
         }

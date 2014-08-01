@@ -51,15 +51,17 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         } else if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
-            if (isWidgetInSplitPanel(leftScrollPanel))
+            if (isWidgetInSplitPanel(leftScrollPanel)) {
                 splitLayoutPanel.remove(leftScrollPanel);
+            }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
             if (!isWidgetInSplitPanel(leftScrollPanel) || !isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
-                if (!isWidgetInSplitPanel(leftScrollPanel))
+                if (!isWidgetInSplitPanel(leftScrollPanel)) {
                     splitLayoutPanel.insertWest(leftScrollPanel, savedSplitPosition, rightComponent.getEntryWidget());
-                else
+                } else {
                     splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
+                }
             }
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
@@ -71,8 +73,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
                     splitLayoutPanel.insertSouth(component.getEntryWidget(), 200, splitLayoutPanel.getWidget(0));
                 }
             } else {
-                if (isComponentInSplitPanel)
+                if (isComponentInSplitPanel) {
                     splitLayoutPanel.remove(component.getEntryWidget());
+                }
             }
         }
         splitLayoutPanel.forceLayout();
@@ -80,10 +83,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
 
     private boolean isWidgetInSplitPanel(Widget widget) {
         int widgetIndex = splitLayoutPanel.getWidgetIndex(widget);
-        if(widgetIndex < 0)
-            return false;
-            
-        return true;
+        return widgetIndex >= 0;
     }
 
     public Panel getViewerWidget() {
