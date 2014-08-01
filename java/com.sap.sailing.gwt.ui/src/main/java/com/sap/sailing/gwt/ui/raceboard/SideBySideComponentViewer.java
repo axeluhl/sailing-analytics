@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
@@ -20,7 +19,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     
     private LayoutPanel mainPanel;
     
-    private SplitLayoutPanel splitLayoutPanel; 
+    private SplitLayoutPanelWithBetterDraggers splitLayoutPanel; 
     private int savedSplitPosition = -1;
     
     public SideBySideComponentViewer(Component<?> leftComponent, Component<?> rightComponent, List<Component<?>> components) {
@@ -31,7 +30,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftScrollPanel.add(leftComponent.getEntryWidget());
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
-        splitLayoutPanel = new SplitLayoutPanel();
+        splitLayoutPanel = new SplitLayoutPanelWithBetterDraggers();
         mainPanel.add(splitLayoutPanel);
         for (Component<?> component : components) {
             if (component.isVisible()) {
