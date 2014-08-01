@@ -2488,13 +2488,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
     
     private void ensureRankColumn() {
-        if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
-            addColumn(getDefaultSortColumn());
-        } else {
-            if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof TotalRankColumn)) {
-                throw new RuntimeException("The first column must always be the rank column but it was of type "
-                        + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
+        if (isShowRegattaRankColumn()) {
+            if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
+                addColumn(getDefaultSortColumn());
+            } else {
+                if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof TotalRankColumn)) {
+                    throw new RuntimeException("The first column must always be the rank column but it was of type "
+                            + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
+                }
             }
+        } else {
+
         }
     }
 
@@ -2645,7 +2649,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection()));
+                            .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
