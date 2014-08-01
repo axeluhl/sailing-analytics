@@ -32,6 +32,11 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      * resolve to the correct host IP and Java server instance.
      */
     private String baseURL;
+    
+    /**
+     * Indicates whether the event is hosted on a remote server or not 
+     */
+    private boolean isOnRemoteServer;
 
     EventBaseDTO() {} // for serialization only
     
@@ -128,6 +133,14 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
         return leaderboardGroups;
+    }
+
+    public boolean isOnRemoteServer() {
+        return isOnRemoteServer;
+    }
+
+    public void setIsOnRemoteServer(boolean isOnRemoteServer) {
+        this.isOnRemoteServer = isOnRemoteServer;
     }
 
 }
