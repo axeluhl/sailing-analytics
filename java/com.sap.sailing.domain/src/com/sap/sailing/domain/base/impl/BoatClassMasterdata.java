@@ -5,7 +5,6 @@ import com.sap.sailing.domain.base.BoatHullType;
 public enum BoatClassMasterdata {
     _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, "2.4M", "2.4mR"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, "505"),
-    //TODO: Need icon of 12mR
     _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, "12M", "12mR", "12SQM"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL),
     //TODO: Need icon of 29erXX
