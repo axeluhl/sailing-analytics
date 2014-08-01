@@ -19,7 +19,6 @@ public enum BoatClassMasterdata {
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, "Extreme-40", "Extreme40"),
     EUROPE_INT ("Europe Int.", false, 3.35, 1.35, BoatHullType.MONOHULL, "Europe"),
     F_18 ("F 18", false, 6.85, 2.25, BoatHullType.CATAMARAN, "F-18"),
-    //TODO: Need icon of Farr 30
     FARR_30 ("Farr 30", false, 9.42, 3.08, BoatHullType.MONOHULL, "F30", "F-30", "Farr-30"),
     FINN ("Finn", false, 4.50, 1.51, BoatHullType.MONOHULL),
     FOLKBOAT ("Folkboat", false, 7.68, 2.20, BoatHullType.MONOHULL, "Folke", "Folkeboot"),

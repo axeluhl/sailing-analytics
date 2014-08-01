@@ -58,6 +58,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/F18.svg")
     ImageResource F18Icon();
     
+    @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FARR_30.svg")
+    ImageResource Farr30Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/svg/boatclass/FINN.svg")
     ImageResource FinnIcon();
     
