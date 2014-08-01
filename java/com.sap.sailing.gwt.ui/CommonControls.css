@@ -171,7 +171,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-VDragger {
 	width: 50px !important;
 	height: 25px !important;
-	bottom: 8px !important;
+	top: -25px !important;
 	left: 50% !important;
 	background: #ffffff url(images/thumb_horz.png) center no-repeat;
 	cursor: row-resize;
