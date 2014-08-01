@@ -309,7 +309,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private final Anchor dummyFocusElement;
     private int blurInOnSelectionChanged;
-    private boolean showRegattaRank;
     private boolean showSelectionCheckbox;
 
     protected StringMessages getStringMessages() {
@@ -1505,8 +1504,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* showCompetitorSearchBox */ false, /* showRegattaRank */ true, /* showSelectionCheckbox */ true,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
+                /* showCompetitorSearchBox */ false, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -1514,11 +1513,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
-            boolean showRegattaRank, boolean showSelectionCheckbox,
-            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
-            boolean adjustTimerDelay) {
+            boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
+            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.dummyFocusElement = new Anchor("");
-        this.showRegattaRank = showRegattaRank;
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -2481,6 +2478,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         addColumn(raceColumn);
     }
 
+    /**
+     * The regatta rank column shall be displayed if an only if the {@link DetailType#REGATTA_RANK} detail is selected in the
+     * {@link #selectedOverallDetailColumns}. It will then be displayed after the selection checkbox column (if any) and
+     * before the sail number / competitor name columns.
+     */
+    private boolean isShowRegattaRankColumn() {
+        return selectedOverallDetailColumns.contains(DetailType.REGATTA_RANK);
+    }
+    
     private void ensureRankColumn() {
         if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
             addColumn(getDefaultSortColumn());

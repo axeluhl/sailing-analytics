@@ -118,8 +118,8 @@ public class TVViewController implements RaceTimesInfoProviderListener {
                 leaderboardSettings,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName,
                 errorReporter, stringMessages, userAgent, showRaceDetails, /* showCompetitorSearchBox */false, /* showRegattaRank */
-                true, /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, /* autoExpandLastRaceColumn */
-                false, /* adjustTimerDelay */true) {
+                /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
+                /* adjustTimerDelay */true) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
