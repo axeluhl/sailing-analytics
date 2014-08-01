@@ -111,8 +111,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
-    private static final int CARRY_COLUMN_INDEX = 3;
-
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
 
     private final SailingServiceAsync sailingService;
@@ -2234,8 +2232,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         int columnIndex = 0;
         columnIndex = ensureRankColumn(columnIndex);
         columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
-        boolean hasCarryColumn = updateCarryColumn(leaderboard);
-        adjustOverallDetailColumns(leaderboard, hasCarryColumn?CARRY_COLUMN_INDEX+1:CARRY_COLUMN_INDEX);
+        columnIndex = updateCarryColumn(leaderboard, columnIndex);
+        adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
@@ -2586,31 +2584,33 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried
      * points but the display still shows a carry column, the column is removed.
      * 
-     * @return <code>true</code> if a carry column is now part of the table (regardless of whether it existed before),
-     *         <code>false</code> otherwise
+     * @param zeroBasedIndexOfCarryColumn
+     *            the 0-based column index where to put the carry column, if any
+     * @return the 0-based index of the next column following this column if the carry column is to be shown, or
+     *         <code>zeroBasedIndexOfCarryColumn</code> otherwise
      */
-    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
+    protected int updateCarryColumn(LeaderboardDTO leaderboard, int zeroBasedIndexOfCarryColumn) {
         final boolean needsCarryColumn = leaderboard != null && leaderboard.hasCarriedPoints;
         if (needsCarryColumn) {
-            ensureCarryColumn();
+            ensureCarryColumn(zeroBasedIndexOfCarryColumn);
         } else {
-            ensureNoCarryColumn();
+            ensureNoCarryColumn(zeroBasedIndexOfCarryColumn);
         }
-        return needsCarryColumn;
+        return needsCarryColumn ? zeroBasedIndexOfCarryColumn+1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX
-                && getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn) {
-            removeColumn(CARRY_COLUMN_INDEX);
+    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+        if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn
+                && getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn) {
+            removeColumn(zeroBasedIndexOfCarryColumn);
         }
     }
 
-    protected void ensureCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() <= CARRY_COLUMN_INDEX
-                || !(getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn)) {
-            while (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX) {
-                removeColumn(CARRY_COLUMN_INDEX);
+    protected void ensureCarryColumn(int zeroBasedIndexOfCarryColumn) {
+        if (getLeaderboardTable().getColumnCount() <= zeroBasedIndexOfCarryColumn
+                || !(getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn)) {
+            while (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn) {
+                removeColumn(zeroBasedIndexOfCarryColumn);
             }
             addColumn(createCarryColumn());
         }
