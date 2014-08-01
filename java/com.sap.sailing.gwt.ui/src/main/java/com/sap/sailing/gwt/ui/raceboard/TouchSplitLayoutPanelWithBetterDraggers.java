@@ -130,6 +130,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     public void onBrowserEvent(Event event) {
       switch (event.getTypeInt()) {
         case Event.ONMOUSEDOWN:
+        case Event.ONTOUCHSTART:
           mouseDown = true;
 
           /*
