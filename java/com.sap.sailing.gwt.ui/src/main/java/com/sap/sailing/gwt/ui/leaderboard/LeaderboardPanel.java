@@ -814,7 +814,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
-        return new DetailType[] { DetailType.TOTAL_DISTANCE_TRAVELED,
+        return new DetailType[] { DetailType.REGATTA_RANK,
+                                  DetailType.TOTAL_DISTANCE_TRAVELED,
                                   DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                                   DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
                                   DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
@@ -2283,7 +2284,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         List<SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
         // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of getAvailableOverallDetailColumnTypes()
         for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
-            if (selectedOverallDetailColumns.contains(overallDetailType)) {
+            if (selectedOverallDetailColumns.contains(overallDetailType) && overallDetailColumnMap.containsKey(overallDetailType)) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }
