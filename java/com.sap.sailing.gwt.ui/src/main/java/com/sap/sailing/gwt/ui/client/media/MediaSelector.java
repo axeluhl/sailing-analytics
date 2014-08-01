@@ -46,6 +46,8 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
 /**
  * The media selector is used as an {@link AsyncCallback} that receives a collection of {@link MediaTrack}s in case the
@@ -70,6 +72,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private final MediaServiceAsync mediaService;
     private StringMessages stringMessages;
     private final ErrorReporter errorReporter;
+    private final UserAgentDetails userAgent;
     private final UserDTO user;
     private boolean autoSelectMedia;
 
@@ -80,13 +83,14 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     public MediaSelector(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserDTO user, boolean autoSelectMedia) {
+            ErrorReporter errorReporter, UserAgentDetails userAgent, UserDTO user, boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.userAgent = userAgent;
         this.user = user;
         this.autoSelectMedia = autoSelectMedia;
 
@@ -138,15 +142,20 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     private void setStatus(final MediaTrack mediaTrack) {
         if (!mediaTrack.isYoutube()) {
-            Audio audio = Audio.createIfSupported();
-            if (audio != null) {
-                AudioElement mediaReachableTester = audio.getAudioElement();
-                addLoadMetadataHandler(mediaReachableTester, mediaTrack);
-                mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
-                mediaReachableTester.setSrc(mediaTrack.url);
-                mediaReachableTester.load();
+            // firefox crashes in the current version when trying to read the metadata from mp4 files
+            if(!userAgent.getType().equals(AgentTypes.FIREFOX)) {
+                Audio audio = Audio.createIfSupported();
+                if (audio != null) {
+                    AudioElement mediaReachableTester = audio.getAudioElement();
+                    addLoadMetadataHandler(mediaReachableTester, mediaTrack);
+                    mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
+                    mediaReachableTester.setSrc(mediaTrack.url);
+                    mediaReachableTester.load();
+                } else {
+                    mediaTrack.status = Status.CANNOT_PLAY;
+                }
             } else {
-                mediaTrack.status = Status.CANNOT_PLAY;
+                mediaTrack.status = Status.REACHABLE;
             }
         } else {
             mediaTrack.status = Status.REACHABLE;
@@ -573,7 +582,14 @@ public class MediaSelector implements PlayStateListener, TimeListener,
                 case video:
                     reachableVideoTracks.add(mediaTrack);
                 case audio: // intentional fall through
-                    reachableAudioTracks.add(mediaTrack);
+                    if(userAgent.getType().equals(AgentTypes.FIREFOX)) {
+                        if(mediaTrack.isYoutube()) {
+                            // only youtube audio tracks work with firefox
+                            reachableAudioTracks.add(mediaTrack);
+                        }
+                    } else {
+                        reachableAudioTracks.add(mediaTrack);
+                    }
                 }
             }
         }

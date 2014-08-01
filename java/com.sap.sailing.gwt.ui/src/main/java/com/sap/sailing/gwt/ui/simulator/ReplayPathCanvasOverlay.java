@@ -51,7 +51,7 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
         if (!isVisible() || windDTOToDraw == null || windFieldDTO == null) {
             return true;
         }
-        if (windDTOToDraw.size() == windFieldDTO.getMatrix().size()) {
+        if (windDTOToDraw.size() >= (windFieldDTO.getMatrix().size()-1)) {
             return true;
         } else {
             return false;
