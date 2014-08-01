@@ -151,7 +151,7 @@ body ::-webkit-scrollbar-track {
 .gwt-SplitLayoutPanel-HDragger {
 	width: 25px !important;
 	height: 50px !important;
-	left: 8px !important;
+	left: 3px !important;
 	top: 50% !important;
 	background: #ffffff url(images/thumb_vertical.png) center no-repeat;
 	cursor: col-resize;
