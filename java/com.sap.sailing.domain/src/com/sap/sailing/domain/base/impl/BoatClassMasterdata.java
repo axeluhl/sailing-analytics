@@ -7,7 +7,6 @@ public enum BoatClassMasterdata {
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, "505"),
     _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, "12M", "12mR", "12SQM"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL),
-    //TODO: Need icon of 29erXX
     _29ERXX ("29erXX", true, 4.45, 1.77, BoatHullType.MONOHULL, "29XX"),
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, "49FX"),
@@ -15,8 +14,6 @@ public enum BoatClassMasterdata {
     _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, "A-Cat", "ACat", "A-Class Catamaran"),
     ALBIN_EXPRESS ("Albin Express", true, 7.77, 2.50, BoatHullType.MONOHULL),
-    //TODO: Need icon of B-25
-    B_25 ("B-25", true, 7.62, 2.54, BoatHullType.MONOHULL, "B25"),
     B_ONE ("B/ONE", true, 7.80, 2.49, BoatHullType.MONOHULL, "B-ONE"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, "Drachen", "Dragon"),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, "Extreme-40", "Extreme40"),
@@ -45,7 +42,7 @@ public enum BoatClassMasterdata {
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, "N17", "Nacra-17"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, "OK-Dinghy", "OK-Jolle", "OK"),
     OPTIMIST ("Optimist", true, 2.34, 1.07, BoatHullType.MONOHULL, "Opti", "Optimist Dinghy"),
-    PLATU_25 ("Platu 25", true, 7.53, 2.62, BoatHullType.MONOHULL, "Platu", "Platu-25", "PLA"),
+    PLATU_25 ("Platu 25", true, 7.53, 2.62, BoatHullType.MONOHULL, "Platu", "Platu-25", "PLA", "B25"),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, "RS-X", "RSX"),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL),
     STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL),
