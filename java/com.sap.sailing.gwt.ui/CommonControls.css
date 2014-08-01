@@ -157,7 +157,7 @@ body ::-webkit-scrollbar-track {
 	cursor: col-resize;
 	border-top-right-radius: 25px;
 	border-bottom-right-radius: 25px;
-	z-index: 100;
+	z-index: 1;
 }
 
 .SplitLayoutPanel-Divider-Horizontal {
@@ -177,7 +177,7 @@ body ::-webkit-scrollbar-track {
 	cursor: row-resize;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
-	z-index: 100;
+	z-index: 1;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
