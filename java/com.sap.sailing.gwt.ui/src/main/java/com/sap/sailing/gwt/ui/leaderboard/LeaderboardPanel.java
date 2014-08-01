@@ -110,9 +110,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
-    private static final int RANK_COLUMN_INDEX = 0;
-
-    private static final int SAIL_ID_COLUMN_INDEX = 1;
 
     private static final int CARRY_COLUMN_INDEX = 3;
 
@@ -2234,8 +2231,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
-        ensureRankColumn();
-        ensureSailIDAndCompetitorColumn();
+        int columnIndex = 0;
+        columnIndex = ensureRankColumn(columnIndex);
+        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
         boolean hasCarryColumn = updateCarryColumn(leaderboard);
         adjustOverallDetailColumns(leaderboard, hasCarryColumn?CARRY_COLUMN_INDEX+1:CARRY_COLUMN_INDEX);
         // first remove race columns no longer needed:
@@ -2487,23 +2485,43 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return selectedOverallDetailColumns.contains(DetailType.REGATTA_RANK);
     }
     
-    private void ensureRankColumn() {
-        if (isShowRegattaRankColumn()) {
-            if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
-                addColumn(getDefaultSortColumn());
+    /**
+     * @param rankColumnIndex
+     *            the column index (0-based) where to put the rank column, if needed
+     * @return the column index (0-based) for the next column; will equal <code>rankColumnIndex</code> if the rank
+     *         column is not {@link #isShowRegattaRankColumn() supposed to be shown}, or one greater otherwise.
+     */
+    private int ensureRankColumn(int rankColumnIndex) {
+        final int indexOfNextColumn = rankColumnIndex + (isShowRegattaRankColumn() ? 1 : 0);
+        if (getLeaderboardTable().getColumnCount() >= rankColumnIndex) {
+            if (isShowRegattaRankColumn()) {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) != getRankColumn()) {
+                    insertColumn(rankColumnIndex, getRankColumn());
+                } // else, the column is needed and is already in place
             } else {
-                if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof TotalRankColumn)) {
-                    throw new RuntimeException("The first column must always be the rank column but it was of type "
-                            + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
+                if (getLeaderboardTable().getColumn(rankColumnIndex) == getRankColumn()) {
+                    removeColumn(rankColumnIndex);
                 }
             }
-        } else {
-
         }
+        return indexOfNextColumn;
     }
 
-    private void ensureSailIDAndCompetitorColumn() {
-        if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
+    /**
+     * Assumes that the sail ID and competitor column are mandatory elements of a leaderboard; hence, if the leaderboard
+     * has columns where sail ID and competitor names are expected, it is silently assumed that those are already in the
+     * correct place because these columns are never optional.
+     * 
+     * @param sailIdColumnIndex
+     *            the 0-based index where the sail ID column is to be placed; the competitor name column will be at the
+     *            index greater by one
+     * @return the 0-based index for the next column; two greater than <code>sailIdColumnIndex</code> because this
+     *         method will always make sure that two columns are placed in the layout, one at
+     *         <code>sailIdColumnIndex</code> and one at <code>sailIdColumnIndex+1</code>.
+     */
+    private int ensureSailIDAndCompetitorColumn(int sailIdColumnIndex) {
+        final int nextColumnIndex;
+        if (getLeaderboardTable().getColumnCount() <= sailIdColumnIndex) {
             addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
                 @Override
                 public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
@@ -2512,11 +2530,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }));
             addColumn(createCompetitorColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
+            if (!(getLeaderboardTable().getColumn(sailIdColumnIndex) instanceof SailIDColumn)) {
                 throw new RuntimeException("The second column must always be the sail ID column but it was of type "
-                        + getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
+                        + getLeaderboardTable().getColumn(sailIdColumnIndex).getClass().getName());
             }
         }
+        nextColumnIndex = sailIdColumnIndex + 2;
+        return nextColumnIndex;
     }
 
     protected CompetitorColumn createCompetitorColumn() {
