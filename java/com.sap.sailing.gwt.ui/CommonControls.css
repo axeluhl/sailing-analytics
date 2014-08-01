@@ -160,14 +160,24 @@ body ::-webkit-scrollbar-track {
 	z-index: 100;
 }
 
-.SplitLayoutPanel-Divider {
+.SplitLayoutPanel-Divider-Horizontal {
+	background: #ffffff;
+}
+
+.SplitLayoutPanel-Divider-Vertical {
 	background: #ffffff;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background-color: #ffffff;
-  background: #cbcaca url(images/thumb_horz.png) center center no-repeat;
-  cursor: row-resize;
+	width: 50px !important;
+	height: 25px !important;
+	bottom: 8px !important;
+	left: 50% !important;
+	background: #ffffff url(images/thumb_horz.png) center no-repeat;
+	cursor: row-resize;
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px;
+	z-index: 100;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
