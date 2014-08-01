@@ -273,7 +273,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      * Consequently, media selector will also NOT react on media added newly during a race board session.
      */
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
