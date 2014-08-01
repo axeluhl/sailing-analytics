@@ -11,17 +11,15 @@
   <div class="{res.mainCss.grid}">
     <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
       <header class="{res.mainCss.mainsection_header}">
-        <h3 class="{res.mainCss.mainsection_header_title}">Latest Events from the Sailing World</h3>
+        <h3 class="{res.mainCss.mainsection_header_title}"><ui:text from='{i18n.mainEventTitle}'/></h3>
       </header>
     </div>
   </div>
-  <div class="{res.mainCss.grid}">
-      <s:recentevent.RecentEvent ui:field='event1'/>
-      <s:recentevent.RecentEvent ui:field='event2'/>
-      <s:recentevent.RecentEvent ui:field='event3'/>
+  <div ui:field="recentEventsDiv" class="{res.mainCss.grid}">
+	<!-- the recent events will be inserted here -->
   </div>
   <div class="{res.mainCss.grid} {res.mainCss.mainsection_navigation}">
-    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}">Show All Events</a></div>
+    <div class="{res.mediaCss.small12} {res.mediaCss.columns}"><a href="#" class="{res.mainCss.button}"><ui:text from='{i18n.mainEventShowAll}'/></a></div>
   </div>
 </div>
     </g:HTMLPanel>

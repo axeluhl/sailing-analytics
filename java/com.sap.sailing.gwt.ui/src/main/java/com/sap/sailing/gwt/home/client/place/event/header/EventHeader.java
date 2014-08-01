@@ -55,7 +55,7 @@ public class EventHeader extends Composite {
     @UiField ImageElement eventLogo2;
 //    @UiField ImageElement eventLogo3;
     
-    private final String defaultLogoUrl = "http://static.sapsailing.com/newhome/default_event_logo.png";
+    private final String defaultLogoUrl = "http://static.sapsailing.com/ubilabsimages/default/default_event_logo.jpg";
 
 //    private final List<Anchor> links1;
 //    private final List<Anchor> links2;
