@@ -35,6 +35,7 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -1440,6 +1441,33 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
+    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, CheckBox> {
+        protected SelectionCheckboxColumn(Cell<CheckBox> cell, SortingOrder preferredSortingOrder,
+                DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+            super(cell, preferredSortingOrder, displayedLeaderboardRowsProvider);
+            // TODO Auto-generated constructor stub
+        }
+
+        @Override
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Header<?> getHeader() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public CheckBox getValue(LeaderboardRowDTO object) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+    }
+    
     private class TotalRankColumn extends SortableColumn<LeaderboardRowDTO, String> {
         public TotalRankColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
@@ -2491,7 +2519,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private int ensureRankColumn(int rankColumnIndex) {
         final int indexOfNextColumn = rankColumnIndex + (isShowRegattaRankColumn() ? 1 : 0);
-        if (getLeaderboardTable().getColumnCount() >= rankColumnIndex) {
+        if (getLeaderboardTable().getColumnCount() > rankColumnIndex) {
             if (isShowRegattaRankColumn()) {
                 if (getLeaderboardTable().getColumn(rankColumnIndex) != getRankColumn()) {
                     insertColumn(rankColumnIndex, getRankColumn());
@@ -2500,6 +2528,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 if (getLeaderboardTable().getColumn(rankColumnIndex) == getRankColumn()) {
                     removeColumn(rankColumnIndex);
                 }
+            }
+        } else {
+            if (isShowRegattaRankColumn()) {
+                insertColumn(rankColumnIndex, getRankColumn());
             }
         }
         return indexOfNextColumn;
