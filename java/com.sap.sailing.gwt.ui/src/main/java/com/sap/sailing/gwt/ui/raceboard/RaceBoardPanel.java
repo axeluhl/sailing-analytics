@@ -301,8 +301,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, raceTimesInfoProvider,
-                /* autoExpandLastRaceColumn */ false, /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
+                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, /* showRegattaRank */ true,
+                /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
+                /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {

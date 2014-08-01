@@ -47,8 +47,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         super(competitorSelectionModel, asyncActionsExecutor, timer, stringMessages, hideToolbar, new LeaderboardPanel(
                 sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, showRaceDetails, /* showCompetitorSearchBox */ false, /* raceTimesInfoProvider */null, /* adjustTimerDelay */
-                autoExpandLastRaceColumn, true));
+                stringMessages, userAgent, showRaceDetails, /* showCompetitorSearchBox */ false, /* showRegattaRank */ true, /* adjustTimerDelay */
+                /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true));
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
@@ -78,7 +78,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                                 overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                                         leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                                        false, /* showCompetitorSearchBox */ false, /* raceTimesInfoProvider */null,  false, /* adjustTimerDelay */ true);
+                                        false, /* showCompetitorSearchBox */ false, /* showRegattaRank */ true,  /* showSelectionCheckbox */ true,
+                                        /* raceTimesInfoProvider */null, false, /* adjustTimerDelay */ true);
                                 mainPanel.add(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
                                         /* hasSettingsWhenComponentIsInvisible*/ true);

@@ -309,6 +309,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      */
     private final Anchor dummyFocusElement;
     private int blurInOnSelectionChanged;
+    private boolean showRegattaRank;
+    private boolean showSelectionCheckbox;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1503,16 +1505,21 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* showCompetitorSearchBox */ false, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
+                /* showCompetitorSearchBox */ false, /* showRegattaRank */ true, /* showSelectionCheckbox */ true,
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails,
-            boolean showCompetitorSearchBox, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+            final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
+            boolean showRegattaRank, boolean showSelectionCheckbox,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
+            boolean adjustTimerDelay) {
         this.dummyFocusElement = new Anchor("");
+        this.showRegattaRank = showRegattaRank;
+        this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
