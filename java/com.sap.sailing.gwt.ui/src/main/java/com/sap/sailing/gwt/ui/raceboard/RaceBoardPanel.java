@@ -95,11 +95,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
-    /**
-     * The offset when scrolling with the menu entry anchors (in the top right corner).
-     */
-    private int scrollOffset;
-
     private final List<ComponentViewer> componentViewers;
     private final FlowPanel componentControlsPanel;
     private final FlowPanel viewControlsPanel;
@@ -145,7 +140,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.timer = timer;
-        this.scrollOffset = 0;        
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -280,7 +274,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
      * Consequently, media selector will also NOT react on media added newly during a race board session.
      */
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, userAgent, this.user, getConfiguration().isAutoSelectMedia());
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
@@ -437,13 +431,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
     private CompetitorsFilterSets loadCompetitorsFilterSets() {
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if(localStorage != null) {
+        if (localStorage != null) {
             try {
                 String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
-                if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                     CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                     JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                    if(value.isObject() != null) {
+                    if (value.isObject() != null) {
                         result = deserializer.deserialize((JSONObject) value);
                     }
                 }
@@ -578,19 +572,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         return errorReporter;
     }
     
-    public int getScrollOffset() {
-        return scrollOffset;
-    }
-    
-    /**
-     * Sets the offset, when scrolling with the menu entry anchors (in the top right corner).<br />
-     * Only the absolute value of <code>scrollOffset</code> will be used.
-     * @param scrollOffset The new scrolling offset. <b>Only</b> the absolute value will be used.
-     */
-    public void setScrollOffset(int scrollOffset) {
-        this.scrollOffset = Math.abs(scrollOffset);
-    }
-
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();

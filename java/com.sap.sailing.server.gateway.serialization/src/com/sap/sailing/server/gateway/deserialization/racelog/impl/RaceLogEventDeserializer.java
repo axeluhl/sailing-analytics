@@ -19,6 +19,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonD
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogAdditionalScoringInformationSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCloseOpenEndedDeviceMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
@@ -83,6 +84,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogRegisterCompetitorEventDeserializer(competitorDeserializer),
                 new RaceLogDefineMarkEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory)),
                 new RaceLogCloseOpenEndedDeviceMappingEventDeserializer(competitorDeserializer),
+                new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer));
                 new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer),
                 new RaceLogSuppressedMarkPassingsEventDeserializer(competitorDeserializer));
     }
@@ -108,6 +110,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer;
     protected final JsonDeserializer<RaceLogEvent> suppressedMarkPassingsDeserializer;
 
@@ -132,6 +135,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> registerCompetitorEventDeserializer,
             JsonDeserializer<RaceLogEvent> defineMarkEventDeserializer,
             JsonDeserializer<RaceLogEvent> closeOpenEndedDeviceMappingEventDeserializer,
+            JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer) {
             JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer,
             JsonDeserializer<RaceLogEvent> suppressedMarkPassingsEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
@@ -155,6 +159,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.registerCompetitorEventDeserializer = registerCompetitorEventDeserializer;
         this.defineMarkEventDeserializer = defineMarkEventDeserializer;
         this.closeOpenEndedDeviceMappingEventDeserializer = closeOpenEndedDeviceMappingEventDeserializer;
+        this.additionalScoringInformationEventDeserializer = additionalScoringInformationEventDeserializer;
         this.fixedMarkPassingEventDeserializer = fixedMarkPassingEventDeserializer;
         this.suppressedMarkPassingsDeserializer = suppressedMarkPassingsEventDeserializer;
     }
@@ -204,6 +209,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return defineMarkEventDeserializer;
         } else if (type.equals(RaceLogCloseOpenEndedDeviceMappingEventSerializer.VALUE_CLASS)) {
             return closeOpenEndedDeviceMappingEventDeserializer;
+        } else if (type.equals(RaceLogAdditionalScoringInformationSerializer.VALUE_CLASS)) {
+            return additionalScoringInformationEventDeserializer;
         } else if (type.equals(RaceLogFixedMarkPassingEventSerializer.VALUE_CLASS)) {
             return fixedMarkPassingEventDeserializer;
         } else if (type.equals(RaceLogSuppressedMarkPassingsEventSerializer.VALUE_CLASS)){

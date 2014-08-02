@@ -137,6 +137,9 @@ public class SimulatorField implements VectorField {
 
     private Vector interpolate(Position p, Date at) {
         int step = (int) ((at.getTime() - startTime.getTime()) / timeStep.asMillis());
+        if (step >= this.data.length) {
+            step = this.data.length - 1;
+        }
         Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
@@ -220,7 +223,7 @@ public class SimulatorField implements VectorField {
     private String[] createColorsForSpeeds() {
         String[] colors = new String[256];
         double alphaMin = 0.0;
-        double alphaMax = 1.0;
+        double alphaMax = 0.9;
         int greyValue = 255;
         for (int i = 0; i < 256; i++) {
             colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + ","

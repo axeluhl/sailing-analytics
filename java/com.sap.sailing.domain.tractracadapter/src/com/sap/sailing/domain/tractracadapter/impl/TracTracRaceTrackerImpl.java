@@ -46,8 +46,8 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
-import com.tractrac.model.lib.api.ModelLocator;
 import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -62,6 +62,7 @@ import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.race.IRacesListener;
 
 public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements IConnectionStatusListener, TracTracRaceTracker, DynamicRaceDefinitionSet {
     private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
@@ -341,6 +342,25 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             
             @Override
             public void addCompetitor(ICompetitor competitor) {
+            }
+        });
+        eventSubscriber.subscribeRaces(new IRacesListener() {
+            @Override public void abandonRace(UUID raceId) {}
+            @Override public void addRace(IRace race) {}
+            @Override public void deleteRace(UUID raceId) {}
+            @Override public void reloadRace(UUID raceId) {}
+            @Override public void startTracking(UUID raceId) {}
+            @Override
+            public void updateRace(IRace race) {
+                if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
+                    int delayToLiveInMillis = race.getLiveDelay()*1000;
+                    for (RaceDefinition raceDefinition : getRaces()) {
+                        DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
+                        if (trackedRace != null) {
+                            trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
+                        }
+                    }
+                }
             }
         });
         // Start live and stored data streams

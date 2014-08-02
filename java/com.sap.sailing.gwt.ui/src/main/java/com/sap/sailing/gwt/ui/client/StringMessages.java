@@ -126,6 +126,7 @@ public interface StringMessages extends Messages {
     String errorWhileTryingToSetWindSourceForRace();
     String inEvent();
     String to();
+    String toSide();
     String showEstimatedWind();
     String timing();
     String raceDetailsToShow();
@@ -381,7 +382,8 @@ public interface StringMessages extends Messages {
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
-    String scoringSchemeWinnerGetsFive();    
+    String scoringSchemeWinnerGetsFive();
+    String scoringSchemeWinnerGetsFiveIgnoringRaceCount();
     String scoringSchemeWinnerGetsSix();
     String scoringSystem();
     String createFlexibleLeaderboard();
@@ -1064,4 +1066,5 @@ public interface StringMessages extends Messages {
     String totalNumberOfOperations();
     String currentOrAverageSpeedOverGroundInKnotsTooltip();
     String currentOrAverageSpeedOverGroundInKnots();
+    String scoringSchemeHighPointFirstGetsTenOrEight();
 }

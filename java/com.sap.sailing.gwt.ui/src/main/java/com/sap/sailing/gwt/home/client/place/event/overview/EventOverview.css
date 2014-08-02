@@ -381,7 +381,7 @@
   background: #000;
   opacity: 0.4;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-  filter: alpha(opacity=40);
+  filter: literal("alpha(opacity=40)");
   position: absolute;
   bottom: 0px;
   height: 5em;

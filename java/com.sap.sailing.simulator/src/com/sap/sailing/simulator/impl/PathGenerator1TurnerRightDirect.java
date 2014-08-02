@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -26,7 +26,7 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
     public Path getPath() {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
+        Grid boundary = new RectangularGrid(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
         WindFieldGenerator windField = this.parameters.getWindField();
         PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
@@ -102,7 +102,7 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
                     // System.out.println("out of time");
                     break;
                 }
-                if (!boundary.isWithinBoundaries(currentPosition)) {
+                if (!boundary.inBounds(currentPosition)) {
                     // outOfBounds = true;
                     // System.out.println("out of bounds");
                     break;

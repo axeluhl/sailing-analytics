@@ -159,7 +159,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             receivedStartAndEndOfTracking = master.getTrackedRace(raceIdentifier).getStartOfTracking() != null &&
                     master.getTrackedRace(raceIdentifier).getEndOfTracking() != null;
         }
-        Thread.sleep(2000); // kept failing several times for a 1000ms timeout
+        Thread.sleep(3000); // kept failing several times for a 1000ms timeout
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());

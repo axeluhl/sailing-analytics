@@ -25,6 +25,7 @@ import java.util.zip.GZIPOutputStream;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.AMQP.Exchange;
+import com.rabbitmq.client.AMQP.Queue.DeleteOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
@@ -412,15 +413,22 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
-        String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
-        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
-        final RacingEventService racingEventService = getRacingEventService();
-        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(
-                rabbitInputStreamProvider.getInputStream()));
-        logger.info("Starting to receive initial load");
-        racingEventService.initiallyFillFrom(ois);
-        logger.info("Done receiving initial load");
-        replicator.setSuspended(false); // apply queued operations
+        final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
+        try {
+            RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
+            final RacingEventService racingEventService = getRacingEventService();
+            ObjectInputStream ois = racingEventService.getBaseDomainFactory()
+                    .createObjectInputStreamResolvingAgainstThisFactory(
+                            new GZIPInputStream(rabbitInputStreamProvider.getInputStream()));
+            logger.info("Starting to receive initial load");
+            racingEventService.initiallyFillFrom(ois);
+            logger.info("Done receiving initial load");
+            replicator.setSuspended(false); // apply queued operations
+        } finally {
+            // delete initial load queue
+            DeleteOk deleteOk = consumer.getChannel().queueDelete(queueName);
+            logger.info("Deleted queue "+queueName+" used for initial load: "+deleteOk.toString());
+        }
     }
 
     /**

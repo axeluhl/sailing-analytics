@@ -170,7 +170,6 @@ public class TabletAndDesktopEventView extends Composite implements EventView, E
         Map<String, String> linkParams = new HashMap<String, String>();
         linkParams.put("name", leaderboard.name);
         linkParams.put("showRaceDetails", "true");
-        linkParams.put("embedded", "true");                   
         if (leaderboard.displayName != null) {
             linkParams.put("displayName", leaderboard.displayName);
         }

@@ -18,7 +18,7 @@ public interface SimulationParameters {
 
     WindFieldGenerator getWindField();
 
-    Boundary getBoundaries();
+    Grid getGrid();
 
     Map<String,Double> getSettings();
 

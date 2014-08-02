@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -27,11 +28,12 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     
     private TextView startCountdownTextView;
     private ImageButton abortButton;
-    private Button resetTimeButton;
+    protected Button resetTimeButton;
     protected Button raceStartIn5Minutes;
     protected Button raceStartIn4Minutes;
     protected Button raceStartIn2Minutes;
     protected Button raceResetCourse;
+    protected ToggleButton toggleGroupRacing;
     private TextView nextCountdownTextView;
     
     private FlagPoleStateRenderer flagRenderer;
@@ -82,6 +84,9 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         
         raceStartIn2Minutes = (Button) getView().findViewById(R.id.raceStartIn1Minute);
         raceStartIn2Minutes.setVisibility(View.INVISIBLE);
+        
+        toggleGroupRacing = (ToggleButton) getView().findViewById(R.id.toggle_group_race_mode);
+        toggleGroupRacing.setVisibility(View.INVISIBLE);
         
         raceResetCourse = (Button) getView().findViewById(R.id.raceResetCourse);
         raceResetCourse.setOnClickListener(new OnClickListener() {

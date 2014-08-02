@@ -10,11 +10,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.recentevent.RecentEvent;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class MainEvents extends Composite {
 
-    private List<EventDTO> recentEvents;
+    private List<EventBaseDTO> recentEvents;
     
     @UiField(provided=true) RecentEvent event1;
     @UiField(provided=true) RecentEvent event2;
@@ -32,10 +32,10 @@ public class MainEvents extends Composite {
         MainEventsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        recentEvents = new ArrayList<EventDTO>();
+        recentEvents = new ArrayList<EventBaseDTO>();
     }
 
-    public void setRecentEvents(List<EventDTO> theRecentEvents) {
+    public void setRecentEvents(List<EventBaseDTO> theRecentEvents) {
         recentEvents.clear();
         recentEvents.addAll(theRecentEvents);
         

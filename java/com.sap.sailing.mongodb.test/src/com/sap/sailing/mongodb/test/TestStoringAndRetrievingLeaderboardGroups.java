@@ -135,8 +135,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         racingEventService.addLeaderboard(leaderboard);
-        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, 
-                leaderboard.getFleet(null));
+        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */false);
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         racingEventService.addLeaderboard(leaderboard);
@@ -192,8 +191,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboards.add(leaderboard);
-        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, 
-                leaderboard.getFleet(null));
+        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */false);
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboards.add(leaderboard);
@@ -249,8 +247,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboards.add(leaderboard);
-        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, 
-                leaderboard.getFleet(null));
+        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */false);
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboards.add(leaderboard);
@@ -435,7 +432,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         final Fleet fleet = leaderboard.getFleet(null);
-        final RaceColumn race = leaderboard.addRaceColumn(columnName, false, fleet);
+        final RaceColumn race = leaderboard.addRaceColumn(columnName, false);
         leaderboards.add(leaderboard);
 
         final LeaderboardGroup group = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);

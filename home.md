@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://www.sapsailing.com/images/sap-logo.png"/> Sailing Analytics Wiki where useful information regarding this project can be found.
+This is the <img src="http://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
@@ -15,6 +15,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
+  * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
 * Information for Developers
@@ -50,6 +51,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
+  * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
 
 ### Internal services (not related to wiki but useful)
 
