@@ -79,7 +79,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogRegisterCompetitorEventSerializer(competitorSerializer),
                 new RaceLogDefineMarkEventSerializer(competitorSerializer, new MarkJsonSerializer()),
                 new RaceLogCloseOpenEndedDeviceMappingEventSerializer(competitorSerializer),
-                new RaceLogAdditionalScoringInformationSerializer(competitorSerializer));
+                new RaceLogAdditionalScoringInformationSerializer(competitorSerializer),
                 new RaceLogFixedMarkPassingEventSerializer(competitorSerializer),
                 new RaceLogSuppressedMarkPassingsEventSerializer(competitorSerializer));
     }
@@ -133,7 +133,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> registerCompetitorSerializer,
             JsonSerializer<RaceLogEvent> defineMarkSerializer,
             JsonSerializer<RaceLogEvent> closeOpenEndedDeviceMappingEventSerializer,
-            JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer) {
+            JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer,
             JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer,
             JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer) {
         this.flagEventSerializer = flagEventSerializer;

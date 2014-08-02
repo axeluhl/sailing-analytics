@@ -42,7 +42,7 @@ import com.sap.sse.common.Util;
  */
 public class CandidateChooserImpl implements CandidateChooser {
 
-    private static final int MILLISECONDS_BEFORE_STARTTIME = 2000;
+    private static final int MILLISECONDS_BEFORE_STARTTIME = 5000;
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
@@ -87,7 +87,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-        TimePoint startOfRace = race.getStartOfRace();
+       TimePoint startOfRace =   race.getStartOfRace();
         if (startOfRace != null) {
             if (raceStartTime == null || !startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME).equals(raceStartTime)) {
                 raceStartTime = startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME);
@@ -174,7 +174,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
                 // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
                 // Otherwise the edge is only created if the distance estimation, which can be calculated as long as the
-                // candidates are not the proxy and or start is big enough.
+                // candidates are not the proxy and or start is close enough to the actual distance sailed.
                 NavigableSet<Candidate> fixed = fixedPassings.get(c);
                 if (fixed.contains(early) || fixed.contains(late)) {
                     if (late == end || early == start && (early.getTimePoint() == null || late.getTimePoint().after(early.getTimePoint()))) {

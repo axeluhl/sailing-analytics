@@ -22,8 +22,10 @@ import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.FixedMarkPassingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.SuppressedMarkPassingsEvent;
 
 public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisitor {
     protected abstract void notifyListenerAboutEventAdded(RaceLogEvent event);
@@ -130,5 +132,15 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     @Override
     public void visit(AdditionalScoringInformationEvent additionalScoringInformation) {
         notifyListenerAboutEventAdded(additionalScoringInformation);
+    }
+    
+    @Override
+    public void visit(FixedMarkPassingEvent fixedMarkPassingEvent) {
+        notifyListenerAboutEventAdded(fixedMarkPassingEvent);
+    }
+    
+    @Override
+    public void visit(SuppressedMarkPassingsEvent event) {
+        notifyListenerAboutEventAdded(event);        
     }
 }

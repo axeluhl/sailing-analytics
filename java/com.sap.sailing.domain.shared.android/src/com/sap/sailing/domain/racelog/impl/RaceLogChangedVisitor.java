@@ -17,9 +17,6 @@ public class RaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
         listener.eventAdded(event);
     }
 
-        listener.eventAdded(event);
-    }
-
     @Override
     public void visit(FixedMarkPassingEvent event) {
         listener.eventAdded(event);
@@ -27,4 +24,5 @@ public class RaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
 
     @Override
     public void visit(SuppressedMarkPassingsEvent event) {
+    }
 }

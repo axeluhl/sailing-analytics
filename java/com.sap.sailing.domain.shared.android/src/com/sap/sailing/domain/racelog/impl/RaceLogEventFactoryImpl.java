@@ -279,15 +279,16 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public AdditionalScoringInformationEvent createAdditionalScoringInformationEvent(TimePoint timePoint, Serializable id,
             RaceLogEventAuthor author, int currentPassId, AdditionalScoringInformationType informationType) {
-        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id, Collections.<Competitor>emptyList(), currentPassId,
-                informationType);
-                
-                    @Override
-    public RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
-        return new FixedMarkPassingEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing, zeroBasedIndexOfWaypoint);
+        return new AdditionalScoringInformationEventImpl(MillisecondsTimePoint.now(), author, timePoint, id,
+                Collections.<Competitor> emptyList(), currentPassId, informationType);
     }
 
+    @Override
+    public RaceLogEvent createFixedMarkPassingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
+        return new FixedMarkPassingEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
+                zeroBasedIndexOfWaypoint);
+    }
 
     @Override
     public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
