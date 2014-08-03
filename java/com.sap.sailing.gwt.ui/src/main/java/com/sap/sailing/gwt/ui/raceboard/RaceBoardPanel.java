@@ -298,11 +298,12 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, raceTimesInfoProvider,
-                /* autoExpandLastRaceColumn */ false, /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
+                userAgent, /* showRaceDetails */ true, /* showCompetitorSearchBox */ true, /* showSelectionCheckbox */ true,
+                raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
+                /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {

@@ -242,7 +242,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         if (leaderboardsTabPanel != null) {
             if (showLeaderboard) {
                 final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-                final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+                final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true); 
                 sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
                         new AsyncCallback<List<StrippedLeaderboardDTO>>() {
                             @Override

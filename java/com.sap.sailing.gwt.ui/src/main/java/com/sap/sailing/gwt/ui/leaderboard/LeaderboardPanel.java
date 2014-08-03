@@ -13,12 +13,15 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -110,11 +113,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
-    private static final int RANK_COLUMN_INDEX = 0;
-
-    private static final int SAIL_ID_COLUMN_INDEX = 1;
-
-    private static final int CARRY_COLUMN_INDEX = 3;
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
 
@@ -156,6 +154,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
+    
+    private final SelectionCheckboxColumn selectionCheckboxColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -304,11 +304,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceTimesInfoProviderListener raceTimesInfoProviderListener;
     
-    /**
-     * Used to set the focus to avoid undesirable table scolling
-     */
-    private final Anchor dummyFocusElement;
     private int blurInOnSelectionChanged;
+    
+    /**
+     * When an element in the leaderboard receives focus, it needs to be blurred again to keep the surrounding scroll panel
+     * from scrolling anything into view
+     */
+    private Element elementToBlur;
+    private boolean showSelectionCheckbox;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -817,7 +820,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
-        return new DetailType[] { DetailType.TOTAL_DISTANCE_TRAVELED,
+        return new DetailType[] { DetailType.REGATTA_RANK,
+                                  DetailType.TOTAL_DISTANCE_TRAVELED,
                                   DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
                                   DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
                                   DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
@@ -1444,6 +1448,53 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
+    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, Boolean> {
+        private CheckboxCell cell;
+        
+        protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+            this(new CheckboxCell(/* depends on selection */ true, /* handles selection */ false), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
+        }
+
+        public SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
+                DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+            super(checkboxCell, descending, displayedLeaderboardRowsProvider);
+            this.cell = checkboxCell;
+            this.setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, Boolean>() {
+                @Override
+                public void update(int index, LeaderboardRowDTO row, Boolean selected) {
+                    competitorSelectionProvider.setSelected(row.competitor, selected);
+                    cell.setViewData(row, selected);
+                }
+            });
+        }
+        
+        @Override
+        public CheckboxCell getCell() {
+            return cell;
+        }
+
+        @Override
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO a, LeaderboardRowDTO b) {
+                    return cell.getViewData(a) ? cell.getViewData(b) ? 0 : 1 : cell.getViewData(b) ? -1 : 0;
+                }
+            };
+        }
+
+        @Override
+        public Header<?> getHeader() {
+            return new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped("").toSafeHtml());
+        }
+
+        @Override
+        public Boolean getValue(LeaderboardRowDTO object) {
+            return cell.getViewData(object);
+        }
+        
+    }
+    
     private class TotalRankColumn extends SortableColumn<LeaderboardRowDTO, String> {
         public TotalRankColumn() {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
@@ -1503,16 +1554,18 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* showCompetitorSearchBox */ false, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
+                /* showCompetitorSearchBox */ false, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails,
-            boolean showCompetitorSearchBox, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
-        this.dummyFocusElement = new Anchor("");
+            final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
+            boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
+            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
+        this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1563,6 +1616,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
+        selectionCheckboxColumn = new SelectionCheckboxColumn(this);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1575,8 +1629,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
-                boolean isClick = "click".equals(event.getNativeEvent().getType());
-                if (isClick) {
+                if ("focus".equals(event.getNativeEvent().getType())) {
+                    elementToBlur = event.getNativeEvent().getEventTarget().cast();
+                    elementToBlur.blur();
                     blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work reliably
                     blurFocusedElementAfterSelectionChange();
                 }
@@ -1593,6 +1648,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
+                if (LeaderboardPanel.this.showSelectionCheckbox) {
+                    // update selection checkboxes
+                    for (LeaderboardRowDTO row : getData().getList()) {
+                        selectionCheckboxColumn.getCell().setViewData(row, selection.contains(row.competitor));
+                    }
+                }
                 updateLeaderboard(getLeaderboard());
                 if (blurInOnSelectionChanged > 0) {
                     blurInOnSelectionChanged--;
@@ -1601,7 +1662,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         });
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
-            //Setting up the toggle selection
+            // Setting up the toggle selection
             leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
             DefaultSelectionEventManager<LeaderboardRowDTO> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
             leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionEventManager);
@@ -1684,7 +1745,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             contentPanel.add(new CompetitorSearchTextBox(competitorSelectionProvider, stringMessages));
         }
         contentPanel.add(getLeaderboardTable());
-        contentPanel.add(dummyFocusElement); // ensure dummy element is part of the DOM
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
@@ -2230,10 +2290,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
-        ensureRankColumn();
-        ensureSailIDAndCompetitorColumn();
-        boolean hasCarryColumn = updateCarryColumn(leaderboard);
-        adjustOverallDetailColumns(leaderboard, hasCarryColumn?CARRY_COLUMN_INDEX+1:CARRY_COLUMN_INDEX);
+        int columnIndex = 0;
+        columnIndex = ensureSelectionCheckboxColumn(columnIndex);
+        columnIndex = ensureRankColumn(columnIndex);
+        columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
+        columnIndex = updateCarryColumn(leaderboard, columnIndex);
+        adjustOverallDetailColumns(leaderboard, columnIndex);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
@@ -2255,7 +2317,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         List<SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
         // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of getAvailableOverallDetailColumnTypes()
         for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
-            if (selectedOverallDetailColumns.contains(overallDetailType)) {
+            if (selectedOverallDetailColumns.contains(overallDetailType) && overallDetailColumnMap.containsKey(overallDetailType)) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }
@@ -2474,19 +2536,83 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         addColumn(raceColumn);
     }
 
-    private void ensureRankColumn() {
-        if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
-            addColumn(getDefaultSortColumn());
+    /**
+     * The regatta rank column shall be displayed if an only if the {@link DetailType#REGATTA_RANK} detail is selected in the
+     * {@link #selectedOverallDetailColumns}. It will then be displayed after the selection checkbox column (if any) and
+     * before the sail number / competitor name columns.
+     */
+    private boolean isShowRegattaRankColumn() {
+        return selectedOverallDetailColumns.contains(DetailType.REGATTA_RANK);
+    }
+    
+    /**
+     * @param rankColumnIndex
+     *            the column index (0-based) where to put the rank column, if needed
+     * @return the column index (0-based) for the next column; will equal <code>rankColumnIndex</code> if the rank
+     *         column is not {@link #isShowRegattaRankColumn() supposed to be shown}, or one greater otherwise.
+     */
+    private int ensureRankColumn(int rankColumnIndex) {
+        final int indexOfNextColumn = rankColumnIndex + (isShowRegattaRankColumn() ? 1 : 0);
+        if (getLeaderboardTable().getColumnCount() > rankColumnIndex) {
+            if (isShowRegattaRankColumn()) {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) != getRankColumn()) {
+                    insertColumn(rankColumnIndex, getRankColumn());
+                } // else, the column is needed and is already in place
+            } else {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) == getRankColumn()) {
+                    removeColumn(rankColumnIndex);
+                }
+            }
         } else {
-            if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof TotalRankColumn)) {
-                throw new RuntimeException("The first column must always be the rank column but it was of type "
-                        + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
+            if (isShowRegattaRankColumn()) {
+                insertColumn(rankColumnIndex, getRankColumn());
             }
         }
+        return indexOfNextColumn;
     }
 
-    private void ensureSailIDAndCompetitorColumn() {
-        if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
+    /**
+     * @param selectionCheckboxColumnIndex
+     *            the column index (0-based) where to put the selection checkbox column, if needed
+     * @return the column index (0-based) for the next column; will equal <code>selectionCheckboxColumnIndex</code> if
+     *         the selection checkbox column is not {@link #showSelectionCheckbox supposed to be shown}, or one greater
+     *         otherwise.
+     */
+    private int ensureSelectionCheckboxColumn(int selectionCheckboxColumnIndex) {
+        final int indexOfNextColumn = selectionCheckboxColumnIndex + (showSelectionCheckbox ? 1 : 0);
+        if (getLeaderboardTable().getColumnCount() > selectionCheckboxColumnIndex) {
+            if (showSelectionCheckbox) {
+                if (getLeaderboardTable().getColumn(selectionCheckboxColumnIndex) != selectionCheckboxColumn) {
+                    insertColumn(selectionCheckboxColumnIndex, selectionCheckboxColumn);
+                } // else, the column is needed and is already in place
+            } else {
+                if (getLeaderboardTable().getColumn(selectionCheckboxColumnIndex) == selectionCheckboxColumn) {
+                    removeColumn(selectionCheckboxColumnIndex);
+                }
+            }
+        } else {
+            if (showSelectionCheckbox) {
+                insertColumn(selectionCheckboxColumnIndex, selectionCheckboxColumn);
+            }
+        }
+        return indexOfNextColumn;
+    }
+
+    /**
+     * Assumes that the sail ID and competitor column are mandatory elements of a leaderboard; hence, if the leaderboard
+     * has columns where sail ID and competitor names are expected, it is silently assumed that those are already in the
+     * correct place because these columns are never optional.
+     * 
+     * @param sailIdColumnIndex
+     *            the 0-based index where the sail ID column is to be placed; the competitor name column will be at the
+     *            index greater by one
+     * @return the 0-based index for the next column; two greater than <code>sailIdColumnIndex</code> because this
+     *         method will always make sure that two columns are placed in the layout, one at
+     *         <code>sailIdColumnIndex</code> and one at <code>sailIdColumnIndex+1</code>.
+     */
+    private int ensureSailIDAndCompetitorColumn(int sailIdColumnIndex) {
+        final int nextColumnIndex;
+        if (getLeaderboardTable().getColumnCount() <= sailIdColumnIndex) {
             addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
                 @Override
                 public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
@@ -2495,11 +2621,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }));
             addColumn(createCompetitorColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
+            if (!(getLeaderboardTable().getColumn(sailIdColumnIndex) instanceof SailIDColumn)) {
                 throw new RuntimeException("The second column must always be the sail ID column but it was of type "
-                        + getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
+                        + getLeaderboardTable().getColumn(sailIdColumnIndex).getClass().getName());
             }
         }
+        nextColumnIndex = sailIdColumnIndex + 2;
+        return nextColumnIndex;
     }
 
     protected CompetitorColumn createCompetitorColumn() {
@@ -2549,31 +2677,33 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried
      * points but the display still shows a carry column, the column is removed.
      * 
-     * @return <code>true</code> if a carry column is now part of the table (regardless of whether it existed before),
-     *         <code>false</code> otherwise
+     * @param zeroBasedIndexOfCarryColumn
+     *            the 0-based column index where to put the carry column, if any
+     * @return the 0-based index of the next column following this column if the carry column is to be shown, or
+     *         <code>zeroBasedIndexOfCarryColumn</code> otherwise
      */
-    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
+    protected int updateCarryColumn(LeaderboardDTO leaderboard, int zeroBasedIndexOfCarryColumn) {
         final boolean needsCarryColumn = leaderboard != null && leaderboard.hasCarriedPoints;
         if (needsCarryColumn) {
-            ensureCarryColumn();
+            ensureCarryColumn(zeroBasedIndexOfCarryColumn);
         } else {
-            ensureNoCarryColumn();
+            ensureNoCarryColumn(zeroBasedIndexOfCarryColumn);
         }
-        return needsCarryColumn;
+        return needsCarryColumn ? zeroBasedIndexOfCarryColumn+1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX
-                && getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn) {
-            removeColumn(CARRY_COLUMN_INDEX);
+    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+        if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn
+                && getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn) {
+            removeColumn(zeroBasedIndexOfCarryColumn);
         }
     }
 
-    protected void ensureCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() <= CARRY_COLUMN_INDEX
-                || !(getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn)) {
-            while (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX) {
-                removeColumn(CARRY_COLUMN_INDEX);
+    protected void ensureCarryColumn(int zeroBasedIndexOfCarryColumn) {
+        if (getLeaderboardTable().getColumnCount() <= zeroBasedIndexOfCarryColumn
+                || !(getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn)) {
+            while (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn) {
+                removeColumn(zeroBasedIndexOfCarryColumn);
             }
             addColumn(createCarryColumn());
         }
@@ -2632,7 +2762,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection()));
+                            .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -2777,7 +2907,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     private void blur() {
-        dummyFocusElement.setFocus(true);
-        dummyFocusElement.getElement().focus();
+        if (elementToBlur != null) {
+            elementToBlur.blur();
+        }
     }
 }

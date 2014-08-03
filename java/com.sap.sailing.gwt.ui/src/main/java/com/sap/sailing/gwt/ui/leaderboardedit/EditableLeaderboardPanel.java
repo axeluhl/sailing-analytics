@@ -605,7 +605,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
@@ -761,9 +761,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * the column must always be shown.
      */
     @Override
-    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
-        ensureCarryColumn();
-        return true;
+    protected int updateCarryColumn(LeaderboardDTO leaderboard, int zeroBasedIndexOfCarryColumn) {
+        ensureCarryColumn(zeroBasedIndexOfCarryColumn);
+        return zeroBasedIndexOfCarryColumn+1;
     }
 
     @Override
