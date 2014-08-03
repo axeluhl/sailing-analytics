@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Anchor;

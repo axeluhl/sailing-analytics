@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
@@ -35,7 +36,6 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -152,6 +152,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
+    
+    private final SelectionCheckboxColumn selectionCheckboxColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1442,29 +1444,37 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, CheckBox> {
-        protected SelectionCheckboxColumn(Cell<CheckBox> cell, SortingOrder preferredSortingOrder,
+    private class SelectionCheckboxColumn extends SortableColumn<LeaderboardRowDTO, Boolean> {
+        private CheckboxCell cell;
+        
+        protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
+            this(new CheckboxCell(true, true), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
+        }
+
+        public SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
                 DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-            super(cell, preferredSortingOrder, displayedLeaderboardRowsProvider);
-            // TODO Auto-generated constructor stub
+            super(checkboxCell, descending, displayedLeaderboardRowsProvider);
+            this.cell = checkboxCell;
         }
 
         @Override
         public InvertibleComparator<LeaderboardRowDTO> getComparator() {
-            // TODO Auto-generated method stub
-            return null;
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO a, LeaderboardRowDTO b) {
+                    return cell.getViewData(a) ? cell.getViewData(b) ? 0 : 1 : cell.getViewData(b) ? -1 : 0;
+                }
+            };
         }
 
         @Override
         public Header<?> getHeader() {
-            // TODO Auto-generated method stub
-            return null;
+            return new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped("").toSafeHtml());
         }
 
         @Override
-        public CheckBox getValue(LeaderboardRowDTO object) {
-            // TODO Auto-generated method stub
-            return null;
+        public Boolean getValue(LeaderboardRowDTO object) {
+            return cell.getViewData(object);
         }
         
     }
@@ -1591,6 +1601,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
+        selectionCheckboxColumn = new SelectionCheckboxColumn(this);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -2259,6 +2270,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
         int columnIndex = 0;
+        columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
         columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
         columnIndex = updateCarryColumn(leaderboard, columnIndex);
@@ -2533,6 +2545,33 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             if (isShowRegattaRankColumn()) {
                 insertColumn(rankColumnIndex, getRankColumn());
+            }
+        }
+        return indexOfNextColumn;
+    }
+
+    /**
+     * @param selectionCheckboxColumnIndex
+     *            the column index (0-based) where to put the selection checkbox column, if needed
+     * @return the column index (0-based) for the next column; will equal <code>selectionCheckboxColumnIndex</code> if
+     *         the selection checkbox column is not {@link #showSelectionCheckbox supposed to be shown}, or one greater
+     *         otherwise.
+     */
+    private int ensureSelectionCheckboxColumn(int selectionCheckboxColumnIndex) {
+        final int indexOfNextColumn = selectionCheckboxColumnIndex + (showSelectionCheckbox ? 1 : 0);
+        if (getLeaderboardTable().getColumnCount() > selectionCheckboxColumnIndex) {
+            if (showSelectionCheckbox) {
+                if (getLeaderboardTable().getColumn(selectionCheckboxColumnIndex) != selectionCheckboxColumn) {
+                    insertColumn(selectionCheckboxColumnIndex, selectionCheckboxColumn);
+                } // else, the column is needed and is already in place
+            } else {
+                if (getLeaderboardTable().getColumn(selectionCheckboxColumnIndex) == selectionCheckboxColumn) {
+                    removeColumn(selectionCheckboxColumnIndex);
+                }
+            }
+        } else {
+            if (showSelectionCheckbox) {
+                insertColumn(selectionCheckboxColumnIndex, selectionCheckboxColumn);
             }
         }
         return indexOfNextColumn;
