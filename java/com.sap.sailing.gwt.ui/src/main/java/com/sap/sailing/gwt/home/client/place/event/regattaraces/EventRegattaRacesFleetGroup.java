@@ -34,7 +34,7 @@ public class EventRegattaRacesFleetGroup extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         for(FleetDTO fleet: fleetsToShow) {
-            EventRegattaRacesFleet eventRegattaRacesFleet = new EventRegattaRacesFleet(fleet);
+            EventRegattaRacesFleet eventRegattaRacesFleet = new EventRegattaRacesFleet(fleet, 0);
             fleetsPanel.appendChild(eventRegattaRacesFleet.getElement());
 
             updateFleetRacesUI(leaderboard, series, fleet, timerForClientServerOffset, pageNavigator);

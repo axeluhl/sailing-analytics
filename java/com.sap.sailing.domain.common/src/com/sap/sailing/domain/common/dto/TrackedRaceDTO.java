@@ -22,6 +22,10 @@ public class TrackedRaceDTO implements Serializable {
     public Date timePointOfNewestEvent;
     public long delayToLiveInMs;
     
+    public int totalLegsCount = -1;
+    public int currentLegNo = -1;
+//    public CompetitorDTO leaderOrWinner;
+    
     @Override
     public int hashCode() {
         final int prime = 31;

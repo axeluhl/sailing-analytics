@@ -39,7 +39,7 @@ public class UpcomingEvent extends UIObject {
         Event.setEventListener(eventOverviewLink, new EventListener() {
             @Override
             public void onBrowserEvent(Event browserEvent) {
-                navigator.goToEvent(event.id.toString(), event.getBaseURL());
+                navigator.goToEvent(event.id.toString(), event.getBaseURL(), event.isOnRemoteServer());
             }
         });
 
