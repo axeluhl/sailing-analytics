@@ -16,6 +16,7 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -1451,13 +1452,25 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         private CheckboxCell cell;
         
         protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
-            this(new CheckboxCell(true, true), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
+            this(new CheckboxCell(/* depends on selection */ true, /* handles selection */ false), SortingOrder.DESCENDING, displayedLeaderboardRowsProvider);
         }
 
         public SelectionCheckboxColumn(CheckboxCell checkboxCell, SortingOrder descending,
                 DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
             super(checkboxCell, descending, displayedLeaderboardRowsProvider);
             this.cell = checkboxCell;
+            this.setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, Boolean>() {
+                @Override
+                public void update(int index, LeaderboardRowDTO row, Boolean selected) {
+                    competitorSelectionProvider.setSelected(row.competitor, selected);
+                    cell.setViewData(row, selected);
+                }
+            });
+        }
+        
+        @Override
+        public CheckboxCell getCell() {
+            return cell;
         }
 
         @Override
@@ -1552,7 +1565,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             final UserAgentDetails userAgent, boolean showRaceDetails, boolean showCompetitorSearchBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
-        this.showSelectionCheckbox = /* showSelectionCheckbox */ false;
+        this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1635,6 +1648,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
+                if (LeaderboardPanel.this.showSelectionCheckbox) {
+                    // update selection checkboxes
+                    for (LeaderboardRowDTO row : getData().getList()) {
+                        selectionCheckboxColumn.getCell().setViewData(row, selection.contains(row.competitor));
+                    }
+                }
                 updateLeaderboard(getLeaderboard());
                 if (blurInOnSelectionChanged > 0) {
                     blurInOnSelectionChanged--;
