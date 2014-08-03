@@ -1513,7 +1513,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
-        this.showSelectionCheckbox = /* showSelectionCheckbox */ false;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
