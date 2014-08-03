@@ -103,10 +103,9 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false, /* showRegattaRank */ null);
-            List<DetailType> overallDetailsToShow = Collections.emptyList();
+                    false, /* showRegattaRank */ true);
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
+                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
