@@ -9,6 +9,8 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class RegattaPhase extends UIObject {
     private static RegattaPhaseUiBinder uiBinder = GWT.create(RegattaPhaseUiBinder.class);
@@ -19,7 +21,7 @@ public class RegattaPhase extends UIObject {
     @UiField SpanElement phaseName;
     @UiField DivElement phaseRacesPanel;
     
-    public RegattaPhase(RaceGroupSeriesDTO series) {
+    public RegattaPhase(RaceGroupSeriesDTO series, StrippedLeaderboardDTO leaderboard, Timer timerForClientServerOffset) {
         RegattaResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
 
@@ -29,9 +31,12 @@ public class RegattaPhase extends UIObject {
             phaseName.setInnerText(series.getName());
         }
         
-        series.getRaceColumns();
         for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
-            RegattaPhaseRace race = new RegattaPhaseRace(raceColumn);
+            // the raceColumn from the RaceGroupSeriesDTO does not contain all required information for the race state.
+            // therefore we take it from the LeaderboardDTO
+            // TODO: try to have only one RaceColumnDTO 
+            RaceColumnDTO raceColumn2 = leaderboard.getRaceColumnByName(raceColumn.getName());
+            RegattaPhaseRace race = new RegattaPhaseRace(raceColumn2, timerForClientServerOffset);
             phaseRacesPanel.appendChild(race.getElement());
         }
     }
