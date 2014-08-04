@@ -164,6 +164,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel, showMapControls);
+        // these calls make sure that leaderboard and competitor map data are loaded
+        leaderboardPanel.setVisible(true);
+        leaderboardPanel.setVisible(false);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 

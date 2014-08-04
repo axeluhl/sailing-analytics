@@ -29,15 +29,11 @@ import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Touch;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 
@@ -115,9 +111,9 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
                 LayoutData layoutData = (LayoutData) target.getLayoutData();
                 if (layoutData.size == 0) {
                   // Restore the old size.
-                  setWidgetVisibilityButAlwaysShowSplitter(target, getAssociatedComponent(), /*hidden*/false, (int)layoutData.oldSize);
+                  setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/false, (int)layoutData.oldSize);
                 } else {
-                  setWidgetVisibilityButAlwaysShowSplitter(target, getAssociatedComponent(), /*hidden*/true, (int)layoutData.oldSize);
+                  setWidgetVisibilityAndPossiblyShowSplitter(target, getAssociatedComponent(), /*hidden*/true, (int)layoutData.oldSize);
                 }
                 event.preventDefault();
             }
@@ -324,22 +320,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       super(target, associatedComponent, reverse);
       getElement().getStyle().setPropertyPx("height", splitterSize);
       setStyleName("gwt-SplitLayoutPanel-VDragger");
-      togglerButton = new Button(target.getTitle());
-      togglerButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-            LayoutData layoutData = (LayoutData)target.getLayoutData();
-            if (!isVisible()) {
-                setVisible(true);
-                setWidgetVisibilityButAlwaysShowSplitter(target, associatedComponent, false, (int)layoutData.oldSize);
-            } else {
-                setVisible(false);
-                setWidgetVisibilityButAlwaysShowSplitter(target, associatedComponent, true, (int)layoutData.size);
-            }
-        }
-      });
-      togglerButton.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton");
-      panelForNorthSouthTogglingButtons.add(togglerButton);
     }
 
     @Override
@@ -393,8 +373,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
   
   private HashMap<Direction, List<Splitter>> directionToSplitterMap;
   
-  private VerticalPanel panelForNorthSouthTogglingButtons;
-
   /**
    * Construct a new {@link TouchSplitLayoutPanelWithBetterDraggers} with the default splitter size of
    * 8px.
@@ -411,8 +389,6 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
    */
   public TouchSplitLayoutPanelWithBetterDraggers(int splitterSize) {
     super(Unit.PX);
-    this.panelForNorthSouthTogglingButtons = new VerticalPanel();
-    panelForNorthSouthTogglingButtons.setStyleName("gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel");
     this.directionToSplitterMap = new HashMap<DockLayoutPanel.Direction, List<Splitter>>();
     this.splitterSize = splitterSize;
     setStyleName("gwt-SplitLayoutPanel");
@@ -449,12 +425,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
   }
   
   public void insert(Widget child, Component<?> associatedComponent, Direction direction, double size, Widget before) {
-    if (direction == Direction.CENTER) {
-        AbsolutePanel absoluteCenterPanel = new AbsolutePanel();
-        absoluteCenterPanel.add(child);
-        absoluteCenterPanel.add(panelForNorthSouthTogglingButtons);
-        super.insert(absoluteCenterPanel, direction, size, before);
-    } else {
+    super.insert(child, direction, size, before);
+    if (direction != Direction.CENTER) {
         super.insert(child, direction, size, before);
         Splitter splitter = insertSplitter(child, before, associatedComponent);
         DockLayoutPanel.LayoutData layoutData = (LayoutData) splitter.getLayoutData();
@@ -524,7 +496,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     }
   }
   
-  public void setWidgetVisibilityButAlwaysShowSplitter(Widget widget, Component<?> associatedComponentToWidget, boolean hidden, int size) {
+  public void setWidgetVisibilityAndPossiblyShowSplitter(Widget widget, Component<?> associatedComponentToWidget, boolean hidden, int size) {
       super.setWidgetHidden(widget, hidden);
       Splitter splitter = getAssociatedSplitter(widget);
       if (splitter != null) {
@@ -532,16 +504,19 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           if (hidden) {
               layoutData.oldSize = size;
               splitter.setAssociatedWidgetSize(0);
+              widget.setVisible(false);
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(false);
               }
-              widget.setVisible(false);
           } else {
               splitter.setAssociatedWidgetSize(size);
+              widget.setVisible(true);
               if (associatedComponentToWidget != null) {
                   associatedComponentToWidget.setVisible(true);
               }
-              widget.setVisible(true);
+          }
+          if (splitter instanceof VSplitter) {
+              splitter.setVisible(!hidden);
           }
       }
       forceLayout();
@@ -643,6 +618,8 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
         break;
       case NORTH:
         splitter = new VSplitter(widget, associatedComponent, false);
+        // hide initially
+        splitter.setVisible(false);
         break;
       case SOUTH:
         splitter = new VSplitter(widget, associatedComponent, true);
