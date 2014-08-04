@@ -38,4 +38,22 @@ public class LongNamesUtil {
         }
         return builder.toSafeHtml();
     }
+
+    /**
+     * Temp -> remove as soon as we have a display name for a leaderboardGroup
+     */
+    public static String shortenLeaderboardGroupName(String eventName, String leaderboardGroupName) {
+        String result = leaderboardGroupName;
+        if (result.startsWith(eventName) && !eventName.equals(leaderboardGroupName)) {
+            result = result.substring(eventName.length(), result.length());
+            result = result.trim();
+
+            if (result.startsWith("-") || result.startsWith("/")) {
+                result = result.substring(1, result.length());
+                result = result.trim();
+            }
+        }
+        return result;
+    }
+
 }
