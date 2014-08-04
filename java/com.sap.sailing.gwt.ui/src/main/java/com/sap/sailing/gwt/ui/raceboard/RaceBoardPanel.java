@@ -211,12 +211,12 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        competitorChart.setTitle(stringMessages.competitorCharts());
+        competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        windChart.setTitle(stringMessages.wind());
+        windChart.getEntryWidget().setTitle(stringMessages.wind());
         components.add(windChart);
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);

@@ -35,9 +35,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
         splitLayoutPanel = new TouchSplitLayoutPanelWithBetterDraggers(/* splitter width */ 3);
         mainPanel.add(splitLayoutPanel);
         for (Component<?> component : components) {
-            if (component.isVisible()) {
-                splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200, null);
-            }
+            // adding components regardless of their visibility as we want to show the splitter knob
+            splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200, null);
         }
         savedSplitPosition = 500;
         splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition, null);
@@ -57,27 +56,14 @@ public class SideBySideComponentViewer implements ComponentViewer {
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
-            if (!isWidgetInSplitPanel(leftScrollPanel) || !isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
-                if (!isWidgetInSplitPanel(leftScrollPanel)) {
-                    splitLayoutPanel.insertWest(leftScrollPanel, savedSplitPosition, rightComponent.getEntryWidget());
-                } else {
-                    splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
-                }
-            }
             splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, leftComponent, /*hidden*/false, savedSplitPosition);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
             boolean isComponentInSplitPanel = isWidgetInSplitPanel(component.getEntryWidget());
-            if (component.isVisible()) {
-                if (!isComponentInSplitPanel) {
-                    splitLayoutPanel.insertSouth(component.getEntryWidget(), 200, splitLayoutPanel.getWidget(0));
-                }
-            } else {
-                if (isComponentInSplitPanel) {
-                    splitLayoutPanel.remove(component.getEntryWidget());
-                }
+            if (isComponentInSplitPanel) {
+                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(component.getEntryWidget(), component, component.isVisible(), 200);
             }
         }
         splitLayoutPanel.forceLayout();

@@ -148,6 +148,24 @@ body ::-webkit-scrollbar-track {
   color: #fff;
 }
 
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel {
+	position: absolute;
+	top: 80%;
+	left: 90%;
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton {
+    height: 40px;
+    width: 120px;
+    margin-bottom: 12px;
+    background-color: white;
+    border: none;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+}
+
 .gwt-SplitLayoutPanel-HDragger {
 	width: 35px !important;
 	height: 80px !important;
@@ -162,6 +180,7 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-HDragger-Label {
 	-webkit-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
     font-size: 10px;
     position: absolute;
     top: 35px;
@@ -177,15 +196,26 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-	width: 50px !important;
-	height: 25px !important;
-	top: -25px !important;
+	width: 60px !important;
+	height: 15px !important;
+	top: -15px !important;
 	left: 50% !important;
-	background: #ffffff url(images/thumb_horz.png) center no-repeat;
+	background: #ffffff url(images/thumb_horz.png) 50% 30% no-repeat;
 	cursor: row-resize;
 	border-top-left-radius: 25px;
 	border-top-right-radius: 25px;
 	z-index: 1;
+}
+
+.gwt-SplitLayoutPanel-VDragger-Additional {
+	left: 70% !important;
+}
+
+.gwt-SplitLayoutPanel-VDragger-Label {
+    font-size: 10px;
+    position: relative;
+    top: 18px;
+    text-align: center;
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
