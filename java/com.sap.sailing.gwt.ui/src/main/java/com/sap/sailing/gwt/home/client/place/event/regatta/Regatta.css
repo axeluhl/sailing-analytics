@@ -85,11 +85,11 @@
   padding-bottom: 0.666666666666667em;
 }
 .regatta_intro_phases_phase {
-  display: inline-block;
+  display: block;
   margin-right: 1.333333333333333em;
   padding: 0.133333333333333em 1.333333333333333em 0.133333333333333em 0;
   min-height: 2.666666666666667em;
-  border-right: 1px solid #ccc;
+
 }
 .regatta_intro_phases_phase_name {
   font-size: 0.866666666666667em;
