@@ -52,7 +52,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         } else if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
-                splitLayoutPanel.remove(leftScrollPanel);
+                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, /*hidden*/true);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
@@ -63,6 +63,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                     splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
                 }
             }
+            splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, /*hidden*/false);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 

@@ -224,7 +224,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
         }
-        setLeaderboardVisible(true);
+        setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         

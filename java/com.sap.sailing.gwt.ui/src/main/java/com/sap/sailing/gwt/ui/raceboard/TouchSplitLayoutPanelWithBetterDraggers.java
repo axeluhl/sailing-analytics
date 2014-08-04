@@ -412,6 +412,14 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           throw new RuntimeException("Unexpected direction: "+direction);
       }
   }
+  
+  public boolean hidePanelContaining(Widget child) {
+      int idx = getWidgetIndex(child);
+      if (idx >= 0) {
+          return true;
+      }
+      return false;
+  }
 
   @Override
   public boolean remove(Widget child) {
@@ -438,6 +446,18 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
       // The splitter is null for the center element.
       super.setWidgetHidden(splitter, hidden);
     }
+  }
+  
+  public void setWidgetVisibilityButAlwaysShowSplitter(Widget widget, boolean hidden) {
+      super.setWidgetHidden(widget, hidden);
+      Splitter splitter = getAssociatedSplitter(widget);
+      if (splitter != null) {
+          if (hidden) {
+              splitter.setAssociatedWidgetSize(0);
+          } else {
+              splitter.setAssociatedWidgetSize(500);
+          }
+      }
   }
 
     private void assertIsChild2(Widget widget) {
