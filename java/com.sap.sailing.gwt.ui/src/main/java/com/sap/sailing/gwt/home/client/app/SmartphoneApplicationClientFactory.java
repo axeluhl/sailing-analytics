@@ -37,7 +37,7 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     private SmartphoneApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new SmartphoneApplicationView(new PlaceNavigatorImpl(placeController)), eventBus, placeController);
+        super(new TabletAndDesktopApplicationView(new PlaceNavigatorImpl(placeController)), eventBus, placeController);
     }
 
     @Override
@@ -58,7 +58,6 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     @Override
     public StartView createStartView() {
         return new TabletAndDesktopStartView(getPlaceNavigator());
-//        return new SmartphoneStartView(getPlaceNavigator());
     }
 
     @Override
