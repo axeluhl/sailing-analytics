@@ -14,10 +14,11 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     private String displayName;
     private String description;
     
-    public LeaderboardGroupBaseImpl(UUID id, String name, String description) {
+    public LeaderboardGroupBaseImpl(UUID id, String name, String description, String displayName) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.displayName = displayName;
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {

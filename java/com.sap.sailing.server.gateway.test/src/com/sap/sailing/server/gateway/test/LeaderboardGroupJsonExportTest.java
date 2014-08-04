@@ -74,14 +74,10 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
     @Test
     public void testExportLeaderboardGroupsAsJson() throws Exception {   
         String jsonString = callJsonHttpServlet(new LeaderboardGroupsJsonGetServlet(), "GET", null);
-        
-        Object obj= JSONValue.parse(jsonString);
-        JSONArray array= (JSONArray) obj;
-        
+        Object obj = JSONValue.parse(jsonString);
+        JSONArray array = (JSONArray) obj;
         assertTrue(array.size() == 1);
-
         String jsonFirstLeaderboardGroup = (String) array.get(0);
-
         assertTrue(leaderboardGroup.getName().equals(jsonFirstLeaderboardGroup));
     }
 }

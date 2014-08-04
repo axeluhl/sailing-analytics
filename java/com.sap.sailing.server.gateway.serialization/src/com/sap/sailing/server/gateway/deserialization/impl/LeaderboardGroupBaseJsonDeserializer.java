@@ -20,8 +20,10 @@ public class LeaderboardGroupBaseJsonDeserializer implements JsonDeserializer<Le
         UUID id = UUID.fromString((String) object.get(EventBaseJsonSerializer.FIELD_ID));
         String name = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_NAME).toString();
         String description = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DESCRIPTION).toString();
+        String displayName = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DISPLAY_NAME).toString();
         String hasOverallLeaderboard = object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD).toString();
-        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, hasOverallLeaderboard == null ? false : Boolean.valueOf(hasOverallLeaderboard));
+        LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, displayName,
+                hasOverallLeaderboard == null ? false : Boolean.valueOf(hasOverallLeaderboard));
         return result;
     }
 }

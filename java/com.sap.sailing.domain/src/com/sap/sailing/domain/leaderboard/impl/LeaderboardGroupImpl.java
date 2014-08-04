@@ -45,8 +45,7 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
      */
     public LeaderboardGroupImpl(UUID id, String name, String description, String displayName,
             boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
-        super(id, name, description);
-        setDisplayName(displayName);
+        super(id, name, description, displayName);
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();

@@ -42,6 +42,7 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                 JSONObject jsonLeaderboardGroup = new JSONObject();
                 jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
                 jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
+                jsonLeaderboardGroup.put("displayName", leaderboardGroup.getDisplayName());
                 jsonLeaderboardGroup.put("timepoint", timePoint.toString());
                 JSONArray jsonLeaderboardEntries = new JSONArray();
                 jsonLeaderboardGroup.put("leaderboards", jsonLeaderboardEntries);
