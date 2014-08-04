@@ -2912,4 +2912,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             elementToBlur.blur();
         }
     }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            timeChanged(getLeaderboardDisplayDate(), null);
+        }
+    }
 }

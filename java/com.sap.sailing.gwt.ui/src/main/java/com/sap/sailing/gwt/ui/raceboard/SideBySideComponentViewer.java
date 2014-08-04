@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.List;
 
+import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -35,12 +36,12 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mainPanel.add(splitLayoutPanel);
         for (Component<?> component : components) {
             if (component.isVisible()) {
-                splitLayoutPanel.addSouth(component.getEntryWidget(), 200);
+                splitLayoutPanel.insert(component.getEntryWidget(), component, Direction.SOUTH, 200, null);
             }
         }
         savedSplitPosition = 500;
-        splitLayoutPanel.addWest(leftScrollPanel, savedSplitPosition);
-        splitLayoutPanel.add(rightComponent.getEntryWidget());
+        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition, null);
+        splitLayoutPanel.insert(rightComponent.getEntryWidget(), rightComponent, Direction.CENTER, 0, null);
     }
 
     public void forceLayout() {
@@ -52,7 +53,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         } else if (!leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
-                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, /*hidden*/true);
+                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, leftComponent, /*hidden*/true, savedSplitPosition);
             }
         } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
             // the leaderboard and the map are visible
@@ -63,7 +64,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
                     splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
                 }
             }
-            splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, /*hidden*/false);
+            splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(leftScrollPanel, leftComponent, /*hidden*/false, savedSplitPosition);
         } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
 
