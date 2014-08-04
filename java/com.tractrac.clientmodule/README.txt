@@ -15,11 +15,41 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+************* TracAPI 3.0.4 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 04/08/2014
+
+1) Bugs
+
+ - Some lists are not thread-safety. The model project exposes some lists based on a 
+ CopyOnWriteArrayList implementation that is thread-safety if you get its iterator. 
+ But if before to invoke the iterator() method of the list, other thread is editing the list,
+ it is possible to get a list in an invalid status. (Reported by Axel Uhl, 31/07/2014)   
+ 
+
+********************************************
+************* TracAPI 3.0.3 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 25/07/2014
+
+1) Bugs
+
+ - When a race is reloaded more than one time it keeps the entries despite of they have been removed. The new entries
+ are correctly added but the removed competitors are kept. (Reported by Axel Uhl, 25/07/2014)   
+ 
  
 ********************************************
 ************* TracAPI 3.0.2 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation
+
+Release date: 24/07/2014
 
 1) New features
 
@@ -31,12 +61,14 @@ This is a final version. Only fixes bugs in the implementation
  - The events IRacesListener.abandonRace() and IRacesListener.startTracking() have been reviewed. Now they are always sent
  when the races are updated either using the event manager or using the external JSON service "update_race_status"
  - The controls are not updated when they are retrieved a second time from a parameters file. The library always returns 
- the first control thas was read the first time.   
+ the first control thas was read the first time. (Reported by Axel Uhl, 24/07/2014)    
  
 ********************************************
 ************* TracAPI 3.0.1 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation
+
+Release date: 09/06/2014
 
 1) Bugs
 
@@ -46,6 +78,8 @@ This is a final version. Only fixes bugs in the implementation
 ************* TracAPI 3.0.0 ****************
 ********************************************
 This is a final version. 
+
+Release date: 04/06/2014
 
 1) New features
 
