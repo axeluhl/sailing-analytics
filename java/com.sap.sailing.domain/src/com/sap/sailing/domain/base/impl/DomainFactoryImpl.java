@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -32,9 +33,11 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
+import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFiveIgnoringRaceCount;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
@@ -90,8 +93,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new LowPointWinnerGetsZero();
         case HIGH_POINT_WINNER_GETS_FIVE:
             return new HighPointWinnerGetsFive();
+        case HIGH_POINT_WINNER_GETS_FIVE_IGNORING_RACE_COUNT:
+            return new HighPointWinnerGetsFiveIgnoringRaceCount();
         case HIGH_POINT_WINNER_GETS_SIX:
             return new HighPointWinnerGetsSix();
+        case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
+            return new HighPointFirstGets10Or8AndLastBreaksTie();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -137,6 +144,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
         trackedRaceDTO.hasWindData = trackedRace.hasWindData();
         trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        trackedRaceDTO.hasMeasuredWindData = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION)) != 0; 
         trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
         return trackedRaceDTO;
     }

@@ -35,7 +35,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         }
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks.size());
         for (QuickRankDTO quickRank : quickRanks) {
-            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank, quickRank.legNumber));
+            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank, quickRank.legNumberOneBased));
         }
         this.courseSidelines = courseSidelines;
         this.coursePositions = coursePositions;

@@ -66,6 +66,15 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         public Serializable getId() {
             return null;
         }
+
+        @Override
+        public Competitor getCompetitorById(Serializable competitorID) {
+            if (competitorID.equals(MockedTrackedRaceWithFixedRank.this.competitor.getId())) {
+                return MockedTrackedRaceWithFixedRank.this.competitor;
+            } else {
+                return null;
+            }
+        }
     }
     
     @Override

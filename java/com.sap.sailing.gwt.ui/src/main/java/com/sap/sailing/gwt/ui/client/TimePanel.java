@@ -398,14 +398,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 timeRangeProvider.setTimeRange(min, max, this);
             }
             
-            int numSteps = timeSlider.getElement().getClientWidth();
-            if (numSteps > 0) {
-                timeSlider.setStepSize(numSteps, fireEvent);
-            } else {
-                timeSlider.setStepSize(1000, fireEvent);
-            }
+            // set timeSlider step-size to 1000 milliseconds (according to time represented as long) 
+            timeSlider.setStepSize(1000, fireEvent);
 
-            // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
             if (timeSlider.getCurrentValue() == null) {
                 timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
             }

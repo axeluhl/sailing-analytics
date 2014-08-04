@@ -29,6 +29,10 @@
 	margin: 9px 12px 0 0;
 }
 
+.viewerToolbar-settingsButton:last-child {
+    margin: 0 0px 0 1px;
+}
+
 .viewerToolbar-settingsButton {
 	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
 	background-position: center, center 0;

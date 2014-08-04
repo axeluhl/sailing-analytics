@@ -1,19 +1,28 @@
 package com.sap.sailing.gwt.home.client.app;
 
+import java.util.List;
+
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.home.client.place.event.TabletAndDesktopEventView;
 import com.sap.sailing.gwt.home.client.place.events.EventsActivity;
 import com.sap.sailing.gwt.home.client.place.events.EventsView;
+import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
+import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivity;
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
+import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivity;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
-import com.sap.sailing.gwt.home.client.place.start.SmartphoneStartView;
+import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
+import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sse.gwt.client.player.Timer;
 
 
 public class SmartphoneApplicationClientFactory extends AbstractApplicationClientFactory implements ApplicationClientFactory {
@@ -30,32 +39,33 @@ public class SmartphoneApplicationClientFactory extends AbstractApplicationClien
     }
 
     @Override
-    public EventView createEventView(EventDTO event) {
-        return null;
+    public EventView createEventView(EventDTO event, List<RaceGroupDTO> raceGroups, String leaderboardName, Timer timerForClientServerOffset) {
+        return new TabletAndDesktopEventView(getSailingService(), event, raceGroups, leaderboardName, timerForClientServerOffset);
     }
 
     @Override
     public EventsView createEventsView(EventsActivity activity) {
-        return null;
+        return new TabletAndDesktopEventsView(getPlaceNavigator());
     }
 
     @Override
     public StartView createStartView() {
-        return new SmartphoneStartView(getPlaceNavigator());
+        return new TabletAndDesktopStartView(getPlaceNavigator());
+//        return new SmartphoneStartView(getPlaceNavigator());
     }
 
     @Override
     public SponsoringView createSponsoringView(SponsoringActivity activity) {
-        return null;
+        return new TabletAndDesktopSponsoringView();
     }
 
     @Override
     public SolutionsView createSolutionsView(SolutionsActivity activity) {
-        return null;
+        return new TabletAndDesktopSolutionsView();
     }
 
     @Override
     public SearchResultView createSearchResultView() {
-        return null;
+        return new TabletAndDesktopSearchResultView(getPlaceNavigator(), getEventBus());
     }
 }

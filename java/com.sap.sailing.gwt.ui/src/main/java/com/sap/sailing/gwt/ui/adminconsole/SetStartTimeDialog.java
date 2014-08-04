@@ -2,14 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
-import com.github.gwtbootstrap.datetimepicker.client.ui.base.HasViewMode.ViewMode;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -25,6 +20,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndProcedureDTO> {
+public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetStartTimeAndProcedureDTO> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
@@ -103,24 +99,8 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeAndPr
     
     private Widget createInputPanel() {
         Grid content = new Grid(5, 2);
-        timeBox = new BetterDateTimeBox();
-        timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
-            }
-        });
-        timeBox.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached()) {
-                    addAutoHidePartner(timeBox.getPicker());
-                }
-            }
-        });
-        timeBox.setAutoClose(true);
-        timeBox.setStartView(ViewMode.HOUR);
-        timeBox.setFormat("dd/mm/yyyy hh:ii");
+        timeBox = createDateTimeBox(new Date());
+        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
         

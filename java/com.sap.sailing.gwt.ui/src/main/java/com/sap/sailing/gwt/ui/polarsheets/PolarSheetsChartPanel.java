@@ -162,6 +162,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                     || result.getHistogramDataMap().get(windspeed).get(i) == null
                     || result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < settings
                             .getMinimumConfidenceMeasure()) {
+                points[i] = new Point(0);
                 continue;
             }
             if (points[i] == null) {

@@ -1,30 +1,38 @@
 package com.sap.sailing.gwt.home.client.shared.mainmedia;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.home.client.shared.stage.StageEventType;
+import com.sap.sailing.gwt.idangerous.Swiper;
+import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
+import com.sap.sse.common.Util.Pair;
 
 public class MainMedia extends Composite {
+    
+    private static final MainMediaResources.LocalCss STYLES = MainMediaResources.INSTANCE.css(); 
 
-    @UiField DivElement photoImage;
+    @UiField HTMLPanel videosPanel;
+    @UiField DivElement videoLightBoxData;
+    
+    @UiField HTMLPanel mediaSlides;
 
-    @UiField(provided=true) RecentEventVideo eventVideo1;
-    @UiField(provided=true) RecentEventVideo eventVideo2;
-    @UiField(provided=true) RecentEventVideo eventVideo3;
-
-    private List<EventDTO> recentEvents;
-
-    private final String basePathToImages = "http://static.sapsailing.com/newhome/media/";
-
-    private String[] images = { "main-media-photo-1.jpg" };
+    private Swiper swiper;
+    private int videoCounter;
     
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
@@ -32,38 +40,89 @@ public class MainMedia extends Composite {
     private static MainMediaUiBinder uiBinder = GWT.create(MainMediaUiBinder.class);
 
     public MainMedia(PlaceNavigator navigator) {
-        eventVideo1 = new RecentEventVideo(navigator);
-        eventVideo2 = new RecentEventVideo(navigator);
-        eventVideo3 = new RecentEventVideo(navigator);
+        videoCounter = 0;
         
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
-        String imagePath = "url(" + basePathToImages + images[0] + ")";
-        photoImage.getStyle().setBackgroundImage(imagePath);
-
-        recentEvents = new ArrayList<EventDTO>();
     }
 
-    public void setRecentEvents(List<EventDTO> theRecentEvents) {
-        recentEvents.clear();
-        recentEvents.addAll(theRecentEvents);
+    public void setFeaturedEvents(List<Pair<StageEventType, EventBaseDTO>> featuredEvents) {
+        for(Pair<StageEventType, EventBaseDTO> featuredEventTypeAndEvent: featuredEvents) {
+            if(featuredEventTypeAndEvent.getB().getVideoURLs().size() > 0 && videoCounter < 3) {
+                addVideoToVideoPanel(featuredEventTypeAndEvent.getB());
+            }
+        }
+    }
+
+    public void setRecentEvents(List<EventBaseDTO> recentEvents) {
+        List<String> photoGalleryUrls = new ArrayList<String>();
         
-        int size = recentEvents.size();
-        if(size > 0) {
-            eventVideo1.setEvent(recentEvents.get(0));
-        } else {
-            eventVideo1.setVisible(false);
+        for(EventBaseDTO event: recentEvents) {
+            photoGalleryUrls.addAll(event.getPhotoGalleryImageURLs());
+
+            if(event.getVideoURLs().size() > 0 && videoCounter < 3) {
+                addVideoToVideoPanel(event);
+            }
         }
-        if(size > 1) {
-            eventVideo2.setEvent(recentEvents.get(1));
-        } else {
-            eventVideo2.setVisible(false);
+
+        // shuffle the image url list (Remark: Collections.shuffle() is not implemented in GWT)
+        int gallerySize = photoGalleryUrls.size();
+        Random random = new Random(gallerySize);  
+        for(int i = 0; i < gallerySize; i++) {  
+            Collections.swap(photoGalleryUrls, i, random.nextInt(gallerySize));  
         }
-        if(size > 2) {
-            eventVideo3.setEvent(recentEvents.get(2));
-        } else {
-            eventVideo3.setVisible(false);
+
+        for(String url : photoGalleryUrls) {
+            SimplePanel imageContainer = new SimplePanel();
+            imageContainer.addStyleName(STYLES.media_swiperslide());
+            String image = "url(" + url + ")";
+            imageContainer.getElement().getStyle().setBackgroundImage(image);
+            mediaSlides.add(imageContainer);
+        }
+        
+        this.swiper = Swiper.createWithLoopOption(STYLES.media_swipecontainer(), STYLES.media_swipewrapper(), STYLES.media_swiperslide());
+    }
+
+    private void addVideoToVideoPanel(EventBaseDTO event) {
+        String youtubeUrl = getRandomVideoURL(event);
+        String eventName = event.getName();
+        String youtubeId = YoutubeApi.getIdByUrl(youtubeUrl);
+        if (youtubeId != null && !youtubeId.trim().isEmpty()) {
+            MainMediaVideo video = new MainMediaVideo(eventName, youtubeId);
+            videosPanel.add(video);
+            videoCounter++;
+        }
+    }
+    
+    private String getRandomVideoURL(EventBaseDTO event) {
+        String result = null;
+        int videosCount = event.getVideoURLs().size();
+        if(videosCount > 0) {
+            if(videosCount == 1) {
+                result = event.getVideoURLs().get(0);
+            } else {
+                List<String> videoUrls = new ArrayList<String>(event.getVideoURLs());
+                Random random = new Random(videosCount);  
+                for(int i = 0; i < videosCount; i++) {  
+                    Collections.swap(videoUrls, i, random.nextInt(videosCount));  
+                }
+                result = videoUrls.get(0);
+            }                
+        }
+        return result;
+    }
+
+    @UiHandler("nextPictureLink")
+    public void nextStageTeaserLinkClicked(ClickEvent e) {
+        if (this.swiper != null) {
+            this.swiper.swipeNext();
+        }
+    }
+
+    @UiHandler("prevPictureLink")
+    public void prevStageTeaserLinkClicked(ClickEvent e) {
+        if (this.swiper != null) {
+            this.swiper.swipePrev();
         }
     }
 }

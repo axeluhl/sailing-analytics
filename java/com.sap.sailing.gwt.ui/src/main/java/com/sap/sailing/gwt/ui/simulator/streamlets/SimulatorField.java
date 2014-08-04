@@ -31,9 +31,9 @@ public class SimulatorField implements VectorField {
     private final Position bdC;
 
     private final double xScale;
-	private double motionFactor;
-	private double lineBase;
-	private double lineScale;
+    private double motionFactor;
+    private double lineBase;
+    private double lineScale;
     private final double maxLength;
     private final double particleFactor;
 
@@ -100,7 +100,7 @@ public class SimulatorField implements VectorField {
             }
         }
         this.maxLength = maxWindSpeed;
-        this.particleFactor = 2.0;
+        this.particleFactor = 1.0;
         final double latAvg = (this.rcEnd.getLatDeg() + this.rcStart.getLatDeg()) / 2.;
         this.lngScale = Math.cos(latAvg * Math.PI / 180.0);
         final double difLat = this.rcEnd.getLatDeg() - this.rcStart.getLatDeg();
@@ -137,6 +137,9 @@ public class SimulatorField implements VectorField {
 
     private Vector interpolate(Position p, Date at) {
         int step = (int) ((at.getTime() - startTime.getTime()) / timeStep.asMillis());
+        if (step >= this.data.length) {
+            step = this.data.length - 1;
+        }
         Neighbors idx = getNeighbors(p);
         if (swarmDebug
                 && ((idx.xTop >= (this.resX + 2 * this.borderX)) || (idx.yTop >= (this.resY + 2 * this.borderY)))) {
@@ -151,7 +154,7 @@ public class SimulatorField implements VectorField {
                 + dataAtStep[idx.yTop][2 * idx.xBot + 1] * idx.yMod * (1 - idx.xMod)
                 + dataAtStep[idx.yBot][2 * idx.xTop + 1] * (1 - idx.yMod) * idx.xMod
                 + dataAtStep[idx.yTop][2 * idx.xTop + 1] * idx.yMod * idx.xMod;
-        return new Vector(avgX / this.lngScale, avgY);
+        return new Vector(avgX, avgY);
     }
 
     @Override
@@ -220,7 +223,7 @@ public class SimulatorField implements VectorField {
     private String[] createColorsForSpeeds() {
         String[] colors = new String[256];
         double alphaMin = 0.0;
-        double alphaMax = 1.0;
+        double alphaMax = 0.9;
         int greyValue = 255;
         for (int i = 0; i < 256; i++) {
             colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + ","

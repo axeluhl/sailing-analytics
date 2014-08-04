@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
@@ -12,23 +10,12 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private static final long serialVersionUID = -7801617988982540470L;
     private String name;
 
-    /**
-     * All fleets for which this column can contain a race. This is the maximum set of keys possible for
-     * {@link #trackedRaces} and {@link #raceIdentifiers}.
-     */
-    private final Iterable<Fleet> fleets;
     private boolean medalRace;
 
-    public RaceColumnImpl(String name, boolean medalRace, Iterable<Fleet> fleets) {
+    public RaceColumnImpl(String name, boolean medalRace) {
         super();
         this.name = name;
         this.medalRace = medalRace;
-        List<Fleet> myFleets = new ArrayList<Fleet>();
-        for (Fleet fleet : fleets) {
-            myFleets.add(fleet);
-        }
-        Collections.sort(myFleets);
-        this.fleets = myFleets;
     }
 
     @Override
@@ -53,8 +40,8 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     }
 
     @Override
-    public Iterable<Fleet> getFleets() {
-        return fleets;
+    public Iterable<? extends Fleet> getFleets() {
+        return Collections.singleton(FlexibleLeaderboardImpl.defaultFleet);
     }
 
 }

@@ -74,7 +74,8 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public void setWindField(final WindFieldDTO windFieldDTO) {
-        this.windFieldDTO = windFieldDTO;
+        this.windFieldDTO = windFieldDTO; 
+        this.swarm = null;
     }
 
     @Override

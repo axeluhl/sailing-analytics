@@ -7,90 +7,53 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.header.EventHeaderResources" />
     <g:HTMLPanel>
 
-<!-- The header of an event including the event navigation-->
-<div data-navigationtype="normal" class="{local_res.css.eventheaderwrapper}">
-  <div ui:field='eventHeaderDiv' class="{local_res.css.eventheader}">
+        <!-- The header of an event including the event navigation-->
+<div ui:field="eventHeaderWrapperDiv" data-navigationtype="normal" class="{local_res.css.eventheaderwrapper}">
+  <div class="{local_res.css.eventheader}">
     <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+      <div class="{res.mediaCss.small9} {res.mediaCss.large8} {res.mediaCss.columns}">
         <div class="{local_res.css.eventheader_intro}"><img ui:field='eventLogo' alt="" height="140" width="140" class="{local_res.css.eventheader_intro_logo}"></img>
           <h3 class="{local_res.css.eventheader_intro_name}"><span ui:field='eventName' /></h3>
-          <div data-labeltype="live" class="{res.mainCss.label}">Live</div>
+          <div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}"><ui:text from='{i18n.live}'/></div>
+          <div ui:field="isFinishedDiv" data-labeltype="finished" class="{res.mainCss.label}"><ui:text from='{i18n.finished}'/></div>
           <div class="{local_res.css.eventheader_intro_details}">
             <div class="{local_res.css.eventheader_intro_details_item}"><span ui:field='eventDate'/></div>
-            <div class="{local_res.css.eventheader_intro_details_item}"><img src="images/location-icon.png" class="{local_res.css.locationicon}"></img><span ui:field='venueName' />
-            </div><a href="http://" target="_blank" class="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}"><span ui:field='eventWebsite' /></a>
+            <div class="{local_res.css.eventheader_intro_details_item}">
+                <img src="images/location-icon.png" class="{local_res.css.locationicon}"></img>
+                <span ui:field='venueName' />
+            </div>
+           	<g:Anchor ui:field="officalWebsiteLink" href="javascript:;" target="_blank" styleName="{local_res.css.eventheader_intro_details_item} {local_res.css.eventheader_intro_details_itemlink}">
+           	    <ui:text from='{i18n.officalEventWebsite}'/>
+           	</g:Anchor>
           </div>
           <div class="{local_res.css.eventheader_intro"><span ui:field='eventDescription'/></div>
         </div>
       </div>
-      <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
-        <div class="{local_res.css.eventheader_sharing}">
-            <a href="mailto:hello@example.de" title="Send an email" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a>
-            <a href="https://twitter.com/event" title="Tweet about it" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
-            <a href="https://facebook.com/event" title="Share on facebook" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
-         </div>
+      <div class="{res.mediaCss.small3} {res.mediaCss.large4} {res.mediaCss.columns}">
+        <div class="{local_res.css.eventheader_sharing}"><a href="mailto:hello@example.de" title="{i18n.sharingEmail}" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itememail}"></a><a href="https://twitter.com/event" title="{i18n.sharingTwitter}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a><a href="https://facebook.com/event" title="{i18n.sharingFacebook}" target="_blank" class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a></div>
       </div>
     </div>
   </div>
-  <div ui:field="eventNavigationNormalDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationnormal}">
+  <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
     <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <g:Anchor ui:field="overviewLink" text="Overview" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="regattasLink" text="Regattas" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="scheduleLink" text="Schedule" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="mediaLink" text="Media" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-<!-- 
-          <a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Overview</a>
-          <a href="series-races.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Races</a>
-          <a href="series-media.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Media</a>
- -->
+        <div class="{res.mediaCss.columns}">
+            <g:Anchor href="javascript:;" ui:field="regattasLink">
+              	<img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
+			</g:Anchor>
+            <g:Anchor href="javascript:;" ui:field="regattasLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}">
+                <span ui:field='eventName2' />
+            </g:Anchor>
       </div>
     </div>
   </div>
-  <div ui:field="eventNavigationCompactDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompact}">
+  <!-- 
+  <div class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompactfloating}">
     <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <a href="event-overview.html">
-              <img ui:field='eventLogo2' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
-          </a>
-          <g:Anchor ui:field="overviewLink2" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}"><span ui:field='eventName2' /></g:Anchor>
-          <g:Anchor ui:field="regattasLink2" text="Regattas" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="scheduleLink2" text="Schedule" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="mediaLink2" text="Media" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <!-- 
-          <a href="series-overview.html">
-              <img src="images/{event.logo}" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
-          </a>
-          <a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>
-          <a href="series-races.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Races</a>
-          <a href="series-media.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Media</a>
-           -->
-      </div>
+      <div class="{res.mediaCss.columns}">{#if navigation.isEvent}<a href="event-overview.html"><img src="images/{event.logo}" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img></a><a href="event-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>{/if navigation.isEvent}{#if navigation.isSeries}<a href="series-overview.html"><img src="images/{event.logo}" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img></a><a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>
+      </div></s>
     </div>
   </div>
-  <div ui:field="eventNavigationFloatingDiv" class="{local_res.css.eventnavigation} {local_res.css.eventnavigationcompactfloating}">
-    <div class="{res.mainCss.grid}">
-      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <!--  event -->
-          <a href="event-overview.html">
-              <img ui:field='eventLogo3' alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
-          </a>
-          <g:Anchor ui:field="overviewLink3" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}"><span ui:field='eventName3' /></g:Anchor>
-          <g:Anchor ui:field="regattasLink3" text="Regattas" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="scheduleLink3" text="Schedule" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <g:Anchor ui:field="mediaLink3" text="Media" styleName="{res.mainCss.button} {local_res.css.eventnavigation_link}" />
-          <!--  series -->
-          <!-- 
-          <a href="series-overview.html">
-              <img src="images/eventlogo.jpg" alt="" height="41" width="41" class="{local_res.css.eventnavigationcompact_logo}"></img>
-          </a>
-          <a href="series-overview.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">{event.name}</a>
-          <a href="series-races.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Races</a>
-          <a href="series-media.html" class="{res.mainCss.button} {local_res.css.eventnavigation_link}">Media</a>
-           -->
-      </div>
-    </div>
-  </div>
+   -->
 </div>
-    </g:HTMLPanel>
+</g:HTMLPanel>
 </ui:UiBinder>

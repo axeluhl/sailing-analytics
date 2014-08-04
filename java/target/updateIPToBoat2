@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # updates a Windows machine's WiFi IP address to the sapsailing.com apache configuration
 # using the updateRedirect CGI-BIN script on the server side
 # Note the "grep" for the German output of ipconfig on a German Windows installation...
