@@ -76,6 +76,7 @@ import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
+import com.sap.sailing.gwt.ui.client.BetterCheckboxCell;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -1455,7 +1456,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         protected SelectionCheckboxColumn(DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider,
                 CompetitorSelectionProvider competitorSelectionProvider) {
-            this(new CheckboxCell(/* depends on selection */false, /* handles selection */false),
+            this(new BetterCheckboxCell(/* depends on selection */false, /* handles selection */false),
                     SortingOrder.DESCENDING, displayedLeaderboardRowsProvider, competitorSelectionProvider);
         }
 
@@ -1473,6 +1474,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
         
         @Override
+        public String getCellStyleNames(Context context, LeaderboardRowDTO object) {
+            String basicStyles = super.getCellStyleNames(context, object);
+            return (basicStyles == null ? tableResources.cellTableStyle().cellTableCheckboxColumnCell() :
+                (basicStyles + " " + tableResources.cellTableStyle().cellTableCheckboxColumnCell()));
+        }
+
+        @Override
         public CheckboxCell getCell() {
             return cell;
         }
@@ -1489,7 +1497,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         public Header<?> getHeader() {
-            return new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped("").toSafeHtml());
+            return new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped("\u2713").toSafeHtml());
         }
 
         @Override
