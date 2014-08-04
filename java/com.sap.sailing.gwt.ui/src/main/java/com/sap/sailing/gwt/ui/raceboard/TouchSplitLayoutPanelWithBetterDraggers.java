@@ -524,7 +524,7 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
     }
   }
   
-  public void setWidgetVisibilityButAlwaysShowSplitter(Widget widget, Component<?> associatedComponent, boolean hidden, int size) {
+  public void setWidgetVisibilityButAlwaysShowSplitter(Widget widget, Component<?> associatedComponentToWidget, boolean hidden, int size) {
       super.setWidgetHidden(widget, hidden);
       Splitter splitter = getAssociatedSplitter(widget);
       if (splitter != null) {
@@ -532,14 +532,14 @@ public class TouchSplitLayoutPanelWithBetterDraggers extends DockLayoutPanel {
           if (hidden) {
               layoutData.oldSize = size;
               splitter.setAssociatedWidgetSize(0);
-              if (associatedComponent != null) {
-                  associatedComponent.setVisible(false);
+              if (associatedComponentToWidget != null) {
+                  associatedComponentToWidget.setVisible(false);
               }
               widget.setVisible(false);
           } else {
               splitter.setAssociatedWidgetSize(size);
-              if (associatedComponent != null) {
-                  associatedComponent.setVisible(true);
+              if (associatedComponentToWidget != null) {
+                  associatedComponentToWidget.setVisible(true);
               }
               widget.setVisible(true);
           }

@@ -63,6 +63,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     
     private static final int LINE_WIDTH = 1;
+    private boolean isVisible;
 
     private final WindChartSettings settings;
     
@@ -91,6 +92,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.settings = settings;
+        this.isVisible = false;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
@@ -609,5 +611,18 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }
         buffer.append("\n");
         return buffer.toString();
-    }    
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
+        if (visible) {
+            timeChanged(timer.getTime(), null);
+        }
+    }
+    
+    @Override
+    public boolean isVisible() {
+        return this.isVisible;
+    }
 }

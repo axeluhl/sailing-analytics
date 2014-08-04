@@ -215,6 +215,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattasDisplayer, Ra
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
+        windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.wind());
         components.add(windChart);

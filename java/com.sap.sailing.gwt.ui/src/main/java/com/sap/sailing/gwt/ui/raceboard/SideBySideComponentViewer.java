@@ -63,7 +63,8 @@ public class SideBySideComponentViewer implements ComponentViewer {
         for (Component<?> component : components) {
             boolean isComponentInSplitPanel = isWidgetInSplitPanel(component.getEntryWidget());
             if (isComponentInSplitPanel) {
-                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(component.getEntryWidget(), component, component.isVisible(), 200);
+                boolean isComponentVisible = component.isVisible();
+                splitLayoutPanel.setWidgetVisibilityButAlwaysShowSplitter(component.getEntryWidget(), component, !isComponentVisible, 200);
             }
         }
         splitLayoutPanel.forceLayout();
