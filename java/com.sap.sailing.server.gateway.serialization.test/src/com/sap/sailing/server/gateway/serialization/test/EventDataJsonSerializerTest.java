@@ -42,7 +42,7 @@ public class EventDataJsonSerializerTest {
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
     protected final URL expectedLogoImageURL;
-    protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
+    protected final LeaderboardGroup expectedLeaderboardGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
     protected EventBaseJsonSerializer serializer;
@@ -74,11 +74,12 @@ public class EventDataJsonSerializerTest {
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
         
-        when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
-        when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
-        when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");
-        when(expectedLeaderbaordGroup.hasOverallLeaderboard()).thenReturn(false);
-        doReturn(Collections.<LeaderboardGroup>singleton(expectedLeaderbaordGroup)).when(event).getLeaderboardGroups();
+        when(expectedLeaderboardGroup.getId()).thenReturn(UUID.randomUUID());
+        when(expectedLeaderboardGroup.getName()).thenReturn("LG");
+        when(expectedLeaderboardGroup.getDescription()).thenReturn("LG Description");
+        when(expectedLeaderboardGroup.getDisplayName()).thenReturn("LG Display Name");
+        when(expectedLeaderboardGroup.hasOverallLeaderboard()).thenReturn(false);
+        doReturn(Collections.<LeaderboardGroup>singleton(expectedLeaderboardGroup)).when(event).getLeaderboardGroups();
     }
 
     @Test
@@ -118,10 +119,11 @@ public class EventDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedStartDate, deserializedEvent.getStartDate());
         assertEquals(expectedEndDate, deserializedEvent.getEndDate());
-        assertEquals(expectedLeaderbaordGroup.getName(), deserializedEvent.getLeaderboardGroups().iterator().next().getName());
-        assertEquals(expectedLeaderbaordGroup.getDescription(), deserializedEvent.getLeaderboardGroups().iterator().next().getDescription());
-        assertEquals(expectedLeaderbaordGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
-        assertEquals(expectedLeaderbaordGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
+        assertEquals(expectedLeaderboardGroup.getName(), deserializedEvent.getLeaderboardGroups().iterator().next().getName());
+        assertEquals(expectedLeaderboardGroup.getDescription(), deserializedEvent.getLeaderboardGroups().iterator().next().getDescription());
+        assertEquals(expectedLeaderboardGroup.getDisplayName(), deserializedEvent.getLeaderboardGroups().iterator().next().getDisplayName());
+        assertEquals(expectedLeaderboardGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
+        assertEquals(expectedLeaderboardGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
     }
 
     @Test

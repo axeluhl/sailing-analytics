@@ -150,7 +150,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     private void readAndUpdateLeaderboardsOfMetaleaderboard() {
-        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<Util.Pair<String, String>>>() {
+        sailingService.getLeaderboardsNamesOfMetaLeaderboard(metaLeaderboardName, new AsyncCallback<List<Util.Pair<String, String>>>() {
             
             @Override
             public void onSuccess(List<Util.Pair<String, String>> leaderboardNamesAndDisplayNames) {
