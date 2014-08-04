@@ -629,8 +629,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
-                newGroup.isDisplayLeaderboardsInReverseOrder(), newGroup.getOverallLeaderboardDiscardThresholds(),
-                newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                         new AsyncCallback<LeaderboardGroupDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
@@ -654,6 +654,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             leaderboardNames.add(leaderboardDTO.name);
         }
         sailingService.updateLeaderboardGroup(oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+                updateDescriptor.getDisplayName(),
                 leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
                 updateDescriptor.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {
@@ -696,6 +697,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             leaderboardNames.add(leaderboardDTO.name);
         }
         sailingService.updateLeaderboardGroup(group.getName(), group.getName(), group.description,
+                group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
                         new AsyncCallback<Void>() {

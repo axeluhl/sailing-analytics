@@ -909,8 +909,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 false);
         assertEquals(16, leaderboardHighPoint.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(16), leaderboardHighPoint.getTotalPoints(competitors[0], later));
-        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("ESS", "ESS", /* displayGroupsInReverseOrder */ false,
-                Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("ESS", "ESS", /* displayName */ null,
+                /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
         LeaderboardGroupMetaLeaderboard leaderboardHighPointESSOverall = new LeaderboardGroupMetaLeaderboard(
                 leaderboardGroup, new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]));
         assertEquals(16, leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later).size());
@@ -966,7 +966,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 false);
         assertTrue(leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[3]) <
                 leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[0])); // c3 better than c0; won last race
-        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", false, Arrays.asList(leaderboard1,
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", /* displayName */ null, false, Arrays.asList(leaderboard1,
                 leaderboard2, leaderboard3));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
@@ -1019,8 +1019,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(4, leaderboard2.getTotalPoints(c[9], later), 0.000000001);
         assertEquals(3, leaderboard2.getTotalPoints(c[11], later), 0.000000001);
         
-        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group ESS Overall", "Leaderboard Group", false,
-                Arrays.asList(leaderboard1, leaderboard2));
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group ESS Overall", "Leaderboard Group", /* displayName */ null,
+                false, Arrays.asList(leaderboard1, leaderboard2));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[c.length-1], true);

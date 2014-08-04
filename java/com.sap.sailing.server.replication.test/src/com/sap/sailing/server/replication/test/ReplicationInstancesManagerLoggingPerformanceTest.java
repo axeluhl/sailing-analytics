@@ -25,8 +25,9 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
         replicationInstanceManager = new ReplicationInstancesManager();
         replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "");
         replicationInstanceManager.registerReplica(replica);
-        operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayGroupsInReverseOrder */ false, Arrays.asList(new String[] { "Default Leaderboard" }),
-                /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
+        operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayName */ null,
+                /* displayGroupsInReverseOrder */ false,
+                Arrays.asList(new String[] { "Default Leaderboard" }), /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
     }
     
     @Test

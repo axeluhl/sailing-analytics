@@ -27,6 +27,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
+    protected TextArea displayNameEntryField;
     protected CheckBox displayLeaderboardsInReverseOrderCheckBox;
     protected CheckBox useOverallLeaderboardCheckBox;
     private Panel overallLeaderboardConfigPanel;
@@ -36,16 +37,18 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     public static class LeaderboardGroupDescriptor {
         private final String name;
         private final String description;
+        private final String displayName;
         private final boolean displayLeaderboardsInReverseOrder;
         private final boolean useOverallLeaderboard;
         private final int[] overallLeaderboardDiscardThresholds;
         private final ScoringSchemeType overallLeaderboardScoringSchemeType;
-        public LeaderboardGroupDescriptor(String name, String description, boolean displayLeaderboardsInReverseOrder,
-                boolean useOverallLeaderboard, int[] overallLeaderboardDiscardThresholds,
-                ScoringSchemeType overallLeaderboardScoringSchemeType) {
+        public LeaderboardGroupDescriptor(String name, String description, String displayName,
+                boolean displayLeaderboardsInReverseOrder, boolean useOverallLeaderboard,
+                int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
             super();
             this.name = name;
             this.description = description;
+            this.displayName = displayName;
             this.displayLeaderboardsInReverseOrder = displayLeaderboardsInReverseOrder;
             this.useOverallLeaderboard = useOverallLeaderboard;
             this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
@@ -56,6 +59,9 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         }
         public String getDescription() {
             return description;
+        }
+        public String getDisplayName() {
+            return displayName;
         }
         public boolean isDisplayLeaderboardsInReverseOrder() {
             return displayLeaderboardsInReverseOrder;
@@ -152,10 +158,10 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     @Override
     protected LeaderboardGroupDescriptor getResult() {
         return new LeaderboardGroupDescriptor(nameEntryField.getText(), descriptionEntryField.getText(),
+                displayNameEntryField.getText().trim().isEmpty() ? null : displayNameEntryField.getText(),
                 displayLeaderboardsInReverseOrderCheckBox.getValue(),
                 useOverallLeaderboardCheckBox.getValue(),
-                useOverallLeaderboardCheckBox.getValue() ? overallLeaderboardDiscardThresholdBoxes.getDiscardThresholds() : null,
-                        useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog.getSelectedScoringSchemeType(
+                        useOverallLeaderboardCheckBox.getValue() ? overallLeaderboardDiscardThresholdBoxes.getDiscardThresholds() : null, useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog.getSelectedScoringSchemeType(
                                 overallLeaderboardScoringSchemeListBox, stringMessages) : null);
     }
     
@@ -173,6 +179,11 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         descriptionEntryField.setVisibleLines(6);
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         panel.add(descriptionEntryField);
+        panel.add(new Label(stringMessages.displayName()));
+        displayNameEntryField.setCharacterWidth(30);
+        displayNameEntryField.setVisibleLines(6);
+        displayNameEntryField.getElement().getStyle().setProperty("resize", "none");
+        panel.add(displayNameEntryField);
         panel.add(displayLeaderboardsInReverseOrderCheckBox);
         panel.add(useOverallLeaderboardCheckBox);
         useOverallLeaderboardCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

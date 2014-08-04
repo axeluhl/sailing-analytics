@@ -67,7 +67,8 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(regatta.getName());
         leaderboardGroup = racingEventService.addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName, "description", 
-                /* displayGroupsInReverseOrder */ false, leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
+                "The LG displayName", /* displayGroupsInReverseOrder */ false,
+                leaderboardNames, /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);
     }
 
     @Test

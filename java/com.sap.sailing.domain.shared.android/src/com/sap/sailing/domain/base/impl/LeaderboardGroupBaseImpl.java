@@ -11,6 +11,7 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
 
     private UUID id;
     private String name;
+    private String displayName;
     private String description;
     
     public LeaderboardGroupBaseImpl(UUID id, String name, String description) {
@@ -49,6 +50,16 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 }

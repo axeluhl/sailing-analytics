@@ -94,7 +94,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
     
     private LeaderboardGroup createLeaderboardGroup(String name) {
-        return new LeaderboardGroupImpl(name, "Description for "+name, /* displayInReverseOrder */ false, Collections.<Leaderboard>emptyList());
+        return new LeaderboardGroupImpl(name, "Description for "+name, /* displayName */ null, /* displayInReverseOrder */ false, Collections.<Leaderboard>emptyList());
     }
 
     @Test
