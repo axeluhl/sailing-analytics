@@ -268,6 +268,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private LatLngBounds currentMapBounds;
     
+    private int currentZoomLevel;
+    
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final RegattaAndRaceIdentifier raceIdentifier;
@@ -382,10 +384,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                               infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
-                      if (streamletOverlay != null) {
-                          streamletOverlay.onBoundsChanged();
+                      int newZoomLevel = map.getZoom();
+                      if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
                       currentMapBounds = map.getBounds();
+                      currentZoomLevel = newZoomLevel;
                   }
               });
               
