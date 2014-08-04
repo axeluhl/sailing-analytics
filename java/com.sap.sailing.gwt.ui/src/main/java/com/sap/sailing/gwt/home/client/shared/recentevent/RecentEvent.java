@@ -7,7 +7,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -15,6 +15,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.home.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 
 public class RecentEvent extends UIObject {
@@ -55,21 +56,8 @@ public class RecentEvent extends UIObject {
     }
     
     private void updateUI() {
-        String name = event.getName();
-        
-        if(name.contains(" - ")) {
-            String[] splittedName = name.split(" - ");
-            SafeHtmlBuilder builder = new SafeHtmlBuilder();
-            for(int i = 0; i < splittedName.length; i++) {
-                builder.appendEscaped(splittedName[i]);
-                if(i != splittedName.length-1) {
-                    builder.appendHtmlConstant("<br/>");
-                }
-            }
-            eventName.setInnerSafeHtml(builder.toSafeHtml()); 
-        } else {
-            eventName.setInnerText(name);
-        }
+        SafeHtml safeHtmlEventName = LongNamesUtil.breakLongName(event.getName());
+        eventName.setInnerSafeHtml(safeHtmlEventName); 
         
         venueName.setInnerText(event.venue.getName());
         eventStartDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.startDate, event.endDate));
